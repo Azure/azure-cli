@@ -770,9 +770,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig create -g {rg} --gallery-name {g1}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsSecureBootSupported=false IsMeasuredBootSupported=false" --hyper-v-generation V2', checks=[
             self.check('features[0].name', 'IsSecureBootSupported'),
-            self.check('features[0].value', 'false'),
+            self.check('features[0].value', 'false', False),
             self.check('features[1].name', 'IsMeasuredBootSupported'),
-            self.check('features[1].value', 'false'),
+            self.check('features[1].value', 'false', False),
         ])
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
         self.cmd('snapshot create -g {rg} -n s1 --source disk')
@@ -1066,7 +1066,7 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
-        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update --enable-auto-upgrade false')
         result = self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
             self.check('*.extensions[0].name', ['VMAccessForLinux']),
         ]).get_output_in_json()
@@ -1078,6 +1078,7 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', '{ext}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('enableAutomaticUpgrade', False)
         ]).get_output_in_json()
         uuid.UUID(result['forceUpdateTag'])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
@@ -1106,23 +1107,6 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('typePropertiesType', '{ext_type}')
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
-
-    @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_with_id_')
-    def test_vm_extension_with_id(self, resource_group):
-        self.kwargs.update({
-            'vm': 'vm1'
-        })
-        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --generate-ssh-keys --admin-username azureuser --nsg-rule NONE').get_output_in_json()['id']
-        self.kwargs.update({
-            'vm_id': vm_id
-        })
-        vm_ext_id = self.cmd('vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}')\
-            .get_output_in_json()['id']
-        self.kwargs.update({
-            'vm_ext_id': vm_ext_id
-        })
-        self.cmd('vm extension delete --ids {vm_ext_id}')
 
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
@@ -1606,12 +1590,13 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
         result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{net-ext}'),
             self.check('publisher', '{net-pub}'),
-            self.check('provisionAfterExtensions', None)
+            self.check('provisionAfterExtensions', None),
+            self.check('enableAutomaticUpgrade', False)
         ]).get_output_in_json()
 
         uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.
@@ -4659,14 +4644,14 @@ class DiskAccessTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('disk show -g {rg} -n {disk}', checks=[
             self.check('name', '{disk}'),
-            self.check('diskAccessId', disk_access_id),
+            self.check('diskAccessId', disk_access_id, False),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
         self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
             self.check('name', '{snapshot}'),
-            self.check('diskAccessId', disk_access_id),
+            self.check('diskAccessId', disk_access_id, False),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
@@ -4675,6 +4660,32 @@ class DiskAccessTest(ScenarioTest):
         self.cmd('disk-access delete -g {rg} -n {diskaccess}')
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 0)
+        ])
+
+
+class DiskBurstingTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_busrting_', location='eastus')
+    def test_disk_bursting(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'mydisk1',
+            'disk2': 'mydisk2'
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1024 --location centraluseuap --enable-bursting')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('burstingEnabled', True)
+        ])
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 1024 --location centraluseuap')
+        self.cmd('disk show -g {rg} -n {disk2}', checks=[
+            self.check('name', '{disk2}'),
+            self.check('burstingEnabled', None)
+        ])
+        self.cmd('disk update -g {rg} -n {disk2} --enable-bursting')
+        self.cmd('disk show -g {rg} -n {disk2}', checks=[
+            self.check('name', '{disk2}'),
+            self.check('burstingEnabled', True)
         ])
 
 
@@ -4928,7 +4939,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         })
 
         self.cmd('ppg create -g {rg} -n {ppg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM --single-placement-group false --ppg {ppg} '
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false --ppg {ppg} '
                  '--platform-fault-domain-count 3 --generate-ssh-keys')
 
 
@@ -5000,6 +5011,37 @@ class VMDiskLogicalSectorSize(ScenarioTest):
         self.cmd('disk create -g {rg} -n d2 --size-gb 10 --tier P4', checks=[
             self.check('tier', 'P4')
         ])
+
+
+class VMSSReimageScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_')
+    def test_vmss_reimage(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vmss1 --image centos')
+        self.cmd('vmss reimage -g {rg} -n vmss1 --instance-id 1')
+        self.cmd('vmss reimage -g {rg} -n vmss1')
+
+
+class VMSSHKeyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
+    def test_vm_ssh_key(self, resource_group):
+        self.kwargs.update({
+            'key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+MQ7LmEsaB7e/H63lCxJzrWdaLVhuUsnwXD5Eo7QpNhG6g9Oj9fKmZTSdHRpnUdVGtyRUJbmEHoeqFBBAt8bHu2bneEJeh8qfRmj0lCJA2QTZsdGlCsVlfSQzMjv/2WiOZ07pPGFVKvwsNS3dYQ1LtsNDAT4KE7ITlCcNjc+BjfWFTYOplAO++nruv+mD8zF1wwgTln/tHs7Ieja9Noon4PqnvyTYExPx7pclDjIPC+FzBrd9JBk+IUZyYPETO5F/LWh0M/+R656SCvHnXZ+xgan+V6nFJ0mGMErUrXUYMyYp8n/k5G5uxAiHjbS6b/+7HGbGLC0OUCBXLB0UyfIBo5ZtOgH9JKbRd2u7hjPBza7SY52JUsHbt7gZU46W35WjbDnW+clB+qLArHrsGr3YvkrEFn0IaD8y/7O9DW0PJFHM8iFZdZqmT+zM/BFse+p9El08MjPydTfKrZW4fzSBogI4oxY42CRDzxTl/WbpuGkjfcGfKwSoDbSy9jqjD/0='
+        })
+        self.cmd('sshkey create -g {rg} -n k1')
+        self.cmd('sshkey list')
+        self.cmd('sshkey show -g {rg} -n k1', checks=[
+            self.check('name', 'k1'),
+            self.exists('publicKey')
+        ])
+        self.cmd('sshkey create -g {rg} -n k2 --public-key "{key}"')
+
+        # Use existing key
+        self.cmd('vm create -g {rg} -n vm1 --image centos --nsg-rule None --ssh-key-name k1')
+
+        # Create new one
+        self.cmd('vm create -g {rg} -n vm3 --image centos --nsg-rule None --ssh-key-name k3 --generate-ssh-keys')
+        self.cmd('sshkey show -g {rg} -n k3')
 
 
 if __name__ == '__main__':

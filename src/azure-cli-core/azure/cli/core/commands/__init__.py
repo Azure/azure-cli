@@ -26,7 +26,8 @@ from azure.cli.core.commands.constants import (
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
-from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
+from azure.cli.core.util import (
+    get_command_type_kwarg, read_file_content, get_arg_list, poller_classes, log_cmd_history, clean_exception_history)
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
 
@@ -518,6 +519,10 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.invocation.data['command_string'] = command
         telemetry.set_raw_command_name(command)
 
+        # record execution log when "az next" is installed
+        log_cmd_history(command, args)
+        clean_exception_history(command)
+
         try:
             self.commands_loader.command_table = {command: self.commands_loader.command_table[command]}
         except KeyError:
@@ -952,8 +957,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
-
+        telemetry.poll_start()
+        poll_flag = False
         while not poller.done():
+            poll_flag = True
             self.cli_ctx.get_progress_controller().add(message='Running')
             try:
                 # pylint: disable=protected-access
@@ -986,7 +993,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
-
+        if poll_flag:
+            telemetry.poll_end()
         return result
 
 

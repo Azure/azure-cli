@@ -16,7 +16,7 @@ TYPE_CLIENT_MAPPING = {
 
 
 def register_providers():
-    _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', False)
+    _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', True)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
     _register_one_provider('Microsoft.CognitiveServices/accounts', '2017-04-18', True)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
@@ -33,6 +33,8 @@ def register_providers():
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     _register_one_provider('Microsoft.Compute/diskAccesses', '2020-05-01', False, support_connection_operation=False)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
+    _register_one_provider('Microsoft.DigitalTwins/digitalTwinsInstances', '2020-12-01', True)
+    _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

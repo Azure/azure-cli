@@ -29,7 +29,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
-    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites)
+    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
+    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -63,6 +64,8 @@ from azure.cli.command_modules.network._validators import (
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
 ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
+NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
+NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -345,6 +348,42 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
+    network_virtual_hub_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualHubsOperations.{}',
+        client_factory=cf_virtual_hub,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_hub,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionOperations.{}',
+        client_factory=cf_virtual_hub_bgp_connection,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connection_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_hub_bgp_connection,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionsOperations.{}',
+        client_factory=cf_virtual_hub_bgp_connections,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connections_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_hub_bgp_connections,
+        min_api='2020-07-01'
+    )
+
     network_vrouter_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRoutersOperations.{}',
         client_factory=cf_virtual_router,
@@ -622,6 +661,16 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_waf_managed_rule_exclusion')
         g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
         g.custom_command('list', 'list_waf_managed_rule_exclusion')
+
+    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+        g.custom_command('add', 'add_trusted_client_certificate')
+        g.custom_command('remove', 'remove_trusted_client_certificate')
+        g.custom_command('list', 'list_trusted_client_certificate')
+
+    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+        g.custom_command('add', 'add_ssl_profile')
+        g.custom_command('remove', 'remove_ssl_profile')
+        g.custom_command('list', 'list_ssl_profile')
     # endregion
 
     # region ApplicationSecurityGroups
@@ -1309,7 +1358,8 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualRouter
-    with self.command_group('network vrouter', network_vrouter_sdk) as g:
+    with self.command_group('network vrouter', network_vrouter_sdk,
+                            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'create_virtual_router')
         g.generic_update_command('update',
                                  getter_name='virtual_router_update_getter',
@@ -1321,7 +1371,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_virtual_router')
         g.custom_command('list', 'list_virtual_router')
 
-    with self.command_group('network vrouter peering', network_vrouter_peering_sdk) as g:
+    with self.command_group(
+            'network vrouter peering', network_vrouter_peering_sdk,
+            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_PEERING_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'create_virtual_router_peering')
         g.generic_update_command('update',
                                  getter_name='virtual_router_peering_update_getter',
@@ -1332,6 +1384,35 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_virtual_router_peering')
         g.custom_show_command('show', 'show_virtual_router_peering')
         g.custom_command('list', 'list_virtual_router_peering')
+    # endregion
+
+    # region VirtualHub
+    with self.command_group('network routeserver', network_virtual_hub_sdk,
+                            custom_command_type=network_virtual_hub_update_sdk) as g:
+        g.custom_command('create', 'create_virtual_hub')
+        g.generic_update_command('update',
+                                 setter_name='virtual_hub_update_setter',
+                                 setter_type=network_virtual_hub_update_sdk,
+                                 custom_func_name='update_virtual_hub')
+        g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_virtual_hub')
+
+    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
+                            custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
+        g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
+        g.generic_update_command('update',
+                                 setter_name='virtual_hub_bgp_connection_update_setter',
+                                 setter_type=network_virtual_hub_bgp_connection_update_sdk,
+                                 custom_func_name='update_virtual_hub_bgp_connection')
+        g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
+        g.show_command('show', 'get')
+
+    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
+                            custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
+        g.command('list', 'list')
+        g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')
+        g.custom_command('list-advertised-routes', 'list_virtual_hub_bgp_connection_advertised_routes')
     # endregion
 
     # region Bastion

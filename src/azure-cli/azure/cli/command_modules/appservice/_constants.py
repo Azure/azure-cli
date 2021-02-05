@@ -67,3 +67,5 @@ RUNTIME_STACKS = os.path.abspath(os.path.join(os.path.abspath(__file__),
 
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),
                                                          '../resources/GenerateRandomAppNames.json'))
+
+PUBLIC_CLOUD = "AzureCloud"

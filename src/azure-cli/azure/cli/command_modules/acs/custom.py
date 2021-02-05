@@ -46,7 +46,8 @@ from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
-                                       InvalidArgumentValueError)
+                                       InvalidArgumentValueError,
+                                       ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -117,6 +118,7 @@ from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_A
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import ADDONS
+from ._consts import CONST_CANIPULL_IMAGE
 
 logger = get_logger(__name__)
 
@@ -1481,6 +1483,97 @@ def subnet_role_assignment_exists(cli_ctx, scope):
         if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
             return True
     return False
+
+
+def aks_check_acr(cmd, client, resource_group_name, name, acr):
+    if not which("kubectl"):
+        raise ValidationError("Can not find kubectl executable in PATH")
+
+    _, browse_path = tempfile.mkstemp()
+    aks_get_credentials(
+        cmd, client, resource_group_name, name, admin=False, path=browse_path
+    )
+
+    # Get kubectl minor version
+    kubectl_minor_version = -1
+    try:
+        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        jsonS, _ = output.communicate()
+        kubectl_version = json.loads(jsonS)
+        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        kubectl_server_minor_version = int(kubectl_version["serverVersion"]["minor"])
+        kubectl_server_patch = int(kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
+                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
+                           'more information.')
+    except subprocess.CalledProcessError as err:
+        raise ValidationError("Could not find kubectl minor version: {}".format(err))
+    if kubectl_minor_version == -1:
+        raise ValidationError("Failed to get kubectl version")
+
+    podName = "canipull-" + str(uuid.uuid4())
+    overrides = {
+        "spec": {
+            "restartPolicy": "Never",
+            "hostNetwork": True,
+            "containers": [
+                {
+                    "securityContext": {"runAsUser": 0},
+                    "name": podName,
+                    "image": CONST_CANIPULL_IMAGE,
+                    "args": ["-v6", acr],
+                    "stdin": True,
+                    "stdinOnce": True,
+                    "tty": True,
+                    "volumeMounts": [
+                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                    ],
+                }
+            ],
+            "tolerations": [
+                {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                {"effect": "NoExecute", "operator": "Exists"},
+            ],
+            "volumes": [
+                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+            ],
+        }
+    }
+
+    try:
+        cmd = [
+            "kubectl",
+            "run",
+            "--kubeconfig",
+            browse_path,
+            "--rm",
+            "--quiet",
+            "--image",
+            CONST_CANIPULL_IMAGE,
+            "--overrides",
+            json.dumps(overrides),
+            "-it",
+            podName,
+        ]
+
+        # Support kubectl versons < 1.18
+        if kubectl_minor_version < 18:
+            cmd += ["--generator=run-pod/v1"]
+
+        output = subprocess.check_output(
+            cmd,
+            universal_newlines=True,
+        )
+    except subprocess.CalledProcessError as err:
+        raise CLIError("Failed to check the ACR: {}".format(err))
+    if output:
+        print(output)
+    else:
+        raise CLIError("Failed to check the ACR.")
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -2908,14 +3001,25 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "westcentralus": "EUS",
         "westeurope": "WEU",
         "westus": "WUS",
-        "westus2": "WUS2"
+        "westus2": "WUS2",
+        "brazilsouth": "CQ",
+        "brazilsoutheast": "BRSE",
+        "norwayeast": "NOE",
+        "southafricanorth": "JNB",
+        "northcentralus": "NCUS",
+        "uaenorth": "DXB",
+        "germanywestcentral": "DEWC",
+        "ukwest": "WUK",
+        "switzerlandnorth": "CHN",
+        "switzerlandwest": "CHW",
+        "uaecentral": "AUH"
     }
     AzureCloudRegionToOmsRegionMap = {
         "australiacentral": "australiacentral",
         "australiacentral2": "australiacentral",
         "australiaeast": "australiaeast",
         "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "southcentralus",
+        "brazilsouth": "brazilsouth",
         "canadacentral": "canadacentral",
         "canadaeast": "canadacentral",
         "centralus": "centralus",
@@ -2929,20 +3033,30 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "japanwest": "japaneast",
         "koreacentral": "koreacentral",
         "koreasouth": "koreacentral",
-        "northcentralus": "eastus",
+        "northcentralus": "northcentralus",
         "northeurope": "northeurope",
-        "southafricanorth": "westeurope",
-        "southafricawest": "westeurope",
+        "southafricanorth": "southafricanorth",
+        "southafricawest": "southafricanorth",
         "southcentralus": "southcentralus",
         "southeastasia": "southeastasia",
         "southindia": "centralindia",
         "uksouth": "uksouth",
-        "ukwest": "uksouth",
+        "ukwest": "ukwest",
         "westcentralus": "eastus",
         "westeurope": "westeurope",
         "westindia": "centralindia",
         "westus": "westus",
-        "westus2": "westus2"
+        "westus2": "westus2",
+        "norwayeast": "norwayeast",
+        "norwaywest": "norwayeast",
+        "switzerlandnorth": "switzerlandnorth",
+        "switzerlandwest": "switzerlandwest",
+        "uaenorth": "uaenorth",
+        "germanywestcentral": "germanywestcentral",
+        "germanynorth": "germanywestcentral",
+        "uaecentral": "uaecentral",
+        "eastus2euap": "eastus2euap",
+        "brazilsoutheast": "brazilsoutheast"
     }
 
     # mapping for azure china cloud
@@ -2962,10 +3076,13 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # mapping for azure us governmner cloud
     AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV"
+        "usgovvirginia": "USGV",
+        "usgovarizona": "PHX"
     }
     AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia"
+        "usgovvirginia": "usgovvirginia",
+        "usgovtexas": "usgovvirginia",
+        "usgovarizona": "usgovarizona"
     }
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
