@@ -185,6 +185,17 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.networkProperties.resourceProviderConnection', 'Outbound')
         ])
 
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_compute_isolation(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_compute_isolation()
+        )
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.computeIsolationProperties.enableComputeIsolation', True)
+        ])
+
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -587,3 +598,9 @@ class HDInsightClusterTests(ScenarioTest):
                '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers' \
                '/Microsoft.Network/virtualNetworks/fakevnet/subnets/default ' \
                '--resource-provider-connection Outbound --enable-private-link'
+
+    @staticmethod
+    def _with_compute_isolation():
+        return '--version 3.6 -l southcentralus ' \
+               '--enable-compute-isolation --host-sku ESv3-Type2 ' \
+               '--workernode-size Standard_E8S_V3 --headnode-size Standard_E8S_V3'

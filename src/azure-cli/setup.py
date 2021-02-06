@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.18.0"
+VERSION = "2.19.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,7 +53,7 @@ DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-appconfiguration~=1.1.1',
     'azure-batch~=10.0.0',
-    'azure-cli-core=={}.*'.format(".".join(VERSION.split(".")[:3])),
+    'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'azure-mgmt-batch~=9.0.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing==1.0.0',
-    'azure-mgmt-botservice~=0.2.0',
+    'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==5.2.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
     'azure-mgmt-compute~=18.1',
@@ -86,7 +86,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid==3.0.0rc7',
     'azure-mgmt-eventhub~=4.1.0',
-    'azure-mgmt-hdinsight~=2.0.0',
+    'azure-mgmt-hdinsight~=2.2.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
@@ -114,7 +114,7 @@ DEPENDENCIES = [
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==12.0.0',
-    'azure-mgmt-search~=2.0',
+    'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
