@@ -135,7 +135,7 @@ def _pre_command_table_create(cli_ctx, args):
     cli_ctx.refresh_request_id()
     real_args = _process_args_with_built_in_alias(cli_ctx, args)
     if real_args != args:
-        logger.warning('`%s` is alias of `%s`' % (' '.join(args), ' '.join(real_args)))
+        logger.warning('`%s` is alias of `%s`', ' '.join(args), ' '.join(real_args))
     return _expand_file_prefixed_files(real_args)
 
 
