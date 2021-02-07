@@ -21,14 +21,18 @@ command = timeseriesinsights environment
 
 [timeseriesinsights environment create]
 command = timeseriesinsights environment longterm create
+    [[--type {{type}}]]
+    command = timeseriesinsights environment {{type}} create
 
 [timeseriesinsights environment update]
 command = timeseriesinsights environment longterm update
+    [[--type {{type}}]]
+    command = timeseriesinsights environment {{type}} update
 
-[configure]
-command = config
-    [[--list-defaults {{defaults_flag}}]]
-    command = config get{% if defaults_flag!="false" %} defaults{% endif %}
-    [[--list-defaults {{defaults_flag}} --scope {{scope}}]]
-    command = config get {% if defaults_flag!="false" %} defaults{% endif %}{% if scope=='local'%} --local{% endif %}
+#[configure]
+#command = config
+#    [[--list-defaults {{defaults_flag}}]]
+#    command = config get{% if defaults_flag!="false" %} defaults{% endif %}
+#    [[--list-defaults {{defaults_flag}} --scope {{scope}}]]
+#    command = config get {% if defaults_flag!="false" %} defaults{% endif %}{% if scope=='local'%} --local{% endif %}
 

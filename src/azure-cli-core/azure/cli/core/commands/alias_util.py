@@ -56,7 +56,7 @@ def _build_alias_tree():
                 continue
             # for other cmd names, create a new node as the child of previous node or get previous node's existing child
             if not node.next_nodes.get(cmd_name):
-                new_node = AliasNode(cmd_name, level=node.level+1)
+                new_node = AliasNode(cmd_name, level=node.level + 1)
                 node.add_next(new_node)
                 node = new_node
             else:
@@ -93,6 +93,7 @@ def _compare_and_transform(args, alias_node):
     return args
 
 
+# pylint: disable=line-too-long
 def _compare_arguments_and_transform(args, argument_alias, argument_command):
     if not argument_command:
         return []
@@ -102,7 +103,7 @@ def _compare_arguments_and_transform(args, argument_alias, argument_command):
     section_arguments = {}
     argument_name = None
     argument_value_name = None
-    import shlex
+
     for item in shlex.split(argument_alias):
         if item.startswith('-'):
             if argument_name:
