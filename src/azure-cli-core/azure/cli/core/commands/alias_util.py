@@ -66,8 +66,7 @@ def _build_alias_tree():
         for key in alias_config[full_cmd_name].keys():
             if not key or not _is_section(alias_config[full_cmd_name][key]):
                 continue
-            if alias_config[full_cmd_name][key].get('command'):
-                node.argument_sections[key] = alias_config[full_cmd_name][key].get('command')
+            node.add_argument_section(key, alias_config[full_cmd_name][key])
     return root_nodes
 
 
@@ -184,6 +183,10 @@ class AliasNode:
         self.argument_sections = argument_sections if argument_sections else {}
         self.next_nodes = next_nodes if next_nodes else {}
         self.level = level if level else 0
+
+    def add_argument_section(self, section_name, argument_section):
+        if section_name and argument_section.get('command'):
+            self.argument_sections[section_name] = argument_section.get('command')
 
     def add_next(self, node):
         self.next_nodes[node.name] = node
