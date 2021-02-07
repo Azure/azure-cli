@@ -80,6 +80,6 @@ def create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip
     elif db_engine == 'mariadb':
         firewall_client = cf_mariadb_firewall_rules(cmd.cli_ctx, None)
 
-    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip,
+    firewall = firewall_client.begin_create_or_update(resource_group_name, server_name, firewall_name, start_ip,
                                                 end_ip).result()
     return firewall.name

@@ -6,11 +6,13 @@
 # pylint: disable=unused-argument, line-too-long
 
 from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import ResourceNotFoundError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
+from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
@@ -39,7 +41,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
 
-    from azure.mgmt.rdbms import mysql_flexibleservers
     db_context = DbContext(
         azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         logging_name='MySQL', command_group='mysql', server_client=client)
@@ -141,7 +142,6 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    from azure.mgmt.rdbms import mysql_flexibleservers
     parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,
         restore_point_in_time=restore_point_in_time,
@@ -156,7 +156,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 # pylint: disable=too-many-branches
@@ -299,7 +299,6 @@ def flexible_server_update_custom_func(cmd, instance,
 
         # set values - if maintenance_window when is None when created then create a new object
         if instance.maintenance_window is None:
-            from azure.mgmt.rdbms import mysql_flexibleservers
             instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
                 day_of_week=day_of_week,
                 start_hour=start_hour,
@@ -324,7 +323,6 @@ def flexible_server_update_custom_func(cmd, instance,
 
     if assign_identity:
         if server_module_path.find('mysql'):
-            from azure.mgmt.rdbms import mysql_flexibleservers
             if instance.identity is None:
                 instance.identity = mysql_flexibleservers.models.Identity(
                     type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
@@ -344,7 +342,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
             yes=yes)
     if confirm:
         try:
-            result = client.delete(resource_group_name, server_name)
+            result = client.begin_delete(resource_group_name, server_name)
             if cmd.cli_ctx.local_context.is_on:
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('mysql flexible-server', 'server_name')
@@ -370,7 +368,13 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     elif source is None:
         source = "user-override"
 
-    return client.update(resource_group_name, server_name, configuration_name, value, source)
+    parameters = mysql_flexibleservers.models.Configuration(
+        name = configuration_name,
+        value = value,
+        source = source
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 
 
 # Replica commands
@@ -399,14 +403,12 @@ def flexible_replica_create(cmd, client, resource_group_name, replica_name, serv
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
 
-    from azure.mgmt.rdbms import mysql_flexibleservers
-
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_id=server_name,
         location=location,
         create_mode="Replica")
-    return sdk_no_wait(no_wait, client.create, resource_group_name, replica_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
 
 def flexible_replica_stop(client, resource_group_name, server_name):
@@ -425,7 +427,7 @@ def flexible_replica_stop(client, resource_group_name, server_name):
 
     params = ServerForUpdate(replication_role='None')
 
-    return client.update(resource_group_name, server_name, params)
+    return client.begin_update(resource_group_name, server_name, params)
 
 
 def flexible_server_mysql_get(cmd, resource_group_name, server_name):
@@ -448,8 +450,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/mysql-pricing for pricing details', server_name, sku_name)
-
-    from azure.mgmt.rdbms import mysql_flexibleservers
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
@@ -475,7 +475,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
             type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
 
     return resolve_poller(
-        server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(logging_name))
 
 
@@ -555,14 +555,33 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
     # check for existing database, create if not
     cf_db, logging_name = db_context.cf_db, db_context.logging_name
     database_client = cf_db(cmd.cli_ctx, None)
-    try:
-        database_client.get(resource_group_name, server_name, database_name)
-    except CloudError:
-        logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
-        resolve_poller(
-            database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8'), cmd.cli_ctx,
-            '{} Database Create/Update'.format(logging_name))
+    # try:
+    #     database_client.get(resource_group_name, server_name, database_name)
+    # except ResourceNotFoundError:
+    logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+    parameters = mysql_flexibleservers.models.Database(
+        name = database_name,
+        charset = 'utf8'
+    )
+    resolve_poller(
+        database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
+        '{} Database Create/Update'.format(logging_name))
 
+def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+    if charset is None:
+        charset = 'utf8'
+
+    parameters = mysql_flexibleservers.models.Database(
+            name = database_name,
+            charset = charset,
+            collation = collation
+        )
+    
+    return client.begin_create_or_update(
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters)
 
 def _create_mysql_connection_string(host, database_name, user_name, password):
     connection_kwargs = {

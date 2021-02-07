@@ -7,7 +7,7 @@
 
 import random
 from knack.log import get_logger
-from msrest.paging import Paged
+from azure.core.paging import ItemPaged
 
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
@@ -106,7 +106,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
     #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
 
-    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip,
+    firewall = firewall_client.begin_create_or_update(resource_group_name, server_name, firewall_name, start_ip,
                                                 end_ip).result()
     return firewall.name
 
@@ -253,7 +253,7 @@ def _get_available_values(sku_info, argument, tier=None):
 
 
 def _get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
+    return list(obj_list) if isinstance(obj_list, ItemPaged) else obj_list
 
 
 def _update_location(cmd, resource_group_name):
