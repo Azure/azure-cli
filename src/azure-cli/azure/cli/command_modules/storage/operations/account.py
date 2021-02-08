@@ -42,7 +42,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
-                           min_tls_version=None):
+                           min_tls_version=None, enable_sftp=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -140,6 +140,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
 
+    if enable_sftp:
+        params.is_sftp_enabled = enable_sftp
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -215,7 +218,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           allow_blob_public_access=None, min_tls_version=None):
+                           allow_blob_public_access=None, min_tls_version=None, enable_sftp=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -361,6 +364,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.allow_blob_public_access = allow_blob_public_access
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
+    if enable_sftp:
+        params.is_sftp_enabled = enable_sftp
 
     return params
 

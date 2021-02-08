@@ -85,6 +85,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      'Directory Properties arguments must be provided.')
     aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
                                  help='Enable Azure Active Directory Domain Services authentication for Azure Files')
+    sftp_type = CLIArgumentType(arg_type=get_three_state_flag(),  is_preview=True, min_api='2019-06-01',
+                                help='Enable Secure File Transfer Protocol')
     domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the primary domain that the AD DNS server is authoritative for. "
                                             "Required when --enable-files-adds is set to True")
@@ -265,6 +267,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
+        c.argument('enable_sftp', sftp_type)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -314,6 +317,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
+        c.argument('enable_sftp', sftp_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
