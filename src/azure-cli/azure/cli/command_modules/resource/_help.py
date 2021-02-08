@@ -2298,6 +2298,11 @@ examples:
     text: az ts list -g MyResourceGroup -n TemplateSpecName
 """
 
+helps['bicep'] = """
+type: group
+short-summary: Bicep CLI command group.
+"""
+
 helps['bicep install'] = """
 type: command
 short-summary: Install Bicep CLI.

@@ -3179,13 +3179,16 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type,
                                                   latest_include_preview=latest_include_preview)
 
+
 def install_bicep_cli(cmd, version=None):
     # The parameter version is actually a git tag here.
     ensure_bicep_installation(release_tag=version)
 
+
 def upgrade_bicep_cli(cmd):
     latest_release_tag = get_bicep_latest_release_tag()
     ensure_bicep_installation(release_tag=latest_release_tag)
+
 
 def build_bicep_file(cmd, file, stdout=None):
     if stdout:
@@ -3193,8 +3196,10 @@ def build_bicep_file(cmd, file, stdout=None):
     else:
         run_bicep_command(["build", file])
 
+
 def show_bicep_cli_version(cmd):
     print(run_bicep_command(["--version"], auto_install=False))
+
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
