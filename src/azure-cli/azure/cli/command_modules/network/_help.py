@@ -123,6 +123,32 @@ examples:
 helps['network application-gateway create'] = """
 type: command
 short-summary: Create an application gateway.
+parameters:
+  - name: --trusted-client-cert
+    short-summary: The application gateway trusted client certificate.
+    long-summary: |
+        Usage: --trusted-client-certificates name=client1 data=client.cer
+
+        name: Required. Name of the trusted client certificate that is unique within an Application Gateway
+        data: Required. Certificate public data.
+
+        Multiple trusted client certificates can be specified by using more than one `--trusted-client-certificates` argument.
+  - name: --ssl-profile
+    short-summary: The application gateway ssl profiles.
+    long-summary: |
+        Usage: --ssl-profile name=MySslProfile client-auth-configuration=True cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom min-protocol-version=TLSv1_0
+
+        name: Required. Name of the SSL profile that is unique within an Application Gateway.
+        polic-name: Name of Ssl Policy.
+        policy-type: Type of Ssl Policy.
+        min-protocol-version: Minimum version of Ssl protocol to be supported on application gateway.
+        cipher-suites: Ssl cipher suites to be enabled in the specified order to application gateway.
+        disabled-ssl-protocols: Space-separated list of protocols to disable.
+        trusted-client-certificates: Array of references to application gateway trusted client certificates.
+        client-auth-configuration: Client authentication configuration of the application gateway resource.
+
+        Multiple ssl profiles can be specified by using more than one `--ssl-profile` argument.
+
 examples:
   - name: Create an application gateway with VMs as backend servers.
     text: |
@@ -1458,6 +1484,64 @@ short-summary: Place the CLI in a waiting state until a condition of the applica
 examples:
   - name: Place the CLI in a waiting state until the application gateway is created.
     text: az network application-gateway wait -g MyResourceGroup -n MyAppGateway --created
+"""
+
+helps['network application-gateway client-cert'] = """
+type: group
+short-summary: Manage trusted client certificate of application gateway.
+"""
+
+helps['network application-gateway client-cert add'] = """
+type: command
+short-summary: Add trusted client certificate of the application gateway.
+examples:
+  - name: Add trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert add --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
+"""
+
+helps['network application-gateway client-cert remove'] = """
+type: command
+short-summary: Remove an existing trusted client certificate of the application gateway.
+examples:
+  - name: Remove a trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert remove --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
+"""
+
+helps['network application-gateway client-cert list'] = """
+type: command
+short-summary: List the existing trusted client certificate of the application gateway.
+examples:
+  - name: list all the trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert list --gateway-name MyAppGateway -g MyResourceGroup
+"""
+
+helps['network application-gateway ssl-profile'] = """
+type: group
+short-summary: Manage ssl profiles of application gateway.
+"""
+
+helps['network application-gateway ssl-profile add'] = """
+type: command
+short-summary: Add ssl profiles of the application gateway.
+examples:
+  - name: Add ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+"""
+
+helps['network application-gateway ssl-profile remove'] = """
+type: command
+short-summary: Remove an existing ssl profiles of the application gateway.
+examples:
+  - name: Remove ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile remove --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+"""
+
+helps['network application-gateway ssl-profile list'] = """
+type: command
+short-summary: List the existing ssl profiles of the application gateway.
+examples:
+  - name: List all the ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
 helps['network asg'] = """
@@ -4518,7 +4602,7 @@ helps['network public-ip create'] = """
 type: command
 short-summary: Create a public IP address.
 long-summary: >
-    [Coming breaking change] In the coming release, the default behavior will be changed as follows when sku is Standard and zone is not provided: For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"]; For non-zonal regions, you will get a non zone-redundant IP indicated by zones:[].
+    [Coming breaking change] In the coming release, the default behavior will be changed as follows when sku is Standard and zone is not provided: zones = [], which means the Standard Public IP has no zones. If you want to create a zone-redundant Public IP address, please specify all the zones in the region. For example, --zone 1 2 3.
 examples:
   - name: Create a basic public IP resource.
     text: az network public-ip create -g MyResourceGroup -n MyIp
@@ -5801,6 +5885,85 @@ short-summary: Show a virtual router peering
 helps['network vrouter peering delete'] = """
 type: command
 short-summary: Delete a virtual router peering.
+"""
+
+helps['network routeserver'] = """
+type: group
+short-summary: Manage the virtual hub router.
+"""
+
+helps['network routeserver create'] = """
+type: command
+short-summary: Create a virtual hub router.
+examples:
+  - name: Create a virtual hub router.
+    text: |
+      az network routeserver create --resource-group myresourcegroup --name myvirtualrouter --hosted-subnet my_subnet_id
+"""
+
+helps['network routeserver update'] = """
+type: command
+short-summary: Update a virtual hub router.
+examples:
+  - name: Update a virtual hub router. (autogenerated)
+    text: |
+        az network routeserver update --name myvirtualrouter --resource-group myresourcegroup --tags super_secure no_80 no_22
+    crafted: true
+"""
+
+helps['network routeserver show'] = """
+type: command
+short-summary: Show a virtual hub router.
+"""
+
+helps['network routeserver list'] = """
+type: command
+short-summary: List all virtual hub routers under a subscription or a resource group.
+"""
+
+helps['network routeserver delete'] = """
+type: command
+short-summary: Delete a virtual hub router under a resource group.
+"""
+
+helps['network routeserver peering'] = """
+type: group
+short-summary: Manage the virtual hub router peering.
+"""
+
+helps['network routeserver peering create'] = """
+type: command
+short-summary: Create a virtual hub router peering.
+"""
+
+helps['network routeserver peering update'] = """
+type: command
+short-summary: Update a virtual hub router peering.
+"""
+
+helps['network routeserver peering list'] = """
+type: command
+short-summary: List all virtual hub router peerings under a resource group.
+"""
+
+helps['network routeserver peering show'] = """
+type: command
+short-summary: Show a virtual hub router peering
+"""
+
+helps['network routeserver peering delete'] = """
+type: command
+short-summary: Delete a virtual hub router peering.
+"""
+
+helps['network routeserver peering list-learned-routes'] = """
+type: command
+short-summary: List all routes the virtual hub bgp connection has learned.
+"""
+
+helps['network routeserver peering list-advertised-routes'] = """
+type: command
+short-summary: List all routes the virtual hub bgp connection is advertising to the specified peer.
 """
 
 helps['network watcher'] = """

@@ -695,6 +695,11 @@ backup protectable-item show:
     protectable_item_type:
       rule_exclusions:
       - option_length_too_long
+backup protectable-item list:
+  parameters:
+    protectable_item_type:
+      rule_exclusions:
+      - option_length_too_long
 backup protection auto-enable-for-azurewl:
   parameters:
     protectable_item_name:
@@ -788,6 +793,9 @@ backup vault backup-properties set:
       rule_exclusions:
       - option_length_too_long
     soft_delete_feature_state:
+      rule_exclusions:
+      - option_length_too_long
+    cross_region_restore_flag:
       rule_exclusions:
       - option_length_too_long
 batch account create:

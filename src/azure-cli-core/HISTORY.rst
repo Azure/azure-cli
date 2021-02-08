@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
+
 2.18.0
 ++++++
 * Print INFO log from SDK (#15676)
