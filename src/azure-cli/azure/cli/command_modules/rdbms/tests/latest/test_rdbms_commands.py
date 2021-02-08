@@ -318,7 +318,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
             result = self.cmd('{} server show -g {} -n {}'
                               .format(database_engine, resource_group_1, servers[4])).get_output_in_json()
             server_version = result['version']
-            # self.assertEqual(server_version, '5.7')
+            self.assertEqual(server_version, '5.7')
 
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'

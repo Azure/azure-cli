@@ -5,8 +5,8 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-from msrestazure.azure_exceptions import CloudError
 from azure.core.exceptions import ResourceNotFoundError
+from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -324,8 +324,7 @@ def flexible_server_update_custom_func(cmd, instance,
     if assign_identity:
         if server_module_path.find('mysql'):
             if instance.identity is None:
-                instance.identity = mysql_flexibleservers.models.Identity(
-                    type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+                instance.identity = mysql_flexibleservers.models.Identity()
             params.identity = instance.identity
 
     return params
@@ -369,9 +368,9 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
         source = "user-override"
 
     parameters = mysql_flexibleservers.models.Configuration(
-        name = configuration_name,
-        value = value,
-        source = source
+        name=configuration_name,
+        value=value,
+        source=source
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
@@ -471,8 +470,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = mysql_flexibleservers.models.Identity(
-            type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+        parameters.identity = mysql_flexibleservers.models.Identity()
 
     return resolve_poller(
         server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
@@ -555,33 +553,35 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
     # check for existing database, create if not
     cf_db, logging_name = db_context.cf_db, db_context.logging_name
     database_client = cf_db(cmd.cli_ctx, None)
-    # try:
-    #     database_client.get(resource_group_name, server_name, database_name)
-    # except ResourceNotFoundError:
-    logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
-    parameters = mysql_flexibleservers.models.Database(
-        name = database_name,
-        charset = 'utf8'
-    )
+    try:
+        database_client.get(resource_group_name, server_name, database_name)
+    except ResourceNotFoundError:
+        logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+        parameters = mysql_flexibleservers.models.Database(
+            name=database_name,
+            charset='utf8'
+        )
     resolve_poller(
         database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
         '{} Database Create/Update'.format(logging_name))
+
 
 def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
     if charset is None:
         charset = 'utf8'
 
     parameters = mysql_flexibleservers.models.Database(
-            name = database_name,
-            charset = charset,
-            collation = collation
-        )
-    
+        name=database_name,
+        charset=charset,
+        collation=collation
+    )
+
     return client.begin_create_or_update(
         resource_group_name,
         server_name,
         database_name,
         parameters)
+
 
 def _create_mysql_connection_string(host, database_name, user_name, password):
     connection_kwargs = {

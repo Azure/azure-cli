@@ -45,9 +45,6 @@ def flexible_server_create(cmd, client,
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
     storage_mb *= 1024
 
-    
-
-    # try:
     db_context = DbContext(
         azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
@@ -235,8 +232,7 @@ def flexible_server_update_custom_func(cmd, instance,
     if assign_identity:
         if server_module_path.find('postgres'):
             if instance.identity is None:
-                instance.identity = postgresql_flexibleservers.models.Identity(
-                    type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+                instance.identity = postgresql_flexibleservers.models.Identity()
             params.identity = instance.identity
     return params
 
@@ -285,9 +281,9 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
         source = "user-override"
 
     parameters = postgresql_flexibleservers.models.Configuration(
-        configuration_name = configuration_name,
-        value = value,
-        source = source
+        configuration_name=configuration_name,
+        value=value,
+        source=source
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
@@ -327,8 +323,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = postgresql_flexibleservers.models.Identity(
-            type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+        parameters.identity = postgresql_flexibleservers.models.Identity()
 
     return resolve_poller(
         server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,

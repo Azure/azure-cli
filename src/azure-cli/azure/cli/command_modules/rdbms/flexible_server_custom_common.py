@@ -60,16 +60,16 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
 
     if isinstance(client, MySqlFirewallRulesOperations):
         parameters = mysql_models.FirewallRule(
-            name = firewall_rule_name,
-            start_ip_address = start_ip_address,
-            end_ip_address = end_ip_address
+            name=firewall_rule_name,
+            start_ip_address=start_ip_address,
+            end_ip_address=end_ip_address
         )
-        
+
     elif isinstance(client, PostgresFirewallRulesOperations):
         parameters = postgres_models.FirewallRule(
-            name = firewall_rule_name,
-            start_ip_address = start_ip_address,
-            end_ip_address = end_ip_address
+            name=firewall_rule_name,
+            start_ip_address=start_ip_address,
+            end_ip_address=end_ip_address
         )
 
     return client.begin_create_or_update(

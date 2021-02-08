@@ -6,31 +6,27 @@
 # pylint: disable=unused-argument, line-too-long
 
 from msrestazure.azure_exceptions import CloudError
-from azure.core.exceptions import ResourceNotFoundError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import postgresql, mysql, mariadb
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
-from azure.mgmt.rdbms.mysql.operations._firewall_rules_operations import FirewallRulesOperations as MySqlFirewallRulesOperations
-from azure.mgmt.rdbms.postgresql.operations._firewall_rules_operations import FirewallRulesOperations as PostgreSqlFirewallRulesOperations
 from azure.mgmt.rdbms.mysql.operations._virtual_network_rules_operations import VirtualNetworkRulesOperations as MySqlVirtualNetworkRulesOperations
-from azure.mgmt.rdbms.postgresql.operations._virtual_network_rules_operations import VirtualNetworkRulesOperations as PostgreSqlVirtualNetworkRulesOperations
 from azure.mgmt.rdbms.mysql.operations._configurations_operations import ConfigurationsOperations as MySqlConfigurationsOperations
-from azure.mgmt.rdbms.postgresql.operations._configurations_operations import ConfigurationsOperations as PostgreSqlConfigurationsOperations
+from azure.mgmt.rdbms.mysql.operations._firewall_rules_operations import FirewallRulesOperations as MySqlFirewallRulesOperations
+from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
 from azure.mgmt.rdbms.mysql.operations._databases_operations import DatabasesOperations as MySqlDatabasesOperations
-from azure.mgmt.rdbms.postgresql.operations._databases_operations import DatabasesOperations as PostgreSqlDatabasesOperations
-
 from azure.mgmt.rdbms.mysql.operations._server_keys_operations import ServerKeysOperations as MySqlServerKeysOperations
-from azure.mgmt.rdbms.postgresql.operations._server_keys_operations import ServerKeysOperations as PostgreSqlServerKeysOperations
-
 from azure.mgmt.rdbms.mysql.operations._private_endpoint_connections_operations import PrivateEndpointConnectionsOperations as MySqlPrivateEndpointConnectionsOperations
+from azure.mgmt.rdbms.postgresql.operations._firewall_rules_operations import FirewallRulesOperations as PostgreSqlFirewallRulesOperations
+from azure.mgmt.rdbms.postgresql.operations._virtual_network_rules_operations import VirtualNetworkRulesOperations as PostgreSqlVirtualNetworkRulesOperations
+from azure.mgmt.rdbms.postgresql.operations._configurations_operations import ConfigurationsOperations as PostgreSqlConfigurationsOperations
+from azure.mgmt.rdbms.postgresql.operations._databases_operations import DatabasesOperations as PostgreSqlDatabasesOperations
+from azure.mgmt.rdbms.postgresql.operations._server_keys_operations import ServerKeysOperations as PostgreSqlServerKeysOperations
 from azure.mgmt.rdbms.postgresql.operations._private_endpoint_connections_operations import PrivateEndpointConnectionsOperations as PostgreSqlPrivateEndpointConnectionsOperations
-
-
 from azure.mgmt.rdbms.postgresql.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as PostgreSQLLocationOperations
 from azure.mgmt.rdbms.mariadb.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as MariaDBLocationOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, cf_mysql_db, cf_mariadb_db, \
@@ -528,13 +524,13 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
 
 
 def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_rule_name, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint):
-    if isinstance(client, MySqlFirewallRulesOperations):
+    if isinstance(client, MySqlVirtualNetworkRulesOperations):
         parameters = mysql.models.VirtualNetworkRule(
             name=virtual_network_rule_name,
             virtual_network_subnet_id=virtual_network_subnet_id,
             ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint
         )
-    elif isinstance(client, PostgreSqlFirewallRulesOperations):
+    elif isinstance(client, PostgreSqlVirtualNetworkRulesOperations):
         parameters = postgresql.models.VirtualNetworkRule(
             name=virtual_network_rule_name,
             virtual_network_subnet_id=virtual_network_subnet_id,
@@ -578,7 +574,7 @@ def _configuration_update(client, resource_group_name, server_name, configuratio
             value=value,
             source=source,
         )
-    elif isinstance(client, PostgreSqlFirewallRulesOperations):
+    elif isinstance(client, PostgreSqlConfigurationsOperations):
         parameters = postgresql.models.Configuration(
             name=configuration_name,
             value=value,
@@ -695,9 +691,9 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     private_endpoint_connection.private_link_service_connection_state = private_link_service_connection_state
 
     return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                   server_name=server_name,
-                                   private_endpoint_connection_name=private_endpoint_connection_name,
-                                   parameters=private_endpoint_connection)
+                                         server_name=server_name,
+                                         private_endpoint_connection_name=private_endpoint_connection_name,
+                                         parameters=private_endpoint_connection)
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
@@ -732,11 +728,7 @@ def server_key_create(client, resource_group_name, server_name, kid):
         parameters = postgresql.models.ServerKey(
             uri=kid
         )
-    else:
-        parameters = mariadb.models.ServerKey(
-            uri=kid
-        )
-    
+
     return client.begin_create_or_update(resource_group_name, key_name, server_name, parameters)
 
 
@@ -871,7 +863,7 @@ def check_server_name_availability(check_name_client, parameters):
     server_availability = check_name_client.execute(parameters)
     if not server_availability.name_available:
         raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                       "other server name.".format(server_name))
+                       "other server name.".format(parameters.name))
     return True
 
 
