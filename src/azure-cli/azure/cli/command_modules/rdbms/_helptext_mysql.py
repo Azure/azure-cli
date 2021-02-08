@@ -269,7 +269,7 @@ type: command
 short-summary: Update a flexible server.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
-    text: az mysql flexible-server update --sku-name Standard_D4s_v3
+    text: az mysql flexible-server update --sku-name Standard_D4ds_v4 --tier GeneralPurpose
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
     crafted: true
@@ -290,4 +290,12 @@ examples:
   - name: Wait for the flexible server to satisfy certain conditions.
     text: az mysql flexible-server wait --exists --resource-group testGroup --name testServer
     crafted: true
+"""
+
+helps['mysql flexible-server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MySQL flexible-server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mysql flexible-server show-connection-string -s testServer -u username -p password -d databasename
 """

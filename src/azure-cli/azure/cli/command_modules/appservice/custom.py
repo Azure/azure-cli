@@ -44,9 +44,11 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
-from azure.cli.core.util import get_az_user_agent
+from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
+                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError,
+                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
 
 from .tunnel import TunnelServer
 
@@ -58,10 +60,10 @@ from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src, get_current_stack_from_runtime)
+                           detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD)
 
 logger = get_logger(__name__)
 
@@ -96,7 +98,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_EXACT_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
-    name_validation = client.check_name_availability(name, 'Site')
+    name_validation = get_site_availability(cmd, name)
     if not name_validation.name_available:
         if name_validation.reason == 'Invalid':
             raise CLIError(name_validation.message)
@@ -137,11 +139,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.app_command_line = startup_file
 
         if runtime:
-            site_config.linux_fx_version = runtime
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
                                " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+            match['setter'](cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -152,7 +154,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif plan_info.is_xenon:  # windows container webapp
-        site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        if deployment_container_image_name:
+            site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
         # set the needed app settings for container image validation
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
@@ -177,7 +180,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         current_stack = get_current_stack_from_runtime(runtime)
 
     else:  # windows webapp without runtime specified
-        if name_validation.name_available:
+        if name_validation.name_available:  # If creating new webapp
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
 
@@ -198,9 +201,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if current_stack:
-        app_metadata = client.web_apps.list_metadata(resource_group_name, name)
-        app_metadata.properties["CURRENT_STACK"] = current_stack
-        client.web_apps.update_metadata(resource_group_name, name, kind="app", properties=app_metadata.properties)
+        _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
     # Ensure SCC operations follow right after the 'create', no precedent appsetting update commands
     _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url,
@@ -1167,16 +1168,29 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     generic_configurations = generic_configurations or []
+
+    # https://github.com/Azure/azure-cli/issues/14857
+    updating_ip_security_restrictions = False
+
     result = {}
     for s in generic_configurations:
         try:
-            result.update(get_json_object(s))
+            json_object = get_json_object(s)
+            for config_name in json_object:
+                if config_name.lower() == 'ip_security_restrictions':
+                    updating_ip_security_restrictions = True
+            result.update(json_object)
         except CLIError:
             config_name, value = s.split('=', 1)
             result[config_name] = value
 
     for config_name, value in result.items():
+        if config_name.lower() == 'ip_security_restrictions':
+            updating_ip_security_restrictions = True
         setattr(configs, config_name, value)
+
+    if not updating_ip_security_restrictions:
+        setattr(configs, 'ip_security_restrictions', None)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -1684,23 +1698,24 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     sku = _normalize_sku(sku)
     _validate_asp_sku(app_service_environment, sku)
     if is_linux and hyper_v:
-        raise CLIError('usage error: --is-linux | --hyper-v')
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
         if hyper_v:
-            raise CLIError('Windows containers is not yet supported in app service environment')
+            raise ArgumentUsageError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
         for ase in ase_list:
-            if ase.name.lower() == app_service_environment.lower():
+            if ase.name.lower() == app_service_environment.lower() or ase.id.lower() == app_service_environment.lower():
                 ase_def = HostingEnvironmentProfile(id=ase.id)
                 location = ase.location
                 ase_found = True
                 break
         if not ase_found:
-            raise CLIError("App service environment '{}' not found in subscription.".format(ase.id))
+            err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
+            raise ResourceNotFoundError(err_msg)
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -2186,19 +2201,23 @@ def list_slots(cmd, resource_group_name, webapp):
     return slots
 
 
-def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
+def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
+    # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
+    isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
+    # converstion from string to Boolean
+    isPreserveVnet = bool(isPreserveVnet == 'true')
     if action == 'swap':
         poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                slot, (target_slot or 'production'), True)
+                                                slot, (target_slot or 'production'), isPreserveVnet)
         return poller
     if action == 'preview':
         if target_slot is None:
             result = client.web_apps.apply_slot_config_to_production(resource_group_name,
-                                                                     webapp, slot, True)
+                                                                     webapp, slot, isPreserveVnet)
         else:
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
-                                                                   slot, target_slot, True)
+                                                                   slot, target_slot, isPreserveVnet)
         return result
     # we will reset both source slot and target slot
     if target_slot is None:
@@ -2373,6 +2392,11 @@ def list_ssl_certs(cmd, resource_group_name):
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
+def show_ssl_cert(cmd, resource_group_name, certificate_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.certificates.get(resource_group_name, certificate_name)
+
+
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     client = web_client_factory(cmd.cli_ctx)
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
@@ -2414,6 +2438,28 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
+
+    # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
+    # subscription
+    kv_secret_name = None
+    cloud_type = cmd.cli_ctx.cloud.name
+    if cloud_type.lower() == PUBLIC_CLOUD.lower():
+        if kv_subscription.lower() != client.config.subscription_id.lower():
+            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                               subscription_id=kv_subscription)
+            ascs = diff_subscription_client.app_service_certificate_orders.list()
+        else:
+            ascs = client.app_service_certificate_orders.list()
+
+        kv_secret_name = None
+        for asc in ascs:
+            if asc.name == key_vault_certificate_name:
+                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+
+    # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
+    if not kv_secret_name:
+        kv_secret_name = key_vault_certificate_name
+
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
@@ -2423,7 +2469,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -2454,8 +2500,31 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     location = webapp.location
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
-    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
-                                                certificate_envelope=easy_cert_def)
+
+    # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
+    try:
+        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                    certificate_envelope=easy_cert_def)
+    except DefaultErrorResponseException as ex:
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError:
+                    return r.text
+            logger.warning("Managed Certificate creation in progress. Please use the command "
+                           "'az webapp config ssl show -g %s --certificate-name %s' "
+                           " to view your certificate once it is created", resource_group_name, hostname)
+            return
+        raise CLIError(ex)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
@@ -2500,27 +2569,36 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+
+    found_cert = None
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                                   webapp_cert.host_names[0], ssl_type,
-                                                   certificate_thumbprint, slot)
+            found_cert = webapp_cert
+    if not found_cert:
+        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+        for webapp_cert in webapp_certs:
+            if webapp_cert.thumbprint == certificate_thumbprint:
+                found_cert = webapp_cert
+    if found_cert:
+        if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
+            return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                               webapp_cert.host_names[0], ssl_type,
+                                               certificate_thumbprint, slot)
 
-            query_result = list_hostnames(cmd, resource_group_name, name, slot)
-            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-            to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
-            for h in to_update:
-                _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                            h, ssl_type, certificate_thumbprint, slot)
+        query_result = list_hostnames(cmd, resource_group_name, name, slot)
+        hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+        to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+        for h in to_update:
+            _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                        h, ssl_type, certificate_thumbprint, slot)
 
-            return show_webapp(cmd, resource_group_name, name, slot)
+        return show_webapp(cmd, resource_group_name, name, slot)
 
-    raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
+    raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
 def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
@@ -2560,7 +2638,13 @@ class _StackRuntimeHelper:
     @staticmethod
     def remove_delimiters(runtime):
         import re
-        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        # delimiters allowed: '|', ':'
+        if '|' in runtime:
+            runtime = re.split('[|]', runtime)
+        elif ':' in runtime:
+            runtime = re.split('[:]', runtime)
+        else:
+            runtime = [runtime]
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name):
@@ -2584,7 +2668,15 @@ class _StackRuntimeHelper:
         NameValuePair = cmd.get_models('NameValuePair')
         if site_config.app_settings is None:
             site_config.app_settings = []
-        site_config.app_settings += [NameValuePair(name=k, value=v) for k, v in stack['configs'].items()]
+
+        for k, v in stack['configs'].items():
+            already_in_appsettings = False
+            for app_setting in site_config.app_settings:
+                if app_setting.name == k:
+                    already_in_appsettings = True
+                    app_setting.value = v
+            if not already_in_appsettings:
+                site_config.app_settings.append(NameValuePair(name=k, value=v))
         return site_config
 
     def _load_stacks_hardcoded(self):
@@ -2593,6 +2685,8 @@ class _StackRuntimeHelper:
         result = []
         if self._linux:
             result = get_file_json(RUNTIME_STACKS)['linux']
+            for r in result:
+                r['setter'] = _StackRuntimeHelper.update_site_config
         else:  # Windows stacks
             result = get_file_json(RUNTIME_STACKS)['windows']
             for r in result:
@@ -3524,8 +3618,8 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     if not delegated:
         subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=subnetObj)
+        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet, subnet,
+                                                   subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
@@ -3569,8 +3663,11 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
+def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
+    if not name:
+        name = generate_default_app_name(cmd)
+
     import os
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
@@ -3638,7 +3735,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                            "Please check if you have configured defaults for plan name and re-run command."
                            .format(plan, current_plan))
         plan = plan or plan_details['name']
-        plan_info = client.app_service_plans.get(rg_name, plan)
+        plan_info = client.app_service_plans.get(plan_details['resource_group'], plan)
         sku = plan_info.sku.name if isinstance(plan_info, AppServicePlan) else 'Free'
         current_os = 'Linux' if plan_info.reserved else 'Windows'
         # Raise error if current OS of the app is different from the current one
@@ -3688,12 +3785,21 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating Resource group '%s' ...", rg_name)
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
-        # create ASP
-        logger.warning("Creating AppServicePlan '%s' ...", plan)
+    # create ASP
+    logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=loc)
+    try:
+        create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                                number_of_workers=1 if _is_linux else None, location=loc)
+    except Exception as ex:
+        if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
+            try:
+                response_content = json.loads(ex.response._content.decode('utf-8'))  # pylint: disable=protected-access
+            except Exception:
+                raise CLIInternalError(ex)
+            raise UnclassifiedUserFault(response_content['error']['message'])
+        raise AzureResponseError(ex)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
@@ -3701,18 +3807,26 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
+        helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
+        match = helper.resolve(runtime_version)
+
         if os_name.lower() == 'linux' and site_config.linux_fx_version != runtime_version:
-            logger.warning('Updating runtime version from %s to %s',
-                           site_config.linux_fx_version, runtime_version)
-            update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
-            logger.warning('Waiting for runtime version to propagate ...')
-            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
-        elif os_name.lower() == 'windows' and site_config.windows_fx_version != runtime_version:
-            logger.warning('Updating runtime version from %s to %s',
-                           site_config.windows_fx_version, runtime_version)
-            update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
-            logger.warning('Waiting for runtime version to propagate ...')
-            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
+            if match and site_config.linux_fx_version != match['configs']['linux_fx_version']:
+                logger.warning('Updating runtime version from %s to %s',
+                               site_config.linux_fx_version, match['configs']['linux_fx_version'])
+                update_site_configs(cmd, rg_name, name, linux_fx_version=match['configs']['linux_fx_version'])
+                logger.warning('Waiting for runtime version to propagate ...')
+                time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
+            elif not match:
+                logger.warning('Updating runtime version from %s to %s',
+                               site_config.linux_fx_version, runtime_version)
+                update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
+                logger.warning('Waiting for runtime version to propagate ...')
+                time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
+        elif os_name.lower() == 'windows':
+            # may need to update stack runtime settings. For node its site_config.app_settings, otherwise site_config
+            if match:
+                _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version)
         create_json['runtime_version'] = runtime_version
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
@@ -3738,6 +3852,54 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         cmd.cli_ctx.config.set_value('defaults', 'location', loc)
         cmd.cli_ctx.config.set_value('defaults', 'web', name)
     return create_json
+
+
+def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
+    update_needed = False
+    if 'node' in runtime_version:
+        settings = []
+        for k, v in match['configs'].items():
+            for app_setting in site_config.app_settings:
+                if app_setting.name == k and app_setting.value != v:
+                    update_needed = True
+                    settings.append('%s=%s', k, v)
+        if update_needed:
+            logger.warning('Updating runtime version to %s', runtime_version)
+            update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
+    else:
+        for k, v in match['configs'].items():
+            if getattr(site_config, k, None) != v:
+                update_needed = True
+                setattr(site_config, k, v)
+        if update_needed:
+            logger.warning('Updating runtime version to %s', runtime_version)
+            update_site_configs(cmd,
+                                rg_name,
+                                name,
+                                net_framework_version=site_config.net_framework_version,
+                                php_version=site_config.php_version,
+                                python_version=site_config.python_version,
+                                java_version=site_config.java_version,
+                                java_container=site_config.java_container,
+                                java_container_version=site_config.java_container_version)
+
+    current_stack = get_current_stack_from_runtime(runtime_version)
+    _update_webapp_current_stack_property_if_needed(cmd, rg_name, name, current_stack)
+
+    if update_needed:
+        logger.warning('Waiting for runtime version to propagate ...')
+        time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
+
+
+def _update_webapp_current_stack_property_if_needed(cmd, resource_group, name, current_stack):
+    if not current_stack:
+        return
+    # portal uses this current_stack value to display correct runtime for windows webapps
+    client = web_client_factory(cmd.cli_ctx)
+    app_metadata = client.web_apps.list_metadata(resource_group, name)
+    if 'CURRENT_STACK' not in app_metadata.properties or app_metadata.properties["CURRENT_STACK"] != current_stack:
+        app_metadata.properties["CURRENT_STACK"] = current_stack
+        client.web_apps.update_metadata(resource_group, name, kind="app", properties=app_metadata.properties)
 
 
 def _ping_scm_site(cmd, resource_group, name, instance=None):
@@ -3891,12 +4053,19 @@ def _start_ssh_session(hostname, port, username, password):
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
-        raise CLIError('webapp ssh is only supported on linux and mac')
+        webapp = show_webapp(cmd, resource_group_name, name, slot)
+        is_linux = webapp.reserved
+        if not is_linux:
+            raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.remote_debugging_enabled:
-        raise CLIError('remote debugging is enabled, please disable')
-    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+        open_page_in_browser(scm_url + '/webssh/host')
+    else:
+        config = get_site_configs(cmd, resource_group_name, name, slot)
+        if config.remote_debugging_enabled:
+            raise ValidationError('Remote debugging is enabled, please disable')
+        create_tunnel_and_session(
+            cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(
@@ -3942,7 +4111,7 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
 
 def _validate_asp_sku(app_service_environment, sku):
     # Isolated SKU is supported only for ASE
-    if sku in ['I1', 'I2', 'I3']:
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
@@ -3973,7 +4142,8 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
     verified_hostname_found = False
     for hostname_binding in hostname_bindings:
         binding_name = hostname_binding.name.split('/')[-1]
-        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+        if binding_name.lower() == hostname and (hostname_binding.host_name_type == 'Verified' or
+                                                 hostname_binding.host_name_type == 'Managed'):
             verified_hostname_found = True
 
     return verified_hostname_found

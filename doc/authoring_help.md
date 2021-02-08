@@ -28,7 +28,7 @@ To override help for a given command:
 
 ### Example YAML help file, \_help.py
 
-```py
+```python
 #---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -61,7 +61,7 @@ examples:
 
 You can also document groups using the same format.
 
-```py
+```python
 helps['account'] = """
 type: group
 short-summary: The account group
@@ -87,7 +87,7 @@ examples:
 
 To verify the YAML help is correctly formatted, the command/group's help command must be executed at runtime.  For example, to verify "az account clear", run the command "az account clear -h" and verify the text.  
 
-Runtime is also when help authoring errors will be reported, such as documenting a parameter that doesn't exist.  Errors will only show when the CLI help is executed, so verifying the CLI help is required to ensure your authoring is correct.   
+Runtime is also when help authoring errors will be reported, such as documenting a parameter that doesn't exist.  Errors will only show when the Azure CLI help is executed, so verifying the Azure CLI help is required to ensure your authoring is correct.   
 
 # Other Help Authoring
 
@@ -114,7 +114,7 @@ Page titles for your command groups as generated from the source are simply the 
 
 ## Profile specific help
 
-The CLI supports multiple profiles. Help can be authored to take advantage of this.  
+The Azure CLI supports multiple profiles. Help can be authored to take advantage of this.  
 Commands available, arguments, descriptions and examples all change dynamically based on the profile in use.
 
 The `az cloud update --profile ...` command allows you to switch profiles.  
@@ -135,7 +135,7 @@ The first example is only supported on the `latest` and `2018-03-01-hybrid` prof
 
 ### \_help.py
 
-```
+```console
     examples:
         - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
@@ -147,10 +147,11 @@ The first example is only supported on the `latest` and `2018-03-01-hybrid` prof
           supported-profiles: 2017-03-09-profile
 ```
 
-Here is how this looks in CLI `--help`:
+Here is how this looks in Azure CLI `--help`:
 
 On profiles `latest` and `2018-03-01-hybrid`.
-```
+
+```console
 Examples
     Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US
     region with locally redundant storage.
@@ -159,7 +160,8 @@ Examples
 ```
 
 On profile `2017-03-09-profile`.
-```
+
+```console
 Examples
     Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US
     region with locally redundant storage.

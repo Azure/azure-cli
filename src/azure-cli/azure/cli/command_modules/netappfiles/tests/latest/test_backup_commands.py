@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "southcentralus"
+LOCATION = "eastus2euap"
 
 
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
@@ -76,6 +76,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         backup = self.create_backup(account_name, pool_name, volume_name, backup_name)
 
         assert backup is not None
+        assert backup['id'] is not None
 
         backup_list = self.cmd("netappfiles volume backup list -g {rg} -a %s -p %s -v %s" %
                                (account_name, pool_name, volume_name)).get_output_in_json()
@@ -145,6 +146,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
                           (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
         assert backup is not None
         assert backup['name'] == account_name + "/" + pool_name + "/" + volume_name + "/" + backup_name
+        assert backup['id'] is not None
         # there is a bug in update where the label is not updated - will be fixed later
         # assert backup['label'] == label
 
@@ -175,13 +177,13 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
+        self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
+                 (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
+
         # disable backup for volume
         vaults = self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
         self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
                  (account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
-
-        self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
-                 (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
 
         # Backup not completely ready, not able to retrieve backupId at the moment since swagger is not updated
         # create new volume and restore backup

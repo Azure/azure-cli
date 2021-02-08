@@ -13,18 +13,12 @@ import azure.cli.command_modules.storage._help  # pylint: disable=unused-import
 class StorageCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from azure.cli.core import ModExtensionSuppress
         storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
         super(StorageCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.DATA_STORAGE,
                                                     custom_command_type=storage_custom,
                                                     command_group_cls=StorageCommandGroup,
-                                                    argument_context_cls=StorageArgumentContext,
-                                                    suppress_extension=ModExtensionSuppress(
-                                                        __name__, 'storage-or-preview', '0.4.0',
-                                                        reason='The storage account or policy commands are now in CLI.',
-                                                        recommend_remove=True)
-                                                    )
+                                                    argument_context_cls=StorageArgumentContext)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.storage.commands import load_command_table
@@ -170,12 +164,14 @@ class StorageArgumentContext(AzArgumentContext):
                    "if it does exist.")
 
     def register_blob_arguments(self):
-        self.extra('blob_name', required=True)
-        self.extra('container_name', required=True)
+        from ._validators import get_not_none_validator
+        self.extra('blob_name', required=True, validator=get_not_none_validator('blob_name'))
+        self.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
         self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     def register_container_arguments(self):
-        self.extra('container_name', required=True)
+        from ._validators import get_not_none_validator
+        self.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
         self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     def register_fs_directory_arguments(self):

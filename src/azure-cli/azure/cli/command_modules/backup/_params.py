@@ -22,7 +22,7 @@ from azure.cli.command_modules.backup._validators import \
 
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase']
-allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE']
+allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
 
@@ -36,7 +36,7 @@ policy_help = """JSON encoded policy definition. Use the show command with JSON 
 target_server_type_help = """Specify the type of the server which should be discovered."""
 protectable_item_name_type_help = """Specify the resource name to be protected by Azure Backup service."""
 backup_type_help = """'Full, Differential, Log, Copy-only-full' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
-retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy."""
+retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). If not specified, 30 days will be taken as default value. For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
@@ -78,6 +78,7 @@ def load_arguments(self, _):
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
         c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')
+        c.argument('cross_region_restore_flag', arg_type=get_enum_type(['True', 'False']), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -87,9 +88,12 @@ def load_arguments(self, _):
     with self.argument_context('backup container show') as c:
         c.argument('name', container_name_type, options_list=['--name', '-n'], help='Name of the container. You can use the backup container list command to get the name of a container.')
         c.argument('backup_management_type', backup_management_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to show container in secondary region.')
+
     with self.argument_context('backup container list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', backup_management_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to list containers in secondary region.')
 
     with self.argument_context('backup container unregister') as c:
         c.argument('backup_management_type', backup_management_type)
@@ -114,6 +118,7 @@ def load_arguments(self, _):
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to show item in secondary region.')
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup item set-policy') as c:
@@ -126,6 +131,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
         c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to list items in secondary region.')
 
     # Policy
     with self.argument_context('backup policy') as c:
@@ -170,12 +176,14 @@ def load_arguments(self, _):
             c.argument('backup_management_type', backup_management_type)
             c.argument('container_name', container_name_type)
             c.argument('workload_type', workload_type)
+            c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
         c.argument('backup_management_type', backup_management_type)
         c.argument('container_name', container_name_type)
         c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     # Protection
     with self.argument_context('backup protection') as c:
@@ -236,6 +244,9 @@ def load_arguments(self, _):
         c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
         c.argument('protectable_item_type', protectable_item_type)
 
+    with self.argument_context('backup protectable-item list') as c:
+        c.argument('protectable_item_type', protectable_item_type)
+
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup restore') as c:
@@ -251,6 +262,7 @@ def load_arguments(self, _):
         c.argument('diskslist', diskslist_type)
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
         c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -296,6 +308,7 @@ def load_arguments(self, _):
     for command in ['show', 'stop', 'wait']:
         with self.argument_context('backup job ' + command) as c:
             c.argument('name', job_name_type, help='Name of the job. You can use the backup job list command to get the name of a job.')
+            c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     with self.argument_context('backup job list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -303,6 +316,8 @@ def load_arguments(self, _):
         c.argument('operation', arg_type=get_enum_type(['Backup', 'ConfigureBackup', 'DeleteBackupData', 'DisableBackup', 'Restore']), help='User initiated operation.')
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     with self.argument_context('backup job wait') as c:
         c.argument('timeout', type=int, help='Maximum time, in seconds, to wait before aborting.')

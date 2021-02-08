@@ -28,10 +28,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
-                   "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
+                   "'https://docs.microsoft.com/cli/azure/query-azure-cli'")
 
 
 _PROXYID_RE = re.compile(
@@ -55,7 +55,7 @@ DISALLOWED_USER_NAMES = [
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
-    from jmespath.exceptions import JMESPathTypeError
+    from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
@@ -76,7 +76,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         if isinstance(ex, azclierror.AzCLIError):
             az_error = ex
 
-        elif isinstance(ex, JMESPathTypeError):
+        elif isinstance(ex, JMESPathError):
             error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
             az_error = azclierror.InvalidArgumentValueError(error_msg)
             az_error.set_recommendation(QUERY_REFERENCE)
@@ -115,13 +115,18 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         elif isinstance(ex, ClientRequestError):
             if is_azure_connection_error(error_msg):
                 az_error = azclierror.AzureConnectionError(error_msg)
+            elif isinstance(ex.inner_exception, SSLError):
+                # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
+                az_error = azclierror.AzureConnectionError(error_msg)
+                az_error.set_recommendation(SSLERROR_TEMPLATE)
             else:
                 az_error = azclierror.ClientRequestError(error_msg)
 
         elif isinstance(ex, HttpOperationError):
-            message, status_code = extract_http_operation_error(ex)
+            message, _ = extract_http_operation_error(ex)
             if message:
                 error_msg = message
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
@@ -168,14 +173,13 @@ def extract_http_operation_error(ex):
         if isinstance(response, str):
             error = response
         else:
-            error = response['error']
+            error = response.get('error', response.get('Error', None))
         # ARM should use ODATA v4. So should try this first.
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
-            status_code = error.get('code', 'Unknown Code')
-            code_str = "{} - ".format(status_code)
-            message = error.get('message', ex)
-            error_msg = "code: {}, {}".format(code_str, message)
+            status_code = error.get('code', error.get('Code', 'Unknown Code'))
+            message = error.get('message', error.get('Message', ex))
+            error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
     except (ValueError, KeyError):
@@ -202,6 +206,7 @@ def get_error_type_by_azure_error(ex):
     return azclierror.UnknownError
 
 
+# pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
     import azure.cli.core.azclierror as azclierror
 
@@ -213,6 +218,8 @@ def get_error_type_by_status_code(status_code):
         return azclierror.ForbiddenError
     if status_code == '404':
         return azclierror.ResourceNotFoundError
+    if status_code.startswith('4'):
+        return azclierror.UnclassifiedUserFault
     if status_code.startswith('5'):
         return azclierror.AzureInternalError
 
@@ -425,15 +432,16 @@ def show_updates_available(new_line_before=False, new_line_after=False):
     if updates_available_components:
         if new_line_before:
             logger.warning("")
-        show_updates(updates_available_components)
+        show_updates(updates_available_components, only_show_when_updates_available=True)
         if new_line_after:
             logger.warning("")
     VERSIONS[_VERSION_CHECK_TIME] = str(datetime.datetime.now())
 
 
-def show_updates(updates_available_components):
+def show_updates(updates_available_components, only_show_when_updates_available=False):
     if updates_available_components is None:
-        logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
+        if not only_show_when_updates_available:
+            logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
             warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
@@ -442,7 +450,7 @@ def show_updates(updates_available_components):
             if CLI_PACKAGE_NAME in updates_available_components:
                 warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
         logger.warning(warning_msg, len(updates_available_components))
-    else:
+    elif not only_show_when_updates_available:
         print('Your CLI is up-to-date.')
 
 
@@ -493,15 +501,15 @@ def read_file_content(file_path, allow_binary=False):
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
-def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
+def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True):
     """ Allows the passing of JSON or Python dictionary strings. This is needed because certain
     JSON strings in CMD shell are not received in main's argv. This allows the user to specify
     the alternative notation, which does not have this problem (but is technically not JSON). """
     try:
         if not preserve_order:
-            return json.loads(json_or_dict_string)
+            return json.loads(json_or_dict_string, strict=strict)
         from collections import OrderedDict
-        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict)
+        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict, strict=strict)
     except ValueError as json_ex:
         try:
             import ast
@@ -615,6 +623,14 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
         # support autorest 3
         handler_args['polling'] = False
 
+    # Support track2 SDK.
+    # In track2 SDK, there is no parameter 'polling' in SDK, but just use '**kwargs'.
+    # So we check the name of the operation to see if it's a long running operation.
+    # The name of long running operation in SDK is like 'begin_xxx_xxx'.
+    op_name = handler.__name__
+    if op_name and op_name.startswith('begin_') and no_wait_enabled:
+        handler_args['polling'] = False
+
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
@@ -656,7 +672,11 @@ def _get_platform_info():
 
 def is_wsl():
     platform_name, release = _get_platform_info()
-    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+    # "Official" way of detecting WSL: https://github.com/Microsoft/WSL/issues/423#issuecomment-221627364
+    # Run `uname -a` to get 'release' without python
+    #   - WSL 1: '4.4.0-19041-Microsoft'
+    #   - WSL 2: '4.19.128-microsoft-standard'
+    return platform_name == 'linux' and 'microsoft' in release
 
 
 def is_windows():
@@ -761,10 +781,10 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     start = timeit.default_timer()
     success = None
     try:
-        s = requests.Session()
-        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
-        s.head(url, timeout=timeout)
-        success = True
+        with requests.Session() as s:
+            s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+            s.head(url, timeout=timeout)
+            success = True
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
         logger.info('Connectivity problem detected.')
         logger.debug(ex)
@@ -1198,3 +1218,128 @@ def scopes_to_resource(scopes):
         scope = scope[:-len("/.default")]
 
     return scope
+
+
+def _get_parent_proc_name():
+    # Un-cached function to get parent process name.
+    try:
+        import psutil
+    except ImportError:
+        return None
+
+    import os
+    parent = psutil.Process(os.getpid()).parent()
+
+    # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
+    if parent and parent.name().lower() == 'python.exe':
+        parent = parent.parent()
+
+    if parent:
+        # On Windows, powershell.exe launches cmd.exe to launch python.exe.
+        grandparent = parent.parent()
+        if grandparent:
+            grandparent_name = grandparent.name().lower()
+            if grandparent_name in ("powershell.exe", "pwsh.exe"):
+                return grandparent.name()
+        # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
+        return parent.name()
+    return None
+
+
+def get_parent_proc_name():
+    # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
+    # function-level cache to save the result.
+    if not hasattr(get_parent_proc_name, "return_value"):
+        parent_proc_name = _get_parent_proc_name()
+        setattr(get_parent_proc_name, "return_value", parent_proc_name)
+    return getattr(get_parent_proc_name, "return_value")
+
+
+def log_cmd_history(command, args):
+    import os
+    from knack.util import ensure_dir
+    from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
+    from azure.cli.core._environment import get_config_dir
+
+    if not args or not command or command == 'next' or '--no-log' in args:
+        return
+
+    # Determine whether "az next" has been installed.
+    # At present, command execution log is only recorded when "az next" is installed
+    try:
+        az_next_is_installed = get_extension("next")
+    except ExtensionNotInstalledException:
+        az_next_is_installed = False
+
+    if not az_next_is_installed:
+        return
+
+    base_dir = os.path.join(get_config_dir(), 'recommendation')
+    ensure_dir(base_dir)
+
+    file_path = os.path.join(base_dir, 'cmd_history.log')
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as fd:
+            fd.write('')
+
+    lines = []
+    with open(file_path, 'r') as fd:
+        lines = fd.readlines()
+        lines = [x.strip('\n') for x in lines if x]
+
+    with open(file_path, 'w') as fd:
+        command_info = {'command': command}
+        params = []
+        for arg in args:
+            if arg.startswith('-'):
+                params.append(arg)
+        if params:
+            command_info['arguments'] = params
+
+        lines.append(json.dumps(command_info))
+        if len(lines) > 15:
+            lines = lines[-15:]
+        fd.write('\n'.join(lines))
+
+
+def log_latest_error_info(error_info, error_type):
+    import os
+    from knack.util import ensure_dir
+    from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
+    from azure.cli.core._environment import get_config_dir
+
+    if not error_info or (error_type and error_type == 'RecommendationError'):
+        return
+
+    # Determine whether "az next" has been installed.
+    # At present, exception log is only recorded when "az next" is installed
+    try:
+        az_next_is_installed = get_extension("next")
+    except ExtensionNotInstalledException:
+        az_next_is_installed = False
+
+    if not az_next_is_installed:
+        return
+
+    base_dir = os.path.join(get_config_dir(), 'recommendation')
+    ensure_dir(base_dir)
+
+    # Format the error info for parsing
+    error_info = error_info.replace("'", '|').replace('"', '|').replace('\r\n', ' ').replace('\n', ' ')
+
+    with open(os.path.join(base_dir, 'exception_history.log'), 'w+') as fd:
+        print(error_info, file=fd)
+
+
+def clean_exception_history(command):
+
+    if command == 'next':
+        return
+
+    import os
+    from azure.cli.core._environment import get_config_dir
+    base_dir = os.path.join(get_config_dir(), 'recommendation')
+    exception_file_path = os.path.join(base_dir, 'exception_history.log')
+
+    if os.path.exists(exception_file_path):
+        os.remove(exception_file_path)

@@ -25,6 +25,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
 class WebappBasicE2ETest(ScenarioTest):
@@ -500,6 +501,33 @@ class WebappConfigureTest(ScenarioTest):
         self.assertTrue(
             self.cmd('webapp deployment user show').get_output_in_json()['type'])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_update_site_configs_persists_ip_restrictions', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_site_configs_persists_ip_restrictions(self, resource_group):
+        webapp_name = self.create_random_name('webapp-config-appsettings-persist', 40)
+        plan_name = self.create_random_name('webapp-config-appsettings-persist', 40)
+        subnet_name = self.create_random_name('testsubnet', 24)
+        vnet_name = self.create_random_name('testvnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        # make sure access-restrictions is correct
+        self.cmd('webapp config set -g {} -n {} --always-on true'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(ipSecurityRestrictions)", 1),
+            JMESPathCheck("ipSecurityRestrictions[0].action", "Allow")
+        ])
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name testclirule --priority 300 --subnet {} --vnet-name {}'.format(
+            resource_group, webapp_name, subnet_name, vnet_name))
+        self.cmd('webapp config set -g {} -n {} --always-on true'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(ipSecurityRestrictions)", 2),
+            JMESPathCheck("ipSecurityRestrictions[0].action", "Allow"),
+            JMESPathCheck("ipSecurityRestrictions[1].action", "Deny")
+        ])
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config_appsettings', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_config_appsettings(self, resource_group):
@@ -752,9 +780,6 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         # On Windows, test 'webapp ssh' throws error
         import platform
         if platform.system() == "Windows":
-            from azure.cli.core.util import CLIError
-            with self.assertRaises(CLIError):
-                self.cmd('webapp ssh -g {} -n {} --timeout 5'.format("foo", "bar"))
             return
 
         runtime = 'node|12-lts'
@@ -879,7 +904,7 @@ class WebappACRScenarioTest(ScenarioTest):
 
 
 class FunctionappACRScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     @AllowLargeResponse()
     def test_acr_integration_function_app(self, resource_group, storage_account):
@@ -1390,6 +1415,35 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), cert_thumbprint)
         ])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP)
+    @live_only()
+    def test_webapp_ssl_import_national_clouds(self, resource_group):
+        plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
+        # Cert Generated using
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-cert'
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            resource_group, kv_name, 'abfa0a7c-a6b6-4736-8310-5855508787cd'))
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            cert_name, kv_name, pfx_file, cert_password))
+
+        name = self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name)).get_output_in_json()['name']
+
+        self.cmd('webapp config ssl show --resource-group {} --certificate-name {}'.format(resource_group, name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
+        ])
+
 
 class WebappUndeleteTest(ScenarioTest):
     @AllowLargeResponse(8192)
@@ -1889,6 +1943,19 @@ class FunctionAppOnLinux(ScenarioTest):
 
         self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 3.8'
                  .format(resource_group, functionapp, plan, storage_account), expect_failure=True)
+
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_consumption_python_39(self, resource_group, storage_account):
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --functions-version 3 --runtime-version 3.9'
+                 .format(resource_group, functionapp, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'Python|3.9')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -3031,12 +3098,14 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration where theres two vnets of the same name. Chosen vnet should default to the one in the same RG
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet_name, subnet_name))
+        time.sleep(5)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(5)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -3044,6 +3113,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration using vnet resource ID
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet['newVNet']['id'], subnet_name_2))
+        time.sleep(5)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name_2)

@@ -19,6 +19,7 @@ from azure.cli.command_modules.rdbms.validators import configuration_value_valid
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
+from ._flexible_server_util import get_current_time
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
@@ -39,6 +40,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                                       local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.GET], scopes=server_name_scope))
         server_name_arg_type = CLIArgumentType(metavar='NAME', help=server_name_help, id_part='name',
                                                local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=server_name_scope))
+        administrator_login_arg_type = CLIArgumentType(metavar='NAME',
+                                                       local_context_attribute=LocalContextAttribute(name='administrator_login', actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=server_name_scope))
+
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
         with self.argument_context(command_group) as c:
@@ -94,7 +98,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type)
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', options_list=['--restore-point-in-time', '--pitr-time'], help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.argument('restore_point_in_time', options_list=['--restore-point-in-time', '--pitr-time'], help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} server georestore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -180,6 +184,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server list-skus'.format(command_group)) as c:
             c.argument('location_name', options_list=['--location', '-l'])
 
+        with self.argument_context('{} server show-connection-string'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_type=administrator_login_arg_type,
+                       help='The login username of the administrator.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The login password of the administrator.')
+            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of a database.')
+
         if command_group != 'mariadb':
             with self.argument_context('{} server key'.format(command_group)) as c:
                 c.argument('server_name', options_list=['--name', '-s'])
@@ -189,6 +201,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('server_name', options_list=['--server-name', '-s'])
                 c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
                 c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+
+        if command_group == 'mysql':
+            with self.argument_context('{} server upgrade'.format(command_group)) as c:
+                c.argument('target_server_version', options_list=['--target-server-version', '-t'], required=True, help='The server version you want to upgrade your mysql server to, currently only support 5.7.')
 
     _complex_params('mariadb')
     _complex_params('mysql')
@@ -258,6 +274,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Server major version.')
                 c.argument('zone', options_list=['--zone, -z'],
                            help='Availability zone into which to provision the resource.')
+                c.argument('iops', type=int, options_list=['--iops'],
+                           help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
+                                'on compute and storage provisioned. The default value for IOPS is free IOPS. '
+                                'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
 
             c.argument('vnet_resource_id', options_list=['--vnet'], help='Name of an existing virtual network or name of a new one to create. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
@@ -281,18 +301,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('database_name')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
-            c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_getter_arg_type)
+            c.argument('resource_group_name', required=True)
+            c.argument('server_name', id_part='name', options_list=['--name', '-n'], required=True, arg_type=server_name_getter_arg_type)
             c.argument('yes', options_list=['--yes', '-y'], action='store_true',
                        help='Do not prompt for confirmation.')
 
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type,
                        help='The name of the new server that is created by the restore command.')
-            c.argument('restore_point_in_time', options_list=['--restore-time'],
-                       help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.argument('restore_point_in_time', options_list=['--restore-time'], default=get_current_time(),
+                       help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
             if command_group == 'postgres':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name of the source server to restore from.')
+                c.argument('zone', options_list=['--zone'],
+                           help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name or resource ID of the source server to restore from.')
@@ -324,6 +347,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Name or ID of the subnet that allows access to an Azure Flexible Server MySQL Server. ')
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
+                c.argument('iops', type=int, options_list=['--iops'],
+                           help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
+                                'on compute and storage provisioned. The default value for IOPS is free IOPS. '
+                                'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
             elif command_group == 'postgres':
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')

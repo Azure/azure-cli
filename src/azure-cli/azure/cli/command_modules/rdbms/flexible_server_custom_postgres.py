@@ -11,7 +11,7 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_check_resource_availability
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
@@ -26,6 +26,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 
 # region create without args
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
@@ -45,99 +46,90 @@ def flexible_server_create(cmd, client,
 
     from azure.mgmt.rdbms import postgresql_flexibleservers
 
-    try:
-        db_context = DbContext(
-            azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-            logging_name='PostgreSQL', command_group='postgres', server_client=client)
+    # try:
+    db_context = DbContext(
+        azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
-        # Raise error when user passes values for both parameters
-        if subnet_arm_resource_id is not None and public_access is not None:
-            raise CLIError("Incorrect usage : A combination of the parameters --subnet "
-                           "and --public_access is invalid. Use either one of them.")
+    # Raise error when user passes values for both parameters
+    if subnet_arm_resource_id is not None and public_access is not None:
+        raise CLIError("Incorrect usage : A combination of the parameters --subnet "
+                       "and --public_access is invalid. Use either one of them.")
 
-        # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
-        # pylint: disable=too-many-boolean-expressions
-        if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
-            if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
-                    ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
-                    ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
-                     ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
-                raise CLIError("Incorrect usage : "
-                               "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+    # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
+    # pylint: disable=too-many-boolean-expressions
+    if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
+        if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
+                ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
+                ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
+                 ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
+            raise CLIError("Incorrect usage : "
+                           "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
 
-        server_result = firewall_id = subnet_id = None
+    server_result = firewall_id = subnet_id = None
 
-        # Check availability for server name if it is supplied by the user
-        if server_name is not None:
-            check_name_client = cf_postgres_check_resource_availability(cmd.cli_ctx, None)
-            server_availability = check_name_client.execute(server_name, DELEGATION_SERVICE_NAME)
-            if not server_availability.name_available:
-                raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                               "other server name.".format(server_name))
+    # Populate desired parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+    server_name = server_name.lower()
 
-        # Populate desired parameters
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                 server_name, 'postgres')
-        server_name = server_name.lower()
+    # Handle Vnet scenario
+    if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
+        subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            subnet_arm_resource_id=subnet_id)
+    elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
+        subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
+                                DELEGATION_SERVICE_NAME)
+        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            subnet_arm_resource_id=subnet_id)
+    else:
+        delegated_subnet_arguments = None
 
-        # Handle Vnet scenario
-        if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-            subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-            delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-                subnet_arm_resource_id=subnet_id)
-        elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
-            subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                    DELEGATION_SERVICE_NAME)
-            delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-                subnet_arm_resource_id=subnet_id)
-        else:
-            delegated_subnet_arguments = None
+    administrator_login_password = generate_password(administrator_login_password)
+    if server_result is None:
+        # Create postgresql
+        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
+        server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
+                                       backup_retention,
+                                       sku_name, tier, storage_mb, administrator_login,
+                                       administrator_login_password,
+                                       version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
+                                       high_availability, zone)
 
-        administrator_login_password = generate_password(administrator_login_password)
-        if server_result is None:
-            # Create postgresql
-            # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
-            server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
-                                           backup_retention,
-                                           sku_name, tier, storage_mb, administrator_login,
-                                           administrator_login_password,
-                                           version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
-                                           high_availability, zone)
+        # Adding firewall rule
+        if public_access is not None and str(public_access).lower() != 'none':
+            if str(public_access).lower() == 'all':
+                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+            else:
+                start_ip, end_ip = parse_public_access_input(public_access)
+            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-            # Adding firewall rule
-            if public_access is not None and str(public_access).lower() != 'none':
-                if str(public_access).lower() == 'all':
-                    start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-                else:
-                    start_ip, end_ip = parse_public_access_input(public_access)
-                firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+    user = server_result.administrator_login
+    server_id = server_result.id
+    loc = server_result.location
+    version = server_result.version
+    sku = server_result.sku.name
+    host = server_result.fully_qualified_domain_name
 
-        user = server_result.administrator_login
-        server_id = server_result.id
-        loc = server_result.location
-        version = server_result.version
-        sku = server_result.sku.name
-        host = server_result.fully_qualified_domain_name
+    logger.warning('Make a note of your password. If you forget, you would have to \
+                   reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
+                   server_name, resource_group_name)
 
-        logger.warning('Make a note of your password. If you forget, you would have to \
-                        reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
-                       server_name, resource_group_name)
+    _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
-        _update_local_contexts(cmd, server_name, resource_group_name, location, user)
-
-        return _form_response(user, sku, loc, server_id, host, version,
-                              administrator_login_password if administrator_login_password is not None else '*****',
-                              _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
-                              subnet_id)
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.error(ex)
+    return _form_response(user, sku, loc, server_id, host, version,
+                          administrator_login_password if administrator_login_password is not None else '*****',
+                          _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
+                          subnet_id)
 
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, restore_point_in_time,
-                            location=None, no_wait=False):
+                            source_server, restore_point_in_time=None,
+                            location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
+
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server_id = resource_id(
@@ -156,7 +148,9 @@ def flexible_server_restore(cmd, client,
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
-        location=location)
+        availability_zone=zone,
+        location=location,
+        server_name=server_name)
 
     # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server_id)
@@ -165,6 +159,11 @@ def flexible_server_restore(cmd, client,
         parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
+
+    if source_server_object.id.split('/')[4] != resource_group_name:
+        raise CLIError("Check if the source server exists in the same resource group you entered. \
+                        The source server and the restored server should be in the same resource group. ")
+
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
@@ -259,8 +258,10 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('postgres flexible-server', 'server_name')
                 local_context_file.remove_option('postgres flexible-server', 'administrator_login')
+                local_context_file.remove_option('postgres flexible-server', 'database_name')
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
+            raise CLIError(ex)
     return result
 
 

@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from datetime import datetime, timedelta
 import azure.cli.command_modules.backup.custom_help as helper
 # pylint: disable=import-error
 # pylint: disable=unused-argument
@@ -18,6 +18,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
@@ -65,9 +66,11 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
         helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+    helper.validate_policy(policy)
 
     protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
                                                      storage_account)
+    helper.validate_azurefileshare_item(protectable_item)
 
     container_uri = helper.get_protection_container_uri_from_id(protectable_item.id)
     item_uri = helper.get_protectable_item_uri_from_id(protectable_item.id)
@@ -83,6 +86,8 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
+    if retain_until is None:
+        retain_until = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
     trigger_backup_request = _get_backup_request(retain_until)
@@ -192,7 +197,15 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
+def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+                         use_secondary_region=None):
+    if use_secondary_region:
+        raise InvalidArgumentValueError(
+            """
+            --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
+            Please either remove the flag or query for any other backup-management-type.
+            """)
+
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)

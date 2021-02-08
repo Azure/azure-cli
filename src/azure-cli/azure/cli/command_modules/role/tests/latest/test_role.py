@@ -16,7 +16,7 @@ from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
-from ..util import cmd_with_retry
+from ..util import retry
 
 
 class RoleScenarioTest(ScenarioTest):
@@ -245,18 +245,18 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
 
-            role = cmd_with_retry(self, 'role definition list -n {role}',
-                                  checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+            role = retry(lambda: self.cmd('role definition list -n {role}',
+                                          checks=self.check('[0].roleName', '{role}'))).get_output_in_json()
 
             # verify we can update
             role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
             with open(temp_file, 'w') as f:
                 json.dump(role[0], f)
-            cmd_with_retry(self, 'role definition update --role-definition {template}',
-                           checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
 
-            cmd_with_retry(self, 'role definition delete -n {role}', checks=self.is_empty())
-            cmd_with_retry(self, 'role definition list -n {role}', checks=self.is_empty())
+            retry(lambda: self.cmd('role definition update --role-definition {template}',
+                                   checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*')))
+            retry(lambda: self.cmd('role definition delete -n {role}', checks=self.is_empty()))
+            retry(lambda: self.cmd('role definition list -n {role}', checks=self.is_empty()))
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):
@@ -355,23 +355,62 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
+        self.kwargs['rg'] = resource_group
+
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            # User
             user = self.create_random_name('testuser', 15)
-            self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
-                'rg': resource_group
-            })
+            self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
             self.kwargs['object_id'] = result['objectId']
             try:
                 # test role assignment on subscription level
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg}')
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role Reader -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
                 self.cmd('role assignment delete -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
             finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                try:
+                    self.cmd('ad user delete --upn-or-object-id {upn}')
+                except:
+                    pass
+
+            # Group
+            self.kwargs['group_name'] = self.create_random_name('testgroup', 15)
+            result = self.cmd(
+                'ad group create --display-name {group_name} --mail-nickname {group_name}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            time.sleep(10)
+            try:
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type Group --role Reader -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+            finally:
+                try:
+                    self.cmd('ad group delete --group {object_id}')
+                except:
+                    pass
+
+            # Service Principal
+            self.kwargs['sp_name'] = self.create_random_name('sp', 15)
+            result = self.cmd('ad sp create-for-rbac --skip-assignment --name {sp_name}').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
+            result = self.cmd('ad sp show --id {app_id}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            try:
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type ServicePrincipal --role Reader -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+            finally:
+                try:
+                    self.cmd('ad sp delete --id {object_id}')
+                except:
+                    pass
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
@@ -560,26 +599,28 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
                 if self.is_live or self.in_recording:
                     now = datetime.datetime.utcnow()
-                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
-                                                             now.minute, now.second)
-                    time.sleep(120)
-                    result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
+                    start = now - datetime.timedelta(minutes=1)
+                    end = now + datetime.timedelta(minutes=1)
+                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(start.year, start.month, start.day, start.hour,
+                                                             start.minute, start.second)
+                    end_time = '{}-{}-{}T{}:{}:{}Z'.format(end.year, end.month, end.day, end.hour,
+                                                           end.minute, end.second)
+
                 else:
                     # figure out the right time stamps from the recording file
                     r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/microsoft.insights/eventtypes/management/' in r.uri)
-                    try:
-                        from urllib.parse import parse_qs, urlparse
-                    except ImportError:
-                        from urlparse import urlparse, parse_qs
+                    from urllib.parse import parse_qs, urlparse
                     query_parts = parse_qs(urlparse(r.uri).query)['$filter'][0].split()
                     start_index, end_index = [i + 2 for (i, j) in enumerate(query_parts) if j == 'eventTimestamp']
                     start_time, end_time = query_parts[start_index], query_parts[end_index]
 
+                # Change log is not immediately available. Retry until success.
+                def check_changelogs():
                     result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
                                       start_time, end_time)).get_output_in_json()
-
-                self.assertTrue([x for x in result if (resource_group in x['scope'] and
-                                                       x['principalName'] == self.kwargs['upn'])])
+                    self.assertTrue([x for x in result if (resource_group in x['scope'] and
+                                                           x['principalName'] == self.kwargs['upn'])])
+                retry(check_changelogs, sleep_duration=60, max_retry=15)
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 

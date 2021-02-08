@@ -6,6 +6,7 @@
 # pylint:disable=too-many-lines
 
 import os
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -14,6 +15,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -21,6 +23,7 @@ from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -462,7 +465,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
-            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            namespace.os_type = image_info.storage_profile.os_disk.os_type
             image_data_disks = image_info.storage_profile.data_disks or []
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
@@ -470,7 +473,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
                                                            gallery_name=res['name'],
                                                            gallery_image_name=res['child_name_1'])
-            namespace.os_type = image_info.os_type.value
+            namespace.os_type = image_info.os_type
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
                 image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
@@ -545,7 +548,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
 
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
-             if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
+             if a.sku.tier == sku_tier and a.location == namespace.location), None)
 
         if account:
             # 3 - nothing specified - find viable storage account in target resource group
@@ -942,7 +945,7 @@ def _validate_vm_create_nics(cmd, namespace):
     logger.debug('existing NIC(s) will be used')
 
 
-def _validate_vm_vmss_create_auth(namespace):
+def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -983,7 +986,7 @@ def _validate_vm_vmss_create_auth(namespace):
         if namespace.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type.')
 
-        validate_ssh_key(namespace)
+        validate_ssh_key(namespace, cmd)
 
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
@@ -996,7 +999,7 @@ def _validate_vm_vmss_create_auth(namespace):
             _prompt_for_password(namespace)
         _validate_admin_password(namespace.admin_password, namespace.os_type)
 
-        validate_ssh_key(namespace)
+        validate_ssh_key(namespace, cmd)
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
@@ -1049,8 +1052,31 @@ def _validate_admin_password(password, os_type):
         raise CLIError(error_msg)
 
 
-def validate_ssh_key(namespace):
-    if namespace.ssh_key_value:
+def validate_ssh_key(namespace, cmd=None):
+    from azure.core.exceptions import HttpResponseError
+    if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
+        client = _compute_client_factory(cmd.cli_ctx)
+        # --ssh-key-name
+        if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
+            # Use existing key, key must exist
+            try:
+                ssh_key_resource = client.ssh_public_keys.get(namespace.resource_group_name, namespace.ssh_key_name)
+            except HttpResponseError:
+                raise ValidationError('SSH key {} does not exist!'.format(namespace.ssh_key_name))
+            namespace.ssh_key_value = [ssh_key_resource.public_key]
+            logger.info('Get a key from --ssh-key-name successfully')
+        elif namespace.ssh_key_value:
+            raise ValidationError('--ssh-key-name and --ssh-key-values cannot be used together')
+        elif namespace.generate_ssh_keys:
+            parameters = {}
+            parameters['location'] = namespace.location
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            parameters['public_key'] = public_key
+            client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
+                                          ssh_public_key_name=namespace.ssh_key_name,
+                                          parameters=parameters)
+            namespace.ssh_key_value = [public_key]
+    elif namespace.ssh_key_value:
         if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
             logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
             namespace.generate_ssh_keys = False
@@ -1163,7 +1189,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-    _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace, cmd)
 
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vm_create_dedicated_host(cmd, namespace)
@@ -1205,9 +1231,9 @@ def _validate_vmss_single_placement_group(namespace):
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
+    from azure.core.exceptions import HttpResponseError
     std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
 
     if namespace.load_balancer and namespace.application_gateway:
@@ -1242,7 +1268,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, ag_name, 'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
-            except CloudError:
+            except HttpResponseError:
                 namespace.app_gateway_type = 'new'
                 logger.debug("application gateway '%s' not found. It will be created.", namespace.application_gateway)
         elif namespace.application_gateway == '':
@@ -1321,11 +1347,11 @@ def get_network_client(cli_ctx):
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     network_client = get_network_client(cli_ctx)
     try:
         return network_client.load_balancers.get(resource_group_name, lb_name)
-    except CloudError:
+    except HttpResponseError:
         return None
 
 
@@ -1421,7 +1447,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_public_ip(cmd, namespace)
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-    _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace, cmd)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
@@ -1483,7 +1509,6 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
 
 def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
-    from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
     source_from_vm = False
     try:
@@ -1495,12 +1520,12 @@ def process_image_create_namespace(cmd, namespace):
             compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
             vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
             source_from_vm = True
-    except CloudError:
+    except ResourceNotFoundError:
         pass
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
+        namespace.os_type = vm_info.storage_profile.os_disk.os_type
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
@@ -1526,7 +1551,6 @@ def process_image_create_namespace(cmd, namespace):
 
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
-    from msrestazure.azure_exceptions import CloudError
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
@@ -1542,7 +1566,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         try:
             info = compute_client.snapshots.get(resource_group_name, source)
             source_snapshot = info.id
-        except CloudError:
+        except ResourceNotFoundError:
             info = compute_client.disks.get(resource_group_name, source)
             source_disk = info.id
 

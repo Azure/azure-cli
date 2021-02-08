@@ -8,7 +8,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
@@ -304,6 +304,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
+    @record_only()  # record_only as the private-link-scope scoped-resource cannot find the components of application insights
     @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_private_link_scope(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -341,6 +342,7 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
             'workspace_id': workspace_id
         })
 
+        # this command failed as service cannot find component of application insights
         self.cmd('monitor private-link-scope scoped-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}', checks=[
             self.check('name', '{assigned_ws}')
         ])
@@ -806,7 +808,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         self.cmd('network private-endpoint-connection approve -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approving')])
 
         # Create second endpoint
         result = self.cmd('network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
@@ -1492,6 +1494,138 @@ class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     def test_private_endpoint_connection_app_configuration(self, resource_group):
         self._test_private_endpoint_connection_scenario(resource_group, 'clitestappconfig', 'Microsoft.AppConfiguration/configurationStores')
+
+
+class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(
+        name_prefix="test_digital_twin_private_endpoint_", location="eastus"
+    )
+    def test_private_endpoint_connection_digitaltwins(
+        self, resource_group, resource_group_location
+    ):
+        from azure.mgmt.core.tools import resource_id
+
+        resource_name = self.create_random_name("cli-test-dt-", 24)
+        templateFile = os.path.join(
+            TEST_DIR,
+            "private_endpoint_arm_templates",
+            "digitaltwins_resource_template.json",
+        )
+        namespace = "Microsoft.DigitalTwins"
+        instance_type = "digitalTwinsInstances"
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=instance_type,
+            name=resource_name,
+        )
+        self.kwargs.update(
+            {
+                "deployment_name": self.create_random_name("cli-test-dt-plr-", 24),
+                "dt_rg": resource_group,
+                "dt_name": resource_name,
+                "dt_loc": resource_group_location,
+                "dt_template": templateFile,
+                "vnet": self.create_random_name("cli-vnet-", 24),
+                "subnet": self.create_random_name("cli-subnet-", 24),
+                "pe": self.create_random_name("cli-pe-", 24),
+                "pe_connection": self.create_random_name("cli-pec-", 24),
+                "target_resource_id": target_resource_id,
+                "dt_type": "{}/{}".format(namespace, instance_type),
+            }
+        )
+
+        # Create DT resource
+        self.cmd(
+            'az deployment group create --name {deployment_name} -g {dt_rg} --template-file "{dt_template}" --parameters name={dt_name} --parameters location={dt_loc}'
+        )
+
+        # List private link resources
+        target_private_link_resource = self.cmd(
+            "az network private-link-resource list --name {dt_name} --resource-group {dt_rg} --type {dt_type}",
+            checks=self.check("@[0].properties.groupId", "API"),
+        ).get_output_in_json()
+        self.kwargs.update(
+            {"group_id": target_private_link_resource[0]["properties"]["groupId"]}
+        )
+
+        # Create VNET
+        self.cmd(
+            "az network vnet create -n {vnet} -g {dt_rg} --subnet-name {subnet}",
+            checks=self.check("length(newVNet.subnets)", 1),
+        )
+        self.cmd(
+            "az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {dt_rg} "
+            "--disable-private-endpoint-network-policies true",
+            checks=self.check("privateEndpointNetworkPolicies", "Disabled"),
+        )
+
+        # Create a private endpoint connection (force manual approval)
+        pe = self.cmd(
+            "az network private-endpoint create -g {dt_rg} -n {pe} --vnet-name {vnet} --subnet {subnet} "
+            "--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} "
+            "--group-id {group_id} --manual-request"
+        ).get_output_in_json()
+        self.kwargs["pe_id"] = pe["id"]
+        self.kwargs["pe_name"] = self.kwargs["pe_id"].split("/")[-1]
+
+        # Show the connection on DT instance
+        list_private_endpoint_conn = self.cmd(
+            "az network private-endpoint-connection list --name {dt_name} --resource-group {dt_rg} --type {dt_type}"
+        ).get_output_in_json()
+        self.kwargs.update({"pec_id": list_private_endpoint_conn[0]["id"]})
+
+        self.kwargs.update({"pec_name": self.kwargs["pec_id"].split("/")[-1]})
+        self.cmd(
+            "az network private-endpoint-connection show --id {pec_id}",
+            checks=self.check("id", "{pec_id}"),
+        )
+        self.cmd(
+            "az network private-endpoint-connection show --resource-name {dt_name} --name {pec_name} --resource-group {dt_rg} --type {dt_type}",
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        )
+
+        # Test approval states
+        # Approved
+        self.kwargs.update(
+            {"approval_desc": "Approved.", "rejection_desc": "Rejected."}
+        )
+        self.cmd(
+            "az network private-endpoint-connection approve --resource-name {dt_name} --resource-group {dt_rg} --name {pec_name} --type {dt_type} "
+            '--description "{approval_desc}"',
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Approved"
+                )
+            ],
+        )
+
+        # Rejected
+        self.cmd(
+            "az network private-endpoint-connection reject --id {pec_id} "
+            '--description "{rejection_desc}"',
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Rejected"
+                )
+            ],
+        )
+
+        # Approval will fail after rejection
+        with self.assertRaises(CLIError):
+            self.cmd(
+                "az network private-endpoint-connection approve --resource-name {dt_name} --resource-group {dt_rg} --name {pec_name} --type {dt_type} "
+                '--description "{approval_desc}"'
+            )
+
+        self.cmd(
+            "az network private-endpoint-connection list --name {dt_name} --resource-group {dt_rg} --type {dt_type}",
+            checks=[self.check("length(@)", 1)],
+        )
+
+        # Test delete
+        self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
 
 
 if __name__ == '__main__':

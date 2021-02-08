@@ -3,6 +3,38 @@
 Release History
 ===============
 
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
+
+2.18.0
+++++++
+* Print INFO log from SDK (#15676)
+
+2.17.1
+++++++
+* No changes
+
+2.17.0
+++++++
+* Minor fixes
+
+2.16.0
+++++++
+* Add 2020-09-01-hybrid API profile for AzureStack (#15096)
+
+2.15.1
+++++++
+* Minor fixes
+
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
+2.14.2
+++++++
+* No changes
+
 2.14.1
 ++++++
 * Minor fixes
@@ -302,8 +334,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35

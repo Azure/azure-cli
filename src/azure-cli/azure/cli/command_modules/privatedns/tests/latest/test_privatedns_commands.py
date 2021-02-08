@@ -947,9 +947,16 @@ class PrivateDnsZoneImportTest(ScenarioTest):
         self.cmd('network private-dns zone export -g {rg} -n {zone} --file-name "{export}"')
         self.cmd('network private-dns zone delete -g {rg} -n {zone} -y')
         time.sleep(10)
+        for i in range(5):
+            try:
+                # Reimport zone file and verify both record sets are equivalent
+                self.cmd('network private-dns zone import -n {zone} -g {rg} --file-name "{export}"')
+                break
+            except:
+                if i == 4:
+                    raise
+                time.sleep(10)
 
-        # Reimport zone file and verify both record sets are equivalent
-        self.cmd('network private-dns zone import -n {zone} -g {rg} --file-name "{export}"')
         records2 = self.cmd('network private-dns record-set list -g {rg} -z {zone}').get_output_in_json()
 
         # verify that each record in the original import is unchanged after export/re-import
@@ -959,7 +966,7 @@ class PrivateDnsZoneImportTest(ScenarioTest):
     def test_Private_Dns_import_file_operation_error_linux(self, resource_group):
         import sys
         if sys.platform != 'linux':
-            self.skip('This test should run on Linux platform')
+            self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
         with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
@@ -978,7 +985,7 @@ class PrivateDnsZoneImportTest(ScenarioTest):
     def test_Private_Dns_import_file_operation_error_windows(self, resource_group):
         import sys
         if sys.platform != 'win32':
-            self.skip('This test should run on Windows platform')
+            self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
         with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:

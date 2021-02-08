@@ -152,6 +152,18 @@ type: group
 short-summary: Manage Azure Kubernetes Services.
 """
 
+helps["aks check-acr"] = """
+type: command
+short-summary: Validate an ACR is accesible from an AKS cluster.
+parameters:
+  - name: --acr
+    short-summary: The FQDN of the ACR.
+examples:
+  - name: Validate the ACR is accesible from the AKS cluster.
+    text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
+    crafted: true
+"""
+
 helps['aks browse'] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
@@ -207,7 +219,7 @@ parameters:
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
   - name: --node-osdisk-type
     type: string
-    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
+    short-summary: "OS disk type to be used for machines in a given agent pool: Ephemeral or Managed. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation."
   - name: --kubernetes-version -k
     type: string
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
@@ -308,7 +320,7 @@ parameters:
                          Learn more at aka.ms/aks/policy.
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
+                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -369,12 +381,30 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
   - name: --aci-subnet-name
     type: string
     short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
+  - name: --appgw-name
+    type: string
+    short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
+  - name: --appgw-subnet-cidr
+    type: string
+    short-summary: Subnet CIDR to use for a new subnet created to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-id
+    type: string
+    short-summary: Resource Id of an existing Application Gateway to use with AGIC. Use with ingress-azure addon.
+  - name: --appgw-subnet-id
+    type: string
+    short-summary: Resource Id of an existing Subnet used to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-watch-namespace
+    type: string
+    short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -540,6 +570,7 @@ long-summary: |-
         virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
         azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                      Learn more at aka.ms/aks/policy.
+        ingress-appgw - enable Application Gateway Ingress Controller addon.
 parameters:
   - name: --addons -a
     type: string
@@ -547,19 +578,39 @@ parameters:
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+  - name: --appgw-name
+    type: string
+    short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
+  - name: --appgw-subnet-cidr
+    type: string
+    short-summary: Subnet CIDR to use for a new subnet created to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-id
+    type: string
+    short-summary: Resource Id of an existing Application Gateway to use with AGIC. Use with ingress-azure addon.
+  - name: --appgw-subnet-id
+    type: string
+    short-summary: Resource Id of an existing Subnet used to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-watch-namespace
+    type: string
+    short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
 examples:
   - name: Enable Kubernetes addons. (autogenerated)
     text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
+    crafted: true
+  - name: Enable ingress-appgw addon with subnet prefix.
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
     crafted: true
 """
 
 helps['aks get-credentials'] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
+long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
 parameters:
   - name: --admin -a
     type: bool
     short-summary: "Get cluster administrator credentials.  Default: cluster user credentials."
+    long-summary: "On clusters with Azure Active Directory integration, this bypasses normal Azure AD authentication and can be used if you're permanently blocked by not having access to a valid Azure AD group with access to your cluster. Requires 'Azure Kubernetes Service Cluster Admin' role."
   - name: --file -f
     type: string
     short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
@@ -675,6 +726,9 @@ parameters:
   - name: --spot-max-price
     type: float
     short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -739,6 +793,9 @@ parameters:
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -758,6 +815,9 @@ parameters:
   - name: --node-image-only
     type: bool
     short-summary: Only upgrade agent pool's node image.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 """
 
 helps['aks remove-dev-spaces'] = """

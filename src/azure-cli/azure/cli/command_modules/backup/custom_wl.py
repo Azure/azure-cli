@@ -22,10 +22,10 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
-    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
+    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
 
 
 fabric_name = "Azure"
@@ -34,6 +34,8 @@ logger = get_logger(__name__)
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
+                     'SQLDataBase': 'SQLDataBase',
+                     'SAPHanaDatabase': 'SAPHanaDatabase',
                      'SAPASE': 'SAPAseDatabase'}
 
 # Mapping of module name
@@ -61,9 +63,9 @@ def show_wl_policy(client, resource_group_name, vault_name, name):
 
 def list_wl_policies(client, resource_group_name, vault_name, workload_type, backup_management_type):
     if workload_type is None:
-        raise CLIError(
+        raise RequiredArgumentMissingError(
             """
-            Workload type is required for Azure Workload.
+            Workload type is required for Azure Workload. Use --workload-type.
             """)
 
     if backup_management_type is None:
@@ -257,19 +259,35 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
 
 
 def show_protectable_instance(items, server_name, protectable_item_type):
-    protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
-    # Server Name filter
-    filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
+    if server_name is None:
+        raise RequiredArgumentMissingError("""
+        Server name missing. Please provide a valid server name using --target-server-name.
+        """)
 
+    if protectable_item_type is None:
+        az_error = RequiredArgumentMissingError("""
+        Protectable item type missing. Please provide a valid protectable item type name using --target-server-type.
+        """)
+        recommendation_text = "{} are the allowed values.".format(str(list(protectable_item_type_map.keys())))
+        az_error.set_recommendation(recommendation_text)
+        raise az_error
+
+    protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Protectable Item Type filter
-    filtered_items = [item for item in filtered_items if
+    filtered_items = [item for item in items if
+                      item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    # Server Name filter
+    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
 
-def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
+def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None,
+                           protectable_item_type=None):
     workload_type = _check_map(workload_type, workload_type_map)
+    if protectable_item_type is not None:
+        protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': "AzureWorkload",
@@ -279,14 +297,19 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
 
+    if protectable_item_type is not None:
+        # Protectable Item Type filter
+        paged_items = [item for item in paged_items if
+                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     if container_uri:
         return [item for item in paged_items if
                 cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+
     return paged_items
 
 
 def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                            extended_info=None):
+                            extended_info=None, use_secondary_region=None):
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -306,6 +329,9 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
             'startDate': query_start_date,
             'endDate': query_end_date,
             'extendedInfo': extended_info})
+
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
@@ -394,6 +420,28 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     param = ProtectedItemResource(properties=properties)
 
     # Trigger disable protection and wait for completion
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
+def undelete_protection(cmd, client, resource_group_name, vault_name, item):
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise ValidationError(
+            """
+            Item must be either of type SQLDataBase or SAPHanaDatabase.
+            """)
+
+    properties = _get_protected_item_instance(backup_item_type)
+    properties.protection_state = 'ProtectionStopped'
+    properties.policy_id = ''
+    properties.is_rehydrate = True
+    param = ProtectedItemResource(properties=properties)
+
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
@@ -636,6 +684,22 @@ def _get_protected_item_instance(item_type):
 
 
 def _check_map(item_type, item_type_map):
+    if item_type is None:
+        if item_type_map == workload_type_map:
+            az_error = RequiredArgumentMissingError("""
+            Workload type missing. Please enter a valid workload type using --workload-type.
+            """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
+        if item_type_map == protectable_item_type_map:
+            az_error = RequiredArgumentMissingError("""
+            Protectable item type missing. Please enter a valid protectable item type using --protectable-item-type.
+            """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
+        raise RequiredArgumentMissingError("Item type missing. Enter a valid item type.")
     if item_type_map.get(item_type) is not None:
         return item_type_map[item_type]
     error_text = "{} is an invalid argument.".format(item_type)

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
@@ -10,19 +11,22 @@ import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_wl as custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
-from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
-                   status="Registered"):
-    return common.show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type, status)
+                   status="Registered", use_secondary_region=None):
+    return common.show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type, status,
+                                 use_secondary_region)
 
 
-def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered"):
-    return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status)
+def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered",
+                    use_secondary_region=None):
+    return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status,
+                                  use_secondary_region)
 
 
 def show_policy(client, resource_group_name, vault_name, name):
@@ -38,7 +42,7 @@ def create_policy(client, resource_group_name, vault_name, name, policy, backup_
         return custom_afs.create_policy(client, resource_group_name, vault_name, name, policy)
     if backup_management_type.lower() == "azureworkload":
         if workload_type is None:
-            raise CLIError("Please provide workload type.")
+            raise RequiredArgumentMissingError("Please provide workload type. Use --workload-type.")
         return custom_wl.create_policy(client, resource_group_name, vault_name, name, policy, workload_type)
     if backup_management_type.lower() == "azureiaasvm":
         return custom.create_policy(client, resource_group_name, vault_name, name, policy)
@@ -46,45 +50,47 @@ def create_policy(client, resource_group_name, vault_name, name, policy, backup_
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
-              workload_type=None):
+              workload_type=None, use_secondary_region=None):
 
     return common.show_item(cmd, client, resource_group_name, vault_name, container_name, name,
-                            backup_management_type, workload_type)
+                            backup_management_type, workload_type, use_secondary_region)
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
-               backup_management_type=None):
+               backup_management_type=None, use_secondary_region=None):
     return common.list_items(cmd, client, resource_group_name, vault_name, workload_type,
-                             container_name, backup_management_type)
+                             container_name, backup_management_type, use_secondary_region)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
-                        workload_type=None, backup_management_type=None):
+                        workload_type=None, backup_management_type=None, use_secondary_region=None):
 
     return common.show_recovery_point(cmd, client, resource_group_name, vault_name, container_name,
-                                      item_name, name, workload_type, backup_management_type)
+                                      item_name, name, workload_type, backup_management_type, use_secondary_region)
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
-                         backup_management_type=None, workload_type=None, start_date=None, end_date=None):
+                         backup_management_type=None, workload_type=None, start_date=None, end_date=None,
+                         use_secondary_region=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
-                     backup_management_type, workload_type)
+                     backup_management_type, workload_type, use_secondary_region)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.list_recovery_points(client, resource_group_name, vault_name, item, start_date, end_date)
+        return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
+                                           use_secondary_region)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.list_recovery_points(client, resource_group_name, vault_name, item, start_date,
-                                               end_date)
+                                               end_date, use_secondary_region)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
-                                                 start_date, end_date)
+                                                 start_date, end_date, use_secondary_region=use_secondary_region)
 
     return None
 
@@ -98,7 +104,10 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
@@ -121,7 +130,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
@@ -143,7 +152,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
@@ -187,7 +196,8 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
                                                    backup_management_type)
 
 
-def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_name=None):
+def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_name=None,
+                           protectable_item_type=None):
     container_uri = None
     if container_name:
         if custom_help.is_native_name(container_name):
@@ -197,8 +207,13 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
             container = show_container(cmd, container_client, container_name, resource_group_name, vault_name,
                                        "AzureWorkload")
             custom_help.validate_container(container)
+            if isinstance(container, list):
+                raise ValidationError("""
+                Multiple containers with same Friendly Name found. Please give native names instead.
+                """)
             container_uri = container.name
-    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri)
+    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri,
+                                            protectable_item_type)
 
 
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
@@ -264,7 +279,7 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, conta
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
     return custom.update_protection_for_vm(cmd, client, resource_group_name, vault_name, item, diskslist,
                                            disk_list_setting, exclude_all_data_disks)
 
@@ -274,7 +289,11 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
     protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
                                              protectable_item_name, server_name, protectable_item_type, workload_type)
+    custom_help.validate_protectable_item(protectable_item)
+
     policy_object = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+    custom_help.validate_policy(policy_object)
+
     return custom_wl.enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object,
                                                     protectable_item)
 
@@ -282,9 +301,13 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item_name,
                              protectable_item_type, server_name, workload_type):
     policy_object = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+    custom_help.validate_policy(policy_object)
+
     protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
     protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
                                              protectable_item_name, server_name, protectable_item_type, workload_type)
+    custom_help.validate_protectable_item(protectable_item)
+
     return custom_wl.auto_enable_for_azure_wl(client, resource_group_name, vault_name, policy_object,
                                               protectable_item)
 
@@ -295,10 +318,10 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restore_as_unmanaged_disks=None):
+                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
-                                restore_only_osdisk, diskslist, restore_as_unmanaged_disks)
+                                restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
@@ -318,7 +341,7 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "FullShareRestore",
@@ -337,7 +360,7 @@ def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, co
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "ItemLevelRestore",
                                              target_storage_account_name=target_storage_account,
@@ -354,7 +377,7 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
@@ -389,7 +412,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                                  vault_name, backup_management_type)
 
         if isinstance(target_container, list):
-            raise CLIError("Multiple containers with same Friendly Name found. Please give native names instead.")
+            raise ValidationError("""
+            Multiple containers with same Friendly Name found. Please give native names instead.
+            """)
 
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time,
@@ -404,10 +429,13 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.undelete_protection(cmd, client, resource_group_name, vault_name, item)
+
+    if item.properties.backup_management_type.lower() == "azureworkload":
+        return custom_wl.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
     return None
 

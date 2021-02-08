@@ -20,7 +20,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version, validate_or_policy)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
+                          get_api_version_type)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -122,12 +123,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     routing_choice_type = CLIArgumentType(
         arg_group='Routing Preference', arg_type=get_enum_type(t_routing_choice),
         help='Routing Choice defines the kind of network routing opted by the user.',
-        is_preview=True, min_api='2019-06-01')
+        min_api='2019-06-01')
     publish_microsoft_endpoints_type = CLIArgumentType(
-        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), min_api='2019-06-01',
         help='A boolean flag which indicates whether microsoft routing storage endpoints are to be published.')
     publish_internet_endpoints_type = CLIArgumentType(
-        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), min_api='2019-06-01',
         help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
     umask_type = CLIArgumentType(
@@ -144,12 +145,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
-    marker_type = CLIArgumentType(
-        help='A string value that identifies the portion of the list of containers to be '
-             'returned with the next listing operation. The operation returns the NextMarker value within '
-             'the response body if the listing operation did not return all containers remaining to be listed '
-             'with the current page. If specified, this generator will begin returning results from the point '
-             'where the previous generator stopped.')
 
     marker_type = CLIArgumentType(
         help='A string value that identifies the portion of the list of containers to be '
@@ -197,7 +192,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('resource_group_name', required=False, validator=process_resource_group)
 
     with self.argument_context('storage account check-name') as c:
-        c.argument('name', options_list=['--name', '-n'])
+        c.argument('name', options_list=['--name', '-n'],
+                   help='The name of the storage account within the specified resource group')
 
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
@@ -213,10 +209,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
-                   arg_type=get_enum_type(t_kind), default='StorageV2')
-        c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
-                   arg_type=get_enum_type(t_kind), default='Storage')
+        c.argument('kind', help='Indicate the type of storage account.',
+                   arg_type=get_enum_type(t_kind),
+                   default='StorageV2' if self.cli_ctx.cloud.profile == 'latest' else 'Storage')
         c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
         c.argument('https_only', arg_type=get_three_state_flag(), max_api='2018-11-01',
@@ -389,10 +384,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
                         'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
-    with self.argument_context('storage account management-policy update') as c:
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
+    for item in ['create', 'update', 'show', 'delete']:
+        with self.argument_context('storage account management-policy {}'.format(item)) as c:
+            c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
@@ -438,6 +433,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    "than zero and less than Delete Retention Days.")
         c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
                    min_api='2019-06-01')
+        c.argument('default_service_version', options_list=['--default-service-version', '-d'],
+                   type=get_api_version_type(), min_api='2018-07-01',
+                   help="Indicate the default version to use for requests to the Blob service if an incoming request's "
+                        "version is not specified.")
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -456,13 +455,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'value can be 1 and the maximum value can be 365.')
 
     with self.argument_context('storage account generate-sas') as c:
+        from ._validators import get_not_none_validator
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
         c.register_sas_arguments()
         c.argument('services', type=services_type(self))
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=['--account-name'])
+        c.argument('account_name', acct_name_type, options_list=['--account-name'],
+                   validator=get_not_none_validator('account_name'))
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
@@ -597,7 +598,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
-        c.argument('id', options_list='--policy-name',
+        c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
                                                                   'get_container_acl'))
@@ -849,6 +850,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
+        c.argument('requires_sync', arg_type=get_three_state_flag(),
+                   help='Enforce that the service will not return a response until the copy is complete.'
+                   'Not support for standard page blob.')
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
@@ -981,9 +985,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
 
-    with self.argument_context('storage container immutability-policy') as c:
-        c.argument('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
-                   arg_type=get_three_state_flag())
+    for item in ['create', 'extend']:
+        with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            c.argument('account_name',
+                       help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
+            c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                        "the operation only if the resource's ETag matches the value specified.")
+            c.extra('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
+                    arg_type=get_three_state_flag(), help='This property can only be changed for unlocked time-based '
+                                                          'retention policies. When enabled, new blocks can be '
+                                                          'written to an append blob while maintaining immutability '
+                                                          'protection and compliance. Only new blocks can be added '
+                                                          'and any existing blocks cannot be modified or deleted. '
+                                                          'This property cannot be changed with '
+                                                          'ExtendImmutabilityPolicy API.')
+            c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
+                                             'creation, in days.')
+            c.ignore('parameters')
 
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)
@@ -1004,8 +1022,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container legal-hold') as c:
         c.argument('container_name', container_name_type)
+        c.argument('account_name',
+                   help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('tags', nargs='+',
-                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
+                   help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
+                        'to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -1031,7 +1052,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from .completers import get_storage_acl_name_completion_list
         t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
         c.register_sas_arguments()
-        c.argument('id', options_list='--policy-name',
+        c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
                                                                   'get_container_acl'))
@@ -1094,6 +1115,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_group_name', required=False)
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+        c.argument('expand', default=None)
         c.ignore('filter', 'maxpagesize')
 
     for item in ['create', 'update']:

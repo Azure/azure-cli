@@ -64,7 +64,7 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_import_file_operation_error(self, resource_group):
         import sys
         if sys.platform != 'linux':
-            self.skip('This test should run on Linux platform')
+            self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
         with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
@@ -84,7 +84,7 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_import_file_operation_error_windows(self, resource_group):
         import sys
         if sys.platform != 'win32':
-            self.skip('This test should run on Windows platform')
+            self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
         with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
@@ -127,6 +127,10 @@ class DnsZoneImportTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_dns_zone8_import')
     def test_dns_zone8_import(self, resource_group):
         self._test_zone('zone8.com', 'zone8.txt')
+
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone9_import')
+    def test_dns_zone9_import(self, resource_group):
+        self._test_zone('zone9.com', 'zone9.txt')
 
 
 class DnsScenarioTest(ScenarioTest):

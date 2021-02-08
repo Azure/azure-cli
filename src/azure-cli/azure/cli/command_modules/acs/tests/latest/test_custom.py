@@ -592,20 +592,20 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles = None
         cmd = mock.MagicMock()
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'http_application_routing', enable=True)
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         self.assertIn(CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, instance.addon_profiles)
         addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertTrue(addon_profile.enabled)
 
         # http_application_routing disabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'http_application_routing', enable=False)
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=False)
         addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'monitoring', enable=True)
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
         self.assertTrue(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
@@ -613,9 +613,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # monitoring disabled, routing enabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'monitoring', enable=False)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
-                                  'http_application_routing', enable=True)
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
         self.assertFalse(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
@@ -624,7 +624,7 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # azurepolicy added
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'azure-policy', enable=True)
+                                  'clitest000001', 'clitest000001', 'azure-policy', enable=True)
         azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
         self.assertTrue(azurepolicy_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
@@ -634,9 +634,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # azurepolicy disabled, routing enabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'azure-policy', enable=False)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
-                                  'http_application_routing', enable=True)
+                                  'clitest000001', 'clitest000001', 'azure-policy', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
         self.assertFalse(azurepolicy_addon_profile.enabled)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
@@ -647,14 +647,14 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # kube-dashboard disabled, no existing dashboard addon profile
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'kube-dashboard', enable=False)
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertFalse(dashboard_addon_profile.enabled)
 
         # kube-dashboard enabled, no existing dashboard addon profile
         instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'kube-dashboard', enable=True)
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=True)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertTrue(dashboard_addon_profile.enabled)
 
@@ -663,7 +663,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         # test lower cased key name
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'kube-dashboard', enable=False)
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertFalse(dashboard_addon_profile.enabled)
 
@@ -672,7 +672,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         # test lower cased key name
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=False)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'kube-dashboard', enable=True)
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=True)
         dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
         self.assertTrue(dashboard_addon_profile.enabled)
 
@@ -680,25 +680,41 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = mock.Mock()
         instance.addon_profiles = None
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'monitoring', enable=True)
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
         with self.assertRaises(CLIError):
             instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                      'clitest000001', 'monitoring', enable=True)
+                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
 
         # virtual-node enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
         cmd = mock.MagicMock()
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
+                                  'clitest000001', 'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
         self.assertIn('aciConnectorLinux', instance.addon_profiles)
         addon_profile = instance.addon_profiles['aciConnectorLinux']
         self.assertTrue(addon_profile.enabled)
 
         # virtual-node disabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'virtual-node', enable=False)
+                                  'clitest000001', 'clitest000001', 'virtual-node', enable=False)
         addon_profile = instance.addon_profiles['aciConnectorLinux']
+        self.assertFalse(addon_profile.enabled)
+
+        # ingress-appgw enabled
+        instance = mock.MagicMock()
+        instance.addon_profiles = None
+        cmd = mock.MagicMock()
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'ingress-appgw', enable=True, appgw_subnet_cidr='10.2.0.0/16')
+        self.assertIn('ingressApplicationGateway', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['ingressApplicationGateway']
+        self.assertTrue(addon_profile.enabled)
+
+        # ingress-appgw disabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'ingress-appgw', enable=False)
+        addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
 
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)

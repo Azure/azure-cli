@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.14.1"
+__version__ = "2.19.0"
 
 import os
 import sys
@@ -36,6 +36,28 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
+# Configure the commands that need to skip command index
+# `az next` needs to search commands from all modules and extensions.
+SKIP_COMMAND_INDEX_FOR = ['next']
+
+
+def _configure_knack():
+    """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
+    from knack.util import status_tag_messages
+    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
+    # Override the preview message.
+    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
+    # Override the experimental message.
+    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append('azure')
+
+
+_configure_knack()
 
 
 class AzCli(CLI):
@@ -49,6 +71,7 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.style import format_styled_text
         from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
@@ -80,6 +103,9 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
+        if not self.enable_color:
+            format_styled_text.theme = 'none'
+
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
 
@@ -102,8 +128,8 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
-                                                       UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
+        from azure.cli.core.commands.constants import SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED
+        from azure.cli.core.style import print_styled_text
 
         ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
@@ -111,8 +137,9 @@ class AzCli(CLI):
 
         show_link = self.config.getboolean('output', 'show_survey_link', True)
         if show_link:
-            print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
-            print(UX_SURVEY_PROMPT_COLOR if self.enable_color else UX_SURVEY_PROMPT)
+            print_styled_text()
+            print_styled_text(SURVEY_PROMPT_STYLED)
+            print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -382,9 +409,14 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
+        need_skip_command_index = False
+        if isinstance(args, list) and args:
+            need_skip_command_index = args[0] in SKIP_COMMAND_INDEX_FOR
+
         command_index = None
         # Set fallback=False to turn off command index in case of regression
-        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+        use_command_index = (self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True) and
+                             not need_skip_command_index)
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
