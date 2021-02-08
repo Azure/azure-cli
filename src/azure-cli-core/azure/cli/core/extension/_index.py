@@ -33,8 +33,12 @@ def get_index(index_url=None):
             msg = ERR_TMPL_NON_200.format(response.status_code, index_url)
             raise CLIError(msg)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
-            msg = ERR_TMPL_NO_NETWORK.format(str(err))
-            raise CLIError(msg)
+            if try_number == TRIES - 1:
+                msg = ERR_TMPL_NO_NETWORK.format(str(err))
+                raise CLIError(msg)
+            import time
+            time.sleep(0.5)
+            continue
         except ValueError as err:
             # Indicates that url is not redirecting properly to intended index url, we stop retrying after TRIES calls
             if try_number == TRIES - 1:
