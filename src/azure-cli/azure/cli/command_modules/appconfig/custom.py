@@ -13,9 +13,10 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 ResourceIdentity,
                                                 UserIdentity,
                                                 EncryptionProperties,
-                                                KeyVaultProperties)
+                                                KeyVaultProperties,
+                                                RegenerateKeyParameters)
 
-from ._utils import resolve_resource_group, user_confirmation
+from ._utils import resolve_store_metadata, user_confirmation
 
 
 logger = get_logger(__name__)
@@ -45,27 +46,25 @@ def create_configstore(client,
                                             sku=Sku(name=sku),
                                             public_network_access=public_network_access)
 
-    return client.create(resource_group_name, name, configstore_params)
+    return client.begin_create(resource_group_name, name, configstore_params)
 
 
 def delete_configstore(cmd, client, name, resource_group_name=None, yes=False):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
-    confirmation_message = "Are you sure you want to delete the App Configuration: {}".format(
-        name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
+    confirmation_message = "Are you sure you want to delete the App Configuration: {}".format(name)
     user_confirmation(confirmation_message, yes)
-    return client.delete(resource_group_name, name)
+    return client.begin_delete(resource_group_name, name)
 
 
 def list_configstore(client, resource_group_name=None):
-    response = client.list() if resource_group_name is None else client.list_by_resource_group(
-        resource_group_name)
+    response = client.list() if resource_group_name is None else client.list_by_resource_group(resource_group_name)
     return response
 
 
 def show_configstore(cmd, client, name, resource_group_name=None):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
     return client.get(resource_group_name, name)
 
 
@@ -78,13 +77,18 @@ def update_configstore(cmd,
                        encryption_key_name=None,
                        encryption_key_vault=None,
                        encryption_key_version=None,
-                       identity_client_id=None):
+                       identity_client_id=None,
+                       enable_public_network=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
 
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
     update_params = ConfigurationStoreUpdateParameters(tags=tags if tags else None,
-                                                       sku=Sku(name=sku) if sku else None)
+                                                       sku=Sku(name=sku) if sku else None,
+                                                       public_network_access=public_network_access)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()
@@ -95,14 +99,14 @@ def update_configstore(cmd,
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
 
-    return client.update(resource_group_name=resource_group_name,
-                         config_store_name=name,
-                         config_store_update_parameters=update_params)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               config_store_name=name,
+                               config_store_update_parameters=update_params)
 
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     if not identities:
         identities = [SYSTEM_ASSIGNED_IDENTITY]
@@ -126,9 +130,9 @@ def assign_managed_identity(cmd, client, name, resource_group_name=None, identit
     managed_identities = ResourceIdentity(type=','.join(identity_types) if identity_types else 'None',
                                           user_assigned_identities=user_assigned_identities if user_assigned_identities else None)
 
-    client.update(resource_group_name=resource_group_name,
-                  config_store_name=name,
-                  config_store_update_parameters=ConfigurationStoreUpdateParameters(identity=managed_identities))
+    client.begin_update(resource_group_name=resource_group_name,
+                        config_store_name=name,
+                        config_store_update_parameters=ConfigurationStoreUpdateParameters(identity=managed_identities))
 
     # Due to a bug in RP https://msazure.visualstudio.com/Azure%20AppConfig/_workitems/edit/6017040
     # It client.update does not return the updated identities.
@@ -137,7 +141,7 @@ def assign_managed_identity(cmd, client, name, resource_group_name=None, identit
 
 def remove_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     current_identities = show_managed_identity(cmd, client, name, resource_group_name)
     if not current_identities or current_identities.type == 'None':
@@ -167,32 +171,24 @@ def remove_managed_identity(cmd, client, name, resource_group_name=None, identit
     managed_identities = ResourceIdentity(type=','.join(identity_types) if identity_types else 'None',
                                           user_assigned_identities=user_assigned_identities if user_assigned_identities else None)
 
-    client.update(resource_group_name=resource_group_name,
-                  config_store_name=name,
-                  config_store_update_parameters=ConfigurationStoreUpdateParameters(identity=managed_identities))
+    client.begin_update(resource_group_name=resource_group_name,
+                        config_store_name=name,
+                        config_store_update_parameters=ConfigurationStoreUpdateParameters(identity=managed_identities))
 
 
 def show_managed_identity(cmd, client, name, resource_group_name=None):
     config_store = show_configstore(cmd, client, name, resource_group_name)
-
     return config_store.identity if config_store.identity else {}
 
 
 def list_credential(cmd, client, name, resource_group_name=None):
-    resource_group_name, endpoint = resolve_resource_group(cmd, name)
-    credentials = client.list_keys(resource_group_name, name)
-    augmented_credentials = []
-
-    for credentail in credentials:
-        augmented_credential = __convert_api_key_to_json(credentail, endpoint)
-        augmented_credentials.append(augmented_credential)
-    return augmented_credentials
+    resource_group_name, _ = resolve_store_metadata(cmd, name)
+    return client.list_keys(resource_group_name, name)
 
 
 def regenerate_credential(cmd, client, name, id_, resource_group_name=None):
-    resource_group_name, endpoint = resolve_resource_group(cmd, name)
-    credentail = client.regenerate_key(resource_group_name, name, id_)
-    return __convert_api_key_to_json(credentail, endpoint)
+    resource_group_name, _ = resolve_store_metadata(cmd, name)
+    return client.regenerate_key(resource_group_name, name, RegenerateKeyParameters(id=id_))
 
 
 def __get_resource_identity(assign_identity):
@@ -231,15 +227,3 @@ def __validate_cmk(encryption_key_name=None,
         else:
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
-
-
-def __convert_api_key_to_json(credentail, endpoint):
-    augmented_credential = {}
-    augmented_credential['id'] = credentail.id
-    augmented_credential['name'] = credentail.name
-    augmented_credential['value'] = credentail.value
-    augmented_credential['lastModified'] = credentail.last_modified
-    augmented_credential['readOnly'] = credentail.read_only
-    augmented_credential['connectionString'] = 'Endpoint=' + \
-        endpoint + ';Id=' + credentail.id + ';Secret=' + credentail.value
-    return augmented_credential

@@ -43,11 +43,14 @@ jobs:
         inputs:
           versionSpec: 3.7
 
-      - task: Bash@3
+      - script: |
+          if [[ "$(Build.Reason)" == "PullRequest" ]]; then
+            branch=$(System.PullRequest.TargetBranch)
+          else
+            branch=$(Build.SourceBranchName)
+          fi
+          scripts/release/pypi/build.sh $branch
         displayName: 'Run Wheel Build Script'
-        inputs:
-          targetType: 'filePath'
-          filePath: scripts/release/pypi/build.sh
 
       - task: PublishPipelineArtifact@0
         displayName: 'Publish Artifact: pypi'

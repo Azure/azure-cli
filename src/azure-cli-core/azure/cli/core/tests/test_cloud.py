@@ -25,7 +25,9 @@ from azure.cli.core.cloud import (Cloud,
                                   update_cloud,
                                   CloudEndpointNotSetException,
                                   CannotUnregisterCloudException,
-                                  switch_active_cloud)
+                                  switch_active_cloud,
+                                  get_known_clouds,
+                                  HARD_CODED_CLOUD_LIST)
 
 from azure.cli.core._profile import Profile
 
@@ -246,6 +248,21 @@ class TestCloud(unittest.TestCase):
 
         switch_active_cloud(cli, 'AzureChinaCloud')
         self.assertEqual(cli.cloud.name, 'AzureChinaCloud')
+
+    @mock.patch.dict('os.environ', {'ARM_CLOUD_METADATA_URL': 'https://management.azure.com/metadata/endpoints?api-version=2019-05-01'})
+    def test_metadata_url_endpoints(self):
+        clouds = get_known_clouds(refresh=True)
+        for cloud in HARD_CODED_CLOUD_LIST:
+            metadata_url_cloud = next(c for c in clouds if c.name == cloud.name)
+            for k, v1 in cloud.endpoints.__dict__.items():
+                v2 = metadata_url_cloud.endpoints.__dict__[k]
+                if v1:
+                    self.assertEqual(v1.strip('/'), v2.strip('/'))
+                else:
+                    self.assertEqual(v1, v2)
+            for k, v1 in cloud.suffixes.__dict__.items():
+                v2 = metadata_url_cloud.suffixes.__dict__[k]
+                self.assertEqual(v1, v2)
 
 
 if __name__ == '__main__':

@@ -662,6 +662,11 @@ backup item show:
     backup_management_type:
       rule_exclusions:
       - option_length_too_long
+backup job list:
+  parameters:
+    backup_management_type:
+      rule_exclusions:
+      - option_length_too_long
 backup policy create:
   parameters:
     backup_management_type:
@@ -1186,6 +1191,16 @@ config set:
 config unset:
   parameters:
     key:
+      rule_exclusions:
+      - no_positional_parameters
+config param-persist show:
+  parameters:
+    name:
+      rule_exclusions:
+      - no_positional_parameters
+config param-persist delete:
+  parameters:
+    name:
       rule_exclusions:
       - no_positional_parameters
 consumption budget create:

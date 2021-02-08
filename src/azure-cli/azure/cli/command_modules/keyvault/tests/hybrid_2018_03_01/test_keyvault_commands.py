@@ -34,7 +34,7 @@ def _create_keyvault(test, kwargs, additional_args=None):
 
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
-    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
+    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium --retention-days 7 {add}')
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -134,14 +134,19 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
-
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-key-', 24),
             'loc': 'westus',
             'key': 'key1'
         })
 
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false')
+        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false').\
+            get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+        key_perms.append('purge')
+        self.kwargs['key_perms'] = ' '.join(key_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
@@ -192,6 +197,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs['key_file'] = key_file
         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file {key_file}')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+        time.sleep(10)
+        self.cmd('keyvault key purge --vault-name {kv} -n {key}')
+        time.sleep(10)
         self.cmd('keyvault key list --vault-name {kv}',
                  checks=self.is_empty())
 
@@ -261,7 +269,13 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             'sec': 'secret1'
         })
 
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false')
+        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false').\
+            get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        secret_perms = keyvault['properties']['accessPolicies'][0]['permissions']['secrets']
+        secret_perms.append('purge')
+        self.kwargs['secret_perms'] = ' '.join(secret_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --secret-permissions {secret_perms}')
 
         # create a secret
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
@@ -311,6 +325,9 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = bak_file
         self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
+        time.sleep(10)
+        self.cmd('keyvault secret purge --vault-name {kv} -n {sec}')
+        time.sleep(10)
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
         # restore secret from backup

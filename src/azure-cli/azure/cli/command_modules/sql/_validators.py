@@ -114,6 +114,19 @@ def validate_subnet(cmd, namespace):
 
 
 ###############################################
+#                   sql db                    #
+###############################################
+
+def validate_backup_storage_redundancy(namespace):
+    # Validate if entered backup storage redundancy value is within allowed values
+    if (not namespace.storage_account_type or
+            (namespace.storage_account_type and namespace.storage_account_type in ['LRS', 'ZRS', 'GRS'])):
+        pass
+    else:
+        raise CLIError('incorrect usage: --backup-storage-redundancy must be either Local, Zone or Geo')
+
+
+###############################################
 #                sql managed instance         #
 ###############################################
 
@@ -124,3 +137,12 @@ def validate_managed_instance_storage_size(namespace):
         pass
     else:
         raise CLIError('incorrect usage: --storage must be specified in increments of 32 GB')
+
+
+def validate_managed_instance_backup_storage_redundancy(namespace):
+    # Validate if entered backup storage redundancy value is within allowed values
+    if (not namespace.storage_account_type or
+            (namespace.storage_account_type and namespace.storage_account_type in ['LRS', 'ZRS', 'GRS'])):
+        pass
+    else:
+        raise CLIError('incorrect usage: --backup-storage-redundancy must be either Local, Zone or Geo')

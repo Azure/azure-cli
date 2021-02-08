@@ -20,7 +20,16 @@ def load_command_table(self, _):
         g.command('delete', 'delete_cache_contents')
         g.command('purge', 'purge_cache_contents')
 
-    with self.command_group('local-context', configure_custom, is_experimental=True) as g:
+    def _local_context_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
+        msg += " Use '{}' instead.".format(self.redirect)
+        # msg += " For more information go to"
+        # msg += " <Add param persist doc link here when it is ready.>"
+        return msg
+
+    with self.command_group('local-context', configure_custom, is_experimental=True,
+                            deprecate_info=self.deprecate(redirect="config param-persist",
+                                                          message_func=_local_context_deprecate_message)) as g:
         g.command('on', 'turn_local_context_on')
         g.command('off', 'turn_local_context_off')
         g.command('show', 'show_local_context', validator=validate_local_context)  # pylint: disable=show-command

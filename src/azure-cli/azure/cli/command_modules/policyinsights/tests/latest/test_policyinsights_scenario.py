@@ -441,7 +441,7 @@ class PolicyInsightsTests(ScenarioTest):
 
         self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
             self.check('name', '{rn}'),
-            self.check('provisioningState', 'Evaluating'),
+            self.check_pattern('provisioningState', '(?:Evaluating|Accepted)'),
             self.check('resourceGroup', '{rg}'),
             self.check('policyAssignmentId', '{pid}'),
             self.check('deploymentStatus.totalDeployments', 0),

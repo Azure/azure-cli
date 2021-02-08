@@ -15,6 +15,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ServiceFabricClusterTests(ScenarioTest):
+    @unittest.skip('Update api version')
     @ResourceGroupPreparer()
     def test_cluster_certs(self):
         self.kwargs.update({

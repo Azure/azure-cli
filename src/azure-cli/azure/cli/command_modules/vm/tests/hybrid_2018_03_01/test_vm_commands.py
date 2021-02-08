@@ -328,6 +328,7 @@ class VMCustomImageTest(ScenarioTest):
 
 class VMImageWithPlanTest(ScenarioTest):
 
+    @unittest.skip('You cannot purchase reservation because required AAD tenant information is missing')
     @ResourceGroupPreparer()
     def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
         # test 2 scenarios, 1. create vm from market place image, 2. create from a custom image captured from such vms
@@ -671,6 +672,7 @@ class VMNoWaitScenarioTest(ScenarioTest):
         })
         self.cmd('vm create -g {rg} -n {vm} --admin-username user12 --admin-password testPassword0 --authentication-type password --image UbuntuLTS --no-wait',
                  checks=self.is_empty())
+        time.sleep(30)
         self.cmd('vm wait -g {rg} -n {vm} --custom "instanceView.statuses[?code==\'PowerState/running\']"',
                  checks=self.is_empty())
         self.cmd('vm get-instance-view -g {rg} -n {vm}',

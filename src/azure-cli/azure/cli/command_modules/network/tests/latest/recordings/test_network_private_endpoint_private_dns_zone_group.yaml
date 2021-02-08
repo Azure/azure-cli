@@ -1,8 +1,8 @@
 interactions:
 - request:
     body: '{"location": "CentralUSEuap", "tags": {}, "properties": {"addressSpace":
-      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties":
-      {"addressPrefix": "10.0.0.0/24"}, "name": "cli-subnet-000004"}]}}'
+      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name":
+      "cli-subnet-000004", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -15,28 +15,25 @@ interactions:
       Content-Length:
       - '229'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"43b5e1cd-869a-4b35-8ac5-f6ef226612c6\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9f7f49eb-858f-4ac1-986c-e5130f5f5951\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"989b54f3-43a7-4aaf-9570-f5b2aaa11234\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"b999f05c-068e-4f73-bce7-a3390f1f02cd\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"43b5e1cd-869a-4b35-8ac5-f6ef226612c6\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9f7f49eb-858f-4ac1-986c-e5130f5f5951\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -47,7 +44,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b34853a6-933a-42db-b607-d35c071fee2d?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ee6ac1ef-b057-41ac-a62f-0cd2cd9d8e7f?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -55,7 +52,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:57:55 GMT
+      - Wed, 16 Dec 2020 05:33:39 GMT
       expires:
       - '-1'
       pragma:
@@ -68,9 +65,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e1add158-c3c1-495b-9193-93952378b403
+      - 452710bc-1123-4d26-a144-920918ea4e6d
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1150'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -78,7 +75,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -88,10 +85,9 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b34853a6-933a-42db-b607-d35c071fee2d?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ee6ac1ef-b057-41ac-a62f-0cd2cd9d8e7f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -103,7 +99,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:57:59 GMT
+      - Wed, 16 Dec 2020 05:33:43 GMT
       expires:
       - '-1'
       pragma:
@@ -120,7 +116,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e96c6ccc-aaa2-4b04-af0e-00a2f08607bd
+      - cfec3b69-cceb-48df-aa8b-1beda55198fe
     status:
       code: 200
       message: OK
@@ -128,7 +124,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -138,22 +134,21 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"2b114339-9dae-4158-8ed6-68f2c6d15335\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"0fa0b8c5-bc8c-45bc-8646-5d0ffd0faf60\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"989b54f3-43a7-4aaf-9570-f5b2aaa11234\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"b999f05c-068e-4f73-bce7-a3390f1f02cd\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"2b114339-9dae-4158-8ed6-68f2c6d15335\\\"\",\r\n
+        \       \"etag\": \"W/\\\"0fa0b8c5-bc8c-45bc-8646-5d0ffd0faf60\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -168,9 +163,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:57:59 GMT
+      - Wed, 16 Dec 2020 05:33:43 GMT
       etag:
-      - W/"2b114339-9dae-4158-8ed6-68f2c6d15335"
+      - W/"0fa0b8c5-bc8c-45bc-8646-5d0ffd0faf60"
       expires:
       - '-1'
       pragma:
@@ -187,7 +182,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bd26d6ac-b651-45f9-bceb-ccdc811112ad
+      - 6ffb0d29-e204-4843-9ae2-c891176a578f
     status:
       code: 200
       message: OK
@@ -205,16 +200,13 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"2b114339-9dae-4158-8ed6-68f2c6d15335\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0fa0b8c5-bc8c-45bc-8646-5d0ffd0faf60\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -227,9 +219,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:00 GMT
+      - Wed, 16 Dec 2020 05:33:44 GMT
       etag:
-      - W/"2b114339-9dae-4158-8ed6-68f2c6d15335"
+      - W/"0fa0b8c5-bc8c-45bc-8646-5d0ffd0faf60"
       expires:
       - '-1'
       pragma:
@@ -246,14 +238,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 33f9a0da-1e18-4fdf-b3e1-dbd56f7f4358
+      - 691a4120-8d17-4e2c-ae88-593af1717cb1
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
-      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "cli-subnet-000004"}'''
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "name": "cli-subnet-000004", "properties": {"addressPrefix": "10.0.0.0/24",
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -266,27 +259,24 @@ interactions:
       Content-Length:
       - '451'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"e6cd3034-ea5a-403a-8709-d8d79e519643\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"2ada51d6-1f0c-409f-a142-80eaaf0b0770\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/65858056-1de6-4842-8b72-3abfd9cd337b?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/a3c4849d-42c0-420f-abaf-3b92304126e5?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -294,7 +284,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:01 GMT
+      - Wed, 16 Dec 2020 05:33:45 GMT
       expires:
       - '-1'
       pragma:
@@ -311,9 +301,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a998f5e6-6b39-4b8c-8faf-6a8180dd3959
+      - 8efa1548-cbe0-4864-9791-e291d47efb43
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1165'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -321,7 +311,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -331,10 +321,9 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/65858056-1de6-4842-8b72-3abfd9cd337b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/a3c4849d-42c0-420f-abaf-3b92304126e5?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -346,7 +335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:05 GMT
+      - Wed, 16 Dec 2020 05:33:50 GMT
       expires:
       - '-1'
       pragma:
@@ -363,7 +352,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6e2b8824-1e1f-4c38-b489-e38235bacb78
+      - 0fbddd5d-9f88-468e-83bf-244b3bd78f47
     status:
       code: 200
       message: OK
@@ -371,7 +360,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -381,14 +370,13 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"5da20750-fa41-4c8c-a64d-6dccbea336ca\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"e9a39502-bff1-45a2-8e74-83093b67814d\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -401,9 +389,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:05 GMT
+      - Wed, 16 Dec 2020 05:33:50 GMT
       etag:
-      - W/"5da20750-fa41-4c8c-a64d-6dccbea336ca"
+      - W/"e9a39502-bff1-45a2-8e74-83093b67814d"
       expires:
       - '-1'
       pragma:
@@ -420,7 +408,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 58a9f5bc-f742-4e04-a746-91c87c63e65f
+      - 66937bcb-8e55-49cb-842d-f2032a8e44f7
     status:
       code: 200
       message: OK
@@ -438,10 +426,7 @@ interactions:
       ParameterSetName:
       - --account-name -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateLinkResources?api-version=2019-06-01
   response:
@@ -455,7 +440,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Jul 2020 02:58:07 GMT
+      - Wed, 16 Dec 2020 05:33:51 GMT
       expires:
       - '-1'
       pragma:
@@ -487,15 +472,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002","name":"saplr000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-20T02:57:26.0222574Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-20T02:57:26.0222574Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-20T02:57:25.9440997Z","primaryEndpoints":{"dfs":"https://saplr000002.dfs.core.windows.net/","web":"https://saplr000002.z22.web.core.windows.net/","blob":"https://saplr000002.blob.core.windows.net/","queue":"https://saplr000002.queue.core.windows.net/","table":"https://saplr000002.table.core.windows.net/","file":"https://saplr000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002","name":"saplr000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-16T05:33:08.8177758Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-16T05:33:08.8177758Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-16T05:33:08.7396713Z","primaryEndpoints":{"dfs":"https://saplr000002.dfs.core.windows.net/","web":"https://saplr000002.z22.web.core.windows.net/","blob":"https://saplr000002.blob.core.windows.net/","queue":"https://saplr000002.queue.core.windows.net/","table":"https://saplr000002.table.core.windows.net/","file":"https://saplr000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -504,7 +486,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Jul 2020 02:58:08 GMT
+      - Wed, 16 Dec 2020 05:33:53 GMT
       expires:
       - '-1'
       pragma:
@@ -523,9 +505,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"location": "CentralUSEuap", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "privateLinkServiceConnections": [{"properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002",
-      "groupIds": ["blob"]}, "name": "cli-pec-000006"}]}}\'''''
+    body: '{"location": "CentralUSEuap", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "privateLinkServiceConnections": [{"name": "cli-pec-000006", "properties": {"privateLinkServiceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002",
+      "groupIds": ["blob"]}}]}}'
     headers:
       Accept:
       - application/json
@@ -538,26 +521,23 @@ interactions:
       Content-Length:
       - '661'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"08cdd52c-be71-41f0-b610-b9bdd6043d21\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8e506bb2-23f4-4aea-828a-3a29892565fc\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"3b89f536-f7f2-428a-b8bb-2d8358e0bb07\",\r\n    \"privateLinkServiceConnections\":
+        \"faae06ac-349a-4c0a-80a8-78e9a50247c9\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"08cdd52c-be71-41f0-b610-b9bdd6043d21\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8e506bb2-23f4-4aea-828a-3a29892565fc\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002\",\r\n
         \         \"groupIds\": [\r\n            \"blob\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -566,13 +546,13 @@ interactions:
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
         \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.69ebc4c4-5958-4e89-8567-05d962416024\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.045a6f61-edc5-4a80-b597-da85571ecbcf\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b9b246df-9fe8-47de-a43b-fb48f6b22077?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/a2411ac5-947d-4f81-8f39-4359f9e23d13?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -580,7 +560,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:19 GMT
+      - Wed, 16 Dec 2020 05:33:59 GMT
       expires:
       - '-1'
       pragma:
@@ -593,9 +573,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a40693b0-2bc8-4eac-a57f-bb99d5cd0f04
+      - ad92db14-2e16-49e6-862b-b7dcd005b85a
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1162'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -603,7 +583,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -614,10 +594,9 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b9b246df-9fe8-47de-a43b-fb48f6b22077?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/a2411ac5-947d-4f81-8f39-4359f9e23d13?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -629,7 +608,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:29 GMT
+      - Wed, 16 Dec 2020 05:34:10 GMT
       expires:
       - '-1'
       pragma:
@@ -646,7 +625,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 478d0ce0-f799-4be2-a740-1188e4dd0079
+      - 6db4454b-0047-45e2-af80-f041cd3fe332
     status:
       code: 200
       message: OK
@@ -654,7 +633,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -665,19 +644,18 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"dc381cc3-df49-4deb-bf88-d53bce88b599\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"664b9bde-ed04-444b-8375-d2ebcf4b1f79\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"3b89f536-f7f2-428a-b8bb-2d8358e0bb07\",\r\n    \"privateLinkServiceConnections\":
+        \"faae06ac-349a-4c0a-80a8-78e9a50247c9\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"dc381cc3-df49-4deb-bf88-d53bce88b599\\\"\",\r\n
+        \       \"etag\": \"W/\\\"664b9bde-ed04-444b-8375-d2ebcf4b1f79\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002\",\r\n
         \         \"groupIds\": [\r\n            \"blob\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -686,7 +664,7 @@ interactions:
         \       },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
         \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.69ebc4c4-5958-4e89-8567-05d962416024\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.045a6f61-edc5-4a80-b597-da85571ecbcf\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
         \"saplr000002.blob.core.windows.net\",\r\n        \"ipAddresses\": [\r\n          \"10.0.0.4\"\r\n
         \       ]\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -698,9 +676,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:29 GMT
+      - Wed, 16 Dec 2020 05:34:10 GMT
       etag:
-      - W/"dc381cc3-df49-4deb-bf88-d53bce88b599"
+      - W/"664b9bde-ed04-444b-8375-d2ebcf4b1f79"
       expires:
       - '-1'
       pragma:
@@ -717,7 +695,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 821bde14-b27d-4a18-b540-cb9a23c943d5
+      - a518df7f-b7cb-49a3-9c10-a2886a3f9a30
     status:
       code: 200
       message: OK
@@ -735,15 +713,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002","name":"saplr000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateEndpointConnections/saplr000002.3d801c9d-a689-4366-b232-64056b9a7271","name":"saplr000002.3d801c9d-a689-4366-b232-64056b9a7271","type":"Microsoft.Storage/storageAccounts/privateEndpointConnections","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved","actionRequired":"None"}}}],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-20T02:57:26.0222574Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-20T02:57:26.0222574Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-20T02:57:25.9440997Z","primaryEndpoints":{"dfs":"https://saplr000002.dfs.core.windows.net/","web":"https://saplr000002.z22.web.core.windows.net/","blob":"https://saplr000002.blob.core.windows.net/","queue":"https://saplr000002.queue.core.windows.net/","table":"https://saplr000002.table.core.windows.net/","file":"https://saplr000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002","name":"saplr000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateEndpointConnections/saplr000002.49ddc48c-173c-4bf1-9857-14f698ce053d","name":"saplr000002.49ddc48c-173c-4bf1-9857-14f698ce053d","type":"Microsoft.Storage/storageAccounts/privateEndpointConnections","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved","actionRequired":"None"}}}],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-16T05:33:08.8177758Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-16T05:33:08.8177758Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-16T05:33:08.7396713Z","primaryEndpoints":{"dfs":"https://saplr000002.dfs.core.windows.net/","web":"https://saplr000002.z22.web.core.windows.net/","blob":"https://saplr000002.blob.core.windows.net/","queue":"https://saplr000002.queue.core.windows.net/","table":"https://saplr000002.table.core.windows.net/","file":"https://saplr000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -752,7 +727,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Jul 2020 02:58:32 GMT
+      - Wed, 16 Dec 2020 05:34:13 GMT
       expires:
       - '-1'
       pragma:
@@ -784,15 +759,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateEndpointConnections/saplr000002.3d801c9d-a689-4366-b232-64056b9a7271?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateEndpointConnections/saplr000002.49ddc48c-173c-4bf1-9857-14f698ce053d?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateEndpointConnections/saplr000002.3d801c9d-a689-4366-b232-64056b9a7271","name":"saplr000002.3d801c9d-a689-4366-b232-64056b9a7271","type":"Microsoft.Storage/storageAccounts/privateEndpointConnections","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved","actionRequired":"None"}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002/privateEndpointConnections/saplr000002.49ddc48c-173c-4bf1-9857-14f698ce053d","name":"saplr000002.49ddc48c-173c-4bf1-9857-14f698ce053d","type":"Microsoft.Storage/storageAccounts/privateEndpointConnections","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved","actionRequired":"None"}}}'
     headers:
       cache-control:
       - no-cache
@@ -801,7 +773,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Jul 2020 02:58:33 GMT
+      - Wed, 16 Dec 2020 05:34:13 GMT
       expires:
       - '-1'
       pragma:
@@ -833,21 +805,18 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"dc381cc3-df49-4deb-bf88-d53bce88b599\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"664b9bde-ed04-444b-8375-d2ebcf4b1f79\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"3b89f536-f7f2-428a-b8bb-2d8358e0bb07\",\r\n    \"privateLinkServiceConnections\":
+        \"faae06ac-349a-4c0a-80a8-78e9a50247c9\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"dc381cc3-df49-4deb-bf88-d53bce88b599\\\"\",\r\n
+        \       \"etag\": \"W/\\\"664b9bde-ed04-444b-8375-d2ebcf4b1f79\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Storage/storageAccounts/saplr000002\",\r\n
         \         \"groupIds\": [\r\n            \"blob\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -856,7 +825,7 @@ interactions:
         \       },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
         \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.69ebc4c4-5958-4e89-8567-05d962416024\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.045a6f61-edc5-4a80-b597-da85571ecbcf\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
         \"saplr000002.blob.core.windows.net\",\r\n        \"ipAddresses\": [\r\n          \"10.0.0.4\"\r\n
         \       ]\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -868,9 +837,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:34 GMT
+      - Wed, 16 Dec 2020 05:34:15 GMT
       etag:
-      - W/"dc381cc3-df49-4deb-bf88-d53bce88b599"
+      - W/"664b9bde-ed04-444b-8375-d2ebcf4b1f79"
       expires:
       - '-1'
       pragma:
@@ -887,7 +856,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2f7c3bfd-31fc-4bce-9de4-cd418dd2bcda
+      - be3acb8b-b621-4462-bc85-0e41bdd061a6
     status:
       code: 200
       message: OK
@@ -911,8 +880,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-privatedns/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
@@ -922,7 +891,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs0YTJiOTRkYi0wMjU1LTQ4MGQtOWNhNi1kNTk2MGM5NzNkM2Q=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTswODIzNDUxMS1kOTIzLTQyYzItODY2ZC0xNzI1ZWY4NDk0NmE=?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -930,9 +899,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:58:44 GMT
+      - Wed, 16 Dec 2020 05:34:26 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs0YTJiOTRkYi0wMjU1LTQ4MGQtOWNhNi1kNTk2MGM5NzNkM2Q=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTswODIzNDUxMS1kOTIzLTQyYzItODY2ZC0xNzI1ZWY4NDk0NmE=?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -962,10 +931,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-privatedns/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs0YTJiOTRkYi0wMjU1LTQ4MGQtOWNhNi1kNTk2MGM5NzNkM2Q=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTswODIzNDUxMS1kOTIzLTQyYzItODY2ZC0xNzI1ZWY4NDk0NmE=?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -977,7 +946,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:59:14 GMT
+      - Wed, 16 Dec 2020 05:34:57 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1011,13 +980,13 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-privatedns/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/fanqiu_cli_test_network_private_endpoints000001\/providers\/Microsoft.Network\/privateDnsZones\/www.clizone1.com","name":"www.clizone1.com","type":"Microsoft.Network\/privateDnsZones","etag":"ea0c16dc-f37b-49ff-8eb5-121a275f0d9f","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/fanqiu_cli_test_network_private_endpoints000001\/providers\/Microsoft.Network\/privateDnsZones\/www.clizone1.com","name":"www.clizone1.com","type":"Microsoft.Network\/privateDnsZones","etag":"cc856302-f6ed-4646-a584-98e675572fe2","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
@@ -1026,9 +995,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:59:14 GMT
+      - Wed, 16 Dec 2020 05:34:58 GMT
       etag:
-      - ea0c16dc-f37b-49ff-8eb5-121a275f0d9f
+      - cc856302-f6ed-4646-a584-98e675572fe2
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1068,8 +1037,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-privatedns/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
@@ -1079,7 +1048,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3YjU0ZWU0ZS1jY2RhLTRjYWEtODNkMS0wOTQ4NDk5MWQyYjU=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiZjY1MTI4Yy04MWMxLTQ2NDMtYjc5Ny04MzJhZTgzNzI1NzM=?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -1087,9 +1056,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:59:26 GMT
+      - Wed, 16 Dec 2020 05:35:09 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3YjU0ZWU0ZS1jY2RhLTRjYWEtODNkMS0wOTQ4NDk5MWQyYjU=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiZjY1MTI4Yy04MWMxLTQ2NDMtYjc5Ny04MzJhZTgzNzI1NzM=?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1119,10 +1088,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-privatedns/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3YjU0ZWU0ZS1jY2RhLTRjYWEtODNkMS0wOTQ4NDk5MWQyYjU=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiZjY1MTI4Yy04MWMxLTQ2NDMtYjc5Ny04MzJhZTgzNzI1NzM=?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1134,7 +1103,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:59:57 GMT
+      - Wed, 16 Dec 2020 05:35:39 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1168,13 +1137,13 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-privatedns/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/fanqiu_cli_test_network_private_endpoints000001\/providers\/Microsoft.Network\/privateDnsZones\/www.clizone2.com","name":"www.clizone2.com","type":"Microsoft.Network\/privateDnsZones","etag":"ebd04cb9-077d-495e-88c1-e4ac60634eef","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/fanqiu_cli_test_network_private_endpoints000001\/providers\/Microsoft.Network\/privateDnsZones\/www.clizone2.com","name":"www.clizone2.com","type":"Microsoft.Network\/privateDnsZones","etag":"321290cc-085e-4da3-9a7d-e6e70635cffb","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
@@ -1183,9 +1152,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:59:57 GMT
+      - Wed, 16 Dec 2020 05:35:40 GMT
       etag:
-      - ebd04cb9-077d-495e-88c1-e4ac60634eef
+      - 321290cc-085e-4da3-9a7d-e6e70635cffb
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1206,8 +1175,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"name": "clidnsgroup", "properties": {"privateDnsZoneConfigs": [{"name":
-      "clizone1", "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com"}}]}}'''
+    body: '{"name": "clidnsgroup", "properties": {"privateDnsZoneConfigs": [{"name":
+      "clizone1", "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com"}}]}}'
     headers:
       Accept:
       - application/json
@@ -1220,31 +1189,28 @@ interactions:
       Content-Length:
       - '331'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"e8431704-1cf8-4c6b-b59d-5fe534442154\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"18423c61-46f6-430c-87ec-a38ee1a386ca\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"e8431704-1cf8-4c6b-b59d-5fe534442154\\\"\",\r\n
+        \       \"etag\": \"W/\\\"18423c61-46f6-430c-87ec-a38ee1a386ca\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6942d649-9f31-4969-9a57-52145af60023?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f80ba209-7037-4d0b-b6fa-e644717d1eb4?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1252,7 +1218,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 02:59:59 GMT
+      - Wed, 16 Dec 2020 05:35:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1265,9 +1231,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7f61b877-e9c6-4542-aa56-dbf1fc8e1955
+      - d340fc9d-f243-4932-b4ab-c9abc5ad58f1
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1165'
+      - '1189'
     status:
       code: 201
       message: Created
@@ -1275,7 +1241,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1285,10 +1251,9 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6942d649-9f31-4969-9a57-52145af60023?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f80ba209-7037-4d0b-b6fa-e644717d1eb4?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1300,7 +1265,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:10 GMT
+      - Wed, 16 Dec 2020 05:35:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1317,7 +1282,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ea629c79-6ef5-4168-bac4-a24fd500de9e
+      - 0e88ee75-f80f-4fba-a58c-6d88b1647551
     status:
       code: 200
       message: OK
@@ -1325,7 +1290,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1335,18 +1300,17 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"a539bfcc-cd72-4912-b6e0-bf236f0862c6\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"64da4e5e-69a7-4a1c-b092-828bbd73b712\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"a539bfcc-cd72-4912-b6e0-bf236f0862c6\\\"\",\r\n
+        \       \"etag\": \"W/\\\"64da4e5e-69a7-4a1c-b092-828bbd73b712\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
@@ -1359,9 +1323,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:11 GMT
+      - Wed, 16 Dec 2020 05:35:54 GMT
       etag:
-      - W/"a539bfcc-cd72-4912-b6e0-bf236f0862c6"
+      - W/"64da4e5e-69a7-4a1c-b092-828bbd73b712"
       expires:
       - '-1'
       pragma:
@@ -1378,7 +1342,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a59500ba-1efc-44ea-9020-fa4d05d26223
+      - b20dd39f-9472-4852-8ef9-5c376e81cc23
     status:
       code: 200
       message: OK
@@ -1396,20 +1360,17 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"a539bfcc-cd72-4912-b6e0-bf236f0862c6\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"64da4e5e-69a7-4a1c-b092-828bbd73b712\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"a539bfcc-cd72-4912-b6e0-bf236f0862c6\\\"\",\r\n
+        \       \"etag\": \"W/\\\"64da4e5e-69a7-4a1c-b092-828bbd73b712\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
@@ -1422,9 +1383,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:12 GMT
+      - Wed, 16 Dec 2020 05:35:56 GMT
       etag:
-      - W/"a539bfcc-cd72-4912-b6e0-bf236f0862c6"
+      - W/"64da4e5e-69a7-4a1c-b092-828bbd73b712"
       expires:
       - '-1'
       pragma:
@@ -1441,15 +1402,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 147c4216-a556-4f4f-b969-5c1fbc760fa3
+      - 9dfc3e3e-c690-4b37-ae07-1173cd44ebb8
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup",
       "name": "clidnsgroup", "properties": {"privateDnsZoneConfigs": [{"name": "clizone1",
       "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com"}},
-      {"name": "clizone2", "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com"}}]}}'''
+      {"name": "clizone2", "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com"}}]}}'
     headers:
       Accept:
       - application/json
@@ -1462,37 +1423,34 @@ interactions:
       Content-Length:
       - '851'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"6d41b2f1-aced-4dca-90ff-4280d9da6920\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"122c0689-e5a5-4ee4-8e58-ef43166fef90\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"6d41b2f1-aced-4dca-90ff-4280d9da6920\\\"\",\r\n
+        \       \"etag\": \"W/\\\"122c0689-e5a5-4ee4-8e58-ef43166fef90\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      },\r\n      {\r\n        \"name\":
         \"clizone2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone2\",\r\n
-        \       \"etag\": \"W/\\\"6d41b2f1-aced-4dca-90ff-4280d9da6920\\\"\",\r\n
+        \       \"etag\": \"W/\\\"122c0689-e5a5-4ee4-8e58-ef43166fef90\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e01d1cf6-501d-4a4d-ad97-46efca3a0938?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/45f22cca-4563-4f47-9f94-d02cea0ff1a3?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1500,7 +1458,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:13 GMT
+      - Wed, 16 Dec 2020 05:35:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1517,9 +1475,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ebc163f5-8967-44c5-93ca-349cb6b52b74
+      - b1a0c18d-867b-41ad-9aae-8c9d294de341
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1151'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1527,7 +1485,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1537,10 +1495,9 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e01d1cf6-501d-4a4d-ad97-46efca3a0938?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/45f22cca-4563-4f47-9f94-d02cea0ff1a3?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1552,7 +1509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:24 GMT
+      - Wed, 16 Dec 2020 05:36:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1569,7 +1526,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3694bdd5-738c-4ae2-9032-2e3a4490756d
+      - abea716c-3769-4f89-b3d8-097f83da1f0b
     status:
       code: 200
       message: OK
@@ -1577,7 +1534,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1587,24 +1544,23 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name --private-dns-zone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      },\r\n      {\r\n        \"name\":
         \"clizone2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone2\",\r\n
-        \       \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com\",\r\n
@@ -1617,9 +1573,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:24 GMT
+      - Wed, 16 Dec 2020 05:36:08 GMT
       etag:
-      - W/"595fde8c-c95a-4a20-acef-e13c3fce411e"
+      - W/"8d2ea5d6-a901-4754-8817-3a920fca1af7"
       expires:
       - '-1'
       pragma:
@@ -1636,7 +1592,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7d0a639b-1c3e-49fd-8c71-dcc0cf5282ac
+      - edfea231-4e7e-4a68-ad47-7845aaa03f0b
     status:
       code: 200
       message: OK
@@ -1654,26 +1610,23 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      },\r\n      {\r\n        \"name\":
         \"clizone2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone2\",\r\n
-        \       \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com\",\r\n
@@ -1686,9 +1639,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:26 GMT
+      - Wed, 16 Dec 2020 05:36:10 GMT
       etag:
-      - W/"595fde8c-c95a-4a20-acef-e13c3fce411e"
+      - W/"8d2ea5d6-a901-4754-8817-3a920fca1af7"
       expires:
       - '-1'
       pragma:
@@ -1705,7 +1658,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d7e4809b-9f27-4004-aa16-fa26947f0365
+      - 67ba732e-9dad-42fb-9421-3e41c437a051
     status:
       code: 200
       message: OK
@@ -1723,28 +1676,25 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"clidnsgroup\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \     \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n      \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"privateDnsZoneConfigs\":
         [\r\n          {\r\n            \"name\": \"clizone1\",\r\n            \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \           \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \           \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \             \"recordSets\": []\r\n            }\r\n          },\r\n          {\r\n
         \           \"name\": \"clizone2\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone2\",\r\n
-        \           \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \           \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com\",\r\n
@@ -1758,7 +1708,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:27 GMT
+      - Wed, 16 Dec 2020 05:36:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1775,7 +1725,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 12ae9a75-43b6-4146-b9d5-475e4ba53948
+      - d9d4d702-38f0-4706-9ba4-91a8713f5101
     status:
       code: 200
       message: OK
@@ -1793,26 +1743,23 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      },\r\n      {\r\n        \"name\":
         \"clizone2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone2\",\r\n
-        \       \"etag\": \"W/\\\"595fde8c-c95a-4a20-acef-e13c3fce411e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8d2ea5d6-a901-4754-8817-3a920fca1af7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone2.com\",\r\n
@@ -1825,9 +1772,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:28 GMT
+      - Wed, 16 Dec 2020 05:36:14 GMT
       etag:
-      - W/"595fde8c-c95a-4a20-acef-e13c3fce411e"
+      - W/"8d2ea5d6-a901-4754-8817-3a920fca1af7"
       expires:
       - '-1'
       pragma:
@@ -1844,14 +1791,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 76388a69-d290-46f5-8f03-2cf7eda3db11
+      - 6e297e7f-1f5f-4f19-b63e-afd9718e2a20
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup",
       "name": "clidnsgroup", "properties": {"privateDnsZoneConfigs": [{"name": "clizone1",
-      "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com"}}]}}'''
+      "properties": {"privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com"}}]}}'
     headers:
       Accept:
       - application/json
@@ -1864,31 +1811,28 @@ interactions:
       Content-Length:
       - '586'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --endpoint-name -g -n --zone-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"fbf87ef4-8904-4e96-959c-0550f8ab0773\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"989d33c0-32cc-4c77-ae0f-ab6fbad2dbf1\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"fbf87ef4-8904-4e96-959c-0550f8ab0773\\\"\",\r\n
+        \       \"etag\": \"W/\\\"989d33c0-32cc-4c77-ae0f-ab6fbad2dbf1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
         \         \"recordSets\": []\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1125c40f-2e2e-4f56-ba7f-535b299806b5?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/0f161557-2304-4d91-97b7-ac79ff4e3a87?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1896,7 +1840,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:29 GMT
+      - Wed, 16 Dec 2020 05:36:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1913,9 +1857,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6582616d-d00a-4767-84c0-b9b4d66974e7
+      - f4d4ed81-ae21-4fed-a128-9ac8cd124207
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1156'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -1923,7 +1867,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1933,10 +1877,9 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1125c40f-2e2e-4f56-ba7f-535b299806b5?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/0f161557-2304-4d91-97b7-ac79ff4e3a87?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1948,7 +1891,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:41 GMT
+      - Wed, 16 Dec 2020 05:36:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1965,7 +1908,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9d5b5b59-b1c2-4b05-978c-954cba54fbfd
+      - c95187ad-71a0-40df-be86-608b58f5e5f4
     status:
       code: 200
       message: OK
@@ -1973,7 +1916,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1983,18 +1926,17 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n --zone-name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"938cda79-a3e5-42b5-a0a8-f6bb7907a4ae\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"72f51116-ffd5-4bf7-a1d0-ebb6a0c91828\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"938cda79-a3e5-42b5-a0a8-f6bb7907a4ae\\\"\",\r\n
+        \       \"etag\": \"W/\\\"72f51116-ffd5-4bf7-a1d0-ebb6a0c91828\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
@@ -2007,9 +1949,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:42 GMT
+      - Wed, 16 Dec 2020 05:36:26 GMT
       etag:
-      - W/"938cda79-a3e5-42b5-a0a8-f6bb7907a4ae"
+      - W/"72f51116-ffd5-4bf7-a1d0-ebb6a0c91828"
       expires:
       - '-1'
       pragma:
@@ -2026,7 +1968,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b1fa3e10-6049-450f-88ec-a70564f67cfc
+      - f559dfb8-d23f-439f-b7f2-1a76c3506313
     status:
       code: 200
       message: OK
@@ -2044,20 +1986,17 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clidnsgroup\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup\",\r\n
-        \ \"etag\": \"W/\\\"938cda79-a3e5-42b5-a0a8-f6bb7907a4ae\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"72f51116-ffd5-4bf7-a1d0-ebb6a0c91828\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateDnsZoneConfigs\":
         [\r\n      {\r\n        \"name\": \"clizone1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup/privateDnsZoneConfigs/clizone1\",\r\n
-        \       \"etag\": \"W/\\\"938cda79-a3e5-42b5-a0a8-f6bb7907a4ae\\\"\",\r\n
+        \       \"etag\": \"W/\\\"72f51116-ffd5-4bf7-a1d0-ebb6a0c91828\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateDnsZoneGroups/privateDnsZoneConfigs\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateDnsZoneId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateDnsZones/www.clizone1.com\",\r\n
@@ -2070,9 +2009,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:43 GMT
+      - Wed, 16 Dec 2020 05:36:29 GMT
       etag:
-      - W/"938cda79-a3e5-42b5-a0a8-f6bb7907a4ae"
+      - W/"72f51116-ffd5-4bf7-a1d0-ebb6a0c91828"
       expires:
       - '-1'
       pragma:
@@ -2089,7 +2028,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d8cdcea0-2eef-4a96-b1af-c00d5e3d52d2
+      - ce4e2d11-6c32-436a-9d6e-75575440f103
     status:
       code: 200
       message: OK
@@ -2109,28 +2048,25 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fanqiu_cli_test_network_private_endpoints000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateDnsZoneGroups/clidnsgroup?api-version=2020-07-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/c489e446-7433-4757-8f0c-0a951083f52b?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f0f619bd-a8a1-4d71-aa87-ca1002351e19?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 20 Jul 2020 03:00:45 GMT
+      - Wed, 16 Dec 2020 05:36:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/c489e446-7433-4757-8f0c-0a951083f52b?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/f0f619bd-a8a1-4d71-aa87-ca1002351e19?api-version=2020-07-01
       pragma:
       - no-cache
       server:
@@ -2141,9 +2077,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ed44bebe-c9fb-4a79-8f44-0d930686848d
+      - 956842b8-5896-4b09-b129-724e0211948a
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14988'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -2151,7 +2087,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2161,10 +2097,9 @@ interactions:
       ParameterSetName:
       - --endpoint-name -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/c489e446-7433-4757-8f0c-0a951083f52b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f0f619bd-a8a1-4d71-aa87-ca1002351e19?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2176,7 +2111,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 03:00:56 GMT
+      - Wed, 16 Dec 2020 05:36:40 GMT
       expires:
       - '-1'
       pragma:
@@ -2193,7 +2128,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a1452d34-9046-42e1-ba20-31ec7862015b
+      - a3781c4c-09e1-4bbb-852a-75b3ec47494c
     status:
       code: 200
       message: OK
