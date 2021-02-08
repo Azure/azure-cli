@@ -3187,8 +3187,11 @@ def upgrade_bicep_cli(cmd):
     latest_release_tag = get_bicep_latest_release_tag()
     ensure_bicep_installation(release_tag=latest_release_tag)
 
-def build_bicep_file(cmd, file):
-    run_bicep_command("build", file)
+def build_bicep_file(cmd, file, stdout=None):
+    if stdout:
+        print(run_bicep_command("build", file, "--stdout"))
+    else:
+        run_bicep_command("build", file)
 
 def show_bicep_cli_version(cmd):
     print(run_bicep_command("--version"))

@@ -572,7 +572,9 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                    type=file_type, help="a Bicep file path in the file system"))
+                                                    type=file_type, help="a Bicep file path in the file system."))
+        c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
+                                                      help="When set, prints all output to stdout instead of corresponding files."))
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

@@ -18,26 +18,28 @@ class TestBicep(unittest.TestCase):
         isfile_stub.return_value = True
 
         # Act.
-        ensure_bicep_installation(check_upgrade=True)
+        installation_path = ensure_bicep_installation(check_upgrade=True)
 
         # Assert.
         warning_mock.assert_called_once_with(
             'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
             "v2.0.0",
         )
+        self.assertIsNotNone(installation_path)
 
+    @mock.patch("os.path.isfile")
+    @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installed_version")
+    @mock.patch("os.path.dirname")
+    def test_ensure_bicep_installation_skip_download_if_installed_version_matches_release_tag(
+        self, dirname_mock, _get_bicep_installed_version_stub, isfile_stub
+    ):
+        # Arrange.
+        _get_bicep_installed_version_stub.return_value = "0.1.0"
+        isfile_stub.return_value = True
 
-# This method will be used by the mock to replace requests.get
-def mocked_requests_get(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
+        # Act.
+        installation_path = ensure_bicep_installation(release_tag='v0.1.0')
 
-        def json(self):
-            return self.json_data
-
-    if args[0] == "https://api.github.com/repos/Azure/bicep/releases/latest":
-        return MockResponse({"tag_name": "v2.0.0"}, 200)
-
-    return MockResponse(None, 404)
+        # Assert
+        dirname_mock.assert_not_called()
+        self.assertIsNotNone(installation_path)

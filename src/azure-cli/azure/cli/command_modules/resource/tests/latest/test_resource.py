@@ -18,6 +18,7 @@ from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScena
                                create_random_name, live_only, record_only)
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
+from azure.cli.command_modules.resource._bicep import _get_bicep_installation_path
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
@@ -3228,8 +3229,8 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
             self.check('location', self.kwargs['location'])
         ])
         self.cmd('group delete -n {group2} -y')
-
-class DeploymentWithBicepScenarioTest(LocalContextScenarioTest):
+        
+class BicepScenarioTest(ScenarioTest):
     def setup(self):
         super.setup()
         self._remove_bicep_cli()
@@ -3238,6 +3239,14 @@ class DeploymentWithBicepScenarioTest(LocalContextScenarioTest):
         super().tearDown()
         self._remove_bicep_cli()
 
+    def _remove_bicep_cli(self):
+        bicep_cli_path = _get_bicep_installation_path(platform.system())
+        if os.path.isfile(bicep_cli_path):
+            os.remove(bicep_cli_path)
+        print('removed')
+
+
+class DeploymentWithBicepScenarioTest(BicepScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicep')
     def test_resource_group_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -3315,24 +3324,11 @@ class DeploymentWithBicepScenarioTest(LocalContextScenarioTest):
         ])
 
 
-    def _remove_bicep_cli(self):
-        bicep_cli_path = self._get_bicep_cli_path()
-        if os.path.isfile(bicep_cli_path):
-            os.remove(bicep_cli_path)
-        
-
-    def _get_bicep_cli_path(self):
-        system = platform.system()
-        if system == "Windows":
-            home_dir = os.environ.get("USERPROFILE")
-            if not home_dir:
-                raise CLIError('Environment variable "USERPROFILE" does not exist')
-            return os.path.join(home_dir, r".bicep\bicep.exe")
-        if system in ("Linux", "Darwin"):
-            return "/usr/local/bin/bicep"
-
-        raise CLIError(f'The platform "{format(system)}" is not supported.')
-
+class BicepCommandScenarioTest(BicepScenarioTest):
+    def test_bicep_list_versions(self):
+        self.cmd('az bicep list-versions', checks=[
+            self.greater_than('length(@)', 0)
+        ])
 
 
 if __name__ == '__main__':
