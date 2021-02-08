@@ -321,6 +321,7 @@ parameters:
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
                          aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
+            confcom      - enable confcom addon, this will enable SGX device plugin by default.
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -405,6 +406,9 @@ parameters:
   - name: --appgw-watch-namespace
     type: string
     short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
+  - name: --enable-sgxquotehelper
+    type: bool
+    short-summary: Enable SGX quote helper for confcom addon.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -510,6 +514,9 @@ parameters:
   - name: --disable-ahub
     type: bool
     short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --enable-sgxquotehelper
+    type: bool
+    short-summary: Enable SGX quote helper for confcom addon.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2

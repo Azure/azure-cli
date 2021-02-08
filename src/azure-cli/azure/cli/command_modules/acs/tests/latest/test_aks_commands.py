@@ -3983,6 +3983,88 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         start_cmd = 'aks start --resource-group={resource_group} --name={name}'
         self.cmd(start_cmd)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_confcom_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity --service-principal xxxx --client-secret yyyy --generate-ssh-keys ' \
+                     '-a confcom -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ACCSGXDevicePlugin.enabled', True),
+            self.check('addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "true")
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_confcom_addon_helper_disabled(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity --service-principal xxxx --client-secret yyyy --generate-ssh-keys ' \
+                     '-a confcom --disable-sgxquotehelper -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ACCSGXDevicePlugin.enabled', True),
+            self.check('addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "false")
+        ])
+
+    @live_only()  # without live only fails with need az login
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_addons_confcom_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity --service-principal xxxx --client-secret yyyy --generate-ssh-keys ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ACCSGXDevicePlugin', None)
+        ])
+
+        enable_cmd = 'aks enable-addons --addons confcom --resource-group={resource_group} --name={name} -o json'
+        self.cmd(enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ACCSGXDevicePlugin.enabled', True),
+            self.check('addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "true")
+        ])
+
+    @live_only()  # without live only fails with need az login
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_disable_addons_confcom_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity --service-principal xxxx --client-secret yyyy --generate-ssh-keys ' \
+                     '-a confcom -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ACCSGXDevicePlugin.enabled', True),
+            self.check('addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "true")
+        ])
+
+        disable_cmd = 'aks disable-addons --addons confcom --resource-group={resource_group} --name={name} -o json'
+        self.cmd(disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ACCSGXDevicePlugin.enabled', False),
+            self.check('addonProfiles.ACCSGXDevicePlugin.config', None)
+        ])
     
     @classmethod
     def generate_ssh_keys(cls):
