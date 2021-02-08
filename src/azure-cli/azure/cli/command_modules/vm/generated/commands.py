@@ -10,23 +10,98 @@
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 
-# from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 
-def load_command_table(_):
-    pass
+def load_command_table(self, _):
 
-    # from ..generated._client_factory import cf_ssh_public_key
-    # vm_ssh_public_key = CliCommandType(
-    #     operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
-    #     client_factory=cf_ssh_public_key)
-    # with self.command_group('vm ssh-public-key', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
-    #     g.custom_command('list', 'vm_ssh_public_key_list')
-    #     g.custom_show_command('show', 'vm_ssh_public_key_show')
-    #     g.custom_command('create', 'vm_ssh_public_key_create')
-    #     g.custom_command('update', 'vm_ssh_public_key_update')
-    #     g.custom_command('delete', 'vm_ssh_public_key_delete', confirmation=True)
-    #     g.custom_command('generate-key-pair', 'vm_ssh_public_key_generate_key_pair')
-    #
-    # with self.command_group('vm', is_experimental=True):
-    #     pass
+    from ..generated._client_factory import cf_ssh_public_key
+    vm_ssh_public_key = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
+        client_factory=cf_ssh_public_key)
+    with self.command_group('vm ssh-public-key', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
+        g.custom_command('list', 'vm_ssh_public_key_list')
+        g.custom_show_command('show', 'vm_ssh_public_key_show')
+        g.custom_command('create', 'vm_ssh_public_key_create')
+        g.custom_command('delete', 'vm_ssh_public_key_delete', confirmation=True)
+        g.custom_command('generate-key-pair', 'vm_ssh_public_key_generate_key_pair')
+
+    from ..generated._client_factory import cf_virtual_machine
+    vm_virtual_machine = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._virtual_machines_operations#VirtualMachinesOperations.{}',
+        client_factory=cf_virtual_machine)
+    with self.command_group('vm virtual-machine', vm_virtual_machine, client_factory=cf_virtual_machine) as g:
+        g.custom_command('reimage', 'vm_virtual_machine_reimage', supports_no_wait=True)
+        g.custom_wait_command('wait', 'vm_ssh_public_key_show')
+
+    from ..generated._client_factory import cf_virtual_machine_scale_set
+    vm_virtual_machine_scale_set = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOp'
+        'erations.{}',
+        client_factory=cf_virtual_machine_scale_set)
+    with self.command_group('vm virtual-machine-scale-set', vm_virtual_machine_scale_set,
+                            client_factory=cf_virtual_machine_scale_set) as g:
+        g.custom_command('force-recovery-service-fabric-platform-update-domain-walk', 'vm_virtual_machine_scale_set_for'
+                         'ce_recovery_service_fabric_platform_update_domain_walk')
+        g.custom_command('redeploy', 'vm_virtual_machine_scale_set_redeploy', supports_no_wait=True)
+        g.custom_command('reimage-all', 'vm_virtual_machine_scale_set_reimage_all', supports_no_wait=True)
+        g.custom_wait_command('wait', 'vm_ssh_public_key_show')
+
+    from ..generated._client_factory import cf_virtual_machine_scale_set_vm_extension
+    vm_virtual_machine_scale_set_vm_extension = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._virtual_machine_scale_set_vm_extensions_operations#VirtualMachi'
+        'neScaleSetVmExtensionsOperations.{}',
+        client_factory=cf_virtual_machine_scale_set_vm_extension)
+    with self.command_group('vm virtual-machine-scale-set-vm-extension', vm_virtual_machine_scale_set_vm_extension,
+                            client_factory=cf_virtual_machine_scale_set_vm_extension) as g:
+        g.custom_command('list', 'vm_virtual_machine_scale_set_vm_extension_list')
+        g.custom_show_command('show', 'vm_virtual_machine_scale_set_vm_extension_show')
+        g.custom_command('create', 'vm_virtual_machine_scale_set_vm_extension_create', supports_no_wait=True)
+        g.custom_wait_command('wait', 'vm_virtual_machine_scale_set_vm_extension_show')
+
+    from ..generated._client_factory import cf_virtual_machine_scale_set_vms
+    vm_virtual_machine_scale_set_vms = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._virtual_machine_scale_set_vms_operations#VirtualMachineScaleSet'
+        'VMsOperations.{}',
+        client_factory=cf_virtual_machine_scale_set_vms)
+    with self.command_group('vm virtual-machine-scale-set-v-ms', vm_virtual_machine_scale_set_vms,
+                            client_factory=cf_virtual_machine_scale_set_vms) as g:
+        g.custom_command('redeploy', 'vm_virtual_machine_scale_set_v_ms_redeploy', supports_no_wait=True)
+        g.custom_command('reimage-all', 'vm_virtual_machine_scale_set_v_ms_reimage_all', supports_no_wait=True)
+        g.custom_command('retrieve-boot-diagnostic-data', 'vm_virtual_machine_scale_set_v_ms_retrieve_boot_diagnostic_d'
+                         'ata')
+        g.custom_wait_command('wait', 'vm_virtual_machine_scale_set_vm_extension_show')
+
+    from ..generated._client_factory import cf_disk_access
+    vm_disk_access = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._disk_accesses_operations#DiskAccessesOperations.{}',
+        client_factory=cf_disk_access)
+    with self.command_group('vm disk-access', vm_disk_access, client_factory=cf_disk_access) as g:
+        g.custom_command('delete', 'vm_disk_access_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('show-private-link-resource', 'vm_disk_access_show_private_link_resource')
+        g.custom_wait_command('wait', 'vm_virtual_machine_scale_set_vm_extension_show')
+
+    from ..generated._client_factory import cf_gallery_application
+    vm_gallery_application = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._gallery_applications_operations#GalleryApplicationsOperations.{'
+        '}',
+        client_factory=cf_gallery_application)
+    with self.command_group('vm gallery-application', vm_gallery_application,
+                            client_factory=cf_gallery_application) as g:
+        g.custom_command('list', 'vm_gallery_application_list')
+        g.custom_show_command('show', 'vm_gallery_application_show')
+        g.custom_command('create', 'vm_gallery_application_create', supports_no_wait=True)
+        g.custom_command('delete', 'vm_gallery_application_delete', supports_no_wait=True, confirmation=True)
+        g.custom_wait_command('wait', 'vm_gallery_application_show')
+
+    from ..generated._client_factory import cf_gallery_application_version
+    vm_gallery_application_version = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations._gallery_application_versions_operations#GalleryApplicationVersi'
+        'onsOperations.{}',
+        client_factory=cf_gallery_application_version)
+    with self.command_group('vm gallery-application-version', vm_gallery_application_version,
+                            client_factory=cf_gallery_application_version) as g:
+        g.custom_command('list', 'vm_gallery_application_version_list')
+
+    with self.command_group('vm', is_experimental=True):
+        pass
