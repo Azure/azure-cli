@@ -49,6 +49,8 @@ DEPENDENCIES = [
     'colorama~=0.4.1',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
+    'configobj',
+    'jinja2~=2.10',
     'knack==0.8.0rc2',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',

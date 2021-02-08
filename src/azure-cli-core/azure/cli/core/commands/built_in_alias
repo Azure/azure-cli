@@ -1,0 +1,38 @@
+[sa]
+command = storage account
+
+[storage account bsp]
+command = storage account blob-service-properties
+
+[storage account fsp]
+command = storage account file-service-properties
+
+[storage account service-properties show-blob]
+command = storage account blob-service-properties show
+
+[storage account service-properties show-file]
+command = storage account file-service-properties show
+
+[tsi]
+command = timeseriesinsights
+
+[timeseriesinsights env]
+command = timeseriesinsights environment
+
+[timeseriesinsights environment create]
+command = timeseriesinsights environment longterm create
+    [[--type {{type}}]]
+    command = timeseriesinsights environment {{type}} create
+
+[timeseriesinsights environment update]
+command = timeseriesinsights environment longterm update
+    [[--type {{type}}]]
+    command = timeseriesinsights environment {{type}} update
+
+#[configure]
+#command = config
+#    [[--list-defaults {{defaults_flag}}]]
+#    command = config get{% if defaults_flag!="false" %} defaults{% endif %}
+#    [[--list-defaults {{defaults_flag}} --scope {{scope}}]]
+#    command = config get {% if defaults_flag!="false" %} defaults{% endif %}{% if scope=='local'%} --local{% endif %}
+
