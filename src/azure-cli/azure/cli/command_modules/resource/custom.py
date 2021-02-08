@@ -323,7 +323,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
-            run_bicep_command("build", "--stdout", template_file)
+            run_bicep_command(["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -896,7 +896,7 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
     else:
         template_content = (
-            run_bicep_command("build", "--stdout", template_file)
+            run_bicep_command(["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -3181,7 +3181,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
 def install_bicep_cli(cmd, version=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version, check_upgrade=False)
+    ensure_bicep_installation(release_tag=version)
 
 def upgrade_bicep_cli(cmd):
     latest_release_tag = get_bicep_latest_release_tag()
@@ -3189,12 +3189,12 @@ def upgrade_bicep_cli(cmd):
 
 def build_bicep_file(cmd, file, stdout=None):
     if stdout:
-        print(run_bicep_command("build", file, "--stdout"))
+        print(run_bicep_command(["build", file, "--stdout"]))
     else:
-        run_bicep_command("build", file)
+        run_bicep_command(["build", file])
 
 def show_bicep_cli_version(cmd):
-    print(run_bicep_command("--version"))
+    print(run_bicep_command(["--version"], auto_install=False))
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()

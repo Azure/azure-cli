@@ -17,36 +17,43 @@ _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1
 _logger = get_logger(__name__)
 
 
-def run_bicep_command(*args):
-    bicep_executable_path = ensure_bicep_installation()
-    return _run_command(bicep_executable_path, *args)
+def run_bicep_command(args, auto_install=True, check_upgrade=True):
+    installation_path = _get_bicep_installation_path(platform.system())
+    installed = os.path.isfile(installation_path)
+
+    if not installed and not auto_install:
+        raise CLIError('Bicep CLI not found. Install it now by running "az bicep install".')
+
+    if installed and check_upgrade:
+        with suppress(CLIError):
+            # Checking upgrade should not raise CLIError.
+            # Users may continue using the current installed version.
+            installed_version = _get_bicep_installed_version(installation_path)
+            latest_release_tag = get_bicep_latest_release_tag()
+            latest_version = _extract_semver(get_bicep_latest_release_tag())
+            if installed_version and latest_version and semver.compare(installed_version, latest_version) < 0:
+                _logger.warning(
+                    'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
+                    latest_release_tag,
+                )
+
+    ensure_bicep_installation()
+
+    return _run_command(installation_path, args)
 
 
-def ensure_bicep_installation(release_tag=None, check_upgrade=True):
+def ensure_bicep_installation(release_tag=None):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
 
     if os.path.isfile(installation_path):
-        if release_tag:
-            installed_version = _get_bicep_installed_version(installation_path)
-            target_version = _extract_semver(release_tag)
-            if installed_version and target_version and semver.compare(installed_version, target_version) == 0:
-                # The requested version is already installed.
-                return installation_path
-        else:
-            if check_upgrade:
-                with suppress(CLIError):
-                    # Checking upgrade should not raise CLIError.
-                    # Users may continue using the current installed version.
-                    installed_version = _get_bicep_installed_version(installation_path)
-                    latest_release_tag = get_bicep_latest_release_tag()
-                    latest_version = _extract_semver(get_bicep_latest_release_tag())
-                    if installed_version and latest_version and semver.compare(installed_version, latest_version) < 0:
-                        _logger.warning(
-                            'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
-                            latest_release_tag,
-                        )
-            return installation_path
+        if not release_tag:
+            return
+
+        installed_version = _get_bicep_installed_version(installation_path)
+        target_version = _extract_semver(release_tag)
+        if installed_version and target_version and semver.compare(installed_version, target_version) == 0:
+            return
 
     installation_dir = os.path.dirname(installation_path)
     if not os.path.exists(installation_dir):
@@ -64,7 +71,6 @@ def ensure_bicep_installation(release_tag=None, check_upgrade=True):
             f.write(request.read())
 
         print(f'Successfully installed Bicep CLI to "{installation_path}".')
-        return installation_path
     except IOError as err:
         raise CLIError(f"Error while attempting to download Bicep CLI: {err}")
 
@@ -90,7 +96,7 @@ def get_bicep_latest_release_tag():
 
 
 def _get_bicep_installed_version(bicep_executable_path):
-    installed_version_output = _run_command(bicep_executable_path, "--version")
+    installed_version_output = _run_command(bicep_executable_path, ["--version"])
     return _extract_semver(installed_version_output)
 
 
@@ -123,8 +129,8 @@ def _extract_semver(text):
     return semver_match.group(0) if semver_match else None
 
 
-def _run_command(executable_path, *args):
-    process = subprocess.run([rf"{executable_path}"] + list(args), capture_output=True)
+def _run_command(bicep_installation_path, args):
+    process = subprocess.run([rf"{bicep_installation_path}"] + args, capture_output=True)
 
     try:
         process.check_returncode()
