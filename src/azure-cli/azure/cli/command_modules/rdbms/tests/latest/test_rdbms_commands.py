@@ -342,30 +342,33 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse
+    @ResourceGroupPreparer()
+    @ServerPreparer(engine_type='mariadb')
+    def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
+        self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
+        self._test_db_mgmt(resource_group, server, database_engine)
+        self._test_configuration_mgmt(resource_group, server, database_engine)
+        self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine, 'mariadbServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine)
+
+    # @AllowLargeResponse
     # @ResourceGroupPreparer()
-    # @ServerPreparer(engine_type='mariadb')
-    # def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
+    # @ServerPreparer(engine_type='mysql')
+    # def test_mysql_proxy_resources_mgmt(self, resource_group, server, database_engine):
     #     self._test_firewall_mgmt(resource_group, server, database_engine)
     #     self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
     #     self._test_db_mgmt(resource_group, server, database_engine)
     #     self._test_configuration_mgmt(resource_group, server, database_engine)
     #     self._test_log_file_mgmt(resource_group, server, database_engine)
-    #     self._test_private_link_resource(resource_group, server, database_engine, 'mariadbServer')
+    #     self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
     #     self._test_private_endpoint_connection(resource_group, server, database_engine)
+    #     self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
+    #     self._test_aad_admin(resource_group, server, database_engine)
 
-    @ResourceGroupPreparer()
-    @ServerPreparer(engine_type='mysql')
-    def test_mysql_proxy_resources_mgmt(self, resource_group, server, database_engine):
-        # self._test_firewall_mgmt(resource_group, server, database_engine)
-        # self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
-        # self._test_db_mgmt(resource_group, server, database_engine)
-        # self._test_configuration_mgmt(resource_group, server, database_engine)
-        # self._test_log_file_mgmt(resource_group, server, database_engine)
-        # self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
-        # self._test_private_endpoint_connection(resource_group, server, database_engine)
-        # self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
-        self._test_aad_admin(resource_group, server, database_engine)
-
+    # @AllowLargeResponse
     # @ResourceGroupPreparer()
     # @ServerPreparer(engine_type='postgres')
     # def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
