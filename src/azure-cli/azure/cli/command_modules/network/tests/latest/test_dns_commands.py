@@ -211,7 +211,7 @@ class DnsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_dns_if_none_match')
     def test_dns_if_none_match(self, resource_group):
 
-        self.kwargs['zone'] = 'myzone.com'
+        self.kwargs['zone'] = 'myzonex.com'
 
         self.cmd('network dns zone list')  # just verify is works (no Exception raised)
         self.cmd('network dns zone create -n {zone} -g {rg}')
