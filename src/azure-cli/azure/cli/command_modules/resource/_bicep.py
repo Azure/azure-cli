@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import os
 import re
 import platform
@@ -8,7 +13,7 @@ from contextlib import suppress
 import requests
 import semver
 
-from six.moves.urllib.request import urlopen
+from six.moves.urlib.request import urlopen
 from knack.log import get_logger
 from knack.util import CLIError
 
