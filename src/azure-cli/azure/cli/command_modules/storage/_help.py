@@ -60,6 +60,8 @@ examples:
     text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
   - name: Enable versioning for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-versioning -n mystorageaccount -g MyResourceGroup
+  - name: Set default version for incoming request for storage account 'mystorageaccount'.
+    text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """

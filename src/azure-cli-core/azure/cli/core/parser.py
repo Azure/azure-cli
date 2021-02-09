@@ -35,8 +35,7 @@ EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "To learn more about extensions, please visit "
                        "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
-                      "'https://aka.ms/cli_ref' to learn more")
+OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
 
 
 class IncorrectUsageError(CLIError):
@@ -162,7 +161,7 @@ class AzCliCommandParser(CLICommandParser):
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
         recommender = CommandRecommender(*command_arguments, message, cli_ctx)
         recommender.set_help_examples(self.get_examples(self.prog))
-        recommendation = recommender.recommend_a_command()
+        recommendations = recommender.provide_recommendations()
 
         az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
@@ -175,9 +174,8 @@ class AzCliCommandParser(CLICommandParser):
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
-        elif recommendation:
-            az_error.set_recommendation("Try this: '{}'".format(recommendation))
-            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
+        elif recommendations:
+            az_error.set_aladdin_recommendation(recommendations)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -304,7 +302,7 @@ class AzCliCommandParser(CLICommandParser):
             from azure.cli.core.util import should_disable_connection_verify
             try:
                 response = requests.get(
-                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
+                    'https://aka.ms/azExtCmdTree',
                     verify=(not should_disable_connection_verify()),
                     timeout=10)
             except Exception as ex:  # pylint: disable=broad-except
@@ -399,6 +397,7 @@ class AzCliCommandParser(CLICommandParser):
             caused_by_extension_not_installed = False
             command_name_inferred = self.prog
             error_msg = None
+            use_dynamic_install = 'no'
             if not self.command_source:
                 candidates = []
                 args = self.prog.split() + self._raw_arguments
@@ -412,9 +411,9 @@ class AzCliCommandParser(CLICommandParser):
                     if isinstance(ext_name, list):
                         if len(ext_name) > 1:
                             from knack.prompting import prompt_choice_list, NoTTYException
+                            prompt_msg = "The command requires the latest version of one of the following " \
+                                "extensions. You need to pick one to install:"
                             try:
-                                prompt_msg = "The command requires the latest version of one of the following " \
-                                    "extensions. You need to pick one to install:"
                                 choice_idx = prompt_choice_list(prompt_msg, ext_name)
                                 ext_name = ext_name[choice_idx]
                                 use_dynamic_install = 'yes_without_prompt'
@@ -507,17 +506,15 @@ class AzCliCommandParser(CLICommandParser):
             if not caused_by_extension_not_installed:
                 recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
                 recommender.set_help_examples(self.get_examples(command_name_inferred))
-                recommended_command = recommender.recommend_a_command()
-                if recommended_command:
-                    az_error.set_recommendation("Try this: '{}'".format(recommended_command))
+                recommendations = recommender.provide_recommendations()
+                if recommendations:
+                    az_error.set_aladdin_recommendation(recommendations)
 
                 # remind user to check extensions if we can not find a command to recommend
                 if isinstance(az_error, CommandNotFoundError) \
                         and not az_error.recommendations and self.prog == 'az' \
                         and use_dynamic_install == 'no':
                     az_error.set_recommendation(EXTENSION_REFERENCE)
-
-                az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
 
             az_error.print_error()
             az_error.send_telemetry()
