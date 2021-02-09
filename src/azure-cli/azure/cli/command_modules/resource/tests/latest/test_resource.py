@@ -760,8 +760,9 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
 
-        with self.assertRaises(IncorrectUsageError):
+        with self.assertRaises(IncorrectUsageError) as err:
             self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+            self.assertTrue("please provide --template-uri if --query-string is specified" in str(err.exception))
 
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
@@ -870,11 +871,18 @@ class TemplateSpecsTest(ScenarioTest):
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
-        ts_cnt = self.cmd('ts show -g {rg} --name {template_spec_name}').get_output_in_json()
-        assert len(ts_cnt) > 0
-        ts_cnt_by_id = self.cmd('ts show --template-spec {template_spec_id}').get_output_in_json()
-        assert len(ts_cnt_by_id) > 0
-        assert len(ts_cnt) == len(ts_cnt_by_id)
+        ts_parent = self.cmd('ts show -g {rg} --name {template_spec_name}').get_output_in_json()
+        assert len(ts_parent) > 0
+        self.assertTrue(ts_parent['versions'] is not None)
+        ts_parent_by_id = self.cmd('ts show --template-spec {template_spec_id}').get_output_in_json()
+        assert len(ts_parent_by_id) > 0
+        assert len(ts_parent) == len(ts_parent_by_id)
+
+        ts_version = self.cmd('ts show -g {rg} --name {template_spec_name} --version 1.0').get_output_in_json()
+        assert len(ts_version) > 0
+        ts_version_by_id = self.cmd('ts show --template-spec {template_spec_version_id}').get_output_in_json()
+        assert len(ts_version_by_id) > 0
+        assert len(ts_version_by_id) == len(ts_version_by_id)
 
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
@@ -965,11 +973,19 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location="westus")
+    def test_template_spec_export_error_handling(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'template_spec_name': 'CLITestTemplateSpecExport',
+            'output_folder': os.path.dirname(os.path.realpath(__file__)).replace('\\', '\\\\')
+        })
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
+            self.assertTrue('A template spec version must be specified for export.' in str(err.exception))
 
 class TemplateSpecsExportTest(LiveScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_export_template_spec(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location='westus')
+    def test_template_spec_export_version(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         dir_name = self.create_random_name('TemplateSpecExport', 30)
         dir_name2 = self.create_random_name('TemplateSpecExport', 30)
@@ -1017,8 +1033,7 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(_template_file))
         self.assertTrue(os.path.isfile(_artifactFile))
         self.assertTrue(os.path.isfile(_artifactFile1))
-        self.assertTrue(os.path.isfile(_artifactFile2))\
-
+        self.assertTrue(os.path.isfile(_artifactFile2))
 
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):

@@ -1816,7 +1816,10 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
         return rcf.template_spec_versions.get(resource_group_name, name, version)
-    return rcf.template_specs.get(resource_group_name, name)
+    retrieved_template = rcf.template_specs.get(resource_group_name, name, expand="versions")
+    version_names = list(retrieved_template.versions.keys())
+    retrieved_template.versions = version_names
+    return retrieved_template
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
@@ -1935,7 +1938,9 @@ def export_template_spec(cmd, output_folder, resource_group_name=None, name=None
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    exported_template = rcf.template_spec_versions.get(resource_group_name, name, version) if version else rcf.template_specs.get(resource_group_name, name)
+    if not version:
+        raise IncorrectUsageError('a template spec version must be specified for export')
+    exported_template = rcf.template_spec_versions.get(resource_group_name, name, version)
     from azure.cli.command_modules.resource._packing_engine import (unpack)
     return unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
 
