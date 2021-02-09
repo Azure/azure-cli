@@ -3708,7 +3708,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('timezoneId', timezone_id),
                                           JMESPathCheck('minimalTlsVersion', tls1_2),
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
-                                          JMESPathCheck('storageAccountType', backup_storage_redundancy_internal)]).get_output_in_json()
+                                          JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy)]).get_output_in_json()
 
         maintenance_configuration_id = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_EastUS2EUAP_MI_2'
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
