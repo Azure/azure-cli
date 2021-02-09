@@ -13,19 +13,34 @@ CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az i
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        result = super(PolicyUpdateResultTransform, self).__call__(poller)
+        from azure.cli.core.commands import _is_poller
+
+        if _is_poller(poller):
+            result = super(PolicyUpdateResultTransform, self).__call__(poller)
+        else:
+            result = poller
         return result.properties.authorization_policies
 
 
 class EndpointUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        result = super(EndpointUpdateResultTransform, self).__call__(poller)
+        from azure.cli.core.commands import _is_poller
+
+        if _is_poller(poller):
+            result = super(EndpointUpdateResultTransform, self).__call__(poller)
+        else:
+            result = poller
         return result.properties.routing.endpoints
 
 
 class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        result = super(RouteUpdateResultTransform, self).__call__(poller)
+        from azure.cli.core.commands import _is_poller
+
+        if _is_poller(poller):
+            result = super(RouteUpdateResultTransform, self).__call__(poller)
+        else:
+            result = poller
         return result.properties.routing.routes
 
 
@@ -35,8 +50,10 @@ class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-f
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         from azure.cli.core.util import CLIError
+        from azure.cli.core.commands import _is_poller
         try:
-            super(HubDeleteResultTransform, self).__call__(poller)
+            if _is_poller(poller):
+                super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:
             if 'not found' not in str(e):
                 raise e
