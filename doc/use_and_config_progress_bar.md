@@ -2,7 +2,7 @@ Progress Bar for Long Running Operation
 ==========================================
 
 ## How to try
-### Install pricate package
+### Install private package
 There are two ways to install the private package:
 1. Using msi (Windows platform)
     - Run `az --version` to check if there is existing azure cli installed.
