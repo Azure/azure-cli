@@ -983,6 +983,7 @@ class TemplateSpecsTest(ScenarioTest):
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
             self.assertTrue('A template spec version must be specified for export.' in str(err.exception))
 
+
 class TemplateSpecsExportTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location='westus')
     def test_template_spec_export_version(self, resource_group, resource_group_location):
