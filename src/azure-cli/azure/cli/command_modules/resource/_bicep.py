@@ -13,7 +13,7 @@ from contextlib import suppress
 import requests
 import semver
 
-from six.moves.urlib.request import urlopen
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError
 
