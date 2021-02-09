@@ -561,9 +561,9 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
             name=database_name,
             charset='utf8'
         )
-    resolve_poller(
-        database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
-        '{} Database Create/Update'.format(logging_name))
+        resolve_poller(
+            database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
+            '{} Database Create/Update'.format(logging_name))
 
 
 def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
