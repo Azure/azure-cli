@@ -18,6 +18,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
@@ -196,7 +197,15 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
+def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+                         use_secondary_region=None):
+    if use_secondary_region:
+        raise InvalidArgumentValueError(
+            """
+            --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
+            Please either remove the flag or query for any other backup-management-type.
+            """)
+
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)

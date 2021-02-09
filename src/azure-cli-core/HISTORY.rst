@@ -3,10 +3,14 @@
 Release History
 ===============
 
-2.18.0.1
+2.19.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
 
 2.18.0
 ++++++

@@ -347,7 +347,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('read_scale',
                      arg_type=read_scale_param_type)
 
-    arg_ctx.argument('read_replica_count',
+    arg_ctx.argument('high_availability_replica_count',
                      arg_type=read_replicas_param_type)
 
     creation_arg_group = 'Creation'
@@ -460,7 +460,7 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count',
+            'high_availability_replica_count',
             'storage_account_type'
         ])
 
@@ -534,6 +534,7 @@ def _configure_db_dw_create_params(
         # --read-replica-count was accidentally included in previous releases and
         # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
+        arg_ctx.ignore('high_availability_replica_count')
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
@@ -1425,6 +1426,49 @@ def load_arguments(self, _):
         c.argument('event_hub', event_hub_param_type)
 
     #####
+    #           sql server ms-support audit-policy
+    ######
+    with self.argument_context('sql server ms-support audit-policy update') as c:
+        c.argument('storage_account',
+                   options_list=['--storage-account'],
+                   arg_group=storage_arg_group,
+                   help='Name of the storage account.')
+
+        c.argument('storage_account_access_key',
+                   options_list=['--storage-key'],
+                   arg_group=storage_arg_group,
+                   help='Access key for the storage account.')
+
+        c.argument('storage_endpoint',
+                   arg_group=storage_arg_group,
+                   help='The storage account endpoint.')
+        _configure_security_policy_storage_params(c)
+
+        policy_arg_group = 'Policy'
+
+        c.argument('state',
+                   arg_group=policy_arg_group,
+                   help='Auditing policy state',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
+
+    #####
     #           sql server conn-policy
     #####
     with self.argument_context('sql server conn-policy') as c:
@@ -1614,7 +1658,8 @@ def load_arguments(self, _):
                 'timezone_id',
                 'tags',
                 'storage_account_type',
-                'yes'
+                'yes',
+                'maintenance_configuration_id'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1658,6 +1703,10 @@ def load_arguments(self, _):
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
 
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1674,6 +1723,10 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Change maintenance configuration for this managed instance.')
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(

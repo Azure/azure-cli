@@ -130,7 +130,7 @@ class FeatureFilter:
 
     :ivar str Name:
         Name of the filter
-    :ivar dict {str, str} parameters:
+    :ivar dict parameters:
         Name-Value pairs of parameters
     '''
 

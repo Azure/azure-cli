@@ -298,6 +298,8 @@ def process_action_group_detail_for_creation(namespace):
         'azure_function_receivers': [r for r in receivers if isinstance(r, AzureFunctionReceiver)],
         'tags': ns.get('tags') or None
     }
+    if hasattr(namespace, 'tags'):
+        del namespace.tags
 
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
 

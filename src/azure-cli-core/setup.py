@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.18.0.1"
+VERSION = "2.19.0.1"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -57,12 +57,16 @@ DEPENDENCIES = [
     'requests~=2.22',
     'six~=1.12',
     'pkginfo>=1.5.0.1',
-    'azure-mgmt-core==1.2.1',
+    'azure-mgmt-core>=1.2.0,<2.0.0',
     # Dependencies of the vendored subscription SDK
     # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
     'msrest>=0.5.0',
     'azure-common~=1.1',
 ]
+
+# dependencies for specific OSes
+if not sys.platform.startswith('cygwin'):
+    DEPENDENCIES.append('psutil~=5.7')
 
 TESTS_REQUIRE = [
     'mock'
