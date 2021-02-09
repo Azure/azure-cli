@@ -448,6 +448,16 @@ class TestUtils(unittest.TestCase):
         parent2.name.return_value = "bash"
         self.assertEqual(_get_parent_proc_name(), "pwsh")
 
+    def test_roughly_parse_command(self):
+        from azure.cli.core.util import roughly_parse_command
+        import shlex
+        self.assertEqual(roughly_parse_command(['login']), 'login')
+        self.assertEqual(roughly_parse_command(shlex.split('login --service-principal')), 'login')
+        self.assertEqual(roughly_parse_command(shlex.split('storage account --resource-group')), 'storage account')
+        self.assertEqual(roughly_parse_command(shlex.split('storage account -g')), 'storage account')
+        # Positional argument can't be distinguished
+        self.assertEqual(roughly_parse_command(shlex.split('config set output=table')), 'config set output=table')
+
 
 class TestBase64ToHex(unittest.TestCase):
 

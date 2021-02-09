@@ -17,3 +17,4 @@ def load_command_table(self, _):
 
     with self.command_group('demo', deprecate_info=g.deprecate(hide=True)) as g:
         g.custom_command('style', 'demo_style')
+        g.custom_command('hint', 'demo_hint')
