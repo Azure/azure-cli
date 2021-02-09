@@ -273,9 +273,9 @@ def load_command_table(self, _):
                          validator=process_vm_create_namespace,
                          exception_handler=handle_template_based_exception,
                          progress=InfiniteProgressBar(self.cli_ctx))
-        g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
-        g.command('deallocate', 'deallocate', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('convert', 'begin_convert_to_managed_disks', min_api='2016-04-30-preview')
+        g.command('deallocate', 'begin_deallocate', supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.command('generalize', 'generalize', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)

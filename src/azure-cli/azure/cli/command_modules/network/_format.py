@@ -101,7 +101,10 @@ def transform_vpn_connection(result):
 
 
 def transform_vnet_create_output(result):
-    return {'newVNet': result.result()}
+    try:
+        return {'newVNet': result.result()}
+    except AttributeError:
+        return {'newVNet': result}
 
 
 def transform_vnet_table_output(result):
@@ -123,7 +126,10 @@ def transform_vnet_table_output(result):
 
 
 def transform_public_ip_create_output(result):
-    return {'publicIp': result.result()}
+    try:
+        return {'publicIp': result.result()}
+    except AttributeError:
+        return {'publicIp': result}
 
 
 def transform_traffic_manager_create_output(result):
@@ -132,12 +138,18 @@ def transform_traffic_manager_create_output(result):
 
 def transform_nic_create_output(result):
     if result:
-        return {'NewNIC': result.result()}
+        try:
+            return {'NewNIC': result.result()}
+        except AttributeError:
+            return {'NewNIC': result}
     return None
 
 
 def transform_nsg_create_output(result):
-    return {'NewNSG': result.result()}
+    try:
+        return {'NewNSG': result.result()}
+    except AttributeError:
+        return {'NewNSG': result}
 
 
 def transform_nsg_rule_table_output(result):
