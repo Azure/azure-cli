@@ -115,6 +115,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
+            c.argument('configuration_name', options_list=['--name', '-n'], help='The name of the configuration')
             c.ignore('source')
 
         with self.argument_context('{} server wait'.format(command_group)) as c:
@@ -133,7 +134,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', id_part=None, help='Name of the Server.')
 
         with self.argument_context('{} db'.format(command_group)) as c:
-            c.argument('database_name', options_list=['--name', '-n'])
+            c.argument('database_name', options_list=['--name', '-n'], help='The name of the database')
+            c.argument('charset', options_list=['--charset'], help='The charset of the database')
+            c.argument('collation', options_list=['--collation'], help='The collation of the database')
 
         with self.argument_context('{} db list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, help='Name of the Server.')
@@ -421,17 +424,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         if command_group == "mysql":
             with self.argument_context('{} flexible-server db'.format(command_group)) as c:
                 c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the server.')
-                c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+                c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
 
             with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
-                c.argument('database_name', arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+                c.argument('charset', options_list=['--charset'], help='The charset of the database')
+                c.argument('collation', options_list=['--collation'], help='The collation of the database')
+                c.argument('database_name', arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
 
             with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
                 c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-                c.argument('database_name', id_part=None, arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+                c.argument('database_name', id_part=None, arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
 
             with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
-                c.argument('database_name', arg_type=database_name_getter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+                c.argument('database_name', arg_type=database_name_getter_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
                 c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
@@ -440,7 +445,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The login username of the administrator.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The login password of the administrator.')
-            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')

@@ -38,7 +38,7 @@ def get_mariadb_management_client(cli_ctx, **_):
         return MariaDBManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MariaDBManagementClient)
 
@@ -66,7 +66,7 @@ def get_mysql_management_client(cli_ctx, **_):
         return MySQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
@@ -94,7 +94,7 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
         return MySQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
@@ -122,7 +122,7 @@ def get_postgresql_management_client(cli_ctx, **_):
         return PostgreSQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
@@ -149,7 +149,7 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
         return PostgreSQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credentials=credentials)
+            credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 

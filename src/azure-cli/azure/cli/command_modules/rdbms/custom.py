@@ -524,7 +524,7 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
     return instance
 
 
-def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_rule_name, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint):
+def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_rule_name, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint=None):
     if isinstance(client, MySqlVirtualNetworkRulesOperations):
         parameters = mysql.models.VirtualNetworkRule(
             name=virtual_network_rule_name,
@@ -591,7 +591,7 @@ def _configuration_update(client, resource_group_name, server_name, configuratio
     return client.begin_create_or_update(resource_group_name, server_name, configuration_name, parameters)
 
 
-def _db_create(client, resource_group_name, server_name, database_name, charset, collation):
+def _db_create(client, resource_group_name, server_name, database_name, charset=None, collation=None):
 
     if isinstance(client, MySqlDatabasesOperations):
         parameters = mysql.models.Database(
