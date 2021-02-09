@@ -17,7 +17,7 @@ from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperati
 from azure.mgmt.rdbms.mysql.operations._virtual_network_rules_operations import VirtualNetworkRulesOperations as MySqlVirtualNetworkRulesOperations
 from azure.mgmt.rdbms.mysql.operations._configurations_operations import ConfigurationsOperations as MySqlConfigurationsOperations
 from azure.mgmt.rdbms.mysql.operations._firewall_rules_operations import FirewallRulesOperations as MySqlFirewallRulesOperations
-from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
+
 from azure.mgmt.rdbms.mysql.operations._databases_operations import DatabasesOperations as MySqlDatabasesOperations
 from azure.mgmt.rdbms.mysql.operations._server_keys_operations import ServerKeysOperations as MySqlServerKeysOperations
 from azure.mgmt.rdbms.mysql.operations._private_endpoint_connections_operations import PrivateEndpointConnectionsOperations as MySqlPrivateEndpointConnectionsOperations
@@ -28,6 +28,7 @@ from azure.mgmt.rdbms.postgresql.operations._databases_operations import Databas
 from azure.mgmt.rdbms.postgresql.operations._server_keys_operations import ServerKeysOperations as PostgreSqlServerKeysOperations
 from azure.mgmt.rdbms.postgresql.operations._private_endpoint_connections_operations import PrivateEndpointConnectionsOperations as PostgreSqlPrivateEndpointConnectionsOperations
 from azure.mgmt.rdbms.postgresql.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as PostgreSQLLocationOperations
+from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
 from azure.mgmt.rdbms.mariadb.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as MariaDBLocationOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, cf_mysql_db, cf_mariadb_db, \
     get_postgresql_management_client, cf_postgres_check_resource_availability_sterling, \
@@ -722,14 +723,16 @@ def server_key_create(client, resource_group_name, server_name, kid):
 
     if isinstance(client, MySqlServerKeysOperations):
         parameters = mysql.models.ServerKey(
-            uri=kid
+            uri=kid,
+            server_key_type="AzureKeyVault"
         )
     elif isinstance(client, PostgreSqlServerKeysOperations):
         parameters = postgresql.models.ServerKey(
-            uri=kid
+            uri=kid,
+            server_key_type="AzureKeyVault"
         )
 
-    return client.begin_create_or_update(resource_group_name, key_name, server_name, parameters)
+    return client.begin_create_or_update(server_name, key_name, resource_group_name, parameters)
 
 
 def server_key_get(client, resource_group_name, server_name, kid):

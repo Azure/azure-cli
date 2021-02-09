@@ -328,7 +328,7 @@ def load_command_table(self, _):
                                  custom_func_name='_firewall_rule_update_custom_func')
 
     with self.command_group('postgres server firewall-rule', postgres_firewall_rule_sdk,
-                            client_factory=cf_mariadb_firewall_rules, custom_command_type=rdbms_custom) as g:
+                            client_factory=cf_postgres_firewall_rules, custom_command_type=rdbms_custom) as g:
         g.custom_command('create', '_firewall_rule_create')
         g.command('delete', 'begin_delete', confirmation=True)
         g.show_command('show', 'get')
