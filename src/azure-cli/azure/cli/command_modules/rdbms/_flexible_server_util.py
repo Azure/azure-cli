@@ -211,9 +211,11 @@ def _parse_list_skus(result, database_engine):
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
+    iops_dict = {}
     for tier_info in tiers:
         tier_name = tier_info.name
         tier_dict = {}
+        sku_iops_dict = {}
 
         skus = set()
         versions = set()
@@ -221,6 +223,8 @@ def _parse_list_skus(result, database_engine):
             versions.add(version.name)
             for vcores in version.supported_vcores:
                 skus.add(vcores.name)
+                if database_engine == 'mysql':
+                    sku_iops_dict[vcores.name] = vcores.additional_properties['supportedIOPS']
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 
@@ -229,6 +233,7 @@ def _parse_list_skus(result, database_engine):
             tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
             tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
                                           int(storage_info.max_storage_size.storage_size_mb) // 1024)
+            iops_dict[tier_name] = sku_iops_dict
         elif database_engine == 'postgres':
             storage_sizes = set()
             for size in storage_info.supported_storage_mb:
@@ -237,6 +242,8 @@ def _parse_list_skus(result, database_engine):
 
         tiers_dict[tier_name] = tier_dict
 
+    if database_engine == 'mysql':
+        return tiers_dict, iops_dict
     return tiers_dict
 
 
