@@ -5,6 +5,7 @@
 
 import os
 import re
+import stat
 import platform
 import subprocess
 
@@ -26,10 +27,12 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
     installation_path = _get_bicep_installation_path(platform.system())
     installed = os.path.isfile(installation_path)
 
-    if not installed and not auto_install:
-        raise CLIError('Bicep CLI not found. Install it now by running "az bicep install".')
-
-    if installed and check_upgrade:
+    if not installed:
+        if auto_install:
+            ensure_bicep_installation()
+        else:
+            raise CLIError('Bicep CLI not found. Install it now by running "az bicep install".')
+    elif check_upgrade:
         with suppress(CLIError):
             # Checking upgrade should not raise CLIError.
             # Users may continue using the current installed version.
@@ -41,8 +44,6 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
                     'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
                     latest_release_tag,
                 )
-
-    ensure_bicep_installation()
 
     return _run_command(installation_path, args)
 
@@ -74,6 +75,8 @@ def ensure_bicep_installation(release_tag=None):
         request = urlopen(_get_bicep_download_url(system, release_tag))
         with open(installation_path, "wb") as f:
             f.write(request.read())
+
+        os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
         print(f'Successfully installed Bicep CLI to "{installation_path}".')
     except IOError as err:
@@ -135,7 +138,7 @@ def _extract_semver(text):
 
 
 def _run_command(bicep_installation_path, args):
-    process = subprocess.run([rf"{bicep_installation_path}"] + args, capture_output=True)
+    process = subprocess.run([rf"{bicep_installation_path}"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     try:
         process.check_returncode()
