@@ -100,6 +100,8 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
+    if extension_name == 'rdbms-connect':
+        _install_deps_for_psycopg2()
     ext_file = None
     if is_url:
         # Download from URL
@@ -165,6 +167,75 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     logger.debug('Saved the whl to %s', dst)
 
     return extension_name
+
+
+def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
+    # Below system dependencies are required to install the psycopg2 dependency for Linux and macOS
+    import platform
+    import subprocess
+    from azure.cli.core.util import get_linux_distro
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    installer = os.getenv(_ENV_AZ_INSTALLER)
+    system = platform.system()
+    if system == 'Darwin':
+        subprocess.call(['xcode-select', '--install'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if installer != 'HOMEBREW':
+            from shutil import which
+            if which('brew') is None:
+                logger.warning('You may need to install postgresql with homebrew first before you install this extension.')
+                return
+        exit_code = subprocess.call(['brew', 'list', 'postgresql'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if exit_code != 0:
+            update_cmd = ['brew', 'install', 'postgresql']
+            logger.warning('This extension depends on postgresql and it will be installed first.')
+            logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
+            subprocess.call(update_cmd)
+        # Fix the issue of -lssl not found during building psycopg2
+        if os.environ.get('LIBRARY_PATH') is None:
+            os.environ['LIBRARY_PATH'] = '/usr/local/opt/openssl/lib/'
+        else:
+            os.environ['LIBRARY_PATH'] = os.pathsep.join([
+                os.environ.get('LIBRARY_PATH'),
+                '/usr/local/opt/openssl/lib/'
+            ])
+    elif system == 'Linux':
+        distname, _ = get_linux_distro()
+        distname = distname.lower().strip()
+        if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
+            from azure.cli.core.util import in_cloud_console
+            if in_cloud_console():
+                raise CLIError("This extension is not supported in Cloud Shell as you do not have permission to install extra dependencies.")
+            exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if exit_code != 0:
+                logger.warning('This extension depends on gcc, libpq-dev, python3-dev and they will be installed first.')
+                apt_update_cmd = 'apt-get update'.split()
+                apt_install_cmd = 'apt-get install -y gcc libpq-dev python3-dev'.split()
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    apt_update_cmd.insert(0, 'sudo')
+                    apt_install_cmd.insert(0, 'sudo')
+                exit_code = subprocess.call(apt_update_cmd, True)
+                if exit_code == 0:
+                    logger.debug("Install dependencies with '%s'", " ".join(apt_install_cmd))
+                    subprocess.call(apt_install_cmd, True)
+        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
+            if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                yum_install_cmd = 'yum install -y gcc postgresql-devel python3-devel'.split()
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    yum_install_cmd.insert(0, 'sudo')
+                logger.debug("Install dependencies with '%s'", " ".join(yum_install_cmd))
+                logger.warning('This extension depends on gcc, postgresql-devel, python3-devel and they will be installed first if not exist.')
+                subprocess.call(yum_install_cmd)
+            elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                zypper_refresh_cmd = ['zypper', 'refresh']
+                zypper_install_cmd = 'zypper install -y gcc postgresql-devel python3-devel'.split()
+                logger.warning('This extension depends on gcc postgresql-devel, python3-devel and they will be installed first if not exist.')
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    zypper_refresh_cmd.insert(0, 'sudo')
+                    zypper_install_cmd.insert(0, 'sudo')
+                exit_code = subprocess.call(zypper_refresh_cmd)
+                if exit_code == 0:
+                    logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
+                    subprocess.call(zypper_install_cmd)
 
 
 def is_valid_sha256sum(a_file, expected_sum):

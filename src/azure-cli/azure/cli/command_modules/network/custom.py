@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
-
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 logger = get_logger(__name__)
 
@@ -154,7 +154,10 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                private_link_ip_address=None,
                                private_link_subnet='PrivateLinkDefaultSubnet',
                                private_link_subnet_prefix='10.0.1.0/24',
-                               private_link_primary=None):
+                               private_link_primary=None,
+                               trusted_client_cert=None,
+                               ssl_profile=None,
+                               ssl_profile_id=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -226,7 +229,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         firewall_policy, max_capacity, user_assigned_identity,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
-        private_link_subnet_id)
+        private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id)
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
@@ -632,6 +635,96 @@ def remove_ag_private_link(cmd,
                        resource_group_name,
                        application_gateway_name,
                        appgw)
+
+
+# region application-gateway trusted-client-certificates
+def add_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
+                                   client_cert_data, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    ApplicationGatewayTrustedClientCertificate = cmd.get_models('ApplicationGatewayTrustedClientCertificate')
+    cert = ApplicationGatewayTrustedClientCertificate(name=client_cert_name, data=client_cert_data)
+    appgw.trusted_client_certificates.append(cert)
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
+def list_trusted_client_certificate(cmd, resource_group_name, application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    return appgw.trusted_client_certificates
+
+
+def remove_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
+                                      no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    for cert in appgw.trusted_client_certificates:
+        if cert.name == client_cert_name:
+            appgw.trusted_client_certificates.remove(cert)
+            break
+    else:
+        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
+# endregion
+
+
+# region application-gateway ssl-profile
+def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
+                    policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
+                    trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    (SubResource,
+     ApplicationGatewaySslPolicy,
+     ApplicationGatewayClientAuthConfiguration,
+     ApplicationGatewaySslProfile) = cmd.get_models('SubResource',
+                                                    'ApplicationGatewaySslPolicy',
+                                                    'ApplicationGatewayClientAuthConfiguration',
+                                                    'ApplicationGatewaySslProfile')
+    sr_trusted_client_certificates = [SubResource(id=item) for item in
+                                      trusted_client_certificates] if trusted_client_certificates else None
+    ssl_policy = ApplicationGatewaySslPolicy(policy_name=policy_name, policy_type=policy_type,
+                                             min_protocol_version=min_protocol_version,
+                                             cipher_suites=cipher_suites, disabled_ssl_protocols=disabled_ssl_protocols)
+    client_auth = ApplicationGatewayClientAuthConfiguration(
+        verify_client_cert_issuer_dn=client_auth_configuration) if client_auth_configuration else None
+    ssl_profile = ApplicationGatewaySslProfile(trusted_client_certificates=sr_trusted_client_certificates,
+                                               ssl_policy=ssl_policy, client_auth_configuration=client_auth,
+                                               name=ssl_profile_name)
+    appgw.ssl_profiles.append(ssl_profile)
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
+def list_ssl_profile(cmd, resource_group_name, application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    return appgw.ssl_profiles
+
+
+def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    for profile in appgw.ssl_profiles:
+        if profile.name == ssl_profile_name:
+            appgw.ssl_profiles.remove(profile)
+            break
+    else:
+        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
+# endregion
 
 
 def add_ag_private_link_ip(cmd,

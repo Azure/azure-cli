@@ -19,6 +19,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -234,6 +235,12 @@ def read_base_64_file(filename):
 def validate_cert(namespace):
     if namespace.cert_data:
         namespace.cert_data = read_base_64_file(namespace.cert_data)
+
+
+def validate_trusted_client_cert(namespace):
+    if namespace.client_cert_data is None or namespace.client_cert_name is None:
+        raise RequiredArgumentMissingError('To use this cmd, you must specify both name and data')
+    namespace.client_cert_data = read_base_64_file(namespace.client_cert_data)
 
 
 def validate_ssl_cert(namespace):
