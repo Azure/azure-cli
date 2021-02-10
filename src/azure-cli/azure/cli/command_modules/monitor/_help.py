@@ -1337,6 +1337,11 @@ short-summary: Manage data export ruls for log analytics workspace.
 helps['monitor log-analytics workspace data-export create'] = """
 type: command
 short-summary: Create a data export rule for a given workspace.
+parameters:
+  - name: --tables -t
+    short-summary: An array of tables to export.
+    populator-commands:
+      - "`az monitor log-analytics workspace table list`"
 examples:
   - name: Create a data export rule for a given workspace.
     text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
@@ -1345,6 +1350,11 @@ examples:
 helps['monitor log-analytics workspace data-export update'] = """
 type: command
 short-summary: Update a data export rule for a given workspace.
+parameters:
+  - name: --tables -t
+    short-summary: An array of tables to export.
+    populator-commands:
+      - "`az monitor log-analytics workspace table list`"
 examples:
   - name: Update a data export rule for a given workspace.
     text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} -t {table_name} --enable false
