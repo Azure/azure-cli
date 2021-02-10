@@ -103,6 +103,93 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
+    def test_storage_blob_azcopy_sync_oauth(self, storage_account, test_dir):
+        container = self.create_random_name(prefix='container', length=20)
+
+        self.oauth_cmd('storage container create -n {} --account-name {} '.format(container, storage_account), checks=[
+            JMESPathCheck('created', True)])
+
+        # sync directory
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+
+        self.oauth_cmd('storage blob delete-batch -s {} --account-name {}'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
+        # resync container
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+
+        # update file
+        with open(os.path.join(test_dir, 'readme'), 'w') as f:
+            f.write('updated.')
+        # sync one blob
+        self.oauth_cmd('storage blob list -c {} --account-name {} --prefix readme'.format(
+            container, storage_account), checks=JMESPathCheck('[0].properties.contentLength', 87))
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {} -d readme'.format(
+            os.path.join(test_dir, 'readme'), container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {} --prefix readme'.format(
+            container, storage_account), checks=JMESPathCheck('[0].properties.contentLength', 8))
+
+        # delete one file and sync
+        os.remove(os.path.join(test_dir, 'readme'))
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 40))
+
+        # delete one folder and sync
+        shutil.rmtree(os.path.join(test_dir, 'apple'))
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 30))
+
+        # sync with another folder
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            os.path.join(test_dir, 'butter'), container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 20))
+
+        # empty the folder and sync
+        shutil.rmtree(os.path.join(test_dir, 'butter'))
+        shutil.rmtree(os.path.join(test_dir, 'duff'))
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
+        # sync a subset of files in a directory
+        with open(os.path.join(test_dir, 'test.json'), 'w') as f:
+            f.write('updated.')
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {} --include-pattern *.json'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 1))
+
+        self.oauth_cmd('storage blob delete-batch -s {} --account-name {}'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
+        # sync with guessing content-type
+        cur = os.path.split(os.path.realpath(__file__))[0]
+        source = os.path.join(cur, "testdir")
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {} ', source, container, storage_account)
+
+        self.oauth_cmd('storage blob show -n "sample.js" -c {} --account-name {} ', container, storage_account)\
+            .assert_with_checks(JMESPathCheck("name", "sample.js"),
+                                JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_remove(self, resource_group, storage_account_info, test_dir):
         storage_account, _ = storage_account_info
         container = self.create_container(storage_account_info)
