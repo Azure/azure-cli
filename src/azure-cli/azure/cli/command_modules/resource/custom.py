@@ -3190,11 +3190,15 @@ def upgrade_bicep_cli(cmd):
     ensure_bicep_installation(release_tag=latest_release_tag)
 
 
-def build_bicep_file(cmd, file, stdout=None):
+def build_bicep_file(cmd, files, stdout=None):
     if stdout:
-        print(run_bicep_command(["build", file, "--stdout"]))
+        print(run_bicep_command(["build"] + files + ["--stdout"]))
     else:
-        run_bicep_command(["build", file])
+        run_bicep_command(["build"] + files)
+
+
+def decompile_bicep_file(cmd, files):
+    run_bicep_command(["decompile"] + files)
 
 
 def show_bicep_cli_version(cmd):
