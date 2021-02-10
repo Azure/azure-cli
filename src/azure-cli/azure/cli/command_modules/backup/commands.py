@@ -11,7 +11,8 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_containers_cf, protection_intent_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
-    transform_recovery_point_list, transform_container, transform_item, transform_protectable_item_list, transform_job)
+    transform_recovery_point_list, transform_container, transform_item, transform_protectable_item_list, transform_job,
+    transform_log_chain_list)
 
 
 # pylint: disable=line-too-long
@@ -88,7 +89,7 @@ def load_command_table(self, _):
     with self.command_group('backup recoverypoint', backup_custom_base, client_factory=recovery_points_cf) as g:
         g.show_command('show', 'show_recovery_point')
         g.command('list', 'list_recovery_points', table_transformer=transform_recovery_point_list)
-        g.show_command('show-log-chain', 'list_recovery_points')
+        g.show_command('show-log-chain', 'list_recovery_points', table_transformer=transform_log_chain_list)
 
     with self.command_group('backup restore', backup_custom_base, client_factory=restores_cf) as g:
         g.command('restore-disks', 'restore_disks')
