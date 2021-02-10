@@ -2847,7 +2847,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                                    'To change confcom configuration, run '
                                    f'"az aks disable-addons -a confcom -n {name} -g {resource_group_name}" '
                                    'before enabling it again.')
-                addon_profile = ManagedClusterAddonProfile(enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+                addon_profile = ManagedClusterAddonProfile(enabled=True,
+                                    config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
                 if enable_sgxquotehelper:
                     addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[addon] = addon_profile
