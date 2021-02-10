@@ -117,12 +117,15 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
         return azcopy_creds
 
     # oauth mode
-    token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
-    try:
-        token_info = _unserialize_non_msi_token_payload(token_info)
-    except KeyError:  # unserialized MSI token payload
-        raise Exception('MSI auth not yet supported.')
-    return AzCopyCredentials(token_info=token_info)
+    if client.token_credential:
+        token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+        try:
+            token_info = _unserialize_non_msi_token_payload(token_info)
+        except KeyError:  # unserialized MSI token payload
+            raise Exception('MSI auth not yet supported.')
+        return AzCopyCredentials(token_info=token_info)
+
+    return None
 
 
 def storage_client_auth_for_azcopy(client, service):
