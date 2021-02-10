@@ -1303,7 +1303,7 @@ type: command
 short-summary: Create a saved search for a given workspace.
 examples:
   - name: Create a saved search for a given workspace.
-    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa myfun --fp "a:string = value"
+    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
 """
 
 helps['monitor log-analytics workspace saved-search update'] = """
@@ -1311,7 +1311,7 @@ type: command
 short-summary: Update a saved search for a given workspace.
 examples:
   - name: Update a saved search for a given workspace.
-    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa myfun --fp "a:string = value"
+    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
 """
 
 helps['monitor log-analytics workspace saved-search list'] = """
