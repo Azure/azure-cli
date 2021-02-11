@@ -9,12 +9,13 @@ import stat
 import platform
 import subprocess
 
+from pathlib import Path
 from contextlib import suppress
 
 import requests
 import semver
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from six.moves.urllib.request import urlopen
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -110,6 +111,7 @@ def _get_bicep_installed_version(bicep_executable_path):
 
 def _get_bicep_download_url(system, release_tag):
     download_url = f"https://github.com/Azure/bicep/releases/download/{release_tag}/{{}}"
+
     if system == "Windows":
         return download_url.format("bicep-win-x64.exe")
     if system == "Linux":
@@ -121,13 +123,12 @@ def _get_bicep_download_url(system, release_tag):
 
 
 def _get_bicep_installation_path(system):
+    installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
+
     if system == "Windows":
-        home_dir = os.environ.get("USERPROFILE")
-        if not home_dir:
-            raise CLIError('Environment variable "USERPROFILE" does not exist')
-        return os.path.join(home_dir, r".bicep\bicep.exe")
+        return os.path.join(installation_folder, "bicep.exe")
     if system in ("Linux", "Darwin"):
-        return "/usr/local/bin/bicep"
+        return os.path.join(installation_folder, "bicep")
 
     raise CLIError(f'The platform "{format(system)}" is not supported.')
 
