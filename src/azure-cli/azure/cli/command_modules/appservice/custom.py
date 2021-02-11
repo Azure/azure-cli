@@ -3635,7 +3635,7 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
         subnet_id_parts = parse_resource_id(subnet)
         vnet_name = subnet_id_parts['name']
         if not (vnet_name.lower() == vnet.lower() or subnet.startswith(vnet)):
-            logger.warning('Ignoring vnet as subnet id is valid.')
+            logger.warning('Subnet ID is valid. Ignoring vNet input.')
         return subnet
 
     vnet_is_id = is_valid_resource_id(vnet)
