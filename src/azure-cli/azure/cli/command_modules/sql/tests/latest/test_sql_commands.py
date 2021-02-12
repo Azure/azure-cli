@@ -3667,7 +3667,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
-    def test_sql_database_maintenance(self, resource_group, resource_group_location, server):
+    def test_sql_db_maintenance(self, resource_group, resource_group_location, server):
         database_name_1 = "createDb1maintenance"
         database_name_2 = "createDb2maintenance"
         database_name_3 = "updateEnrollAndSwitchDb1maintenance"
@@ -3713,7 +3713,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.DEFAULT_MC))])
 
         # Test enrolling into maintenance
-        self.cmd('sql db update -g {} --server {} --name {} --edition {} --capacity {} --maint-config-id {}'
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --capacity {} -m {}'
                  .format(resource_group, server, database_name_3, "Premium", 125, self.MDB2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -3727,7 +3727,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB2))])
 
         # Test switching maintenance and enrolling into zone redundancy
-        self.cmd('sql db update -g {} --server {} --name {} --maint-config-id {} --zone-redundant'
+        self.cmd('sql db update -g {} --server {} --name {} -m {} --zone-redundant'
                  .format(resource_group, server, database_name_3, self._get_full_maintenance_id(self.MDB1)),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -3742,7 +3742,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
-    def test_sql_pool_maintenance(self, resource_group, resource_group_location, server):
+    def test_sql_elastic_pool_maintenance(self, resource_group, resource_group_location, server):
         pool_name_1 = "createDb1maintenance"
         pool_name_2 = "createDb2maintenance"
         pool_name_3 = "updateEnrollAndSwitchDb1maintenance"
@@ -3782,7 +3782,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.DEFAULT_MC))])
 
         # Test enrolling into maintenance
-        self.cmd('sql elastic-pool update -g {} --server {} --name {} --edition {} --maint-config-id {}'
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --edition {} -m {}'
                  .format(resource_group, server, pool_name_3, "Premium", self.MDB2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
