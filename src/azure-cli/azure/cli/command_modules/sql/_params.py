@@ -199,7 +199,7 @@ zone_redundant_param_type = CLIArgumentType(
     arg_type=get_three_state_flag())
 
 maintenance_configuration_id_param_type = CLIArgumentType(
-    options_list=['--maintenance-configuration', '--mc'],
+    options_list=['--maint-config-id', '-m'],
     help='Specified maintenance configuration id or name for this resource.')
 
 managed_instance_param_type = CLIArgumentType(
