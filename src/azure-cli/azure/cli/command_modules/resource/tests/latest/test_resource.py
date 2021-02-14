@@ -973,16 +973,6 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location="westus")
-    def test_template_spec_export_error_handling(self, resource_group, resource_group_location):
-        self.kwargs.update({
-            'template_spec_name': 'CLITestTemplateSpecExport',
-            'output_folder': os.path.dirname(os.path.realpath(__file__)).replace('\\', '\\\\')
-        })
-        with self.assertRaises(IncorrectUsageError) as err:
-            self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
-            self.assertTrue('A template spec version must be specified for export.' in str(err.exception))
-
 
 class TemplateSpecsExportTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location='westus')
@@ -1035,6 +1025,16 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(_artifactFile))
         self.assertTrue(os.path.isfile(_artifactFile1))
         self.assertTrue(os.path.isfile(_artifactFile2))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location="westus")
+    def test_template_spec_export_error_handling(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'template_spec_name': 'CLITestTemplateSpecExport',
+            'output_folder': os.path.dirname(os.path.realpath(__file__)).replace('\\', '\\\\')
+        })
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
+            self.assertTrue('A template spec version must be specified for export.' in str(err.exception))
 
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):
