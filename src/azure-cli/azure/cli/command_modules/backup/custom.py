@@ -471,6 +471,8 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
                          use_secondary_region=None):
+    if cmd.name.split()[2] == 'show-log-chain':
+        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
