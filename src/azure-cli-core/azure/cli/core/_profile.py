@@ -622,12 +622,16 @@ class Profile:
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
         """
+        from msal import ClientApplication
+        import posixpath
         account = self.get_subscription()
         username = account[_USER_ENTITY][_USER_NAME]
         tenant = account[_TENANT_ID] or 'common'
         _, refresh_token, _, _ = self.get_refresh_token()
-        certificate = self._creds_cache.retrieve_msal_token(tenant, scopes, data, refresh_token)
-        return username, certificate
+        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
+        app = ClientApplication(_CLIENT_ID, authority=authority)
+        result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
+        return username, result["access_token"]
 
     def get_refresh_token(self, resource=None,
                           subscription=None):
@@ -1071,18 +1075,6 @@ class CredsCache:
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
-    def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
-        """
-        This is added only for vmssh feature.
-        It is a temporary solution and will deprecate after MSAL adopted completely.
-        """
-        from azure.cli.core._msal import AdalRefreshTokenBasedClientApplication
-        tenant = tenant or 'organizations'
-        authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
-        app = AdalRefreshTokenBasedClientApplication(_CLIENT_ID, authority=authority)
-        result = app.acquire_token_silent(scopes, None, data=data, refresh_token=refresh_token)
-
-        return result["access_token"]
 
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()

@@ -50,7 +50,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack==0.8.0rc2',
-    'msal~=1.3',
+    'msal~=1.9',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT',
