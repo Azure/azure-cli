@@ -197,7 +197,7 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
                          use_secondary_region=None):
     if use_secondary_region:
         raise InvalidArgumentValueError(
@@ -205,6 +205,9 @@ def list_recovery_points(client, resource_group_name, vault_name, item, start_da
             --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
             Please either remove the flag or query for any other backup-management-type.
             """)
+
+    if cmd.name.split()[2] == 'show-log-chain':
+        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
 
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)

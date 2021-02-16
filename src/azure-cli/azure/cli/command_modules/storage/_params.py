@@ -20,7 +20,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
+                          get_api_version_type)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -432,6 +433,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    "than zero and less than Delete Retention Days.")
         c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
                    min_api='2019-06-01')
+        c.argument('default_service_version', options_list=['--default-service-version', '-d'],
+                   type=get_api_version_type(), min_api='2018-07-01',
+                   help="Indicate the default version to use for requests to the Blob service if an incoming request's "
+                        "version is not specified.")
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
