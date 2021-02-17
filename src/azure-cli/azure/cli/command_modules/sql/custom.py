@@ -413,6 +413,7 @@ def failover_group_update_common(
         grace_period = int(grace_period) * 60
         instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
 
+
 def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     '''
     Completes maintenance configuration id from short to full type if needed

@@ -39,6 +39,7 @@ managed_instance_name_prefix = 'clitestmi'
 instance_pool_name_prefix = 'clitestip'
 managed_instance_name_max_length = 20
 
+
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
                  admin_user='admin123', admin_password='SecretPassword123',
@@ -1209,6 +1210,7 @@ def _wait_until_first_backup_midb(self):
                       checks=[self.greater_than('length(@)', 0)])
 
         earliest_restore_date_string = db.json_value['earliestRestorePoint']
+
 
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
@@ -3656,6 +3658,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
+
 class SqlDBMaintenanceScenarioTest(ScenarioTest):
     DEFAULT_MC = "SQL_Default"
     MDB1 = "SQL_EastUS2_DB_1"
@@ -3803,6 +3806,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True),
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
+
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 

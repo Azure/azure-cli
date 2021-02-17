@@ -375,6 +375,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
+
 def _configure_db_dw_create_params(
         arg_ctx,
         engine,
