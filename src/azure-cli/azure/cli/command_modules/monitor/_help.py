@@ -1476,13 +1476,14 @@ examples:
   - name: Create a high CPU usage alert on several VMs with no actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
-            --condition "avg Percentage CPU > 90" --description "High CPU"
+            --condition "avg Percentage CPU > 90" --description "High CPU" --region westus
   - name: Create a dynamic CPU usage alert on several VMs with no actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
             --condition "avg Percentage CPU > dynamic medium 2 of 4 since 2020-10-01T10:23:00.000Z"
             --description "Dynamic CPU"
             --window-size 5m
+            --region westus
 
 """
 

@@ -126,9 +126,10 @@ def flexible_server_create(cmd, client,
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, restore_point_in_time,
-                            location=None, no_wait=False):
+                            source_server, restore_point_in_time=None,
+                            location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
+
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server_id = resource_id(
@@ -147,7 +148,9 @@ def flexible_server_restore(cmd, client,
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
-        location=location)
+        availability_zone=zone,
+        location=location,
+        server_name=server_name)
 
     # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server_id)
@@ -156,6 +159,11 @@ def flexible_server_restore(cmd, client,
         parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
+
+    if source_server_object.id.split('/')[4] != resource_group_name:
+        raise CLIError("Check if the source server exists in the same resource group you entered. \
+                        The source server and the restored server should be in the same resource group. ")
+
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
