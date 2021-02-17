@@ -30,7 +30,7 @@ from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
-    backup_protected_items_crr_cf)
+    backup_protected_items_crr_cf, protection_container_operation_results_cf)
 
 logger = get_logger(__name__)
 
@@ -106,27 +106,65 @@ def create_vault(client, vault_name, resource_group_name, location):
 def _force_delete_vault(cmd, vault_name, resource_group_name):
     logger.warning('Attemping to force delete vault: %s', vault_name)
     container_client = backup_protection_containers_cf(cmd.cli_ctx)
+    protection_containers_client = protection_containers_cf(cmd.cli_ctx)
     backup_item_client = backup_protected_items_cf(cmd.cli_ctx)
     item_client = protected_items_cf(cmd.cli_ctx)
     vault_client = vaults_cf(cmd.cli_ctx)
+    # delete the AzureIaasVM backup management type items
     containers = _get_containers(
         container_client, 'AzureIaasVM', 'Registered',
         resource_group_name, vault_name)
     for container in containers:
         container_name = container.name.rsplit(';', 1)[1]
         items = list_items(
-            cmd, backup_item_client, resource_group_name, vault_name, container_name)
+            cmd, backup_item_client, resource_group_name, vault_name, container.name)
         for item in items:
             item_name = item.name.rsplit(';', 1)[1]
             logger.warning("Deleting backup item '%s' in container '%s'",
                            item_name, container_name)
             disable_protection(cmd, item_client, resource_group_name, vault_name,
                                item, True)
+
+    # delete the AzureWorkload backup management type items
+    containers = _get_containers(
+        container_client, 'AzureWorkload', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items_sql = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureWorkload', 'SQLDataBase')
+        items_hana = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureWorkload',
+            'SAPHanaDatabase')
+        items = items_sql + items_hana
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            disable_protection(cmd, item_client, resource_group_name, vault_name,
+                               item, True)
+        _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
+
+    # delete the AzureStorage backup management type items
+    containers = _get_containers(
+        container_client, 'AzureStorage', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureStorage', 'AzureFileShare')
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            disable_protection(cmd, item_client, resource_group_name, vault_name,
+                               item, True)
+        _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
     # now delete the vault
     try:
         vault_client.delete(resource_group_name, vault_name)
-    except Exception:
-        raise CLIError("Vault cannot be deleted as there are existing resources within the vault")
+    except Exception as ex:
+        raise ex
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
@@ -793,6 +831,11 @@ def _get_containers(client, container_type, status, resource_group_name, vault_n
     return containers
 
 
+def _unregister_containers(cmd, client, resource_group_name, vault_name, container_name):
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
+    return _track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
+
+
 def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
     protection_containers_client = protection_containers_cf(cli_ctx)
 
@@ -1007,6 +1050,20 @@ def _track_backup_job(cli_ctx, result, vault_name, resource_group):
         job_id = operation_status.properties.job_id
         job_details = job_details_client.get(vault_name, resource_group, job_id)
         return job_details
+
+
+def _track_register_operation(cli_ctx, result, vault_name, resource_group, container_name):
+    protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
+
+    operation_id = _get_operation_id_from_header(result.response.headers['Location'])
+    result = protection_container_operation_results_client.get(vault_name, resource_group,
+                                                               fabric_name, container_name,
+                                                               operation_id, raw=True)
+    while result.response.status_code == 202:
+        time.sleep(1)
+        result = protection_container_operation_results_client.get(vault_name, resource_group,
+                                                                   fabric_name, container_name,
+                                                                   operation_id, raw=True)
 
 
 def _track_backup_operation(cli_ctx, resource_group, result, vault_name):
