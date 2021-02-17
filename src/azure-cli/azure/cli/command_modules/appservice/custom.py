@@ -63,7 +63,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD)
 
 logger = get_logger(__name__)
 
@@ -2439,17 +2439,24 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
 
-    if kv_subscription.lower() != client.config.subscription_id.lower():
-        diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                           subscription_id=kv_subscription)
-        ascs = diff_subscription_client.app_service_certificate_orders.list()
-    else:
-        ascs = client.app_service_certificate_orders.list()
-
+    # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
+    # subscription
     kv_secret_name = None
-    for asc in ascs:
-        if asc.name == key_vault_certificate_name:
-            kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+    cloud_type = cmd.cli_ctx.cloud.name
+    if cloud_type.lower() == PUBLIC_CLOUD.lower():
+        if kv_subscription.lower() != client.config.subscription_id.lower():
+            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                               subscription_id=kv_subscription)
+            ascs = diff_subscription_client.app_service_certificate_orders.list()
+        else:
+            ascs = client.app_service_certificate_orders.list()
+
+        kv_secret_name = None
+        for asc in ascs:
+            if asc.name == key_vault_certificate_name:
+                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+
+    # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
@@ -2562,27 +2569,36 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+
+    found_cert = None
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                                   webapp_cert.host_names[0], ssl_type,
-                                                   certificate_thumbprint, slot)
+            found_cert = webapp_cert
+    if not found_cert:
+        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+        for webapp_cert in webapp_certs:
+            if webapp_cert.thumbprint == certificate_thumbprint:
+                found_cert = webapp_cert
+    if found_cert:
+        if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
+            return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                               webapp_cert.host_names[0], ssl_type,
+                                               certificate_thumbprint, slot)
 
-            query_result = list_hostnames(cmd, resource_group_name, name, slot)
-            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-            to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
-            for h in to_update:
-                _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                            h, ssl_type, certificate_thumbprint, slot)
+        query_result = list_hostnames(cmd, resource_group_name, name, slot)
+        hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+        to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+        for h in to_update:
+            _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                        h, ssl_type, certificate_thumbprint, slot)
 
-            return show_webapp(cmd, resource_group_name, name, slot)
+        return show_webapp(cmd, resource_group_name, name, slot)
 
-    raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
+    raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
 def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
