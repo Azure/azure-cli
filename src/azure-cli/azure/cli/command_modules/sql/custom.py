@@ -776,6 +776,7 @@ def _db_dw_create(
         dest_db,
         no_wait,
         sku=None,
+        secondary_type=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -798,6 +799,9 @@ def _db_dw_create(
     # Set create mode properties
     if source_db:
         kwargs['source_database_id'] = source_db.id()
+    
+    if secondary_type:
+        kwargs['secondary_type'] = secondary_type
 
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
@@ -961,6 +965,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        secondary_type=None,
         no_wait=False,
         **kwargs):
     '''
@@ -996,13 +1001,13 @@ def db_create_replica(
         if kwargs['storage_account_type'] == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
 
-    # Replica must have the same database name as the source db
     return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
+        secondary_type=secondary_type,
         **kwargs)
 
 
