@@ -70,7 +70,8 @@ def default_content_types():
             "text/x-java-source"]
 
 
-def create_afd_endpoint(client, resource_group_name, profile_name, endpoint_name, origin_response_timeout_seconds,
+def create_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, profile_name, endpoint_name,
+                        origin_response_timeout_seconds,
                         enabled_state, location=None, tags=None, no_wait=None):
 
     endpoint = AFDEndpoint(location=location,
@@ -78,7 +79,7 @@ def create_afd_endpoint(client, resource_group_name, profile_name, endpoint_name
                            enabled_state=enabled_state,
                            tags=tags)
 
-    return sdk_no_wait(no_wait, client.afd_endpoints.create, resource_group_name, profile_name, endpoint_name, endpoint)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, profile_name, endpoint_name, endpoint)
 
 
 def update_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, profile_name, endpoint_name,

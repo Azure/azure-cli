@@ -24,6 +24,14 @@ def _not_found(message):
     return _inner_not_found
 
 
+def get_custom_sdk(client_factory, exception_handler):
+    return CliCommandType(
+        operations_tmpl='azure.cli.command_modules.cdn.custom#custom_afdx.{}',
+        client_factory=client_factory,
+        exception_handler=exception_handler
+    )
+
+
 _not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's parent resources " \
     "exist."
 
@@ -39,6 +47,7 @@ def load_command_table(self, _):
     waf_policy_not_found_msg = _not_found_msg.format('WAF Policy')
     route_not_found_msg = _not_found_msg.format('Route')
     rule_set_not_found_msg = _not_found_msg.format('Rule Set')
+    rule_not_found_msg = _not_found_msg.format('Rule')
     security_policy_not_found_msg = _not_found_msg.format('Security Policy')
     secret_not_found_msg = _not_found_msg.format('Secret')
     log_analytic_not_found_msg = _not_found_msg.format('Log Analytic')
@@ -127,7 +136,7 @@ def load_command_table(self, _):
     cdn_afd_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#RulesOperations.{}',
         client_factory=cf_afd_rules,
-        exception_handler=_not_found(rule_set_not_found_msg)
+        exception_handler=_not_found(rule_not_found_msg)
     )
 
     cdn_afd_security_policy_sdk = CliCommandType(
@@ -283,7 +292,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
 
         g.custom_command('update', 'update_afd_endpoint', client_factory=cf_afd_endpoints)
-        g.custom_command('create', 'create_afd_endpoint', client_factory=cf_cdn,
+        g.custom_command('create', 'create_afd_endpoint', client_factory=cf_afd_endpoints,
                          doc_string_source='azure.mgmt.cdn.models#AFDEndpoint')
 
     with self.command_group('afd origin-group', cdn_afd_origin_group_sdk, is_preview=True) as g:
@@ -319,19 +328,25 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_afd_rule', client_factory=cf_afd_rules)
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd rule condition', cdn_afd_rule_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_afd_rule_condition', client_factory=cf_afd_rules,
+    with self.command_group('afd rule condition',
+                            cdn_afd_rule_sdk,
+                            is_preview=True,
+                            custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
+        g.custom_command('add', 'add_afd_rule_condition',
                          doc_string_source='azure.mgmt.cdn.models#Rule')
-        g.custom_command('remove', 'remove_afd_rule_condition', client_factory=cf_afd_rules,
+        g.custom_command('remove', 'remove_afd_rule_condition',
                          doc_string_source='azure.mgmt.cdn.models#Rule')
-        g.custom_command('list', 'list_afd_rule_condition', client_factory=cf_afd_rules)
+        g.custom_command('list', 'list_afd_rule_condition')
 
-    with self.command_group('afd rule action', cdn_afd_rule_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_afd_rule_action', client_factory=cf_afd_rules,
+    with self.command_group('afd rule action',
+                            cdn_afd_rule_sdk,
+                            is_preview=True,
+                            custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
+        g.custom_command('add', 'add_afd_rule_action',
                          doc_string_source='azure.mgmt.cdn.models#Rule')
-        g.custom_command('remove', 'remove_afd_rule_action', client_factory=cf_afd_rules,
+        g.custom_command('remove', 'remove_afd_rule_action',
                          doc_string_source='azure.mgmt.cdn.models#Rule')
-        g.custom_command('list', 'list_afd_rule_action', client_factory=cf_afd_rules)
+        g.custom_command('list', 'list_afd_rule_action')
 
     with self.command_group('afd security-policy', cdn_afd_security_policy_sdk, is_preview=True) as g:
         g.show_command('show', 'get')

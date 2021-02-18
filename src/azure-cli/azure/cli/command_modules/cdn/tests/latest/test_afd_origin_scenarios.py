@@ -18,7 +18,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                          profile_name,
                                          origin_group_name,
                                          "--probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt "
-                                         "--load-balancing-sample-size 4 --load-balancing-successful-samples-required 3 --load-balancing-additional-latency-in-milliseconds 50")
+                                         "--sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50")
 
         origin_name = self.create_random_name(prefix='origin', length=16)
         create_options = "--host-name huaiyiztesthost1.blob.core.chinacloudapi.cn " \

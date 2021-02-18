@@ -106,4 +106,18 @@ afd rule action add:
         query_string_behavior:
             rule_exclusions:
             - option_length_too_long
+cdn endpoint waf policy set:
+    parameters:
+        waf_policy_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cdn endpoint:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+afd endpoint:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+afd custom-domain:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
 ...

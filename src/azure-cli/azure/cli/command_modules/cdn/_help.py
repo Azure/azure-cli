@@ -995,84 +995,18 @@ short-summary: Manage origin groups under the specified profile.
 
 helps['afd origin-group create'] = """
 type: command
-parameters:
-  - name: --origin-group-name
-    type: string
-    short-summary: >
-        The Name of the origin group.
-  - name: --probe-request-type
-    type: string
-    short-summary: >
-        Type of health probe request. Allowed to be GET and HEAD.
-  - name: --probe-protocol
-    type: string
-    short-summary: >
-        Protocol to use for health probe. Allowed to be Http and Https.
-  - name: --probe-interval-in-seconds
-    type: int
-    short-summary: >
-        The number of seconds between health probes. Default is 240 seconds.
-  - name: --probe-path
-    type: string
-    short-summary: >
-        The path relative to the origin that is used to determine the health of the origin.
-  - name: --load-balancing-sample-size
-    type: int
-    short-summary: >
-        The number of samples to consider for load balancing decisions.
-  - name: --load-balancing-successful-samples-required
-    type: int
-    short-summary: >
-        The number of samples within the sample period that must succeed for the orgin to be deemed as healthy.
-  - name: --load-balancing-additional-latency-in-milliseconds
-    type: int
-    short-summary: >
-        The additional latency in milliseconds for probes to fall into the lowest latency bucket.
 short-summary: Creates a new origin group within the specified profile.
 examples:
   - name: Creates a new origin group within the specified profile.
     text: >
         az afd origin-group create -g group --origin-group-name og1 --profile-name profile
         --probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt
-        --load-balancing-sample-size 4 --load-balancing-successful-samples-required 3
-        --load-balancing-additional-latency-in-milliseconds 50
+        --sample-size 4 --successful-samples-required 3
+        --additional-latency-in-milliseconds 50
 """
 
 helps['afd origin-group update'] = """
 type: command
-parameters:
-  - name: --origin-group-name
-    type: string
-    short-summary: >
-        The Name of the origin group.
-  - name: --probe-request-type
-    type: string
-    short-summary: >
-        Type of health probe request. Allowed to be GET and HEAD.
-  - name: --probe-protocol
-    type: string
-    short-summary: >
-        Protocol to use for health probe. Allowed to be Http and Https.
-  - name: --probe-interval-in-seconds
-    type: int
-    short-summary: >
-        The number of seconds between health probes. Default is 240 seconds.
-  - name: --probe-path
-    type: string
-    short-summary: >
-        The path relative to the origin that is used to determine the health of the origin.
-  - name: --load-balancing-sample-size
-    type: int
-    short-summary: >
-        The number of samples to consider for load balancing decisions.
-  - name: --load-balancing-successful-samples-required
-    type: int
-    short-summary: >
-        The number of samples within the sample period that must succeed for the orgin to be deemed as healthy.
-  - name: --load-balancing-additional-latency-in-milliseconds
-    type: int
-    short-summary: >
-        The additional latency in milliseconds for probes to fall into the lowest latency bucket.
 short-summary: Creates a new origin group within the specified profile.
 examples:
   - name: Update the probe setting of the specified origin group.
@@ -1098,62 +1032,6 @@ short-summary: Manage origins within the specified origin group.
 helps['afd origin create'] = """
 type: command
 short-summary: Create an AFD origin.
-parameters:
-  - name: --host-name
-    type: string
-    short-summary: >
-        The address of the origin. Domain names, IPv4 addresses, and IPv6 addresses are supported. This should be unique across all origins in a origin group.
-  - name: --http-port
-    type: int
-    short-summary: >
-        The port used for http requests to the origin.  Default: 80.
-  - name: --https-port
-    type: int
-    short-summary: >
-        The port used for https requests to the origin.  Default: 443.
-  - name: --origin-host-header
-    type: string
-    short-summary: >
-        The Host header to send for requests to this origin. If you leave this blank, the request hostname determines this value.
-        Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services require this host header value to match the origin hostname by default.
-  - name: --origin-group-name
-    type: string
-    short-summary: >
-        The Name of the origin group.
-  - name: --weight
-    type: int
-    short-summary: >
-        The weight of the origin in given origin group for load balancing. Must be between 1 and 1000.
-  - name: --priority
-    type: int
-    short-summary: >
-        The load balancing priority. Higher priorities will not be used for load balancing if any lower priority origin is healthy.
-        Must be between 1 and 5.
-  - name: --enabled-state
-    type: bool
-    short-summary: >
-        Whether to enable this origin. Allowed values: Disabled, Enabled.
-  - name: --origin-name
-    type: string
-    short-summary: >
-        Name of the origin.
-  - name: --private-link-resource
-    type: string
-    short-summary: >
-        The resource ID of the origin that will be connected to using the private link.
-  - name: --private-link-location
-    type: string
-    short-summary: >
-        The location of origin that will be connected to using the private link.
-  - name: --private-link-request-message
-    type: string
-    short-summary: >
-        The message that is shown to the approver of the private link request.
-  - name: --private-link-sub-resource-type
-    type: string
-    short-summary: >
-        The sub-resource type of the origin that will be connected to using the private link.
-        You can use "az network private-link-resource list" to obtain the supported sub-resource types.
 examples:
   - name: Create an regular origin
     text: >
@@ -1172,62 +1050,6 @@ examples:
 helps['afd origin update'] = """
 type: command
 short-summary: Update the settings of the specified AFD origin.
-parameters:
-  - name: --host-name
-    type: string
-    short-summary: >
-        The address of the origin. Domain names, IPv4 addresses, and IPv6 addresses are supported. This should be unique across all origins in a origin group.
-  - name: --http-port
-    type: int
-    short-summary: >
-        The port used for http requests to the origin.  Default: 80.
-  - name: --https-port
-    type: int
-    short-summary: >
-        The port used for https requests to the origin.  Default: 443.
-  - name: --origin-host-header
-    type: string
-    short-summary: >
-        The Host header to send for requests to this origin. If you leave this blank, the request hostname determines this value.
-        Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services require this host header value to match the origin hostname by default.
-  - name: --origin-group-name
-    type: string
-    short-summary: >
-        The Name of the origin group.
-  - name: --weight
-    type: int
-    short-summary: >
-        The weight of the origin in given origin group for load balancing. Must be between 1 and 1000.
-  - name: --priority
-    type: int
-    short-summary: >
-        The load balancing priority. Higher priorities will not be used for load balancing if any lower priority origin is healthy.
-        Must be between 1 and 5.
-  - name: --enabled-state
-    type: bool
-    short-summary: >
-        Whether to enable this origin. Allowed values: Disabled, Enabled.
-  - name: --origin-name
-    type: string
-    short-summary: >
-        Name of the origin.
-  - name: --private-link-resource
-    type: string
-    short-summary: >
-        The resource ID of the origin that will be connected to using the private link.
-  - name: --private-link-location
-    type: string
-    short-summary: >
-        The location of origin that will be connected to using the private link.
-  - name: --private-link-request-message
-    type: string
-    short-summary: >
-        The message that is shown to the approver of the private link request.
-  - name: --private-link-sub-resource-type
-    type: string
-    short-summary: >
-        The sub-resource type of the origin that will be connected to using the private link.
-        You can use "az network private-link-resource list" to obtain the supported sub-resource types.
 examples:
   - name: Update the host header and priority of the specified origin.
     text: >
@@ -1246,9 +1068,11 @@ short-summary: Manage custom domains within the specified profile.
 
 helps['afd custom-domain create'] = """
 type: command
-short-summary: Create a custom domain within the specified profile. Your need to create a DNS TXT record to prove the custom domain's ownership to make the operation successful.
-               Suggest to use "--no-wait" if the DNS update take a lot of time.
-               Use "az afd custom-domain show" to obtain the validation token and create a DNS TXT record for record "_dnsauth.{your custom domain}" with the validation token as its value.
+short-summary: Create a custom domain within the specified profile.
+long-summary: >
+    Your need to create a DNS TXT record to prove the custom domain's ownership to make the operation successful.
+    Suggest to use "--no-wait" if the DNS update take a lot of time. Use "az afd custom-domain show" to obtain the validation token and
+    create a DNS TXT record for record "_dnsauth.{your custom domain}" with the validation token as its value.
 examples:
   - name: Create a custom domain that uses AFD managed cerficate for SSL/TLS encryption.
     text: >
@@ -1386,7 +1210,7 @@ examples:
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
   - name: Update a route's compression settings to enable compression for the specified content types.
     text: >
-        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 ----query-string-caching-behavior IgnoreQueryString
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --query-string-caching-behavior IgnoreQueryString
         --enable-compression true --content-types-to-compress text/javascript text/plain
 """
 

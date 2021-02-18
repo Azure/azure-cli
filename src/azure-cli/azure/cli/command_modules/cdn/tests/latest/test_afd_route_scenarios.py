@@ -27,7 +27,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                          profile_name,
                                          origin_group_name,
                                          "--probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt " +
-                                         "--load-balancing-sample-size 4 --load-balancing-successful-samples-required 3 --load-balancing-additional-latency-in-milliseconds 50")
+                                         "--sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50")
 
         origin_group_id = f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group_name}'
 

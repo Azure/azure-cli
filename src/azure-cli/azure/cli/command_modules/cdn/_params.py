@@ -233,7 +233,7 @@ def load_arguments(self, _):
                    help="Send and receive timeout on forwarding request to the origin. "
                         "When timeout is reached, the request fails and returns.")
         c.argument('profile_name', help=profile_name_help, id_part='name')
-        c.argument('enabled_state', arg_type=get_enum_type([item.value for item in list(EnabledState)]),
+        c.argument('enabled_state', arg_type=get_enum_type(EnabledState),
                    options_list=["--enabled-state"],
                    help="Whether to enable this endpoint.")
         c.argument('endpoint_name', endpoint_name_type, id_part='child_name_1',
@@ -253,21 +253,27 @@ def load_arguments(self, _):
         c.argument('profile_name', help=profile_name_help, id_part='name')
 
         # health probe related paramters
-        c.argument('probe_request_type', arg_type=get_enum_type([item.value for item in list(HealthProbeRequestType)]),
+        c.argument('probe_request_type', arg_type=get_enum_type(HealthProbeRequestType),
                    help='The type of health probe request that is made.')
-        c.argument('probe_protocol', arg_type=get_enum_type([item.value for item in list(ProbeProtocol)]),
+        c.argument('probe_protocol', arg_type=get_enum_type(ProbeProtocol),
                    help='Protocol to use for health probe.')
         c.argument('probe_interval_in_seconds', type=int,
-                   help='The number of seconds between health probes.Default is 240 seconds.')
+                   help='The number of seconds between health probes.')
         c.argument('probe_path',
                    help="The path relative to the origin that is used to determine the health of the origin.")
 
         # load balancing related parameters
         c.argument('load_balancing_sample_size', type=int,
+                   options_list='--sample-size',
+                   arg_group="Load Balancing",
                    help="The number of samples to consider for load balancing decisions.")
         c.argument('load_balancing_successful_samples_required', type=int,
+                   options_list='--successful-samples-required',
+                   arg_group="Load Balancing",
                    help="The number of samples within the sample period that must succeed.")
         c.argument('load_balancing_additional_latency_in_milliseconds', type=int,
+                   options_list='--additional-latency-in-milliseconds',
+                   arg_group="Load Balancing",
                    help="The additional latency in milliseconds for probes to fall into the lowest latency bucket.")
 
     with self.argument_context('afd origin-group list') as c:
@@ -280,12 +286,18 @@ def load_arguments(self, _):
         c.argument('profile_name', help=profile_name_help, id_part='name')
         c.argument('origin_group_name', origin_group_name_type, id_part='child_name_1',
                    help='Name of the origin group which is unique within the endpoint.')
-        c.argument('http_port', type=int, help="The value of the HTTP port. Must be between 1 and 65535.")
-        c.argument('https_port', type=int, help="The value of the HTTPS port. Must be between 1 and 65535.")
-        c.argument('enabled_state', arg_type=get_enum_type([item.value for item in list(EnabledState)]),
-                   help="Whether to enable health probes to be made against backends defined under backendPools. "
-                        "Health probes can only be disabled if there is a single enabled backend "
-                        "in single enabled backend pool.")
+        c.argument('host_name',
+                   help="The address of the origin. Domain names, IPv4 addresses, and IPv6 addresses are supported."
+                        "This should be unique across all origins in a origin group.")
+        c.argument('origin_host_header',
+                   help="The Host header to send for requests to this origin. If you leave this blank, "
+                        "the request hostname determines this value. "
+                        "Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services "
+                        "require this host header value to match the origin hostname by default.")
+        c.argument('http_port', type=int, help="The port used for http requests to the origin.")
+        c.argument('https_port', type=int, help="The port used for https requests to the origin.")
+        c.argument('enabled_state', arg_type=get_enum_type(EnabledState),
+                   help="Whether to enable this origin.")
         c.argument('priority', type=int,
                    help="Priority of origin in given origin group for load balancing. Higher priorities will not be "
                         "used for load balancing if any lower priority origin is healthy. Must be between 1 and 5.")
@@ -293,6 +305,16 @@ def load_arguments(self, _):
                    help="Weight of the origin in given origin group for load balancing. Must be between 1 and 1000.")
         c.argument('enable_private_link', arg_type=get_three_state_flag(invert=False),
                    help='Indicates whether private link is enanbled on that origin.')
+        c.argument('private_link_resource',
+                   help="The resource ID of the origin that will be connected to using the private link.")
+        c.argument('private_link_location',
+                   help="The location of origin that will be connected to using the private link.")
+        c.argument(
+            'private_link_sub_resource_type',
+            help="The sub-resource type of the origin that will be connected to using the private link."
+                 'You can use "az network private-link-resource list" to obtain the supported sub-resource types.')
+        c.argument('private_link_request_message',
+                   help="The message that is shown to the approver of the private link request.")
 
     with self.argument_context('afd origin list') as c:
         c.argument('profile_name', id_part=None)
@@ -309,22 +331,22 @@ def load_arguments(self, _):
                    help='A directory path on the origin that AFD can use to retrieve content from. E.g, "/img/*"')
         c.argument('custom_domains', nargs='*', help='Custom domains referenced by this endpoint.')
         c.argument('supported_protocols', nargs='+',
-                   arg_type=get_enum_type([item.value for item in list(AFDEndpointProtocols)]),
+                   arg_type=get_enum_type(AFDEndpointProtocols),
                    help="List of supported protocols for this route.")
         c.argument('link_to_default_domain',
-                   arg_type=get_enum_type([item.value for item in list(LinkToDefaultDomain)]),
+                   arg_type=get_enum_type(LinkToDefaultDomain),
                    help="Whether this route will be linked to the default endpoint domain.")
         c.argument('forwarding_protocol',
-                   arg_type=get_enum_type([item.value for item in list(ForwardingProtocol)]),
+                   arg_type=get_enum_type(ForwardingProtocol),
                    help="Protocol this rule will use when forwarding traffic to backends.")
         c.argument('https_redirect',
-                   arg_type=get_enum_type([item.value for item in list(HttpsRedirect)]),
+                   arg_type=get_enum_type(HttpsRedirect),
                    help='Whether to automatically redirect HTTP traffic to HTTPS traffic.')
         c.argument('rule_sets', nargs='*', help='Collection of ID or name of rule set referenced by the route.')
         c.argument('content_types_to_compress', nargs='+',
                    help='List of content types on which compression applies. The value should be a valid MIME type.')
         c.argument('query_string_caching_behavior',
-                   arg_type=get_enum_type([item.value for item in list(QueryStringCachingBehavior)]),
+                   arg_type=get_enum_type(QueryStringCachingBehavior),
                    help="Defines how CDN caches requests that include query strings. "
                         "You can ignore any query strings when caching, "
                         "bypass caching to prevent requests that contain query strings from being cached, "
@@ -357,7 +379,7 @@ def load_arguments(self, _):
         configure_rule_parameters(c)
         c.argument('rule_name', rule_name_type, id_part='child_name_2', help='Name of the rule.')
         c.argument('match_processing_behavior',
-                   arg_type=get_enum_type([item.value for item in list(MatchProcessingBehavior)]),
+                   arg_type=get_enum_type(MatchProcessingBehavior),
                    help='Indicate whether rules engine should continue to run the remaining rules or stop if matched.'
                         ' Defaults to Continue.')
 
@@ -395,9 +417,9 @@ def load_arguments(self, _):
         c.argument('profile_name', help=profile_name_help, id_part='name')
         c.argument('custom_domain_name', custom_name_arg_type, id_part="child_name_1",
                    help='Name of the custom domain.')
-        c.argument('certificate_type', arg_type=get_enum_type([item.value for item in list(AfdCertificateType)]),
+        c.argument('certificate_type', arg_type=get_enum_type(AfdCertificateType),
                    help='Defines the source of the SSL certificate.')
-        c.argument('minimum_tls_version', arg_type=get_enum_type([item.value for item in list(AfdMinimumTlsVersion)]),
+        c.argument('minimum_tls_version', arg_type=get_enum_type(AfdMinimumTlsVersion),
                    help='TLS protocol version that will be used for Https.')
         c.argument('host_name', help='The host name of the domain. Must be a domain name.')
         c.argument('azure_dns_zone', help='ID of the Azure DNS zone.')
