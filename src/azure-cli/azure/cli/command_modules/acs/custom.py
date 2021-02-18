@@ -2843,10 +2843,10 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
             elif addon == CONST_CONFCOM_ADDON_NAME:
                 if addon_profile.enabled:
-                    raise CLIError('The confcom addon is already enabled for this managed cluster.\n'
-                                   'To change confcom configuration, run '
-                                   f'"az aks disable-addons -a confcom -n {name} -g {resource_group_name}" '
-                                   'before enabling it again.')
+                    raise ValidationError('The confcom addon is already enabled for this managed cluster.',
+                                          recommendation='To change confcom configuration, run '
+                                          f'"az aks disable-addons -a confcom -n {name} -g {resource_group_name}" '
+                                          'before enabling it again.')
                 addon_profile = ManagedClusterAddonProfile(
                     enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
                 if enable_sgxquotehelper:
