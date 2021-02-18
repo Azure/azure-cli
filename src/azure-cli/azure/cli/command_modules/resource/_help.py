@@ -2323,7 +2323,7 @@ type: command
 short-summary: Build one or more Bicep files.
 examples:
   - name: Build a Bicep file.
-    text: az bicep build --files <bicep_file>
+    text: az bicep build --files {bicep-file}
   - name: Build multiple Bicep files.
     text: az bicep build --files <bicep_file1> <bicep_file2>
   - name: Build a Bicep file and prints all output to stdout.
