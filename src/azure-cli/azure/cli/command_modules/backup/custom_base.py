@@ -261,8 +261,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                               container_name, backup_management_type)
 
 
-def check_protection_enabled_for_vm(cmd, vm_id):
-    return custom.check_protection_enabled_for_vm(cmd, vm_id)
+def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    return custom.check_protection_enabled_for_vm(cmd, vm_id, vm, resource_group_name)
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
