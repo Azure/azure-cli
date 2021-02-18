@@ -799,7 +799,7 @@ def _db_dw_create(
     # Set create mode properties
     if source_db:
         kwargs['source_database_id'] = source_db.id()
-    
+
     if secondary_type:
         kwargs['secondary_type'] = secondary_type
 

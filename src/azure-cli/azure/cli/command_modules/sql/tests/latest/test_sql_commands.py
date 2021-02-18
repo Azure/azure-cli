@@ -2321,7 +2321,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                  ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {}'
                  .format(s1.group, s1.name, hs_database_name,
                          s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type),
-                checks=[
+                 checks=[
                      JMESPathCheck('name', hs_target_database_name),
                      JMESPathCheck('resourceGroup', s1.group),
                      JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
