@@ -1939,7 +1939,7 @@ def export_template_spec(cmd, output_folder, resource_group_name=None, name=None
         if version == name:
             version = None
     if not version:
-        raise IncorrectUsageError('a template spec version must be specified for export')
+        raise IncorrectUsageError('Please specify the template spec version for export')
     exported_template = rcf.template_spec_versions.get(resource_group_name, name, version)
     from azure.cli.command_modules.resource._packing_engine import (unpack)
     return unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
