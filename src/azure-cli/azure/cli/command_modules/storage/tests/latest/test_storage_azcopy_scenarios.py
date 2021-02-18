@@ -17,7 +17,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_sync(self, resource_group, storage_account_info, test_dir):
-        storage_account, _ = storage_account_info
+        storage_account, account_key = storage_account_info
         container = self.create_container(storage_account_info)
 
         # sync directory
@@ -186,6 +186,29 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.oauth_cmd('storage blob show -n "sample.js" -c {} --account-name {} ', container, storage_account)\
             .assert_with_checks(JMESPathCheck("name", "sample.js"),
                                 JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
+    def test_storage_blob_azcopy_sync_sas(self, resource_group, storage_account, test_dir):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_random_name(prefix='container', length=20)
+
+        self.oauth_cmd('storage container create -n {} --account-name {} '.format(container, storage_account), checks=[
+            JMESPathCheck('created', True)])
+
+        sas = self.storage_cmd('storage container generate-sas -n {} --https-only --permissions dlrw --expiry {} -otsv',
+                               account_info, container, expiry).output.strip()
+        # sync directory
+        self.cmd('storage blob list -c {} --account-name {} --sas-token {} '.format(
+            container, storage_account, sas), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('storage blob sync -s "{}" -c {} --account-name {} --sas-token {} '.format(
+            test_dir, container, storage_account, sas))
+        self.cmd('storage blob list -c {} --account-name {} --sas-token {}'.format(
+            container, storage_account, sas), checks=JMESPathCheck('length(@)', 41))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
