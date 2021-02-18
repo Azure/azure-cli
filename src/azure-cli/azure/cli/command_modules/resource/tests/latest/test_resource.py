@@ -665,6 +665,12 @@ class ProviderRegistrationTest(ScenarioTest):
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
 
+    def test_provider_registration_mg(self):
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
+
+        result = self.cmd('provider register -n {prov} --m testmg')
+        self.assertTrue(result, None)
+
 
 class ProviderOperationTest(ScenarioTest):
 
@@ -753,6 +759,9 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('template.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
             self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
 
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
@@ -950,7 +959,7 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', {})])
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
 
-        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --yes')
+        self.cmd('ts create -g {rg} -n {template_spec_name} --yes')
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {})])
 
         # clean up

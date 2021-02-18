@@ -14,12 +14,6 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
-def str2bool(v):
-    if v is not None:
-        return v.lower() == "true"
-    return v
-
-
 def check_name_availability(cmd, client, name):
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
     account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
@@ -128,8 +122,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         RoutingPreference = cmd.get_models('RoutingPreference')
         params.routing_preference = RoutingPreference(
             routing_choice=routing_choice,
-            publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
-            publish_internet_endpoints=str2bool(publish_internet_endpoints)
+            publish_microsoft_endpoints=publish_microsoft_endpoints,
+            publish_internet_endpoints=publish_internet_endpoints
         )
     if allow_blob_public_access is not None:
         params.allow_blob_public_access = allow_blob_public_access
@@ -353,9 +347,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         if routing_choice is not None:
             params.routing_preference.routing_choice = routing_choice
         if publish_microsoft_endpoints is not None:
-            params.routing_preference.publish_microsoft_endpoints = str2bool(publish_microsoft_endpoints)
+            params.routing_preference.publish_microsoft_endpoints = publish_microsoft_endpoints
         if publish_internet_endpoints is not None:
-            params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
+            params.routing_preference.publish_internet_endpoints = publish_internet_endpoints
 
     if allow_blob_public_access is not None:
         params.allow_blob_public_access = allow_blob_public_access
@@ -490,7 +484,7 @@ def update_management_policies(cmd, client, resource_group_name, account_name, p
 def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
                                    delete_retention_days=None, enable_restore_policy=None, restore_days=None,
                                    enable_versioning=None, enable_container_delete_retention=None,
-                                   container_delete_retention_days=None):
+                                   container_delete_retention_days=None, default_service_version=None):
     if enable_change_feed is not None:
         instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
 
@@ -514,6 +508,9 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
 
     if enable_versioning is not None:
         instance.is_versioning_enabled = enable_versioning
+
+    if default_service_version is not None:
+        instance.default_service_version = default_service_version
 
     return instance
 

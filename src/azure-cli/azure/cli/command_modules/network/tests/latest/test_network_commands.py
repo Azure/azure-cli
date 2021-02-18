@@ -573,6 +573,68 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         ])
 
 
+class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_trusted_client_cert')
+    def test_network_app_gateway_with_trusted_client_cert(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'gw': 'gateway',
+            'ip': 'ip1',
+            'cert': os.path.join(TEST_DIR, 'client.cer'),
+            'cert1': os.path.join(TEST_DIR, 'client1.cer'),
+            'cname': 'cert_name',
+            'cname1': 'cert_name1',
+        })
+
+        # create an ag with trusted client cert
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
+                 '--trusted-client-cert name={cname} data={cert}',
+                 checks=[self.check('length(applicationGateway.trustedClientCertificates)', 1)])
+
+        self.cmd('network application-gateway client-cert add -g {rg} --gateway-name {gw} '
+                 '--name {cname1} --data {cert1}',
+                 checks=[self.check('length(trustedClientCertificates)', 2)])
+
+        self.cmd('network application-gateway client-cert list -g {rg} --gateway-name {gw}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('network application-gateway client-cert remove -g {rg} --gateway-name {gw} --name {cname1}',
+                 checks=[self.check('length(trustedClientCertificates)', 1)])
+
+
+class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_ssl_profile')
+    def test_network_app_gateway_with_ssl_profile(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'gw': 'gateway',
+            'ip': 'ip1',
+            'name': 'name',
+            'name1': 'name1',
+        })
+
+        # create an ag with ssl profile
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
+                 '--ssl-profile name={name} client-auth-configuration=True min-protocol-version=TLSv1_0 '
+                 'cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom',
+                 checks=[self.check('length(applicationGateway.sslProfiles)', 1)])
+
+        self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name1} '
+                 '--client-auth-configuration True --min-protocol-version TLSv1_0 '
+                 '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 --policy-type Custom',
+                 checks=[self.check('length(sslProfiles)', 2)])
+
+        self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name} ',
+                 checks=[self.check('length(sslProfiles)', 1)])
+
+
 class NetworkAppGatewayZoneScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_zone', location='westus2')
@@ -3550,6 +3612,72 @@ class NetworkVirtualRouter(ScenarioTest):
         self.cmd('network vrouter peering delete -g {rg} --vrouter-name {vrouter} -n {peer}')
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
+
+
+class NetworkVirtualHubRouter(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_hub_router', location='centraluseuap')
+    def test_network_virtual_hub_router_scenario(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vnet': 'vnet2',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'vrouter': 'vrouter2',
+            'peer': 'peer1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} '
+                 '--location {location} '
+                 '--subnet-name {subnet1} '
+                 '--address-prefix 10.0.0.0/24')
+
+        # a cleanup program runs in short peoridically to assign subnets a NSG within that subscription
+        # which will block subnet is assigned to the virtual router
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
+        vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet1_id': vnet['subnets'][0]['id']
+        })
+
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
+                 '--hosted-subnet {subnet1_id}',
+                 checks=[
+                     self.check('type', 'Microsoft.Network/virtualHubs'),
+                     self.check('ipConfigurations', None),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic', checks=[
+            self.check('allowBranchToBranchTraffic', True)
+        ])
+
+        self.cmd('network routeserver list -g {rg}')
+
+        self.cmd('network routeserver show -g {rg} -n {vrouter}', checks=[
+            self.check('virtualRouterAsn', 65515),
+            self.check('length(virtualRouterIps)', 2),
+        ])
+
+        self.cmd('network routeserver peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
+                 '--peer-asn 11000 --peer-ip 10.0.0.120')
+
+        self.cmd('network routeserver peering list -g {rg} --vrouter-name {vrouter}')
+
+        self.cmd('network routeserver peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        self.cmd('network routeserver peering list-advertised-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        self.cmd('network routeserver peering list-learned-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        # unable to update unless the ASN's range is required
+        # self.cmd('network routeserver peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
+
+        self.cmd('network routeserver peering delete -g {rg} --vrouter-name {vrouter} -n {peer} -y')
+
+        self.cmd('network routeserver delete -g {rg} -n {vrouter} -y')
 
 
 class NetworkSubnetScenarioTests(ScenarioTest):

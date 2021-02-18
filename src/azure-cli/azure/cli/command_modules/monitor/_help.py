@@ -140,6 +140,12 @@ examples:
     crafted: true
 """
 
+helps['monitor action-group enable-receiver'] = """
+type: command
+short-summary: Enable a receiver in an action group.
+long-summary: This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
+"""
+
 helps['monitor activity-log'] = """
 type: group
 short-summary: Manage activity logs.
@@ -1334,9 +1340,6 @@ short-summary: Create a data export rule for a given workspace.
 examples:
   - name: Create a data export rule for a given workspace.
     text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
-  - name: Create a data export rule for a given workspace with all tables.
-    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable --all
-
 """
 
 helps['monitor log-analytics workspace data-export update'] = """
@@ -1344,7 +1347,7 @@ type: command
 short-summary: Update a data export rule for a given workspace.
 examples:
   - name: Update a data export rule for a given workspace.
-    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} --all --enable false
+    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} -t {table_name} --enable false
 """
 
 helps['monitor log-analytics workspace data-export list'] = """
@@ -1473,13 +1476,14 @@ examples:
   - name: Create a high CPU usage alert on several VMs with no actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
-            --condition "avg Percentage CPU > 90" --description "High CPU"
+            --condition "avg Percentage CPU > 90" --description "High CPU" --region westus
   - name: Create a dynamic CPU usage alert on several VMs with no actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
             --condition "avg Percentage CPU > dynamic medium 2 of 4 since 2020-10-01T10:23:00.000Z"
             --description "Dynamic CPU"
             --window-size 5m
+            --region westus
 
 """
 

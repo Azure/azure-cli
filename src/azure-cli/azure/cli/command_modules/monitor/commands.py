@@ -21,7 +21,9 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_saved_searches, cf_subscription_diagnostics,
         cf_log_analytics_workspace_data_exports)
     from .transformers import (action_group_list_table)
-    from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
+    from .validators import (process_autoscale_create_namespace,
+                             validate_private_endpoint_connection_id,
+                             process_action_group_detail_for_creation)
     from ._exception_handler import exception_handler
 
     monitor_custom = CliCommandType(
@@ -263,9 +265,9 @@ def load_command_table(self, _):
 
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
         g.show_command('show', 'get', table_transformer=action_group_list_table)
-        g.command('create', 'create_or_update', table_transformer=action_group_list_table)
+        g.command('create', 'create_or_update', table_transformer=action_group_list_table, validator=process_action_group_detail_for_creation)
         g.command('delete', 'delete')
-        g.command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
+        g.custom_command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
         g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
         g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
                                  table_transformer=action_group_list_table)
@@ -366,9 +368,9 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_log_analytics_workspace')
         g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'list_log_analytics_workspace')
         g.custom_command('list-deleted-workspaces', 'list_deleted_log_analytics_workspaces', custom_command_type=log_analytics_deleted_workspace_custom)
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
@@ -377,10 +379,10 @@ def load_command_table(self, _):
         g.command('list-management-groups', 'list', command_type=log_analytics_workspace_management_groups_sdk)
         g.command('get-shared-keys', 'get_shared_keys', command_type=log_analytics_workspace_shared_keys_sdk)
 
-    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk) as g:
+    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
-        g.command('update', 'update')
+        g.custom_command('update', 'update_log_analytics_workspace_table')
 
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:
@@ -405,22 +407,22 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_linked_service', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_linked_service', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_workspace')
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
         g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_cluster')
         g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'create_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
         g.command('delete', 'delete', confirmation=True)
