@@ -86,7 +86,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
                                            use_secondary_region)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
-        return custom_afs.list_recovery_points(client, resource_group_name, vault_name, item, start_date,
+        return custom_afs.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date,
                                                end_date, use_secondary_region)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
