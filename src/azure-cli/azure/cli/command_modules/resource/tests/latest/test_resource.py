@@ -1034,7 +1034,7 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         })
         with self.assertRaises(IncorrectUsageError) as err:
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
-            self.assertTrue('A template spec version must be specified for export.' in str(err.exception))
+            self.assertTrue('Please specify the template spec version for export' in str(err.exception))
 
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):
