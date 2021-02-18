@@ -19,7 +19,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
-                          validate_file_delete_retention_days,
+                          validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type)
 
@@ -410,6 +410,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
+        c.argument('change_feed_retention_days', type=int, min_api='2019-06-01',
+                   validator=validator_change_feed_retention_days,
+                   help='Indicates the duration of changeFeed retention in days. '
+                        'Minimum value is 1 day and maximum value is 146000 days (400 years). '
+                        'A null value indicates an infinite retention of the change feed.')
         c.argument('enable_container_delete_retention',
                    arg_type=get_three_state_flag(),
                    options_list=['--enable-container-delete-retention', '--container-retention'],
