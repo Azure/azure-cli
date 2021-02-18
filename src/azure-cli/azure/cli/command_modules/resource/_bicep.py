@@ -39,7 +39,7 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
             # Users may continue using the current installed version.
             installed_version = _get_bicep_installed_version(installation_path)
             latest_release_tag = get_bicep_latest_release_tag()
-            latest_version = _extract_semver(get_bicep_latest_release_tag())
+            latest_version = _extract_semver(latest_release_tag)
             if installed_version and latest_version and semver.compare(installed_version, latest_version) < 0:
                 _logger.warning(
                     'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
