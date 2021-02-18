@@ -300,6 +300,34 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_sftp')
+    def test_storage_account_with_sftp(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        name1 = self.create_random_name(prefix='cli', length=24)
+        name2 = self.create_random_name(prefix='cli', length=24)
+        name3 = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {}'.format(name, resource_group),
+                 checks=[JMESPathCheck('isSftpEnabled', None)])
+
+        self.cmd('az storage account create -n {} -g {} --enable-sftp'.format(name1, resource_group),
+                 checks=[JMESPathCheck('isSftpEnabled', True)])
+
+        self.cmd('az storage account create -n {} -g {} --enable-sftp false'.format(name2, resource_group),
+                 checks=[JMESPathCheck('isSftpEnabled', False)])
+
+        self.cmd('az storage account create -n {} -g {} --enable-sftp true'.format(name3, resource_group),
+                 checks=[JMESPathCheck('isSftpEnabled', True)])
+
+        self.cmd('az storage account update -n {} --enable-sftp false'.format(name3),
+                 checks=[JMESPathCheck('isSftpEnabled', False)])
+
+        self.cmd('az storage account update -n {} --enable-sftp true'.format(name2),
+                 checks=[JMESPathCheck('isSftpEnabled', True)])
+
+        self.cmd('az storage account update -n {} --enable-sftp'.format(name),
+                 checks=[JMESPathCheck('isSftpEnabled', True)])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
     def test_storage_account_with_routing_preference(self, resource_group):
         # Create Storage Account with Publish MicrosoftEndpoint, choose MicrosoftRouting

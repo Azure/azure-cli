@@ -85,7 +85,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      'Directory Properties arguments must be provided.')
     aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
                                  help='Enable Azure Active Directory Domain Services authentication for Azure Files')
-    sftp_type = CLIArgumentType(arg_type=get_three_state_flag(),  is_preview=True, min_api='2019-06-01',
+    sftp_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-06-01',
                                 help='Enable Secure File Transfer Protocol')
     domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the primary domain that the AD DNS server is authoritative for. "

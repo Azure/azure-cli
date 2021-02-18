@@ -140,7 +140,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
 
-    if enable_sftp:
+    if enable_sftp is not None:
         params.is_sftp_enabled = enable_sftp
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
@@ -364,7 +364,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.allow_blob_public_access = allow_blob_public_access
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
-    if enable_sftp:
+    if enable_sftp is not None:
         params.is_sftp_enabled = enable_sftp
 
     return params
