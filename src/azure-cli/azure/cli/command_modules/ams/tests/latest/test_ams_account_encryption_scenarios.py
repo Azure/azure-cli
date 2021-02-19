@@ -36,7 +36,7 @@ class AmsEncryptionTests(ScenarioTest):
 
         self.cmd('keyvault set-policy --object-id {principalId} --name {keyVault} --key-permissions {identityPermissions}')
 
-        self.cmd('az ams account encryption set -a {amsname} -g {rg} --key-source {keySource} --key-vault-id {keyVaultId}', checks=[
+        self.cmd('az ams account encryption set -a {amsname} -g {rg} --key-source {keySource} --key-identifier {keyVaultId}', checks=[
             self.check('name', '{amsname}'),
         ])
 

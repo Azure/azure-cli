@@ -60,7 +60,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   validator=get_default_location_from_resource_group, required=False)
+                   validator=get_default_location_from_resource_group, required=True)
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams account create') as c:
@@ -103,8 +103,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams account encryption') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('key_source', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.')
-        c.argument('key_vault_id', help='The Uri of the KeyVault.')
-        c.argument('key_version', help='The version of KeyVault key.')
+        c.argument('key_identifier', help='The URL of the Key Vault key used to encrypt the account. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).')
+        c.argument('current_key_identifier', help='The current key used to encrypt the Media Services account, including the key version.')
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)
@@ -371,7 +371,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('stream_options', nargs='+', arg_type=get_enum_type(StreamOptionsFlag), help='The options to use for the LiveEvent. This value is specified at creation time and cannot be updated.')
         c.argument('transcription_lang', help='Live transcription language for the live event. Allowed values: {} See https://go.microsoft.com/fwlink/?linkid=2133742 for more information about the live transcription feature.'.format(", ".join(get_allowed_transcription_languages())))
         c.argument('use_static_hostname', help='Specifies whether a static hostname would be assigned to the live event preview and ingest endpoints. This value can only be updated if the live event is in Standby state')
-        c.argument('custom_hostname', help='When useStaticHostname is set to true, the hostnamePrefix specifies the first part of the hostname assigned to the live event preview and ingest endpoints. The final hostname would be a combination of this prefix, the media service account name and a short code for the Azure Media Services data center.')
+        c.argument('hostname_prefix', help='When useStaticHostname is set to true, hostname_prefix specifies the first part of the hostname assigned to the live event preview and ingest endpoints. The final hostname would be a combination of this prefix, the media service account name and a short code for the Azure Media Services data center.')
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
 
     with self.argument_context('ams live-event list') as c:

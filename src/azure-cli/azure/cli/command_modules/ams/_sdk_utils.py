@@ -59,7 +59,7 @@ def get_media_type():
 
 
 def get_encoding_types():
-    return ['Basic', 'None', 'Standard']
+    return ['Premium1080p', 'None', 'Standard']
 
 
 def get_transcription_langauges():
