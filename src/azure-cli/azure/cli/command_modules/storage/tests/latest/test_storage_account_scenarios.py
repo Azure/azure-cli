@@ -1063,11 +1063,13 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             'cmd': 'storage account file-service-properties'
         })
         self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
-            JMESPathCheck('shareDeleteRetentionPolicy', None))
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 7))
 
         # Test update without properties
         self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
-            JMESPathCheck('shareDeleteRetentionPolicy', None))
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 7))
 
         with self.assertRaises(ValidationError):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')

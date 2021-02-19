@@ -516,8 +516,9 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
 
 
 def update_file_service_properties(cmd, instance, enable_delete_retention=None,
-                                   delete_retention_days=None):
+                                   delete_retention_days=None, enable_smb_multichannel=None):
     from azure.cli.core.azclierror import ValidationError
+    params = {}
     # set delete retention policy according input
     if enable_delete_retention is not None:
         if enable_delete_retention is False:
@@ -538,8 +539,18 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
     # TODO: remove it when server side return null not 0 for days
     if instance.share_delete_retention_policy is not None and instance.share_delete_retention_policy.enabled is False:
         instance.share_delete_retention_policy.days = None
+    if instance.share_delete_retention_policy:
+        params['share_delete_retention_policy'] = instance.share_delete_retention_policy
 
-    return instance
+    # set protocol settings
+    if enable_smb_multichannel is not None:
+        instance.protocol_settings = cmd.get_models('ProtocolSettings')()
+        instance.protocol_settings.smb = cmd.get_models('SmbSetting')(
+            multichannel=cmd.get_models('Multichannel')(enabled=enable_smb_multichannel))
+    if instance.protocol_settings.smb.multichannel:
+        params['protocol_settings'] = instance.protocol_settings
+
+    return params
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
