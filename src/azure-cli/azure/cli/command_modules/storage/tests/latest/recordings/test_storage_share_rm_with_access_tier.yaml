@@ -19,20 +19,21 @@ interactions:
       User-Agent:
       - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003?$expand=snapshots&api-version=2021-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003?api-version=2021-01-01
   response:
     body:
-      string: '{"error":{"code":"ShareNotFound","message":"The specified share does
-        not exist.\nRequestId:a25c1393-b01a-009a-175f-0641b6000000\nTime:2021-02-19T01:36:54.6521800Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '165'
+      - '370'
       content-type:
       - application/json
       date:
-      - Fri, 19 Feb 2021 01:36:54 GMT
+      - Fri, 19 Feb 2021 05:19:56 GMT
+      etag:
+      - '"0x8D8D495FF94765B"'
       expires:
       - '-1'
       pragma:
@@ -44,8 +45,256 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1182'
+      - '1198'
     status:
-      code: 404
-      message: Not Found
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g -n
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D8D495FF94765B\"","properties":{"accessTier":"TransactionOptimized","lastModifiedTime":"2021-02-19T05:19:57.0000000Z","shareQuota":5120}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '520'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Feb 2021 05:19:57 GMT
+      etag:
+      - '"0x8D8D495FF94765B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g -n --access-tier
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003?api-version=2021-01-01&$expand=stats
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D8D495FF94765B\"","properties":{"shareUsageBytes":0,"accessTier":"TransactionOptimized","lastModifiedTime":"2021-02-19T05:19:57.0000000Z","shareQuota":5120}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '540'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Feb 2021 05:19:58 GMT
+      etag:
+      - '"0x8D8D495FF94765B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"shareQuota": 5120, "accessTier": "Hot"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '57'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --storage-account -g -n --access-tier
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","properties":{"accessTier":"Hot","shareQuota":5120}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '422'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Feb 2021 05:19:59 GMT
+      etag:
+      - '"0x8D8D49600F494C7"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g -n
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D8D49600F494C7\"","properties":{"accessTier":"Hot","accessTierChangeTime":"2021-02-19T05:19:59.0000000Z","lastModifiedTime":"2021-02-19T05:19:59.0000000Z","shareQuota":5120}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '557'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Feb 2021 05:20:00 GMT
+      etag:
+      - '"0x8D8D49600F494C7"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"accessTier": "Hot"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '37'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --storage-account -g -n --access-tier
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000004?api-version=2021-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tier000001/providers/Microsoft.Storage/storageAccounts/tier000002/fileServices/default/shares/share000004","name":"share000004","type":"Microsoft.Storage/storageAccounts/fileServices/shares","properties":{"accessTier":"Hot"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '404'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Feb 2021 05:20:00 GMT
+      etag:
+      - '"0x8D8D49601EDA123"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
 version: 1

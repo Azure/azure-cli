@@ -36,7 +36,7 @@ def create_share_rm(cmd, client, resource_group_name, account_name, share_name, 
         file_share.access_tier = access_tier
 
     return client.create(resource_group_name=resource_group_name, account_name=account_name, share_name=share_name,
-                         file_share=file_share)
+                         file_share=file_share, expand=None)
 
 
 def get_stats(client, resource_group_name, account_name, share_name):
