@@ -14,7 +14,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     def test_rule_set_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_rule_set_list_cmd(resource_group, profile_name, expect_failure=True)
-        self.afd_profile_create_cmd(resource_group, profile_name, options='--sku Standard_Microsoft')
+        self.afd_profile_create_cmd(resource_group, profile_name)
 
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_rule_set_list_cmd(resource_group, profile_name, checks=list_checks)
@@ -39,7 +39,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_afd_rule_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
-        self.afd_profile_create_cmd(resource_group, profile_name, options='--sku Standard_Microsoft')
+        self.afd_profile_create_cmd(resource_group, profile_name)
 
         rule_set_name = self.create_random_name(prefix='ruleset', length=16)
         self.afd_rule_set_add_cmd(resource_group, rule_set_name, profile_name)

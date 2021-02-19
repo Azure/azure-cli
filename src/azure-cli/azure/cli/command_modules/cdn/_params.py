@@ -39,7 +39,10 @@ def load_arguments(self, _):
         c.argument('profile_name', name_arg_type, id_part='name', help=profile_name_help)
 
     with self.argument_context('cdn profile create') as c:
-        c.argument('sku', arg_type=get_enum_type([item.value for item in list(SkuName)]))
+        # Remove Stardard/Premium Front Door from old cdn profile's supported SKU list
+        supported_skus = [item.value for item in list(SkuName) if item.value not in
+                          (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door)]
+        c.argument('sku', arg_type=get_enum_type(supported_skus))
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('name', name_arg_type, id_part='name', help=profile_name_help)
 
@@ -226,6 +229,13 @@ def load_arguments(self, _):
     with self.argument_context('afd') as c:
         c.argument('tags', tags_type)
 
+    # AFD Profiles
+    with self.argument_context('afd profile') as c:
+        c.argument('sku',
+                   arg_type=get_enum_type([SkuName.standard_azure_front_door, SkuName.premium_azure_front_door]),
+                   help="The pricing tier of the AFD profile.")
+        c.argument('profile_name', help=profile_name_help, id_part='name')
+
     # AFD endpoint #
     with self.argument_context('afd endpoint') as c:
         c.argument('origin_response_timeout_seconds', type=int,
@@ -238,7 +248,6 @@ def load_arguments(self, _):
                    help="Whether to enable this endpoint.")
         c.argument('endpoint_name', endpoint_name_type, id_part='child_name_1',
                    help='Name of the endpoint under the profile which is unique globally.')
-        c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('content_paths', nargs='+',
                    help="The path to the content to be purged. Can describe a file path or a wildcard directory.")
         c.argument('domains', nargs='+', help='List of domains.')

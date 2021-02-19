@@ -22,6 +22,10 @@ def cf_profiles(cli_ctx, _):
     return cf_cdn(cli_ctx).profiles
 
 
+def cf_afd_profiles(cli_ctx, _):
+    return cf_cdn(cli_ctx).afd_profiles
+
+
 def cf_origins(cli_ctx, _):
     return cf_cdn(cli_ctx).origins
 

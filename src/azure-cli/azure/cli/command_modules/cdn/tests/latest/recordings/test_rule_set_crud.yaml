@@ -14,7 +14,7 @@ interactions:
       - -g --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:09 GMT
+      - Fri, 19 Feb 2021 11:48:07 GMT
       expires:
       - '-1'
       pragma:
@@ -47,88 +47,43 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: null
+    body: '{"location": "global", "sku": {"name": "Standard_AzureFrontDoor"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku --sku
-      User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-15T17:19:07Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Feb 2021 17:19:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "sku": {"name": "Standard_Microsoft"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       Content-Length:
-      - '61'
+      - '66'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n --sku --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"WestUs","kind":"cdn","tags":{},"sku":{"name":"Standard_Microsoft"},"properties":{"resourceState":"Creating","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"frontDoorId":"266e441c-3910-461a-b405-890fd3127875","resourceState":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7365296e-5b1b-4c64-990d-e43f94a384f3?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a89f37b2-4e14-46f9-91ca-77db3ff642a1?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
-      - '411'
+      - '475'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:16 GMT
+      - Fri, 19 Feb 2021 11:48:15 GMT
       expires:
       - '-1'
       pragma:
@@ -140,7 +95,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '23'
+      - '24'
     status:
       code: 201
       message: Created
@@ -152,63 +107,16 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --sku --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7365296e-5b1b-4c64-990d-e43f94a384f3?api-version=2020-09-01
-  response:
-    body:
-      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '62'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Feb 2021 17:19:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cdn profile create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku --sku
-      User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7365296e-5b1b-4c64-990d-e43f94a384f3?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a89f37b2-4e14-46f9-91ca-77db3ff642a1?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -220,7 +128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:56 GMT
+      - Fri, 19 Feb 2021 11:48:26 GMT
       expires:
       - '-1'
       pragma:
@@ -246,28 +154,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --sku --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"WestUs","kind":"cdn","tags":{},"sku":{"name":"Standard_Microsoft"},"properties":{"resourceState":"Active","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"frontDoorId":"266e441c-3910-461a-b405-890fd3127875","resourceState":"Active","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '410'
+      - '474'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:56 GMT
+      - Fri, 19 Feb 2021 11:48:26 GMT
       expires:
       - '-1'
       pragma:
@@ -283,7 +191,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '48'
+      - '46'
     status:
       code: 200
       message: OK
@@ -302,7 +210,7 @@ interactions:
       - -g --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -318,7 +226,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:58 GMT
+      - Fri, 19 Feb 2021 11:48:27 GMT
       expires:
       - '-1'
       pragma:
@@ -355,7 +263,7 @@ interactions:
       - -g --rule-set-name --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -371,7 +279,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:59 GMT
+      - Fri, 19 Feb 2021 11:48:28 GMT
       expires:
       - '-1'
       pragma:
@@ -402,7 +310,7 @@ interactions:
       - -g --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -418,7 +326,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:00 GMT
+      - Fri, 19 Feb 2021 11:48:29 GMT
       expires:
       - '-1'
       pragma:
@@ -451,7 +359,7 @@ interactions:
       - -g --rule-set-name --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -467,7 +375,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:01 GMT
+      - Fri, 19 Feb 2021 11:48:29 GMT
       expires:
       - '-1'
       pragma:
@@ -502,7 +410,7 @@ interactions:
       - -g --rule-set-name --profile-name --yes
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: DELETE
@@ -516,7 +424,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 15 Feb 2021 17:20:02 GMT
+      - Fri, 19 Feb 2021 11:48:31 GMT
       expires:
       - '-1'
       pragma:
@@ -528,7 +436,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -547,7 +455,7 @@ interactions:
       - -g --rule-set-name --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -564,7 +472,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:03 GMT
+      - Fri, 19 Feb 2021 11:48:32 GMT
       expires:
       - '-1'
       pragma:
@@ -593,7 +501,7 @@ interactions:
       - -g --profile-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -609,7 +517,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:04 GMT
+      - Fri, 19 Feb 2021 11:48:33 GMT
       expires:
       - '-1'
       pragma:

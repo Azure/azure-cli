@@ -17,13 +17,31 @@ def _add_paramter_if_needed(command, paramter_name, parameter_value):
 # pylint: disable=too-many-public-methods
 class CdnAfdScenarioMixin:
     def afd_profile_create_cmd(self, resource_group_name, profile_name, tags=None, checks=None, options=None,
-                               sku="Standard_AzureFrontDoor"):
-        command = f'cdn profile create -g {resource_group_name} -n {profile_name} --sku {sku}'
+                               sku="Standard_AzureFrontDoor", expect_failure=False):
+        command = f'afd profile create -g {resource_group_name} --profile-name {profile_name} --sku {sku}'
         if tags:
             command = command + ' --tags {}'.format(tags)
         if options:
             command = command + ' ' + options
 
+        return self.cmd(command, checks, expect_failure=expect_failure)
+
+    def afd_profile_update_cmd(self, group, name, tags=None, checks=None):
+        command = 'afd profile update -g {} --profile-name {}'.format(group, name)
+        if tags:
+            command = command + ' --tags {}'.format(tags)
+        return self.cmd(command, checks)
+
+    def afd_profile_list_cmd(self, group, checks=None):
+        command = 'afd profile list -g {}'.format(group)
+        return self.cmd(command, checks)
+
+    def afd_profile_show_cmd(self, group, name, checks=None):
+        command = f'afd profile show -g {group} --profile-name {name}'
+        return self.cmd(command, checks)
+
+    def afd_profile_delete_cmd(self, group, name, checks=None):
+        command = 'afd profile delete -g {} --profile-name {}'.format(group, name)
         return self.cmd(command, checks)
 
     def afd_endpoint_create_cmd(self, resource_group_name, profile_name, endpoint_name,

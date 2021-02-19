@@ -1,58 +1,13 @@
 interactions:
 - request:
-    body: null
+    body: '{"location": "global", "sku": {"name": "Premium_AzureFrontDoor"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku
-      User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-15T17:17:01Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Feb 2021 17:17:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "sku": {"name": "Premium_AzureFrontDoor"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       Content-Length:
@@ -60,20 +15,20 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"WestUs","kind":"frontdoor","tags":{},"sku":{"name":"Premium_AzureFrontDoor"},"properties":{"frontDoorId":"94281d64-be70-458d-b924-93a353ae404d","resourceState":"Creating","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Premium_AzureFrontDoor"},"properties":{"frontDoorId":"1c934b52-b250-4e36-a5d2-ce9951d3979e","resourceState":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/28041073-21ba-4949-ae03-d09bdf1cee7f?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bcec11c5-b502-4d76-981d-8b3df6e12269?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -81,7 +36,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:17:12 GMT
+      - Fri, 19 Feb 2021 11:46:43 GMT
       expires:
       - '-1'
       pragma:
@@ -93,7 +48,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '23'
+      - '24'
     status:
       code: 201
       message: Created
@@ -105,16 +60,16 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/28041073-21ba-4949-ae03-d09bdf1cee7f?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bcec11c5-b502-4d76-981d-8b3df6e12269?api-version=2020-09-01
   response:
     body:
       string: '{"status":"InProgress","error":{"code":"None","message":null}}'
@@ -126,7 +81,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:17:23 GMT
+      - Fri, 19 Feb 2021 11:46:54 GMT
       expires:
       - '-1'
       pragma:
@@ -152,16 +107,16 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/28041073-21ba-4949-ae03-d09bdf1cee7f?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bcec11c5-b502-4d76-981d-8b3df6e12269?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -173,7 +128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:17:53 GMT
+      - Fri, 19 Feb 2021 11:47:24 GMT
       expires:
       - '-1'
       pragma:
@@ -199,19 +154,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile create
+      - afd profile create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --sku
+      - -g --profile-name --sku
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"WestUs","kind":"frontdoor","tags":{},"sku":{"name":"Premium_AzureFrontDoor"},"properties":{"frontDoorId":"94281d64-be70-458d-b924-93a353ae404d","resourceState":"Active","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Premium_AzureFrontDoor"},"properties":{"frontDoorId":"1c934b52-b250-4e36-a5d2-ce9951d3979e","resourceState":"Active","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -220,7 +175,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:17:54 GMT
+      - Fri, 19 Feb 2021 11:47:24 GMT
       expires:
       - '-1'
       pragma:
@@ -260,11 +215,11 @@ interactions:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g --profile-name --origin-group-name --probe-request-type --probe-protocol
-        --probe-interval-in-seconds --probe-path --load-balancing-sample-size --load-balancing-successful-samples-required
-        --load-balancing-additional-latency-in-milliseconds
+        --probe-interval-in-seconds --probe-path --sample-size --successful-samples-required
+        --additional-latency-in-milliseconds
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -280,7 +235,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:17:56 GMT
+      - Fri, 19 Feb 2021 11:47:27 GMT
       expires:
       - '-1'
       pragma:
@@ -318,7 +273,7 @@ interactions:
         --priority --weight --http-port --https-port --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -328,7 +283,7 @@ interactions:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004","type":"Microsoft.Cdn/profiles/originGroups/origins","name":"origin000004","properties":{"originGroupName":"og000003","hostName":"huaiyiztesthost1.blob.core.chinacloudapi.cn","httpPort":80,"httpsPort":443,"originHostHeader":"huaiyiztesthost1.blob.core.chinacloudapi.cn","priority":1,"weight":1000,"enabledState":"Enabled","sharedPrivateLinkResource":null,"provisioningState":"Creating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/5daeb3cc-d3f1-4792-8c27-54255d5be2ab?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d4d488c0-bc6a-4b1c-938b-e9a82efaf819?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -336,7 +291,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:17:58 GMT
+      - Fri, 19 Feb 2021 11:47:29 GMT
       expires:
       - '-1'
       pragma:
@@ -368,9 +323,9 @@ interactions:
         --priority --weight --http-port --https-port --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/5daeb3cc-d3f1-4792-8c27-54255d5be2ab?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d4d488c0-bc6a-4b1c-938b-e9a82efaf819?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -382,7 +337,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:10 GMT
+      - Fri, 19 Feb 2021 11:47:40 GMT
       expires:
       - '-1'
       pragma:
@@ -416,7 +371,7 @@ interactions:
         --priority --weight --http-port --https-port --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004?api-version=2020-09-01
   response:
@@ -430,7 +385,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:10 GMT
+      - Fri, 19 Feb 2021 11:47:40 GMT
       expires:
       - '-1'
       pragma:
@@ -470,7 +425,7 @@ interactions:
         --priority --weight --http-port --https-port --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -480,7 +435,7 @@ interactions:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000005","type":"Microsoft.Cdn/profiles/originGroups/origins","name":"origin000005","properties":{"originGroupName":"og000003","hostName":"huaiyiztesthost1.blob.core.chinacloudapi.cn","httpPort":8080,"httpsPort":443,"originHostHeader":"huaiyiztesthost1.blob.core.chinacloudapi.cn","priority":1,"weight":666,"enabledState":"Enabled","sharedPrivateLinkResource":null,"provisioningState":"Creating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f0fbe85d-3470-4cce-97b3-761d7ee50b5b?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/c51f3d57-2752-4ac0-856e-db26e0ac198f?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -488,7 +443,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:12 GMT
+      - Fri, 19 Feb 2021 11:47:41 GMT
       expires:
       - '-1'
       pragma:
@@ -500,7 +455,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '99'
+      - '98'
     status:
       code: 201
       message: Created
@@ -520,57 +475,9 @@ interactions:
         --priority --weight --http-port --https-port --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f0fbe85d-3470-4cce-97b3-761d7ee50b5b?api-version=2020-09-01
-  response:
-    body:
-      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '62'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Feb 2021 17:18:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - afd origin create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --profile-name --origin-group-name --origin-name --host-name --origin-host-header
-        --priority --weight --http-port --https-port --enabled-state
-      User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f0fbe85d-3470-4cce-97b3-761d7ee50b5b?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/c51f3d57-2752-4ac0-856e-db26e0ac198f?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -582,7 +489,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:53 GMT
+      - Fri, 19 Feb 2021 11:47:53 GMT
       expires:
       - '-1'
       pragma:
@@ -616,7 +523,7 @@ interactions:
         --priority --weight --http-port --https-port --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000005?api-version=2020-09-01
   response:
@@ -630,7 +537,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:54 GMT
+      - Fri, 19 Feb 2021 11:47:53 GMT
       expires:
       - '-1'
       pragma:
@@ -663,7 +570,7 @@ interactions:
       - -g --profile-name --origin-group-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -679,7 +586,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:54 GMT
+      - Fri, 19 Feb 2021 11:47:55 GMT
       expires:
       - '-1'
       pragma:
@@ -712,7 +619,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --weight --http-port
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -728,7 +635,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:54 GMT
+      - Fri, 19 Feb 2021 11:47:56 GMT
       expires:
       - '-1'
       pragma:
@@ -767,7 +674,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --weight --http-port
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -777,7 +684,7 @@ interactions:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004","type":"Microsoft.Cdn/profiles/originGroups/origins","name":"origin000004","properties":{"originGroupName":"og000003","hostName":"huaiyiztesthost1.blob.core.chinacloudapi.cn","httpPort":8080,"httpsPort":443,"originHostHeader":"huaiyiztesthost1.blob.core.chinacloudapi.cn","priority":1,"weight":58,"enabledState":"Enabled","sharedPrivateLinkResource":null,"provisioningState":"Updating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ac041991-eb43-4590-bd7c-9494d66ad71d?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/571771ce-b5d9-41c3-b1bf-11fa9e6f374c?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -785,11 +692,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:18:57 GMT
+      - Fri, 19 Feb 2021 11:47:58 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ac041991-eb43-4590-bd7c-9494d66ad71d/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/571771ce-b5d9-41c3-b1bf-11fa9e6f374c/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -818,9 +725,9 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --weight --http-port
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ac041991-eb43-4590-bd7c-9494d66ad71d?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/571771ce-b5d9-41c3-b1bf-11fa9e6f374c?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -832,7 +739,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:07 GMT
+      - Fri, 19 Feb 2021 11:48:09 GMT
       expires:
       - '-1'
       pragma:
@@ -865,7 +772,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --weight --http-port
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004?api-version=2020-09-01
   response:
@@ -879,7 +786,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:08 GMT
+      - Fri, 19 Feb 2021 11:48:09 GMT
       expires:
       - '-1'
       pragma:
@@ -914,7 +821,7 @@ interactions:
         --private-link-request-message
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -930,7 +837,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:09 GMT
+      - Fri, 19 Feb 2021 11:48:10 GMT
       expires:
       - '-1'
       pragma:
@@ -974,7 +881,7 @@ interactions:
         --private-link-request-message
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -985,7 +892,7 @@ interactions:
         link service from AFD"},"provisioningState":"Updating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/76c85c36-433c-46cf-9414-4ef2d9c489f8?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/456da961-83fd-4f53-9bf9-e86987826803?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -993,11 +900,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:11 GMT
+      - Fri, 19 Feb 2021 11:48:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/76c85c36-433c-46cf-9414-4ef2d9c489f8/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/456da961-83fd-4f53-9bf9-e86987826803/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -1007,7 +914,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '99'
+      - '97'
     status:
       code: 202
       message: Accepted
@@ -1028,9 +935,9 @@ interactions:
         --private-link-request-message
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/76c85c36-433c-46cf-9414-4ef2d9c489f8?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/456da961-83fd-4f53-9bf9-e86987826803?api-version=2020-09-01
   response:
     body:
       string: '{"status":"InProgress","error":{"code":"None","message":null}}'
@@ -1042,7 +949,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:21 GMT
+      - Fri, 19 Feb 2021 11:48:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1077,9 +984,9 @@ interactions:
         --private-link-request-message
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/76c85c36-433c-46cf-9414-4ef2d9c489f8?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/456da961-83fd-4f53-9bf9-e86987826803?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -1091,7 +998,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:51 GMT
+      - Fri, 19 Feb 2021 11:48:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1126,7 +1033,7 @@ interactions:
         --private-link-request-message
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004?api-version=2020-09-01
   response:
@@ -1141,7 +1048,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:52 GMT
+      - Fri, 19 Feb 2021 11:48:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1174,7 +1081,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --private-link-sub-resource
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -1191,7 +1098,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:53 GMT
+      - Fri, 19 Feb 2021 11:48:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1233,7 +1140,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --private-link-sub-resource
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -1244,7 +1151,7 @@ interactions:
         link service from AFD"},"provisioningState":"Updating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a7234066-9dd0-4afe-b3c4-3884bdcc1968?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f442ce7c-26bf-4598-85d7-1c58c81f9943?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -1252,11 +1159,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:19:55 GMT
+      - Fri, 19 Feb 2021 11:48:54 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a7234066-9dd0-4afe-b3c4-3884bdcc1968/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f442ce7c-26bf-4598-85d7-1c58c81f9943/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -1266,7 +1173,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '98'
+      - '99'
     status:
       code: 202
       message: Accepted
@@ -1285,9 +1192,9 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --private-link-sub-resource
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a7234066-9dd0-4afe-b3c4-3884bdcc1968?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f442ce7c-26bf-4598-85d7-1c58c81f9943?api-version=2020-09-01
   response:
     body:
       string: '{"status":"InProgress","error":{"code":"None","message":null}}'
@@ -1299,7 +1206,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:05 GMT
+      - Fri, 19 Feb 2021 11:49:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1332,9 +1239,9 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --private-link-sub-resource
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a7234066-9dd0-4afe-b3c4-3884bdcc1968?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f442ce7c-26bf-4598-85d7-1c58c81f9943?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -1346,7 +1253,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:35 GMT
+      - Fri, 19 Feb 2021 11:49:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1379,7 +1286,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --private-link-sub-resource
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004?api-version=2020-09-01
   response:
@@ -1394,7 +1301,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:36 GMT
+      - Fri, 19 Feb 2021 11:49:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1428,7 +1335,7 @@ interactions:
         --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -1445,7 +1352,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:38 GMT
+      - Fri, 19 Feb 2021 11:49:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1485,7 +1392,7 @@ interactions:
         --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
@@ -1495,7 +1402,7 @@ interactions:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004","type":"Microsoft.Cdn/profiles/originGroups/origins","name":"origin000004","properties":{"originGroupName":"og000003","hostName":"huaiyiztesthost1.blob.core.chinacloudapi.cn","httpPort":80,"httpsPort":443,"originHostHeader":"huaiyiztesthost1.blob.core.chinacloudapi.cn","priority":1,"weight":99,"enabledState":"Disabled","sharedPrivateLinkResource":null,"provisioningState":"Updating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/b8016ff9-f8f5-4910-b7ea-22f22d47c9e0?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/cc45ee5c-dd48-488a-94c9-9f68d8978c21?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
@@ -1503,11 +1410,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:39 GMT
+      - Fri, 19 Feb 2021 11:49:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/b8016ff9-f8f5-4910-b7ea-22f22d47c9e0/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/cc45ee5c-dd48-488a-94c9-9f68d8978c21/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -1517,7 +1424,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '98'
+      - '99'
     status:
       code: 202
       message: Accepted
@@ -1537,9 +1444,9 @@ interactions:
         --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/b8016ff9-f8f5-4910-b7ea-22f22d47c9e0?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/cc45ee5c-dd48-488a-94c9-9f68d8978c21?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -1551,7 +1458,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:50 GMT
+      - Fri, 19 Feb 2021 11:49:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1585,7 +1492,7 @@ interactions:
         --enabled-state
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000004?api-version=2020-09-01
   response:
@@ -1599,7 +1506,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:20:50 GMT
+      - Fri, 19 Feb 2021 11:49:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1634,7 +1541,7 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --yes
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: DELETE
@@ -1644,17 +1551,115 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4cbf5435-d390-43b7-90d2-b1e5ab8460c1?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/833e2667-5190-4bcd-97c3-27d76e9e8110?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 15 Feb 2021 17:20:51 GMT
+      - Fri, 19 Feb 2021 11:49:53 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4cbf5435-d390-43b7-90d2-b1e5ab8460c1/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/833e2667-5190-4bcd-97c3-27d76e9e8110/profileresults/profile000002/origingroupresults/og000003/originresults/origin000004?api-version=2020-09-01
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14996'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - afd origin delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --profile-name --origin-group-name --origin-name --yes
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/833e2667-5190-4bcd-97c3-27d76e9e8110?api-version=2020-09-01
+  response:
+    body:
+      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '61'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Feb 2021 11:50:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - afd origin delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --profile-name --origin-group-name --origin-name --yes
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000005?api-version=2020-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/02cfb577-a945-4874-ac6e-6166be358149?api-version=2020-09-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 19 Feb 2021 11:50:05 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/02cfb577-a945-4874-ac6e-6166be358149/profileresults/profile000002/origingroupresults/og000003/originresults/origin000005?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -1683,21 +1688,21 @@ interactions:
       - -g --profile-name --origin-group-name --origin-name --yes
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/4cbf5435-d390-43b7-90d2-b1e5ab8460c1?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/02cfb577-a945-4874-ac6e-6166be358149?api-version=2020-09-01
   response:
     body:
-      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '61'
+      - '62'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:21:03 GMT
+      - Fri, 19 Feb 2021 11:50:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1726,64 +1731,13 @@ interactions:
       - afd origin delete
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
       ParameterSetName:
       - -g --profile-name --origin-group-name --origin-name --yes
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/originGroups/og000003/origins/origin000005?api-version=2020-09-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ee8b61d9-6a94-4924-b000-48438896d0d1?api-version=2020-09-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 15 Feb 2021 17:21:04 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ee8b61d9-6a94-4924-b000-48438896d0d1/profileresults/profile000002/origingroupresults/og000003/originresults/origin000005?api-version=2020-09-01
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - afd origin delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --profile-name --origin-group-name --origin-name --yes
-      User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ee8b61d9-6a94-4924-b000-48438896d0d1?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/02cfb577-a945-4874-ac6e-6166be358149?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -1795,7 +1749,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:21:15 GMT
+      - Fri, 19 Feb 2021 11:50:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1828,7 +1782,7 @@ interactions:
       - -g --profile-name --origin-group-name
       User-Agent:
       - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.17.1
+        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
@@ -1844,7 +1798,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Feb 2021 17:21:17 GMT
+      - Fri, 19 Feb 2021 11:50:47 GMT
       expires:
       - '-1'
       pragma:

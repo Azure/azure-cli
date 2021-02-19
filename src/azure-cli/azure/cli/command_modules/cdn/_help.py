@@ -643,6 +643,15 @@ examples:
         az cdn profile list -g group
 """
 
+helps['cdn profile show'] = """
+type: command
+short-summary: Show CDN profile details.
+examples:
+  - name: Show CDN profile details.
+    text: >
+        az cdn profile show -g group -n profile
+"""
+
 helps['cdn profile update'] = """
 type: command
 short-summary: Update a CDN profile.
@@ -986,6 +995,64 @@ examples:
   - name: Get a rate limit rule of a CDN WAF policy.
     text: >
         az cdn waf policy rate-limit-rule show -g group --policy-name policy -n ratelimitrule
+"""
+
+helps['afd profile'] = """
+type: group
+short-summary: Manage AFD profiles.
+"""
+
+helps['afd profile create'] = """
+type: command
+short-summary: Create a new AFD profile.
+examples:
+  - name: Create an AFD profile using Standard SKU.
+    text: >
+        az afd profile create -g group --profile-name profile --sku Standard_AzureFrontDoor
+"""
+
+helps['afd profile delete'] = """
+type: command
+short-summary: Delete an AFD profile.
+examples:
+  - name: Delete an AFD profile.
+    text: >
+        az afd profile delete -g group --profile-name profile
+"""
+
+helps['afd profile usage'] = """
+type: command
+short-summary: List resource usage within the specific AFD profile.
+examples:
+  - name: List resource usage within the specific AFD profile.
+    text: >
+        az afd profile usage -g group --profile-name profile
+"""
+
+helps['afd profile show'] = """
+type: command
+short-summary: Show details of an AFD profile.
+examples:
+  - name: Show details of an AFD profile.
+    text: >
+        az afd profile show -g group --profile-name profile
+"""
+
+helps['afd profile list'] = """
+type: command
+short-summary: List AFD profiles.
+examples:
+  - name: List AFD profiles in a resource group.
+    text: >
+        az afd profile list -g group
+"""
+
+helps['afd profile update'] = """
+type: command
+short-summary: Update an AFD profile.
+examples:
+  - name: Update an AFD profile with tags.
+    text: az afd profile update --profile-name profile --resource-group MyResourceGroup --tags tag1=value1
 """
 
 helps['afd origin-group'] = """

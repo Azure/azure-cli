@@ -11,15 +11,19 @@ from azure.mgmt.cdn.models import (AFDEndpoint, HealthProbeRequestType, EnabledS
                                    LoadBalancingSettingsParameters, SecurityPolicyWebApplicationFirewallParameters,
                                    SecurityPolicyWebApplicationFirewallAssociation, CustomerCertificateParameters,
                                    AFDDomain, AFDDomainHttpsParameters, AfdCertificateType, AfdMinimumTlsVersion,
-                                   AFDEndpointUpdateParameters)
+                                   AFDEndpointUpdateParameters, SkuName, ErrorResponseException)
 
-from azure.mgmt.cdn.operations import (AFDOriginGroupsOperations, AFDOriginsOperations,
+from azure.mgmt.cdn.operations import (AFDOriginGroupsOperations, AFDOriginsOperations, AFDProfilesOperations,
                                        SecretsOperations, AFDEndpointsOperations, RoutesOperations, RuleSetsOperations,
-                                       RulesOperations, SecurityPoliciesOperations, AFDCustomDomainsOperations)
+                                       RulesOperations, SecurityPoliciesOperations, AFDCustomDomainsOperations,
+                                       ProfilesOperations)
 
 from azure.cli.core.util import (sdk_no_wait)
+from azure.cli.core.azclierror import (ResourceNotFoundError)
+
 from knack.util import CLIError
 from knack.log import get_logger
+from msrest.polling import LROPoller, NoPolling
 
 from .custom import _update_mapper
 
@@ -70,11 +74,78 @@ def default_content_types():
             "text/x-java-source"]
 
 
+def create_afd_profile(client: ProfilesOperations, resource_group_name, profile_name,
+                       sku: SkuName,
+                       tags=None):
+    from azure.mgmt.cdn.models import (Profile, Sku)
+
+    # Force location to global
+    profile = Profile(location="global", sku=Sku(name=sku), tags=tags)
+    return client.create(resource_group_name, profile_name, profile)
+
+
+def delete_afd_profile(client: ProfilesOperations, resource_group_name, profile_name):
+    profile = None
+    try:
+        profile = client.get(resource_group_name, profile_name)
+    except ErrorResponseException as e:
+        props = getattr(e.inner_exception, 'additional_properties', {})
+        if not isinstance(props, dict) or not isinstance(props.get('error'), dict):
+            raise e
+        props = props['error']
+        if props.get('code') != 'ResourceNotFound':
+            raise e
+
+    if profile is None or profile.sku.name not in (SkuName.premium_azure_front_door,
+                                                   SkuName.standard_azure_front_door):
+        def get_long_running_output(_):
+            return None
+
+        logger.warning("Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported.")
+        return LROPoller(client, None, get_long_running_output, NoPolling())
+
+    return client.delete(resource_group_name, profile_name)
+
+
+def update_afd_profile(client: ProfilesOperations, resource_group_name, profile_name, tags):
+    profile = client.get(resource_group_name, profile_name)
+    if profile.sku.name not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
+        logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
+        raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
+
+    return client.update(resource_group_name, profile_name, tags)
+
+
+def list_afd_profiles(client: ProfilesOperations, resource_group_name=None):
+    profile_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+
+    profile_list = [profile for profile in profile_list if profile.sku.name in
+                    (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door)]
+
+    return list(profile_list)
+
+
+def get_afd_profile(client: ProfilesOperations, resource_group_name, profile_name):
+    profile = client.get(resource_group_name, profile_name)
+    if profile.sku.name not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
+        # Workaround to make the behavior consist with true "Not Found"
+        logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
+        raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
+
+    return profile
+
+
+def list_resource_usage(client: AFDProfilesOperations, resource_group_name, profile_name):
+    return client.list_resource_usage(resource_group_name, profile_name)
+
+
 def create_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, profile_name, endpoint_name,
                         origin_response_timeout_seconds,
-                        enabled_state, location=None, tags=None, no_wait=None):
+                        enabled_state, tags=None, no_wait=None):
 
-    endpoint = AFDEndpoint(location=location,
+    # Force location to global
+    endpoint = AFDEndpoint(location="global",
                            origin_response_timeout_seconds=origin_response_timeout_seconds,
                            enabled_state=enabled_state,
                            tags=tags)

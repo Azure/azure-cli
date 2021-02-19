@@ -5,6 +5,8 @@
 
 from .custom import default_content_types  # pylint: disable=unused-import
 from .custom import list_profiles          # pylint: disable=unused-import
+from .custom import get_profile            # pylint: disable=unused-import
+from .custom import delete_profile         # pylint: disable=unused-import
 from .custom import update_endpoint        # pylint: disable=unused-import
 from .custom import create_condition       # pylint: disable=unused-import
 from .custom import create_action          # pylint: disable=unused-import
@@ -47,6 +49,12 @@ from .custom_waf import delete_waf_rate_limit_rule                    # pylint: 
 from .custom_waf import show_waf_rate_limit_rule                      # pylint: disable=unused-import
 from .custom_waf import list_waf_rate_limit_rules                     # pylint: disable=unused-import
 
+from .custom_afdx import create_afd_profile                           # pylint: disable=unused-import
+from .custom_afdx import list_afd_profiles                            # pylint: disable=unused-import
+from .custom_afdx import get_afd_profile                              # pylint: disable=unused-import
+from .custom_afdx import update_afd_profile                           # pylint: disable=unused-import
+from .custom_afdx import delete_afd_profile                           # pylint: disable=unused-import
+from .custom_afdx import list_resource_usage                          # pylint: disable=unused-import
 from .custom_afdx import create_afd_endpoint                          # pylint: disable=unused-import
 from .custom_afdx import update_afd_endpoint                          # pylint: disable=unused-import
 from .custom_afdx import create_afd_origin_group                      # pylint: disable=unused-import

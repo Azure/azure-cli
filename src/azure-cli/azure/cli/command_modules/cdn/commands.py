@@ -10,7 +10,8 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
                               cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups, cf_afd_endpoints,
                               cf_afd_origins, cf_afd_routes, cf_afd_rule_sets, cf_afd_rules, cf_afd_security_policies,
-                              cf_afd_secrets, cf_afd_log_analytics, cf_afd_origin_groups, cf_afd_custom_domain)
+                              cf_afd_secrets, cf_afd_log_analytics, cf_afd_origin_groups, cf_afd_custom_domain,
+                              cf_afd_profiles)
 
 
 def _not_found(message):
@@ -212,9 +213,9 @@ def load_command_table(self, _):
                          doc_string_source='azure.mgmt.cdn.models#Endpoint')
 
     with self.command_group('cdn profile', cdn_profiles_sdk) as g:
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'get_profile', client_factory=cf_cdn)
         g.command('usage', 'list_resource_usage')
-        g.command('delete', 'delete')
+        g.custom_command('delete', 'delete_profile', client_factory=cf_cdn)
         g.custom_command('list', 'list_profiles', client_factory=cf_cdn)
         g.custom_command('create', 'create_profile', client_factory=cf_cdn)
         g.generic_update_command('update', setter_name='update', custom_func_name='update_profile',
@@ -284,6 +285,15 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_waf_rate_limit_rule', client_factory=cf_waf_policy, confirmation=True)
         g.custom_command('list', 'list_waf_rate_limit_rules', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_rate_limit_rule', client_factory=cf_waf_policy)
+
+    with self.command_group('afd profile', cdn_profiles_sdk,
+                            custom_command_type=get_custom_sdk(cf_profiles, _not_found(profile_not_found_msg))) as g:
+        g.custom_show_command('show', 'get_afd_profile')
+        g.custom_command('delete', 'delete_afd_profile')
+        g.custom_command('update', 'update_afd_profile')
+        g.custom_command('list', 'list_afd_profiles')
+        g.custom_command('create', 'create_afd_profile')
+        g.custom_command('usage', 'list_resource_usage', client_factory=cf_afd_profiles)
 
     with self.command_group('afd endpoint', cdn_afd_endpoints_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
