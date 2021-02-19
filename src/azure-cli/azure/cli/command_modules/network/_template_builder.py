@@ -29,6 +29,8 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         frontend_ip_config['zones'] = zone
+    elif not zone and cmd.supported_api_version(min_api='2020-08-01'):
+        frontend_ip_config['zones'] = []
 
     if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
         frontend_ip_config['properties']['privateIPAddressVersion'] = private_ip_address_version
