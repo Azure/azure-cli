@@ -281,6 +281,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
+        c.argument('sku', arg_type=get_enum_type(t_sku_name),
+                   help='Note that the SKU name cannot be updated to Standard_ZRS, Premium_LRS or Premium_ZRS, '
+                   'nor can accounts of those SKU names be updated to any other value')
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
                         'existing value.',

@@ -6,6 +6,7 @@ import os
 import time
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
+from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
@@ -72,6 +73,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(virtualNetworkRules)', 0)
         ])
 
+    @serial_test()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(location='southcentralus')
     def test_create_storage_account_with_assigned_identity(self, resource_group):
@@ -83,6 +85,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(result['identity']['principalId'])
         self.assertTrue(result['identity']['tenantId'])
 
+    @serial_test()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(location='southcentralus')
     def test_update_storage_account_with_assigned_identity(self, resource_group):
@@ -1217,7 +1220,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
 class StorageAccountSkuScenarioTest(ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer(name_prefix='clistorage', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='eastus2')
     @StorageAccountPreparer(name_prefix='clistoragesku', location='eastus2euap', kind='StorageV2', sku='Standard_ZRS')
     def test_storage_account_sku(self, resource_group, storage_account):
         self.kwargs = {
