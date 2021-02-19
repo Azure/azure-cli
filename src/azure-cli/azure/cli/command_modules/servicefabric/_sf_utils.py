@@ -13,14 +13,13 @@ logger = get_logger(__name__)
 
 
 def _get_resource_group_by_name(cli_ctx, resource_group_name):
+    from msrestazure.azure_exceptions import CloudError
     try:
         resource_client = resource_client_factory(cli_ctx).resource_groups
         return resource_client.get(resource_group_name)
-    except Exception as ex:  # pylint: disable=broad-except
-        azureError = getattr(ex, 'Azure Error', ex)
-        if hasattr(azureError, 'error') and hasattr(azureError.error, 'error'):  # pylint: disable=no-member 
-            if azureError.error.error == 'ResourceGroupNotFound':  # pylint: disable=no-member 
-                return None
+    except CloudError as ex:
+        if ex.status_code == 404:
+            return None
         raise
 
 
