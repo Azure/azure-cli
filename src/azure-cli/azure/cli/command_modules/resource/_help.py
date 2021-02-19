@@ -2262,11 +2262,9 @@ examples:
 
 helps['ts export'] = """
 type: command
-short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
+short-summary: Export the specified template spec version and artifacts (if any) to the specified output folder.
 examples:
-  - name: Export the specified template spec with all versions.
-    text: az ts export -g testrg --name TemplateSpecName --output-folder C:/path/
-  - name: Export the specified template spec.
+  - name: Export the specified template spec version based on resource ID.
     text: az ts export -s resourceID --output-folder C:/path/
   - name: Export the specified template spec version.
     text: az ts export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
