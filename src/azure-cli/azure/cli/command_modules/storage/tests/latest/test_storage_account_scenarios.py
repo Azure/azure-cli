@@ -1071,6 +1071,19 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 7))
 
+        self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
+        self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+
+        # Test update without properties
+        self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
         with self.assertRaises(ValidationError):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
 
@@ -1089,18 +1102,45 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
 
-        self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
-            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer(name_prefix='cli_file_smb')
+    @StorageAccountPreparer(parameter_name='storage_account1', name_prefix='filesmb1', kind='FileStorage',
+                            sku='Premium_LRS', location='centraluseuap')
+    @StorageAccountPreparer(parameter_name='storage_account2', name_prefix='filesmb2', kind='StorageV2')
+    def test_storage_account_file_smb_multichannel(self, resource_group, storage_account1, storage_account2):
+
+        from azure.core.exceptions import ResourceExistsError
+        self.kwargs.update({
+            'sa': storage_account1,
+            'sa2': storage_account2,
+            'rg': resource_group,
+            'cmd': 'storage account file-service-properties'
+        })
+
+        with self.assertRaisesRegexp(ResourceExistsError, "SMB Multichannel is not supported for the account."):
+            self.cmd('{cmd} update --mc -n {sa2} -g {rg}')
 
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
-            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-            JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', False))
 
-        # Test update without properties
-        self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
-            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+        self.cmd('{cmd} show -n {sa2} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
+            JMESPathCheck('protocolSettings.smb.multichannel', None))
+
+        self.cmd(
+            '{cmd} update --enable-smb-multichannel -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', True))
+
+        self.cmd(
+            '{cmd} update --enable-smb-multichannel false -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', False))
+
+        self.cmd(
+            '{cmd} update --enable-smb-multichannel true -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', True))
 
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
