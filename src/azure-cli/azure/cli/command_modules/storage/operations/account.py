@@ -490,7 +490,7 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
         if enable_change_feed is False:
             change_feed_retention_days = None
         instance.change_feed = cmd.get_models('ChangeFeed')(
-            enabled=enable_change_feed, retentionInDays=change_feed_retention_days)
+            enabled=enable_change_feed, retention_in_days=change_feed_retention_days)
 
     if enable_container_delete_retention is not None:
         if enable_container_delete_retention is False:

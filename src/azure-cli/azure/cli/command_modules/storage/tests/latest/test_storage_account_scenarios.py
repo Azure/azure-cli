@@ -919,7 +919,7 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
 class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix='cli_storage_account_update_change_feed')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location="eastus2euap")
     def test_storage_account_update_change_feed(self, resource_group, storage_account):
         self.kwargs.update({
             'sa': storage_account,
@@ -927,22 +927,20 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             'cmd': 'storage account blob-service-properties update'
         })
 
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} --enable-change-feed true -n {sa} -g {rg}')
-
-        with self.assertRaises(SystemExit):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('{cmd} --enable-change-feed false --change-feed-retention-days 14600 -n {sa} -g {rg}')
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('{cmd} --change-feed-retention-days 1 -n {sa} -g {rg}')
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days -1 -n {sa} -g {rg}')
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 0 -n {sa} -g {rg}')
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 146001 -n {sa} -g {rg}')
 
         result = self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 1 -n {sa} -g {rg}').get_output_in_json()

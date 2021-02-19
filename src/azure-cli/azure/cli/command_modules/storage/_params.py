@@ -412,7 +412,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    arg_group='Change Feed Policy')
         c.argument('change_feed_retention_days',
-                   option_list=['--change-feed-retention-days', '--change-feed-days'],
+                   options_list=['--change-feed-retention-days', '--change-feed-days'],
                    type=int, min_api='2019-06-01', arg_group='Change Feed Policy',
                    validator=validator_change_feed_retention_days,
                    help='Indicates the duration of changeFeed retention in days. '
