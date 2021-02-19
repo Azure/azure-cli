@@ -33,7 +33,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
-                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
+                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity, GpuResource)
 from azure.cli.core.util import sdk_no_wait
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
                               cf_log_analytics_workspace_shared_keys, cf_resource, cf_network)
@@ -73,6 +73,8 @@ def create_container(cmd,
                      location=None,
                      cpu=1,
                      memory=1.5,
+                     gpu=0,
+                     gpu_sku=None,
                      restart_policy='Always',
                      ports=None,
                      protocol=None,
@@ -121,7 +123,7 @@ def create_container(cmd,
     ports = ports or [80]
     protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
-    container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
+    container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory, gpu=gpu, gpu_sku=gpu_sku)
 
     image_registry_credentials = _create_image_registry_credentials(registry_login_server=registry_login_server,
                                                                     registry_username=registry_username,
@@ -415,11 +417,17 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_resource_requirements(cpu, memory):
+def _create_resource_requirements(cpu, memory, gpu, gpu_sku):
     """Create resource requirements. """
-    if cpu or memory:
+    resource_requirements = None
+    if gpu or gpu_sku:
+        gpu_resource = GpuResource(count=gpu, sku=gpu_sku)
+        container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu, gpu=gpu_resource)
+        resource_requirements = ResourceRequirements(requests=container_resource_requests)
+    elif cpu or memory:
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
-        return ResourceRequirements(requests=container_resource_requests)
+        resource_requirements = ResourceRequirements(requests=container_resource_requests)
+    return resource_requirements
 
 
 def _create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):

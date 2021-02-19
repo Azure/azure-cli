@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.mgmt.containerinstance.models import (
-    ContainerGroupRestartPolicy, OperatingSystemTypes, ContainerNetworkProtocol)
+    ContainerGroupRestartPolicy, OperatingSystemTypes, ContainerNetworkProtocol, GpuSku)
 from ._validators import (validate_volume_mount_path, validate_secrets, validate_subnet, validate_msi,
                           validate_gitrepo_directory, validate_network_profile, validate_image)
 
@@ -66,6 +66,8 @@ def load_arguments(self, _):
         c.argument('image', validator=validate_image, help='The container image name')
         c.argument('cpu', type=float, help='The required number of CPU cores of the containers, accurate to one decimal place')
         c.argument('memory', type=float, help='The required memory of the containers in GB, accurate to one decimal place')
+        c.argument('gpu', type=float, help='The required number of GPU cores of the containers, accurate to one decimal place')
+        c.argument('gpu_sku', arg_type=get_enum_type(GpuSku), help='The required GPU SKU')
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The OS type of the containers')
         c.argument('ip_address', arg_type=get_enum_type(IP_ADDRESS_TYPES), help='The IP address type of the container group')
         c.argument('ports', type=int, nargs='+', default=[80], help='A list of ports to open. Space-separated list of ports')
