@@ -25,6 +25,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
 class WebappBasicE2ETest(ScenarioTest):
@@ -1412,6 +1413,35 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
                 webapp_name), cert_thumbprint)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP)
+    @live_only()
+    def test_webapp_ssl_import_national_clouds(self, resource_group):
+        plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
+        # Cert Generated using
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-cert'
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            resource_group, kv_name, 'abfa0a7c-a6b6-4736-8310-5855508787cd'))
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            cert_name, kv_name, pfx_file, cert_password))
+
+        name = self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name)).get_output_in_json()['name']
+
+        self.cmd('webapp config ssl show --resource-group {} --certificate-name {}'.format(resource_group, name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
 
@@ -3254,6 +3284,25 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
 
         self.cmd('functionapp delete -n {functionapp_name}')
         self.cmd('functionapp plan delete -n {plan_name} -y')
+
+
+class WebappOneDeployScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_one_deploy(self, resource_group):
+        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
+        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'OneDeploy'),
+            JMESPathCheck('message', 'OneDeploy'),
+            JMESPathCheck('complete', True)
+        ])
 
 
 if __name__ == '__main__':

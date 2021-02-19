@@ -1788,6 +1788,9 @@ examples:
   - name: Register a provider from RPaaS.
     text: |
         az provider register -n 'Microsoft.Confluent' --accept-terms
+  - name: Register a management group.
+    text: |
+        az provider register --namespace Microsoft.Automation -m mgID
 """
 
 helps['provider unregister'] = """

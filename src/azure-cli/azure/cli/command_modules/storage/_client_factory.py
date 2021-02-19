@@ -195,9 +195,16 @@ def get_account_url(cli_ctx, account_name, service):
     return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
 
 
+def _config_location_mode(kwargs, client_kwargs):
+    location_mode = kwargs.pop('location_mode', None)
+    if location_mode:
+        client_kwargs['_location_mode'] = location_mode
+    return client_kwargs
+
+
 def cf_blob_service(cli_ctx, kwargs):
-    from knack.util import CLIError
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
     connection_string = kwargs.pop('connection_string', None)
@@ -219,10 +226,7 @@ def cf_blob_service(cli_ctx, kwargs):
     account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
 
-    if account_url and credential:
-        return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
-    raise CLIError("Please provide valid connection string, or account name with account key, "
-                   "sas token or login auth mode.")
+    return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
 
 
 def cf_blob_client(cli_ctx, kwargs):
@@ -244,6 +248,7 @@ def cf_container_client(cli_ctx, kwargs):
 
 def cf_adls_service(cli_ctx, kwargs):
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
     connection_string = kwargs.pop('connection_string', None)
@@ -252,15 +257,17 @@ def cf_adls_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
+    location_mode = kwargs.pop('location_mode', None)
+    if location_mode:
+        client_kwargs['_location_mode'] = location_mode
+
     if connection_string:
         return t_adls_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
     account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs')
     credential = account_key or sas_token or token_credential
 
-    if account_url and credential:
-        return t_adls_service(account_url=account_url, credential=credential, **client_kwargs)
-    return None
+    return t_adls_service(account_url=account_url, credential=credential, **client_kwargs)
 
 
 def cf_adls_file_system(cli_ctx, kwargs):
@@ -281,8 +288,8 @@ def cf_or_policy(cli_ctx, _):
 
 
 def cf_queue_service(cli_ctx, kwargs):
-    from knack.util import CLIError
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_QUEUE, '_queue_service_client#QueueServiceClient')
     connection_string = kwargs.pop('connection_string', None)
     account_name = kwargs.pop('account_name', None)
@@ -296,10 +303,7 @@ def cf_queue_service(cli_ctx, kwargs):
     account_url = get_account_url(cli_ctx, account_name=account_name, service='queue')
     credential = account_key or sas_token or token_credential
 
-    if account_url and credential:
-        return t_queue_service(account_url=account_url, credential=credential, **client_kwargs)
-    raise CLIError("Please provide valid connection string, or account name with account key, "
-                   "sas token or login auth mode.")
+    return t_queue_service(account_url=account_url, credential=credential, **client_kwargs)
 
 
 def cf_queue_client(cli_ctx, kwargs):

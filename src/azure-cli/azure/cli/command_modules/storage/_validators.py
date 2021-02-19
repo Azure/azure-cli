@@ -104,6 +104,7 @@ def validate_bypass(namespace):
 
 
 def get_config_value(cmd, section, key, default):
+    logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
 
 
@@ -144,7 +145,8 @@ def validate_client_parameters(cmd, namespace):
                            ' ,'.join(account_key_args))
         return
 
-    if not n.connection_string:
+    # When there is no input for credential, we will read environment variable
+    if not n.connection_string and not n.account_key and not n.sas_token:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
@@ -157,7 +159,7 @@ def validate_client_parameters(cmd, namespace):
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
         n.account_name = get_config_value(cmd, 'storage', 'account', None)
-    if not n.account_key:
+    if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
         n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
@@ -182,7 +184,10 @@ def validate_client_parameters(cmd, namespace):
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting the corresponding environment variables can avoid inputting credentials in '
                        'your command. Please use --help to get more information.')
-        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        try:
+            n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        except Exception:  # pylint: disable=broad-except
+            pass
 
 
 def validate_encryption_key(cmd, namespace):
@@ -1025,6 +1030,21 @@ def get_datetime_type(to_string):
     return datetime_type
 
 
+def get_api_version_type():
+    """ Examples of accepted forms: 2017-12-31 """
+    from datetime import datetime
+
+    def api_version_type(string):
+        """ Validates api version format. Examples of accepted form: 2017-12-31 """
+        accepted_format = '%Y-%m-%d'
+        try:
+            return datetime.strptime(string, accepted_format).strftime(accepted_format)
+        except ValueError:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("Input '{}' not valid. Valid example: 2008-10-27.".format(string))
+    return api_version_type
+
+
 def ipv4_range_type(string):
     """ Validates an IPv4 address or address range. """
     import re
@@ -1407,7 +1427,6 @@ def validate_or_policy(namespace):
 
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
     import re
-    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     # usage check
     if not container and blob:
@@ -1461,18 +1480,7 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         service = 'blob'
         url = 'https://{}.{}.{}'.format(namespace.account_name, service, storage_endpoint)
 
-    # Add sas in url
-    if namespace.sas_token:
-        sas_token = namespace.sas_token.lstrip('?')
-    else:
-        try:
-            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.debug("Cannot generate sas token. %s", ex)
-            sas_token = None
-    if sas_token:
-        return '{}?{}'.format(url, sas_token)
-    return url
+    return service, url
 
 
 def _is_valid_uri(uri):
@@ -1486,14 +1494,34 @@ def _is_valid_uri(uri):
     return False
 
 
+def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions):
+    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+
+    if sas_token:
+        sas_token = sas_token.lstrip('?')
+    else:
+        try:
+            sas_token = _generate_sas_token(cmd, account_name, account_key, service,
+                                            resource_types=resource_types, permissions=permissions)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Cannot generate sas token. %s", ex)
+            sas_token = None
+    if sas_token:
+        return'{}?{}'.format(url, sas_token)
+    return url
+
+
 def validate_azcopy_credential(cmd, namespace):
     # Get destination uri
     if not _is_valid_uri(namespace.destination):
         namespace.url = namespace.destination
-        namespace.destination = get_url_with_sas(
+        service, namespace.destination = get_url_with_sas(
             cmd, namespace, url=namespace.destination,
             container=namespace.destination_container, blob=namespace.destination_blob,
             share=namespace.destination_share, file_path=namespace.destination_file_path)
+        namespace.destination = _add_sas_for_url(cmd, url=namespace.destination, account_name=namespace.account_name,
+                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                 service=service, resource_types='co', permissions='wac')
 
     if not _is_valid_uri(namespace.source):
         # determine if source account is same with destination
@@ -1509,10 +1537,13 @@ def validate_azcopy_credential(cmd, namespace):
 
         # Get source uri
         namespace.url = namespace.source
-        namespace.source = get_url_with_sas(
+        service, namespace.source = get_url_with_sas(
             cmd, namespace, url=namespace.source,
             container=namespace.source_container, blob=namespace.source_blob,
             share=namespace.source_share, file_path=namespace.source_file_path)
+        namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service=service, resource_types='sco', permissions='rl')
 
 
 def validate_text_configuration(cmd, ns):
@@ -1566,3 +1597,9 @@ def get_not_none_validator(attribute_name):
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
     return validate_not_none
+
+
+def validate_policy(namespace):
+    if namespace.id is not None:
+        logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
+                       "policy.")
