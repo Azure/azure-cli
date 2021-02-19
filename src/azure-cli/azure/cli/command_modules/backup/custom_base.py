@@ -402,9 +402,14 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     target_item = None
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
-        target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
-                                                target_server_name, target_server_type,
-                                                workload_type, container_name)
+        if target_container_name is None:
+            target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
+                                                    target_server_name, target_server_type,
+                                                    workload_type, container_name)
+        else:
+            target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
+                                                    target_server_name, target_server_type,
+                                                    workload_type, target_container_name)
     target_container = None
     if target_container_name is not None:
         container_client = backup_protection_containers_cf(cmd.cli_ctx)
