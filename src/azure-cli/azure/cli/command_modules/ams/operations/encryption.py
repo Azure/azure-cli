@@ -16,16 +16,16 @@ def get_encryption(client, resource_group_name, account_name):
     return account_info.encryption
 
 
-def set_encryption(client, resource_group_name, account_name, key_source=None,
+def set_encryption(client, resource_group_name, account_name, key_type=None,
                    current_key_identifier=None, key_identifier=None):
     try:
         account_info = client.get(resource_group_name,
                                   account_name) if resource_group_name else client.get_by_subscription(account_name)
-        if key_source == 'CustomerKey':
+        if key_type == 'CustomerKey':
             key_vault_props = KeyVaultProperties(key_identifier=key_identifier, current_key_identifier=current_key_identifier)
         else:
             key_vault_props = None
-        encryption = AccountEncryption(type=key_source, key_vault_properties=key_vault_props)
+        encryption = AccountEncryption(type=key_type, key_vault_properties=key_vault_props)
         media_service = MediaService(location=account_info.location, identity=account_info.identity,
                                      storage_accounts=account_info.storage_accounts, encryption=encryption)
 

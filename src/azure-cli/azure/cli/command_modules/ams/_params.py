@@ -102,7 +102,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account encryption') as c:
         c.argument('account_name', account_name_arg_type)
-        c.argument('key_source', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.')
+        c.argument('key_type', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.', required=True)
         c.argument('key_identifier', help='The URL of the Key Vault key used to encrypt the account. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).')
         c.argument('current_key_identifier', help='The current key used to encrypt the Media Services account, including the key version.')
 
@@ -370,7 +370,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cross_domain_policy', arg_group='Cross Site Access Policies', help='Filepath to the crossdomain.xml used by Microsoft Silverlight and Adobe Flash. Use @{file} to load from a file.')
         c.argument('stream_options', nargs='+', arg_type=get_enum_type(StreamOptionsFlag), help='The options to use for the LiveEvent. This value is specified at creation time and cannot be updated.')
         c.argument('transcription_lang', help='Live transcription language for the live event. Allowed values: {} See https://go.microsoft.com/fwlink/?linkid=2133742 for more information about the live transcription feature.'.format(", ".join(get_allowed_transcription_languages())))
-        c.argument('use_static_hostname', help='Specifies whether a static hostname would be assigned to the live event preview and ingest endpoints. This value can only be updated if the live event is in Standby state')
+        c.argument('use_static_hostname', help='Specifies whether a static hostname would be assigned to the live event preview and ingest endpoints. This value can only be updated if the live event is in Standby state. If hostname_prefix is not specified, the live event name will be used as the hostname prefix.')
         c.argument('hostname_prefix', help='When useStaticHostname is set to true, hostname_prefix specifies the first part of the hostname assigned to the live event preview and ingest endpoints. The final hostname would be a combination of this prefix, the media service account name and a short code for the Azure Media Services data center.')
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
 
