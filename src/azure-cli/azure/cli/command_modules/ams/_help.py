@@ -60,6 +60,13 @@ helps['ams account encryption show'] = """
 helps['ams account encryption set'] = """
     type: command
     short-summary: Set the encryption settings for an Azure Media Services account.
+    examples:
+        - name: Set the media account's encryption to a customer managed key
+          text: >
+            az ams account encryption create -a myAmsAccount -g myRG --key-source CustomerKey --key-vault-id keyVaultId 
+        - name: Set the media account's encryption to a system managed key
+          text: >
+            az ams account encryption create -a myAmsAccount -g myRG --key-source SystemKey
 """
 
 helps['ams account storage'] = """
@@ -613,15 +620,15 @@ helps['ams account-filter delete'] = """
 
 helps['ams account mru'] = """
     type: group
-    short-summary: Manage media reserved units for an Azure Media Services account.
+    short-summary: Manage media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
 
 helps['ams account mru set'] = """
     type: command
-    short-summary: Set the type and number of media reserved units for an Azure Media Services account.
+    short-summary: Set the type and number of media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
 
 helps['ams account mru show'] = """
     type: command
-    short-summary: Show the details of media reserved units for an Azure Media Services account.
+    short-summary: Show the details of media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
