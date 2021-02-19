@@ -336,6 +336,49 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
+    def test_storage_azcopy_remove_sas(self, resource_group, storage_account, test_dir):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info, prefix='container', length=20)
+
+        sas = self.storage_cmd(
+            'storage account generate-sas --https-only --permissions dlr --resource-types co --services bf --expiry {} -otsv',
+            account_info, expiry).output.strip()
+        # remove blob
+        self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+
+        self.cmd('storage remove -c {} -n readme --account-name {} --sas-token {}'.format(
+            container, storage_account, sas))
+
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 40))
+
+        # remove file share
+        s1 = self.create_share(account_info)
+        d1 = 'dir1'
+
+        local_file = self.create_temp_file(512, full_random=False)
+        src1_file = os.path.join(d1, 'source_file1.txt')
+
+        self.storage_cmd('storage directory create --share-name {} -n {}', account_info, s1, d1)
+        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
+                         src1_file, s1, local_file)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src1_file, s1) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.storage_cmd('storage remove --share-name {} -p "{}" --sas-token {} ',
+                         account_info, s1, src1_file, sas)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src1_file, s1) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
