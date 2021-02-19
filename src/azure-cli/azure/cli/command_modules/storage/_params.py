@@ -395,13 +395,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
 
-    with self.argument_context('storage account network-rule') as c:
+    with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import validate_subnet
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', help='The action of virtual network rule.')
+        c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule',
+                   min_api='2020-08-01-preview')
+        c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
+                   min_api='2020-08-01-preview')
 
     with self.argument_context('storage account blob-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
