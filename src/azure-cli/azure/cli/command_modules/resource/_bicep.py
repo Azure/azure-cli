@@ -17,7 +17,7 @@ import semver
 
 from six.moves.urllib.request import urlopen
 from knack.log import get_logger
-from knack.util import CLIError
+from azure.cli.core.azclierror import FileOperationError, ValidationError, UnclassifiedUserFault, ClientRequestError
 
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
@@ -32,10 +32,10 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
         if auto_install:
             ensure_bicep_installation()
         else:
-            raise CLIError('Bicep CLI not found. Install it now by running "az bicep install".')
+            raise FileOperationError('Bicep CLI not found. Install it now by running "az bicep install".')
     elif check_upgrade:
-        with suppress(CLIError):
-            # Checking upgrade should not raise CLIError.
+        with suppress(ClientRequestError):
+            # Checking upgrade should ignore connection issues.
             # Users may continue using the current installed version.
             installed_version = _get_bicep_installed_version(installation_path)
             latest_release_tag = get_bicep_latest_release_tag()
@@ -81,7 +81,7 @@ def ensure_bicep_installation(release_tag=None):
 
         print(f'Successfully installed Bicep CLI to "{installation_path}".')
     except IOError as err:
-        raise CLIError(f"Error while attempting to download Bicep CLI: {err}")
+        raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 
 
 def is_bicep_file(file_path):
@@ -93,7 +93,7 @@ def get_bicep_available_release_tags():
         response = requests.get("https://api.github.com/repos/Azure/bicep/releases")
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
-        raise CLIError(f"Error while attempting to retrieve available Bicep versions: {err}.")
+        raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
 
 
 def get_bicep_latest_release_tag():
@@ -101,7 +101,7 @@ def get_bicep_latest_release_tag():
         response = requests.get("https://api.github.com/repos/Azure/bicep/releases/latest")
         return response.json()["tag_name"]
     except IOError as err:
-        raise CLIError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+        raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
 
 
 def _get_bicep_installed_version(bicep_executable_path):
@@ -119,7 +119,7 @@ def _get_bicep_download_url(system, release_tag):
     if system == "Darwin":
         return download_url.format("bicep-osx-x64")
 
-    raise CLIError(f'The platform "{format(system)}" is not supported.')
+    raise ValidationError(f'The platform "{format(system)}" is not supported.')
 
 
 def _get_bicep_installation_path(system):
@@ -130,7 +130,7 @@ def _get_bicep_installation_path(system):
     if system in ("Linux", "Darwin"):
         return os.path.join(installation_folder, "bicep")
 
-    raise CLIError(f'The platform "{format(system)}" is not supported.')
+    raise ValidationError(f'The platform "{format(system)}" is not supported.')
 
 
 def _extract_semver(text):
@@ -145,4 +145,4 @@ def _run_command(bicep_installation_path, args):
         process.check_returncode()
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
-        raise CLIError(process.stderr.decode("utf-8"))
+        raise UnclassifiedUserFault(process.stderr.decode("utf-8"))
