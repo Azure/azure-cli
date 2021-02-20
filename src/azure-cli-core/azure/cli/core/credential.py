@@ -7,6 +7,7 @@ from typing import Tuple, List
 
 import requests
 from azure.cli.core._identity import resource_to_scopes
+from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.util import in_cloud_console
 from azure.core.credentials import AccessToken
 from azure.core.exceptions import ClientAuthenticationError
@@ -53,22 +54,20 @@ class CredentialAdaptor:
             if in_cloud_console():
                 CredentialAdaptor._log_hostname()
 
-            err = getattr(err, 'message', None) or ''
-            if 'authentication is required' in err:
-                raise CLIError("Authentication is migrated to Microsoft identity platform (v2.0). {}".format(
-                    "Please run 'az login' to login." if not in_cloud_console() else ''))
-            if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
+            err_message = getattr(err, 'error_details', None) or ''
+            if 'AADSTS70008' in err_message:  # all errors starting with 70008 should be creds expiration related
                 raise CLIError("Credentials have expired due to inactivity. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50079' in err:
+            if 'AADSTS50079' in err_message:
                 raise CLIError("Configuration of your account was changed. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50173' in err:
-                raise CLIError("The credential data used by CLI has been expired because you might have changed or "
-                               "reset the password. {}".format(
-                                   "Please clear browser's cookies and run 'az login'"
-                                   if not in_cloud_console() else ''))
-            raise CLIError(err)
+            if 'AADSTS50173' in err_message:
+                refined_message = "The refresh token has been revoked."
+                if not in_cloud_console():
+                    refined_message = refined_message + " Please run `az login`."
+                refined_message = refined_message + "\n\nError detail:\n" + err.error_details
+                raise AuthenticationError(refined_message) from err
+            raise CLIError(err_message)
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))

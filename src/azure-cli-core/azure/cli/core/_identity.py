@@ -86,7 +86,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         #   - Access token
         #   - Service principal secret
         #   - Service principal certificate
-        # self._credential_kwargs['logging_enable'] = True
+        self._credential_kwargs['logging_enable'] = True
 
     def _load_msal_cache(self):
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95

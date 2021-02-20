@@ -49,7 +49,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack==0.8.0rc2',
-    'azure-identity==1.5.0b2',
+    'azure-identity==1.6.0b1',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT==1.7.1',
