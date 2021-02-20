@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.19.1
+++++++
+
+**Key Vault**
+
+* Hotfix: Dependency package `azure-keyvault-administration` is pinned to 4.0.0b1
+
 2.19.0
 ++++++
 

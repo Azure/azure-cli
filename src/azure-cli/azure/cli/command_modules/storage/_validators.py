@@ -1443,7 +1443,7 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
 
     # get url
     storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
-
+    service = None
     if url is not None:
         # validate source is uri or local path
         storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
@@ -1457,6 +1457,9 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
                 service = 'file'
             else:
                 raise ValueError('{} is not valid storage endpoint.'.format(url))
+        else:
+            logger.info("%s is not Azure storage url.", url)
+            return service, url
     # validate credential
     validate_client_parameters(cmd, namespace)
     kwargs = {'account_name': namespace.account_name,
