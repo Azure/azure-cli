@@ -7,6 +7,7 @@ from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPrepa
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse
 
+
 class TestMonitorAutoscaleScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale')
