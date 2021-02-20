@@ -19,9 +19,8 @@ from azure.mgmt.cdn.operations import (AFDOriginGroupsOperations, AFDOriginsOper
                                        ProfilesOperations)
 
 from azure.cli.core.util import (sdk_no_wait)
-from azure.cli.core.azclierror import (ResourceNotFoundError)
+from azure.cli.core.azclierror import (ResourceNotFoundError, InvalidArgumentValueError)
 
-from knack.util import CLIError
 from knack.log import get_logger
 from msrest.polling import LROPoller, NoPolling
 
@@ -650,10 +649,10 @@ def create_afd_security_policy(client: SecurityPoliciesOperations,
 
     if any([("/afdendpoints/" not in domain.lower() and
              "/customdomains/" not in domain.lower()) for domain in domains]):
-        raise CLIError('Domain should either be endpoint ID or custom domain ID.')
+        raise InvalidArgumentValueError('Domain should either be endpoint ID or custom domain ID.')
 
     if "/frontdoorwebapplicationfirewallpolicies/" not in waf_policy.lower():
-        raise CLIError('waf_policy should be valid Front Door WAF policy ID.')
+        raise InvalidArgumentValueError('waf_policy should be valid Front Door WAF policy ID.')
 
     # Add patterns and multiple domains support in the feature
     parameters = SecurityPolicyWebApplicationFirewallParameters(
@@ -677,10 +676,10 @@ def update_afd_security_policy(client: SecurityPoliciesOperations,
 
     if domains is not None and any([("/afdendpoints/" not in domain.lower() and
                                      "/customdomains/" not in domain.lower()) for domain in domains]):
-        raise CLIError('Domain should either be endpoint ID or custom domain ID.')
+        raise InvalidArgumentValueError('Domain should be either endpoint ID or custom domain ID.')
 
     if waf_policy is not None and "/frontdoorwebapplicationfirewallpolicies/" not in waf_policy:
-        raise CLIError('waf_policy should be Front Door WAF policy ID.')
+        raise InvalidArgumentValueError('waf_policy should be Front Door WAF policy ID.')
 
     existing = client.get(resource_group_name, profile_name, security_policy_name)
 
@@ -706,10 +705,10 @@ def create_afd_secret(client: SecretsOperations,
                       use_latest_version: bool = None):
 
     if "/certificates/" not in secret_source.lower():
-        raise CLIError('secret_source should be valid Azure key vault certificate ID.')
+        raise InvalidArgumentValueError('secret_source should be valid Azure key vault certificate ID.')
 
     if secret_version is None and not use_latest_version:
-        raise CLIError('Either specify secret_version or enable use_latest_version.')
+        raise InvalidArgumentValueError('Either specify secret_version or enable use_latest_version.')
 
     # Only support CustomerCertificate for the moment
     parameters = None
@@ -773,10 +772,10 @@ def create_afd_custom_domain(client: AFDCustomDomainsOperations,
                              no_wait: bool = None):
 
     if azure_dns_zone is not None and "/dnszones/" not in azure_dns_zone.lower():
-        raise CLIError('azure_dns_zone should be valid Azure dns zone ID.')
+        raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
 
     if secret is not None and "/secrets/" not in secret.lower():
-        raise CLIError('secret should be valid Azure Front Door secret ID.')
+        raise InvalidArgumentValueError('secret should be valid Azure Front Door secret ID.')
 
     tls_settings = AFDDomainHttpsParameters(certificate_type=certificate_type,
                                             minimum_tls_version=minimum_tls_version,
@@ -799,7 +798,7 @@ def update_afd_custom_domain(client: AFDCustomDomainsOperations,
                              secret: str = None):
 
     if azure_dns_zone is not None and "/dnszones/" not in azure_dns_zone.lower():
-        raise CLIError('azure_dns_zone should be valid Azure dns zone ID.')
+        raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
 
     if secret is not None and "/secrets/" not in secret.lower():
         secret = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \

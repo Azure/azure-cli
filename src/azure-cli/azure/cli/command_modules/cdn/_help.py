@@ -1058,6 +1058,8 @@ examples:
 helps['afd origin-group'] = """
 type: group
 short-summary: Manage origin groups under the specified profile.
+long-summary: >
+    An origin group is a set of origins to which Front Door load balances your client requests.
 """
 
 helps['afd origin-group create'] = """
@@ -1094,6 +1096,9 @@ examples:
 helps['afd origin'] = """
 type: group
 short-summary: Manage origins within the specified origin group.
+long-summary: >
+    Origins are the application servers where Front Door will route your client requests.
+    Utilize any publicly accessible application server, including App Service, Traffic Manager, Private Link, and many others.
 """
 
 helps['afd origin create'] = """
@@ -1193,6 +1198,8 @@ examples:
 helps['afd endpoint'] = """
 type: group
 short-summary: Manage AFD endpoints within the specified profile.
+long-summary: >
+    An endpoint is a logical grouping of domains and their associated configurations.
 """
 
 helps['afd endpoint create'] = """
@@ -1242,8 +1249,9 @@ examples:
 
 helps['afd route'] = """
 type: group
-short-summary: Manage routes under an AFD endpoint. Routes are used to associate doamins and origin groups.
-               All domains and origin groups must be connected with a route to enable HTTPS, caching, and custom forwarding logic on specific route paths.
+short-summary: Manage routes under an AFD endpoint.
+long-summary: >
+    A route maps your domains and matching URL path patterns to a specific origin group.
 """
 
 helps['afd route create'] = """
@@ -1283,8 +1291,10 @@ examples:
 
 helps['afd security-policy'] = """
 type: group
-short-summary: Manage security policies within the specified profile. Security policies could be used to apply a web application firewall policy to
-               protect your web applications against OWASP top-10 vulnerabilities and block malicious bots.
+short-summary: Manage security policies within the specified profile.
+long-summary: >
+    Security policies could be used to apply a web application firewall policy to protect your web applications against OWASP top-10 vulnerabilities and
+    block malicious bots.
 """
 
 helps['afd security-policy create'] = """
@@ -1321,8 +1331,10 @@ examples:
 
 helps['afd secret'] = """
 type: group
-short-summary: Manage secrets within the specified profile. Secrets are used to reference your own certificate stored in Azure Key Vault.
-               You must specifiy the secret name when creating custom domain if you want to use your own certificate for TLS encryption.
+short-summary: Manage secrets within the specified profile.
+long-summary: >
+    Secrets are used to reference your own certificate stored in Azure Key Vault.
+    You must specifiy the secret name when creating custom domain if you want to use your own certificate for TLS encryption.
 """
 
 helps['afd secret create'] = """
@@ -1374,6 +1386,8 @@ examples:
 helps['afd rule-set'] = """
 type: group
 short-summary: Manage rule set for the specified profile.
+long-summary: >
+    Rules Set allows you to customize how HTTP requests are handled at the edge and provides more controls of the behaviors of your web application.
 """
 
 helps['afd rule-set create'] = """
