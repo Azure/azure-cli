@@ -431,11 +431,11 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
                                checks=[
                                    self.check('status', 'Succeeded'),
                                    self.exists('startTime'),
-                                   self.exists('id'),
-                                   self.exists('azureStorageBlobContainerUri')
+                                   self.exists('jobId'),
+                                   self.exists('folderUrl')
                                ]).get_output_in_json()
 
-        self.kwargs['backup_folder'] = backup_data['azureStorageBlobContainerUri'].split('/')[-1]
+        self.kwargs['backup_folder'] = backup_data['folderUrl'].split('/')[-1]
 
         self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=self.check('length(@)', 1))
         self.cmd('az keyvault key delete -n {key_name} --hsm-name {hsm_name}')
@@ -445,7 +445,6 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
         self.cmd('az keyvault key restore --hsm-name {hsm_name} --blob-container-name {blob} '
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}" '
-                 '--backup-folder "{backup_folder}" '
                  '--name {key_name}', checks=self.check('status', 'Succeeded'))
 
         self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=[
@@ -481,8 +480,8 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  checks=[
                      self.check('status', 'Succeeded'),
                      self.exists('startTime'),
-                     self.exists('id'),
-                     self.exists('azureStorageBlobContainerUri')
+                     self.exists('jobId'),
+                     self.exists('folderUrl')
                  ])
 
         backup_data = self.cmd('az keyvault backup start --hsm-name {hsm_name} --blob-container-name {blob} '
@@ -491,19 +490,18 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                checks=[
                                    self.check('status', 'Succeeded'),
                                    self.exists('startTime'),
-                                   self.exists('id'),
-                                   self.exists('azureStorageBlobContainerUri')
+                                   self.exists('jobId'),
+                                   self.exists('folderUrl')
                                ]).get_output_in_json()
 
-        self.kwargs['backup_folder'] = backup_data['azureStorageBlobContainerUri'].split('/')[-1]
+        self.kwargs['backup_folder'] = backup_data['folderUrl'].split('/')[-1]
         self.cmd('az keyvault restore start --hsm-name {hsm_name} --blob-container-name {blob} '
                  '--storage-account-name {storage_account} '
-                 '--storage-container-SAS-token "{sas}" '
-                 '--backup-folder "{backup_folder}"',
+                 '--storage-container-SAS-token "{sas}" ',
                  checks=[
                      self.check('status', 'Succeeded'),
                      self.exists('startTime'),
-                     self.exists('id')
+                     self.exists('jobId')
                  ])
 
 
