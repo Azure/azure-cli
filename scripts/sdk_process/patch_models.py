@@ -97,10 +97,10 @@ def solve_one_model(models_module, output_folder, track2=False):
     # Only sort based on the first element in the tuple
     models_classes.sort(key=lambda x: x[0])
 
-    py2_models_classes = [
-        (len_mro, path.replace("_py3.py", ".py"), None)
-        for len_mro, path, _ in models_classes
-    ]
+    # py2_models_classes = [
+    #     (len_mro, path.replace("_py3.py", ".py"), None)
+    #     for len_mro, path, _ in models_classes
+    # ]
 
     paged_models_classes = [
         (inspect.getfile(model_class), model_class) for model_name, model_class in vars(models_module).items()
@@ -119,7 +119,7 @@ def solve_one_model(models_module, output_folder, track2=False):
         enum_file_module_name = None
 
     write_model_file(Path(output_folder, "models_py3.py"), models_classes, track2=track2)
-    write_model_file(Path(output_folder, "models.py"), py2_models_classes, track2=track2)
+    # write_model_file(Path(output_folder, "models.py"), py2_models_classes, track2=track2)
     write_paging_file(Path(output_folder, "paged_models.py"), paged_models_classes)
     write_init(
         Path(output_folder, "__init__.py"),
