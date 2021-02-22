@@ -3851,6 +3851,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
         cmd.cli_ctx.config.set_value('defaults', 'location', loc)
         cmd.cli_ctx.config.set_value('defaults', 'web', name)
+        cmd.cli_ctx.config.set_value('defaults', 'runtime', runtime_version)
+        cmd.cli_ctx.config.set_value('defaults', 'os', os_name.lower())
     return create_json
 
 
