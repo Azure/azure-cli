@@ -368,6 +368,7 @@ def load_command_table(self, _):
 
     with self.command_group('afd custom-domain', cdn_afd_domain_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
+        g.wait_command('wait')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_custom_domain', client_factory=cf_afd_custom_domain,

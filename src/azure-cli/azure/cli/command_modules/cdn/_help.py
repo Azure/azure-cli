@@ -1195,6 +1195,14 @@ examples:
         az afd custom-domain list -g group --profile-name profile
 """
 
+helps['afd custom-domain wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the custom domain is met.
+examples:
+  - name: Wait until a custom domain is created.
+    text: az afd custom-domain wait -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain --created
+"""
+
 helps['afd endpoint'] = """
 type: group
 short-summary: Manage AFD endpoints within the specified profile.

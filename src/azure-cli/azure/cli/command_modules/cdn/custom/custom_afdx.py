@@ -775,7 +775,8 @@ def create_afd_custom_domain(client: AFDCustomDomainsOperations,
         raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
 
     if secret is not None and "/secrets/" not in secret.lower():
-        raise InvalidArgumentValueError('secret should be valid Azure Front Door secret ID.')
+        secret = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+                 f'/providers/Microsoft.Cdn/profiles/{profile_name}/secrets/{secret}'
 
     tls_settings = AFDDomainHttpsParameters(certificate_type=certificate_type,
                                             minimum_tls_version=minimum_tls_version,
