@@ -11,7 +11,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
@@ -21,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_mongodb_collection000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001","name":"cli_test_cosmosdb_mongodb_collection000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-21T03:29:52Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001","name":"cli_test_cosmosdb_mongodb_collection000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-22T07:51:06Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 21 Feb 2021 03:28:01 GMT
+      - Mon, 22 Feb 2021 07:49:18 GMT
       expires:
       - '-1'
       pragma:
@@ -47,7 +47,8 @@ interactions:
 - request:
     body: '{"location": "westus", "kind": "MongoDB", "properties": {"locations": [{"locationName":
       "westus", "failoverPriority": 0, "isZoneRedundant": false}], "databaseAccountOfferType":
-      "Standard", "apiProperties": {}, "enableAnalyticalStorage": true}}'
+      "Standard", "apiProperties": {"serverVersion": "3.2"}, "enableAnalyticalStorage":
+      true}}'
     headers:
       Accept:
       - application/json
@@ -58,11 +59,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '243'
+      - '265'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
@@ -73,24 +74,24 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003","name":"cli000003","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-02-21T03:28:06.264774Z"},"properties":{"provisioningState":"Creating","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":true,"instanceId":"14c72a4d-611e-46fb-84c2-f77530cb7b93","createMode":"Default","databaseAccountOfferType":"Standard","enableCassandraConnector":false,"connectorOffer":"","networkAclBypass":0,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{},"writeLocations":[{"id":"cli000003-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-02-22T07:49:24.3304901Z"},"properties":{"provisioningState":"Creating","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":true,"instanceId":"33d3e49f-e2d4-46aa-836c-c2dcdfe18ab4","createMode":"Default","databaseAccountOfferType":"Standard","enableCassandraConnector":false,"connectorOffer":"","networkAclBypass":0,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.2"},"configurationOverrides":{},"writeLocations":[{"id":"cli000003-westus","locationName":"West
         US","provisioningState":"Creating","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli000003-westus","locationName":"West
         US","provisioningState":"Creating","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli000003-westus","locationName":"West
         US","provisioningState":"Creating","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli000003-westus","locationName":"West
-        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":1}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
+        US","failoverPriority":0}],"cors":[],"capabilities":[],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":1}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a45031e2-546d-4e85-bb7d-430244a2caca?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/89670a18-c63e-4293-98eb-f431a3d8090f?api-version=2021-01-15
       cache-control:
       - no-store, no-cache
       content-length:
-      - '1951'
+      - '1930'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:28:06 GMT
+      - Mon, 22 Feb 2021 07:49:25 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/operationResults/a45031e2-546d-4e85-bb7d-430244a2caca?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/operationResults/89670a18-c63e-4293-98eb-f431a3d8090f?api-version=2021-01-15
       pragma:
       - no-cache
       server:
@@ -122,12 +123,12 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a45031e2-546d-4e85-bb7d-430244a2caca?api-version=2021-01-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/89670a18-c63e-4293-98eb-f431a3d8090f?api-version=2021-01-15
   response:
     body:
       string: '{"status":"Dequeued"}'
@@ -139,7 +140,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:28:37 GMT
+      - Mon, 22 Feb 2021 07:49:56 GMT
       pragma:
       - no-cache
       server:
@@ -169,12 +170,12 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a45031e2-546d-4e85-bb7d-430244a2caca?api-version=2021-01-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/89670a18-c63e-4293-98eb-f431a3d8090f?api-version=2021-01-15
   response:
     body:
       string: '{"status":"Dequeued"}'
@@ -186,7 +187,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:29:08 GMT
+      - Mon, 22 Feb 2021 07:50:26 GMT
       pragma:
       - no-cache
       server:
@@ -216,59 +217,12 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a45031e2-546d-4e85-bb7d-430244a2caca?api-version=2021-01-15
-  response:
-    body:
-      string: '{"status":"Dequeued"}'
-    headers:
-      cache-control:
-      - no-store, no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json
-      date:
-      - Sun, 21 Feb 2021 03:29:38 GMT
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-gatewayversion:
-      - version=2.11.0
-    status:
-      code: 200
-      message: Ok
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cosmosdb create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
-      User-Agent:
-      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a45031e2-546d-4e85-bb7d-430244a2caca?api-version=2021-01-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/89670a18-c63e-4293-98eb-f431a3d8090f?api-version=2021-01-15
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -280,7 +234,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:08 GMT
+      - Mon, 22 Feb 2021 07:50:57 GMT
       pragma:
       - no-cache
       server:
@@ -310,7 +264,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
@@ -319,20 +273,20 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003","name":"cli000003","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-02-21T03:29:15.3823375Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000003.documents.azure.com:443/","mongoEndpoint":"https://cli000003.mongo.cosmos.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":true,"instanceId":"14c72a4d-611e-46fb-84c2-f77530cb7b93","createMode":"Default","databaseAccountOfferType":"Standard","enableCassandraConnector":false,"connectorOffer":"","networkAclBypass":0,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnableBsonSchema":"True"},"writeLocations":[{"id":"cli000003-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-02-22T07:50:15.8529396Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000003.documents.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":true,"instanceId":"33d3e49f-e2d4-46aa-836c-c2dcdfe18ab4","createMode":"Default","databaseAccountOfferType":"Standard","enableCassandraConnector":false,"connectorOffer":"","networkAclBypass":0,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.2"},"configurationOverrides":{"EnableBsonSchema":"True"},"writeLocations":[{"id":"cli000003-westus","locationName":"West
         US","documentEndpoint":"https://cli000003-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli000003-westus","locationName":"West
         US","documentEndpoint":"https://cli000003-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli000003-westus","locationName":"West
         US","documentEndpoint":"https://cli000003-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli000003-westus","locationName":"West
-        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":1}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
+        US","failoverPriority":0}],"cors":[],"capabilities":[],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":1}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '2352'
+      - '2260'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:09 GMT
+      - Mon, 22 Feb 2021 07:50:57 GMT
       pragma:
       - no-cache
       server:
@@ -362,7 +316,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --kind --enable-analytical-storage
+      - -n -g --kind --enable-analytical-storage --server-version
       User-Agent:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
@@ -373,20 +327,20 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003","name":"cli000003","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-02-21T03:29:15.3823375Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000003.documents.azure.com:443/","mongoEndpoint":"https://cli000003.mongo.cosmos.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":true,"instanceId":"14c72a4d-611e-46fb-84c2-f77530cb7b93","createMode":"Default","databaseAccountOfferType":"Standard","enableCassandraConnector":false,"connectorOffer":"","networkAclBypass":0,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnableBsonSchema":"True"},"writeLocations":[{"id":"cli000003-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-02-22T07:50:15.8529396Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000003.documents.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":true,"instanceId":"33d3e49f-e2d4-46aa-836c-c2dcdfe18ab4","createMode":"Default","databaseAccountOfferType":"Standard","enableCassandraConnector":false,"connectorOffer":"","networkAclBypass":0,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.2"},"configurationOverrides":{"EnableBsonSchema":"True"},"writeLocations":[{"id":"cli000003-westus","locationName":"West
         US","documentEndpoint":"https://cli000003-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli000003-westus","locationName":"West
         US","documentEndpoint":"https://cli000003-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli000003-westus","locationName":"West
         US","documentEndpoint":"https://cli000003-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli000003-westus","locationName":"West
-        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":1}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
+        US","failoverPriority":0}],"cors":[],"capabilities":[],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":1}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '2352'
+      - '2260'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:09 GMT
+      - Mon, 22 Feb 2021 07:50:58 GMT
       pragma:
       - no-cache
       server:
@@ -433,7 +387,7 @@ interactions:
       string: '{"status":"Enqueued"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/2bd4ac0a-6701-45ee-a488-a271b3146d86?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/71cb37b7-47eb-4075-b844-0a4dd1da214e?api-version=2021-01-15
       cache-control:
       - no-store, no-cache
       content-length:
@@ -441,9 +395,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:16 GMT
+      - Mon, 22 Feb 2021 07:50:59 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/operationResults/2bd4ac0a-6701-45ee-a488-a271b3146d86?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/operationResults/71cb37b7-47eb-4075-b844-0a4dd1da214e?api-version=2021-01-15
       pragma:
       - no-cache
       server:
@@ -476,7 +430,7 @@ interactions:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/2bd4ac0a-6701-45ee-a488-a271b3146d86?api-version=2021-01-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/71cb37b7-47eb-4075-b844-0a4dd1da214e?api-version=2021-01-15
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -488,7 +442,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:47 GMT
+      - Mon, 22 Feb 2021 07:51:30 GMT
       pragma:
       - no-cache
       server:
@@ -526,16 +480,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004?api-version=2021-01-15
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases","name":"cli000004","properties":{"resource":{"id":"cli000004"}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases","name":"cli000004","properties":{"resource":{"id":"cli000004","_rid":"EbNnAA==","_etag":"\"00003410-0000-0700-0000-603362680000\"","_ts":1613980264}}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '388'
+      - '474'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:48 GMT
+      - Mon, 22 Feb 2021 07:51:31 GMT
       pragma:
       - no-cache
       server:
@@ -575,17 +529,31 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
   response:
     body:
-      string: '{"code":"NotFound","message":"the collection cli000004 doesn''t exist.\r\nActivityId:
-        73ef7ce8-73f5-11eb-ac4f-1c1adfb60c2d, Microsoft.Azure.Documents.Common/2.11.0"}'
+      string: '{"code":"NotFound","message":"Message: {\"code\":\"NotFound\",\"message\":\"Message:
+        {\\\"Errors\\\":[\\\"Resource Not Found. Learn more: https:\\\\/\\\\/aka.ms\\\\/cosmosdb-tsg-not-found\\\"]}\\r\\nActivityId:
+        0ae94679-74e3-11eb-a325-1c1adfb60c2d, Request URI: /apps/3a2b6359-3cb1-438f-9f37-fcd775261bff/services/52d28053-1ce5-4518-9325-808238a8862d/partitions/d571aef7-498f-495a-b876-ddc711524c73/replicas/132584517061444298s,
+        RequestStats: \\r\\nRequestStartTime: 2021-02-22T07:51:33.3517373Z, RequestEndTime:
+        2021-02-22T07:51:33.3717319Z,  Number of regions attempted:1\\r\\nResponseTime:
+        2021-02-22T07:51:33.3717319Z, StoreResult: StorePhysicalAddress: rntbd://10.0.0.28:11300/apps/3a2b6359-3cb1-438f-9f37-fcd775261bff/services/52d28053-1ce5-4518-9325-808238a8862d/partitions/d571aef7-498f-495a-b876-ddc711524c73/replicas/132584517061444298s,
+        LSN: 7, GlobalCommittedLsn: 7, PartitionKeyRangeId: , IsValid: True, StatusCode:
+        404, SubStatusCode: 0, RequestCharge: 1, ItemLSN: -1, SessionToken: -1#7,
+        UsingLocalLSN: False, TransportException: null, ResourceType: Collection,
+        OperationType: Read\\r\\nResponseTime: 2021-02-22T07:51:33.3717319Z, StoreResult:
+        StorePhysicalAddress: rntbd://10.0.0.27:11000/apps/3a2b6359-3cb1-438f-9f37-fcd775261bff/services/52d28053-1ce5-4518-9325-808238a8862d/partitions/d571aef7-498f-495a-b876-ddc711524c73/replicas/132584517061444296s,
+        LSN: 7, GlobalCommittedLsn: 7, PartitionKeyRangeId: , IsValid: True, StatusCode:
+        404, SubStatusCode: 0, RequestCharge: 1, ItemLSN: -1, SessionToken: -1#7,
+        UsingLocalLSN: False, TransportException: null, ResourceType: Collection,
+        OperationType: Read\\r\\n, SDK: Microsoft.Azure.Documents.Common/2.11.0\"},
+        Request URI: /dbs/cli000004/colls/cli000002, RequestStats: , SDK: Microsoft.Azure.Documents.Common/2.11.0"}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '170'
+      - '1795'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:50 GMT
+      - Mon, 22 Feb 2021 07:51:32 GMT
       pragma:
       - no-cache
       server:
@@ -629,7 +597,7 @@ interactions:
       string: '{"status":"Enqueued"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/8bbff317-17f6-46ae-9b90-076b8692f428?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/1e8c74b5-d99a-4a16-91b5-d3a67f38eb0e?api-version=2021-01-15
       cache-control:
       - no-store, no-cache
       content-length:
@@ -637,9 +605,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:30:52 GMT
+      - Mon, 22 Feb 2021 07:51:34 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002/operationResults/8bbff317-17f6-46ae-9b90-076b8692f428?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002/operationResults/1e8c74b5-d99a-4a16-91b5-d3a67f38eb0e?api-version=2021-01-15
       pragma:
       - no-cache
       server:
@@ -651,7 +619,7 @@ interactions:
       x-ms-gatewayversion:
       - version=2.11.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -672,7 +640,7 @@ interactions:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/8bbff317-17f6-46ae-9b90-076b8692f428?api-version=2021-01-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/1e8c74b5-d99a-4a16-91b5-d3a67f38eb0e?api-version=2021-01-15
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -684,7 +652,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:31:23 GMT
+      - Mon, 22 Feb 2021 07:52:04 GMT
       pragma:
       - no-cache
       server:
@@ -722,16 +690,216 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","analyticalStorageTtl":3000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]}}]}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","_rid":"EbNnAPsgvaE=","_etag":"\"00003610-0000-0700-0000-6033628a0000\"","_ts":1613980298,"analyticalStorageTtl":3000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]},"options":{}},{"key":{"keys":["DocumentDBDefaultIndex"]},"options":{}}]}}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '527'
+      - '687'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:31:24 GMT
+      - Mon, 22 Feb 2021 07:52:05 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.11.0
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb mongodb collection update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -d -n --idx --analytical-storage-ttl
+      User-Agent:
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","_rid":"EbNnAPsgvaE=","_etag":"\"00003610-0000-0700-0000-6033628a0000\"","_ts":1613980298,"analyticalStorageTtl":3000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]},"options":{}},{"key":{"keys":["DocumentDBDefaultIndex"]},"options":{}}]}}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '687'
+      content-type:
+      - application/json
+      date:
+      - Mon, 22 Feb 2021 07:52:07 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.11.0
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: '{"properties": {"resource": {"id": "cli000002", "shardKey": {"theShardKey":
+      "Hash"}, "indexes": [{"key": {"keys": ["_ts"]}, "options": {"expireAfterSeconds":
+      1000}}], "analyticalStorageTtl": 6000}, "options": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb mongodb collection update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '219'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -a -d -n --idx --analytical-storage-ttl
+      User-Agent:
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
+  response:
+    body:
+      string: '{"status":"Enqueued"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/3329baeb-5195-4498-8e6e-97b3fffaaa28?api-version=2021-01-15
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json
+      date:
+      - Mon, 22 Feb 2021 07:52:07 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002/operationResults/3329baeb-5195-4498-8e6e-97b3fffaaa28?api-version=2021-01-15
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.11.0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb mongodb collection update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -d -n --idx --analytical-storage-ttl
+      User-Agent:
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/3329baeb-5195-4498-8e6e-97b3fffaaa28?api-version=2021-01-15
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json
+      date:
+      - Mon, 22 Feb 2021 07:52:38 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.11.0
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb mongodb collection update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -d -n --idx --analytical-storage-ttl
+      User-Agent:
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","_rid":"EbNnAPsgvaE=","_etag":"\"00003c10-0000-0700-0000-603362ac0000\"","_ts":1613980332,"analyticalStorageTtl":6000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]},"options":{}},{"key":{"keys":["_ts"]},"options":{"expireAfterSeconds":1000}},{"key":{"keys":["DocumentDBDefaultIndex"]},"options":{}}]}}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '750'
+      content-type:
+      - application/json
+      date:
+      - Mon, 22 Feb 2021 07:52:39 GMT
       pragma:
       - no-cache
       server:
@@ -771,16 +939,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","analyticalStorageTtl":3000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]}}]}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","_rid":"EbNnAPsgvaE=","_etag":"\"00003c10-0000-0700-0000-603362ac0000\"","_ts":1613980332,"analyticalStorageTtl":6000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]},"options":{}},{"key":{"keys":["_ts"]},"options":{"expireAfterSeconds":1000}},{"key":{"keys":["DocumentDBDefaultIndex"]},"options":{}}]}}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '527'
+      - '750'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:31:26 GMT
+      - Mon, 22 Feb 2021 07:52:42 GMT
       pragma:
       - no-cache
       server:
@@ -820,16 +988,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections?api-version=2021-01-15
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","analyticalStorageTtl":3000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]}}]}}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","_rid":"EbNnAPsgvaE=","_etag":"\"00003c10-0000-0700-0000-603362ac0000\"","_ts":1613980332,"analyticalStorageTtl":6000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]},"options":{}},{"key":{"keys":["_ts"]},"options":{"expireAfterSeconds":1000}},{"key":{"keys":["DocumentDBDefaultIndex"]},"options":{}}]}}}]}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '539'
+      - '762'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:31:27 GMT
+      - Mon, 22 Feb 2021 07:52:42 GMT
       pragma:
       - no-cache
       server:
@@ -869,16 +1037,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002?api-version=2021-01-15
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","analyticalStorageTtl":3000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]}}]}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli000002","properties":{"resource":{"id":"cli000002","_rid":"EbNnAPsgvaE=","_etag":"\"00003c10-0000-0700-0000-603362ac0000\"","_ts":1613980332,"analyticalStorageTtl":6000,"shardKey":{"theShardKey":"Hash"},"indexes":[{"key":{"keys":["_id"]},"options":{}},{"key":{"keys":["_ts"]},"options":{"expireAfterSeconds":1000}},{"key":{"keys":["DocumentDBDefaultIndex"]},"options":{}}]}}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '527'
+      - '750'
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:31:29 GMT
+      - Mon, 22 Feb 2021 07:52:44 GMT
       pragma:
       - no-cache
       server:
@@ -923,7 +1091,7 @@ interactions:
       string: '{"status":"Enqueued"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/550c3cb4-692d-4b32-b139-a9fdf8cc3ff7?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c7abef94-ce0b-48b9-a518-19113e23a701?api-version=2021-01-15
       cache-control:
       - no-store, no-cache
       content-length:
@@ -931,9 +1099,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:31:31 GMT
+      - Mon, 22 Feb 2021 07:52:45 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002/operationResults/550c3cb4-692d-4b32-b139-a9fdf8cc3ff7?api-version=2021-01-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongodb_collection000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000003/mongodbDatabases/cli000004/collections/cli000002/operationResults/c7abef94-ce0b-48b9-a518-19113e23a701?api-version=2021-01-15
       pragma:
       - no-cache
       server:
@@ -966,7 +1134,7 @@ interactions:
       - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cosmosdb/3.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/550c3cb4-692d-4b32-b139-a9fdf8cc3ff7?api-version=2021-01-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c7abef94-ce0b-48b9-a518-19113e23a701?api-version=2021-01-15
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -978,7 +1146,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:32:02 GMT
+      - Mon, 22 Feb 2021 07:53:16 GMT
       pragma:
       - no-cache
       server:
@@ -1027,7 +1195,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 21 Feb 2021 03:32:05 GMT
+      - Mon, 22 Feb 2021 07:53:18 GMT
       pragma:
       - no-cache
       server:
