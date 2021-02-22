@@ -1142,6 +1142,12 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_download_file_path_validator(namespace):
+    if os.path.isdir(namespace.file_path):
+        from azure.cli.core.azclierror import FileOperationError
+        raise FileOperationError('File is expected, not a directory: {}'.format(namespace.file_path))
+
+
 def blob_rehydrate_priority_validator(namespace):
     if namespace.blob_type == 'page' and namespace.rehydrate_priority:
         raise ValueError('--rehydrate-priority is only applicable to block blob.')
