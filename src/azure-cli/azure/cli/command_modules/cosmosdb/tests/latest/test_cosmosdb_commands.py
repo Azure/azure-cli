@@ -64,10 +64,11 @@ class CosmosDBTests(ScenarioTest):
             self.check('enableFreeTier', 'False')
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline --server-version 3.2')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRules[0].ipAddressOrRange', "20.10.10.10"),
+            self.check('apiProperties.serverVersion', '3.2')
         ]).get_output_in_json()
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
