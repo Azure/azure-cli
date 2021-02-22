@@ -287,6 +287,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_waf_rate_limit_rule', client_factory=cf_waf_policy)
 
     with self.command_group('afd profile', cdn_profiles_sdk,
+                            is_preview=True,
                             custom_command_type=get_custom_sdk(cf_profiles, _not_found(profile_not_found_msg))) as g:
         g.custom_show_command('show', 'get_afd_profile')
         g.custom_command('delete', 'delete_afd_profile')
@@ -365,7 +366,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_afd_security_policy', client_factory=cf_afd_security_policies)
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd custom-domain', cdn_afd_domain_sdk) as g:
+    with self.command_group('afd custom-domain', cdn_afd_domain_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list_by_profile')
@@ -373,27 +374,27 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.custom_command('update', 'update_afd_custom_domain', client_factory=cf_afd_custom_domain)
 
-    with self.command_group('afd secret', cdn_afd_secret_sdk) as g:
+    with self.command_group('afd secret', cdn_afd_secret_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_secret', client_factory=cf_afd_secrets)
         g.custom_command('update', 'update_afd_secret', client_factory=cf_afd_secrets)
 
-    with self.command_group('afd log-analytic metric', cdn_afd_log_analytic_sdk) as g:
+    with self.command_group('afd log-analytic metric', cdn_afd_log_analytic_sdk, is_preview=True) as g:
         g.command('list', 'get_log_analytics_metrics')
 
-    with self.command_group('afd log-analytic ranking', cdn_afd_log_analytic_sdk) as g:
+    with self.command_group('afd log-analytic ranking', cdn_afd_log_analytic_sdk, is_preview=True) as g:
         g.command('list', 'get_log_analytics_rankings')
 
-    with self.command_group('afd log-analytic location', cdn_afd_log_analytic_sdk) as g:
+    with self.command_group('afd log-analytic location', cdn_afd_log_analytic_sdk, is_preview=True) as g:
         g.command('list', 'get_log_analytics_locations')
 
-    with self.command_group('afd log-analytic resource', cdn_afd_log_analytic_sdk) as g:
+    with self.command_group('afd log-analytic resource', cdn_afd_log_analytic_sdk, is_preview=True) as g:
         g.command('list', 'get_log_analytics_resources')
 
-    with self.command_group('afd waf-log-analytic metric', cdn_afd_log_analytic_sdk) as g:
+    with self.command_group('afd waf-log-analytic metric', cdn_afd_log_analytic_sdk, is_preview=True) as g:
         g.command('list', 'get_waf_log_analytics_metrics')
 
-    with self.command_group('afd waf-log-analytic ranking', cdn_afd_log_analytic_sdk) as g:
+    with self.command_group('afd waf-log-analytic ranking', cdn_afd_log_analytic_sdk, is_preview=True) as g:
         g.command('list', 'get_waf_log_analytics_rankings')
