@@ -91,6 +91,9 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
+            az_error.set_recommendation("The access token may have expired or been revoked due to Continuous Access "
+                                        "Evaluation. To re-authenticate, please run `az login`. "
+                                        "(Silent re-authentication will be attempted in the future.)")
 
         elif isinstance(ex, ValidationError):
             az_error = azclierror.ValidationError(error_msg)

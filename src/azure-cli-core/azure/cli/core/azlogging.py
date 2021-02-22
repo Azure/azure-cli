@@ -58,6 +58,10 @@ class AzCliLogging(CLILogging):
             # when debug log is shown.
             logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
 
+        if self.log_level <= CliLogLevel.WARNING:
+            # Disable warnings from Azure Identity
+            logging.getLogger("azure.identity").setLevel(logging.CRITICAL)
+
     def get_command_log_dir(self):
         return self.command_log_dir
 

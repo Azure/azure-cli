@@ -11,6 +11,7 @@ from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.util import in_cloud_console
 from azure.core.credentials import AccessToken
 from azure.core.exceptions import ClientAuthenticationError
+from azure.identity import AuthenticationRequiredError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -49,6 +50,16 @@ class CredentialAdaptor:
             if in_cloud_console():
                 CredentialAdaptor._log_hostname()
             raise err
+
+        except AuthenticationRequiredError as err:
+            refined_message = "Interactive authentication is required to get a token."
+            refined_message = refined_message + "\n\nError detail:\n" + err.error_details
+
+            recommendation = "It may be caused by password change or being blocked by Conditional Access policy. " \
+                             "To re-authenticate, " +\
+                             ("please refresh Azure Portal." if in_cloud_console() else "please run `az login`.")
+            raise AuthenticationError(refined_message, recommendation) from err
+
         except ClientAuthenticationError as err:
             # pylint: disable=no-member
             if in_cloud_console():
@@ -61,12 +72,6 @@ class CredentialAdaptor:
             if 'AADSTS50079' in err_message:
                 raise CLIError("Configuration of your account was changed. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50173' in err_message:
-                refined_message = "The refresh token has been revoked."
-                if not in_cloud_console():
-                    refined_message = refined_message + " Please run `az login`."
-                refined_message = refined_message + "\n\nError detail:\n" + err.error_details
-                raise AuthenticationError(refined_message) from err
             raise CLIError(err_message)
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
