@@ -13,7 +13,7 @@ from .util import log_latest_error_info
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
 
-UNAUTHORIZED_MESSAGE = ("The access token may have expired or been revoked due to Continuous Access "
+UNAUTHORIZED_MESSAGE = ("The access token has expired or been revoked due to being blocked by Continuous Access "
                         "Evaluation. To re-authenticate, please run `az login`. "
                         "(Silent re-authentication will be attempted in the future.)")
 

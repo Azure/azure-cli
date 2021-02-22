@@ -55,7 +55,8 @@ class CredentialAdaptor:
             refined_message = "Interactive authentication is required to get a token."
             refined_message = refined_message + "\n\nError detail:\n" + err.error_details
 
-            recommendation = "It may be caused by password change or being blocked by Conditional Access policy. " \
+            recommendation = "The refresh token has been revoked due to password change or " \
+                             "being blocked by Conditional Access policy. " \
                              "To re-authenticate, " +\
                              ("please refresh Azure Portal." if in_cloud_console() else "please run `az login`.")
             raise AuthenticationError(refined_message, recommendation) from err
