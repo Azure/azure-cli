@@ -63,7 +63,6 @@ from azure.cli.command_modules.network._validators import (
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
-ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
 NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
@@ -1209,7 +1208,7 @@ def load_command_table(self, _):
     # endregion
 
     # region RouteTables
-    with self.command_group('network route-table', network_rt_sdk, deprecate_info=self.deprecate(redirect=ROUTE_TABLE_DEPRECATION_INFO, hide=False)) as g:
+    with self.command_group('network route-table', network_rt_sdk) as g:
         g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')

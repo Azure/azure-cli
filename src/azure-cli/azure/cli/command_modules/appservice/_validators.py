@@ -174,6 +174,17 @@ def validate_ip_address(cmd, namespace):
             _validate_ip_address_existence(cmd, namespace)
 
 
+def validate_onedeploy_params(namespace):
+    if namespace.src_path and namespace.src_url:
+        raise CLIError('Only one of --src-path and --src-url can be specified')
+
+    if not namespace.src_path and not namespace.src_url:
+        raise CLIError('Either of --src-path or --src-url must be specified')
+
+    if namespace.src_url and not namespace.artifact_type:
+        raise CLIError('Deployment type is mandatory when deploying from URLs. Use --type')
+
+
 def _validate_ip_address_format(namespace):
     if namespace.ip_address is not None:
         # IPv6
