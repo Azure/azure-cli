@@ -2027,7 +2027,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_update_ultra_ssd_enabled_', location='eastus2')
-    @AllowLargeResponse(size_kb=18192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vm_vmss_update_ultra_ssd_enabled(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
