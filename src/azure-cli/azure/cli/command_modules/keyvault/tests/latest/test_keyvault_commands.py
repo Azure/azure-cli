@@ -547,7 +547,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                                     checks=[
                                         self.check('name', '{role_assignment_name1}'),
                                         self.check('roleDefinitionId', '{role_def_id1}'),
-                                        self.check('roleDefinitionName', '{role_name1}'),
+                                        self.check('roleName', '{role_name1}'),
                                         self.check('principalName', '{user1}'),
                                         self.check('scope', '/keys')
                                     ]).get_output_in_json()
@@ -558,7 +558,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                                     checks=[
                                         self.check('name', '{role_assignment_name2}'),
                                         self.check('roleDefinitionId', '{role_def_id2}'),
-                                        self.check('roleDefinitionName', '{role_name2}'),
+                                        self.check('roleName', '{role_name2}'),
                                         self.check('principalName', '{user1}'),
                                         self.check('scope', '/')
                                     ]).get_output_in_json()
@@ -570,7 +570,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{role_assignment_name3}'),
                      self.check('roleDefinitionId', '{role_def_id1}'),
-                     self.check('roleDefinitionName', '{role_name1}'),
+                     self.check('roleName', '{role_name1}'),
                      self.check('principalName', '{user2}'),
                      self.check('scope', '/keys')
                  ]).get_output_in_json()
@@ -580,7 +580,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{role_assignment_name4}'),
                      self.check('roleDefinitionId', '{role_def_id2}'),
-                     self.check('roleDefinitionName', '{role_name2}'),
+                     self.check('roleName', '{role_name2}'),
                      self.check('principalName', '{user2}'),
                      self.check('scope', '/')
                  ]).get_output_in_json()
@@ -592,7 +592,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                      self.check('name', '{role_assignment_name5}'),
                      self.check('principalId', '{user3_principal_id}'),
                      self.check('roleDefinitionId', '{role_def_id1}'),
-                     self.check('roleDefinitionName', '{role_name1}'),
+                     self.check('roleName', '{role_name1}'),
                      self.check('principalName', '{user3}'),
                      self.check('scope', '/keys')
                  ]).get_output_in_json()
@@ -603,7 +603,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                      self.check('name', '{role_assignment_name6}'),
                      self.check('principalId', '{user3_principal_id}'),
                      self.check('roleDefinitionId', '{role_def_id2}'),
-                     self.check('roleDefinitionName', '{role_name2}'),
+                     self.check('roleName', '{role_name2}'),
                      self.check('principalName', '{user3}'),
                      self.check('scope', '/')
                  ]).get_output_in_json()

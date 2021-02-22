@@ -3286,5 +3286,24 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
 
+class WebappOneDeployScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_one_deploy(self, resource_group):
+        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
+        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'OneDeploy'),
+            JMESPathCheck('message', 'OneDeploy'),
+            JMESPathCheck('complete', True)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
