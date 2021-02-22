@@ -93,7 +93,9 @@ def cli_cosmosdb_create(cmd, client,
                         enable_public_network=None,
                         enable_analytical_storage=None,
                         enable_free_tier=None,
-                        server_version=None):
+                        server_version=None,
+                        network_acl_bypass=None,
+                        network_acl_bypass_resource_ids=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -139,7 +141,9 @@ def cli_cosmosdb_create(cmd, client,
         public_network_access=public_network_access,
         api_properties=api_properties,
         enable_analytical_storage=enable_analytical_storage,
-        enable_free_tier=enable_free_tier)
+        enable_free_tier=enable_free_tier,
+        network_acl_bypass=network_acl_bypass,
+        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -164,7 +168,9 @@ def cli_cosmosdb_update(client,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
                         enable_public_network=None,
-                        enable_analytical_storage=None):
+                        enable_analytical_storage=None,
+                        network_acl_bypass=None,
+                        network_acl_bypass_resource_ids=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -205,7 +211,9 @@ def cli_cosmosdb_update(client,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
         public_network_access=public_network_access,
-        enable_analytical_storage=enable_analytical_storage)
+        enable_analytical_storage=enable_analytical_storage,
+        network_acl_bypass=network_acl_bypass,
+        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
