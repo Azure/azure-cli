@@ -20,16 +20,19 @@ class CosmosDBTests(ScenarioTest):
             'network_acl_bypass_resource_id': network_acl_bypass_resource_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids "{network_acl_bypass_resource_id}"')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids "{network_acl_bypass_resource_id}" --backup-interval 480 --backup-retention 8')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
             self.check('publicNetworkAccess', 'Enabled'),
             self.check('networkAclBypass', 'AzureServices'),
             self.check('networkAclBypassResourceIds[0]', network_acl_bypass_resource_id),
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '480'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.type', 'Periodic'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --enable-public-network false --network-acl-bypass None' )
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --enable-public-network false --network-acl-bypass None')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'Session'),
@@ -61,7 +64,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('ipRules[2].ipAddressOrRange', '12.22.11.11'),
             self.check('apiProperties.serverVersion', '3.2'),
             self.check('enableAnalyticalStorage', 'True'),
-            self.check('enableFreeTier', 'False')
+            self.check('enableFreeTier', 'False'),
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline --server-version 3.2')
@@ -75,6 +78,12 @@ class CosmosDBTests(ScenarioTest):
 
         connection_strings = self.cmd('az cosmosdb keys list --type connection-strings -n {acc} -g {rg}').get_output_in_json()
         assert len(connection_strings['connectionStrings']) == 4
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8', checks=[
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.type', 'Periodic'),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_delete_database_account(self, resource_group):
