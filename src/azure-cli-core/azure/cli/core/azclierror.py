@@ -13,6 +13,9 @@ from .util import log_latest_error_info
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
 
+UNAUTHORIZED_MESSAGE = ("The access token may have expired or been revoked due to Continuous Access "
+                        "Evaluation. To re-authenticate, please run `az login`. "
+                        "(Silent re-authentication will be attempted in the future.)")
 
 # Error types in AzureCLI are from different sources, and there are many general error types like CLIError, AzureError.
 # Besides, many error types with different names are actually showing the same kind of error.
@@ -171,7 +174,8 @@ class BadRequestError(UserFault):
 
 class UnauthorizedError(UserFault):
     """ Unauthorized request: 401 error """
-    pass
+    def __init__(self, error_msg, recommendation=UNAUTHORIZED_MESSAGE):
+        super().__init__(error_msg, recommendation)
 
 
 class ForbiddenError(UserFault):
