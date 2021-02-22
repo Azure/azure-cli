@@ -170,7 +170,8 @@ def cli_cosmosdb_update(client,
                         enable_public_network=None,
                         enable_analytical_storage=None,
                         network_acl_bypass=None,
-                        network_acl_bypass_resource_ids=None):
+                        network_acl_bypass_resource_ids=None,
+                        server_version=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -199,6 +200,8 @@ def cli_cosmosdb_update(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
+    api_properties = {'ServerVersion': server_version}
+
     params = DatabaseAccountUpdateParameters(
         locations=locations,
         tags=tags,
@@ -213,7 +216,8 @@ def cli_cosmosdb_update(client,
         public_network_access=public_network_access,
         enable_analytical_storage=enable_analytical_storage,
         network_acl_bypass=network_acl_bypass,
-        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids)
+        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
+        api_properties=api_properties)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
