@@ -413,6 +413,24 @@ def failover_group_update_common(
         grace_period = int(grace_period) * 60
         instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
 
+
+def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
+    '''
+    Completes maintenance configuration id from short to full type if needed
+    '''
+
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if argument_value and not is_valid_resource_id(argument_value):
+        return resource_id(
+            subscription=get_subscription_id(cli_ctx),
+            namespace='Microsoft.Maintenance',
+            type='publicMaintenanceConfigurations',
+            name=argument_value)
+
+    return argument_value
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -817,6 +835,11 @@ def _db_dw_create(
         kwargs['elastic_pool_id'],
         dest_db.server_name,
         dest_db.resource_group_name)
+
+    # Expand maintenance configuration id if needed
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cli_ctx,
+        kwargs['maintenance_configuration_id'])
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -1354,10 +1377,12 @@ def db_update(
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None,
-        storage_account_type=None):
+        storage_account_type=None,
+        maintenance_configuration_id=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
+
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -1438,6 +1463,10 @@ def db_update(
     # Otherwise, empty value defaults to current storage_account_type
     # and will potentially conflict with a previously requested update
     instance.storage_account_type = storage_account_type
+
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     #####
     # Set other (serverless related) properties
@@ -3021,6 +3050,7 @@ def elastic_pool_create(
         resource_group_name,
         elastic_pool_name,
         sku=None,
+        maintenance_configuration_id=None,
         **kwargs):
     '''
     Creates an elastic pool.
@@ -3035,6 +3065,11 @@ def elastic_pool_create(
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+
+    # Expand maintenance configuration id if needed
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     # Create
     return client.create_or_update(
@@ -3053,7 +3088,8 @@ def elastic_pool_update(
         zone_redundant=None,
         tier=None,
         family=None,
-        capacity=None):
+        capacity=None,
+        maintenance_configuration_id=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3087,6 +3123,10 @@ def elastic_pool_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     return instance
 

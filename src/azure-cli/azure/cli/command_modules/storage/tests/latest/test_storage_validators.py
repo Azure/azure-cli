@@ -324,5 +324,57 @@ class TestGetSourceClientValidator(unittest.TestCase):
         return ns
 
 
+class TestAzcopyValidator(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+
+    def test_validate_azcopy_credential(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        ns = Namespace(source='https://testaccount1.s3.amazonaws.com/test/dir',
+                       destination='https://testaccount2.blob.core.windows.net/test/blob',
+                       destination_container=None, destination_blob=None,
+                       destination_share=None, destination_file_path=None,
+                       source_container=None, source_blob=None,
+                       source_share=None, source_file_path=None,
+                       source_account_name=None, source_account_key=None,
+                       source_connection_string=None, source_sas=None,
+                       account_name=None, account_key=None,
+                       connection_string=None, sas_token=None,
+                       _cmd=MockCmd(self.cli))
+        validate_azcopy_credential(MockCmd(self.cli), ns)
+        self.assertIsNotNone(ns.source)
+        self.assertIsNotNone(ns.destination)
+
+        ns = Namespace(source='./dir',
+                       destination=None,
+                       destination_container='destcon', destination_blob=None,
+                       destination_share=None, destination_file_path=None,
+                       source_container=None, source_blob=None,
+                       source_share=None, source_file_path=None,
+                       source_account_name=None, source_account_key=None,
+                       source_connection_string=None, source_sas=None,
+                       account_name='destacc', account_key=None,
+                       connection_string=None, sas_token=None,
+                       _cmd=MockCmd(self.cli))
+        validate_azcopy_credential(MockCmd(self.cli), ns)
+        self.assertIsNotNone(ns.source)
+        self.assertIsNotNone(ns.destination)
+
+        ns = Namespace(source=None,
+                       destination=None,
+                       destination_container=None, destination_blob=None,
+                       destination_share='destshare', destination_file_path='dir/file',
+                       source_container=None, source_blob=None,
+                       source_share='srcshare', source_file_path='dir/file',
+                       source_account_name='srcacc', source_account_key='mockacckey',
+                       source_connection_string=None, source_sas=None,
+                       account_name='destacc', account_key='mockacckey',
+                       connection_string=None, sas_token=None,
+                       _cmd=MockCmd(self.cli))
+        validate_azcopy_credential(MockCmd(self.cli), ns)
+        self.assertIsNotNone(ns.source)
+        self.assertIsNotNone(ns.destination)
+
+
 if __name__ == '__main__':
     unittest.main()
