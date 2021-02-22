@@ -187,7 +187,8 @@ setup(
         'azure.cli.command_modules.appservice': [
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
-            'resources/WebappRuntimeStacks.json'
+            'resources/WebappRuntimeStacks.json',
+            'resources/GenerateRandomAppNames.json'
         ],
         'azure.cli.command_modules.rdbms': [
             'randomname/adjectives.txt',
