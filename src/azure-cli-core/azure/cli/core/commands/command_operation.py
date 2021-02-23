@@ -74,9 +74,9 @@ class BaseCommandOperation:
 
     def load_op_description(self, handler=None):
         if handler is None:
-            def handler():
-                """"""
-                pass
+            def default_handler():
+                """"""  # default_handler should have __doc__ property
+            handler = default_handler
         self.apply_doc_string(handler)
         return extract_full_summary_from_signature(handler)
 

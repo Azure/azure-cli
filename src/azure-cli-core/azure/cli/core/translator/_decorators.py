@@ -44,7 +44,7 @@ def func_exception_handler_wrapper(func):
 
 
 # resource_type
-def register_custom_resource_type(register_name, import_prefix, client_name): # pylint: disable=unused-argument
+def register_custom_resource_type(register_name, import_prefix, client_name):  # pylint: disable=unused-argument
     return CustomResourceType(import_prefix=import_prefix, client_name=client_name)
 
 
