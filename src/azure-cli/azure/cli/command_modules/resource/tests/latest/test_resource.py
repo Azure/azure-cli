@@ -3323,12 +3323,10 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-
     def _remove_bicep_cli(self):
         bicep_cli_path = self._get_bicep_cli_path()
         if os.path.isfile(bicep_cli_path):
             os.remove(bicep_cli_path)
-
 
     def _get_bicep_cli_path(self):
         installation_folder = os.path.join(str(Path.home()), ".azure", "bin")

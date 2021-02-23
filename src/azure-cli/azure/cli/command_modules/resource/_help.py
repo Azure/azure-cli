@@ -2325,11 +2325,11 @@ examples:
   - name: Build a Bicep file.
     text: az bicep build --files {bicep-file}
   - name: Build multiple Bicep files.
-    text: az bicep build --files <bicep_file1> <bicep_file2>
+    text: az bicep build --files {bicep_file1} {bicep_file2}
   - name: Build a Bicep file and prints all output to stdout.
-    text: az bicep build --files <bicep_file> --stdout
+    text: az bicep build --files {bicep_file} --stdout
   - name: Build multiple Bicep files and prints all output to stdout.
-    text: az bicep build --files <bicep_file1> <bicep_file2> --stdout
+    text: az bicep build --files {bicep_file1} {bicep_file2} --stdout
 """
 
 helps['bicep decompile'] = """
@@ -2337,9 +2337,9 @@ type: command
 short-summary: Attempt to decompile one or more ARM template files to Bicep files
 examples:
   - name: Decompile an ARM template file.
-    text: az bicep decompile --files <json_file>
+    text: az bicep decompile --files {json_template_file}
   - name: Decompile multiple ARM template files.
-    text: az bicep decompile --files <json_file1> <json_file2>
+    text: az bicep decompile --files {json_template_file1} {json_template_file2}
 """
 
 helps['bicep version'] = """
