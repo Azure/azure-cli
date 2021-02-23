@@ -4,9 +4,10 @@
 # license information.
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-lines
+# pylint: disable=too-many-locals
 
 from azure.cli.core.util import sdk_no_wait
-from knack.util import CLIError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 
 def _get_database_client(cli_ctx):
@@ -90,8 +91,11 @@ def redisenterprise_create(cmd,
             database_param_list_str.append('--persistence')
         if modules is not None:
             database_param_list_str.append('--modules')
-        raise CLIError('Usage error: --no-database conflicts with the '
-                       'specified database parameter(s): {}'.format(', '.join(database_param_list_str)))
+        error_msg = ('--no-database conflicts with the specified database parameter(s): '
+                     '{}'.format(', '.join(database_param_list_str)))
+        recommendation = ('Try to use --no-database without specifying database parameters, '
+                          'or else try removing --no-database')
+        raise MutuallyExclusiveArgumentError(error_msg, recommendation)
 
     # Create cluster
     cluster_parameters = {}
