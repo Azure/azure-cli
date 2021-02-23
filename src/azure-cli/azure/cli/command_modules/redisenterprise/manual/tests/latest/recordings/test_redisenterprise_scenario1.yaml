@@ -1,0 +1,3440 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest-redisenterprise-rg1-000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001","name":"clitest-redisenterprise-rg1-000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-23T03:44:31Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '358'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:44:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"tag1": "value1"}, "location": "eastus", "sku": {"name": "Enterprise_E20",
+      "capacity": 4}, "zones": ["1", "2", "3"], "properties": {"minimumTlsVersion":
+      "1.2"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '170'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"location\": \"East US\",\r\n  \"name\": \"clitest-cache1-000002\"\
+        ,\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002\"\
+        ,\r\n  \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n  \"tags\": {\r\n\
+        \    \"tag1\": \"value1\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Enterprise_E20\"\
+        ,\r\n    \"capacity\": 4\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Creating\",\r\n    \"resourceState\": \"Creating\"\r\n  },\r\n  \"zones\"\
+        : [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n  ]\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '567'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:44:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002?api-version=2021-03-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"clientProtocol": "Encrypted", "port": 10000, "clusteringPolicy":
+      "EnterpriseCluster", "evictionPolicy": "NoEviction", "persistence": {"aofEnabled":
+      true, "aofFrequency": "1s"}, "modules": [{"name": "RedisBloom", "args": "ERROR_RATE
+      0.00 INITIAL_SIZE 400"}, {"name": "RedisTimeSeries", "args": "RETENTION_POLICY
+      20"}, {"name": "RediSearch"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '359'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default\"\
+        ,\r\n  \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \"properties\"\
+        : {\r\n    \"clientProtocol\": \"Encrypted\",\r\n    \"port\": 10000,\r\n\
+        \    \"provisioningState\": \"Creating\",\r\n    \"resourceState\": \"Creating\"\
+        ,\r\n    \"clusteringPolicy\": \"EnterpriseCluster\",\r\n    \"evictionPolicy\"\
+        : \"NoEviction\",\r\n    \"modules\": [\r\n      {\r\n        \"name\": \"\
+        RedisBloom\",\r\n        \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\
+        \n        \"version\": \"2.2.4\"\r\n      },\r\n      {\r\n        \"name\"\
+        : \"RedisTimeSeries\",\r\n        \"args\": \"RETENTION_POLICY 20\",\r\n \
+        \       \"version\": \"1.4.5\"\r\n      },\r\n      {\r\n        \"name\"\
+        : \"RediSearch\",\r\n        \"args\": \"\",\r\n        \"version\": \"2.0.1\"\
+        \r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '905'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:44:35 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default?api-version=2021-03-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:45:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:45:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:45:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:45:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:46:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:46:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:46:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:46:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:47:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:47:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:47:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:47:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:48:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:48:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:48:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:48:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:49:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:49:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:49:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:49:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:50:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:50:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"InProgress","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:44:35.8261999+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:50:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Pending","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"0001-01-01T00:00:00+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:50:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/728a5708-f3db-4ffd-a16d-1c48a98a4290","name":"728a5708-f3db-4ffd-a16d-1c48a98a4290","status":"Succeeded","startTime":"2021-02-23T03:44:34.3126081+00:00","endTime":"2021-02-23T03:50:51.6077551+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"location\": \"East US\",\r\n  \"name\": \"clitest-cache1-000002\"\
+        ,\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002\"\
+        ,\r\n  \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n  \"tags\": {\r\n\
+        \    \"tag1\": \"value1\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Enterprise_E20\"\
+        ,\r\n    \"capacity\": 4\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"resourceState\": \"Running\",\r\n    \"privateEndpointConnections\"\
+        : []\r\n  },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n\
+        \  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '606'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/755eb3b3-f890-422e-bc15-ead0c4fd5e06","name":"755eb3b3-f890-422e-bc15-ead0c4fd5e06","status":"Succeeded","startTime":"2021-02-23T03:44:36.2514838+00:00","endTime":"2021-02-23T03:51:07.6847073+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --sku --capacity --tags --zones --minimum-tls-version --client-protocol
+        --clustering-policy --eviction-policy --modules --modules --modules --persistence
+        --port --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default?api-version=2021-03-01
+  response:
+    body:
+      string: '{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default","type":"Microsoft.Cache/redisEnterprise/databases","properties":{"clientProtocol":"Encrypted","port":10000,"provisioningState":"Succeeded","resourceState":"Running","clusteringPolicy":"EnterpriseCluster","evictionPolicy":"NoEviction","modules":[{"name":"RedisBloom","args":"ERROR_RATE
+        0.00 INITIAL_SIZE 400","version":"2.2.4"},{"name":"RedisTimeSeries","args":"RETENTION_POLICY
+        20","version":"1.4.5"},{"name":"RediSearch","args":"","version":"2.0.1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '677'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"location\": \"East US\",\r\n  \"name\": \"clitest-cache1-000002\"\
+        ,\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002\"\
+        ,\r\n  \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n  \"tags\": {\r\n\
+        \    \"tag1\": \"value1\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Enterprise_E20\"\
+        ,\r\n    \"capacity\": 4\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"resourceState\": \"Running\",\r\n    \"privateEndpointConnections\"\
+        : []\r\n  },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n\
+        \  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '606'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          },\r\n          {\r\n        \
+        \    \"name\": \"RedisTimeSeries\",\r\n            \"args\": \"RETENTION_POLICY\
+        \ 20\",\r\n            \"version\": \"1.4.5\"\r\n          },\r\n        \
+        \  {\r\n            \"name\": \"RediSearch\",\r\n            \"args\": \"\"\
+        ,\r\n            \"version\": \"2.0.1\"\r\n          }\r\n        ]\r\n  \
+        \    }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1050'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/redisEnterprise?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"East US\",\r\n\
+        \      \"name\": \"clicache-no-db-test1\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/clicache-no-db-test1\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"Enterprise_E20\",\r\n        \"capacity\": 4\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      },\r\n      \"zones\": [\r\n        \"1\",\r\n        \"2\"\
+        ,\r\n        \"3\"\r\n      ]\r\n    },\r\n    {\r\n      \"location\": \"\
+        East US\",\r\n      \"name\": \"azcli95\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli95\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"Enterprise_E20\",\r\n        \"capacity\": 4\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      }\r\n    },\r\n    {\r\n      \"location\": \"East US\",\r\n\
+        \      \"name\": \"azcli93\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli93\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"EnterpriseFlash_F300\",\r\n        \"capacity\": 3\r\n\
+        \      },\r\n      \"properties\": {\r\n        \"provisioningState\": \"\
+        Succeeded\",\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      }\r\n    },\r\n    {\r\n      \"location\": \"East US\",\r\n\
+        \      \"name\": \"clitest-cache1-000002\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"Enterprise_E20\",\r\n        \"capacity\": 4\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      },\r\n      \"zones\": [\r\n        \"1\",\r\n        \"2\"\
+        ,\r\n        \"3\"\r\n      ]\r\n    },\r\n    {\r\n      \"location\": \"\
+        East US\",\r\n      \"name\": \"clitest-cache2-eeyigvsqdkbrws5\",\r\n    \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg2-sps7dxvjg74m/providers/Microsoft.Cache/redisEnterprise/clitest-cache2-eeyigvsqdkbrws5\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"EnterpriseFlash_F300\",\r\n        \"capacity\": 3\r\n\
+        \      },\r\n      \"properties\": {\r\n        \"provisioningState\": \"\
+        Succeeded\",\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      },\r\n      \"zones\": [\r\n        \"1\",\r\n        \"2\"\
+        ,\r\n        \"3\"\r\n      ]\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3217'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/clicache-no-db-test1/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/clicache-no-db-test1/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          },\r\n          {\r\n        \
+        \    \"name\": \"RedisTimeSeries\",\r\n            \"args\": \"RETENTION_POLICY\
+        \ 20\",\r\n            \"version\": \"1.4.5\"\r\n          },\r\n        \
+        \  {\r\n            \"name\": \"RediSearch\",\r\n            \"args\": \"\"\
+        ,\r\n            \"version\": \"2.0.1\"\r\n          }\r\n        ]\r\n  \
+        \    }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1016'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli95/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli95/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RediSearch\"\
+        ,\r\n            \"args\": \"\",\r\n            \"version\": \"2.0.1\"\r\n\
+        \          },\r\n          {\r\n            \"name\": \"RedisTimeSeries\"\
+        ,\r\n            \"args\": \"RETENTION_POLICY 20\",\r\n            \"version\"\
+        : \"1.4.5\"\r\n          },\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          }\r\n        ]\r\n      }\r\n\
+        \    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1003'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli93/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          },\r\n          {\r\n        \
+        \    \"name\": \"RedisTimeSeries\",\r\n            \"args\": \"RETENTION_POLICY\
+        \ 20\",\r\n            \"version\": \"1.4.5\"\r\n          },\r\n        \
+        \  {\r\n            \"name\": \"RediSearch\",\r\n            \"args\": \"\"\
+        ,\r\n            \"version\": \"2.0.1\"\r\n          }\r\n        ]\r\n  \
+        \    }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1050'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg2-sps7dxvjg74m/providers/Microsoft.Cache/redisEnterprise/clitest-cache2-eeyigvsqdkbrws5/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/redisEnterprise?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"East US\",\r\n\
+        \      \"name\": \"clicache-no-db-test1\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/clicache-no-db-test1\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"Enterprise_E20\",\r\n        \"capacity\": 4\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      },\r\n      \"zones\": [\r\n        \"1\",\r\n        \"2\"\
+        ,\r\n        \"3\"\r\n      ]\r\n    },\r\n    {\r\n      \"location\": \"\
+        East US\",\r\n      \"name\": \"azcli95\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli95\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"Enterprise_E20\",\r\n        \"capacity\": 4\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      }\r\n    },\r\n    {\r\n      \"location\": \"East US\",\r\n\
+        \      \"name\": \"azcli93\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli93\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"EnterpriseFlash_F300\",\r\n        \"capacity\": 3\r\n\
+        \      },\r\n      \"properties\": {\r\n        \"provisioningState\": \"\
+        Succeeded\",\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      }\r\n    },\r\n    {\r\n      \"location\": \"East US\",\r\n\
+        \      \"name\": \"clitest-cache1-000002\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"Enterprise_E20\",\r\n        \"capacity\": 4\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      },\r\n      \"zones\": [\r\n        \"1\",\r\n        \"2\"\
+        ,\r\n        \"3\"\r\n      ]\r\n    },\r\n    {\r\n      \"location\": \"\
+        East US\",\r\n      \"name\": \"clitest-cache2-eeyigvsqdkbrws5\",\r\n    \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg2-sps7dxvjg74m/providers/Microsoft.Cache/redisEnterprise/clitest-cache2-eeyigvsqdkbrws5\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n      \"tags\"\
+        : {\r\n        \"tag1\": \"value1\"\r\n      },\r\n      \"sku\": {\r\n  \
+        \      \"name\": \"EnterpriseFlash_F300\",\r\n        \"capacity\": 3\r\n\
+        \      },\r\n      \"properties\": {\r\n        \"provisioningState\": \"\
+        Succeeded\",\r\n        \"resourceState\": \"Running\",\r\n        \"privateEndpointConnections\"\
+        : []\r\n      },\r\n      \"zones\": [\r\n        \"1\",\r\n        \"2\"\
+        ,\r\n        \"3\"\r\n      ]\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3217'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/clicache-no-db-test1/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/clicache-no-db-test1/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          },\r\n          {\r\n        \
+        \    \"name\": \"RedisTimeSeries\",\r\n            \"args\": \"RETENTION_POLICY\
+        \ 20\",\r\n            \"version\": \"1.4.5\"\r\n          },\r\n        \
+        \  {\r\n            \"name\": \"RediSearch\",\r\n            \"args\": \"\"\
+        ,\r\n            \"version\": \"2.0.1\"\r\n          }\r\n        ]\r\n  \
+        \    }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1016'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli95/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli95/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RediSearch\"\
+        ,\r\n            \"args\": \"\",\r\n            \"version\": \"2.0.1\"\r\n\
+        \          },\r\n          {\r\n            \"name\": \"RedisTimeSeries\"\
+        ,\r\n            \"args\": \"RETENTION_POLICY 20\",\r\n            \"version\"\
+        : \"1.4.5\"\r\n          },\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          }\r\n        ]\r\n      }\r\n\
+        \    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1003'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/andrew-newtemprg/providers/Microsoft.Cache/redisEnterprise/azcli93/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          },\r\n          {\r\n        \
+        \    \"name\": \"RedisTimeSeries\",\r\n            \"args\": \"RETENTION_POLICY\
+        \ 20\",\r\n            \"version\": \"1.4.5\"\r\n          },\r\n        \
+        \  {\r\n            \"name\": \"RediSearch\",\r\n            \"args\": \"\"\
+        ,\r\n            \"version\": \"2.0.1\"\r\n          }\r\n        ]\r\n  \
+        \    }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1050'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg2-sps7dxvjg74m/providers/Microsoft.Cache/redisEnterprise/clitest-cache2-eeyigvsqdkbrws5/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise database show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default?api-version=2021-03-01
+  response:
+    body:
+      string: '{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default","type":"Microsoft.Cache/redisEnterprise/databases","properties":{"clientProtocol":"Encrypted","port":10000,"provisioningState":"Succeeded","resourceState":"Running","clusteringPolicy":"EnterpriseCluster","evictionPolicy":"NoEviction","modules":[{"name":"RedisBloom","args":"ERROR_RATE
+        0.00 INITIAL_SIZE 400","version":"2.2.4"},{"name":"RedisTimeSeries","args":"RETENTION_POLICY
+        20","version":"1.4.5"},{"name":"RediSearch","args":"","version":"2.0.1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '677'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise database list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"default\",\r\n  \
+        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default\"\
+        ,\r\n      \"type\": \"Microsoft.Cache/redisEnterprise/databases\",\r\n  \
+        \    \"properties\": {\r\n        \"clientProtocol\": \"Encrypted\",\r\n \
+        \       \"port\": 10000,\r\n        \"provisioningState\": \"Succeeded\",\r\
+        \n        \"resourceState\": \"Running\",\r\n        \"clusteringPolicy\"\
+        : \"EnterpriseCluster\",\r\n        \"evictionPolicy\": \"NoEviction\",\r\n\
+        \        \"modules\": [\r\n          {\r\n            \"name\": \"RedisBloom\"\
+        ,\r\n            \"args\": \"ERROR_RATE 0.00 INITIAL_SIZE 400\",\r\n     \
+        \       \"version\": \"2.2.4\"\r\n          },\r\n          {\r\n        \
+        \    \"name\": \"RedisTimeSeries\",\r\n            \"args\": \"RETENTION_POLICY\
+        \ 20\",\r\n            \"version\": \"1.4.5\"\r\n          },\r\n        \
+        \  {\r\n            \"name\": \"RediSearch\",\r\n            \"args\": \"\"\
+        ,\r\n            \"version\": \"2.0.1\"\r\n          }\r\n        ]\r\n  \
+        \    }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1050'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise database list-keys
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default/listKeys?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"primaryKey\": \"AZczo172MKq9Qy645JQBo0Y+9hHLxikkVg4ycylhZD0=\"\
+        \r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '68'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"keyType": "Primary"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise database regenerate-key
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --cluster-name --key-type --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/databases/default/regenerateKey?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"primaryKey\": \"Pw/t24GPTosp14ErwnQfUF+3R9P6IKkkStZ874UK+eI=\"\
+        ,\r\n  \"secondaryKey\": \"Pw/t24GPTosp14ErwnQfUF+3R9P6IKkkStZ874UK+eI=\"\r\
+        \n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '135'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002?api-version=2021-03-01
+  response:
+    body:
+      string: "{\r\n  \"location\": \"East US\",\r\n  \"name\": \"clitest-cache1-000002\"\
+        ,\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002\"\
+        ,\r\n  \"type\": \"Microsoft.Cache/redisEnterprise\",\r\n  \"tags\": {\r\n\
+        \    \"tag1\": \"value1\"\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Enterprise_E20\"\
+        ,\r\n    \"capacity\": 4\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Deleting\",\r\n    \"resourceState\": \"Deleting\",\r\n    \"privateEndpointConnections\"\
+        : []\r\n  },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n\
+        \  ]\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '606'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-redisenterprise-rg1-000001/providers/Microsoft.Cache/redisEnterprise/clitest-cache1-000002/operationresults/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:51:17.7479092+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:51:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:51:17.7479092+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:52:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:51:17.7479092+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:52:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:53:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:53:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:54:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:54:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:55:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:55:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:56:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:52:51.6620028+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:56:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:57:09.7510477+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:57:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"InProgress","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:57:09.7510477+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:57:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redisenterprise delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -y --cluster-name --resource-group
+      User-Agent:
+      - AZURECLI/2.19.1 azsdk-python-mgmt-redisenterprise/1.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East%20US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/East
+        US/operationsStatus/4a9fd33e-c3ed-4236-a752-d0b8005101a7","name":"4a9fd33e-c3ed-4236-a752-d0b8005101a7","status":"Succeeded","startTime":"2021-02-23T03:51:16.4509355+00:00","endTime":"2021-02-23T03:58:11.396986+00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '318'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 23 Feb 2021 03:58:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - b23cd069-38d7-4d13-87a0-e3f31a877503
+    status:
+      code: 200
+      message: OK
+version: 1
