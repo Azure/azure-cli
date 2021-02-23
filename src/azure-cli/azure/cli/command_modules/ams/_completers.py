@@ -13,8 +13,7 @@ from azure.cli.command_modules.ams._sdk_utils import (get_stand_alone_presets, g
                                                       get_protocols, get_encoding_types,
                                                       get_allowed_resolutions, get_transcription_langauges,
                                                       get_analysis_modes, get_stretch_mode_types,
-                                                      get_storage_authentication_allowed_values,
-                                                      get_managed_identity_allowed_values)
+                                                      get_storage_authentication_allowed_values)
 
 from azure.mgmt.media.models import EncoderNamedPreset
 
@@ -97,9 +96,4 @@ def get_stretch_mode_types_list():
 
 def get_storage_authentication_allowed_values_list():
     values = get_storage_authentication_allowed_values()
-    return values
-
-
-def get_managed_identity_allowed_values_list():
-    values = get_managed_identity_allowed_values()
     return values

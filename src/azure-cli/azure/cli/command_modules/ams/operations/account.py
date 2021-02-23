@@ -68,7 +68,7 @@ def set_mediaservice_trusted_storage(client, resource_group_name, account_name,
 def create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts=None,
                                   location=None, assign_identity=False,
                                   tags=None):
-    identity = 'SystemAssigned' if assign_identity == 'System' else 'None'
+    identity = 'SystemAssigned' if assign_identity else 'None'
     media_service = MediaService(location=location, storage_accounts=storage_accounts,
                                  identity=MediaServiceIdentity(type=identity), tags=tags)
 

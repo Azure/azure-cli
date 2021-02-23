@@ -21,10 +21,9 @@ class AmsEncryptionTests(ScenarioTest):
             'keyVault': key_vault,
             'keyName': self.create_random_name(prefix='ams', length=12),
             'identityPermissions': "get unwrapkey wrapkey",
-            'identity': "System",
         })
 
-        account_result = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --assign-identity {identity}', checks=[
+        account_result = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --id-system-assigned', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central US')
         ])
