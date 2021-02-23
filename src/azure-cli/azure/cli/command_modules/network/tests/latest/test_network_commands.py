@@ -1932,7 +1932,6 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n AzurePrivatePeering --set vlanId=200',
                  checks=self.check('vlanId', 200))
 
-
     def _test_express_route_auth(self):
 
         self.cmd('network express-route auth create -g {rg} --circuit-name {er} -n auth1',
