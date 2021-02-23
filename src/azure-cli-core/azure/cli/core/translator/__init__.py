@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=unused-import
+
 # action
 from ._decorators import cls_action_wrapper, cls_action_factory_wrapper
 # arg_type

@@ -16,7 +16,7 @@ def cls_action_factory_wrapper(factory):
 
 
 # arg_type
-def register_arg_type(register_name, overrides=None, **kwargs):
+def register_arg_type(register_name, overrides=None, **kwargs):  # pylint: disable=unused-argument
     return CLIArgumentType(overrides=overrides, **kwargs)
 
 
@@ -44,7 +44,7 @@ def func_exception_handler_wrapper(func):
 
 
 # resource_type
-def register_custom_resource_type(register_name, import_prefix, client_name):
+def register_custom_resource_type(register_name, import_prefix, client_name): # pylint: disable=unused-argument
     return CustomResourceType(import_prefix=import_prefix, client_name=client_name)
 
 
