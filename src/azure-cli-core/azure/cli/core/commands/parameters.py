@@ -14,13 +14,13 @@ from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_P
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
-from azure.cli.core.translator import cls_action_wrapper, cls_action_factory_wrapper
+from azure.cli.core.translator import (cls_action_wrapper, cls_action_factory_wrapper,
+                                       func_completer_wrapper, completer_factory_wrapper, func_type_converter_wrapper,
+                                       func_type_converter_factory_wrapper, register_arg_type, arg_type_factory_wrapper)
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.translator import (func_completer_wrapper, completer_factory_wrapper, func_type_converter_wrapper,
-                                       func_type_converter_factory_wrapper, register_arg_type, arg_type_factory_wrapper)
 
 logger = get_logger(__name__)
 
@@ -398,7 +398,8 @@ class AzArgumentContext(ArgumentsContext):
             arg_type_copy.update(merged_kwargs)
             if '_arg_type' in arg_type_copy:
                 raise KeyError('"_arg_type" is a reserved key')
-            arg_type_copy['_arg_type'] = arg_type   # The key name `arg_type` will exist for nested arg_type, so use `_arg_type`. Example: https://github.com/Azure/azure-cli/blob/dd891a940b3a15751ecfbf71b62a1aafb1cfe608/src/azure-cli/azure/cli/command_modules/storage/_params.py#L886-L890
+            # The key name `arg_type` will exist for nested arg_type, so use `_arg_type`.
+            arg_type_copy['_arg_type'] = arg_type
             return arg_type_copy
         return merged_kwargs
 
