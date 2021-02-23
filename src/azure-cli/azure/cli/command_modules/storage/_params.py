@@ -21,7 +21,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type)
+                          get_api_version_type, blob_download_file_path_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -715,7 +715,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download') as c:
-        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type,
+                   completer=FilesCompleter(), validator=blob_download_file_path_validator)
         c.argument('max_connections', type=int)
         c.argument('start_range', type=int)
         c.argument('end_range', type=int)
