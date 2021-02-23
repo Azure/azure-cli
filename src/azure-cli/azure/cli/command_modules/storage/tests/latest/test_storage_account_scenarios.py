@@ -360,6 +360,25 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
         ])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    def test_storage_account_with_shared_key_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True)])
+
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access false'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', False)])
+
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access true'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True)])
+
+        self.cmd('az storage account update -n {} --allow-shared-key-access false'.format(name),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', False)])
+
+        self.cmd('az storage account update -n {} --allow-shared-key-access true'.format(name),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True)])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -628,16 +647,28 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(ex.exception.code, 3)
 
     @ResourceGroupPreparer()
-    def test_management_policy(self, resource_group):
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_management_policy(self, resource_group, storage_account):
         import os
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
-        storage_account = self.create_random_name(prefix='cli', length=24)
-
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'policy': policy_file}
-        self.cmd('storage account create -g {rg} -n {sa} --kind StorageV2')
-        self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"')
+        self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
+                 checks=[JMESPathCheck('policy.rules[0].name', 'olcmtest'),
+                         JMESPathCheck('policy.rules[0].enabled', True),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterModificationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToArchive.daysAfterModificationGreaterThan', 90),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 1000),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToCool.daysAfterCreationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToArchive.daysAfterCreationGreaterThan', 90),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.delete.daysAfterCreationGreaterThan', 1000),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.tierToCool.daysAfterCreationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.tierToArchive.daysAfterCreationGreaterThan', 90),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.delete.daysAfterCreationGreaterThan', 1000),
+                         JMESPathCheck('policy.rules[0].definition.filters.blobTypes[0]', "blockBlob"),
+                         JMESPathCheck('policy.rules[0].definition.filters.prefixMatch[0]', "olcmtestcontainer1")])
+
         self.cmd('storage account management-policy update --account-name {sa} -g {rg}'
                  ' --set "policy.rules[0].name=newname"')
         self.cmd('storage account management-policy show --account-name {sa} -g {rg}',
