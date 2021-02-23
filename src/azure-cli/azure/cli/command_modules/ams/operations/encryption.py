@@ -17,12 +17,13 @@ def get_encryption(client, resource_group_name, account_name):
 
 
 def set_encryption(client, resource_group_name, account_name, key_type=None,
-                   current_key_identifier=None, key_identifier=None):
+                   current_key_id=None, key_identifier=None):
     try:
         account_info = client.get(resource_group_name,
                                   account_name) if resource_group_name else client.get_by_subscription(account_name)
         if key_type == 'CustomerKey':
-            key_vault_props = KeyVaultProperties(key_identifier=key_identifier, current_key_identifier=current_key_identifier)
+            key_vault_props = KeyVaultProperties(key_identifier=key_identifier,
+                                                 current_key_identifier=current_key_id)
         else:
             key_vault_props = None
         encryption = AccountEncryption(type=key_type, key_vault_properties=key_vault_props)

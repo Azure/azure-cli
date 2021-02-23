@@ -28,7 +28,8 @@ from azure.cli.command_modules.ams._completers import (get_role_definition_name_
                                                        get_allowed_transcription_languages,
                                                        get_allowed_analysis_modes,
                                                        get_stretch_mode_types_list,
-                                                       get_storage_authentication_allowed_values_list)
+                                                       get_storage_authentication_allowed_values_list,
+                                                       get_managed_identity_allowed_values_list)
 
 from azure.cli.command_modules.ams._validators import (validate_storage_account_id,
                                                        datetime_format,
@@ -66,7 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
-        c.argument('identity_system_assigned', help='Set this flag to enable managed identity on the account.', action='store_true')
+        c.argument('assign_identity', arg_type=get_enum_type(get_managed_identity_allowed_values_list()), help='Set the managed identity on the media services account.')
 
     with self.argument_context('ams account check-name') as c:
         c.argument('account_name', options_list=['--name', '-n'], id_part=None,
@@ -104,7 +105,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', account_name_arg_type)
         c.argument('key_type', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.', required=True)
         c.argument('key_identifier', help='The URL of the Key Vault key used to encrypt the account. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).')
-        c.argument('current_key_identifier', help='The current key used to encrypt the Media Services account, including the key version.')
+        c.argument('current_key_id', help='The current key used to encrypt the Media Services account, including the key version.')
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)

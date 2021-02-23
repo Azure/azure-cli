@@ -15,10 +15,11 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'centralus'
+            'location': 'centralus',
+            'identity': 'System'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --identity-system-assigned', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --assign-identity {identity}', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central US'),
             self.check('identity.type', 'SystemAssigned')

@@ -55,6 +55,10 @@ helps['ams account encryption'] = """
 helps['ams account encryption show'] = """
     type: command
     short-summary: Show the details of encryption settings for an Azure Media Services account.
+    examples:
+        - name: Show the media account's encryption details
+          text: >
+            az ams account encryption show --account-name myAmsAccount -g myRG
 """
 
 helps['ams account encryption set'] = """
@@ -63,10 +67,10 @@ helps['ams account encryption set'] = """
     examples:
         - name: Set the media account's encryption to a customer managed key
           text: >
-            az ams account encryption create -a myAmsAccount -g myRG --key-source CustomerKey --key-vault-id keyVaultId 
+            az ams account encryption set -a myAmsAccount -g myRG --key-type CustomerKey --key-identifier keyVaultId 
         - name: Set the media account's encryption to a system managed key
           text: >
-            az ams account encryption create -a myAmsAccount -g myRG --key-source SystemKey
+            az ams account encryption set -a myAmsAccount -g myRG --key-type SystemKey
 """
 
 helps['ams account storage'] = """

@@ -77,3 +77,6 @@ def get_stretch_mode_types():
 
 def get_storage_authentication_allowed_values():
     return ['System', 'ManagedIdentity']
+
+def get_managed_identity_allowed_values():
+    return ['System']

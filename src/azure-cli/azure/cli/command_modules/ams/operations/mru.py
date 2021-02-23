@@ -21,9 +21,10 @@ def get_mru(client, cmd, resource_group_name, account_name):
     account_info = client.get(resource_group_name,
                               account_name) if resource_group_name else client.get_by_subscription(account_name)
     if account_info.encryption:
-        raise BadRequestError('The media reserved unit operation failed as the Media Services account was created with the'
-                       ' 2020-05-01 version of the API or later. Accounts created this way no longer need to set'
-                       ' media reserved units as the system will automatically scale up and down based on load.')
+        raise BadRequestError('The media reserved unit operation failed as the Media Services account was created'
+                              ' with the 2020-05-01 version of the API or later. Accounts created this way no'
+                              ' longer need to set media reserved units as the system will automatically'
+                              ' scale up and down based on load.')
     mru = MediaV2Client(cmd.cli_ctx, resource_group_name, account_name).get_mru()
     return _map_mru(mru)
 
@@ -32,9 +33,10 @@ def set_mru(client, cmd, resource_group_name, account_name, count=None, type=Non
     account_info = client.get(resource_group_name,
                               account_name) if resource_group_name else client.get_by_subscription(account_name)
     if account_info.encryption:
-        raise BadRequestError('The media reserved unit operation failed as the Media Services account was created with the'
-                       ' 2020-05-01 version of the API or later. Accounts created this way no longer need to set'
-                       ' media reserved units as the system will automatically scale up and down based on load.')
+        raise BadRequestError('The media reserved unit operation failed as the Media Services account was created'
+                              ' with the 2020-05-01 version of the API or later. Accounts created this way no'
+                              ' longer need to set media reserved units as the system will automatically'
+                              ' scale up and down based on load.')
     client = MediaV2Client(cmd.cli_ctx, resource_group_name, account_name)
     mru = client.get_mru()
 
