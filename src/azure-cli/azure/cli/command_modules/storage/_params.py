@@ -169,7 +169,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         type=get_datetime_type(False))
 
     allow_shared_key_access_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), min_api='2019-04-01',
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access', '-k'], min_api='2019-04-01',
         help='Indicate whether the storage account permits requests to be authorized with the account access key via '
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
