@@ -181,7 +181,7 @@ class PostgresFlexibleServerHighAvailabilityMgmt(FlexibleServerHighAvailabilityM
         self._test_flexible_server_high_availability_update_parameter('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_create'])
+    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_update_parameter'])
     def test_postgres_flexible_server_high_availability_restore(self):
         self._test_flexible_server_high_availability_restore('postgres', self.resource_group, self.server)
 
@@ -213,8 +213,8 @@ class PostgresFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerM
         self.vnet_name_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         self.subnet_name = self.create_random_name('Subnet', SERVER_NAME_MAX_LENGTH)
         self.subnet_name_2 = self.create_random_name('Subnet', SERVER_NAME_MAX_LENGTH)
-        self.restore_server = 'restore-' + self.server_name
-        self.restore_server_2 = 'restore-' + self.server_name2
+        self.restore_server = 'restore-' + self.server
+        self.restore_server_2 = 'restore-' + self.server_2
         self.current_time = datetime.utcnow()
         self.current_time_2 = datetime.utcnow()
 
@@ -228,30 +228,30 @@ class PostgresFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerM
     
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_create'])
     def test_postgres_flexible_server_vnet_server_update_scale_up(self):
-        self._test_flexible_server_vnet_server_update_scale_up('postgres', self.resource_group, self.server, self.vnet_name, self.subnet_name)
+        self._test_flexible_server_vnet_server_update_scale_up('postgres', self.resource_group, self.server)
     
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_update_scale_up'])
     def test_postgres_flexible_server_vnet_server_restore(self):
-        self._test_flexible_server_vnet_server_restore('postgres', self.resource_group, self.server, self.vnet_name, self.subnet_name)
+        self._test_flexible_server_vnet_server_restore('postgres', self.resource_group, self.server, self.restore_server)
     
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_restore'])
     def test_postgres_flexible_server_vnet_server_delete(self):
-        self._test_flexible_server_vnet_server_delete('postgres', self.resource_group, self.server, self.vnet_name, self.subnet_name)
+        self._test_flexible_server_vnet_server_delete('postgres', self.resource_group, self.server, self.restore_server)
 
     def test_postgres_flexible_server_vnet_ha_server_create(self):
         self._test_flexible_server_vnet_ha_server_create('postgres', self.resource_group, self.server_2, self.vnet_name_2, self.subnet_name_2)
 
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_create'])
     def test_postgres_flexible_server_vnet_ha_server_update_scale_up(self):
-        self._test_flexible_server_vnet_ha_server_update_scale_up('postgres', self.resource_group, self.server_2, self.vnet_name_2, self.subnet_name_2)
+        self._test_flexible_server_vnet_ha_server_update_scale_up('postgres', self.resource_group, self.server_2)
 
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_update_scale_up'])
     def test_postgres_flexible_server_vnet_ha_server_restore(self):
-        self._test_flexible_server_vnet_ha_server_restore('postgres', self.resource_group, self.server_2, self.vnet_name_2, self.subnet_name_2)
+        self._test_flexible_server_vnet_ha_server_restore('postgres', self.resource_group, self.server_2, self.restore_server_2)
 
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_restore'])
     def test_postgres_flexible_server_vnet_ha_server_delete(self):
-        self._test_flexible_server_vnet_ha_server_delete('postgres', self.resource_group, self.server_2, self.vnet_name_2, self.subnet_name_2)
+        self._test_flexible_server_vnet_ha_server_delete('postgres', self.resource_group, self.server_2, self.restore_server_2)
 
 
 class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyResourceMgmtScenarioTest):
@@ -283,62 +283,53 @@ class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyRes
         self._test_database_mgmt('postgres', self.resource_group, self.server)
 
 
-class PostgresFlexibleServerValidatorScenarioTest(FlexibleServerValidatorScenarioTest):
+# class PostgresFlexibleServerValidatorScenarioTest(FlexibleServerValidatorScenarioTest):
 
-    postgres_location = postgres_location
+#     postgres_location = postgres_location
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_mgmt_validator(self, resource_group):
-        self._test_mgmt_validator('postgres', resource_group)
-
-
-class PostgresFlexibleServerReplicationMgmtScenarioTest(FlexibleServerReplicationMgmtScenarioTest):  # pylint: disable=too-few-public-methods
-
-    postgres_location = postgres_location
-
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_replica_mgmt(self, resource_group):
-        self._test_flexible_server_replica_mgmt('postgres', resource_group)
+#     @AllowLargeResponse()
+#     @ResourceGroupPreparer(location=postgres_location)
+#     def test_postgres_flexible_server_mgmt_validator(self, resource_group):
+#         self._test_mgmt_validator('postgres', resource_group)
 
 
-class PostgresFlexibleServerVnetMgmtScenarioTest(FlexibleServerVnetMgmtScenarioTest):
+# class PostgresFlexibleServerVnetMgmtScenarioTest(FlexibleServerVnetMgmtScenarioTest):
 
-    postgres_location = postgres_location
+#     postgres_location = postgres_location
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @VirtualNetworkPreparer(location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
-        # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
-        self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
-        # Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
-        self._test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid('postgres', resource_group)
+#     @AllowLargeResponse()
+#     @ResourceGroupPreparer(location=postgres_location)
+#     @VirtualNetworkPreparer(location=postgres_location)
+#     def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
+#         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
+#         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
+#         # Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
+#         self._test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid('postgres', resource_group)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_supplied_vnet('postgres', resource_group)
+#     @AllowLargeResponse()
+#     @ResourceGroupPreparer(location=postgres_location)
+#     def test_postgres_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
+#         self._test_flexible_server_vnet_mgmt_supplied_vnet('postgres', resource_group)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @VirtualNetworkPreparer(parameter_name='virtual_network', location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
-        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group, virtual_network)
+#     @AllowLargeResponse()
+#     @ResourceGroupPreparer(location=postgres_location)
+#     @VirtualNetworkPreparer(parameter_name='virtual_network', location=postgres_location)
+#     def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
+#         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group, virtual_network)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
-    def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
-        self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
+#     @AllowLargeResponse()
+#     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
+#     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
+#     def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
+#         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
 
 
-class PostgresFlexibleServerPublicAccessMgmtScenarioTest(FlexibleServerPublicAccessMgmtScenarioTest):
+# class PostgresFlexibleServerPublicAccessMgmtScenarioTest(FlexibleServerPublicAccessMgmtScenarioTest):
 
-    postgres_location = postgres_location
+#     postgres_location = postgres_location
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @live_only()
-    def test_postgres_flexible_server_public_access_mgmt(self, resource_group):
-        self._test_flexible_server_public_access_mgmt('postgres', resource_group)
+#     @AllowLargeResponse()
+#     @ResourceGroupPreparer(location=postgres_location)
+#     @live_only()
+#     def test_postgres_flexible_server_public_access_mgmt(self, resource_group):
+#         self._test_flexible_server_public_access_mgmt('postgres', resource_group)
