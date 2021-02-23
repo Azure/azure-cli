@@ -149,6 +149,15 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    def test_storage_blob_download_directory(self, resource_group, storage_account):
+        local_dir = self.create_temp_dir()
+        account_info = self.get_account_info(resource_group, storage_account)
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegexp(FileOperationError, 'File is expected, not a directory'):
+            self.storage_cmd('storage blob download -c mycontainer -n myblob -f "{}"', account_info, local_dir)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
     def test_storage_blob_socket_timeout(self, resource_group, storage_account):
         local_dir = self.create_temp_dir()
         local_file = self.create_temp_file(1)

@@ -198,6 +198,10 @@ zone_redundant_param_type = CLIArgumentType(
     help='Specifies whether to enable zone redundancy',
     arg_type=get_three_state_flag())
 
+maintenance_configuration_id_param_type = CLIArgumentType(
+    options_list=['--maint-config-id', '-m'],
+    help='Specified maintenance configuration id or name for this resource.')
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
@@ -461,7 +465,8 @@ def _configure_db_dw_create_params(
             'compute_model',
             'read_scale',
             'high_availability_replica_count',
-            'storage_account_type'
+            'storage_account_type',
+            'maintenance_configuration_id',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -488,12 +493,16 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('storage_account_type',
                      arg_type=backup_storage_redundancy_param_type)
 
+    arg_ctx.argument('maintenance_configuration_id',
+                     arg_type=maintenance_configuration_id_param_type)
+
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
+        arg_ctx.ignore('maintenance_configuration_id')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -693,6 +702,8 @@ def load_arguments(self, _):
         c.argument('storage_account_type',
                    arg_type=backup_storage_redundancy_param_type)
 
+        c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
+
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
         create_args_for_complex_type(
@@ -815,6 +826,11 @@ def load_arguments(self, _):
                    options_list=['--partner-database'],
                    help='Name of the new replica.'
                    ' If unspecified, defaults to the source database name.')
+
+        c.argument('secondary_type',
+                   options_list=['--secondary-type'],
+                   help='Type of secondary to create.'
+                   ' Allowed values include: Geo, Named.')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
@@ -1124,6 +1140,9 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku (for vcore skus only). '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('maintenance_configuration_id',
+                   arg_type=maintenance_configuration_id_param_type)
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1134,6 +1153,7 @@ def load_arguments(self, _):
                 'per_database_settings',
                 'tags',
                 'zone_redundant',
+                'maintenance_configuration_id',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
