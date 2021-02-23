@@ -643,15 +643,19 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
             'gateway': 'ag1',
             'ip': 'pubip1'
         })
+<<<<<<< HEAD
         # for public-ip after '2020-08-01', when set '-z 1 3', actually return 'zones:[1,2,3]'
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1 3', checks=[
             self.check('length(publicIp.zones)', 3)
         ])
         self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 3 --public-ip-address {ip} --no-wait')
+=======
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 --public-ip-address {ip} --no-wait')
+>>>>>>> 7bdbf686ea22d682cb0eecb4eace2f31ba05b533
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway show -g {rg} -n {gateway}', checks=[
-            self.check('zones[0]', 1),
-            self.check('zones[1]', 3)
+            self.check('zones[0]', 1)
         ])
 
 

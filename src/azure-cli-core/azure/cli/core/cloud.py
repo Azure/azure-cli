@@ -79,6 +79,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  synapse_analytics_resource_id=None,
                  attestation_resource_id=None,
                  portal=None,
+                 azmirror_storage_account_resource_id=None,
                  **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
@@ -100,6 +101,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
         self.portal = portal
+        self.azmirror_storage_account_resource_id = azmirror_storage_account_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -239,7 +241,8 @@ def _arm_to_cli_mapper(arm_dict):
             synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=get_endpoint_fallback_value('synapse_analytics_resource_id')),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=get_endpoint_fallback_value('app_insights_telemetry_channel_resource_id')),
             attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=get_endpoint_fallback_value('attestation_resource_id')),
-            portal=get_endpoint('portal')),
+            portal=get_endpoint('portal'),
+            azmirror_storage_account_resource_id=get_endpoint('azmirrorStorageAccountResourceId')),
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=get_suffix_fallback_value('storage_sync_endpoint')),

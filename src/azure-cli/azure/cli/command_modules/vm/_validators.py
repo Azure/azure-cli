@@ -1457,9 +1457,6 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
 
-    if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
-
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
