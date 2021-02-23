@@ -22,14 +22,16 @@ from .test_rdbms_flexible_commands_local_context import (
 )
 from .conftest import postgres_location
 
-#Local context test is separated out from the rest of the test due to daily pipeline run issue
+
+# Local context test is separated out from the rest of the test due to daily pipeline run issue
 @pytest.fixture(autouse=True, scope='class')
 def postgres_location(request):
     request.cls.postgres_location = request.config.getoption("--postgres-location")
 
+
 @pytest.mark.usefixtures("postgres_location")
 class PostgresFlexibleServerLocalContextScenarioTest(FlexibleServerLocalContextScenarioTest):
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_local_context(self, resource_group):

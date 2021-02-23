@@ -23,7 +23,8 @@ from .test_rdbms_flexible_commands_local_context import (
 
 from .conftest import mysql_location
 
-#Local context test is separated out from the rest of the test due to daily pipeline run issue
+# Local context test is separated out from the rest of the test due to daily pipeline run issue
+
 
 class MySqlFlexibleServerLocalContextScenarioTest(FlexibleServerLocalContextScenarioTest):
 
