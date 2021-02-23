@@ -80,4 +80,4 @@ def get_storage_authentication_allowed_values():
 
 
 def get_managed_identity_allowed_values():
-    return ['System']
+    return ['None', 'System']
