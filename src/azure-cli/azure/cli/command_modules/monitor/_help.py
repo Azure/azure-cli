@@ -1338,7 +1338,7 @@ helps['monitor log-analytics workspace data-export create'] = """
 type: command
 short-summary: Create a data export rule for a given workspace.
 long-summary: |
-    For more information, see 
+    For more information, see
     https://docs.microsoft.com/en-us/azure/azure-monitor/platform/logs-data-export.
 parameters:
   - name: --tables -t
@@ -1354,7 +1354,7 @@ helps['monitor log-analytics workspace data-export update'] = """
 type: command
 short-summary: Update a data export rule for a given workspace.
 long-summary: |
-    For more information, see 
+    For more information, see
     https://docs.microsoft.com/en-us/azure/azure-monitor/platform/logs-data-export.
 parameters:
   - name: --tables -t
