@@ -281,6 +281,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
+        c.argument('sku', arg_type=get_enum_type(t_sku_name),
+                   help='Note that the SKU name cannot be updated to Standard_ZRS, Premium_LRS or Premium_ZRS, '
+                   'nor can accounts of those SKU names be updated to any other value')
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
                         'existing value.',
@@ -451,8 +454,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2019-06-01', help='Enable file service properties for share soft delete.')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
                    validator=validate_file_delete_retention_days, min_api='2019-06-01',
-                   help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
+                   help='Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
+        c.argument('enable_smb_multichannel', options_list=['--enable-smb-multichannel', '--mc'],
+                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview',
+                   help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
 
     with self.argument_context('storage account generate-sas') as c:
         from ._validators import get_not_none_validator
