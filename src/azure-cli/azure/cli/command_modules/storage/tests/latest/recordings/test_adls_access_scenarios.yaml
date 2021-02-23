@@ -15,9 +15,9 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/17.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-01-01&$expand=kerb
   response:
     body:
       string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 06 Nov 2020 10:14:20 GMT
+      - Sat, 20 Feb 2021 10:58:26 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11994'
+      - '11990'
     status:
       code: 200
       message: OK
@@ -56,14 +56,18 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:20 GMT
+      - Sat, 20 Feb 2021 10:58:26 GMT
       x-ms-version:
       - '2020-02-10'
     method: PUT
@@ -75,11 +79,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 10:14:24 GMT
+      - Sat, 20 Feb 2021 10:58:29 GMT
       etag:
-      - '"0x8D8823CBC6EC9B5"'
+      - '"0x8D8D58E74D245E4"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:24 GMT
+      - Sat, 20 Feb 2021 10:58:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -94,14 +98,18 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs file create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -p -f --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:25 GMT
+      - Sat, 20 Feb 2021 10:58:29 GMT
       x-ms-properties:
       - ''
       x-ms-version:
@@ -115,11 +123,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 10:14:27 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       etag:
-      - '"0x8D8823CBEECB927"'
+      - '"0x8D8D58E7592D26B"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -134,12 +142,16 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs file show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -p -f --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:29 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       x-ms-version:
       - '2020-02-10'
     method: HEAD
@@ -155,11 +167,11 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Fri, 06 Nov 2020 10:14:30 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       etag:
-      - '"0x8D8823CBEECB927"'
+      - '"0x8D8D58E7592D26B"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-access-tier:
@@ -169,7 +181,7 @@ interactions:
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       x-ms-lease-state:
       - available
       x-ms-lease-status:
@@ -188,12 +200,16 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs file show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -p -f --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:31 GMT
+      - Sat, 20 Feb 2021 10:58:31 GMT
       x-ms-version:
       - '2020-02-10'
     method: HEAD
@@ -203,11 +219,11 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 06 Nov 2020 10:14:33 GMT
+      - Sat, 20 Feb 2021 10:58:32 GMT
       etag:
-      - '"0x8D8823CBEECB927"'
+      - '"0x8D8D58E7592D26B"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-acl:
@@ -230,12 +246,16 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs directory show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -f --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:34 GMT
+      - Sat, 20 Feb 2021 10:58:32 GMT
       x-ms-version:
       - '2020-02-10'
     method: HEAD
@@ -249,11 +269,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 10:14:36 GMT
+      - Sat, 20 Feb 2021 10:58:33 GMT
       etag:
-      - '"0x8D8823CBEEBD1AB"'
+      - '"0x8D8D58E7591EBC7"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-access-tier:
@@ -263,7 +283,7 @@ interactions:
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       x-ms-lease-state:
       - available
       x-ms-lease-status:
@@ -284,12 +304,16 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs directory show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -f --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:37 GMT
+      - Sat, 20 Feb 2021 10:58:33 GMT
       x-ms-version:
       - '2020-02-10'
     method: HEAD
@@ -299,11 +323,11 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 06 Nov 2020 10:14:38 GMT
+      - Sat, 20 Feb 2021 10:58:34 GMT
       etag:
-      - '"0x8D8823CBEEBD1AB"'
+      - '"0x8D8D58E7591EBC7"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-acl:
@@ -326,16 +350,20 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs access set
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -f -p --acl --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-acl:
       - user::rwx,group::r--,other::---
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:39 GMT
+      - Sat, 20 Feb 2021 10:58:35 GMT
       x-ms-version:
       - '2020-02-10'
     method: PATCH
@@ -347,11 +375,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 10:14:42 GMT
+      - Sat, 20 Feb 2021 10:58:35 GMT
       etag:
-      - '"0x8D8823CBCB1CDD4"'
+      - '"0x8D8D58E74D7E8C9"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:24 GMT
+      - Sat, 20 Feb 2021 10:58:29 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-namespace-enabled:
@@ -368,12 +396,16 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs access show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -f -p --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:43 GMT
+      - Sat, 20 Feb 2021 10:58:36 GMT
       x-ms-version:
       - '2020-02-10'
     method: HEAD
@@ -383,11 +415,11 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 06 Nov 2020 10:14:46 GMT
+      - Sat, 20 Feb 2021 10:58:36 GMT
       etag:
-      - '"0x8D8823CBCB1CDD4"'
+      - '"0x8D8D58E74D7E8C9"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:24 GMT
+      - Sat, 20 Feb 2021 10:58:29 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-acl:
@@ -410,14 +442,18 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs access set
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -f -p --permissions --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:46 GMT
+      - Sat, 20 Feb 2021 10:58:37 GMT
       x-ms-permissions:
       - rwxrwxrwx
       x-ms-version:
@@ -431,11 +467,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 10:14:48 GMT
+      - Sat, 20 Feb 2021 10:58:38 GMT
       etag:
-      - '"0x8D8823CBEECB927"'
+      - '"0x8D8D58E7592D26B"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-namespace-enabled:
@@ -452,12 +488,16 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage fs access show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -f -p --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-dfs/12.2.0b1 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-storage-dfs/12.2.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Fri, 06 Nov 2020 10:14:49 GMT
+      - Sat, 20 Feb 2021 10:58:38 GMT
       x-ms-version:
       - '2020-02-10'
     method: HEAD
@@ -467,11 +507,11 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 06 Nov 2020 10:14:51 GMT
+      - Sat, 20 Feb 2021 10:58:38 GMT
       etag:
-      - '"0x8D8823CBEECB927"'
+      - '"0x8D8D58E7592D26B"'
       last-modified:
-      - Fri, 06 Nov 2020 10:14:28 GMT
+      - Sat, 20 Feb 2021 10:58:30 GMT
       server:
       - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
       x-ms-acl:

@@ -21,7 +21,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type)
+                          get_api_version_type, blob_download_file_path_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -281,6 +281,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
+        c.argument('sku', arg_type=get_enum_type(t_sku_name),
+                   help='Note that the SKU name cannot be updated to Standard_ZRS, Premium_LRS or Premium_ZRS, '
+                   'nor can accounts of those SKU names be updated to any other value')
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
                         'existing value.',
@@ -451,8 +454,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2019-06-01', help='Enable file service properties for share soft delete.')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
                    validator=validate_file_delete_retention_days, min_api='2019-06-01',
-                   help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
+                   help='Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
+        c.argument('enable_smb_multichannel', options_list=['--enable-smb-multichannel', '--mc'],
+                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview',
+                   help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
 
     with self.argument_context('storage account generate-sas') as c:
         from ._validators import get_not_none_validator
@@ -709,7 +715,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download') as c:
-        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type,
+                   completer=FilesCompleter(), validator=blob_download_file_path_validator)
         c.argument('max_connections', type=int)
         c.argument('start_range', type=int)
         c.argument('end_range', type=int)
