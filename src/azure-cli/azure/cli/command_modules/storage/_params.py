@@ -177,12 +177,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
-    tier_type = CLIArgumentType(
-        arg_type=get_enum_type(t_blob_tier), options_list='--tier',
-        help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
-             'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
-             'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
-             'values are Archive, Cool and Hot. This is only applicable to block blobs on standard storage accounts.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -650,7 +644,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
                    help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
-    with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB, 
+    with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB,
                                min_api='2020-04-08') as c:
         t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
         t_blob_tier = self.get_sdk('_models#StandardBlobTier',
@@ -668,10 +662,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
 
         c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
-                   help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob '
-                        'will overwrite the existing data. If set to False, the operation will fail with '
-                        'ResourceExistsError.', is_preview=True)
-        c.extra('include_source_blob_properties',  arg_type=get_three_state_flag(),
+                help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob '
+                'will overwrite the existing data. If set to False, the operation will fail with ResourceExistsError.')
+        c.extra('include_source_blob_properties', arg_type=get_three_state_flag(),
                 help='Indicate if properties from the source blob should be copied. Defaults to True.')
         c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
         c.extra('source_content_md5',
