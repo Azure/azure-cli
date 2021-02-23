@@ -18,11 +18,11 @@ def list_mediaservices(client, resource_group_name=None):
 
 
 def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None,
-                        managed_identity=False, tags=None):
+                        identity_system_assigned=False, tags=None):
     storage_account_primary = StorageAccount(type='Primary', id=storage_account)
 
     return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary],
-                                         location, managed_identity,
+                                         location, identity_system_assigned,
                                          tags)
 
 
@@ -66,9 +66,9 @@ def set_mediaservice_trusted_storage(client, resource_group_name, account_name,
 
 
 def create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts=None,
-                                  location=None, managed_identity=False,
+                                  location=None, identity_system_assigned=False,
                                   tags=None):
-    identity = 'SystemAssigned' if managed_identity else 'None'
+    identity = 'SystemAssigned' if identity_system_assigned else 'None'
     media_service = MediaService(location=location, storage_accounts=storage_accounts,
                                  identity=MediaServiceIdentity(type=identity), tags=tags)
 

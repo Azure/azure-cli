@@ -60,13 +60,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   validator=get_default_location_from_resource_group, required=True)
+                   validator=get_default_location_from_resource_group, required=False)
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
-        c.argument('managed_identity', help='Set this flag to enable managed identity on the account.')
+        c.argument('identity_system_assigned', help='Set this flag to enable managed identity on the account.', action='store_true')
 
     with self.argument_context('ams account check-name') as c:
         c.argument('account_name', options_list=['--name', '-n'], id_part=None,
@@ -87,7 +87,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', required=True)
 
     with self.argument_context('ams account storage set-authentication') as c:
-        c.argument('storage_auth', help='Allowed values: {}'.format(", ".join(get_storage_authentication_allowed_values_list())))
+        c.argument('storage_auth', arg_type=get_enum_type(get_storage_authentication_allowed_values_list()), help='The type of authentication for the storage account associated with the media services account.')
 
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
