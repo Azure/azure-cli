@@ -45,6 +45,8 @@ from azure.mgmt.cosmosdb.models import (
     ThroughputSettingsResource,
     ThroughputSettingsUpdateParameters,
     AutoscaleSettings,
+    PeriodicModeBackupPolicy,
+    PeriodicModeProperties
 )
 
 logger = get_logger(__name__)
@@ -95,7 +97,9 @@ def cli_cosmosdb_create(cmd, client,
                         enable_free_tier=None,
                         server_version=None,
                         network_acl_bypass=None,
-                        network_acl_bypass_resource_ids=None):
+                        network_acl_bypass_resource_ids=None,
+                        backup_interval=None,
+                        backup_retention=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -124,6 +128,15 @@ def cli_cosmosdb_create(cmd, client,
     elif server_version is not None:
         raise CLIError('server-version is a valid argument only when kind is MongoDB.')
 
+    backup_policy = None
+    if backup_interval is not None or backup_retention is not None:
+        backup_policy = PeriodicModeBackupPolicy()
+        periodic_mode_properties = PeriodicModeProperties(
+            backup_interval_in_minutes=backup_interval,
+            backup_retention_interval_in_hours=backup_retention
+        )
+        backup_policy.periodic_mode_properties = periodic_mode_properties
+
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
         locations=locations,
@@ -143,7 +156,8 @@ def cli_cosmosdb_create(cmd, client,
         enable_analytical_storage=enable_analytical_storage,
         enable_free_tier=enable_free_tier,
         network_acl_bypass=network_acl_bypass,
-        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids)
+        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
+        backup_policy=backup_policy)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -171,7 +185,9 @@ def cli_cosmosdb_update(client,
                         enable_analytical_storage=None,
                         network_acl_bypass=None,
                         network_acl_bypass_resource_ids=None,
-                        server_version=None):
+                        server_version=None,
+                        backup_interval=None,
+                        backup_retention=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -202,6 +218,19 @@ def cli_cosmosdb_update(client,
 
     api_properties = {'ServerVersion': server_version}
 
+    backup_policy = None
+    if backup_interval is not None or backup_retention is not None:
+        if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
+            periodic_mode_properties = PeriodicModeProperties(
+                backup_interval_in_minutes=backup_interval,
+                backup_retention_interval_in_hours=backup_retention
+            )
+            backup_policy = existing.backup_policy
+            backup_policy.periodic_mode_properties = periodic_mode_properties
+        else:
+            raise CLIError(
+                'backup-interval and backup-retention can only be set for accounts with periodic backup policy.')
+
     params = DatabaseAccountUpdateParameters(
         locations=locations,
         tags=tags,
@@ -217,7 +246,8 @@ def cli_cosmosdb_update(client,
         enable_analytical_storage=enable_analytical_storage,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
-        api_properties=api_properties)
+        api_properties=api_properties,
+        backup_policy=backup_policy)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
