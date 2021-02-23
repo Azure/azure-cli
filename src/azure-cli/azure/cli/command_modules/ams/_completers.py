@@ -99,6 +99,7 @@ def get_storage_authentication_allowed_values_list():
     values = get_storage_authentication_allowed_values()
     return values
 
+
 def get_managed_identity_allowed_values_list():
     values = get_managed_identity_allowed_values()
     return values

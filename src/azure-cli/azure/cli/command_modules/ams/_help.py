@@ -67,7 +67,7 @@ helps['ams account encryption set'] = """
     examples:
         - name: Set the media account's encryption to a customer managed key
           text: >
-            az ams account encryption set -a myAmsAccount -g myRG --key-type CustomerKey --key-identifier keyVaultId 
+            az ams account encryption set -a myAmsAccount -g myRG --key-type CustomerKey --key-identifier keyVaultId
         - name: Set the media account's encryption to a system managed key
           text: >
             az ams account encryption set -a myAmsAccount -g myRG --key-type SystemKey
