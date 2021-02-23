@@ -359,7 +359,8 @@ class AzCliCommandParser(CLICommandParser):
             ...
         }
         """
-
+        if not command_str:
+            return None
         cmd_chain = self._get_extension_command_tree()
         if not cmd_chain:
             return None
