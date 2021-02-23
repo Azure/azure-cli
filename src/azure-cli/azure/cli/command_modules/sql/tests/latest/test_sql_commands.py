@@ -2236,7 +2236,10 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         database_name = "cliautomationdb01"
         target_database_name = "cliautomationdb02"
+        hs_database_name = "cliautomationhs03"
+        hs_target_database_name = "cliautomationnr04"
         service_objective = 'GP_Gen5_8'
+        hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
         class ServerInfo(object):  # pylint: disable=too-few-public-methods
@@ -2264,8 +2267,15 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s1.group)])
 
+        # create hs db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
+                 checks=[
+                     JMESPathCheck('name', hs_database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
         # create replica in second server with min params
-        # partner resouce group unspecified because s1.group == s2.group
+        # partner resource group unspecified because s1.group == s2.group
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
                  .format(s1.group, s1.name, database_name,
                          s2.name),
@@ -2294,14 +2304,28 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db delete -g {} -s {} -n {} --yes'
                  .format(s2.group, s2.name, database_name))
 
+        secondary_type = "Geo"
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {} --partner-database {}'
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
                  .format(s1.group, s1.name, database_name,
-                         s2.name, service_objective, target_database_name),
+                         s2.name, service_objective, target_database_name, secondary_type),
                  checks=[
                      JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
+
+        # Create a named replica
+        secondary_type = "Named"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, hs_database_name,
+                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', hs_target_database_name),
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'pool1'
