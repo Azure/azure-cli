@@ -22,12 +22,12 @@ from azure.cli.command_modules.keyvault._validators import (
 
 def transform_assignment_list(result):
     return [OrderedDict([('Principal', r['principalName']),
-                         ('Role', r['roleDefinitionName']),
+                         ('RoleName', r['roleName']),
                          ('Scope', r['scope'])]) for r in result]
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+    return [OrderedDict([('Name', r['name']), ('RoleName', r['roleName']), ('Type', r['type']),
                          ('Description', r['description'])]) for r in result]
 
 

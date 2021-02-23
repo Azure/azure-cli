@@ -1857,9 +1857,9 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     role_definition_id = getattr(role_assignment, 'role_definition_id', None)
     ret['roleDefinitionId'] = role_definition_id
     if role_definition_id:
-        ret['roleDefinitionName'] = role_dics.get(role_definition_id)
+        ret['roleName'] = role_dics.get(role_definition_id)
     else:
-        ret['roleDefinitionName'] = None  # the role definition might have been deleted
+        ret['roleName'] = None  # the role definition might have been deleted
 
     # fill in principal names
     principal_id = getattr(role_assignment, 'principal_id', None)
