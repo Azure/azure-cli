@@ -1091,9 +1091,9 @@ def backup_key(client, file_path, vault_base_url=None,
 def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
                 identifier=None, storage_resource_uri=None,  # pylint: disable=unused-argument
                 storage_account_name=None, blob_container_name=None,
-                token=None, key_name=None, no_wait=False):
+                token=None, backup_folder=None, key_name=None, no_wait=False):
     if file_path:
-        if any([storage_account_name, blob_container_name, token]):
+        if any([storage_account_name, blob_container_name, token, backup_folder]):
             raise MutuallyExclusiveArgumentError('Do not use --file/-f with any of --storage-account-name/'
                                                  '--blob-container-name/--storage-container-SAS-token/--backup-folder')
         if key_name:
@@ -1102,7 +1102,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
         if no_wait:
             raise MutuallyExclusiveArgumentError('Please do not specify --no-wait when using --file/-f')
 
-    if not file_path and not any([storage_account_name, blob_container_name, token]):
+    if not file_path and not any([storage_account_name, blob_container_name, token, backup_folder]):
         raise RequiredArgumentMissingError('Please specify --file/-f or --storage-account-name & '
                                            '--blob-container-name & --storage-container-SAS-token & --backup-folder')
 
@@ -1115,6 +1115,8 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
 
     if not token:
         raise RequiredArgumentMissingError('Please specify --storage-container-SAS-token/-t')
+    if not backup_folder:
+        raise RequiredArgumentMissingError('Please specify --backup-folder')
 
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
@@ -1125,7 +1127,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'hsm_name': hsm_name})
     return sdk_no_wait(
         no_wait, backup_client.begin_selective_restore,
-        folder_url=storage_resource_uri,
+        folder_url=storage_resource_uri + backup_folder,
         sas_token=token,
         key_name=key_name
     )
@@ -2069,13 +2071,13 @@ def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_n
     return client.begin_backup(storage_resource_uri, token)
 
 
-def full_restore(cmd, client, token, storage_resource_uri=None, storage_account_name=None,
+def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
                  blob_container_name=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_restore(storage_resource_uri, token)
+    return client.begin_restore(storage_resource_uri + folder_to_restore, token)
 # endregion
 
 
