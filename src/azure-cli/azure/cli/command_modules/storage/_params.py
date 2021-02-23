@@ -655,16 +655,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_precondition_options()
         c.register_source_uri_arguments(validator=validate_source_url, blob_only=False, arg_group='Source Blob')
 
-        c.argument('if_match', options_list=['--destination-if-match'])
-        c.argument('if_modified_since', options_list=['--destination-if-modified-since'])
-        c.argument('if_none_match', options_list=['--destination-if-none-match'])
-        c.argument('if_unmodified_since', options_list=['--destination-if-unmodified-since'])
-        c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
+        c.argument('if_match', options_list=['--destination-if-match', '--dest-match'])
+        c.argument('if_modified_since', options_list=['--destination-if-modified-since', '--dest-modiified'])
+        c.argument('if_none_match', options_list=['--destination-if-none-match', '--dest-none-match'])
+        c.argument('if_unmodified_since', options_list=['--destination-if-unmodified-since', '--dest-unmodified'])
+        c.argument('if_tags_match_condition', options_list=['--destination-tags-condition', '--dest-tag'])
+
+        c.argument('source_if_match', options_list=['--source-if-match', '--src-match'])
+        c.argument('source_if_modified_since', options_list=['--source-if-modified-since', '--src-modiified'])
+        c.argument('source_if_none_match', options_list=['--source-if-none-match', '--src-none-match'])
+        c.argument('source_if_unmodified_since', options_list=['--source-if-unmodified-since', '--src-unmodified'])
+        c.argument('source_if_tags_match_condition', options_list=['--source-tags-condition', '--src-tag'])
 
         c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                 help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob '
                 'will overwrite the existing data. If set to False, the operation will fail with ResourceExistsError.')
-        c.extra('include_source_blob_properties', arg_type=get_three_state_flag(),
+        c.extra('include_source_blob_properties', options_list=['--include-source-blob-properties', '-i'],
+                arg_type=get_three_state_flag(),
                 help='Indicate if properties from the source blob should be copied. Defaults to True.')
         c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
         c.extra('source_content_md5',
