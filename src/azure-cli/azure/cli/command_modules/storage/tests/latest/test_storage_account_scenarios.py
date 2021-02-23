@@ -360,6 +360,25 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
         ])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    def test_storage_account_with_shared_key_access(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True)])
+
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access false'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', False)])
+
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access true'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True)])
+
+        self.cmd('az storage account update -n {} --allow-shared-key-access false'.format(name),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', False)])
+
+        self.cmd('az storage account update -n {} --allow-shared-key-access true'.format(name),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True)])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
