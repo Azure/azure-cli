@@ -1868,13 +1868,11 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_public_ip_zone', location='eastus2')
     def test_network_public_ip_zone(self, resource_group):
         self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1 2 3', checks=[
             self.check('length(publicIp.zones)', 3)
         ])
-
 
 
 class NetworkZonedPublicIpScenarioTest(ScenarioTest):
