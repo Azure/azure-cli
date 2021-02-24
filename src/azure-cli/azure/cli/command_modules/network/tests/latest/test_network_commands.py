@@ -2125,6 +2125,18 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
             self.check('ipv6PeeringConfig.state', 'Enabled')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering2', location='eastus')
+    def test_network_express_route_ipv6_peering2(self, resource_group):
+        self.kwargs['er'] = 'test_circuit'
+        # create with ipv6
+        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" '
+                 '--peering-location Area51 --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type AzurePrivatePeering '
+                 '--peer-asn 10002 --vlan-id 103 --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 '
+                 '--secondary-peer-subnet 2003:db00::/126',
+                 checks=[self.check('ipv6PeeringConfig.primaryPeerAddressPrefix', '2002:db00::/126'),
+                         self.check('ipv6PeeringConfig.secondaryPeerAddressPrefix', '2003:db00::/126')])
+
 
 class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 

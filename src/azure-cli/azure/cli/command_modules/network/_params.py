@@ -747,8 +747,8 @@ def load_arguments(self, _):
         c.argument('peering_type', validator=validate_peering_type, arg_type=get_enum_type(ExpressRoutePeeringType), help='BGP peering type for the circuit.')
         c.argument('sku_family', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily))
         c.argument('sku_tier', arg_type=get_enum_type(ExpressRouteCircuitSkuTier))
-        c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30 subnet used to configure IP addresses for primary interface.')
-        c.argument('secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'], help='/30 subnet used to configure IP addresses for secondary interface.')
+        c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30(ipv4) or /126(ipv6) subnet used to configure IP addresses for primary interface.')
+        c.argument('secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'], help='/30(ipv4) or /126(ipv6) subnet used to configure IP addresses for secondary interface.')
         c.argument('shared_key', help='Key for generating an MD5 for the BGP session.')
 
     with self.argument_context('network express-route peering', arg_group='Microsoft Peering') as c:
