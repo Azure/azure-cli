@@ -260,4 +260,8 @@ class RecommendationError(ClientError):
     """ The client error raised by `az next`. It is needed in `az next` to skip error records. """
     pass
 
+
+class AuthenticationError(ServiceError):
+    """ Raised when AAD authentication fails. """
+
 # endregion
