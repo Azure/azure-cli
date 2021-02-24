@@ -286,8 +286,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_waf_rate_limit_rules', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_rate_limit_rule', client_factory=cf_waf_policy)
 
+    with self.command_group('afd', is_preview=True):
+        pass
+
     with self.command_group('afd profile', cdn_profiles_sdk,
-                            is_preview=True,
                             custom_command_type=get_custom_sdk(cf_profiles, _not_found(profile_not_found_msg))) as g:
         g.custom_show_command('show', 'get_afd_profile')
         g.custom_command('delete', 'delete_afd_profile')
@@ -296,52 +298,57 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_afd_profile')
         g.custom_command('usage', 'list_resource_usage', client_factory=cf_afd_profiles)
 
-    with self.command_group('afd endpoint', cdn_afd_endpoints_sdk, is_preview=True) as g:
+    with self.command_group('afd endpoint', cdn_afd_endpoints_sdk,
+                            client_factory=cf_afd_endpoints) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
         g.command('purge', 'purge_content', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
 
-        g.custom_command('update', 'update_afd_endpoint', client_factory=cf_afd_endpoints)
-        g.custom_command('create', 'create_afd_endpoint', client_factory=cf_afd_endpoints,
+        g.custom_command('update', 'update_afd_endpoint')
+        g.custom_command('create', 'create_afd_endpoint',
                          doc_string_source='azure.mgmt.cdn.models#AFDEndpoint')
 
-    with self.command_group('afd origin-group', cdn_afd_origin_group_sdk, is_preview=True) as g:
+    with self.command_group('afd origin-group', cdn_afd_origin_group_sdk,
+                            client_factory=cf_afd_origin_groups) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.custom_command('create', 'create_afd_origin_group', client_factory=cf_afd_origin_groups)
-        g.custom_command('update', 'update_afd_origin_group', client_factory=cf_afd_origin_groups)
+        g.custom_command('create', 'create_afd_origin_group')
+        g.custom_command('update', 'update_afd_origin_group')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd origin', cdn_afd_origin_sdk, is_preview=True) as g:
+    with self.command_group('afd origin', cdn_afd_origin_sdk,
+                            client_factory=cf_afd_origins) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_origin_group')
-        g.custom_command('create', 'create_afd_origin', client_factory=cf_afd_origins)
-        g.custom_command('update', 'update_afd_origin', client_factory=cf_afd_origins)
+        g.custom_command('create', 'create_afd_origin')
+        g.custom_command('update', 'update_afd_origin')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd route', cdn_afd_route_sdk, is_preview=True) as g:
+    with self.command_group('afd route', cdn_afd_route_sdk,
+                            client_factory=cf_afd_routes) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_endpoint')
-        g.custom_command('create', 'create_afd_route', client_factory=cf_afd_routes)
-        g.custom_command('update', 'update_afd_route', client_factory=cf_afd_routes)
+        g.custom_command('create', 'create_afd_route')
+        g.custom_command('update', 'update_afd_route')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd rule-set', cdn_afd_rule_set_sdk, is_preview=True) as g:
+    with self.command_group('afd rule-set', cdn_afd_rule_set_sdk,
+                            client_factory=cf_afd_rule_sets) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.custom_command('create', 'create_afd_rule_set', client_factory=cf_afd_rule_sets)
+        g.custom_command('create', 'create_afd_rule_set')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd rule', cdn_afd_rule_sdk, is_preview=True) as g:
+    with self.command_group('afd rule', cdn_afd_rule_sdk,
+                            client_factory=cf_afd_rules) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_rule_set')
-        g.custom_command('create', 'create_afd_rule', client_factory=cf_afd_rules)
+        g.custom_command('create', 'create_afd_rule')
         g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('afd rule condition',
                             cdn_afd_rule_sdk,
-                            is_preview=True,
                             custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
         g.custom_command('add', 'add_afd_rule_condition',
                          doc_string_source='azure.mgmt.cdn.models#Rule')
@@ -351,7 +358,6 @@ def load_command_table(self, _):
 
     with self.command_group('afd rule action',
                             cdn_afd_rule_sdk,
-                            is_preview=True,
                             custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
         g.custom_command('add', 'add_afd_rule_action',
                          doc_string_source='azure.mgmt.cdn.models#Rule')
@@ -359,43 +365,46 @@ def load_command_table(self, _):
                          doc_string_source='azure.mgmt.cdn.models#Rule')
         g.custom_command('list', 'list_afd_rule_action')
 
-    with self.command_group('afd security-policy', cdn_afd_security_policy_sdk, is_preview=True) as g:
+    with self.command_group('afd security-policy', cdn_afd_security_policy_sdk,
+                            client_factory=cf_afd_security_policies) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.custom_command('create', 'create_afd_security_policy', client_factory=cf_afd_security_policies)
-        g.custom_command('update', 'update_afd_security_policy', client_factory=cf_afd_security_policies)
+        g.custom_command('create', 'create_afd_security_policy')
+        g.custom_command('update', 'update_afd_security_policy')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('afd custom-domain', cdn_afd_domain_sdk, is_preview=True) as g:
+    with self.command_group('afd custom-domain', cdn_afd_domain_sdk,
+                            client_factory=cf_afd_custom_domain) as g:
         g.show_command('show', 'get')
         g.wait_command('wait')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list_by_profile')
-        g.custom_command('create', 'create_afd_custom_domain', client_factory=cf_afd_custom_domain,
+        g.custom_command('create', 'create_afd_custom_domain',
                          supports_no_wait=True)
-        g.custom_command('update', 'update_afd_custom_domain', client_factory=cf_afd_custom_domain)
+        g.custom_command('update', 'update_afd_custom_domain')
 
-    with self.command_group('afd secret', cdn_afd_secret_sdk, is_preview=True) as g:
+    with self.command_group('afd secret', cdn_afd_secret_sdk,
+                            client_factory=cf_afd_secrets) as g:
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list_by_profile')
-        g.custom_command('create', 'create_afd_secret', client_factory=cf_afd_secrets)
-        g.custom_command('update', 'update_afd_secret', client_factory=cf_afd_secrets)
+        g.custom_command('create', 'create_afd_secret')
+        g.custom_command('update', 'update_afd_secret')
 
-    with self.command_group('afd log-analytic metric', cdn_afd_log_analytic_sdk, is_preview=True) as g:
+    with self.command_group('afd log-analytic metric', cdn_afd_log_analytic_sdk) as g:
         g.command('list', 'get_log_analytics_metrics')
 
-    with self.command_group('afd log-analytic ranking', cdn_afd_log_analytic_sdk, is_preview=True) as g:
+    with self.command_group('afd log-analytic ranking', cdn_afd_log_analytic_sdk) as g:
         g.command('list', 'get_log_analytics_rankings')
 
-    with self.command_group('afd log-analytic location', cdn_afd_log_analytic_sdk, is_preview=True) as g:
+    with self.command_group('afd log-analytic location', cdn_afd_log_analytic_sdk) as g:
         g.command('list', 'get_log_analytics_locations')
 
-    with self.command_group('afd log-analytic resource', cdn_afd_log_analytic_sdk, is_preview=True) as g:
+    with self.command_group('afd log-analytic resource', cdn_afd_log_analytic_sdk) as g:
         g.command('list', 'get_log_analytics_resources')
 
-    with self.command_group('afd waf-log-analytic metric', cdn_afd_log_analytic_sdk, is_preview=True) as g:
+    with self.command_group('afd waf-log-analytic metric', cdn_afd_log_analytic_sdk) as g:
         g.command('list', 'get_waf_log_analytics_metrics')
 
-    with self.command_group('afd waf-log-analytic ranking', cdn_afd_log_analytic_sdk, is_preview=True) as g:
+    with self.command_group('afd waf-log-analytic ranking', cdn_afd_log_analytic_sdk) as g:
         g.command('list', 'get_waf_log_analytics_rankings')
