@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 import os
 import time
+import unittest
+
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.testsdk.decorators import serial_test
@@ -1068,6 +1070,7 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+    @unittest.skip('FileServiceProperties object has no attribute protocol_settings')
     @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
     @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
     def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
@@ -1231,6 +1234,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
 
 class StorageAccountSkuScenarioTest(ScenarioTest):
+    @unittest.skip('Storage account type Standard_ZRS cannot be changed to Standard_GZRS')
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='eastus2')
     @StorageAccountPreparer(name_prefix='clistoragesku', location='eastus2euap', kind='StorageV2', sku='Standard_ZRS')

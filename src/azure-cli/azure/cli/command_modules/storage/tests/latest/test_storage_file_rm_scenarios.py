@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import unittest
+
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
                                JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
@@ -238,6 +240,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             share_name, storage_account, resource_group)).output.strip('\n')
         self.assertEqual(result, str(512 * 1024))
 
+    @unittest.skip('FileServiceProperties object has no attribute protocol_settings')
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_sf", location="francecentral")
     @StorageAccountPreparer(name_prefix="clitest", location="francecentral")
