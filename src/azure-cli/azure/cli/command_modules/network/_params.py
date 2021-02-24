@@ -105,6 +105,12 @@ def load_arguments(self, _):
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
     express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
     express_route_link_admin_state_type = CLIArgumentType(get_enum_type(ExpressRouteLinkAdminState))
+    zone_compatible_type = CLIArgumentType(
+        options_list=['--zone', '-z'],
+        nargs='+',
+        help='Space-separated list of availability zones into which to provision the resource.',
+        choices=['1', '2', '3']
+    )
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -1670,7 +1676,8 @@ def load_arguments(self, _):
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
         c.argument('idle_timeout', help='Idle timeout in minutes.')
-        c.argument('zone', zone_type, min_api='2017-06-01')
+        c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
+        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
 
     with self.argument_context('network public-ip create') as c:
