@@ -1127,7 +1127,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'hsm_name': hsm_name})
     return sdk_no_wait(
         no_wait, backup_client.begin_selective_restore,
-        folder_url=storage_resource_uri + backup_folder,
+        folder_url='{}/{}'.format(storage_resource_uri, backup_folder),
         sas_token=token,
         key_name=key_name
     )
@@ -2038,7 +2038,6 @@ def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable
         query_scope = ''
     role_definitions = client.list_role_definitions(role_scope=query_scope)
     return [_reconstruct_role_definition(role) for role in role_definitions]
-    # return client.list_role_definitions(role_scope=query_scope)
 # endregion
 
 
@@ -2077,7 +2076,8 @@ def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=Non
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_restore(storage_resource_uri + folder_to_restore, token)
+    folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
+    return client.begin_restore(folder_url, token)
 # endregion
 
 
