@@ -42,19 +42,20 @@ class CAEScenarioTest(LiveScenarioTest):
                 exit_code = self.cmd(command).exit_code
                 sleep(ARM_RETRY_INTERVAL)
         if checks:
-            checks(ex)
+            checks(ex.exception)
 
     def test_revoke_session_track2(self):
         def check_aad_error_code(ex):
-            self.assertIn('AADSTS50173', str(ex.exception))
+            self.assertIn('AADSTS50173', str(ex))
 
         self._test_revoke_session("storage account list", AuthenticationError, check_aad_error_code)
 
     def test_revoke_session_track1(self):
-        def check_status_code(ex):
-            self.assertEqual(ex.exception.status_code, 401)
+        def check_arm_error(ex):
+            self.assertEqual(ex.status_code, 401)
+            self.assertIsNotNone(ex.response.headers["WWW-Authenticate"])
 
-        self._test_revoke_session('group list', CloudError, check_status_code)
+        self._test_revoke_session('group list', CloudError, check_arm_error)
 
     def _revoke_sign_in_sessions(self):
         # Manually revoke sign in sessions
