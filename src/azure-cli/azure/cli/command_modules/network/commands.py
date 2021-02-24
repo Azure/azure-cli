@@ -694,7 +694,7 @@ def load_command_table(self, _):
     with self.command_group('network dns', network_dns_reference_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
         g.command('list-references', 'get_by_target_resources')
 
-    with self.command_group('network dns zone', network_dns_zone_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
+    with self.command_group('network dns zone', network_dns_zone_sdk) as g:
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get', table_transformer=transform_dns_zone_table_output)
         g.custom_command('list', 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
@@ -703,7 +703,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dns_zone', client_factory=cf_dns_mgmt_zones)
         g.generic_update_command('update', custom_func_name='update_dns_zone')
 
-    with self.command_group('network dns record-set', resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
+    with self.command_group('network dns record-set') as g:
         g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
 
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
@@ -723,11 +723,11 @@ def load_command_table(self, _):
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.generic_update_command('update', custom_func_name='update_dns_record_set', transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set soa', network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
+    with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
         g.show_command('show', 'get', transform=transform_dns_record_set_output)
         g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
 
-    with self.command_group('network dns record-set cname', network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
+    with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:
         g.show_command('show', 'get', transform=transform_dns_record_set_output)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
