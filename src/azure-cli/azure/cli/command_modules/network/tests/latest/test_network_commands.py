@@ -643,8 +643,12 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
             'gateway': 'ag1',
             'ip': 'pubip1'
         })
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1')
-        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 --public-ip-address {ip} --no-wait')
+
+        # for public-ip after '2020-08-01', when set '-z 1 3', actually return 'zones:[1,2,3]'
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1 3', checks=[
+            self.check('length(publicIp.zones)', 3)
+        ])
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 3 --public-ip-address {ip} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway show -g {rg} -n {gateway}', checks=[
             self.check('zones[0]', 1)
@@ -1863,6 +1867,12 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_zone', location='eastus2')
+    def test_network_public_ip_zone(self, resource_group):
+        self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1 2 3', checks=[
+            self.check('length(publicIp.zones)', 3)
+        ])
 
 
 class NetworkZonedPublicIpScenarioTest(ScenarioTest):
