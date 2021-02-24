@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc16',
-    'azure-mgmt-cosmosdb~=1.0.0',
+    'azure-mgmt-cosmosdb~=3.0.0',
     'azure-mgmt-containerservice~=9.4.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -98,11 +98,11 @@ DEPENDENCIES = [
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
-    'azure-mgmt-media~=2.1,>=2.1.0',
+    'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.15.0',
-    'azure-mgmt-network~=17.0.0',
+    'azure-mgmt-network~=17.1.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=3.1.0rc1',
@@ -121,7 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr~=0.4.0',
     'azure-mgmt-sql~=0.26.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
-    'azure-mgmt-storage~=16.0.0',
+    'azure-mgmt-storage~=17.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.48.0',
     'azure-mgmt-synapse~=0.6.0',
@@ -141,7 +141,8 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0'
+    'jsondiff==1.2.0',
+    'semver==2.13.0'
 ]
 
 TESTS_REQUIRE = [
@@ -187,7 +188,8 @@ setup(
         'azure.cli.command_modules.appservice': [
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
-            'resources/WebappRuntimeStacks.json'
+            'resources/WebappRuntimeStacks.json',
+            'resources/GenerateRandomAppNames.json'
         ],
         'azure.cli.command_modules.rdbms': [
             'randomname/adjectives.txt',

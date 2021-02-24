@@ -827,6 +827,11 @@ def load_arguments(self, _):
                    help='Name of the new replica.'
                    ' If unspecified, defaults to the source database name.')
 
+        c.argument('secondary_type',
+                   options_list=['--secondary-type'],
+                   help='Type of secondary to create.'
+                   ' Allowed values include: Geo, Named.')
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
