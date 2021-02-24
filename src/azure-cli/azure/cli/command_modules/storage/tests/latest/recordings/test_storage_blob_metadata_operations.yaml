@@ -15,9 +15,9 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/17.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-storage/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-01-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-06-01&$expand=kerb
   response:
     body:
       string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sat, 20 Feb 2021 10:59:18 GMT
+      - Wed, 24 Feb 2021 06:37:43 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11988'
+      - '11996'
     status:
       code: 200
       message: OK
@@ -57,9 +57,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.19.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.19.1
       x-ms-date:
-      - Sat, 20 Feb 2021 10:59:18 GMT
+      - Wed, 24 Feb 2021 06:37:44 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -71,11 +71,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 20 Feb 2021 10:59:18 GMT
+      - Wed, 24 Feb 2021 06:37:44 GMT
       etag:
-      - '"0x8D8D58E92D52B5C"'
+      - '"0x8D8D88EB1C2D8FB"'
       last-modified:
-      - Sat, 20 Feb 2021 10:59:19 GMT
+      - Wed, 24 Feb 2021 06:37:45 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -178,15 +178,22 @@ interactions:
       \                        'The expected number of block put requests is {} but
       the actual '\r\n                         'number is {}.'.format(block_count,
       len(put_blocks)))\r\n\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer()\r\n
-      \   def test_storage_blob_socket_timeout(self, resource_group, storage_account):\r\n
-      \       local_dir = self.create_temp_dir()\r\n        local_file = self.create_temp_file(1)\r\n
-      \       blob_name = self.create_random_name(prefix='blob', length=24)\r\n        account_info
-      = self.get_account_info(resource_group, storage_account)\r\n\r\n        container
-      = self.create_container(account_info)\r\n\r\n        from azure.common import
-      AzureException\r\n        with self.assertRaises(AzureException):\r\n            self.storage_cmd('storage
-      blob upload -c {} -f \"{}\" -n {} --type block --socket-timeout -11',\r\n                             account_info,
-      container, local_file, blob_name)\r\n\r\n        self.storage_cmd('storage blob
-      exists -n {} -c {}', account_info, blob_name, container) \\\r\n            .assert_with_checks(JMESPathCheck('exists',
+      \   def test_storage_blob_download_directory(self, resource_group, storage_account):\r\n
+      \       local_dir = self.create_temp_dir()\r\n        account_info = self.get_account_info(resource_group,
+      storage_account)\r\n        from azure.cli.core.azclierror import FileOperationError\r\n
+      \       with self.assertRaisesRegexp(FileOperationError, 'File is expected,
+      not a directory'):\r\n            self.storage_cmd('storage blob download -c
+      mycontainer -n myblob -f \"{}\"', account_info, local_dir)\r\n\r\n    @ResourceGroupPreparer()\r\n
+      \   @StorageAccountPreparer()\r\n    def test_storage_blob_socket_timeout(self,
+      resource_group, storage_account):\r\n        local_dir = self.create_temp_dir()\r\n
+      \       local_file = self.create_temp_file(1)\r\n        blob_name = self.create_random_name(prefix='blob',
+      length=24)\r\n        account_info = self.get_account_info(resource_group, storage_account)\r\n\r\n
+      \       container = self.create_container(account_info)\r\n\r\n        from
+      azure.common import AzureException\r\n        with self.assertRaises(AzureException):\r\n
+      \           self.storage_cmd('storage blob upload -c {} -f \"{}\" -n {} --type
+      block --socket-timeout -11',\r\n                             account_info, container,
+      local_file, blob_name)\r\n\r\n        self.storage_cmd('storage blob exists
+      -n {} -c {}', account_info, blob_name, container) \\\r\n            .assert_with_checks(JMESPathCheck('exists',
       False))\r\n\r\n        self.storage_cmd('storage blob upload -c {} -f \"{}\"
       -n {} --type block --socket-timeout 10',\r\n                         account_info,
       container, local_file, blob_name)\r\n        self.storage_cmd('storage blob
@@ -584,15 +591,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '42696'
+      - '43243'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.19.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.19.1
       x-ms-blob-content-type:
-      - text/plain
+      - text/x-python
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Sat, 20 Feb 2021 10:59:19 GMT
+      - Wed, 24 Feb 2021 06:37:45 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -604,13 +611,13 @@ interactions:
       content-length:
       - '0'
       content-md5:
-      - KpgQxTncMCTum19oVX9lng==
+      - mnr+2QdbpHR+Yy5wLhMS5w==
       date:
-      - Sat, 20 Feb 2021 10:59:20 GMT
+      - Wed, 24 Feb 2021 06:37:46 GMT
       etag:
-      - '"0x8D8D58E93BD53A8"'
+      - '"0x8D8D88EB2B9BA13"'
       last-modified:
-      - Sat, 20 Feb 2021 10:59:21 GMT
+      - Wed, 24 Feb 2021 06:37:46 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -628,9 +635,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.19.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.19.1
       x-ms-date:
-      - Sat, 20 Feb 2021 10:59:21 GMT
+      - Wed, 24 Feb 2021 06:37:47 GMT
       x-ms-meta-a:
       - b
       x-ms-meta-c:
@@ -646,11 +653,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 20 Feb 2021 10:59:22 GMT
+      - Wed, 24 Feb 2021 06:37:47 GMT
       etag:
-      - '"0x8D8D58E9473A53A"'
+      - '"0x8D8D88EB3666C59"'
       last-modified:
-      - Sat, 20 Feb 2021 10:59:22 GMT
+      - Wed, 24 Feb 2021 06:37:47 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -666,9 +673,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.19.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.19.1
       x-ms-date:
-      - Sat, 20 Feb 2021 10:59:22 GMT
+      - Wed, 24 Feb 2021 06:37:48 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -680,11 +687,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 20 Feb 2021 10:59:23 GMT
+      - Wed, 24 Feb 2021 06:37:48 GMT
       etag:
-      - '"0x8D8D58E9473A53A"'
+      - '"0x8D8D88EB3666C59"'
       last-modified:
-      - Sat, 20 Feb 2021 10:59:22 GMT
+      - Wed, 24 Feb 2021 06:37:47 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-meta-a:
@@ -704,9 +711,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.19.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.19.1
       x-ms-date:
-      - Sat, 20 Feb 2021 10:59:23 GMT
+      - Wed, 24 Feb 2021 06:37:49 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -718,11 +725,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 20 Feb 2021 10:59:24 GMT
+      - Wed, 24 Feb 2021 06:37:49 GMT
       etag:
-      - '"0x8D8D58E95BEFEF3"'
+      - '"0x8D8D88EB4D0C3D3"'
       last-modified:
-      - Sat, 20 Feb 2021 10:59:24 GMT
+      - Wed, 24 Feb 2021 06:37:50 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -738,9 +745,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.19.1
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.19.1
       x-ms-date:
-      - Sat, 20 Feb 2021 10:59:24 GMT
+      - Wed, 24 Feb 2021 06:37:50 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -752,11 +759,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sat, 20 Feb 2021 10:59:25 GMT
+      - Wed, 24 Feb 2021 06:37:51 GMT
       etag:
-      - '"0x8D8D58E95BEFEF3"'
+      - '"0x8D8D88EB4D0C3D3"'
       last-modified:
-      - Sat, 20 Feb 2021 10:59:24 GMT
+      - Wed, 24 Feb 2021 06:37:50 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
