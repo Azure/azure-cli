@@ -266,28 +266,28 @@ class PostgresFlexibleServerHighAvailabilityMgmt(FlexibleServerHighAvailabilityM
 #         self._test_flexible_server_vnet_ha_server_delete('postgres', self.resource_group, self.server_2, self.restore_server_2)
 
 
-# class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyResourceMgmtScenarioTest):
+class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyResourceMgmtScenarioTest):
 
-#     postgres_location = postgres_location
+    postgres_location = postgres_location
 
-#     def __init__(self, method_name):
-#         super(PostgresFlexibleServerProxyResourceMgmtScenarioTest, self).__init__(method_name)
-#         self.resource_group = self.create_random_name(RG_NAME_PREFIX, RG_NAME_MAX_LENGTH)
-#         self.server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+    def __init__(self, method_name):
+        super(PostgresFlexibleServerProxyResourceMgmtScenarioTest, self).__init__(method_name)
+        self.resource_group = self.create_random_name(RG_NAME_PREFIX, RG_NAME_MAX_LENGTH)
+        self.server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
     
-#     def test_postgres_flexible_server_proxy_resource_mgmt_prepare(self):
-#         self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group))
-#         self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('postgres', postgres_location, self.resource_group, self.server))
+    def test_postgres_flexible_server_proxy_resource_mgmt_prepare(self):
+        self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group))
+        self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('postgres', postgres_location, self.resource_group, self.server))
 
-#     @AllowLargeResponse()
-#     @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_proxy_resource_mgmt_prepare'])
-#     def test_postgres_flexible_server_firewall_rule_mgmt(self):
-#         self._test_firewall_rule_mgmt('postgres', self.resource_group, self.server)
+    @AllowLargeResponse()
+    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_proxy_resource_mgmt_prepare'])
+    def test_postgres_flexible_server_firewall_rule_mgmt(self):
+        self._test_firewall_rule_mgmt('postgres', self.resource_group, self.server)
 
-#     @AllowLargeResponse()
-#     @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_firewall_rule_mgmt'])
-#     def test_postgres_flexible_server_parameter_mgmt(self):
-#         self._test_parameter_mgmt('postgres', self.resource_group, self.server)
+    @AllowLargeResponse()
+    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_firewall_rule_mgmt'])
+    def test_postgres_flexible_server_parameter_mgmt(self):
+        self._test_parameter_mgmt('postgres', self.resource_group, self.server)
     
 
 # class PostgresFlexibleServerValidatorScenarioTest(FlexibleServerValidatorScenarioTest):
