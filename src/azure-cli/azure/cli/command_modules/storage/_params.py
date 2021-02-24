@@ -168,6 +168,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
         type=get_datetime_type(False))
 
+    allow_shared_key_access_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access', '-k'], min_api='2019-04-01',
+        help='Indicate whether the storage account permits requests to be authorized with the account access key via '
+             'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
+             'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -260,6 +266,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
+        c.argument('allow_shared_key_access', allow_shared_key_access_type)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -312,6 +319,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
+        c.argument('allow_shared_key_access', allow_shared_key_access_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
@@ -395,13 +403,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
 
-    with self.argument_context('storage account network-rule') as c:
+    with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import validate_subnet
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', help='The action of virtual network rule.')
+        c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule',
+                   min_api='2020-08-01-preview')
+        c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
+                   min_api='2020-08-01-preview')
 
     with self.argument_context('storage account blob-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
