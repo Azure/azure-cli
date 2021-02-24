@@ -653,7 +653,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
         c.register_precondition_options(prefix='source_')
         c.register_precondition_options()
-        c.register_source_uri_arguments(validator=validate_source_url, blob_only=False, arg_group='Source Blob')
+        c.register_source_uri_arguments(validator=validate_source_url, blob_only=True, arg_group='Source Blob')
 
         c.argument('if_match', options_list=['--destination-if-match', '--dest-match'])
         c.argument('if_modified_since', options_list=['--destination-if-modified-since', '--dest-modiified'])
@@ -667,7 +667,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_if_unmodified_since', options_list=['--source-if-unmodified-since', '--src-unmodified'])
         c.argument('source_if_tags_match_condition', options_list=['--source-tags-condition', '--src-tag'])
 
-        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
+        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", default=True,
                 help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob '
                 'will overwrite the existing data. If set to False, the operation will fail with ResourceExistsError.')
         c.extra('include_source_blob_properties', options_list=['--include-source-blob-properties', '-i'],
@@ -683,11 +683,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('standard_blob_tier', arg_type=get_enum_type(t_blob_tier), options_list='--tier',
                 help='A standard blob tier value to set the blob to. For this version of the library, '
                      'this is only applicable to block blobs on standard storage accounts.')
-        c.argument('encryption_scope',
-                   help='A predefined encryption scope used to encrypt the data on the service. An encryption scope '
-                   'can be created using the Management API and referenced here by name. If a default encryption scope '
-                   'has been defined at the container, this value will override it if the container-level scope is '
-                   'configured to allow overrides. Otherwise an error will be raised.')
+        c.extra('encryption_scope',
+                help='A predefined encryption scope used to encrypt the data on the service. An encryption scope '
+                'can be created using the Management API and referenced here by name. If a default encryption scope '
+                'has been defined at the container, this value will override it if the container-level scope is '
+                'configured to allow overrides. Otherwise an error will be raised.')
 
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')

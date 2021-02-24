@@ -103,6 +103,18 @@ def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
+# Create blob sas with track2 SDK
+def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
+    from datetime import datetime, timedelta
+    generate_blob_sas = cmd.get_models('_shared_access_signature#generate_blob_sas')
+
+    t_blob_permissions = cmd.get_models('_models#BlobSasPermissions')
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = generate_blob_sas(account_name=account_name, account_key=account_key, container_name=container, blob_name=blob,
+                            permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
+    return sas
+
+
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
     from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
@@ -110,7 +122,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
     else:
         t_sas = cmd.get_models('shareaccesssignature#SharedAccessSignature')
 
-    t_blob_permissions = cmd.get_models('blob.models#BlobPermissions')
+    t_blob_permissions = cmd.get_models('blob.models#BlobPermissions', resource_type=Re)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = t_sas(account_name, account_key)
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')

@@ -383,7 +383,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
 
 def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
-    from .util import create_short_lived_blob_sas
+    from .util import create_short_lived_blob_sas_v2
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri [--source-sas]' \
@@ -444,7 +444,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_blob_source or not same_account:
-            source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
+            source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container, blob)
 
     query_params = []
     if source_sas:

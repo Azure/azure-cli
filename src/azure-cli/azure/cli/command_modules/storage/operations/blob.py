@@ -560,6 +560,28 @@ def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blo
     return type_func[blob_type]()
 
 
+# pylint: disable=protected-access
+def _adjust_block_blob_size(client, blob_type, length):
+    if not blob_type or blob_type != 'block':
+        return
+    # increase the block size to 100MB when the block list will contain more than
+    # 50,000 blocks(each block 4MB)
+    if length > 50000 * 4 * 1024 * 1024:
+        client._config.max_block_size = 100 * 1024 * 1024
+        client._config.max_single_put_size = 256 * 1024 * 1024
+    # increase the block size to 4000MB when the block list will contain more than
+    # 50,000 blocks(each block 100MB)
+    if length > 50000 * 100 * 1024 * 1024:
+        client._config.max_block_size = 4000 * 1024 * 1024
+        client._config.max_single_put_size = 5000 * 1024 * 1024
+
+
+def rewrite_blob(client, source_url, **kwargs):
+    client._config.max_block_size = 4000 * 1024 * 1024
+    client._config.max_single_put_size = 5000 * 1024 * 1024
+    return client.upload_blob_from_url(source_url=source_url, **kwargs)
+
+
 def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,
               if_modified_since=None, if_unmodified_since=None, if_match=None,
               if_none_match=None, timeout=None):
