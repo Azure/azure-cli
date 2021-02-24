@@ -2972,6 +2972,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
+    # temporary workaround for dotnet-isolated linux consumption apps
+    if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
+        site_config.linux_fx_version = ''
+
     # adding app settings
     for app_setting, value in app_settings_json.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
