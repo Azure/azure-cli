@@ -23,7 +23,7 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.adal_authentication import aad_exception_handler
+from azure.cli.core.adal_authentication import aad_exception_handler, adal_exception_handler
 
 logger = get_logger(__name__)
 
@@ -693,7 +693,7 @@ class Profile:
                                                                                    use_cert_sn_issuer)
             except adal.AdalError as ex:
                 from azure.cli.core.adal_authentication import aad_exception_handler
-                aad_exception_handler(ex)
+                adal_exception_handler(ex)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))

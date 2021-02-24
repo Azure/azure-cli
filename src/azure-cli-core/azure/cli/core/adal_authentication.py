@@ -45,10 +45,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         except adal.AdalError as err:
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
-            try:
-                aad_exception_handler(err.error_response)
-            except AttributeError:
-                raise CLIError(str(err))
+            adal_exception_handler(err)
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
@@ -236,14 +233,25 @@ def _timestamp(dt):
     return dt.timestamp()
 
 
-def aad_exception_handler(ex: dict):
+def aad_exception_handler(error: dict):
+    """ Handle the error from AAD server returned by ADAL or MSAL. """
     login_message = ("To re-authenticate, please {}. If the problem persists, "
                      "please contact your tenant administrator."
                      .format("refresh Azure Portal" if in_cloud_console() else "run `az login`"))
 
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
-    msg = ex.get('error_description')
+    msg = error.get('error_description')
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(msg, login_message)
+
+
+def adal_exception_handler(err: adal.AdalError):
+    """ Handle AdalError. """
+    try:
+        aad_exception_handler(err.error_response)
+    except AttributeError:
+        # In case of AdalError created as
+        #   AdalError('More than one token matches the criteria. The result is ambiguous.')
+        raise CLIError(str(err))
