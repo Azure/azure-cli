@@ -445,6 +445,7 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
         self.cmd('az keyvault key restore --hsm-name {hsm_name} --blob-container-name {blob} '
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}" '
+                 '--backup-folder "{backup_folder}" '
                  '--name {key_name}', checks=self.check('status', 'Succeeded'))
 
         self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=[
@@ -497,7 +498,8 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
         self.kwargs['backup_folder'] = backup_data['folderUrl'].split('/')[-1]
         self.cmd('az keyvault restore start --hsm-name {hsm_name} --blob-container-name {blob} '
                  '--storage-account-name {storage_account} '
-                 '--storage-container-SAS-token "{sas}" ',
+                 '--storage-container-SAS-token "{sas}" '
+                 '--backup-folder "{backup_folder}"',
                  checks=[
                      self.check('status', 'Succeeded'),
                      self.exists('startTime'),
