@@ -23,6 +23,7 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.adal_authentication import aad_exception_handler
 
 logger = get_logger(__name__)
 
@@ -631,6 +632,9 @@ class Profile:
         authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
         app = ClientApplication(_CLIENT_ID, authority=authority)
         result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
+
+        if 'error' in result:
+            aad_exception_handler(result)
         return username, result["access_token"]
 
     def get_refresh_token(self, resource=None,
