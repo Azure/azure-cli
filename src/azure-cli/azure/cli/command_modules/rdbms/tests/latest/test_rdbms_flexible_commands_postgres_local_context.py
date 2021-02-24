@@ -17,8 +17,10 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 from .test_rdbms_flexible_commands_local_context import (
-    ServerPreparer,
     FlexibleServerLocalContextScenarioTest
+)
+from .test_rdbms_flexible_commands import (
+    ServerPreparer
 )
 from .conftest import postgres_location
 

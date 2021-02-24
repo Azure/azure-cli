@@ -1,0 +1,160 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+        (MSI)
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/azuredbclitest-000002?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_E2s_v3","tier":"MemoryOptimized","capacity":2},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"dopeyMacaw5","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"2","storageProfile":{"storageMB":262144,"backupRetentionDays":17},"earliestRestoreDate":"2021-02-24T05:24:28.2129783+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":1,"startHour":1,"startMinute":30}},"location":"East
+        US","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1085'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 24 Feb 2021 06:37:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "East US", "properties": {"sourceServerName": "azuredbclitest-000002",
+      "pointInTimeUTC": "2021-02-24T06:57:58.884698Z", "availabilityZone": "2", "createMode":
+      "PointInTimeRestore"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '236'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+        (MSI)
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"operation":"RestoreSnapshotManagementOperation","startTime":"2021-02-24T06:38:01.66Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/cc99e2d9-3d84-45ea-aa52-e32287dde462?api-version=2020-02-14-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '88'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 24 Feb 2021 06:38:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/cc99e2d9-3d84-45ea-aa52-e32287dde462?api-version=2020-02-14-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+        (MSI)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/cc99e2d9-3d84-45ea-aa52-e32287dde462?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"cc99e2d9-3d84-45ea-aa52-e32287dde462","status":"Canceled","startTime":"2021-02-24T06:38:01.66Z","error":{"code":"OperationCancelled","message":"The
+        operation has been cancelled by user."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '197'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 24 Feb 2021 06:39:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
