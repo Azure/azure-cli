@@ -1979,8 +1979,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',
-                   help='The name of the Virtual Hub Router.')
-        c.argument('hosted_subnet', help='The ID of a subnet where Virtual Hub Router would be deployed')
+                   help='The name of the Route Server.')
+        c.argument('hosted_subnet', help='The ID of a subnet where Route Server would be deployed')
         c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
                    arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
 
@@ -1988,10 +1988,11 @@ def load_arguments(self, _):
         c.argument('virtual_hub_name', id_part=None)
 
     with self.argument_context('network routeserver peering') as c:
-        c.argument('virtual_hub_name', options_list=['--vrouter-name'], id_part='name',
-                   help='The name of the Virtual Hub Router.')
+        c.argument('virtual_hub_name', options_list=[
+            '--routeserver', c.deprecate(target='--vrouter-name', redirect='--routeserver', hide=True)
+        ], id_part='name', help='The name of the Route Server.')
         c.argument('connection_name', options_list=['--name', '-n'], id_part='child_name_1',
-                   help='The name of the Virtual Hub Router Peering')
+                   help='The name of the Route Server Peering')
         c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
         c.argument('peer_ip', help='Peer IP address.')
 

@@ -3670,21 +3670,21 @@ class NetworkVirtualHubRouter(ScenarioTest):
             self.check('length(virtualRouterIps)', 2),
         ])
 
-        self.cmd('network routeserver peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
+        self.cmd('network routeserver peering create -g {rg} --routeserver {vrouter} -n {peer} '
                  '--peer-asn 11000 --peer-ip 10.0.0.120')
 
-        self.cmd('network routeserver peering list -g {rg} --vrouter-name {vrouter}')
+        self.cmd('network routeserver peering list -g {rg} --routeserver {vrouter}')
 
-        self.cmd('network routeserver peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network routeserver peering show -g {rg} --routeserver {vrouter} -n {peer}')
 
-        self.cmd('network routeserver peering list-advertised-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-advertised-routes -g {rg} --routeserver {vrouter} -n {peer}')
 
-        self.cmd('network routeserver peering list-learned-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-learned-routes -g {rg} --routeserver {vrouter} -n {peer}')
 
         # unable to update unless the ASN's range is required
-        # self.cmd('network routeserver peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
+        # self.cmd('network routeserver peering update -g {rg} --routeserver {vrouter} -n {peer} --peer-ip 10.0.0.0')
 
-        self.cmd('network routeserver peering delete -g {rg} --vrouter-name {vrouter} -n {peer} -y')
+        self.cmd('network routeserver peering delete -g {rg} --routeserver {vrouter} -n {peer} -y')
 
         self.cmd('network routeserver delete -g {rg} -n {vrouter} -y')
 
