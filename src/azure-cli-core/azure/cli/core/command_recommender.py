@@ -160,12 +160,6 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
             "parameters": ','.join(parameters)
         }
 
-        params={
-                    'query': json.dumps(query),
-                    'clientType': 'AzureCli',
-                    'context': json.dumps(context)
-                }
-        print(params)
         response = None
         try:
             response = requests.get(
