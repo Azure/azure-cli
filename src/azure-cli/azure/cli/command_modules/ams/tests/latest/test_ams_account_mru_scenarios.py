@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.core.util import CLIError
 
 
 class AmsMruTests(LiveScenarioTest):
@@ -20,14 +21,17 @@ class AmsMruTests(LiveScenarioTest):
             'type': 'S3',
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        account_info = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams account mru set -n {amsname} -g {rg} --count {count} --type {type}', checks=[
-            self.check('count', '{count}'),
-            self.check('type', '{type}')
-        ])
+        if account_info.get_output_in_json()['encryption']:
+            self.cmd('az ams account mru set -n {amsname} -g {rg} --count {count} --type {type}', expect_failure=True)
+        else:
+            self.cmd('az ams account mru set -n {amsname} -g {rg} --count {count} --type {type}', checks=[
+                self.check('count', '{count}'),
+                self.check('type', '{type}')
+            ])
 
-        self.cmd('az ams account mru show -n {amsname} -g {rg}', checks=[
-            self.check('count', '{count}'),
-            self.check('type', '{type}')
-        ])
+            self.cmd('az ams account mru show -n {amsname} -g {rg}', checks=[
+                self.check('count', '{count}'),
+                self.check('type', '{type}')
+            ])
