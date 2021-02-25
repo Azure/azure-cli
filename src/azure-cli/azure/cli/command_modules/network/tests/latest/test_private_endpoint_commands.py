@@ -705,7 +705,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         })
 
         # Prepare cosmos db account and network
-        account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-public-network false').get_output_in_json()
         self.kwargs['acc_id'] = account['id']
         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
@@ -772,6 +772,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
         ])
 
+    @unittest.skip('Service Unavailable')
     @ResourceGroupPreparer(location='westus2')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({

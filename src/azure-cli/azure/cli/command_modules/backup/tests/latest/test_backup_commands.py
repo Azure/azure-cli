@@ -427,6 +427,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
+    @unittest.skip('more than 3 hours')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
