@@ -163,7 +163,7 @@ class StorageArgumentContext(AzArgumentContext):
                    help="Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
                    type=get_datetime_type(False))
         self.extra('{}if_unmodified_since'.format(prefix), arg_group='Precondition',
-                   help="Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
+                   help="Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
                    type=get_datetime_type(False))
         self.extra('{}if_match'.format(prefix), arg_group='Precondition',
                    help="An ETag value, or the wildcard character (*). Specify this header to perform the "

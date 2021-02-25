@@ -875,7 +875,7 @@ short-summary:  Create a new Block Blob where the content of the blob is read fr
 long-summary: The content of an existing blob is overwritten with the new blob.
 examples:
   - name: Update encryption scope for existing blob.
-    text: az storage blob rewrite --source-uri https://srcaccount.blob.core.windows.net/mycontainer/myblob?<sastoken> --encryption-scope newscope -c mycontainer -n myblob --account-name mystorageaccount --aaccount-key 0000-0000
+    text: az storage blob rewrite --source-uri https://srcaccount.blob.core.windows.net/mycontainer/myblob?<sastoken> --encryption-scope newscope -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage blob service-properties'] = """
