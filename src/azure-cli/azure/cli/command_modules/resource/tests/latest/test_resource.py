@@ -2726,6 +2726,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
+            'new_ad_desc': 'new_test_appdef_123',
             'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
             'auth': principal_id + ':' + role_definition_id,
             'lock': 'None'
@@ -2744,13 +2745,26 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('artifacts[1].type', 'Custom')
         ]).get_output_in_json()['id']
 
+        # update a managedapp definition
+        self.cmd('managedapp definition update -n {adn} --package-file-uri {uri} --display-name {addn} --description {new_ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{new_ad_desc}'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
+        ])
+
         self.cmd('managedapp definition list -g {rg}',
                  checks=self.check('[0].name', '{adn}'))
 
         self.cmd('managedapp definition show --ids {ad_id}', checks=[
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
-            self.check('description', '{ad_desc}'),
+            self.check('description', '{new_ad_desc}'),
             self.check('authorizations[0].principalId', principal_id),
             self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),

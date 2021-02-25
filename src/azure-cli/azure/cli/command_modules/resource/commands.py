@@ -408,7 +408,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_applications')
 
     with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('create', 'create_applicationdefinition')
+        g.custom_command('create', 'create_or_update_applicationdefinition')
+        g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'delete')
         g.custom_show_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
