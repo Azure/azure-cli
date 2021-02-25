@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.arguments import CLIArgumentType
 from azure.cli.core.profiles import CustomResourceType
+from azure.cli.core.decorators import Completer
 
 
 # action
@@ -31,11 +32,14 @@ def func_client_factory_wrapper(func):
 
 # completer
 def func_completer_wrapper(func):
-    return func
+    return Completer(func)
 
 
 def completer_factory_wrapper(factory):
-    return factory
+    def wrapper(*args, **kwargs):
+        func = factory(*args, **kwargs)
+        return Completer(func)
+    return wrapper
 
 
 # exception_handler
