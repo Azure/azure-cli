@@ -571,7 +571,7 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
-                            key_source=None, key_uri=None):
+                            key_source=None, key_uri=None, require_infrastructure_encryption=None):
     EncryptionScope = cmd.get_models('EncryptionScope')
 
     if key_source:
@@ -580,6 +580,9 @@ def create_encryption_scope(cmd, client, resource_group_name, account_name, encr
     if key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
         encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
+
+    if require_infrastructure_encryption is not None:
+        encryption_scope.require_infrastructure_encryption = require_infrastructure_encryption
 
     return client.put(resource_group_name=resource_group_name, account_name=account_name,
                       encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)

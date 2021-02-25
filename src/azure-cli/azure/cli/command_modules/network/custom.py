@@ -5583,7 +5583,7 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None,
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
@@ -5607,8 +5607,14 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['ip_tags'] = ip_tags
     if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
         public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
+
     if sku:
         public_ip_args['sku'] = {'name': sku}
+    if tier:
+        if not sku:
+            public_ip_args['sku'] = {'name': 'Basic'}
+        public_ip_args['sku'].update({'tier': tier})
+
     public_ip = PublicIPAddress(**public_ip_args)
 
     if dns_name or reverse_fqdn:
