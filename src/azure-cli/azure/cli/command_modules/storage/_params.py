@@ -370,9 +370,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'use the key referenced by the identifier to enable customer-managed key support on this '
                        'encryption scope.')
             c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
-                   arg_type=get_three_state_flag(), min_api='2021-01-01',
-                   help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
-                   'platform managed keys for data at rest.')
+                       arg_type=get_three_state_flag(), min_api='2021-01-01',
+                       help='A boolean indicating whether or not the service applies a secondary layer of encryption '
+                       'with platform managed keys for data at rest.')
 
     with self.argument_context('storage account encryption-scope update') as c:
         t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
