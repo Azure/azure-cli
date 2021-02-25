@@ -23,7 +23,7 @@ class AmsEncryptionTests(ScenarioTest):
             'identityPermissions': "get unwrapkey wrapkey",
         })
 
-        account_result = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --id-system-assigned', checks=[
+        account_result = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central US')
         ])
