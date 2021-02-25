@@ -82,7 +82,8 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('content_disposition', default=None, arg_group=arg_group,
                    help='Conveys additional information about how to process the response payload, and can also be '
                         'used to attach additional metadata.')
-        self.extra('content_cache_control', options_list=['--content-cache-control', '--content-cache'], default=None, help='The cache control string.',
+        self.extra('content_cache_control', options_list=['--content-cache-control', '--content-cache'],
+                   default=None, help='The cache control string.',
                    arg_group=arg_group)
         self.extra('content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
         if update:

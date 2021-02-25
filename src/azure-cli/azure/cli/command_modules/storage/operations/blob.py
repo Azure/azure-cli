@@ -565,7 +565,7 @@ def get_block_length(content_length):
     # block list will not contain more than 50,000 blocks
     block_length = content_length // 50000
     if block_length % (8 * 1024 * 1024) != 0:
-         block_length = (block_length // (8 * 1024 * 1024) + 1) * (8 * 1024 * 1024)
+        block_length = (block_length // (8 * 1024 * 1024) + 1) * (8 * 1024 * 1024)
     return block_length
 
 
@@ -591,7 +591,8 @@ def rewrite_blob(client, source_url, encryption_scope=None, **kwargs):
 
     src_content_length = src_properties.size
     if src_content_length <= 5000 * 1024 * 1024:
-        return client.upload_blob_from_url(source_url=source_url, encryption_scope=encryption_scope, **kwargs)
+        return client.upload_blob_from_url(source_url=source_url, overwrite=True, encryption_scope=encryption_scope,
+                                           destination_lease=kwargs.pop('lease', None), **kwargs)
 
     block_length = get_block_length(src_content_length)
     block_ids = get_block_ids(src_content_length, block_length)
