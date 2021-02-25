@@ -586,9 +586,13 @@ def get_block_ids(content_length, block_length):
     return block_ids
 
 
-def rewrite_blob(client, source_url, encryption_scope=None, **kwargs):
+def rewrite_blob(cmd, client, source_url, encryption_scope=None, **kwargs):
     src_properties = client.from_blob_url(source_url).get_blob_properties()
-
+    BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if src_properties.blobType != BlobType.BlockBlob:
+        from azure.cli.core.azclierror import ValidationError
+        raise ValidationError("Currently only support block blob! The source blob is {}.".format(
+            src_properties.blobType))
     src_content_length = src_properties.size
     if src_content_length <= 5000 * 1024 * 1024:
         return client.upload_blob_from_url(source_url=source_url, overwrite=True, encryption_scope=encryption_scope,
