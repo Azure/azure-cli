@@ -21,17 +21,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_E2s_v3","tier":"MemoryOptimized","capacity":2},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"machoSnail8","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":262144,"backupRetentionDays":17},"earliestRestoreDate":"2021-02-25T01:00:48.046992+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":1,"startHour":1,"startMinute":30}},"location":"East
-        US 2 EUAP","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D8s_v3","tier":"GeneralPurpose","capacity":8},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"eagerRaccoon1","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNETbclitest-0225-vnetservermgmtscenar/subnets/Subnetbclitest-0225-vnetservermgmtscenar"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-25T09:15:47.5032374+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1086'
+      - '1279'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:08 GMT
+      - Thu, 25 Feb 2021 09:15:46 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +51,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
+      "pointInTimeUTC": "2021-02-25T08:55:47.100007Z", "availabilityZone": "2", "createMode":
       "PointInTimeRestore"}}'
     headers:
       Accept:
@@ -63,7 +63,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '242'
+      - '220'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -74,11 +74,11 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''7855a39a-7a49-446d-9a96-7fd3b9274f0f''"}}'
+        occured while processing the request. Tracking ID: ''2d2101ad-f455-43b4-a868-5804ff3b9f28''"}}'
     headers:
       cache-control:
       - no-cache
@@ -89,7 +89,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:09 GMT
+      - Thu, 25 Feb 2021 09:15:48 GMT
       expires:
       - '-1'
       pragma:
@@ -109,7 +109,7 @@ interactions:
       message: Internal Server Error
 - request:
     body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
+      "pointInTimeUTC": "2021-02-25T08:55:47.100007Z", "availabilityZone": "2", "createMode":
       "PointInTimeRestore"}}'
     headers:
       Accept:
@@ -121,7 +121,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '242'
+      - '220'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -132,11 +132,11 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''4a11c3eb-568f-4e6a-a2f3-e7b719d54fd9''"}}'
+        occured while processing the request. Tracking ID: ''99447fdb-bf73-4859-8bdf-930a406d892a''"}}'
     headers:
       cache-control:
       - no-cache
@@ -147,7 +147,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:11 GMT
+      - Thu, 25 Feb 2021 09:15:49 GMT
       expires:
       - '-1'
       pragma:
@@ -167,7 +167,7 @@ interactions:
       message: Internal Server Error
 - request:
     body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
+      "pointInTimeUTC": "2021-02-25T08:55:47.100007Z", "availabilityZone": "2", "createMode":
       "PointInTimeRestore"}}'
     headers:
       Accept:
@@ -179,7 +179,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '242'
+      - '220'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -190,11 +190,11 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''5aa893d9-945b-426e-9c59-780cc339808a''"}}'
+        occured while processing the request. Tracking ID: ''f57e35da-c399-4364-a6ca-63a28cadd686''"}}'
     headers:
       cache-control:
       - no-cache
@@ -205,7 +205,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:14 GMT
+      - Thu, 25 Feb 2021 09:15:52 GMT
       expires:
       - '-1'
       pragma:
@@ -225,7 +225,7 @@ interactions:
       message: Internal Server Error
 - request:
     body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
+      "pointInTimeUTC": "2021-02-25T08:55:47.100007Z", "availabilityZone": "2", "createMode":
       "PointInTimeRestore"}}'
     headers:
       Accept:
@@ -237,7 +237,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '242'
+      - '220'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -248,11 +248,11 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''2eb8a673-75e3-4a8c-9bde-f1f093da2c35''"}}'
+        occured while processing the request. Tracking ID: ''9d1112da-8ba7-4e2b-a9cf-6d30178999f0''"}}'
     headers:
       cache-control:
       - no-cache
@@ -263,7 +263,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:18 GMT
+      - Thu, 25 Feb 2021 09:15:57 GMT
       expires:
       - '-1'
       pragma:
@@ -283,7 +283,7 @@ interactions:
       message: Internal Server Error
 - request:
     body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
+      "pointInTimeUTC": "2021-02-25T08:55:47.100007Z", "availabilityZone": "2", "createMode":
       "PointInTimeRestore"}}'
     headers:
       Accept:
@@ -295,7 +295,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '242'
+      - '220'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -306,11 +306,11 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
       string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''a3b0a685-119d-48b0-92d3-7a9eff33bae1''"}}'
+        occured while processing the request. Tracking ID: ''3a56cd06-379b-4e4b-bea6-c6bc5e99c07f''"}}'
     headers:
       cache-control:
       - no-cache
@@ -321,7 +321,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:26 GMT
+      - Thu, 25 Feb 2021 09:16:04 GMT
       expires:
       - '-1'
       pragma:

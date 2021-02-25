@@ -13,26 +13,25 @@ interactions:
       ParameterSetName:
       - -g --name --source-server --restore-time
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-        (MSI)
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose","capacity":4},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":1,"haEnabled":"Enabled","administratorLogin":"nearHornet1","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"Healthy","state":"Ready","availabilityZone":"2","standbyAvailabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-24T07:08:49.4475517+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
-        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose","capacity":4},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":1,"haEnabled":"Enabled","administratorLogin":"zippyParrot0","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"Healthy","state":"Ready","availabilityZone":"1","standbyAvailabilityZone":"2","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-25T01:00:47.9289738+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1094'
+      - '1100'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 08:02:01 GMT
+      - Thu, 25 Feb 2021 07:48:36 GMT
       expires:
       - '-1'
       pragma:
@@ -51,8 +50,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-24T07:42:01.780492Z", "createMode": "PointInTimeRestore"}}'
+    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
+      "pointInTimeUTC": "2021-02-25T07:28:35.973721Z", "createMode": "PointInTimeRestore"}}'
     headers:
       Accept:
       - application/json
@@ -63,37 +62,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '211'
+      - '218'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-        (MSI)
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleserverhighavail?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"operation":"RestoreSnapshotManagementOperation","startTime":"2021-02-24T08:02:02.727Z"}'
+      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
+        occured while processing the request. Tracking ID: ''f7168b46-85b6-43d3-bf26-a3bf01fa7921''"}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/ca5f48db-2c1f-4503-8fa6-1bbd95af77be?api-version=2020-02-14-preview
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '89'
+      - '162'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 08:02:02 GMT
+      - Thu, 25 Feb 2021 07:48:36 GMT
       expires:
       - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/ca5f48db-2c1f-4503-8fa6-1bbd95af77be?api-version=2020-02-14-preview
       pragma:
       - no-cache
       server:
@@ -102,13 +99,16 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - service
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 202
-      message: Accepted
+      code: 500
+      message: Internal Server Error
 - request:
-    body: null
+    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
+      "pointInTimeUTC": "2021-02-25T07:28:35.973721Z", "createMode": "PointInTimeRestore"}}'
     headers:
       Accept:
       - application/json
@@ -118,27 +118,34 @@ interactions:
       - postgres flexible-server restore
       Connection:
       - keep-alive
+      Content-Length:
+      - '218'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-        (MSI)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/ca5f48db-2c1f-4503-8fa6-1bbd95af77be?api-version=2020-02-14-preview
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleserverhighavail?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"ca5f48db-2c1f-4503-8fa6-1bbd95af77be","status":"Failed","startTime":"2021-02-24T08:02:02.727Z","error":{"code":"InternalServerError","message":"An
-        unexpected error occured while processing the request. Tracking ID: ''60516c4a-c786-4833-9234-a30a3a5a2549''"}}'
+      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
+        occured while processing the request. Tracking ID: ''4880486d-9675-4260-89d5-50fdf6ed8cfb''"}}'
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '265'
+      - '162'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 08:03:02 GMT
+      - Thu, 25 Feb 2021 07:48:38 GMT
       expires:
       - '-1'
       pragma:
@@ -147,13 +154,184 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
-      code: 200
-      message: OK
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
+      "pointInTimeUTC": "2021-02-25T07:28:35.973721Z", "createMode": "PointInTimeRestore"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '218'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --name --source-server --restore-time
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleserverhighavail?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
+        occured while processing the request. Tracking ID: ''3b439297-6ac2-4376-bde2-2a8cab7231a8''"}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '162'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 25 Feb 2021 07:48:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
+      "pointInTimeUTC": "2021-02-25T07:28:35.973721Z", "createMode": "PointInTimeRestore"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '218'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --name --source-server --restore-time
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleserverhighavail?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
+        occured while processing the request. Tracking ID: ''95104831-8762-45f1-ab2f-40b0c22c63ea''"}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '162'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 25 Feb 2021 07:48:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
+      "pointInTimeUTC": "2021-02-25T07:28:35.973721Z", "createMode": "PointInTimeRestore"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '218'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --name --source-server --restore-time
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleserverhighavail?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
+        occured while processing the request. Tracking ID: ''5128960d-676f-4c70-b877-9350c407c89b''"}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '162'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 25 Feb 2021 07:48:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 500
+      message: Internal Server Error
 version: 1
