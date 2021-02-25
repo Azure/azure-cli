@@ -407,7 +407,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
 
-    with self.argument_context('storage atest_storage_share_rm_soft_deleteccount network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
+    with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import validate_subnet
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
