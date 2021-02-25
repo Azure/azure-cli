@@ -8,11 +8,11 @@ from azure.cli.core.decorators import Completer
 
 
 # action
-def cls_action_wrapper(action_cls):
+def action_class(action_cls):
     return action_cls
 
 
-def cls_action_factory_wrapper(factory):
+def action_class_by_factory(factory):
     return factory
 
 
@@ -21,21 +21,21 @@ def register_arg_type(register_name, overrides=None, **kwargs):  # pylint: disab
     return CLIArgumentType(overrides=overrides, **kwargs)
 
 
-def arg_type_factory_wrapper(factory):
+def arg_type_by_factory(factory):
     return factory
 
 
 # client_factory
-def func_client_factory_wrapper(func):
+def client_factory_func(func):
     return func
 
 
 # completer
-def func_completer_wrapper(func):
+def completer_func(func):
     return Completer(func)
 
 
-def completer_factory_wrapper(factory):
+def completer_by_factory(factory):
     def wrapper(*args, **kwargs):
         func = factory(*args, **kwargs)
         return Completer(func)
@@ -43,7 +43,7 @@ def completer_factory_wrapper(factory):
 
 
 # exception_handler
-def func_exception_handler_wrapper(func):
+def exception_handler_func(func):
     return func
 
 
@@ -53,23 +53,23 @@ def register_custom_resource_type(register_name, import_prefix, client_name):  #
 
 
 # transformer
-def func_transformer_wrapper(func):
+def transformer_func(func):
     return func
 
 
 # type_converter
-def func_type_converter_wrapper(func):
+def type_converter_func(func):
     return func
 
 
-def func_type_converter_factory_wrapper(factory):
+def type_converter_func_by_factory(factory):
     return factory
 
 
 # validator
-def func_validator_wrapper(func):
+def validator_func(func):
     return func
 
 
-def validator_factory_wrapper(factory):
+def validator_by_factory(factory):
     return factory

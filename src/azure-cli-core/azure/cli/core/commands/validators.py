@@ -8,7 +8,7 @@ import time
 import random
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.translator import func_validator_wrapper
+from azure.cli.core.translator import validator_func
 from knack.log import get_logger
 from knack.validators import DefaultStr, DefaultInt  # pylint: disable=unused-import
 
@@ -35,7 +35,7 @@ class IterateValue(list):
     pass  # pylint: disable=unnecessary-pass
 
 
-@func_validator_wrapper
+@validator_func
 def validate_tags(ns):
     """ Extracts multiple space-separated tags in key[=value] format """
     if isinstance(ns.tags, list):
@@ -63,14 +63,14 @@ def validate_key_value_pairs(string):
     return result
 
 
-@func_validator_wrapper
+@validator_func
 def generate_deployment_name(namespace):
     if not namespace.deployment_name:
         namespace.deployment_name = \
             'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
 
 
-@func_validator_wrapper
+@validator_func
 def get_default_location_from_resource_group(cmd, namespace):
     if not namespace.location:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
