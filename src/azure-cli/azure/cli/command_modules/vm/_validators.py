@@ -1196,8 +1196,6 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
-    if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM')
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
