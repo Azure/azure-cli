@@ -628,6 +628,8 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False, as_user=False):
+    from ..url_quote_util import encode_url_path
+    from urllib.parse import quote
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
@@ -642,11 +644,9 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
             protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
             content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
-        from ..url_quote_util import encode_url_path
-        from urllib.parse import quote
         return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
                                                     sas_token=quote(sas_token, safe='&%()$=\',~')))
-    return sas_token
+    return quote(sas_token, safe='&%()$=\',~')
 
 
 def generate_container_shared_access_signature(client, container_name, permission=None,
