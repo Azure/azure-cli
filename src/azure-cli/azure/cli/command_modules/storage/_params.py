@@ -646,40 +646,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB,
                                min_api='2020-04-08') as c:
-        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
-        t_blob_tier = self.get_sdk('_models#StandardBlobTier',
-                                   resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_blob_arguments()
-        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
-        c.register_precondition_options(prefix='source_')
         c.register_precondition_options()
-        c.register_source_uri_arguments(validator=validate_source_url, blob_only=True, arg_group='Source Blob')
 
-        c.argument('if_match', options_list=['--destination-if-match', '--dest-match'])
-        c.argument('if_modified_since', options_list=['--destination-if-modified-since', '--dest-modiified'])
-        c.argument('if_none_match', options_list=['--destination-if-none-match', '--dest-none-match'])
-        c.argument('if_unmodified_since', options_list=['--destination-if-unmodified-since', '--dest-unmodified'])
-        c.argument('if_tags_match_condition', options_list=['--destination-tags-condition', '--dest-tag'])
-
-        c.argument('source_if_match', options_list=['--source-if-match', '--src-match'])
-        c.argument('source_if_modified_since', options_list=['--source-if-modified-since', '--src-modiified'])
-        c.argument('source_if_none_match', options_list=['--source-if-none-match', '--src-none-match'])
-        c.argument('source_if_unmodified_since', options_list=['--source-if-unmodified-since', '--src-unmodified'])
-        c.argument('source_if_tags_match_condition', options_list=['--source-tags-condition', '--src-tag'])
-
-        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", default=True,
-                help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob '
-                'will overwrite the existing data. If set to False, the operation will fail with ResourceExistsError.')
-        c.extra('include_source_blob_properties', options_list=['--include-source-blob-properties', '-i'],
-                arg_type=get_three_state_flag(),
-                help='Indicate if properties from the source blob should be copied. Defaults to True.')
-        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
-        c.extra('source_content_md5',
-                help='Specify the md5 that is used to verify the integrity of the source bytes.')
-        c.extra('destination_lease', options_list='--destination-lease-id',
-                help='The lease ID specified for this header must match the lease ID of the estination blob. '
-                'If the request does not include the lease ID or it is not valid, the operation fails with status '
-                'code 412 (Precondition Failed).')
+        c.argument('source_url', options_list=['--source-uri', '-u'],
+                   help='A URL of up to 2 KB in length that specifies a file or blob. The value should be URL-encoded '
+                   'as it would appear in a request URI. If the source is in another account, the source must either '
+                   'be public or must be authenticated via a shared access signature. If the source is public, no '
+                   'authentication is required.')
+        c.extra('lease', options_list='--lease-id',
+                help='Required if the blob has an active lease. Value can be a BlobLeaseClient object '
+                'or the lease ID as a string.')
         c.extra('standard_blob_tier', arg_type=get_enum_type(t_blob_tier), options_list='--tier',
                 help='A standard blob tier value to set the blob to. For this version of the library, '
                      'this is only applicable to block blobs on standard storage accounts.')

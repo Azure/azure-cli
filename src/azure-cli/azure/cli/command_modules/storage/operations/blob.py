@@ -560,26 +560,61 @@ def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blo
     return type_func[blob_type]()
 
 
-# pylint: disable=protected-access
-def _adjust_block_blob_size(client, blob_type, length):
-    if not blob_type or blob_type != 'block':
-        return
-    # increase the block size to 100MB when the block list will contain more than
-    # 50,000 blocks(each block 4MB)
-    if length > 50000 * 4 * 1024 * 1024:
-        client._config.max_block_size = 100 * 1024 * 1024
-        client._config.max_single_put_size = 256 * 1024 * 1024
-    # increase the block size to 4000MB when the block list will contain more than
-    # 50,000 blocks(each block 100MB)
-    if length > 50000 * 100 * 1024 * 1024:
-        client._config.max_block_size = 4000 * 1024 * 1024
-        client._config.max_single_put_size = 5000 * 1024 * 1024
+def get_block_length(content_length):
+    """Get the block size from block blob length"""
+    # block list will not contain more than 50,000 blocks
+    block_length = content_length // 50000
+    if block_length % (8 * 1024 * 1024) != 0:
+         block_length = (block_length // (8 * 1024 * 1024) + 1) * (8 * 1024 * 1024)
+    return block_length
 
 
-def rewrite_blob(client, source_url, **kwargs):
-    client._config.max_block_size = 4000 * 1024 * 1024
-    client._config.max_single_put_size = 5000 * 1024 * 1024
-    return client.upload_blob_from_url(source_url=source_url, **kwargs)
+def get_block_ids(content_length, block_length):
+    """Get the block id arrary from block blob length, block size"""
+    from ..track2_util import encode_base64, url_quote
+    block_count = 0
+    if block_length:
+        block_count = content_length // block_length
+    if block_count * block_length != content_length:
+        block_count += 1
+    block_ids = []
+    for i in range(block_count):
+        chunk_offset = i * block_length
+        index = '{0:032d}'.format(chunk_offset)
+        block_id = encode_base64(url_quote(encode_base64(index)))
+        block_ids.append(block_id)
+    return block_ids
+
+
+def rewrite_blob(client, source_url, encryption_scope=None, **kwargs):
+    src_properties = client.from_blob_url(source_url).get_blob_properties()
+
+    src_content_length = src_properties.size
+    if src_content_length <= 5000 * 1024 * 1024:
+        return client.upload_blob_from_url(source_url=source_url, encryption_scope=encryption_scope, **kwargs)
+
+    block_length = get_block_length(src_content_length)
+    block_ids = get_block_ids(src_content_length, block_length)
+
+    copyoffset = 0
+    for block_id in block_ids:
+        block_size = block_length
+        if copyoffset + block_size > src_content_length:
+            block_size = src_content_length - copyoffset
+        client.stage_block_from_url(
+            block_id=block_id,
+            source_url=source_url,
+            source_offset=copyoffset,
+            source_length=block_size,
+            encryption_scope=encryption_scope)
+        copyoffset += block_size
+    committed, uncommitted = client.get_block_list(block_list_type='all')
+    # print(committed)
+    # print('\n')
+    # print(uncommitted)
+    # block_list = uncommitted.id
+    return client.commit_block_list(block_list=block_ids, content_settings=src_properties.content_settings,
+                                    metadata=src_properties.metadata, encryption_scope=encryption_scope, **kwargs)
 
 
 def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,

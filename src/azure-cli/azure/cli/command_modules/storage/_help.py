@@ -874,7 +874,7 @@ type: command
 short-summary:  Create a new Block Blob where the content of the blob is read from a given URL.
 long-summary: The content of an existing blob is overwritten with the new blob.
 parameters:
-  - name: --source-uri -u
+  - name: --source-url -u
     type: string
     short-summary: >
         A URL of up to 2 KB in length that specifies a file or blob.
