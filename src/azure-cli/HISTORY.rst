@@ -5,7 +5,7 @@ Release History
 
 **IoT Central**
 
-* Ensure the resourceType (iotApps) is in camel case.
+* Ensure the resourceType (IotApps) is in camel case.
 * Replace appTemplateName field with name for appTemplate API.
 * Add support for industry and locations field in appTemplate API.
 * Remove the need of checking etag when updating the existing iotc app.
