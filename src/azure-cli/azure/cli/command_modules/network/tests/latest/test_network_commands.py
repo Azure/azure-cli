@@ -341,17 +341,42 @@ class NetworkPublicIpWithSku(ScenarioTest):
     def test_network_public_ip_sku(self, resource_group):
 
         self.kwargs.update({
-            'sku': 'standard',
+            'standard_sku': 'Standard',
+            'basic_sku': 'Basic',
+            'regional_tier': 'Regional',
+            'global_tier': 'Global',
             'location': 'eastus2',
-            'ip': 'pubip1'
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3',
+            'ip4': 'pubip4'
         })
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku} --tags foo=doo')
-        self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
-            self.check('sku.name', 'Standard'),
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('sku.tier', self.kwargs.get('regional_tier')),
+            self.check('publicIpAllocationMethod', 'Dynamic')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('sku.tier', self.kwargs.get('regional_tier')),
             self.check('publicIpAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier}')
+        self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('sku.tier', self.kwargs.get('global_tier')),
+            self.check('publicIpAllocationMethod', 'Static')
+        ])
+
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegexp(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
+            self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
@@ -2212,7 +2237,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         ])
 
         # test internet facing load balancer with existing public IP (by name)
-        self.cmd('network public-ip create -n {pub_ip} -g {rg} --sku Standard')
+        self.cmd('network public-ip create -n {pub_ip} -g {rg} --sku Standard --tier Global')
         self.cmd('network cross-region-lb create -n {lb}3 -g {rg} --public-ip-address {pub_ip}', checks=[
             self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
