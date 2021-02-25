@@ -1421,6 +1421,22 @@ examples:
             --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
 
+helps['managedapp definition update'] = """
+type: command
+short-summary: Update a managed application definition.
+examples:
+  - name: Update a managed application defintion.
+    text: >
+        az managedapp definition update -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
+            --package-file-uri "https://path/to/myPackage.zip"
+  - name: Update a managed application defintion with inline values for createUiDefinition and mainTemplate.
+    text: >
+        az managedapp definition update -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
+            --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
+"""
+
 helps['managedapp definition delete'] = """
 type: command
 short-summary: Delete a managed application definition.
