@@ -414,6 +414,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
         ])
 
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_account_with_shared_key_access(self, resource_group):
@@ -1005,20 +1006,47 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
 class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind="StorageV2")
-    def test_storage_account_update_change_feed(self):
-        result = self.cmd('storage account blob-service-properties update --enable-change-feed true -n {sa} -g {rg}').get_output_in_json()
-        self.assertEqual(result['changeFeed']['enabled'], True)
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_storage_account_update_change_feed')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location="eastus2euap")
+    def test_storage_account_update_change_feed(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account blob-service-properties update'
+        })
 
-        result = self.cmd('storage account blob-service-properties update --enable-change-feed false -n {sa} -g {rg}').get_output_in_json()
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('{cmd} --enable-change-feed false --change-feed-retention-days 14600 -n {sa} -g {rg}')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('{cmd} --change-feed-retention-days 1 -n {sa} -g {rg}')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days -1 -n {sa} -g {rg}')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 0 -n {sa} -g {rg}')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 146001 -n {sa} -g {rg}')
+
+        result = self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+        self.assertEqual(result['changeFeed']['retentionInDays'], 1)
+
+        result = self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 100 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+        self.assertEqual(result['changeFeed']['retentionInDays'], 100)
+
+        result = self.cmd('{cmd} --enable-change-feed true --change-feed-retention-days 14600 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+        self.assertEqual(result['changeFeed']['retentionInDays'], 14600)
+
+        result = self.cmd('{cmd} --enable-change-feed false -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['changeFeed']['enabled'], False)
-
-        result = self.cmd('storage account blob-service-properties update --enable-change-feed -n {sa} -g {rg}').get_output_in_json()
-        self.assertEqual(result['changeFeed']['enabled'], True)
-
-        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
-        self.assertEqual(result['changeFeed']['enabled'], True)
+        self.assertEqual(result['changeFeed']['retentionInDays'], None)
 
     @ResourceGroupPreparer(name_prefix='cli_storage_account_update_delete_retention_policy')
     @StorageAccountPreparer()

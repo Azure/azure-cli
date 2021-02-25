@@ -2498,78 +2498,6 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
 
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
-    def test_vmss_update_cross_tenant(self, resource_group):
-        self.kwargs.update({
-            'location': 'westus2',
-            'another_rg': self.create_random_name('cli_test_vmss_update_', 40),
-            'vm': self.create_random_name('cli_test_vmss_update_', 40),
-            'image_name': self.create_random_name('cli_test_vmss_update_', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
-            'sig_name': self.create_random_name('cli_test_vmss_update_', 40),
-            'image_definition_name_1': self.create_random_name('cli_test_vmss_update_', 40),
-            'image_definition_name_2': self.create_random_name('cli_test_vmss_update_', 40),
-            'version': '0.1.0',
-            'vmss': 'cross_tenant_vmss',
-        })
-
-        # Prepare sig in another tenant
-        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['another_rg']))
-        self.cmd(
-            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
-        self.cmd(
-            'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
-        time.sleep(70)
-        self.cmd('vm deallocate -g {another_rg} -n {vm} --subscription {aux_sub}')
-        self.cmd('vm generalize -g {another_rg} -n {vm} --subscription {aux_sub}')
-        res = self.cmd(
-            'image create -g {another_rg} -n {image_name} --source {vm} --subscription {aux_sub}').get_output_in_json()
-        self.kwargs.update({
-            'image_id': res['id']
-        })
-
-        self.cmd('sig create -g {another_rg} --gallery-name {sig_name} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['sig_name']))
-        res1 = self.cmd(
-            'sig image-definition create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_1} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
-            checks=self.check('name', self.kwargs['image_definition_name_1'])).get_output_in_json()
-        self.cmd(
-            'sig image-version create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_1} --gallery-image-version {version} --managed-image {image_name} --replica-count 1 --subscription {aux_sub}',
-            checks=self.check('name', self.kwargs['version']))
-
-        res2 = self.cmd(
-            'sig image-definition create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_2} --os-type linux -p publisher2 -f offer2 -s sku2 --subscription {aux_sub}',
-            checks=self.check('name', self.kwargs['image_definition_name_2'])).get_output_in_json()
-        self.cmd(
-            'sig image-version create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_2} --gallery-image-version {version} --managed-image {image_name} --replica-count 1 --subscription {aux_sub}',
-            checks=self.check('name', self.kwargs['version']))
-
-        self.kwargs.update({
-            'image_1_id': res1['id'],
-            'image_2_id': res2['id']
-        })
-
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image_1_id}')
-        self.cmd('vmss show --name {vmss} -g {rg}', checks=[
-            self.check('name', self.kwargs['vmss']),
-            self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_1_id'])
-        ])
-
-        self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.storageProfile.imageReference.id={image_2_id}', checks=[
-            self.check('name', self.kwargs['vmss']),
-            self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_2_id'])
-        ])
-
-        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
-
-        # Test vmss can be update even if the image reference is not available
-        self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
-            self.check('tags.foo', 'bar')
-        ])
-
 
 class AcceleratedNetworkingTest(ScenarioTest):
 
@@ -4946,9 +4874,8 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
                  ])
 
 
-class VMCrossTenantUpdateScenarioTest(ScenarioTest):
+class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2')
     def test_vm_cross_tenant_update(self, resource_group):
         self.kwargs.update({
@@ -4984,6 +4911,80 @@ class VMCrossTenantUpdateScenarioTest(ScenarioTest):
         ])
 
         self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
+
+
+class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
+    def test_vmss_cross_tenant_update(self, resource_group):
+        self.kwargs.update({
+            'location': 'westus2',
+            'another_rg': self.create_random_name('cli_test_vmss_update_', 40),
+            'vm': self.create_random_name('cli_test_vmss_update_', 40),
+            'image_name': self.create_random_name('cli_test_vmss_update_', 40),
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'sig_name': self.create_random_name('cli_test_vmss_update_', 40),
+            'image_definition_name_1': self.create_random_name('cli_test_vmss_update_', 40),
+            'image_definition_name_2': self.create_random_name('cli_test_vmss_update_', 40),
+            'version': '0.1.0',
+            'vmss': 'cross_tenant_vmss',
+        })
+
+        # Prepare sig in another tenant
+        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['another_rg']))
+        self.cmd(
+            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+        self.cmd(
+            'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {another_rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {another_rg} -n {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'image create -g {another_rg} -n {image_name} --source {vm} --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'image_id': res['id']
+        })
+
+        self.cmd('sig create -g {another_rg} --gallery-name {sig_name} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['sig_name']))
+        res1 = self.cmd(
+            'sig image-definition create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_1} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
+            checks=self.check('name', self.kwargs['image_definition_name_1'])).get_output_in_json()
+        self.cmd(
+            'sig image-version create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_1} --gallery-image-version {version} --managed-image {image_name} --replica-count 1 --subscription {aux_sub}',
+            checks=self.check('name', self.kwargs['version']))
+
+        res2 = self.cmd(
+            'sig image-definition create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_2} --os-type linux -p publisher2 -f offer2 -s sku2 --subscription {aux_sub}',
+            checks=self.check('name', self.kwargs['image_definition_name_2'])).get_output_in_json()
+        self.cmd(
+            'sig image-version create -g {another_rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name_2} --gallery-image-version {version} --managed-image {image_name} --replica-count 1 --subscription {aux_sub}',
+            checks=self.check('name', self.kwargs['version']))
+
+        self.kwargs.update({
+            'image_1_id': res1['id'],
+            'image_2_id': res2['id']
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image_1_id}')
+        self.cmd('vmss show --name {vmss} -g {rg}', checks=[
+            self.check('name', self.kwargs['vmss']),
+            self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_1_id'])
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.storageProfile.imageReference.id={image_2_id}', checks=[
+            self.check('name', self.kwargs['vmss']),
+            self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_2_id'])
+        ])
+
+        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
+
+        # Test vmss can be update even if the image reference is not available
+        self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
+            self.check('tags.foo', 'bar')
+        ])
 
 
 class VMAutoUpdateScenarioTest(ScenarioTest):

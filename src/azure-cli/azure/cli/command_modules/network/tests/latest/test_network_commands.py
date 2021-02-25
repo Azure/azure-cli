@@ -2288,7 +2288,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb frontend-ip list -g {rg} --lb-name lb1',
                  checks=self.check('length(@)', 1))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_address_pool')
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_address_pool', location='eastus2')
     def test_network_cross_region_lb_address_pool(self, resource_group):
 
         self.kwargs.update({
@@ -2310,7 +2310,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_address_pool_addresses')
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_address_pool_addresses', location='eastus2')
     def test_network_cross_region_lb_address_pool_addresses(self, resource_group):
 
         self.kwargs.update({
@@ -2352,7 +2352,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 1))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_probes')
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_probes', location='eastus2')
     def test_network_cross_region_lb_probes(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
@@ -2426,7 +2426,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer')
+    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer', location='eastus2')
     def test_network_lb(self, resource_group):
 
         self.kwargs.update({
@@ -2490,7 +2490,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config')
+    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config', location='eastus2')
     def test_network_load_balancer_ip_config(self, resource_group):
 
         for i in range(1, 4):  # create 3 public IPs to use for the test
@@ -2531,7 +2531,6 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
 
-    @unittest.skip('skip temporarily when bump version to 2020-08-01')
     @ResourceGroupPreparer(name_prefix='test_network_lb_outbound_rules', location='eastus2')
     def test_network_load_balancer_outbound_rules(self, resource_group, resource_group_location):
 
@@ -2579,7 +2578,7 @@ class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules')
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules', location='eastus2')
     def test_network_lb_nat_rules(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
@@ -2604,7 +2603,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb inbound-nat-rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 0))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools')
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools', location='eastus2')
     def test_network_lb_nat_pools(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
@@ -2630,7 +2629,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb inbound-nat-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 0))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool')
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool', location='eastus2')
     def test_network_lb_address_pool(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
@@ -2648,7 +2647,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses')
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses', location='eastus2')
     def test_network_lb_address_pool_addresses(self, resource_group):
 
         self.kwargs.update({
@@ -2702,7 +2701,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '1'))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_probes', location='eastus2')
     def test_network_lb_probes(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
@@ -2738,7 +2737,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
         self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_rules')
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_rules', location='eastus2')
     def test_network_lb_rules(self, resource_group):
 
         self.kwargs['lb'] = 'lb1'
@@ -2805,7 +2804,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
 class NetworkNicScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario')
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario', location='eastus2')
     def test_network_nic(self, resource_group):
 
         self.kwargs.update({
@@ -2897,7 +2896,7 @@ class NetworkNicScenarioTest(ScenarioTest):
 
 class NetworkNicAppGatewayScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway')
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway', location='eastus2')
     def test_network_nic_app_gateway(self, resource_group):
         from azure.core.exceptions import HttpResponseError
         import json
@@ -3020,7 +3019,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
                  checks=self.check("subnet.contains(id, '{subnet}')", True))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools')
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools', location='eastus2')
     def test_network_nic_lb_address_pools(self, resource_group):
 
         self.kwargs.update({
