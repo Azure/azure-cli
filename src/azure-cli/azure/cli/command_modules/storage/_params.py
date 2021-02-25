@@ -414,13 +414,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    arg_group='Change Feed Policy')
-        c.argument('change_feed_retention_days',
+        c.argument('change_feed_retention_days', is_preview=True,
                    options_list=['--change-feed-retention-days', '--change-feed-days'],
                    type=int, min_api='2019-06-01', arg_group='Change Feed Policy',
                    validator=validator_change_feed_retention_days,
                    help='Indicates the duration of changeFeed retention in days. '
                         'Minimum value is 1 day and maximum value is 146000 days (400 years). '
-                        'A null value indicates an infinite retention of the change feed.')
+                        'A null value indicates an infinite retention of the change feed.'
+                        '(Use `--enable-change-feed` without `--change-feed-days` to indicate null)')
         c.argument('enable_container_delete_retention',
                    arg_type=get_three_state_flag(),
                    options_list=['--enable-container-delete-retention', '--container-retention'],
