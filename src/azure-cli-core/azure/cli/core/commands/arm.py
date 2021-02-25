@@ -17,7 +17,7 @@ from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import shell_safe_json_parse, get_command_type_kwarg
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.translator import func_transformer_wrapper, func_exception_handler_wrapper
+from azure.cli.core.translator import transformer_func, exception_handler_func
 
 from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature
@@ -96,7 +96,7 @@ class ArmTemplateBuilder:
         return json.loads(json.dumps(self.parameters))
 
 
-@func_exception_handler_wrapper
+@exception_handler_func
 def handle_template_based_exception(ex):
     try:
         raise CLIError(ex.inner_exception.error.message)
@@ -133,7 +133,7 @@ def handle_long_running_operation_exception(ex):
     raise cli_error
 
 
-@func_transformer_wrapper
+@transformer_func
 def deployment_validate_table_format(result):
 
     if result.get('error', None):

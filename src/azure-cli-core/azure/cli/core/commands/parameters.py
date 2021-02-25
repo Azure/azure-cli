@@ -14,9 +14,9 @@ from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_P
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
-from azure.cli.core.translator import (cls_action_wrapper, cls_action_factory_wrapper,
-                                       func_completer_wrapper, completer_factory_wrapper, func_type_converter_wrapper,
-                                       func_type_converter_factory_wrapper, register_arg_type, arg_type_factory_wrapper)
+from azure.cli.core.translator import (action_class, action_class_by_factory,
+                                       completer_func, completer_by_factory, type_converter_func,
+                                       type_converter_func_by_factory, register_arg_type, arg_type_by_factory)
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
@@ -31,13 +31,13 @@ def get_subscription_locations(cli_ctx):
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 
-@func_completer_wrapper
+@completer_func
 def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_subscription_locations(cmd.cli_ctx)
     return [item.name for item in result]
 
 
-@cls_action_factory_wrapper
+@action_class_by_factory
 def get_datetime_action(date=True, time=True, timezone=True):
     # pylint: disable=too-few-public-methods
     class DatetimeAction(argparse.Action):
@@ -86,7 +86,7 @@ def get_datetime_action(date=True, time=True, timezone=True):
 
 
 # pylint: disable=redefined-builtin
-@arg_type_factory_wrapper
+@arg_type_by_factory
 def get_datetime_type(help=None, date=True, time=True, timezone=True):
     help_string = help + ' ' if help else ''
     accepted_formats = []
@@ -101,19 +101,19 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
     return CLIArgumentType(action=action, nargs='+', help=help_string)
 
 
-@func_type_converter_wrapper
+@type_converter_func
 def file_type(path):
     import os
     return os.path.expanduser(path)
 
 
-@func_type_converter_wrapper
+@type_converter_func
 def json_object_type(json_string):
     from azure.cli.core.util import get_json_object
     return get_json_object(json_string)
 
 
-@func_type_converter_factory_wrapper
+@type_converter_func_by_factory
 def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
@@ -137,7 +137,7 @@ def get_resource_groups(cli_ctx):
     return list(rcf.resource_groups.list())
 
 
-@func_completer_wrapper
+@completer_func
 def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_resource_groups(cmd.cli_ctx)
     return [item.name for item in result]
@@ -161,7 +161,7 @@ def get_resources_in_subscription(cli_ctx, resource_type=None):
     return list(rcf.resources.list(filter=filter_str))
 
 
-@completer_factory_wrapper
+@completer_by_factory
 def get_resource_name_completion_list(resource_type=None):
 
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
@@ -173,7 +173,7 @@ def get_resource_name_completion_list(resource_type=None):
     return completer
 
 
-@completer_factory_wrapper
+@completer_by_factory
 def get_generic_completion_list(generic_list):
 
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
@@ -181,7 +181,7 @@ def get_generic_completion_list(generic_list):
     return completer
 
 
-@cls_action_factory_wrapper
+@action_class_by_factory
 def get_three_state_action(positive_label='true', negative_label='false', invert=False, return_label=False):
     # pylint: disable=too-few-public-methods
     class ThreeStateAction(argparse.Action):
@@ -198,7 +198,7 @@ def get_three_state_action(positive_label='true', negative_label='false', invert
     return ThreeStateAction
 
 
-@arg_type_factory_wrapper
+@arg_type_by_factory
 def get_three_state_flag(positive_label='true', negative_label='false', invert=False, return_label=False):
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
@@ -222,7 +222,7 @@ def get_three_state_flag(positive_label='true', negative_label='false', invert=F
     # pylint: disable=too-few-public-methods
 
 
-@cls_action_wrapper
+@action_class
 class EnumAction(argparse.Action):
 
     def __call__(self, parser, args, values, option_string=None):
@@ -237,7 +237,7 @@ class EnumAction(argparse.Action):
         setattr(args, self.dest, values)
 
 
-@arg_type_factory_wrapper
+@arg_type_by_factory
 def get_enum_type(data, default=None):
     """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
     if not data:
@@ -285,7 +285,7 @@ resource_group_name_type = register_arg_type(
 name_type = register_arg_type('name_type', options_list=['--name', '-n'], help='the primary resource name')
 
 
-@arg_type_factory_wrapper
+@arg_type_by_factory
 def get_location_type(cli_ctx):
     location_type = CLIArgumentType(
         options_list=['--location', '-l'],
