@@ -58,7 +58,7 @@ def load_arguments(self, _):
      Direction,
      ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRoutePortsEncapsulation,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
-     IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
+     IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
      ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
@@ -69,7 +69,7 @@ def load_arguments(self, _):
          'Direction',
          'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'ExpressRoutePortsEncapsulation',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
-         'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
+         'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
          'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
@@ -747,8 +747,8 @@ def load_arguments(self, _):
         c.argument('peering_type', validator=validate_peering_type, arg_type=get_enum_type(ExpressRoutePeeringType), help='BGP peering type for the circuit.')
         c.argument('sku_family', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily))
         c.argument('sku_tier', arg_type=get_enum_type(ExpressRouteCircuitSkuTier))
-        c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30 subnet used to configure IP addresses for primary interface.')
-        c.argument('secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'], help='/30 subnet used to configure IP addresses for secondary interface.')
+        c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30(ipv4) or /126(ipv6) subnet used to configure IP addresses for primary interface.')
+        c.argument('secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'], help='/30(ipv4) or /126(ipv6) subnet used to configure IP addresses for secondary interface.')
         c.argument('shared_key', help='Key for generating an MD5 for the BGP session.')
 
     with self.argument_context('network express-route peering', arg_group='Microsoft Peering') as c:
@@ -1682,7 +1682,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
+        c.argument('sku', min_api='2017-08-01', help='Name of a public IP address SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
+        c.argument('tier', min_api='2020-07-01', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(PublicIPAddressSkuTier))
         c.ignore('dns_name_type')
 
     for item in ['create', 'update']:

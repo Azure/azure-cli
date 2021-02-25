@@ -2632,7 +2632,7 @@ def create_express_route_peering(
         cmd, client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
-        route_filter=None, legacy_mode=None):
+        route_filter=None, legacy_mode=None, ip_version='IPv4'):
     (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
         cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
 
@@ -2641,21 +2641,37 @@ def create_express_route_peering(
     else:
         ExpressRoutePeeringType = cmd.get_models('ExpressRouteCircuitPeeringType')
 
-    peering = ExpressRouteCircuitPeering(
-        peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
-        primary_peer_address_prefix=primary_peer_address_prefix,
-        secondary_peer_address_prefix=secondary_peer_address_prefix,
-        shared_key=shared_key)
+    if ip_version == 'IPv6' and cmd.supported_api_version(min_api='2020-08-01'):
+        Ipv6ExpressRouteCircuitPeeringConfig = cmd.get_models('Ipv6ExpressRouteCircuitPeeringConfig')
+        if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
+            microsoft_config = ExpressRouteCircuitPeeringConfig(advertised_public_prefixes=advertised_public_prefixes,
+                                                                customer_asn=customer_asn,
+                                                                routing_registry_name=routing_registry_name)
+        else:
+            microsoft_config = None
+        ipv6 = Ipv6ExpressRouteCircuitPeeringConfig(primary_peer_address_prefix=primary_peer_address_prefix,
+                                                    secondary_peer_address_prefix=secondary_peer_address_prefix,
+                                                    microsoft_peering_config=microsoft_config,
+                                                    route_filter=route_filter)
+        peering = ExpressRouteCircuitPeering(peering_type=peering_type, ipv6_peering_config=ipv6, peer_asn=peer_asn,
+                                             vlan_id=vlan_id)
 
-    if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
-        peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
-            advertised_public_prefixes=advertised_public_prefixes,
-            customer_asn=customer_asn,
-            routing_registry_name=routing_registry_name)
-    if cmd.supported_api_version(min_api='2016-12-01') and route_filter:
-        peering.route_filter = RouteFilter(id=route_filter)
-    if cmd.supported_api_version(min_api='2017-10-01') and legacy_mode is not None:
-        peering.microsoft_peering_config.legacy_mode = legacy_mode
+    else:
+        peering = ExpressRouteCircuitPeering(
+            peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
+            primary_peer_address_prefix=primary_peer_address_prefix,
+            secondary_peer_address_prefix=secondary_peer_address_prefix,
+            shared_key=shared_key)
+
+        if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
+            peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
+                advertised_public_prefixes=advertised_public_prefixes,
+                customer_asn=customer_asn,
+                routing_registry_name=routing_registry_name)
+        if cmd.supported_api_version(min_api='2016-12-01') and route_filter:
+            peering.route_filter = RouteFilter(id=route_filter)
+        if cmd.supported_api_version(min_api='2017-10-01') and legacy_mode is not None:
+            peering.microsoft_peering_config.legacy_mode = legacy_mode
 
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_type, peering)
 
@@ -5567,7 +5583,7 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None,
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
@@ -5591,8 +5607,14 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['ip_tags'] = ip_tags
     if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
         public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
+
     if sku:
         public_ip_args['sku'] = {'name': sku}
+    if tier:
+        if not sku:
+            public_ip_args['sku'] = {'name': 'Basic'}
+        public_ip_args['sku'].update({'tier': tier})
+
     public_ip = PublicIPAddress(**public_ip_args)
 
     if dns_name or reverse_fqdn:

@@ -341,17 +341,42 @@ class NetworkPublicIpWithSku(ScenarioTest):
     def test_network_public_ip_sku(self, resource_group):
 
         self.kwargs.update({
-            'sku': 'standard',
+            'standard_sku': 'Standard',
+            'basic_sku': 'Basic',
+            'regional_tier': 'Regional',
+            'global_tier': 'Global',
             'location': 'eastus2',
-            'ip': 'pubip1'
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3',
+            'ip4': 'pubip4'
         })
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku} --tags foo=doo')
-        self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
-            self.check('sku.name', 'Standard'),
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('sku.tier', self.kwargs.get('regional_tier')),
+            self.check('publicIpAllocationMethod', 'Dynamic')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('sku.tier', self.kwargs.get('regional_tier')),
             self.check('publicIpAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier}')
+        self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('sku.tier', self.kwargs.get('global_tier')),
+            self.check('publicIpAllocationMethod', 'Static')
+        ])
+
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegexp(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
+            self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
@@ -2125,6 +2150,18 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
             self.check('ipv6PeeringConfig.state', 'Enabled')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering2', location='eastus')
+    def test_network_express_route_ipv6_peering2(self, resource_group):
+        self.kwargs['er'] = 'test_circuit'
+        # create with ipv6
+        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" '
+                 '--peering-location Area51 --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type AzurePrivatePeering '
+                 '--peer-asn 10002 --vlan-id 103 --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 '
+                 '--secondary-peer-subnet 2003:db00::/126',
+                 checks=[self.check('ipv6PeeringConfig.primaryPeerAddressPrefix', '2002:db00::/126'),
+                         self.check('ipv6PeeringConfig.secondaryPeerAddressPrefix', '2003:db00::/126')])
+
 
 class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
@@ -2200,7 +2237,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         ])
 
         # test internet facing load balancer with existing public IP (by name)
-        self.cmd('network public-ip create -n {pub_ip} -g {rg} --sku Standard')
+        self.cmd('network public-ip create -n {pub_ip} -g {rg} --sku Standard --tier Global')
         self.cmd('network cross-region-lb create -n {lb}3 -g {rg} --public-ip-address {pub_ip}', checks=[
             self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
