@@ -20,6 +20,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     check_precondition_success)
 from knack.log import get_logger
 from knack.util import CLIError
+from .._transformers import transform_response_with_bytearray
 
 logger = get_logger(__name__)
 
@@ -438,6 +439,18 @@ def transform_blob_type(cmd, blob_type):
     return None
 
 
+# pylint: disable=protected-access
+def _adjust_block_blob_size(client, blob_type, length):
+    if not blob_type or blob_type != 'block':
+        return
+
+    # increase the block size to 4000MB when the block list will contain more than
+    # 50,000 blocks(each block 100MB)
+    if length > 50000 * 100 * 1024 * 1024:
+        client._config.max_block_size = 4000 * 1024 * 1024
+        client._config.max_single_put_size = 5000 * 1024 * 1024
+
+
 # pylint: disable=too-many-locals
 def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
                 metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
@@ -480,11 +493,9 @@ def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blo
         if if_none_match:
             upload_args['etag'] = if_none_match
             upload_args['match_condition'] = MatchConditions.IfModified
+        _adjust_block_blob_size(client, blob_type, length=count)
         response = client.upload_blob(data=data, length=count, encryption_scope=encryption_scope, **upload_args)
-        if response['content_md5'] is not None:
-            from msrest import Serializer
-            response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])
-        return response
+        return transform_response_with_bytearray(response)
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
@@ -560,18 +571,8 @@ def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blo
     return type_func[blob_type]()
 
 
-def get_block_length(content_length):
-    """Get the block size from block blob length"""
-    # block list will not contain more than 50,000 blocks
-    block_length = content_length // 50000
-    if block_length % (8 * 1024 * 1024) != 0:
-        block_length = (block_length // (8 * 1024 * 1024) + 1) * (8 * 1024 * 1024)
-    return block_length
-
-
 def get_block_ids(content_length, block_length):
     """Get the block id arrary from block blob length, block size"""
-    from ..track2_util import encode_base64, url_quote
     block_count = 0
     if block_length:
         block_count = content_length // block_length
@@ -580,8 +581,7 @@ def get_block_ids(content_length, block_length):
     block_ids = []
     for i in range(block_count):
         chunk_offset = i * block_length
-        index = '{0:032d}'.format(chunk_offset)
-        block_id = encode_base64(url_quote(encode_base64(index)))
+        block_id = '{0:032d}'.format(chunk_offset)
         block_ids.append(block_id)
     return block_ids
 
@@ -589,16 +589,16 @@ def get_block_ids(content_length, block_length):
 def rewrite_blob(cmd, client, source_url, encryption_scope=None, **kwargs):
     src_properties = client.from_blob_url(source_url).get_blob_properties()
     BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    if src_properties.blobType != BlobType.BlockBlob:
+    if src_properties.blob_type != BlobType.BlockBlob:
         from azure.cli.core.azclierror import ValidationError
         raise ValidationError("Currently only support block blob! The source blob is {}.".format(
-            src_properties.blobType))
+            src_properties.blob_type))
     src_content_length = src_properties.size
     if src_content_length <= 5000 * 1024 * 1024:
         return client.upload_blob_from_url(source_url=source_url, overwrite=True, encryption_scope=encryption_scope,
                                            destination_lease=kwargs.pop('lease', None), **kwargs)
 
-    block_length = 4000 * 1024 * 1024
+    block_length = 4000 * 1024 * 1024  # using max block size
     block_ids = get_block_ids(src_content_length, block_length)
 
     copyoffset = 0
@@ -613,13 +613,9 @@ def rewrite_blob(cmd, client, source_url, encryption_scope=None, **kwargs):
             source_length=block_size,
             encryption_scope=encryption_scope)
         copyoffset += block_size
-    # committed, uncommitted = client.get_block_list(block_list_type='all')
-    # print(committed)
-    # print('\n')
-    # print(uncommitted)
-    # block_list = uncommitted.id
-    return client.commit_block_list(block_list=block_ids, content_settings=src_properties.content_settings,
-                                    metadata=src_properties.metadata, encryption_scope=encryption_scope, **kwargs)
+    response = client.commit_block_list(block_list=block_ids, content_settings=src_properties.content_settings,
+                                        metadata=src_properties.metadata, encryption_scope=encryption_scope, **kwargs)
+    return transform_response_with_bytearray(response)
 
 
 def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,

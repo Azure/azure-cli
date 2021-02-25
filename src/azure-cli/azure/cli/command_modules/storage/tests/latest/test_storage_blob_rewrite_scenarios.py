@@ -42,6 +42,12 @@ class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
             JMESPathCheck("state", "Enabled")
         ])
 
+        # Set blob encryption
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --encryption-scope {}', account_info, container,
+                         local_file, blob, self.kwargs["encryption1"])
+        self.storage_cmd('storage blob show -c {} -n {}', account_info, container, blob).assert_with_checks(
+            JMESPathCheck('encryptionScope', self.kwargs["encryption1"]))
+
         # Prepare encryption scope 2
         # Create with Microsoft.Keyvault key source
         self.kwargs.update({
@@ -71,16 +77,10 @@ class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
             JMESPathCheck("state", "Enabled")
         ])
 
-        # Set blob encryption
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --encryption-scope {}', account_info, container,
-                         local_file, blob, self.kwargs["encryption1"])
-        self.storage_cmd('storage blob show -c {} -n {}', account_info, container, blob).assert_with_checks(
-            JMESPathCheck('encryptionScope', self.kwargs["encryption1"]))
-
         # Update blob encryption
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%MZ')
         source_url = self.storage_cmd(
-            'storage blob generate-sas -c {} -n {} --https-only --permissions r --expiry {} --full-ur -otsv',
+            'storage blob generate-sas -c {} -n {} --https-only --permissions r --expiry {} --full-uri -otsv',
             account_info, container, blob, expiry).output.strip()
 
         self.storage_cmd('storage blob rewrite -c {} -n {} --encryption-scope {} --source-uri {}',
