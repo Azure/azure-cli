@@ -633,8 +633,8 @@ class Profile:
         result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
 
         if 'error' in result:
-            from azure.cli.core.adal_authentication import aad_exception_handler
-            aad_exception_handler(result)
+            from azure.cli.core.adal_authentication import aad_error_handler
+            aad_error_handler(result)
         return username, result["access_token"]
 
     def get_refresh_token(self, resource=None,
@@ -692,8 +692,8 @@ class Profile:
                                                                                    tenant_dest,
                                                                                    use_cert_sn_issuer)
             except adal.AdalError as ex:
-                from azure.cli.core.adal_authentication import adal_exception_handler
-                adal_exception_handler(ex)
+                from azure.cli.core.adal_authentication import adal_error_handler
+                adal_error_handler(ex)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))

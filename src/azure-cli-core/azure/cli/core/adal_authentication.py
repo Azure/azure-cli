@@ -45,7 +45,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         except adal.AdalError as err:
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
-            adal_exception_handler(err)
+            adal_error_handler(err)
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
@@ -233,7 +233,7 @@ def _timestamp(dt):
     return dt.timestamp()
 
 
-def aad_exception_handler(error: dict):
+def aad_error_handler(error: dict):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
     login_message = ("To re-authenticate, please {}. If the problem persists, "
                      "please contact your tenant administrator."
@@ -247,10 +247,10 @@ def aad_exception_handler(error: dict):
     raise AuthenticationError(msg, login_message)
 
 
-def adal_exception_handler(err: adal.AdalError):
+def adal_error_handler(err: adal.AdalError):
     """ Handle AdalError. """
     try:
-        aad_exception_handler(err.error_response)
+        aad_error_handler(err.error_response)
     except AttributeError:
         # In case of AdalError created as
         #   AdalError('More than one token matches the criteria. The result is ambiguous.')
