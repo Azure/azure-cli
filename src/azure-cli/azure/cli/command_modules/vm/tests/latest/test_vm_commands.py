@@ -4943,8 +4943,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
                      self.check('vmss.platformFaultDomainCount', 1)
-                 ]
-        )
+                 ])
 
 
 class VMCrossTenantUpdateScenarioTest(ScenarioTest):
