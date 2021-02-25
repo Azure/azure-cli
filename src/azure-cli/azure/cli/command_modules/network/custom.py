@@ -3303,7 +3303,7 @@ def create_lb_inbound_nat_rule(
         backend_port, frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
@@ -3317,6 +3317,21 @@ def create_lb_inbound_nat_rule(
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)
+
+
+# workaround for : https://github.com/Azure/azure-cli/issues/17071
+def lb_get(client, resource_group_name, load_balancer_name):
+    lb = client.get(resource_group_name, load_balancer_name)
+    return lb_get_operation(lb)
+
+
+# workaround for : https://github.com/Azure/azure-cli/issues/17071
+def lb_get_operation(lb):
+    for item in lb.frontend_ip_configurations:
+        if item.zones is not None and len(item.zones) >= 3:
+            item.zones = None
+
+    return lb
 
 
 def set_lb_inbound_nat_rule(
@@ -3345,7 +3360,7 @@ def create_lb_inbound_nat_pool(
         floating_ip=None, idle_timeout=None):
     InboundNatPool = cmd.get_models('InboundNatPool')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name) \
@@ -3396,7 +3411,7 @@ def create_lb_frontend_ip_configuration(
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
     if private_ip_address_allocation is None:
         private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
@@ -3470,7 +3485,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
             if not isinstance(addr, dict):
                 raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     (BackendAddressPool,
      LoadBalancerBackendAddress,
      VirtualNetwork) = cmd.get_models('BackendAddressPool',
@@ -3511,7 +3526,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
     from azure.cli.core.commands import LongRunningOperation
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
     def delete_basic_lb_backend_address_pool():
         new_be_pools = [pool for pool in lb.backend_address_pools
@@ -3612,7 +3627,7 @@ def create_cross_region_lb_frontend_ip_configuration(
     FrontendIPConfiguration, SubResource = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
     new_config = FrontendIPConfiguration(
         name=item_name,
@@ -3710,6 +3725,7 @@ def create_cross_region_lb_rule(
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
+    lb = lb_get_operation(lb)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     if not backend_address_pool_name:
@@ -3804,7 +3820,7 @@ def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_n
                             outbound_ports=None, enable_tcp_reset=None, idle_timeout=None):
     OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).load_balancers
-    lb = client.get(resource_group_name, load_balancer_name)
+    lb = lb_get(client, resource_group_name, load_balancer_name)
     rule = OutboundRule(
         protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
         backend_address_pool=SubResource(id=backend_address_pool),
@@ -3836,7 +3852,7 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
                     path=None, interval=None, threshold=None):
     Probe = cmd.get_models('Probe')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     new_probe = Probe(
         protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
         request_path=path, name=item_name)
@@ -3864,6 +3880,7 @@ def create_lb_rule(
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
+    lb = lb_get_operation(lb)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     if not backend_address_pool_name:
