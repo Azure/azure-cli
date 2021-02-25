@@ -609,7 +609,7 @@ def rewrite_blob(client, source_url, encryption_scope=None, **kwargs):
             source_length=block_size,
             encryption_scope=encryption_scope)
         copyoffset += block_size
-    committed, uncommitted = client.get_block_list(block_list_type='all')
+    # committed, uncommitted = client.get_block_list(block_list_type='all')
     # print(committed)
     # print('\n')
     # print(uncommitted)

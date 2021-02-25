@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from datetime import datetime, timedelta
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,\
     JMESPathCheck, api_version_constraint
 from azure.cli.core.profiles import ResourceType
@@ -13,11 +14,19 @@ from ..storage_test_util import StorageScenarioMixin
 class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(name_prefix="rewrite", kind="StorageV2", sku='Standard_LRS', location="eastus2")
-    def test_storage_blob_rewrite_encryption_scope(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
+    def test_storage_blob_rewrite_encryption_scope_64mb(self, resource_group, storage_account):
+        self.test_storage_blob_rewrite_encryption_scope(resource_group, storage_account, 64 * 1024)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(name_prefix="rewrite", kind="StorageV2", sku='Standard_LRS', location="eastus2")
+    def test_storage_blob_rewrite_encryption_scope_10G(self, resource_group, storage_account):
+        self.test_storage_blob_rewrite_encryption_scope(resource_group, storage_account, 10 * 1024 * 1024)
+
+    def test_storage_blob_rewrite_encryption_scope(self, group, account, file_size_kb):
+        account_info = self.get_account_info(group, account)
         container = self.create_container(account_info)
         blob = self.create_random_name(prefix='blob', length=24)
-        local_file = self.create_temp_file(1024)
+        local_file = self.create_temp_file(file_size_kb)
 
         # Prepare encryption scope 1
         self.kwargs.update({
@@ -66,7 +75,6 @@ class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
             JMESPathCheck('encryptionScope', self.kwargs["encryption1"]))
 
         # Update blob encryption
-        from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         source_url = self.storage_cmd(
             'storage blob generate-sas -c {} -n {} --https-only --permissions r --expiry {} --full-ur -otsv',
