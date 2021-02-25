@@ -233,7 +233,7 @@ class PostgresFlexibleServerHighAvailabilityMgmt(FlexibleServerHighAvailabilityM
     @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_restore'])
     def test_postgres_flexible_server_high_availability_delete(self):
         self._test_flexible_server_high_availability_delete(self.resource_group)
-    
+
 
 class PostgresFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerMgmtScenarioTest):
     

@@ -404,11 +404,12 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
             format(database_engine, resource_group, server, self.location))
                 
         show_result = self.cmd('{} flexible-server show -g {} -n {}'
-                               .format(database_engine, resource_group, server)).get_output_in_json()
-
+                               .format(database_engine, resource_group, server),
+                               checks=[JMESPathCheck('haEnabled', 'Enabled')]).get_output_in_json()
+        print(show_result)
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, 'VNET' + server[6:], 'Subnet' + servers[6:]))
+                             self.get_subscription_id(), resource_group, 'VNET' + server[6:], 'Subnet' + server[6:]))
     
     def _test_flexible_server_vnet_server_update_scale_up(self, database_engine, resource_group, server):
 
@@ -425,7 +426,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
                  .format(database_engine, resource_group, restore_server, server, restore_time),
                  checks=[JMESPathCheck('name', restore_server),
                          JMESPathCheck('resourceGroup', resource_group),
-                         JMESPathCheck('availabilityZone', 2)])
+                         JMESPathCheck('availabilityZone', 1)])
         
     def _test_flexible_server_vnet_server_delete(self, database_engine, resource_group, server, restore_server):
 

@@ -11,27 +11,27 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --name --source-server --restore-time
+      - -g --name --source-server --restore-time --zone
       User-Agent:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/azuredbclitest-000002?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/azuredbclitest-2000003?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose","capacity":4},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":1,"haEnabled":"Enabled","administratorLogin":"zippyParrot0","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"Healthy","state":"Ready","availabilityZone":"1","standbyAvailabilityZone":"2","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-25T01:00:47.9289738+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D8s_v3","tier":"GeneralPurpose","capacity":8},"properties":{"fullyQualifiedDomainName":"azuredbclitest-2000003.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"eagerRaccoon1","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNETbclitest-0225-vnetservermgmtscenar/subnets/Subnetbclitest-0225-vnetservermgmtscenar"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-25T09:15:47.5032374+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-2000003","name":"azuredbclitest-2000003","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1100'
+      - '1279'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 07:48:36 GMT
+      - Thu, 25 Feb 2021 09:15:46 GMT
       expires:
       - '-1'
       pragma:
@@ -50,8 +50,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T07:28:35.973721Z", "createMode": "PointInTimeRestore"}}'
+    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-2000003",
+      "pointInTimeUTC": "2021-02-25T08:55:47.100007Z", "availabilityZone": "2", "createMode":
+      "PointInTimeRestore"}}'
     headers:
       Accept:
       - application/json
@@ -62,18 +63,18 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '218'
+      - '220'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g --name --source-server --restore-time
+      - -g --name --source-server --restore-time --zone
       User-Agent:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleserverhighavail?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-2000003?api-version=2020-02-14-preview
   response:
     body:
       string: '{"operation":"RestoreSnapshotManagementOperation","startTime":"2021-02-14T18:49:34.093Z"}'
@@ -544,12 +545,12 @@ interactions:
       User-Agent:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-2000003?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"restore-azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"sereneDunbird9","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"2","storageProfile":{"storageMB":262144,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-14T18:58:38.9470656+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
-        US 2 EUAP","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/restore-azuredbclitest-000002","name":"restore-azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D8s_v3","tier":"GeneralPurpose","capacity":8},"properties":{"fullyQualifiedDomainName":"azuredbclitest-2000003.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"eagerRaccoon1","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNETbclitest-0225-vnetservermgmtscenar/subnets/Subnetbclitest-0225-vnetservermgmtscenar"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-25T09:15:47.5032374+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-2000003","name":"restore-azuredbclitest-2000003","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache

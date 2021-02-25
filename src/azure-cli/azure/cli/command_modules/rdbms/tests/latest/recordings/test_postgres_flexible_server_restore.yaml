@@ -13,7 +13,7 @@ interactions:
       ParameterSetName:
       - -g --name --source-server --restore-time --zone
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
@@ -21,17 +21,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_E2s_v3","tier":"MemoryOptimized","capacity":2},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"machoSnail8","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":262144,"backupRetentionDays":17},"earliestRestoreDate":"2021-02-25T01:00:48.046992+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":1,"startHour":1,"startMinute":30}},"location":"East
+      string: '{"sku":{"name":"Standard_E2s_v3","tier":"MemoryOptimized","capacity":2},"properties":{"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"sereneDunbird9","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":262144,"backupRetentionDays":17},"earliestRestoreDate":"2021-02-14T16:51:54.3911961+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":1,"startHour":1,"startMinute":30}},"location":"East
         US 2 EUAP","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1086'
+      - '982'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:08 GMT
+      - Sun, 14 Feb 2021 18:49:30 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +51,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
+      "pointInTimeUTC": "2021-02-14T17:08:55.685354Z", "availabilityZone": "2", "createMode":
       "PointInTimeRestore"}}'
     headers:
       Accept:
@@ -63,35 +63,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '242'
+      - '200'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time --zone
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''7855a39a-7a49-446d-9a96-7fd3b9274f0f''"}}'
+      string: '{"operation":"RestoreSnapshotManagementOperation","startTime":"2021-02-14T18:49:34.093Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
-      - '162'
+      - '89'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:09 GMT
+      - Sun, 14 Feb 2021 18:49:33 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/operationResults/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
       pragma:
       - no-cache
       server:
@@ -100,17 +101,13 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 500
-      message: Internal Server Error
+      code: 202
+      message: Accepted
 - request:
-    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
-      "PointInTimeRestore"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -120,34 +117,25 @@ interactions:
       - postgres flexible-server restore
       Connection:
       - keep-alive
-      Content-Length:
-      - '242'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time --zone
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''4a11c3eb-568f-4e6a-a2f3-e7b719d54fd9''"}}'
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
-      - '162'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:11 GMT
+      - Sun, 14 Feb 2021 18:50:34 GMT
       expires:
       - '-1'
       pragma:
@@ -156,19 +144,17 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 500
-      message: Internal Server Error
+      code: 200
+      message: OK
 - request:
-    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
-      "PointInTimeRestore"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -178,34 +164,25 @@ interactions:
       - postgres flexible-server restore
       Connection:
       - keep-alive
-      Content-Length:
-      - '242'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time --zone
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''5aa893d9-945b-426e-9c59-780cc339808a''"}}'
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
-      - '162'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:14 GMT
+      - Sun, 14 Feb 2021 18:51:35 GMT
       expires:
       - '-1'
       pragma:
@@ -214,19 +191,17 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 500
-      message: Internal Server Error
+      code: 200
+      message: OK
 - request:
-    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
-      "PointInTimeRestore"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -236,34 +211,25 @@ interactions:
       - postgres flexible-server restore
       Connection:
       - keep-alive
-      Content-Length:
-      - '242'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time --zone
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''2eb8a673-75e3-4a8c-9bde-f1f093da2c35''"}}'
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
-      - '162'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:18 GMT
+      - Sun, 14 Feb 2021 18:52:34 GMT
       expires:
       - '-1'
       pragma:
@@ -272,19 +238,17 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 500
-      message: Internal Server Error
+      code: 200
+      message: OK
 - request:
-    body: '{"location": "East US 2 EUAP", "properties": {"sourceServerName": "azuredbclitest-000002",
-      "pointInTimeUTC": "2021-02-25T06:15:08.082218Z", "availabilityZone": "2", "createMode":
-      "PointInTimeRestore"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -294,34 +258,25 @@ interactions:
       - postgres flexible-server restore
       Connection:
       - keep-alive
-      Content-Length:
-      - '242'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --source-server --restore-time --zone
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-24canary-postgresflexibleservermgmt?api-version=2020-02-14-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"error":{"code":"InternalServerError","message":"An unexpected error
-        occured while processing the request. Tracking ID: ''a3b0a685-119d-48b0-92d3-7a9eff33bae1''"}}'
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
-      - '162'
+      - '108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 Feb 2021 08:15:26 GMT
+      - Sun, 14 Feb 2021 18:53:35 GMT
       expires:
       - '-1'
       pragma:
@@ -330,13 +285,296 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 500
-      message: Internal Server Error
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:54:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:55:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:56:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"InProgress","startTime":"2021-02-14T18:49:34.093Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:57:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/30f60907-7871-4b3a-9f08-2af93ebc6b7d?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"30f60907-7871-4b3a-9f08-2af93ebc6b7d","status":"Succeeded","startTime":"2021-02-14T18:49:34.093Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:58:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --source-server --restore-time --zone
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/restore-azuredbclitest-000002?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_E2s_v3","tier":"MemoryOptimized","capacity":2},"properties":{"fullyQualifiedDomainName":"restore-azuredbclitest-000002.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"sereneDunbird9","publicNetworkAccess":"Enabled","logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"2","storageProfile":{"storageMB":262144,"backupRetentionDays":7},"earliestRestoreDate":"2021-02-14T18:58:38.9470656+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","tags":{"key":"3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/restore-azuredbclitest-000002","name":"restore-azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1005'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:58:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1
