@@ -3639,7 +3639,7 @@ class NetworkVirtualRouter(ScenarioTest):
 
 class NetworkVirtualHubRouter(ScenarioTest):
 
-    @unittest.skip('CannotDeleteVirtualHubWhenItIsInUse')
+    # @unittest.skip('CannotDeleteVirtualHubWhenItIsInUse')
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_hub_router', location='centraluseuap')
     def test_network_virtual_hub_router_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
