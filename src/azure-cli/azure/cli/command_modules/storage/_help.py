@@ -54,14 +54,18 @@ parameters:
   - name: --delete-retention-days
     short-summary: 'Indicate the number of days that the deleted blob should be retained. The value must be in range [1,365]. It must be provided when `--enable-delete-retention` is true.'
 examples:
-  - name: Enable the change feed for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-change-feed true -n mystorageaccount -g MyResourceGroup
-  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
-  - name: Enable versioning for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-versioning -n mystorageaccount -g MyResourceGroup
+  - name: Enable change feed and set change feed retention days to infinite for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-change-feed true -n mystorageaccount -g myresourcegroup
+  - name: Enable change feed and set change feed retention days to 100 for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-change-feed --change-feed-days 100 -n mystorageaccount -g myresourcegroup
+  - name: Disable change feed for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-change-feed false -n mystorageaccount -g myresourcegroup
+  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g myresourcegroup
+  - name: Enable versioning for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n mystorageaccount -g myresourcegroup
   - name: Set default version for incoming request for storage account 'mystorageaccount'.
-    text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g MyResourceGroup
+    text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g myresourcegroup
 """
 
 helps['storage account create'] = """
