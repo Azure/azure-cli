@@ -418,7 +418,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    options_list=['--change-feed-retention-days', '--change-feed-days'],
                    type=int, min_api='2019-06-01', arg_group='Change Feed Policy',
                    validator=validator_change_feed_retention_days,
-                   help='Indicates the duration of changeFeed retention in days. '
+                   help='Indicate the duration of changeFeed retention in days. '
                         'Minimum value is 1 day and maximum value is 146000 days (400 years). '
                         'A null value indicates an infinite retention of the change feed.')
         c.argument('enable_container_delete_retention',
