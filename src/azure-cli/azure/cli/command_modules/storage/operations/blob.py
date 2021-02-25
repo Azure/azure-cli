@@ -598,7 +598,7 @@ def rewrite_blob(cmd, client, source_url, encryption_scope=None, **kwargs):
         return client.upload_blob_from_url(source_url=source_url, overwrite=True, encryption_scope=encryption_scope,
                                            destination_lease=kwargs.pop('lease', None), **kwargs)
 
-    block_length = get_block_length(src_content_length)
+    block_length = 4000 * 1024 * 1024
     block_ids = get_block_ids(src_content_length, block_length)
 
     copyoffset = 0

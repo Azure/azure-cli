@@ -6,21 +6,24 @@
 from datetime import datetime, timedelta
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,\
     JMESPathCheck, api_version_constraint
+from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-04-08')
 class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer(name_prefix="rewrite", kind="StorageV2", sku='Standard_LRS', location="eastus2")
     def test_storage_blob_rewrite_encryption_scope_64mb(self, resource_group, storage_account):
         self.test_storage_blob_rewrite_encryption_scope(resource_group, storage_account, 64 * 1024)
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer(name_prefix="rewrite", kind="StorageV2", sku='Standard_LRS', location="eastus2")
-    def test_storage_blob_rewrite_encryption_scope_10G(self, resource_group, storage_account):
-        self.test_storage_blob_rewrite_encryption_scope(resource_group, storage_account, 10 * 1024 * 1024)
+    def test_storage_blob_rewrite_encryption_scope_6G(self, resource_group, storage_account):
+        self.test_storage_blob_rewrite_encryption_scope(resource_group, storage_account, 6 * 1024 * 1024)
 
     def test_storage_blob_rewrite_encryption_scope(self, group, account, file_size_kb):
         account_info = self.get_account_info(group, account)
