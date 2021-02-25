@@ -1169,7 +1169,6 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
-    @unittest.skip('FileServiceProperties object has no attribute protocol_settings')
     @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
     @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
     def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
