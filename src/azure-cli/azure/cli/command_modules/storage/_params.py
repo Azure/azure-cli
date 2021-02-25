@@ -357,6 +357,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_group_name', validator=process_resource_group, required=False)
         c.argument('encryption_scope_name', options_list=['--name', '-n'],
                    help='The name of the encryption scope within the specified storage account.')
+        c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
+                   arg_type=get_three_state_flag(), min_api='2021-01-01', 
+                   help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
+                   'platform managed keys for data at rest.')
 
     for scope in ['storage account encryption-scope create', 'storage account encryption-scope update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -369,10 +373,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The object identifier for a key vault key object. When applied, the encryption scope will '
                        'use the key referenced by the identifier to enable customer-managed key support on this '
                        'encryption scope.')
-            c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
-                    arg_type=get_three_state_flag(),
-                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
-                    'platform managed keys for data at rest.')
 
     with self.argument_context('storage account encryption-scope update') as c:
         t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
@@ -407,7 +407,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
 
-    with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
+    with self.argument_context('storage atest_storage_share_rm_soft_deleteccount network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import validate_subnet
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
