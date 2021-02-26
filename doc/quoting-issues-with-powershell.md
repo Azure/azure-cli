@@ -171,7 +171,7 @@ Command arguments: ['{"key": "value"}', '--debug']
 
 ## Best practice: use file input for JSON
 
-For complex arguments like JSON string, the best practice is to use Azure CLI's `@<file>` convention to load from a file to bypass the shell's interpretation mechanisms.
+For complex arguments like JSON string, the best practice is to use Azure CLI's `@<file>` convention to load from a file to bypass the shell's interpretation.
 
 Note that At symbol (`@`) is [splatting operator](https://docs.microsoft.com/powershell/module/microsoft.powershell.core/about/about_splatting) in PowerShell, so it should be quoted.
 
