@@ -70,11 +70,6 @@ cli:
         apiVersion: '2019-03-01'
       hidden: false
     - where:
-        group: 'GalleryApplications'
-        op: Get
-        apiVersion: '2019-07-01'
-      hidden: false
-    - where:
         group: 'GalleryApplicationVersions'
         op: ListByGalleryApplication
         apiVersion: '2019-03-01'
