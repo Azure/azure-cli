@@ -391,6 +391,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
     if sku and cmd.supported_api_version(min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     if tier and cmd.supported_api_version(min_api='2020-07-01'):
+        if not sku:
+            public_ip['sku'] = {'name': 'Basic'}
         public_ip['sku'].update({'tier': tier})
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         public_ip['zones'] = zone

@@ -30,7 +30,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
                                   allowed values are "enabled" or "disabled".
     :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma or semicolon;
                      These IP rules are applicable only when public_network_access is "enabled".
-    :param identity_type: The identity type. Possible values include: "None", "SystemAssigned".
+    :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
     """
     from azure.mgmt.search.models import SearchService, Sku, NetworkRuleSet, IpRule, Identity
     from azure.cli.command_modules.search._client_factory import cf_search_services
@@ -79,7 +79,7 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
                      semicolon(';'); If spaces (ex - ' '), ',' or ';' is provided, any existing IP rule will be
                      nullified and no public IP rule is applied. These IP rules are applicable only when
                      public_network_access is "enabled".
-    :param identity_type: The identity type. Possible values include: "None", "SystemAssigned".
+    :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
     """
     from azure.mgmt.search.models import NetworkRuleSet, IpRule, Identity
     import re

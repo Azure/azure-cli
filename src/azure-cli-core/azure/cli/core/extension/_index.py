@@ -19,11 +19,28 @@ ERR_UNABLE_TO_GET_EXTENSIONS = 'Unable to get extensions from index. Improper in
 TRIES = 3
 
 
+def get_index_url(cli_ctx=None):
+    """Use extension index url in the order of:
+    1. Environment variable: AZURE_EXTENSION_INDEX_URL
+    2. Config setting: extension.index_url
+    3. Index file in azmirror storage account cloud endpoint
+    4. DEFAULT_INDEX_URL
+    """
+    import posixpath
+    if cli_ctx:
+        url = cli_ctx.config.get('extension', 'index_url', None)
+        if url:
+            return url
+    azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
+        cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
+    return posixpath.join(azmirror_endpoint, 'extensions', 'index.json') if azmirror_endpoint else DEFAULT_INDEX_URL
+
+
 # pylint: disable=inconsistent-return-statements
-def get_index(index_url=None):
+def get_index(index_url=None, cli_ctx=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    index_url = index_url or DEFAULT_INDEX_URL
+    index_url = index_url or get_index_url(cli_ctx=cli_ctx)
 
     for try_number in range(TRIES):
         try:
@@ -43,8 +60,8 @@ def get_index(index_url=None):
             continue
 
 
-def get_index_extensions(index_url=None):
-    index = get_index(index_url=index_url)
+def get_index_extensions(index_url=None, cli_ctx=None):
+    index = get_index(index_url=index_url, cli_ctx=cli_ctx)
     extensions = index.get('extensions')
     if extensions is None:
         logger.warning(ERR_UNABLE_TO_GET_EXTENSIONS)
