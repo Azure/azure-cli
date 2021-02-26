@@ -256,6 +256,9 @@ aks create:
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
+    enable-encryption-at-host:
+      rule_exclusions:
+      - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
@@ -269,6 +272,9 @@ aks install-cli:
 aks nodepool add:
   parameters:
     enable_node_public_ip:
+      rule_exclusions:
+      - option_length_too_long
+    enable-encryption-at-host:
       rule_exclusions:
       - option_length_too_long
 aks update:

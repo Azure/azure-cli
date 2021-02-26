@@ -1894,6 +1894,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
+               enable_encryption_at_host=False,
                no_wait=False,
                yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1922,6 +1923,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         proximity_placement_group_id=ppg,
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
+        enable_encryption_at_host=enable_encryption_at_host,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -3361,6 +3363,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       labels=None,
                       max_surge=None,
                       mode="User",
+                      enable_encryption_at_host=False,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -3405,6 +3408,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         enable_node_public_ip=enable_node_public_ip,
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
+        enable_encryption_at_host=enable_encryption_at_host,
         mode=mode
     )
 

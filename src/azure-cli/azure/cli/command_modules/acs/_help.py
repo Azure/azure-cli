@@ -446,6 +446,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
   - name: Create a kubernetes cluster with ephemeral OS enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a kubernetes cluster with EncryptionAtHost enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
 """
 
 helps['aks update'] = """
@@ -739,6 +741,8 @@ parameters:
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a nodepool with EncryptionAtHost enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
 """
 
 helps['aks nodepool delete'] = """
