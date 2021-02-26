@@ -24,11 +24,11 @@ Release History
 **App Service**
 
 * `az webapp config ssl bind`: handle if webapp and appservice plan in different rg. Also reference text updates (#16778)
-* Fix #8743- az webapp deploy (#16715)
+* Fix #8743: az webapp deploy (#16715)
 * Bugfix: Add generateRandomAppNames.json to setup (#17035)
-* `az functionapp create`: Added preview support for creating dotnet-isolated apps. (#17066)
-* Fix #12150 Support for subnet ID in vnet-integration add (#16902)
-* `az functionapp create`: Removed preview flag from Node.js 14. (#16877)
+* `az functionapp create`: Add preview support for creating dotnet-isolated apps. (#17066)
+* Fix #12150: Support for subnet ID in vnet-integration add (#16902)
+* `az functionapp create`: Remove preview flag from Node.js 14. (#16877)
 
 **ARM**
 
