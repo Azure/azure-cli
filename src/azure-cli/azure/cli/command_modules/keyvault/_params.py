@@ -488,6 +488,7 @@ def load_arguments(self, _):
                    help='Path to a file where the JSON blob returned by this command is stored.')
         c.argument('sd_quorum', type=int, help='The minimum number of shares required to decrypt the security domain '
                                                'for recovery.')
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain wait') as c:
         c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
