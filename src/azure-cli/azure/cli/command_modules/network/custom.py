@@ -2632,7 +2632,7 @@ def create_express_route_peering(
         cmd, client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
-        route_filter=None, legacy_mode=None):
+        route_filter=None, legacy_mode=None, ip_version='IPv4'):
     (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
         cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
 
@@ -2641,21 +2641,37 @@ def create_express_route_peering(
     else:
         ExpressRoutePeeringType = cmd.get_models('ExpressRouteCircuitPeeringType')
 
-    peering = ExpressRouteCircuitPeering(
-        peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
-        primary_peer_address_prefix=primary_peer_address_prefix,
-        secondary_peer_address_prefix=secondary_peer_address_prefix,
-        shared_key=shared_key)
+    if ip_version == 'IPv6' and cmd.supported_api_version(min_api='2020-08-01'):
+        Ipv6ExpressRouteCircuitPeeringConfig = cmd.get_models('Ipv6ExpressRouteCircuitPeeringConfig')
+        if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
+            microsoft_config = ExpressRouteCircuitPeeringConfig(advertised_public_prefixes=advertised_public_prefixes,
+                                                                customer_asn=customer_asn,
+                                                                routing_registry_name=routing_registry_name)
+        else:
+            microsoft_config = None
+        ipv6 = Ipv6ExpressRouteCircuitPeeringConfig(primary_peer_address_prefix=primary_peer_address_prefix,
+                                                    secondary_peer_address_prefix=secondary_peer_address_prefix,
+                                                    microsoft_peering_config=microsoft_config,
+                                                    route_filter=route_filter)
+        peering = ExpressRouteCircuitPeering(peering_type=peering_type, ipv6_peering_config=ipv6, peer_asn=peer_asn,
+                                             vlan_id=vlan_id)
 
-    if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
-        peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
-            advertised_public_prefixes=advertised_public_prefixes,
-            customer_asn=customer_asn,
-            routing_registry_name=routing_registry_name)
-    if cmd.supported_api_version(min_api='2016-12-01') and route_filter:
-        peering.route_filter = RouteFilter(id=route_filter)
-    if cmd.supported_api_version(min_api='2017-10-01') and legacy_mode is not None:
-        peering.microsoft_peering_config.legacy_mode = legacy_mode
+    else:
+        peering = ExpressRouteCircuitPeering(
+            peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
+            primary_peer_address_prefix=primary_peer_address_prefix,
+            secondary_peer_address_prefix=secondary_peer_address_prefix,
+            shared_key=shared_key)
+
+        if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
+            peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
+                advertised_public_prefixes=advertised_public_prefixes,
+                customer_asn=customer_asn,
+                routing_registry_name=routing_registry_name)
+        if cmd.supported_api_version(min_api='2016-12-01') and route_filter:
+            peering.route_filter = RouteFilter(id=route_filter)
+        if cmd.supported_api_version(min_api='2017-10-01') and legacy_mode is not None:
+            peering.microsoft_peering_config.legacy_mode = legacy_mode
 
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_type, peering)
 
@@ -3287,7 +3303,7 @@ def create_lb_inbound_nat_rule(
         backend_port, frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
@@ -3301,6 +3317,21 @@ def create_lb_inbound_nat_rule(
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)
+
+
+# workaround for : https://github.com/Azure/azure-cli/issues/17071
+def lb_get(client, resource_group_name, load_balancer_name):
+    lb = client.get(resource_group_name, load_balancer_name)
+    return lb_get_operation(lb)
+
+
+# workaround for : https://github.com/Azure/azure-cli/issues/17071
+def lb_get_operation(lb):
+    for item in lb.frontend_ip_configurations:
+        if item.zones is not None and len(item.zones) >= 3:
+            item.zones = None
+
+    return lb
 
 
 def set_lb_inbound_nat_rule(
@@ -3329,7 +3360,7 @@ def create_lb_inbound_nat_pool(
         floating_ip=None, idle_timeout=None):
     InboundNatPool = cmd.get_models('InboundNatPool')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name) \
@@ -3380,7 +3411,7 @@ def create_lb_frontend_ip_configuration(
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
     if private_ip_address_allocation is None:
         private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
@@ -3454,7 +3485,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
             if not isinstance(addr, dict):
                 raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     (BackendAddressPool,
      LoadBalancerBackendAddress,
      VirtualNetwork) = cmd.get_models('BackendAddressPool',
@@ -3495,7 +3526,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
     from azure.cli.core.commands import LongRunningOperation
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
     def delete_basic_lb_backend_address_pool():
         new_be_pools = [pool for pool in lb.backend_address_pools
@@ -3596,7 +3627,7 @@ def create_cross_region_lb_frontend_ip_configuration(
     FrontendIPConfiguration, SubResource = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
 
     new_config = FrontendIPConfiguration(
         name=item_name,
@@ -3694,6 +3725,7 @@ def create_cross_region_lb_rule(
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
+    lb = lb_get_operation(lb)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     if not backend_address_pool_name:
@@ -3788,7 +3820,7 @@ def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_n
                             outbound_ports=None, enable_tcp_reset=None, idle_timeout=None):
     OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).load_balancers
-    lb = client.get(resource_group_name, load_balancer_name)
+    lb = lb_get(client, resource_group_name, load_balancer_name)
     rule = OutboundRule(
         protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
         backend_address_pool=SubResource(id=backend_address_pool),
@@ -3820,7 +3852,7 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
                     path=None, interval=None, threshold=None):
     Probe = cmd.get_models('Probe')
     ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     new_probe = Probe(
         protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
         request_path=path, name=item_name)
@@ -3848,6 +3880,7 @@ def create_lb_rule(
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
+    lb = lb_get_operation(lb)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     if not backend_address_pool_name:
@@ -5567,7 +5600,7 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None,
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
@@ -5591,8 +5624,14 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['ip_tags'] = ip_tags
     if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
         public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
+
     if sku:
         public_ip_args['sku'] = {'name': sku}
+    if tier:
+        if not sku:
+            public_ip_args['sku'] = {'name': 'Basic'}
+        public_ip_args['sku'].update({'tier': tier})
+
     public_ip = PublicIPAddress(**public_ip_args)
 
     if dns_name or reverse_fqdn:

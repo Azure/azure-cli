@@ -43,15 +43,15 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2.3',
+    'adal~=1.2.6',
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'colorama~=0.4.1',
+    'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack==0.8.0rc2',
-    'msal~=1.0.0',
-    'msal-extensions~=0.1.3',
+    'msal~=1.9',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT==1.7.1',

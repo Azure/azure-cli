@@ -2972,6 +2972,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
+    # temporary workaround for dotnet-isolated linux consumption apps
+    if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
+        site_config.linux_fx_version = ''
+
     # adding app settings
     for app_setting, value in app_settings_json.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
@@ -4000,6 +4004,208 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     else:
         while s.is_alive() and t.is_alive():
             time.sleep(5)
+
+
+def perform_onedeploy(cmd,
+                      resource_group_name,
+                      name,
+                      src_path=None,
+                      src_url=None,
+                      target_path=None,
+                      artifact_type=None,
+                      is_async=None,
+                      restart=None,
+                      clean=None,
+                      ignore_stack=None,
+                      timeout=None,
+                      slot=None):
+    params = OneDeployParams()
+
+    params.cmd = cmd
+    params.resource_group_name = resource_group_name
+    params.webapp_name = name
+    params.src_path = src_path
+    params.src_url = src_url
+    params.target_path = target_path
+    params.artifact_type = artifact_type
+    params.is_async_deployment = is_async
+    params.should_restart = restart
+    params.is_clean_deployment = clean
+    params.should_ignore_stack = ignore_stack
+    params.timeout = timeout
+    params.slot = slot
+
+    return _perform_onedeploy_internal(params)
+
+
+# Class for OneDeploy parameters
+# pylint: disable=too-many-instance-attributes,too-few-public-methods
+class OneDeployParams:
+    def __init__(self):
+        self.cmd = None
+        self.resource_group_name = None
+        self.webapp_name = None
+        self.src_path = None
+        self.src_url = None
+        self.artifact_type = None
+        self.is_async_deployment = None
+        self.target_path = None
+        self.should_restart = None
+        self.is_clean_deployment = None
+        self.should_ignore_stack = None
+        self.timeout = None
+        self.slot = None
+# pylint: enable=too-many-instance-attributes,too-few-public-methods
+
+
+def _build_onedeploy_url(params):
+    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
+
+    if params.is_async_deployment is not None:
+        deploy_url = deploy_url + '&async=' + str(params.is_async_deployment)
+
+    if params.should_restart is not None:
+        deploy_url = deploy_url + '&restart=' + str(params.should_restart)
+
+    if params.is_clean_deployment is not None:
+        deploy_url = deploy_url + '&clean=' + str(params.is_clean_deployment)
+
+    if params.should_ignore_stack is not None:
+        deploy_url = deploy_url + '&ignorestack=' + str(params.should_ignore_stack)
+
+    if params.target_path is not None:
+        deploy_url = deploy_url + '&path=' + params.target_path
+
+    return deploy_url
+
+
+def _get_onedeploy_status_url(params):
+    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    return scm_url + '/api/deployments/latest'
+
+
+def _get_basic_headers(params):
+    import urllib3
+
+    user_name, password = _get_site_credential(params.cmd.cli_ctx, params.resource_group_name,
+                                               params.webapp_name, params.slot)
+
+    if params.src_path:
+        content_type = 'application/octet-stream'
+    elif params.src_url:
+        content_type = 'application/json'
+    else:
+        raise CLIError('Unable to determine source location of the artifact being deployed')
+
+    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers['Cache-Control'] = 'no-cache'
+    headers['User-Agent'] = get_az_user_agent()
+    headers['Content-Type'] = content_type
+
+    return headers
+
+
+def _get_onedeploy_request_body(params):
+    import os
+
+    if params.src_path:
+        logger.info('Deploying from local path: %s', params.src_path)
+        try:
+            with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
+                body = fs.read()
+        except Exception as e:
+            raise CLIError("Either '{}' is not a valid local file path or you do not have permissions to access it"
+                           .format(params.src_path)) from e
+    elif params.src_url:
+        logger.info('Deploying from URL: %s', params.src_url)
+        body = json.dumps({
+            "packageUri": params.src_url
+        })
+    else:
+        raise CLIError('Unable to determine source location of the artifact being deployed')
+
+    return body
+
+
+def _update_artifact_type(params):
+    import ntpath
+
+    if params.artifact_type is not None:
+        return
+
+    # Interpret deployment type from the file extension if the type parameter is not passed
+    file_name = ntpath.basename(params.src_path)
+    file_extension = file_name.split(".", 1)[1]
+    if file_extension in ('war', 'jar', 'ear', 'zip'):
+        params.artifact_type = file_extension
+    elif file_extension in ('sh', 'bat'):
+        params.artifact_type = 'startup'
+    else:
+        params.artifact_type = 'static'
+    logger.warning("Deployment type: %s. To override deloyment type, please specify the --type parameter. "
+                   "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
+
+
+def _make_onedeploy_request(params):
+    import requests
+
+    from azure.cli.core.util import (
+        should_disable_connection_verify,
+    )
+
+    # Build the request body, headers, API URL and status URL
+    body = _get_onedeploy_request_body(params)
+    headers = _get_basic_headers(params)
+    deploy_url = _build_onedeploy_url(params)
+    deployment_status_url = _get_onedeploy_status_url(params)
+
+    logger.info("Deployment API: %s", deploy_url)
+    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+
+    # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
+    # For that, set poll_async_deployment_for_debugging=True
+    poll_async_deployment_for_debugging = True
+
+    # check the status of async deployment
+    if response.status_code == 202:
+        response_body = None
+        if poll_async_deployment_for_debugging:
+            logger.info('Polloing the status of async deployment')
+            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
+                                                         deployment_status_url, headers, params.timeout)
+            logger.info('Async deployment complete. Server response: %s', response_body)
+        return response_body
+
+    if response.status_code == 200:
+        return response
+
+    # API not available yet!
+    if response.status_code == 404:
+        raise CLIError("This API isn't available in this environment yet!")
+
+    # check if there's an ongoing process
+    if response.status_code == 409:
+        raise CLIError("Another deployment is in progress. You can track the ongoing deployment at {}"
+                       .format(deployment_status_url))
+
+    # check if an error occured during deployment
+    if response.status_code:
+        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
+                       .format(response.status_code, response.text))
+
+
+# OneDeploy
+def _perform_onedeploy_internal(params):
+
+    # Update artifact type, if required
+    _update_artifact_type(params)
+
+    # Now make the OneDeploy API call
+    logger.info("Initiating deployment")
+    response = _make_onedeploy_request(params)
+    logger.info("Deployment has completed successfully")
+    return response
 
 
 def _wait_for_webapp(tunnel_server):
