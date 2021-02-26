@@ -52,9 +52,9 @@ Release History
 **Compute**
 
 * `az vm (extension) image list`: Make it more robust (#16992)
-* vmss create: Fix a license type issue (#17007)
+* `az vmss create`: Fix a license type issue (#17007)
 * Upgrade API version to 2020-12-01 (#17042)
-* vm create: add --enable-hotpatching (#17042)
+* `az vm create`: add `--enable-hotpatching` (#17042)
 
 **Cosmos DB**
 
