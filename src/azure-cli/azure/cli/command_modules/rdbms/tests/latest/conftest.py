@@ -2,6 +2,7 @@ mysql_location = None
 postgres_location = None
 resource_random_name = None
 
+
 def pytest_addoption(parser):
     parser.addoption("--mysql-location", action="store", default="eastus2euap")
     parser.addoption("--postgres-location", action="store", default="eastus2euap")
