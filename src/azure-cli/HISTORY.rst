@@ -12,7 +12,7 @@ Release History
 
 **AMS**
 
-* Updated module to use 2020 Azure Media Services api. (#16492)
+* Update module to use 2020 Azure Media Services api. (#16492)
 * `az ams account encryption`: New subgroup to show or set the encryption for the media service account (#16492)
 * `az ams account storage set-authentication`: New command to set the authentication for the storage account associated with the media service account (#16492)
 * `az ams account create (mi-system-assigned)`: New --mi-system-assigned parameter for account create to set the managed identity of the media account (#16492)
@@ -24,7 +24,7 @@ Release History
 **App Service**
 
 * `az webapp config ssl bind`: handle if webapp and appservice plan in different rg. Also reference text updates (#16778)
-* : fix ##8743- az webapp deploy (#16715)
+* Fix #8743- az webapp deploy (#16715)
 * Bugfix: Add generateRandomAppNames.json to setup (#17035)
 * `az functionapp create`: Added preview support for creating dotnet-isolated apps. (#17066)
 * Fix #12150 Support for subnet ID in vnet-integration add (#16902)
@@ -38,12 +38,12 @@ Release History
 * `az bicep build`: New command for building Bicep files (#16857)
 * `az bicep version`: New command for showing the current installed version of Bicep CLI (#16857)
 * `az bicep list-versions`: New command for showing the available Bicep CLI versions (#16857)
-* `managedapp definition update`: Add new command for updating managedapp definition (#16966)
+* `az managedapp definition update`: Add new command for updating managedapp definition (#16966)
 
 **Backup**
 
-* `az backup recoverypoint show-log-chain`: Added start/end time in show-log-chain table output (#16753)
-* BugFix: Enabled Alternate Location Restore for SQL/SAPHANA protected items (#16997)
+* `az backup recoverypoint show-log-chain`: Add start/end time in show-log-chain table output (#16753)
+* BugFix: Enable Alternate Location Restore for SQL/SAPHANA protected items (#16997)
 
 **CDN**
 
@@ -89,12 +89,12 @@ Release History
 
 **Search**
 
-* `az search`: fix the `--identity-type` helper's guide. (#17039)
+* `az search`: Fix the `--identity-type` helper's guide. (#17039)
 
 **SQL**
 
 * Update az sql mi examples (#16852)
-* `az sql db/elastic-pool create/update`: Added maintenance-configuration argument (#16915)
+* `az sql db/elastic-pool create/update`: Add maintenance-configuration argument (#16915)
 * `az sql db replica create`: Add --secondary-type argument (#16960)
 
 **Storage**
