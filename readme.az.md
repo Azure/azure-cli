@@ -124,10 +124,5 @@ cli:
         op: List
         apiVersion: '2020-12-01'
       hidden: false
-    - where:
-        group: 'ContainerServices'
-        op: CreateOrUpdate
-        apiVersion: '2016-09-30'
-      hidden: false
 ```
 ### -----end of auto generated cli-directive----- ###
