@@ -92,6 +92,6 @@ def delete_lb_resource_property_entry(resource, prop):
             if next((x for x in getattr(result, prop) or [] if x.name.lower() == item_name.lower()), None):
                 raise CLIError("Failed to delete '{}' on '{}'".format(item_name, resource_name))
 
-    func_name = 'delete_network_resource_property_entry_{}_{}'.format(resource, prop)
+    func_name = 'delete_lb_resource_property_entry_{}_{}'.format(resource, prop)
     setattr(sys.modules[__name__], func_name, delete_func)
     return func_name
