@@ -18,3 +18,35 @@ def cf_vm_cl(cli_ctx, *_):
 
 def cf_ssh_public_key(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).ssh_public_keys
+
+
+def cf_virtual_machine(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).virtual_machines
+
+
+def cf_virtual_machine_scale_set(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).virtual_machine_scale_sets
+
+
+def cf_virtual_machine_scale_set_vm_extension(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).virtual_machine_scale_set_vm_extensions
+
+
+def cf_virtual_machine_scale_set_vms(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).virtual_machine_scale_set_vms
+
+
+def cf_virtual_machine_scale_set_vm_run_command(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).virtual_machine_scale_set_vm_run_commands
+
+
+def cf_disk_access(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).disk_accesses
+
+
+def cf_gallery_application(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).gallery_applications
+
+
+def cf_gallery_application_version(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).gallery_application_versions
