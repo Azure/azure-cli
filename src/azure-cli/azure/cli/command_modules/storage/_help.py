@@ -873,6 +873,15 @@ examples:
         az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2 --no-wait
 """
 
+helps['storage blob rewrite'] = """
+type: command
+short-summary:  Create a new Block Blob where the content of the blob is read from a given URL.
+long-summary: The content of an existing blob is overwritten with the new blob.
+examples:
+  - name: Update encryption scope for existing blob.
+    text: az storage blob rewrite --source-uri https://srcaccount.blob.core.windows.net/mycontainer/myblob?<sastoken> --encryption-scope newscope -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage blob service-properties'] = """
 type: group
 short-summary: Manage storage blob service properties.
