@@ -19,9 +19,9 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
-                          validate_file_delete_retention_days,
+                          validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -173,6 +173,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Indicate whether the storage account permits requests to be authorized with the account access key via '
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+
+    t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB)
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -369,6 +372,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The object identifier for a key vault key object. When applied, the encryption scope will '
                        'use the key referenced by the identifier to enable customer-managed key support on this '
                        'encryption scope.')
+            c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
+                       arg_type=get_three_state_flag(), min_api='2021-01-01',
+                       help='A boolean indicating whether or not the service applies a secondary layer of encryption '
+                       'with platform managed keys for data at rest.')
 
     with self.argument_context('storage account encryption-scope update') as c:
         t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
@@ -424,7 +431,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
-        c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
+        c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01',
+                   arg_group='Change Feed Policy')
+        c.argument('change_feed_retention_days', is_preview=True,
+                   options_list=['--change-feed-retention-days', '--change-feed-days'],
+                   type=int, min_api='2019-06-01', arg_group='Change Feed Policy',
+                   validator=validator_change_feed_retention_days,
+                   help='Indicate the duration of changeFeed retention in days. '
+                        'Minimum value is 1 day and maximum value is 146000 days (400 years). '
+                        'A null value indicates an infinite retention of the change feed.'
+                        '(Use `--enable-change-feed` without `--change-feed-days` to indicate null)')
         c.argument('enable_container_delete_retention',
                    arg_type=get_three_state_flag(),
                    options_list=['--enable-container-delete-retention', '--container-retention'],
@@ -636,6 +652,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
                    help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
+    with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB,
+                               min_api='2020-04-08') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+
+        c.argument('source_url', options_list=['--source-uri', '-u'],
+                   help='A URL of up to 2 KB in length that specifies a file or blob. The value should be URL-encoded '
+                   'as it would appear in a request URI. If the source is in another account, the source must either '
+                   'be public or must be authenticated via a shared access signature. If the source is public, no '
+                   'authentication is required.')
+        c.extra('lease', options_list='--lease-id',
+                help='Required if the blob has an active lease. Value can be a BlobLeaseClient object '
+                'or the lease ID as a string.')
+        c.extra('standard_blob_tier', arg_type=get_enum_type(t_blob_tier), options_list='--tier',
+                help='A standard blob tier value to set the blob to. For this version of the library, '
+                     'this is only applicable to block blobs on standard storage accounts.')
+        c.extra('encryption_scope',
+                help='A predefined encryption scope used to encrypt the data on the service. An encryption scope '
+                'can be created using the Management API and referenced here by name. If a default encryption scope '
+                'has been defined at the container, this value will override it if the container-level scope is '
+                'configured to allow overrides. Otherwise an error will be raised.')
+
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=True)
@@ -649,8 +687,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
-        from azure.cli.command_modules.storage._validators import (blob_tier_validator,
-                                                                   blob_rehydrate_priority_validator)
+        from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
         c.register_blob_arguments()
 
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))

@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
 
 from knack.util import CLIError
 
@@ -181,6 +182,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
                  checks=self.check('length(@)', 3))
 
+    @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_configuration(self, resource_group, resource_group_location):
@@ -246,6 +248,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--location {location} ',
                  checks=self.check('length(@)', 3))
 
+    @unittest.skip('PathNotSupportedInBothHTTPConfigurationAndAddress')
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
     def test_connection_monitor_v2_test_group(self, resource_group, resource_group_location):

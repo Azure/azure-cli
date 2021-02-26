@@ -1371,13 +1371,13 @@ def show_applicationdefinition(cmd, resource_group_name=None, application_defini
     return racf.application_definitions.get(resource_group_name, application_definition_name)
 
 
-def create_applicationdefinition(cmd, resource_group_name,
-                                 application_definition_name,
-                                 lock_level, authorizations,
-                                 description, display_name,
-                                 package_file_uri=None, create_ui_definition=None,
-                                 main_template=None, location=None, tags=None):
-    """ Create a new managed application definition.
+def create_or_update_applicationdefinition(cmd, resource_group_name,
+                                           application_definition_name,
+                                           lock_level, authorizations,
+                                           description, display_name,
+                                           package_file_uri=None, create_ui_definition=None,
+                                           main_template=None, location=None, tags=None):
+    """ Create or update a new managed application definition.
     :param str resource_group_name:the desired resource group name
     :param str application_definition_name:the managed application definition name
     :param str description:the managed application definition description
