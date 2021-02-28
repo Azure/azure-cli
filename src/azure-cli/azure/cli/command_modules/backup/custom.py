@@ -262,7 +262,11 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
             vm_id = vm
         else:
             vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
-
+    else:
+        logger.warning(
+            """
+            Please use --vm argument instead of --vm-id. --vm-id may get deprecated in future releases.
+            """)
     vaults = list_vaults(vaults_cf(cmd.cli_ctx))
     for vault in vaults:
         vault_rg = _get_resource_group_from_id(vault.id)
