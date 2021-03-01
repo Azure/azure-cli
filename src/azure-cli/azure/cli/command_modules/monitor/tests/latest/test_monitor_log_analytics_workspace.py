@@ -321,7 +321,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'category': 'cli',
             'category_2': 'cli2',
             'query': "Heartbeat | getschema",
-            'query_2': "AzureActivity | summarize count() by bin(timestamp, 1h)",
+            'query_2': "AzureActivity | summarize count() by bin(TimeGenerated, 1h)",
             'display_name': 'myclitest',
             'display_name_2': 'myclitest2',
             'function_alias': 'myfun',

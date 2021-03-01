@@ -53,9 +53,11 @@ class AzCopy:
         else:
             raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
         try:
+            os.chmod(install_dir,
+                     os.stat(install_dir).st_mode | stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
+            _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-            _urlretrieve(file_url, install_location)
         except IOError as err:
             raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
                            'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
@@ -115,12 +117,16 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
         return azcopy_creds
 
     # oauth mode
-    token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
-    try:
-        token_info = _unserialize_non_msi_token_payload(token_info)
-    except KeyError:  # unserialized MSI token payload
-        raise Exception('MSI auth not yet supported.')
-    return AzCopyCredentials(token_info=token_info)
+    if client.token_credential:
+        token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+        try:
+            token_info = _unserialize_non_msi_token_payload(token_info)
+        except KeyError as ex:  # unserialized token payload
+            from azure.cli.core.azclierror import ValidationError
+            raise ValidationError('No {}. MSI auth and service principal are not yet supported.'.format(ex))
+        return AzCopyCredentials(token_info=token_info)
+
+    return None
 
 
 def storage_client_auth_for_azcopy(client, service):

@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg, validate_asp_sku
+from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg, validate_asp_sku, validate_onedeploy_params
 
 
 def output_slots_in_table(slots):
@@ -129,6 +129,7 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_identity', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('identity remove', 'remove_identity', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
+        g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
@@ -305,6 +306,7 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
+        g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
         g.generic_update_command('update', setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
