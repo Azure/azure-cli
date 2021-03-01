@@ -3,12 +3,29 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+import json
 import shlex
+
+from knack.log import get_logger
+logger = get_logger(__name__)
+
+ALIAS_JSON_FILE = os.path.join(os.path.dirname(__file__), 'built_in_alias.json')
 
 
 def find_alias_and_transform_args(args, root_alias_nodes):
-    if not root_alias_nodes:
-        root_alias_nodes = _build_alias_tree()
+    if root_alias_nodes is None:
+        from json import JSONDecodeError
+        try:
+            root_alias_nodes = _build_alias_tree()
+            if not root_alias_nodes:
+                return args
+        except FileNotFoundError:
+            logger.debug("Alias config file not found: {}".format(ALIAS_JSON_FILE))
+            return args
+        except JSONDecodeError:
+            logger.debug("Alias config file invalid: {}".format(ALIAS_JSON_FILE))
+            return args
 
     matched_node = None
     find_in_nodes = root_alias_nodes
@@ -26,17 +43,12 @@ def find_alias_and_transform_args(args, root_alias_nodes):
 
 
 def _build_alias_tree():
-    def _is_section(config):
-        try:
-            config.keys()
-        except AttributeError:
-            return False
-        return True
+    with open(ALIAS_JSON_FILE) as f:
+        alias_config = json.load(f)
+    if not alias_config:
+        logger.debug("Alias config file is empty: {}".format(ALIAS_JSON_FILE))
+        return None
 
-    import os
-    import configobj
-    alias_fp = os.path.join(os.path.dirname(__file__), 'built_in_alias')
-    alias_config = configobj.ConfigObj(alias_fp, interpolation=None)
     root_nodes = {}
     # read config section by section
     # each section key is full cmd, eg. storage account bsp
@@ -64,7 +76,7 @@ def _build_alias_tree():
         # parse section command and argument sub sections
         node.command = alias_config[full_cmd_name].get('command')
         for key in alias_config[full_cmd_name].keys():
-            if not key or not _is_section(alias_config[full_cmd_name][key]):
+            if not key or not isinstance(alias_config[full_cmd_name][key], dict):
                 continue
             node.add_argument_section(key, alias_config[full_cmd_name][key])
     return root_nodes

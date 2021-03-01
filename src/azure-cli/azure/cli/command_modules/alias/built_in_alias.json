@@ -16,5 +16,14 @@
     "--type {{type}}": {
       "command": "timeseriesinsights environment {{type}} create"
     }
+  },
+  "example configure": {
+    "command": "config",
+    "--list-defaults {{defaults_flag}}": {
+      "command": "config get{% if defaults_flag!=\"false\" %} defaults{% endif %}"
+    },
+    "--list-defaults {{defaults_flag}} --scope {{scope}}": {
+      "command": "config get {% if defaults_flag!=\"false\" %} defaults{% endif %}{% if scope=='local'%} --local{% endif %}"
+    }
   }
 }

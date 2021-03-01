@@ -36,6 +36,8 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
+# Modules loaded before all others.
+PRE_LOADED_MODULES = ['alias']
 
 
 class AzCli(CLI):
@@ -383,6 +385,9 @@ class MainCommandsLoader(CLICommandsLoader):
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
+
+        for mod in PRE_LOADED_MODULES:
+            _load_module_command_loader(self, args, mod)
 
         command_index = None
         # Set fallback=False to turn off command index in case of regression

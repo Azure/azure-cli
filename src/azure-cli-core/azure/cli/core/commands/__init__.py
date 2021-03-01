@@ -112,31 +112,9 @@ def _expand_file_prefixed_files(args):
     return list([_expand_file_prefix(arg) for arg in args])
 
 
-def _process_args_with_built_in_alias(cli_ctx, args):
-    # [] or ['az'] can just return
-    if not args or (len(args) == 1 and args[0] == 'az'):
-        return args
-
-    # Check core config
-    transform_built_in_alias = cli_ctx.config.getboolean('core', 'transform_built_in_alias', fallback=True)
-    if not transform_built_in_alias:
-        return args
-
-    # process args
-    from azure.cli.core.commands.alias_util import find_alias_and_transform_args
-    if args[0] == 'az':
-        args_transformed = ['az']
-        args_transformed.extend(find_alias_and_transform_args(args[1:], None))
-        return args_transformed
-    return find_alias_and_transform_args(args, None)
-
-
 def _pre_command_table_create(cli_ctx, args):
     cli_ctx.refresh_request_id()
-    real_args = _process_args_with_built_in_alias(cli_ctx, args)
-    if real_args != args:
-        logger.warning('`%s` is alias of `%s`', ' '.join(args), ' '.join(real_args))
-    return _expand_file_prefixed_files(real_args)
+    return _expand_file_prefixed_files(args)
 
 
 # pylint: disable=too-many-instance-attributes
