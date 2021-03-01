@@ -20,6 +20,6 @@ from ._decorators import register_custom_resource_type
 # transformer
 from ._decorators import transformer_func
 # type_converter
-from ._decorators import type_converter_func, type_converter_func_by_factory
+from ._decorators import type_converter_func, type_converter_by_factory
 # validator
 from ._decorators import validator_func, validator_by_factory
