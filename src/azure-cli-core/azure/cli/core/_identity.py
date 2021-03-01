@@ -104,7 +104,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return msal_app
 
     @property
-    def _msal_app(self):
+    def msal_app(self):
+        """ Get the MSAL ClientApplication to directly interact with MSAL. """
         if not self._msal_app_instance:
             # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
             msal_authority = "{}/{}".format(self.authority, self.tenant_id)
@@ -305,15 +306,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return credential, cloud_shell_identity_info
 
     def logout_user(self, user):
-        accounts = self._msal_app.get_accounts(user)
+        accounts = self.msal_app.get_accounts(user)
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
         # `accounts` are the same user in all tenants, log out all of them
         for account in accounts:
-            self._msal_app.remove_account(account)
+            self.msal_app.remove_account(account)
 
-        accounts = self._msal_app.get_accounts(user)
+        accounts = self.msal_app.get_accounts(user)
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
 
@@ -323,25 +324,25 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def logout_all(self):
         # TODO: Support multi-authority logout
-        accounts = self._msal_app.get_accounts()
+        accounts = self.msal_app.get_accounts()
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
         for account in accounts:
-            self._msal_app.remove_account(account)
+            self.msal_app.remove_account(account)
 
-        accounts = self._msal_app.get_accounts()
+        accounts = self.msal_app.get_accounts()
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
         # remove service principal secrets
         self._msal_secret_store.remove_all_cached_creds()
 
     def get_user(self, user=None):
-        accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
+        accounts = self.msal_app.get_accounts(user) if user else self.msal_app.get_accounts()
         return accounts
 
     def get_user_credential(self, username):
-        accounts = self._msal_app.get_accounts(username)
+        accounts = self.msal_app.get_accounts(username)
 
         # TODO: Confirm with MSAL team that username can uniquely identify the account
         if not accounts:
