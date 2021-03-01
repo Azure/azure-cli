@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 import os
 import time
+import unittest
+
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.testsdk.decorators import serial_test
@@ -1330,6 +1332,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
 
 class StorageAccountSkuScenarioTest(ScenarioTest):
+    @unittest.skip('Storage account type Standard_ZRS cannot be changed to Standard_GZRS')
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='eastus2')
     @StorageAccountPreparer(name_prefix='clistoragesku', location='eastus2euap', kind='StorageV2', sku='Standard_ZRS')

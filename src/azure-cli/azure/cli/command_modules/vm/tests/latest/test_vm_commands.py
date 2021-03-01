@@ -2027,7 +2027,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_update_ultra_ssd_enabled_', location='eastus2')
-    @AllowLargeResponse(size_kb=18192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vm_vmss_update_ultra_ssd_enabled(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
@@ -4858,7 +4858,6 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
 
 class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
-    @unittest.skip('not whitelist yet')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='centraluseuap')
     def test_vmss_orchestration_mode(self, resource_group):
         self.kwargs.update({
@@ -4867,8 +4866,12 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         })
 
         self.cmd('ppg create -g {rg} -n {ppg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false --ppg {ppg} '
-                 '--platform-fault-domain-count 3 --generate-ssh-keys')
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
+                 '--ppg {ppg} --platform-fault-domain-count 1 --generate-ssh-keys',
+                 checks=[
+                     self.check('vmss.singlePlacementGroup', False),
+                     self.check('vmss.platformFaultDomainCount', 1)
+                 ])
 
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
@@ -4986,16 +4989,18 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
 class VMAutoUpdateScenarioTest(ScenarioTest):
 
+    @unittest.skip('subscription needs to be allowed')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_auto_update_')
     def test_vm_auto_update(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Win2019Datacenter --enable-agent --enable-auto-update --patch-mode AutomaticByOS --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Win2019Datacenter --enable-agent --enable-auto-update --patch-mode AutomaticByPlatform --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', True),
-            self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'AutomaticByOS')
+            self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'AutomaticByPlatform'),
+            self.check('osProfile.windowsConfiguration.patchSettings.enableHotpatching', True)
         ])
         self.cmd('vm assess-patches -g {rg} -n {vm}', checks=[
             self.check('status', 'Succeeded')
