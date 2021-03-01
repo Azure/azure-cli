@@ -21,10 +21,10 @@ def find_alias_and_transform_args(args, root_alias_nodes):
             if not root_alias_nodes:
                 return args
         except FileNotFoundError:
-            logger.debug("Alias config file not found: {}".format(ALIAS_JSON_FILE))
+            logger.debug("Alias config file not found: %s", ALIAS_JSON_FILE)
             return args
         except JSONDecodeError:
-            logger.debug("Alias config file invalid: {}".format(ALIAS_JSON_FILE))
+            logger.debug("Alias config file invalid: %s", ALIAS_JSON_FILE)
             return args
 
     matched_node = None
@@ -46,7 +46,7 @@ def _build_alias_tree():
     with open(ALIAS_JSON_FILE) as f:
         alias_config = json.load(f)
     if not alias_config:
-        logger.debug("Alias config file is empty: {}".format(ALIAS_JSON_FILE))
+        logger.debug("Alias config file is empty: %s", ALIAS_JSON_FILE)
         return None
 
     root_nodes = {}

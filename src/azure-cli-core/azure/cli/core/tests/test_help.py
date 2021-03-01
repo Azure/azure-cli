@@ -323,6 +323,7 @@ class TestHelpLoads(unittest.TestCase):
     # Mock logic in core.MainCommandsLoader.load_command_table for retrieving installed modules.
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_basic(self, mocked_load, mocked_pkg_util):
         with self.assertRaises(SystemExit):
             self.test_cli.invoke(["test", "alpha", "-h"])
@@ -330,6 +331,7 @@ class TestHelpLoads(unittest.TestCase):
     # Mock logic in core.MainCommandsLoader.load_command_table for retrieving installed modules.
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_load_from_help_py(self, mocked_load, mocked_pkg_util):
         self.set_help_py()
         create_invoker_and_load_cmds_and_args(self.test_cli)
@@ -385,6 +387,7 @@ class TestHelpLoads(unittest.TestCase):
 
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_load_from_help_yaml(self, mocked_load, mocked_pkg_util):
         # setup help.py and help.yaml help.
         self.set_help_py()
@@ -457,6 +460,7 @@ class TestHelpLoads(unittest.TestCase):
     @mock.patch('inspect.getmembers', side_effect=mock_inspect_getmembers)
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_load_from_help_json(self, mocked_load, mocked_pkg_util, mocked_getmembers):
         # setup help.py, help.yaml and help.json
         self.set_help_py()
