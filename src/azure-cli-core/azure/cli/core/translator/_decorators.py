@@ -62,7 +62,7 @@ def type_converter_func(func):
     return func
 
 
-def type_converter_func_by_factory(factory):
+def type_converter_by_factory(factory):
     return factory
 
 

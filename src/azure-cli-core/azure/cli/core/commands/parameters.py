@@ -16,7 +16,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.core.translator import (action_class, action_class_by_factory,
                                        completer_func, completer_by_factory, type_converter_func,
-                                       type_converter_func_by_factory, register_arg_type, arg_type_by_factory)
+                                       type_converter_by_factory, register_arg_type, arg_type_by_factory)
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
@@ -113,7 +113,7 @@ def json_object_type(json_string):
     return get_json_object(json_string)
 
 
-@type_converter_func_by_factory
+@type_converter_by_factory
 def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
