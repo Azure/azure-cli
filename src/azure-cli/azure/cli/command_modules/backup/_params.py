@@ -210,7 +210,7 @@ def load_arguments(self, _):
         c.argument('workload_type', workload_type)
 
     with self.argument_context('backup protection check-vm') as c:
-        c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
+        c.argument('vm_id', help='ID of the virtual machine to be checked for protection.', deprecate_info=c.deprecate(redirect='--vm', hide=True))
 
     with self.argument_context('backup protection enable-for-vm') as c:
         c.argument('diskslist', diskslist_type)
