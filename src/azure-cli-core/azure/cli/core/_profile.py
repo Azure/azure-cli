@@ -759,6 +759,18 @@ class Profile:
         app = Identity(authority=self._authority, tenant_id=tenant).msal_app
         msal_accounts = app.get_accounts(username)[0]
         result = app.acquire_token_silent_with_error(scopes, msal_accounts, data=data)
+
+        # If acquire_token_silent_with_error failed, interactively get new RT and AT
+        if not result or 'error' in result:
+            if result:
+                logger.warning(result['error_description'])
+
+            # Retry login with VM SSH as resource
+            result = app.acquire_token_interactive(scopes, prompt='select_account')
+
+            if 'error' in result:
+                from azure.cli.core.credential import aad_error_handler
+                aad_error_handler(result)
         return username, result["access_token"]
 
     def refresh_accounts(self, subscription_finder=None):
