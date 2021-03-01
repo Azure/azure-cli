@@ -46,7 +46,8 @@ from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
-                                       InvalidArgumentValueError)
+                                       InvalidArgumentValueError,
+                                       ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -116,7 +117,9 @@ from ._consts import CONST_INGRESS_APPGW_ADDON_NAME
 from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
+from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
 from ._consts import ADDONS
+from ._consts import CONST_CANIPULL_IMAGE
 
 logger = get_logger(__name__)
 
@@ -1483,6 +1486,97 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
+def aks_check_acr(cmd, client, resource_group_name, name, acr):
+    if not which("kubectl"):
+        raise ValidationError("Can not find kubectl executable in PATH")
+
+    _, browse_path = tempfile.mkstemp()
+    aks_get_credentials(
+        cmd, client, resource_group_name, name, admin=False, path=browse_path
+    )
+
+    # Get kubectl minor version
+    kubectl_minor_version = -1
+    try:
+        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        jsonS, _ = output.communicate()
+        kubectl_version = json.loads(jsonS)
+        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        kubectl_server_minor_version = int(kubectl_version["serverVersion"]["minor"])
+        kubectl_server_patch = int(kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
+                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
+                           'more information.')
+    except subprocess.CalledProcessError as err:
+        raise ValidationError("Could not find kubectl minor version: {}".format(err))
+    if kubectl_minor_version == -1:
+        raise ValidationError("Failed to get kubectl version")
+
+    podName = "canipull-" + str(uuid.uuid4())
+    overrides = {
+        "spec": {
+            "restartPolicy": "Never",
+            "hostNetwork": True,
+            "containers": [
+                {
+                    "securityContext": {"runAsUser": 0},
+                    "name": podName,
+                    "image": CONST_CANIPULL_IMAGE,
+                    "args": ["-v6", acr],
+                    "stdin": True,
+                    "stdinOnce": True,
+                    "tty": True,
+                    "volumeMounts": [
+                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                    ],
+                }
+            ],
+            "tolerations": [
+                {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                {"effect": "NoExecute", "operator": "Exists"},
+            ],
+            "volumes": [
+                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+            ],
+        }
+    }
+
+    try:
+        cmd = [
+            "kubectl",
+            "run",
+            "--kubeconfig",
+            browse_path,
+            "--rm",
+            "--quiet",
+            "--image",
+            CONST_CANIPULL_IMAGE,
+            "--overrides",
+            json.dumps(overrides),
+            "-it",
+            podName,
+        ]
+
+        # Support kubectl versons < 1.18
+        if kubectl_minor_version < 18:
+            cmd += ["--generator=run-pod/v1"]
+
+        output = subprocess.check_output(
+            cmd,
+            universal_newlines=True,
+        )
+    except subprocess.CalledProcessError as err:
+        raise CLIError("Failed to check the ACR: {}".format(err))
+    if output:
+        print(output)
+    else:
+        raise CLIError("Failed to check the ACR.")
+
+
 # pylint: disable=too-many-statements,too-many-branches
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                listen_address='127.0.0.1', listen_port='8001'):
@@ -1799,6 +1893,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_id=None,
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
+               enable_sgxquotehelper=False,
                no_wait=False,
                yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1992,6 +2087,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         appgw_id,
         appgw_subnet_id,
         appgw_watch_namespace,
+        enable_sgxquotehelper
     )
     monitoring = False
     if CONST_MONITORING_ADDON_NAME in addon_profiles:
@@ -2187,6 +2283,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       appgw_id=None,
                       appgw_subnet_id=None,
                       appgw_watch_namespace=None,
+                      enable_sgxquotehelper=False,
                       no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2199,6 +2296,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               appgw_id=appgw_id,
                               appgw_subnet_id=appgw_subnet_id,
                               appgw_watch_namespace=appgw_watch_namespace,
+                              enable_sgxquotehelper=enable_sgxquotehelper,
                               no_wait=no_wait)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
@@ -2674,6 +2772,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    appgw_id=None,
                    appgw_subnet_id=None,
                    appgw_watch_namespace=None,
+                   enable_sgxquotehelper=False,
                    no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
@@ -2742,6 +2841,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
                 if appgw_watch_namespace is not None:
                     addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+            elif addon == CONST_CONFCOM_ADDON_NAME:
+                if addon_profile.enabled:
+                    raise ValidationError('The confcom addon is already enabled for this managed cluster.',
+                                          recommendation='To change confcom configuration, run '
+                                          f'"az aks disable-addons -a confcom -n {name} -g {resource_group_name}" '
+                                          'before enabling it again.')
+                addon_profile = ManagedClusterAddonProfile(
+                    enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+                if enable_sgxquotehelper:
+                    addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -2782,7 +2891,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
                         appgw_subnet_cidr=None,
                         appgw_id=None,
                         appgw_subnet_id=None,
-                        appgw_watch_namespace=None):
+                        appgw_watch_namespace=None,
+                        enable_sgxquotehelper=False):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -2837,6 +2947,12 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
         addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
         addons.remove('ingress-appgw')
+    if 'confcom' in addons:
+        addon_profile = ManagedClusterAddonProfile(enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+        if enable_sgxquotehelper:
+            addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+        addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
+        addons.remove('confcom')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
@@ -2887,92 +3003,83 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # log analytics workspaces cannot be created in WCUS region due to capacity limits
     # so mapped to EUS per discussion with log analytics team
     AzureCloudLocationToOmsRegionCodeMap = {
-        "southcentralus": "SCUS",
-        "uksouth": "SUK",
-        "southeastasia": "SEA",
-        "westeurope": "WEU",
-        "eastus": "EUS",
+        "australiasoutheast": "ASE",
         "australiaeast": "EAU",
-        "eastus2": "EUS2",
-        "northeurope": "NEU",
-        "japaneast": "EJP",
-        "brazilsouth": "CQ",
+        "australiacentral": "CAU",
+        "canadacentral": "CCA",
+        "centralindia": "CIN",
         "centralus": "CUS",
-        "norwayeast": "NOE",
-        "chinaeast2": "CNE2",
         "eastasia": "EA",
-        "switzerlandnorth": "CHN",
-        "southafricanorth": "JNB",
+        "eastus": "EUS",
+        "eastus2": "EUS2",
+        "eastus2euap": "EAP",
         "francecentral": "PAR",
-        "northcentralus": "NCUS",
+        "japaneast": "EJP",
+        "koreacentral": "SE",
+        "northeurope": "NEU",
+        "southcentralus": "SCUS",
+        "southeastasia": "SEA",
+        "uksouth": "SUK",
+        "usgovvirginia": "USGV",
+        "westcentralus": "EUS",
+        "westeurope": "WEU",
         "westus": "WUS",
         "westus2": "WUS2",
-        "centralindia": "CIN",
-        "koreacentral": "SE",
+        "brazilsouth": "CQ",
+        "brazilsoutheast": "BRSE",
+        "norwayeast": "NOE",
+        "southafricanorth": "JNB",
+        "northcentralus": "NCUS",
         "uaenorth": "DXB",
         "germanywestcentral": "DEWC",
-        "usgovvirginia": "USGV",
-        "canadacentral": "CAC",
-        "usgovarizona": "PHX",
         "ukwest": "WUK",
-        "australiasoutheast": "SEAU",
-        "westcentralus": "EUS",
+        "switzerlandnorth": "CHN",
         "switzerlandwest": "CHW",
-        "australiacentral": "CAU",
-        "uaecentral": "AUH",
-        "eastus2euap": "EASTUS2EUAP",
-        "brazilsoutheast": "BRSE"
+        "uaecentral": "AUH"
     }
     AzureCloudRegionToOmsRegionMap = {
-        "southcentralus": "southcentralus",
-        "uksouth": "uksouth",
-        "southeastasia": "southeastasia",
-        "westeurope": "westeurope",
-        "eastus": "eastus",
+        "australiacentral": "australiacentral",
+        "australiacentral2": "australiacentral",
         "australiaeast": "australiaeast",
-        "eastus2": "eastus2",
-        "northeurope": "northeurope",
-        "japaneast": "japaneast",
+        "australiasoutheast": "australiasoutheast",
         "brazilsouth": "brazilsouth",
+        "canadacentral": "canadacentral",
+        "canadaeast": "canadacentral",
         "centralus": "centralus",
-        "norwayeast": "norwayeast",
-        "chinaeast2": "chinaeast2",
+        "centralindia": "centralindia",
         "eastasia": "eastasia",
-        "switzerlandnorth": "switzerlandnorth",
-        "southafricanorth": "southafricanorth",
+        "eastus": "eastus",
+        "eastus2": "eastus2",
         "francecentral": "francecentral",
+        "francesouth": "francecentral",
+        "japaneast": "japaneast",
+        "japanwest": "japaneast",
+        "koreacentral": "koreacentral",
+        "koreasouth": "koreacentral",
         "northcentralus": "northcentralus",
+        "northeurope": "northeurope",
+        "southafricanorth": "southafricanorth",
+        "southafricawest": "southafricanorth",
+        "southcentralus": "southcentralus",
+        "southeastasia": "southeastasia",
+        "southindia": "centralindia",
+        "uksouth": "uksouth",
+        "ukwest": "ukwest",
+        "westcentralus": "eastus",
+        "westeurope": "westeurope",
+        "westindia": "centralindia",
         "westus": "westus",
         "westus2": "westus2",
-        "centralindia": "centralindia",
-        "koreacentral": "koreacentral",
+        "norwayeast": "norwayeast",
+        "norwaywest": "norwayeast",
+        "switzerlandnorth": "switzerlandnorth",
+        "switzerlandwest": "switzerlandwest",
         "uaenorth": "uaenorth",
         "germanywestcentral": "germanywestcentral",
-        "usgovvirginia": "usgovvirginia",
-        "canadacentral": "canadacentral",
-        "usgovarizona": "usgovarizona",
-        "ukwest": "ukwest",
-        "australiasoutheast": "australiasoutheast",
-        "westcentralus": "eastus",
-        "switzerlandwest": "switzerlandwest",
-        "australiacentral": "australiacentral",
+        "germanynorth": "germanywestcentral",
         "uaecentral": "uaecentral",
         "eastus2euap": "eastus2euap",
-        "brazilsoutheast": "brazilsoutheast",
-        "southafricawest": "southafricanorth",
-        "westindia": "centralindia",
-        "chinaeast": "chinaeast2",
-        "chinanorth": "chinaeast2",
-        "australiacentral2": "australiacentral",
-        "norwaywest": "norwayeast",
-        "germanynorth": "germanywestcentral",
-        "southindia": "centralindia",
-        "koreasouth": "koreacentral",
-        "chinanorth2": "chinaeast2",
-        "francesouth": "francecentral",
-        "canadaeast": "canadacentral",
-        "usgovtexas": "usgovvirginia",
-        "japanwest": "japaneast"
+        "brazilsoutheast": "brazilsoutheast"
     }
 
     # mapping for azure china cloud
@@ -2992,10 +3099,13 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # mapping for azure us governmner cloud
     AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV"
+        "usgovvirginia": "USGV",
+        "usgovarizona": "PHX"
     }
     AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia"
+        "usgovvirginia": "usgovvirginia",
+        "usgovtexas": "usgovvirginia",
+        "usgovarizona": "usgovarizona"
     }
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -3902,14 +4012,14 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
 
 def openshift_show(cmd, client, resource_group_name, name):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     mc = client.get(resource_group_name, name)
     return _remove_osa_nulls([mc])[0]
 
 
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
@@ -3929,7 +4039,7 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
 
 
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
     workspace_id = _format_workspace_id(workspace_id)
@@ -3940,7 +4050,7 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
 
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long

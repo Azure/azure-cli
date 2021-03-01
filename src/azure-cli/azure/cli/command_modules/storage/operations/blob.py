@@ -20,6 +20,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     check_precondition_success)
 from knack.log import get_logger
 from knack.util import CLIError
+from .._transformers import transform_response_with_bytearray
 
 logger = get_logger(__name__)
 
@@ -46,9 +47,9 @@ def create_or_update_immutability_policy(cmd, client, container_name, account_na
                                                        if_match, immutability_policy)
 
 
-def extend_immutability_policy(cmd, client, container_name, account_name,
+def extend_immutability_policy(cmd, client, container_name, account_name, if_match,
                                resource_group_name=None, allow_protected_append_writes=None,
-                               period=None, if_match=None):
+                               period=None):
     ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
                                              allow_protected_append_writes=allow_protected_append_writes)
@@ -438,6 +439,18 @@ def transform_blob_type(cmd, blob_type):
     return None
 
 
+# pylint: disable=protected-access
+def _adjust_block_blob_size(client, blob_type, length):
+    if not blob_type or blob_type != 'block':
+        return
+
+    # increase the block size to 4000MB when the block list will contain more than
+    # 50,000 blocks(each block 100MB)
+    if length > 50000 * 100 * 1024 * 1024:
+        client._config.max_block_size = 4000 * 1024 * 1024
+        client._config.max_single_put_size = 5000 * 1024 * 1024
+
+
 # pylint: disable=too-many-locals
 def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
                 metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
@@ -480,11 +493,9 @@ def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blo
         if if_none_match:
             upload_args['etag'] = if_none_match
             upload_args['match_condition'] = MatchConditions.IfModified
+        _adjust_block_blob_size(client, blob_type, length=count)
         response = client.upload_blob(data=data, length=count, encryption_scope=encryption_scope, **upload_args)
-        if response['content_md5'] is not None:
-            from msrest import Serializer
-            response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])
-        return response
+        return transform_response_with_bytearray(response)
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
@@ -560,6 +571,53 @@ def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blo
     return type_func[blob_type]()
 
 
+def get_block_ids(content_length, block_length):
+    """Get the block id arrary from block blob length, block size"""
+    block_count = 0
+    if block_length:
+        block_count = content_length // block_length
+    if block_count * block_length != content_length:
+        block_count += 1
+    block_ids = []
+    for i in range(block_count):
+        chunk_offset = i * block_length
+        block_id = '{0:032d}'.format(chunk_offset)
+        block_ids.append(block_id)
+    return block_ids
+
+
+def rewrite_blob(cmd, client, source_url, encryption_scope=None, **kwargs):
+    src_properties = client.from_blob_url(source_url).get_blob_properties()
+    BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if src_properties.blob_type != BlobType.BlockBlob:
+        from azure.cli.core.azclierror import ValidationError
+        raise ValidationError("Currently only support block blob! The source blob is {}.".format(
+            src_properties.blob_type))
+    src_content_length = src_properties.size
+    if src_content_length <= 5000 * 1024 * 1024:
+        return client.upload_blob_from_url(source_url=source_url, overwrite=True, encryption_scope=encryption_scope,
+                                           destination_lease=kwargs.pop('lease', None), **kwargs)
+
+    block_length = 4000 * 1024 * 1024  # using max block size
+    block_ids = get_block_ids(src_content_length, block_length)
+
+    copyoffset = 0
+    for block_id in block_ids:
+        block_size = block_length
+        if copyoffset + block_size > src_content_length:
+            block_size = src_content_length - copyoffset
+        client.stage_block_from_url(
+            block_id=block_id,
+            source_url=source_url,
+            source_offset=copyoffset,
+            source_length=block_size,
+            encryption_scope=encryption_scope)
+        copyoffset += block_size
+    response = client.commit_block_list(block_list=block_ids, content_settings=src_properties.content_settings,
+                                        metadata=src_properties.metadata, encryption_scope=encryption_scope, **kwargs)
+    return transform_response_with_bytearray(response)
+
+
 def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,
               if_modified_since=None, if_unmodified_since=None, if_match=None,
               if_none_match=None, timeout=None):
@@ -628,6 +686,8 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False, as_user=False):
+    from ..url_quote_util import encode_url_path
+    from urllib.parse import quote
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
@@ -642,9 +702,9 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
             protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
             content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
-        from ..url_quote_util import encode_url_path
-        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token))
-    return sas_token
+        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
+                                                    sas_token=quote(sas_token, safe='&%()$=\',~')))
+    return quote(sas_token, safe='&%()$=\',~')
 
 
 def generate_container_shared_access_signature(client, container_name, permission=None,

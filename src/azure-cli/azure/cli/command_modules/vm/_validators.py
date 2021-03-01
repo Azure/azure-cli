@@ -15,6 +15,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -944,7 +945,7 @@ def _validate_vm_create_nics(cmd, namespace):
     logger.debug('existing NIC(s) will be used')
 
 
-def _validate_vm_vmss_create_auth(namespace):
+def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -985,7 +986,7 @@ def _validate_vm_vmss_create_auth(namespace):
         if namespace.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type.')
 
-        validate_ssh_key(namespace)
+        validate_ssh_key(namespace, cmd)
 
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
@@ -998,7 +999,7 @@ def _validate_vm_vmss_create_auth(namespace):
             _prompt_for_password(namespace)
         _validate_admin_password(namespace.admin_password, namespace.os_type)
 
-        validate_ssh_key(namespace)
+        validate_ssh_key(namespace, cmd)
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
@@ -1051,8 +1052,31 @@ def _validate_admin_password(password, os_type):
         raise CLIError(error_msg)
 
 
-def validate_ssh_key(namespace):
-    if namespace.ssh_key_value:
+def validate_ssh_key(namespace, cmd=None):
+    from azure.core.exceptions import HttpResponseError
+    if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
+        client = _compute_client_factory(cmd.cli_ctx)
+        # --ssh-key-name
+        if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
+            # Use existing key, key must exist
+            try:
+                ssh_key_resource = client.ssh_public_keys.get(namespace.resource_group_name, namespace.ssh_key_name)
+            except HttpResponseError:
+                raise ValidationError('SSH key {} does not exist!'.format(namespace.ssh_key_name))
+            namespace.ssh_key_value = [ssh_key_resource.public_key]
+            logger.info('Get a key from --ssh-key-name successfully')
+        elif namespace.ssh_key_value:
+            raise ValidationError('--ssh-key-name and --ssh-key-values cannot be used together')
+        elif namespace.generate_ssh_keys:
+            parameters = {}
+            parameters['location'] = namespace.location
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            parameters['public_key'] = public_key
+            client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
+                                          ssh_public_key_name=namespace.ssh_key_name,
+                                          parameters=parameters)
+            namespace.ssh_key_value = [public_key]
+    elif namespace.ssh_key_value:
         if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
             logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
             namespace.generate_ssh_keys = False
@@ -1165,15 +1189,13 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-    _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace, cmd)
 
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vm_create_dedicated_host(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
-    if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM')
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1332,9 +1354,9 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
-    # scale_set_vm_str = 'ScaleSetVM'
-    vm_str = 'VM'
-    if namespace.orchestration_mode.lower() == vm_str.lower():
+    # uniform_str = 'Uniform'
+    flexible_str = 'Flexible'
+    if namespace.orchestration_mode.lower() == flexible_str.lower():
         validate_tags(namespace)
         if not namespace.location:
             get_default_location_from_resource_group(cmd, namespace)
@@ -1404,7 +1426,10 @@ def process_vmss_create_namespace(cmd, namespace):
         if any(param is not None for param in banned_params):
             raise CLIError('usage error: In VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+        _validate_proximity_placement_group(cmd, namespace)
         return
+
+    # Uniform mode
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
@@ -1423,7 +1448,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_public_ip(cmd, namespace)
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-    _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace, cmd)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
@@ -1432,9 +1457,6 @@ def process_vmss_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
-
-    if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')

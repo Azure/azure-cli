@@ -88,7 +88,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 az_update_cmd.insert(0, 'sudo')
             exit_code = subprocess.call(apt_update_cmd)
             if exit_code == 0:
-                logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
+                logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
                 exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
@@ -172,22 +172,37 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                    else auto_upgrade_msg)
 
 
-def demo_style(cmd):  # pylint: disable=unused-argument
-    from azure.cli.core.style import Style, print_styled_text
-    print("[available styles]\n")
+def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
+    from azure.cli.core.style import Style, print_styled_text, format_styled_text
+    format_styled_text.theme = theme
+    print_styled_text("[How to call print_styled_text]")
+    # Print an empty line
+    print_styled_text()
+    # Various methods to print
+    print_styled_text("- Print using a str")
+    print_styled_text("- Print using multiple", "strs")
+    print_styled_text((Style.PRIMARY, "- Print using a tuple"))
+    print_styled_text((Style.PRIMARY, "- Print using multiple"), (Style.IMPORTANT, "tuples"))
+    print_styled_text([(Style.PRIMARY, "- Print using a "), (Style.IMPORTANT, "list")])
+    print_styled_text([(Style.PRIMARY, "- Print using multiple")], [(Style.IMPORTANT, "lists")])
+    print_styled_text()
+
+    print_styled_text("[Available styles]\n")
+    placeholder = '{:19s}: {}\n'
     styled_text = [
-        (Style.PRIMARY, "Bright White: Primary text color\n"),
-        (Style.SECONDARY, "White: Secondary text color\n"),
-        (Style.IMPORTANT, "Bright Magenta: Important text color\n"),
-        (Style.ACTION, "Bright Blue: Commands, parameters, and system inputs\n"),
-        (Style.HYPERLINK, "Bright Cyan: Hyperlink\n"),
-        (Style.ERROR, "Bright Red: Error message indicator\n"),
-        (Style.SUCCESS, "Bright Green: Success message indicator\n"),
-        (Style.WARNING, "Bright Yellow: Warning message indicator\n"),
+        (Style.PRIMARY, placeholder.format("White", "Primary text color")),
+        (Style.SECONDARY, placeholder.format("Bright Black", "Secondary text color")),
+        (Style.IMPORTANT, placeholder.format("Bright/Dark Magent", "Important text color")),
+        (Style.ACTION, placeholder.format(
+            "Bright/Dark Blue", "Commands, parameters, and system inputs. (White in legacy powershell terminal.)")),
+        (Style.HYPERLINK, placeholder.format("Bright/Dark Cyan", "Hyperlink")),
+        (Style.ERROR, placeholder.format("Bright/Dark Red", "Error message indicator")),
+        (Style.SUCCESS, placeholder.format("Bright/Dark Green", "Success message indicator")),
+        (Style.WARNING, placeholder.format("Bright/Dark Yellow", "Warning message indicator")),
     ]
     print_styled_text(styled_text)
 
-    print("[interactive]\n")
+    print_styled_text("[interactive]\n")
     # NOTE! Unicode character ⦾ ⦿ will most likely not be displayed correctly
     styled_text = [
         (Style.ACTION, "?"),
@@ -203,7 +218,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[progress report]\n")
+    print_styled_text("[progress report]\n")
     # NOTE! Unicode character ✓ will most likely not be displayed correctly
     styled_text = [
         (Style.SUCCESS, '(✓) Done: '),
@@ -219,7 +234,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[error handing]\n")
+    print_styled_text("[error handing]\n")
     styled_text = [
         (Style.ERROR, "ERROR: Command not found: az storage create\n"),
         (Style.PRIMARY, "TRY\n"),
@@ -234,7 +249,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[post-output hint]\n")
+    print_styled_text("[post-output hint]\n")
     styled_text = [
         (Style.PRIMARY, "The default subscription is "),
         (Style.IMPORTANT, "AzureSDKTest (0b1f6471-1bf0-4dda-aec3-cb9272f09590)"),

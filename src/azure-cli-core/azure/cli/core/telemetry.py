@@ -62,6 +62,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         # stops generate_payload() from adding new azurecli/command event
         # used for interactive to send new custom event upon exit
         self.suppress_new_event = False
+        self.poll_start_time = None
+        self.poll_end_time = None
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         # Move the exception info into userTask record, in order to make one Telemetry record for one command
@@ -196,6 +198,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'error_type', self.error_type)
         set_custom_properties(result, 'exception_name', self.exception_name)
         set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
+        set_custom_properties(result, 'PollStartTime', str(self.poll_start_time))
+        set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
 
         return result
 
@@ -256,6 +260,16 @@ def set_init_time_elapsed(init_time_elapsed):
 @decorators.suppress_all_exceptions()
 def set_invoke_time_elapsed(invoke_time_elapsed):
     _session.invoke_time_elapsed = invoke_time_elapsed
+
+
+@decorators.suppress_all_exceptions()
+def poll_start():
+    _session.poll_start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions()
+def poll_end():
+    _session.poll_end_time = datetime.datetime.utcnow()
 
 
 @_user_agrees_to_telemetry

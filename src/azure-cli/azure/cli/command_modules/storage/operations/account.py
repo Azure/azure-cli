@@ -14,12 +14,6 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
-def str2bool(v):
-    if v is not None:
-        return v.lower() == "true"
-    return v
-
-
 def check_name_availability(cmd, client, name):
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
     account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
@@ -42,7 +36,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
-                           min_tls_version=None):
+                           min_tls_version=None, allow_shared_key_access=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -63,7 +57,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if access_tier:
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
-        params.identity = Identity()
+        params.identity = Identity(type='SystemAssigned')
     if https_only is not None:
         params.enable_https_traffic_only = https_only
     if enable_hierarchical_namespace is not None:
@@ -128,8 +122,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         RoutingPreference = cmd.get_models('RoutingPreference')
         params.routing_preference = RoutingPreference(
             routing_choice=routing_choice,
-            publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
-            publish_internet_endpoints=str2bool(publish_internet_endpoints)
+            publish_microsoft_endpoints=publish_microsoft_endpoints,
+            publish_internet_endpoints=publish_internet_endpoints
         )
     if allow_blob_public_access is not None:
         params.allow_blob_public_access = allow_blob_public_access
@@ -139,6 +133,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
+
+    if allow_shared_key_access is not None:
+        params.allow_shared_key_access = allow_shared_key_access
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -215,7 +212,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           allow_blob_public_access=None, min_tls_version=None):
+                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -327,7 +324,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                     origin_storage_account.azure_files_identity_based_authentication
 
     if assign_identity:
-        params.identity = Identity()
+        params.identity = Identity(type='SystemAssigned')
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
@@ -353,14 +350,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         if routing_choice is not None:
             params.routing_preference.routing_choice = routing_choice
         if publish_microsoft_endpoints is not None:
-            params.routing_preference.publish_microsoft_endpoints = str2bool(publish_microsoft_endpoints)
+            params.routing_preference.publish_microsoft_endpoints = publish_microsoft_endpoints
         if publish_internet_endpoints is not None:
-            params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
+            params.routing_preference.publish_internet_endpoints = publish_internet_endpoints
 
     if allow_blob_public_access is not None:
         params.allow_blob_public_access = allow_blob_public_access
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
+
+    if allow_shared_key_access is not None:
+        params.allow_shared_key_access = allow_shared_key_access
 
     return params
 
@@ -374,7 +374,7 @@ def list_network_rules(client, resource_group_name, account_name):
 
 
 def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
-                     vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
+                     vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
@@ -393,6 +393,13 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
             rules.ip_rules = []
         rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip_address]
         rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
+    if resource_id:
+        ResourceAccessRule = cmd.get_models('ResourceAccessRule')
+        if not rules.resource_access_rules:
+            rules.resource_access_rules = []
+        rules.resource_access_rules = [r for r in rules.resource_access_rules if r.resource_id !=
+                                       resource_id or r.tenant_id != tenant_id]
+        rules.resource_access_rules.append(ResourceAccessRule(tenant_id=tenant_id, resource_id=resource_id))
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
@@ -400,7 +407,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
 
 
 def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
-                        vnet_name=None):  # pylint: disable=unused-argument
+                        vnet_name=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
@@ -408,6 +415,10 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
+
+    if resource_id:
+        rules.resource_access_rules = [x for x in rules.resource_access_rules if
+                                       not (x.tenant_id == tenant_id and x.resource_id == resource_id)]
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
@@ -487,12 +498,16 @@ def update_management_policies(cmd, client, resource_group_name, account_name, p
 
 
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
-def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
-                                   delete_retention_days=None, enable_restore_policy=None, restore_days=None,
+def update_blob_service_properties(cmd, instance, enable_change_feed=None, change_feed_retention_days=None,
+                                   enable_delete_retention=None, delete_retention_days=None,
+                                   enable_restore_policy=None, restore_days=None,
                                    enable_versioning=None, enable_container_delete_retention=None,
-                                   container_delete_retention_days=None):
+                                   container_delete_retention_days=None, default_service_version=None):
     if enable_change_feed is not None:
-        instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+        if enable_change_feed is False:
+            change_feed_retention_days = None
+        instance.change_feed = cmd.get_models('ChangeFeed')(
+            enabled=enable_change_feed, retention_in_days=change_feed_retention_days)
 
     if enable_container_delete_retention is not None:
         if enable_container_delete_retention is False:
@@ -515,12 +530,16 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
     if enable_versioning is not None:
         instance.is_versioning_enabled = enable_versioning
 
+    if default_service_version is not None:
+        instance.default_service_version = default_service_version
+
     return instance
 
 
 def update_file_service_properties(cmd, instance, enable_delete_retention=None,
-                                   delete_retention_days=None):
+                                   delete_retention_days=None, enable_smb_multichannel=None):
     from azure.cli.core.azclierror import ValidationError
+    params = {}
     # set delete retention policy according input
     if enable_delete_retention is not None:
         if enable_delete_retention is False:
@@ -541,12 +560,22 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
     # TODO: remove it when server side return null not 0 for days
     if instance.share_delete_retention_policy is not None and instance.share_delete_retention_policy.enabled is False:
         instance.share_delete_retention_policy.days = None
+    if instance.share_delete_retention_policy:
+        params['share_delete_retention_policy'] = instance.share_delete_retention_policy
 
-    return instance
+    # set protocol settings
+    if enable_smb_multichannel is not None:
+        instance.protocol_settings = cmd.get_models('ProtocolSettings')()
+        instance.protocol_settings.smb = cmd.get_models('SmbSetting')(
+            multichannel=cmd.get_models('Multichannel')(enabled=enable_smb_multichannel))
+    if instance.protocol_settings.smb.multichannel:
+        params['protocol_settings'] = instance.protocol_settings
+
+    return params
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
-                            key_source=None, key_uri=None):
+                            key_source=None, key_uri=None, require_infrastructure_encryption=None):
     EncryptionScope = cmd.get_models('EncryptionScope')
 
     if key_source:
@@ -555,6 +584,9 @@ def create_encryption_scope(cmd, client, resource_group_name, account_name, encr
     if key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
         encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
+
+    if require_infrastructure_encryption is not None:
+        encryption_scope.require_infrastructure_encryption = require_infrastructure_encryption
 
     return client.put(resource_group_name=resource_group_name, account_name=account_name,
                       encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)

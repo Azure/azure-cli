@@ -38,13 +38,14 @@ def create_account(cmd, client, account_name, resource_group_name, location, tag
 # current limitation is 1 AD/subscription
 def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
-                         server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None):
+                         server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
+                         security_operators=None, tags=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
-                                       ldap_signing=ldap_signing)
+                                       ldap_signing=ldap_signing, security_operators=security_operators)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -108,16 +109,18 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
                   kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None,
                   kerberos5i_rw=None, kerberos5p_r=None, kerberos5p_rw=None,
-                  has_root_access=None, snapshot_dir_visible=None):
+                  has_root_access=None, snapshot_dir_visible=None,
+                  smb_encryption=None, smb_continuously_available=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
+
+    # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
+    subnet_rg = resource_group_name
 
     # determine vnet - supplied value can be name or ARM resource Id
     if is_valid_resource_id(vnet):
         resource_parts = parse_resource_id(vnet)
         vnet = resource_parts['resource_name']
-
-    # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
-    subnet_rg = resource_group_name
+        subnet_rg = resource_parts['resource_group']
 
     # determine subnet - supplied value can be name or ARM reource Id
     if is_valid_resource_id(subnet):
@@ -179,7 +182,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         snapshot_directory_visible=snapshot_dir_visible,
         security_style=security_style,
         tags=tags,
-        snapshot_id=snapshot_id)
+        snapshot_id=snapshot_id,
+        smb_encryption=smb_encryption,
+        smb_continuously_available=smb_continuously_available)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
