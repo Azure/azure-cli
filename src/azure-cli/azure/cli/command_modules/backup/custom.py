@@ -262,7 +262,10 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
             vm_id = vm
         else:
             if vm is None or resource_group_name is None:
-                raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required arguments.")
+                raise RequiredArgumentMissingError(
+                    """
+                    --vm or --resource-group missing. Please provide the required arguments.
+                    """)
             vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
     vaults = list_vaults(vaults_cf(cmd.cli_ctx))
     for vault in vaults:
