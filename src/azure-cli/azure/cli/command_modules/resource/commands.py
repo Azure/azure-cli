@@ -408,7 +408,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_applications')
 
     with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('create', 'create_applicationdefinition')
+        g.custom_command('create', 'create_or_update_applicationdefinition')
+        g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'delete')
         g.custom_show_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
@@ -431,3 +432,11 @@ def load_command_table(self, _):
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
+
+    with self.command_group('bicep') as g:
+        g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('upgrade', 'upgrade_bicep_cli')
+        g.custom_command('build', 'build_bicep_file')
+        g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('version', 'show_bicep_cli_version')
+        g.custom_command('list-versions', 'list_bicep_cli_versions')

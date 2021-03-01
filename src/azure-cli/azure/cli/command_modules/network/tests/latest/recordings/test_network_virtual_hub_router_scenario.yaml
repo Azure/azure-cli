@@ -2,7 +2,7 @@ interactions:
 - request:
     body: '{"location": "centraluseuap", "tags": {}, "properties": {"addressSpace":
       {"addressPrefixes": ["10.0.0.0/24"]}, "dhcpOptions": {}, "subnets": [{"name":
-      "subnet1", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
+      "RouteServerSubnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -13,46 +13,46 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '212'
+      - '222'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --location --subnet-name --address-prefix
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"22e5250f-b32d-480b-9d62-07a81344a9b2\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5ab1595b-9ebe-45be-8c98-45ae52f9285e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"a9e28b06-9452-424c-8d75-9dbca3dda058\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"27044a26-96d2-4b7b-95af-11082c3c8578\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/24\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"22e5250f-b32d-480b-9d62-07a81344a9b2\\\"\",\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"RouteServerSubnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
+        \       \"etag\": \"W/\\\"5ab1595b-9ebe-45be-8c98-45ae52f9285e\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/7d21ad90-63aa-4d61-bb22-f1b5dd2f6cdb?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/11421e06-7dea-4dd4-a3da-01ad17dfa86f?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
-      - '1444'
+      - '1430'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:09:34 GMT
+      - Thu, 25 Feb 2021 06:39:14 GMT
       expires:
       - '-1'
       pragma:
@@ -65,9 +65,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 735971a3-3567-49d6-84a7-c263b8d72d54
+      - 8230a875-c0e6-40f0-bdda-db14a7694a71
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -85,9 +85,9 @@ interactions:
       ParameterSetName:
       - -g -n --location --subnet-name --address-prefix
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/7d21ad90-63aa-4d61-bb22-f1b5dd2f6cdb?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/11421e06-7dea-4dd4-a3da-01ad17dfa86f?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -99,7 +99,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:09:38 GMT
+      - Thu, 25 Feb 2021 06:39:17 GMT
       expires:
       - '-1'
       pragma:
@@ -116,7 +116,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 602287ef-5954-424b-bb11-90c97e846639
+      - df0e57f2-220c-4d9b-b538-5187d87304eb
     status:
       code: 200
       message: OK
@@ -134,38 +134,38 @@ interactions:
       ParameterSetName:
       - -g -n --location --subnet-name --address-prefix
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"4dbf28b4-1c52-464c-af89-f21eaf61f4e0\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"d52c8434-c413-4e1f-ba8d-2e8fd6b51205\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a9e28b06-9452-424c-8d75-9dbca3dda058\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"27044a26-96d2-4b7b-95af-11082c3c8578\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/24\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"4dbf28b4-1c52-464c-af89-f21eaf61f4e0\\\"\",\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"RouteServerSubnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
+        \       \"etag\": \"W/\\\"d52c8434-c413-4e1f-ba8d-2e8fd6b51205\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1446'
+      - '1432'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:09:38 GMT
+      - Thu, 25 Feb 2021 06:39:17 GMT
       etag:
-      - W/"4dbf28b4-1c52-464c-af89-f21eaf61f4e0"
+      - W/"d52c8434-c413-4e1f-ba8d-2e8fd6b51205"
       expires:
       - '-1'
       pragma:
@@ -182,7 +182,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4fd459b3-4110-4426-bc0e-8a61e30a871b
+      - 4be897f0-3773-48c4-8506-bcae0ff2548a
     status:
       code: 200
       message: OK
@@ -200,13 +200,13 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"4dbf28b4-1c52-464c-af89-f21eaf61f4e0\\\"\",\r\n  \"properties\":
+      string: "{\r\n  \"name\": \"RouteServerSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
+        \ \"etag\": \"W/\\\"d52c8434-c413-4e1f-ba8d-2e8fd6b51205\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -215,13 +215,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '586'
+      - '606'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:09:39 GMT
+      - Thu, 25 Feb 2021 06:39:19 GMT
       etag:
-      - W/"4dbf28b4-1c52-464c-af89-f21eaf61f4e0"
+      - W/"d52c8434-c413-4e1f-ba8d-2e8fd6b51205"
       expires:
       - '-1'
       pragma:
@@ -238,14 +238,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6bce11e4-a120-48df-9a3b-8b0b6e49750c
+      - 95a6b1c8-b703-44b7-b1ba-1b3787895fed
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1",
-      "name": "subnet1", "properties": {"addressPrefix": "10.0.0.0/24", "delegations":
-      [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet",
+      "name": "RouteServerSubnet", "properties": {"addressPrefix": "10.0.0.0/24",
+      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
       "Enabled"}}'
     headers:
       Accept:
@@ -257,34 +257,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '397'
+      - '417'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"b5e27d4a-9fab-4236-99eb-73b59b4ab5e5\\\"\",\r\n  \"properties\":
+      string: "{\r\n  \"name\": \"RouteServerSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
+        \ \"etag\": \"W/\\\"466bf89d-edc0-4e3a-b6b5-832c123f3fa5\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e775c162-4ee5-45a1-8960-cfb29db8032f?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a939b4f-033b-4f7b-a770-4b7b6ded4b3d?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
-      - '586'
+      - '606'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:09:39 GMT
+      - Thu, 25 Feb 2021 06:39:19 GMT
       expires:
       - '-1'
       pragma:
@@ -301,9 +301,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 63a94204-d9ab-4e36-aa53-5a1f59f83561
+      - 2cb61e60-7c1c-4540-b798-32605b432359
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -321,9 +321,9 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e775c162-4ee5-45a1-8960-cfb29db8032f?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8a939b4f-033b-4f7b-a770-4b7b6ded4b3d?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -335,7 +335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:09 GMT
+      - Thu, 25 Feb 2021 06:39:50 GMT
       expires:
       - '-1'
       pragma:
@@ -352,7 +352,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c01f3b7f-e9af-4fe5-afa7-ed5babb77b1b
+      - 3a711691-25a5-4da8-aa6a-a9612c9b41ae
     status:
       code: 200
       message: OK
@@ -370,13 +370,13 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"b5e27d4a-9fab-4236-99eb-73b59b4ab5e5\\\"\",\r\n  \"properties\":
+      string: "{\r\n  \"name\": \"RouteServerSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
+        \ \"etag\": \"W/\\\"466bf89d-edc0-4e3a-b6b5-832c123f3fa5\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -385,13 +385,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '586'
+      - '606'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:10 GMT
+      - Thu, 25 Feb 2021 06:39:50 GMT
       etag:
-      - W/"b5e27d4a-9fab-4236-99eb-73b59b4ab5e5"
+      - W/"466bf89d-edc0-4e3a-b6b5-832c123f3fa5"
       expires:
       - '-1'
       pragma:
@@ -408,7 +408,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4028bb91-8cd3-4742-91ef-3fd61a51c89e
+      - c6a58fa2-802d-4260-ba4b-673b4e01961e
     status:
       code: 200
       message: OK
@@ -426,38 +426,38 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"b5e27d4a-9fab-4236-99eb-73b59b4ab5e5\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"466bf89d-edc0-4e3a-b6b5-832c123f3fa5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a9e28b06-9452-424c-8d75-9dbca3dda058\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"27044a26-96d2-4b7b-95af-11082c3c8578\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/24\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"b5e27d4a-9fab-4236-99eb-73b59b4ab5e5\\\"\",\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"RouteServerSubnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
+        \       \"etag\": \"W/\\\"466bf89d-edc0-4e3a-b6b5-832c123f3fa5\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1446'
+      - '1432'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:11 GMT
+      - Thu, 25 Feb 2021 06:39:52 GMT
       etag:
-      - W/"b5e27d4a-9fab-4236-99eb-73b59b4ab5e5"
+      - W/"466bf89d-edc0-4e3a-b6b5-832c123f3fa5"
       expires:
       - '-1'
       pragma:
@@ -474,7 +474,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 32b15616-27a7-423d-826a-4625b7dd3f7a
+      - 282108d9-3946-4bfb-8356-68870ffb66f5
     status:
       code: 200
       message: OK
@@ -486,15 +486,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/virtualHubs/vrouter2''
@@ -508,7 +508,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:12 GMT
+      - Thu, 25 Feb 2021 06:39:53 GMT
       expires:
       - '-1'
       pragma:
@@ -530,7 +530,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       Content-Length:
@@ -540,13 +540,13 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"399e2eae-8547-45ff-9298-60e47bd17bf3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b176d372-adb8-4c23-aea4-23e4d372b78b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 0,\r\n    \"virtualRouterIps\": [],\r\n    \"routeTable\":
@@ -556,7 +556,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/06f1ede2-3785-4149-898f-0e36964975da?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51576f87-bb59-4603-b60a-7f3cf7fe96f2?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
@@ -564,7 +564,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:19 GMT
+      - Thu, 25 Feb 2021 06:40:01 GMT
       expires:
       - '-1'
       pragma:
@@ -577,7 +577,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - eb860665-72ae-45e9-b920-aced1c96d31d
+      - 9d0cc00f-5df7-4b97-a720-d4c85b1a0493
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -591,15 +591,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/06f1ede2-3785-4149-898f-0e36964975da?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51576f87-bb59-4603-b60a-7f3cf7fe96f2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -611,7 +611,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:49 GMT
+      - Thu, 25 Feb 2021 06:40:32 GMT
       expires:
       - '-1'
       pragma:
@@ -628,7 +628,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6ea74107-95a1-40ba-852d-d9c1229bf6bd
+      - 449e57b2-177b-4ee4-ad7f-de5d886f2246
     status:
       code: 200
       message: OK
@@ -640,19 +640,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"399e2eae-8547-45ff-9298-60e47bd17bf3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b176d372-adb8-4c23-aea4-23e4d372b78b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 0,\r\n    \"virtualRouterIps\": [],\r\n    \"routeTable\":
@@ -666,7 +666,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:51 GMT
+      - Thu, 25 Feb 2021 06:40:33 GMT
       expires:
       - '-1'
       pragma:
@@ -683,50 +683,50 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d1c02845-b77e-4f64-9d42-3f7d90c7b3fb
+      - 3307f2c0-4805-43b8-a6f2-9f4d9842e0bf
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1"}}}'
+    body: '{"properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet"}}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       Content-Length:
-      - '246'
+      - '256'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"Default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default\",\r\n
-        \ \"etag\": \"W/\\\"b1fd90ff-f5c5-43f5-b9be-b60ac46f43fc\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4032926a-6996-4b11-adea-da5d34bedda7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/ipConfigurations\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\"\r\n
+        \"Dynamic\",\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\"\r\n
         \   }\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
-      - '728'
+      - '738'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:10:52 GMT
+      - Thu, 25 Feb 2021 06:40:35 GMT
       expires:
       - '-1'
       pragma:
@@ -739,9 +739,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 49169397-f58a-465d-bc05-a36c08a1722e
+      - c402ea5e-3283-4cea-b906-69e31b67a803
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -753,15 +753,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -773,7 +773,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:11:02 GMT
+      - Thu, 25 Feb 2021 06:40:45 GMT
       expires:
       - '-1'
       pragma:
@@ -790,7 +790,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5d917a66-5db6-41f4-8f98-65c1ba5fdf23
+      - 2174ce43-942c-4431-a627-5543af54a593
     status:
       code: 200
       message: OK
@@ -802,15 +802,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -822,7 +822,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:11:13 GMT
+      - Thu, 25 Feb 2021 06:40:55 GMT
       expires:
       - '-1'
       pragma:
@@ -839,7 +839,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0ed6eede-085a-4a63-bf0d-9ccdedf47edf
+      - bf51b644-9e8d-4718-8816-8a6969560429
     status:
       code: 200
       message: OK
@@ -851,15 +851,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -871,7 +871,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:11:33 GMT
+      - Thu, 25 Feb 2021 06:41:15 GMT
       expires:
       - '-1'
       pragma:
@@ -888,7 +888,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0e1407c7-0818-468d-b979-1b36e7666732
+      - 41a678e9-b5b8-4d8f-8ce1-47aadb024ba8
     status:
       code: 200
       message: OK
@@ -900,15 +900,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -920,7 +920,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:12:13 GMT
+      - Thu, 25 Feb 2021 06:41:56 GMT
       expires:
       - '-1'
       pragma:
@@ -937,7 +937,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 394b0533-99e3-4f6b-b885-e1577488749c
+      - 9d7d012f-b56c-43a1-bbc1-84949d421595
     status:
       code: 200
       message: OK
@@ -949,15 +949,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -969,7 +969,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:13:34 GMT
+      - Thu, 25 Feb 2021 06:43:16 GMT
       expires:
       - '-1'
       pragma:
@@ -986,7 +986,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b73c21c7-bb1e-49bc-b558-290c7937172c
+      - 43222dcd-a041-4c1c-a980-4807ab434237
     status:
       code: 200
       message: OK
@@ -998,15 +998,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1018,7 +1018,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:16:14 GMT
+      - Thu, 25 Feb 2021 06:45:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1035,7 +1035,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9840d517-2d16-4fd9-bd37-7a593506df3d
+      - 2e2c5885-97e7-4862-830d-cc28354386c5
     status:
       code: 200
       message: OK
@@ -1047,15 +1047,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1067,7 +1067,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:17:55 GMT
+      - Thu, 25 Feb 2021 06:47:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1084,7 +1084,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 77271371-6cc3-49c8-ab7a-e94c8feeaccf
+      - c8cbdef6-cbb5-4aab-84cc-5cf8f0388c69
     status:
       code: 200
       message: OK
@@ -1096,15 +1096,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1116,7 +1116,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:19:36 GMT
+      - Thu, 25 Feb 2021 06:49:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1133,7 +1133,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 151d4a13-f20d-49a6-b2c7-c9c4b839dff4
+      - 79bce62d-131e-4354-91c6-e457468ec149
     status:
       code: 200
       message: OK
@@ -1145,15 +1145,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1165,7 +1165,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:21:17 GMT
+      - Thu, 25 Feb 2021 06:51:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1182,7 +1182,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e4513727-0bab-4bfd-b20e-301cabb11b4f
+      - a11fbd45-3233-4ef3-8e18-e3f9eaa57d4e
     status:
       code: 200
       message: OK
@@ -1194,15 +1194,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1214,7 +1214,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:22:58 GMT
+      - Thu, 25 Feb 2021 06:52:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1231,7 +1231,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a156e05e-df2c-4822-8ba4-2aecb116b957
+      - 6be0c982-3d16-429a-bfe0-904d41de9e06
     status:
       code: 200
       message: OK
@@ -1243,64 +1243,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 12 Jan 2021 03:24:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 1d51d3ff-d51b-4ea2-9a82-21b2e9ae827d
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network virtualhub-router create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet
-      User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e54ba9ca-4746-4e1c-a9e7-9c91953fd0e4?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/29ea9c6c-9308-4fdf-aed1-16c96e6f8daf?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1312,7 +1263,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:19 GMT
+      - Thu, 25 Feb 2021 06:54:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1329,7 +1280,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 12541380-67e4-43f7-ac5c-dd537563c618
+      - 4dba52eb-ddb4-4c11-b1ee-f7d52f6efcc2
     status:
       code: 200
       message: OK
@@ -1341,34 +1292,34 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"Default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default\",\r\n
-        \ \"etag\": \"W/\\\"f5d73f58-fb6f-4609-b580-6ab86ee5d166\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"cc3fe119-a108-4e96-b8c2-d858169e3a4d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/ipConfigurations\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\"\r\n
+        \"Dynamic\",\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\"\r\n
         \   }\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '729'
+      - '739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:20 GMT
+      - Thu, 25 Feb 2021 06:54:22 GMT
       etag:
-      - W/"f5d73f58-fb6f-4609-b580-6ab86ee5d166"
+      - W/"cc3fe119-a108-4e96-b8c2-d858169e3a4d"
       expires:
       - '-1'
       pragma:
@@ -1385,7 +1336,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4b06312a-f914-463c-80fe-322a21c840d5
+      - e426d3b2-202a-4013-8c0a-7b30b1048e09
     status:
       code: 200
       message: OK
@@ -1397,19 +1348,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router create
+      - network routeserver create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -l -n --hosted-subnet
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"f5d73f58-fb6f-4609-b580-6ab86ee5d166\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"cc3fe119-a108-4e96-b8c2-d858169e3a4d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
@@ -1424,7 +1375,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:21 GMT
+      - Thu, 25 Feb 2021 06:54:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1441,7 +1392,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a57e368b-7e6a-4ce9-a4f6-d43b75fcf090
+      - a0a581dc-aeb3-4db7-bb66-0ede932ff5c9
     status:
       code: 200
       message: OK
@@ -1453,19 +1404,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"f5d73f58-fb6f-4609-b580-6ab86ee5d166\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"cc3fe119-a108-4e96-b8c2-d858169e3a4d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
@@ -1480,7 +1431,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:23 GMT
+      - Thu, 25 Feb 2021 06:54:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1497,7 +1448,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cd210436-e163-4f67-ab33-d4b1d3ea48e5
+      - 39c62122-3099-4b76-a53c-ce155161a7fd
     status:
       code: 200
       message: OK
@@ -1512,7 +1463,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       Content-Length:
@@ -1522,13 +1473,13 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"e3cd28a8-6669-449e-9f55-c82af1c50752\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"170b62c5-1340-40ce-b547-9c9cbe9b205d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
@@ -1537,7 +1488,7 @@ interactions:
         \"Provisioned\",\r\n    \"allowBranchToBranchTraffic\": true\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8ab0ccb1-c31a-4319-a352-7342bb98b45c?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8c2abde6-786a-4574-8077-d8a156f27d44?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1545,7 +1496,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:24 GMT
+      - Thu, 25 Feb 2021 06:54:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1562,7 +1513,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4df15c21-254d-440e-b469-16a3b1723ce0
+      - a5c93af9-679c-4f93-83fc-de670ef31e58
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1576,15 +1527,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8ab0ccb1-c31a-4319-a352-7342bb98b45c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8c2abde6-786a-4574-8077-d8a156f27d44?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1596,7 +1547,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:34 GMT
+      - Thu, 25 Feb 2021 06:54:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1613,7 +1564,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e30a1a82-c348-4a18-a57b-f3dd7818b1ad
+      - d3a2fda0-2cc9-492c-8686-4bb81125eb0c
     status:
       code: 200
       message: OK
@@ -1625,15 +1576,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8ab0ccb1-c31a-4319-a352-7342bb98b45c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8c2abde6-786a-4574-8077-d8a156f27d44?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1645,7 +1596,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:26:44 GMT
+      - Thu, 25 Feb 2021 06:54:46 GMT
       expires:
       - '-1'
       pragma:
@@ -1662,7 +1613,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3678198a-4988-4637-ae31-46b1633e09fe
+      - ed9c1c55-0cc8-4e3d-9081-7350ae4208ef
     status:
       code: 200
       message: OK
@@ -1674,15 +1625,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8ab0ccb1-c31a-4319-a352-7342bb98b45c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8c2abde6-786a-4574-8077-d8a156f27d44?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1694,7 +1645,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:05 GMT
+      - Thu, 25 Feb 2021 06:55:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1711,7 +1662,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5f75f3d4-f8eb-480d-b100-639f7148f650
+      - 2c365b63-1a9e-4806-b3b1-9fe5a534a46f
     status:
       code: 200
       message: OK
@@ -1723,15 +1674,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8ab0ccb1-c31a-4319-a352-7342bb98b45c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8c2abde6-786a-4574-8077-d8a156f27d44?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1743,7 +1694,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:45 GMT
+      - Thu, 25 Feb 2021 06:55:46 GMT
       expires:
       - '-1'
       pragma:
@@ -1760,7 +1711,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a17b501b-2311-480b-bd09-63fb2d5bd4cc
+      - 1115c2d3-a547-42af-8ff1-73286891315f
     status:
       code: 200
       message: OK
@@ -1772,19 +1723,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router update
+      - network routeserver update
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"ba3c87f6-6c7a-4133-8cae-4e576c5d570a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3aa8103d-aaf6-4fe2-855c-cbb3c3997a03\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
@@ -1799,7 +1750,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:45 GMT
+      - Thu, 25 Feb 2021 06:55:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1816,7 +1767,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 95b2ed4b-d3b0-442c-9077-05f89bcca98f
+      - 3d77f827-b539-4014-9990-781b2829f9fb
     status:
       code: 200
       message: OK
@@ -1828,20 +1779,20 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router list
+      - network routeserver list
       Connection:
       - keep-alive
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vrouter2\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \     \"etag\": \"W/\\\"ba3c87f6-6c7a-4133-8cae-4e576c5d570a\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"3aa8103d-aaf6-4fe2-855c-cbb3c3997a03\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n      \"location\": \"centraluseuap\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"virtualHubRouteTableV2s\": [],\r\n        \"virtualRouterAsn\":
@@ -1857,7 +1808,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:47 GMT
+      - Thu, 25 Feb 2021 06:55:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1874,7 +1825,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ac7e7b76-ed85-4715-8627-c6d79058b5de
+      - 737c1e90-8260-4e82-8084-c8d2eb07d1ac
     status:
       code: 200
       message: OK
@@ -1886,19 +1837,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router show
+      - network routeserver show
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"ba3c87f6-6c7a-4133-8cae-4e576c5d570a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3aa8103d-aaf6-4fe2-855c-cbb3c3997a03\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
@@ -1913,7 +1864,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:48 GMT
+      - Thu, 25 Feb 2021 06:55:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1930,7 +1881,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 65b38654-471e-4728-949c-27cae5211a82
+      - 908b37cc-15fc-47a2-af05-24bd14ad94c0
     status:
       code: 200
       message: OK
@@ -1942,7 +1893,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering create
+      - network routeserver peering create
       Connection:
       - keep-alive
       Content-Length:
@@ -1950,21 +1901,21 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g --vrouter-name -n --peer-asn --peer-ip
+      - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"peer1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \ \"etag\": \"W/\\\"b20d2d9d-a016-4948-9650-25ddc414a21b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"887edaad-7248-407e-80bb-67c1900f60a3\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"peerIp\": \"10.0.0.120\",\r\n
         \   \"peerAsn\": 11000\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1b6038b6-07fa-454b-a352-c992cd126d1c?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d6057357-d9b5-4894-810e-81d532c32da7?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1972,7 +1923,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:49 GMT
+      - Thu, 25 Feb 2021 06:55:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1985,9 +1936,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 71ef33d1-9570-43bb-b380-3b6bca1ea7cd
+      - b9a959cb-6b7c-4ff5-b52b-f5ead35693f5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -1999,15 +1950,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering create
+      - network routeserver peering create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n --peer-asn --peer-ip
+      - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1b6038b6-07fa-454b-a352-c992cd126d1c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d6057357-d9b5-4894-810e-81d532c32da7?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2019,7 +1970,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:27:59 GMT
+      - Thu, 25 Feb 2021 06:56:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2036,7 +1987,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6df7d9b0-dcbe-423b-896e-0315b061a47c
+      - 7d7f718f-2f02-4976-8493-0b5004bae2c1
     status:
       code: 200
       message: OK
@@ -2048,15 +1999,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering create
+      - network routeserver peering create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n --peer-asn --peer-ip
+      - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1b6038b6-07fa-454b-a352-c992cd126d1c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d6057357-d9b5-4894-810e-81d532c32da7?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2068,7 +2019,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:28:09 GMT
+      - Thu, 25 Feb 2021 06:56:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2085,7 +2036,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c29cbe02-47e8-4026-ae5d-790148ff883c
+      - 5c8d06d8-1e3a-415a-833e-dec3797f3b78
     status:
       code: 200
       message: OK
@@ -2097,15 +2048,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering create
+      - network routeserver peering create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n --peer-asn --peer-ip
+      - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1b6038b6-07fa-454b-a352-c992cd126d1c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d6057357-d9b5-4894-810e-81d532c32da7?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2117,7 +2068,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:28:29 GMT
+      - Thu, 25 Feb 2021 06:56:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2134,7 +2085,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dfb9a14a-0ad0-40df-9e4d-589e3a98a233
+      - 78fed8a2-a768-4122-a314-481ab934d9df
     status:
       code: 200
       message: OK
@@ -2146,15 +2097,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering create
+      - network routeserver peering create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n --peer-asn --peer-ip
+      - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1b6038b6-07fa-454b-a352-c992cd126d1c?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d6057357-d9b5-4894-810e-81d532c32da7?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2166,7 +2117,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:09 GMT
+      - Thu, 25 Feb 2021 06:57:13 GMT
       expires:
       - '-1'
       pragma:
@@ -2183,7 +2134,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fd4382a0-a5f0-48cd-a50f-569764f688bc
+      - bb730e15-4743-433e-999e-63d3d1d9fa9d
     status:
       code: 200
       message: OK
@@ -2195,19 +2146,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering create
+      - network routeserver peering create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n --peer-asn --peer-ip
+      - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"peer1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \ \"etag\": \"W/\\\"a1ef615a-b606-496a-8e85-2fdeac3ef8ab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9f44adbe-c855-467d-902d-2f60b3d2c290\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"peerIp\": \"10.0.0.120\",\r\n
         \   \"peerAsn\": 11000\r\n  }\r\n}"
@@ -2219,9 +2170,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:10 GMT
+      - Thu, 25 Feb 2021 06:57:13 GMT
       etag:
-      - W/"a1ef615a-b606-496a-8e85-2fdeac3ef8ab"
+      - W/"9f44adbe-c855-467d-902d-2f60b3d2c290"
       expires:
       - '-1'
       pragma:
@@ -2238,7 +2189,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a2d0ec3d-a56a-42ae-a851-f0cff9033837
+      - f05f7c1d-9409-40db-b581-94cf9cbbb428
     status:
       code: 200
       message: OK
@@ -2250,20 +2201,20 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering list
+      - network routeserver peering list
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name
+      - -g --routeserver
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"peer1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \     \"etag\": \"W/\\\"a1ef615a-b606-496a-8e85-2fdeac3ef8ab\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"9f44adbe-c855-467d-902d-2f60b3d2c290\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"peerIp\":
         \"10.0.0.120\",\r\n        \"peerAsn\": 11000\r\n      }\r\n    }\r\n  ]\r\n}"
@@ -2275,7 +2226,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:12 GMT
+      - Thu, 25 Feb 2021 06:57:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2292,7 +2243,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bd5171d0-b844-4a5d-8e15-024751846af2
+      - fa2c04fe-482a-4e0a-a260-e3b24db8eef1
     status:
       code: 200
       message: OK
@@ -2304,19 +2255,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering show
+      - network routeserver peering show
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n
+      - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"peer1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \ \"etag\": \"W/\\\"a1ef615a-b606-496a-8e85-2fdeac3ef8ab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9f44adbe-c855-467d-902d-2f60b3d2c290\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"peerIp\": \"10.0.0.120\",\r\n
         \   \"peerAsn\": 11000\r\n  }\r\n}"
@@ -2328,9 +2279,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:14 GMT
+      - Thu, 25 Feb 2021 06:57:16 GMT
       etag:
-      - W/"a1ef615a-b606-496a-8e85-2fdeac3ef8ab"
+      - W/"9f44adbe-c855-467d-902d-2f60b3d2c290"
       expires:
       - '-1'
       pragma:
@@ -2347,7 +2298,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 568689b4-304e-4043-a350-a77a52b2c297
+      - 7c695aa5-d61e-429d-b404-a95e61903303
     status:
       code: 200
       message: OK
@@ -2359,17 +2310,17 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering list-advertised-routes
+      - network routeserver peering list-advertised-routes
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g --vrouter-name -n
+      - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/advertisedRoutes?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/advertisedRoutes?api-version=2020-08-01
   response:
     body:
       string: 'null'
@@ -2381,11 +2332,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:14 GMT
+      - Thu, 25 Feb 2021 06:57:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/9c3018c3-5927-4f27-9e92-65e79fcfb72f?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/e1e438ef-2754-4c36-98b6-c6cab640d459?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -2396,7 +2347,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c5610598-5d5a-4dc8-8ff5-2a9809b80cd2
+      - aa1d9d61-5eb2-4762-a984-68a81067ae8f
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -2410,15 +2361,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering list-advertised-routes
+      - network routeserver peering list-advertised-routes
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n
+      - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/9c3018c3-5927-4f27-9e92-65e79fcfb72f?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/e1e438ef-2754-4c36-98b6-c6cab640d459?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"RouteServiceRole_IN_0\": [],\r\n  \"RouteServiceRole_IN_1\":
@@ -2431,11 +2382,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:24 GMT
+      - Thu, 25 Feb 2021 06:57:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/9c3018c3-5927-4f27-9e92-65e79fcfb72f?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/e1e438ef-2754-4c36-98b6-c6cab640d459?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -2450,7 +2401,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c5610598-5d5a-4dc8-8ff5-2a9809b80cd2
+      - aa1d9d61-5eb2-4762-a984-68a81067ae8f
     status:
       code: 200
       message: OK
@@ -2462,17 +2413,17 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering list-learned-routes
+      - network routeserver peering list-learned-routes
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g --vrouter-name -n
+      - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/learnedRoutes?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/learnedRoutes?api-version=2020-08-01
   response:
     body:
       string: 'null'
@@ -2484,11 +2435,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:27 GMT
+      - Thu, 25 Feb 2021 06:57:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/0853fbc7-266b-4013-9d0d-3fb2c32035fa?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/bdd0262b-7e2f-4d15-a116-ff726f3cc5c0?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -2499,7 +2450,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 547118d7-ecbe-4115-ba05-d6c2506e9b34
+      - bfddc886-19e6-4507-88f2-f02150f7633a
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -2513,15 +2464,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering list-learned-routes
+      - network routeserver peering list-learned-routes
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n
+      - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/0853fbc7-266b-4013-9d0d-3fb2c32035fa?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/bdd0262b-7e2f-4d15-a116-ff726f3cc5c0?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"RouteServiceRole_IN_0\": [],\r\n  \"RouteServiceRole_IN_1\":
@@ -2534,11 +2485,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:38 GMT
+      - Thu, 25 Feb 2021 06:57:40 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/0853fbc7-266b-4013-9d0d-3fb2c32035fa?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/bdd0262b-7e2f-4d15-a116-ff726f3cc5c0?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -2553,7 +2504,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 547118d7-ecbe-4115-ba05-d6c2506e9b34
+      - bfddc886-19e6-4507-88f2-f02150f7633a
     status:
       code: 200
       message: OK
@@ -2565,33 +2516,33 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering delete
+      - network routeserver peering delete
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g --vrouter-name -n -y
+      - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2020-08-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1884cc91-9ff2-4316-ac55-07f3551a5bd1?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fccc14ad-2aba-4bf5-96a3-54ad9c7c4f50?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 12 Jan 2021 03:29:39 GMT
+      - Thu, 25 Feb 2021 06:57:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/1884cc91-9ff2-4316-ac55-07f3551a5bd1?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/fccc14ad-2aba-4bf5-96a3-54ad9c7c4f50?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -2602,7 +2553,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5cbecb97-21f1-4eb1-959f-b3d50a38fbde
+      - 5d88840a-2975-4172-af8f-5aa6877aaf18
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -2616,15 +2567,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering delete
+      - network routeserver peering delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n -y
+      - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1884cc91-9ff2-4316-ac55-07f3551a5bd1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fccc14ad-2aba-4bf5-96a3-54ad9c7c4f50?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2636,7 +2587,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:29:49 GMT
+      - Thu, 25 Feb 2021 06:57:52 GMT
       expires:
       - '-1'
       pragma:
@@ -2653,7 +2604,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 638748cf-7b1f-4afa-9437-8866a7e57d1f
+      - 04f19c46-d070-454b-8c25-7da669ad0787
     status:
       code: 200
       message: OK
@@ -2665,15 +2616,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering delete
+      - network routeserver peering delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n -y
+      - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1884cc91-9ff2-4316-ac55-07f3551a5bd1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fccc14ad-2aba-4bf5-96a3-54ad9c7c4f50?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2685,7 +2636,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:30:00 GMT
+      - Thu, 25 Feb 2021 06:58:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2702,7 +2653,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0380054d-49b1-4925-a31e-1726afff1287
+      - 34c4a75b-6601-4635-832e-f8de8d7f2e89
     status:
       code: 200
       message: OK
@@ -2714,15 +2665,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering delete
+      - network routeserver peering delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n -y
+      - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1884cc91-9ff2-4316-ac55-07f3551a5bd1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fccc14ad-2aba-4bf5-96a3-54ad9c7c4f50?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2734,7 +2685,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:30:20 GMT
+      - Thu, 25 Feb 2021 06:58:23 GMT
       expires:
       - '-1'
       pragma:
@@ -2751,7 +2702,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9761f223-246b-4d5d-90f5-9d414b777cb7
+      - d6e6f7ea-5ccd-4f5a-a5f9-1591b76f2dc5
     status:
       code: 200
       message: OK
@@ -2763,15 +2714,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router peering delete
+      - network routeserver peering delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --vrouter-name -n -y
+      - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1884cc91-9ff2-4316-ac55-07f3551a5bd1?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fccc14ad-2aba-4bf5-96a3-54ad9c7c4f50?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2783,7 +2734,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:31:00 GMT
+      - Thu, 25 Feb 2021 06:59:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2800,7 +2751,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 71d0cc79-c7a2-4c07-bea8-b874ebf7e460
+      - a92e1f59-a797-4d3b-a478-1c25f43e3173
     status:
       code: 200
       message: OK
@@ -2812,7 +2763,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       Content-Length:
@@ -2820,25 +2771,25 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2020-08-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 12 Jan 2021 03:31:02 GMT
+      - Thu, 25 Feb 2021 06:59:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -2849,7 +2800,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c836a048-6cd9-4087-ac8b-23d9705b1088
+      - c6ec36bb-a63e-4c7f-9776-81d2f09beaab
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -2863,15 +2814,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2883,7 +2834,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:31:12 GMT
+      - Thu, 25 Feb 2021 06:59:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2900,7 +2851,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e665b6f6-96e5-4658-b633-e701d979acd7
+      - a9e344d0-1e80-4581-ae65-f00dfdaf467c
     status:
       code: 200
       message: OK
@@ -2912,15 +2863,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2932,7 +2883,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:31:23 GMT
+      - Thu, 25 Feb 2021 06:59:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2949,7 +2900,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4e828606-83ed-4ac7-a8f2-d0b6152e1cae
+      - a2fee92f-c69c-499b-a963-c4d63036cd60
     status:
       code: 200
       message: OK
@@ -2961,15 +2912,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2981,7 +2932,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:31:43 GMT
+      - Thu, 25 Feb 2021 06:59:46 GMT
       expires:
       - '-1'
       pragma:
@@ -2998,7 +2949,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 37e35f62-ede8-4b4f-8cfa-51e81d426174
+      - b85ab6de-13cf-46a0-a4f8-0ebefac7ec0a
     status:
       code: 200
       message: OK
@@ -3010,15 +2961,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -3030,7 +2981,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:32:23 GMT
+      - Thu, 25 Feb 2021 07:00:26 GMT
       expires:
       - '-1'
       pragma:
@@ -3047,7 +2998,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6c64540c-a574-46c4-8d96-f0812024dacb
+      - e347b473-b22e-4722-80ea-138747c1d19d
     status:
       code: 200
       message: OK
@@ -3059,64 +3010,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 12 Jan 2021 03:33:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 6b7886be-fe64-4690-857e-a520a7784433
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network virtualhub-router delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/dcda1029-2797-4790-97cc-d14980cb8318?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/4de6693f-6d02-4870-851a-a7cbf7ae50e4?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3128,7 +3030,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:36:25 GMT
+      - Thu, 25 Feb 2021 07:01:48 GMT
       expires:
       - '-1'
       pragma:
@@ -3145,7 +3047,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9397a3d2-98e5-4225-ac10-cb8111978466
+      - e67a7933-1e10-4480-a115-c1cc29d6fc00
     status:
       code: 200
       message: OK
@@ -3157,7 +3059,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       Content-Length:
@@ -3165,9 +3067,9 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2020-08-01
   response:
     body:
       string: ''
@@ -3175,17 +3077,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/719b4b10-36d3-4315-872b-403d75999776?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1d7e00a0-410f-4f5e-ad32-258a84716023?api-version=2020-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 12 Jan 2021 03:36:28 GMT
+      - Thu, 25 Feb 2021 07:01:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/719b4b10-36d3-4315-872b-403d75999776?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/1d7e00a0-410f-4f5e-ad32-258a84716023?api-version=2020-08-01
       pragma:
       - no-cache
       server:
@@ -3196,7 +3098,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dd3cfd3a-5818-4285-9845-57ed33a09629
+      - f10c15fa-377e-4c4a-aaab-ac2d1dc8a97e
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -3210,15 +3112,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network virtualhub-router delete
+      - network routeserver delete
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.17.1 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/719b4b10-36d3-4315-872b-403d75999776?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/1d7e00a0-410f-4f5e-ad32-258a84716023?api-version=2020-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3230,7 +3132,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jan 2021 03:36:39 GMT
+      - Thu, 25 Feb 2021 07:02:00 GMT
       expires:
       - '-1'
       pragma:
@@ -3247,7 +3149,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ce0baded-30d5-4915-9263-b188ef845a34
+      - c89b807b-0ed8-4890-9b5c-4190894d7a4b
     status:
       code: 200
       message: OK

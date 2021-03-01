@@ -3,10 +3,119 @@
 Release History
 ===============
 
-2.19.1.1
+2.20.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.20.0
+++++++
+
+**AKS**
+
+* Add support for SGX addon 'confcom' (#16869)
+
+**AMS**
+
+* Update module to use 2020 Azure Media Services api. (#16492)
+* `az ams account encryption`: New subgroup to show or set the encryption for the media service account (#16492)
+* `az ams account storage set-authentication`: New command to set the authentication for the storage account associated with the media service account (#16492)
+* `az ams account create (mi-system-assigned)`: New --mi-system-assigned parameter for account create to set the managed identity of the media account (#16492)
+* `az ams account mru set`: This command will no longer work for Media Services accounts that are created with the 2020-05-01 version of the API or later. (#16492)
+* `az ams live-event create (stretch-mode, key-frame-interval, transcrip-lang, use-static-hostname, custom hostname)`: Add new parameter options to live-event create command (#16492)
+* `az ams live-event standby`: New command to put the live event in standby mode (#16492)
+* `az ams transform create (videoanalysismode, audioanalysis mode)`: New parameter options for transform create (#16492)
+
+**App Service**
+
+* `az webapp config ssl bind`: handle if webapp and appservice plan in different rg. Also reference text updates (#16778)
+* Fix #8743: az webapp deploy (#16715)
+* Bugfix: Add generateRandomAppNames.json to setup (#17035)
+* `az functionapp create`: Add preview support for creating dotnet-isolated apps. (#17066)
+* Fix #12150: Support for subnet ID in vnet-integration add (#16902)
+* `az functionapp create`: Remove preview flag from Node.js 14. (#16877)
+
+**ARM**
+
+* `az deployment group/sub/mg/tenant validate/create/what-if`: Add support for Bicep files (#16857)
+* `az bicep install`: New command for installing Bicep CLI (#16857)
+* `az bicep upgrade`: New command for upgrading Bicep CLI (#16857)
+* `az bicep build`: New command for building Bicep files (#16857)
+* `az bicep version`: New command for showing the current installed version of Bicep CLI (#16857)
+* `az bicep list-versions`: New command for showing the available Bicep CLI versions (#16857)
+* `az managedapp definition update`: Add new command for updating managedapp definition (#16966)
+
+**Backup**
+
+* `az backup recoverypoint show-log-chain`: Add start/end time in show-log-chain table output (#16753)
+* BugFix: Enable Alternate Location Restore for SQL/SAPHANA protected items (#16997)
+
+**CDN**
+
+* Add cli support for AFD SKU (#16951)
+
+**Compute**
+
+* `az vm (extension) image list`: Make it more robust (#16992)
+* `az vmss create`: Fix a license type issue (#17007)
+* Upgrade API version to 2020-12-01 (#17042)
+* `az vm create`: add `--enable-hotpatching` (#17042)
+
+**Cosmos DB**
+
+* Upgrade to version 3.0.0 and add support for NetworkAclBypass + Update Mongo ServerVersion + backup policy (#17021)
+
+**Extension**
+
+* Support config of extension index url (#15128)
+
+**IoT Central**
+
+* `az iot central app`: Address several S360 fixes (#17022)
+* `az iot central app update`: Remove the need of checking etag when updating the existing iotc app. (#17022)
+* Change the resourceType (IotApps) to be in camel case. (#17022)
+
+**Key Vault**
+
+* [BREAKING CHANGE] `az keyvault role assignment/definition list`: `roleDefinitionName` should be `roleName` in command output (#16781)
+* [BREAKING CHANGE] `id` changes to be `jobId`, `azureStorageBlobContainerUri` changes to be `folderUrl` in command output of `az keyvault backup/restore`, `az keyvault key restore` (#17011)
+
+**Network**
+
+* Bump version from '2020-07-01' to '2020-08-01' (#16889)
+* `az network public-ip create`: Support '--zone 1 2 3' after '2020-08-01' (#17043)
+* `az network routeserver peering`: Rename `--vrouter-name` by `--routeserver` (#17049)
+* `az network express-route peering create`: Support ipv6 address (#17048)
+* `az network public-ip create`: Expose a new argument `--tier` (#17069)
+
+**OpenShift**
+
+* Update of az openshift deprecation warning (#16604)
+
+**Search**
+
+* `az search`: Fix the `--identity-type` helper's guide. (#17039)
+
+**SQL**
+
+* Update az sql mi examples (#16852)
+* `az sql db/elastic-pool create/update`: Add maintenance-configuration argument (#16915)
+* `az sql db replica create`: Add --secondary-type argument (#16960)
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage account file-service-properties`: Default to enable delete retention policy with retention days 7 in server side (#17028)
+* Fix #16872: az storage blob now (2.19) requires login even if connection-string is provided (#16885)
+* Fix #16959: az storage copy crashes: ValidationError: local variable 'service' referenced before assignment (#16971)
+* Fix #14054: 'NoneType' object has no attribute '__name__' (#16993)
+* Fix #16679: `az storage blob download` fails with "Permission denied" if the destination file is a directory (#17008)
+* Upgrade storage api version to 2021-01-01 (#17028)
+* Support version in Lifecyle management policy (#16724)
+* Support storage account shared key access management (#16759)
+* `az storage account network-rule`: GA resource access rules (#16995)
+* Support double encryption for encryption scope (#17087)
+* `az storage account blob-service-properties update`: Support --change-feed-retention-days (#16990)
+* Support rewrite existing blob (#16796)
 
 2.19.1
 ++++++
