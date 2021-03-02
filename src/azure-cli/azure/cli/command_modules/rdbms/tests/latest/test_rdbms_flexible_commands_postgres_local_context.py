@@ -29,11 +29,6 @@ if postgres_location is None:
 
 
 # Local context test is separated out from the rest of the test due to daily pipeline run issue
-@pytest.fixture(autouse=True, scope='class')
-def postgres_location(request):
-    request.cls.postgres_location = request.config.getoption("--postgres-location")
-
-
 @pytest.mark.usefixtures("postgres_location")
 class PostgresFlexibleServerLocalContextScenarioTest(FlexibleServerLocalContextScenarioTest):
 

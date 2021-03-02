@@ -27,9 +27,8 @@ from .conftest import mysql_location
 if mysql_location is None:
     mysql_location = 'eastus2euap'
 
+
 # Local context test is separated out from the rest of the test due to daily pipeline run issue
-
-
 class MySqlFlexibleServerLocalContextScenarioTest(FlexibleServerLocalContextScenarioTest):
 
     mysql_location = mysql_location
