@@ -1142,6 +1142,12 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_download_file_path_validator(namespace):
+    if os.path.isdir(namespace.file_path):
+        from azure.cli.core.azclierror import FileOperationError
+        raise FileOperationError('File is expected, not a directory: {}'.format(namespace.file_path))
+
+
 def blob_rehydrate_priority_validator(namespace):
     if namespace.blob_type == 'page' and namespace.rehydrate_priority:
         raise ValueError('--rehydrate-priority is only applicable to block blob.')
@@ -1227,6 +1233,28 @@ def as_user_validator(namespace):
                 (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
+
+
+def validator_change_feed_retention_days(namespace):
+    enable = namespace.enable_change_feed
+    days = namespace.change_feed_retention_days
+
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if enable is False and days is not None:
+        raise InvalidArgumentValueError("incorrect usage: "
+                                        "'--change-feed-retention-days' is invalid "
+                                        "when '--enable-change-feed' is set to false")
+    if enable is None and days is not None:
+        raise InvalidArgumentValueError("incorrect usage: "
+                                        "please specify '--enable-change-feed true' if you "
+                                        "want to set the value for '--change-feed-retention-days'")
+    if days is not None:
+        if days < 1:
+            raise InvalidArgumentValueError("incorrect usage: "
+                                            "'--change-feed-retention-days' must be greater than or equal to 1")
+        if days > 146000:
+            raise InvalidArgumentValueError("incorrect usage: "
+                                            "'--change-feed-retention-days' must be less than or equal to 146000")
 
 
 def validator_delete_retention_days(namespace, enable=None, days=None):

@@ -174,7 +174,8 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text, format_styled_text
-    format_styled_text.theme = theme
+    if theme:
+        format_styled_text.theme = theme
     print_styled_text("[How to call print_styled_text]")
     # Print an empty line
     print_styled_text()

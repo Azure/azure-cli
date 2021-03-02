@@ -48,7 +48,7 @@ def load_arguments(self, _):
     deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
     management_group_id_type = CLIArgumentType(options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
-                                                    help="a template file path in the file system")
+                                                    help="a path to a template file or Bicep file in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], is_preview=True, help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
@@ -508,11 +508,12 @@ def load_arguments(self, _):
         c.argument('managedby_resource_group_id', options_list=['--managed-rg-id', '-m'], help='the resource group managed by the managed application')
         c.argument('parameters', help='JSON formatted string or a path to a file with such content', type=file_type)
 
-    with self.argument_context('managedapp definition create') as c:
-        c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
-        c.argument('createUiDefinition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
-        c.argument('mainTemplate', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
+    for operation in ['create', 'update']:
+        with self.argument_context('managedapp definition {}'.format(operation)) as c:
+            c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
+            c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
+            c.argument('create_ui_definition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('main_template', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)
@@ -569,3 +570,16 @@ def load_arguments(self, _):
 
     with self.argument_context('ts list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type)
+
+    with self.argument_context('bicep build') as c:
+        c.argument('files', arg_type=CLIArgumentType(nargs="+", options_list=['--files', '-f'], completer=FilesCompleter(),
+                                                     type=file_type, help="Space separated Bicep file paths in the file system."))
+        c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
+                                                      help="When set, prints all output to stdout instead of corresponding files."))
+
+    with self.argument_context('bicep decompile') as c:
+        c.argument('files', arg_type=CLIArgumentType(nargs="+", options_list=['--files', '-f'], completer=FilesCompleter(),
+                                                     type=file_type, help="Space separated ARM template paths in the file system."))
+
+    with self.argument_context('bicep install') as c:
+        c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.19.1"
+VERSION = "2.20.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -51,8 +51,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack==0.8.0rc2',
-    'msal~=1.0.0',
-    'msal-extensions~=0.1.3',
+    'msal~=1.9',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT==1.7.1',
