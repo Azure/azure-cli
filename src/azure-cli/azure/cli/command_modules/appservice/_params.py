@@ -233,6 +233,8 @@ def load_arguments(self, _):
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
+            c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
+            c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
         with self.argument_context(scope + ' config ssl show') as c:
             c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
