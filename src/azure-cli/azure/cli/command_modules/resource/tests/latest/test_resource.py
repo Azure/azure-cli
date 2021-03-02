@@ -5,15 +5,17 @@
 
 import json
 import os
+import platform
 import shutil
 import time
 import mock
 import unittest
+from pathlib import Path
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
@@ -665,6 +667,12 @@ class ProviderRegistrationTest(ScenarioTest):
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
 
+    def test_provider_registration_mg(self):
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
+
+        result = self.cmd('provider register -n {prov} --m testmg')
+        self.assertTrue(result, None)
+
 
 class ProviderOperationTest(ScenarioTest):
 
@@ -754,8 +762,12 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
 
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+            self.assertTrue("please provide --template-uri if --query-string is specified" in str(err.exception))
+
         # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -791,7 +803,7 @@ class TemplateSpecsTest(ScenarioTest):
         ])
 
         # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -861,11 +873,18 @@ class TemplateSpecsTest(ScenarioTest):
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
-        ts_cnt = self.cmd('ts show -g {rg} --name {template_spec_name}').get_output_in_json()
-        assert len(ts_cnt) > 0
-        ts_cnt_by_id = self.cmd('ts show --template-spec {template_spec_id}').get_output_in_json()
-        assert len(ts_cnt_by_id) > 0
-        assert len(ts_cnt) == len(ts_cnt_by_id)
+        ts_parent = self.cmd('ts show -g {rg} --name {template_spec_name}').get_output_in_json()
+        assert len(ts_parent) > 0
+        self.assertTrue(ts_parent['versions'] is not None)
+        ts_parent_by_id = self.cmd('ts show --template-spec {template_spec_id}').get_output_in_json()
+        assert len(ts_parent_by_id) > 0
+        assert len(ts_parent) == len(ts_parent_by_id)
+
+        ts_version = self.cmd('ts show -g {rg} --name {template_spec_name} --version 1.0').get_output_in_json()
+        assert len(ts_version) > 0
+        ts_version_by_id = self.cmd('ts show --template-spec {template_spec_version_id}').get_output_in_json()
+        assert len(ts_version_by_id) > 0
+        assert len(ts_version_by_id) == len(ts_version_by_id)
 
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
@@ -950,7 +969,7 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', {})])
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
 
-        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --yes')
+        self.cmd('ts create -g {rg} -n {template_spec_name} --yes')
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {})])
 
         # clean up
@@ -958,9 +977,8 @@ class TemplateSpecsTest(ScenarioTest):
 
 
 class TemplateSpecsExportTest(LiveScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_export_template_spec(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location='westus')
+    def test_template_spec_export_version(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         dir_name = self.create_random_name('TemplateSpecExport', 30)
         dir_name2 = self.create_random_name('TemplateSpecExport', 30)
@@ -1008,8 +1026,110 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(_template_file))
         self.assertTrue(os.path.isfile(_artifactFile))
         self.assertTrue(os.path.isfile(_artifactFile1))
-        self.assertTrue(os.path.isfile(_artifactFile2))\
+        self.assertTrue(os.path.isfile(_artifactFile2))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location="westus")
+    def test_template_spec_export_error_handling(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'template_spec_name': 'CLITestTemplateSpecExport',
+            'output_folder': os.path.dirname(os.path.realpath(__file__)).replace('\\', '\\\\')
+        })
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
+            self.assertTrue('Please specify the template spec version for export' in str(err.exception))
+
+
+class DeploymentTestsWithQueryString(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
+    @StorageAccountPreparer(name_prefix='testquerystrrg', location='eastus', kind='StorageV2')
+    def test_resource_group_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
+
+        container_name = self.create_random_name('querystr', 20)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'resource_group_level_linked_template.json')
+        linked_template = os.path.join(curr_dir, 'storage_account_linked_template.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'storage_account': storage_account,
+            'container_name': container_name,
+            'tf': tf,
+            'linked_tf': linked_template
+        })
+
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
+
+        self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
+
+        self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n storage_account_linked_template.json --account-name {storage_account} --account-key {storage_key}')
+
+        from datetime import datetime, timedelta
+        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs['sas_token'] = self.cmd(
+            'storage container generate-sas --account-name {storage_account} --account-key {storage_key} --name {container_name} --permissions rw --expiry {expiry}  -otsv').output.strip()
+
+        self.kwargs['blob_url'] = self.cmd(
+            'storage blob url -c {container_name} -n mainTemplate --account-name {storage_account} --account-key {storage_key}').output.strip()
+
+        self.cmd('deployment group validate -g {resource_group} --template-uri {blob_url} --query-string "{sas_token}" --parameters projectName=qsproject', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group create -g {resource_group} --template-uri {blob_url} --query-string "{sas_token}" --parameters projectName=qsproject', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_query_str_sub', location='eastus')
+    @StorageAccountPreparer(name_prefix='testquerystrsub', location='eastus', kind='StorageV2')
+    def test_subscription_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
+
+        container_name = self.create_random_name('querystr', 20)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'subscription_level_linked_template.json')
+        linked_tf = os.path.join(curr_dir, 'createResourceGroup.json')
+        linked_tf1 = os.path.join(curr_dir, 'createKeyVault.json')
+        linked_tf2 = os.path.join(curr_dir, 'createKeyVaultWithSecret.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'resource_group_location': resource_group_location,
+            'storage_account': storage_account,
+            'container_name': container_name,
+            'tf': tf,
+            'linked_tf': linked_tf,
+            'linked_tf1': linked_tf1,
+            'linked_tf2': linked_tf2
+        })
+
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
+
+        self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
+
+        self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n createResourceGroup.json --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf1}" -n createKeyVault.json --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf2}" -n createKeyVaultWithSecret.json --account-name {storage_account} --account-key {storage_key}')
+
+        from datetime import datetime, timedelta
+        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs['sas_token'] = self.cmd(
+            'storage container generate-sas --account-name {storage_account} --name {container_name} --permissions dlrw --expiry {expiry} --https-only -otsv').output.strip()
+
+        self.kwargs['blob_url'] = self.cmd(
+            'storage blob url -c {container_name} -n mainTemplate --account-name {storage_account}').output.strip()
+
+        self.kwargs['key_vault'] = self.create_random_name('querystrKV', 20)
+
+        self.cmd('deployment sub validate -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub create -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
 
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
@@ -2606,6 +2726,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
+            'new_ad_desc': 'new_test_appdef_123',
             'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
             'auth': principal_id + ':' + role_definition_id,
             'lock': 'None'
@@ -2624,13 +2745,26 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('artifacts[1].type', 'Custom')
         ]).get_output_in_json()['id']
 
+        # update a managedapp definition
+        self.cmd('managedapp definition update -n {adn} --package-file-uri {uri} --display-name {addn} --description {new_ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{new_ad_desc}'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
+        ])
+
         self.cmd('managedapp definition list -g {rg}',
                  checks=self.check('[0].name', '{adn}'))
 
         self.cmd('managedapp definition show --ids {ad_id}', checks=[
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
-            self.check('description', '{ad_desc}'),
+            self.check('description', '{new_ad_desc}'),
             self.check('authorizations[0].principalId', principal_id),
             self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
@@ -3125,6 +3259,111 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
             self.check('location', self.kwargs['location'])
         ])
         self.cmd('group delete -n {group2} -y')
+
+
+class BicepScenarioTest(ScenarioTest):
+    def test_bicep_list_versions(self):
+        self.cmd('az bicep list-versions', checks=[
+            self.greater_than('length(@)', 0)
+        ])
+
+
+class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+    def setup(self):
+        super.setup()
+        self._remove_bicep_cli()
+
+    def tearDown(self):
+        super().tearDown()
+        self._remove_bicep_cli()
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicep')
+    def test_resource_group_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_subscription_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy.bicep').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment sub validate --location westus --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment sub create --location westus --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_management_group_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy.bicep').replace('\\', '\\\\'),
+            'mg': self.create_random_name('azure-cli-management', 30)
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} --location WestUS --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_tenent_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'role_definition_deploy.bicep').replace('\\', '\\\\')
+        })
+
+        self.cmd('deployment tenant validate --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant create --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def _remove_bicep_cli(self):
+        bicep_cli_path = self._get_bicep_cli_path()
+        if os.path.isfile(bicep_cli_path):
+            os.remove(bicep_cli_path)
+
+    def _get_bicep_cli_path(self):
+        installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
+
+        if platform.system() == "Windows":
+            return os.path.join(installation_folder, "bicep.exe")
+        return os.path.join(installation_folder, "bicep")
 
 
 if __name__ == '__main__':

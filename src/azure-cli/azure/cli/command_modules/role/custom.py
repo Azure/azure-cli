@@ -316,17 +316,15 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     odata_filters = 'resourceProvider eq Microsoft.Authorization and {}'.format(time_filter)
 
     activity_log = list(client.activity_logs.list(filter=odata_filters))
-    start_events, end_events, offline_events = {}, {}, []
+    start_events, end_events = {}, {}
 
     for item in activity_log:
-        if item.http_request:
+        if item.operation_name.value.startswith('Microsoft.Authorization/roleAssignments'):
             if item.status.value == 'Started':
                 start_events[item.operation_id] = item
             else:
                 end_events[item.operation_id] = item
-        elif item.event_name and item.event_name.value.lower() == 'classicadministrators':
-            offline_events.append(item)
-    return start_events, end_events, offline_events, client
+    return start_events, end_events
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
@@ -334,7 +332,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
-    start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
+    start_events, end_events = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
 
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
@@ -349,8 +347,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                 continue
 
             entry = {}
-            op = e.operation_name and e.operation_name.value
-            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+            if e.status.value == 'Succeeded':
                 s, payload = start_events[op_id], None
                 entry = dict.fromkeys(
                     ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
@@ -408,25 +405,6 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
             if principal_dics:
                 for e in result:
                     e['principalName'] = principal_dics.get(e['principalId'], None)
-
-    offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
-                                                    x.operation_name.value.lower().startswith(
-                                                        'microsoft.authorization/classicadministrators'))]
-    for e in offline_events:
-        entry = {
-            'timestamp': e.event_timestamp,
-            'caller': 'Subscription Admin',
-            'roleDefinitionId': None,
-            'principalId': None,
-            'principalType': 'User',
-            'scope': '/subscriptions/' + client.config.subscription_id,
-            'scopeType': 'Subscription',
-            'scopeName': client.config.subscription_id,
-        }
-        if e.properties:
-            entry['principalName'] = e.properties.get('adminEmail')
-            entry['roleName'] = e.properties.get('adminType')
-        result.append(entry)
 
     return result
 

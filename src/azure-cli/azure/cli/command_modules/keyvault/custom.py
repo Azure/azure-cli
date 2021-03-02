@@ -1127,9 +1127,8 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'hsm_name': hsm_name})
     return sdk_no_wait(
         no_wait, backup_client.begin_selective_restore,
-        blob_storage_uri=storage_resource_uri,
+        folder_url='{}/{}'.format(storage_resource_uri, backup_folder),
         sas_token=token,
-        folder_name=backup_folder,
         key_name=key_name
     )
 
@@ -1189,7 +1188,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA'):
+               byok_string=None, kty='RSA', curve=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
@@ -1234,6 +1233,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
 
         key_obj.kty = kty + '-HSM'
         key_obj.t = byok_data
+        key_obj.crv = curve
 
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 
@@ -1569,7 +1569,7 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
                 f.write(cert)
             else:
                 import base64
-                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
@@ -1818,14 +1818,14 @@ def _resolve_role_id(client, role, scope):
     else:
         all_roles = list_role_definitions(client, scope=scope)
         for _role in all_roles:
-            if getattr(_role, 'role_name', None) == role:
-                role_id = _role.id
+            if _role.get('roleName', None) == role:
+                role_id = _role['id']
                 break
     return role_id
 
 
 def _get_role_dics(role_defs):
-    return {i.id: getattr(i, 'role_name', None) for i in role_defs}
+    return {i['id']: i.get('roleName', None) for i in role_defs}
 
 
 def _get_principal_dics(cli_ctx, role_assignments):
@@ -1848,7 +1848,7 @@ def _get_principal_dics(cli_ctx, role_assignments):
 
 def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     ret = {
-        'id': role_assignment.assignment_id,
+        'id': role_assignment.role_assignment_id,
         'name': role_assignment.name,
         'scope': role_assignment.scope,
         'type': role_assignment.type
@@ -1856,9 +1856,9 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     role_definition_id = getattr(role_assignment, 'role_definition_id', None)
     ret['roleDefinitionId'] = role_definition_id
     if role_definition_id:
-        ret['roleDefinitionName'] = role_dics.get(role_definition_id)
+        ret['roleName'] = role_dics.get(role_definition_id)
     else:
-        ret['roleDefinitionName'] = None  # the role definition might have been deleted
+        ret['roleName'] = None  # the role definition might have been deleted
 
     # fill in principal names
     principal_id = getattr(role_assignment, 'principal_id', None)
@@ -2006,12 +2006,38 @@ def list_role_assignments(cmd, client, scope=None, assignee=None, role=None, ass
     return ret
 
 
+def _reconstruct_role_definition(role_definition):
+    ret_permissions = []
+    permissions = role_definition.permissions
+    for permission in permissions:
+        ret_permissions.append({
+            'actions': permission.allowed_actions,
+            'notActions': permission.denied_actions,
+            'dataActions': permission.allowed_data_actions,
+            'notDataActions': permission.denied_data_actions
+        })
+
+    ret = {
+        'assignableScopes': role_definition.assignable_scopes,
+        'description': role_definition.description,
+        'id': role_definition.id,
+        'name': role_definition.name,
+        'permissions': ret_permissions,
+        'roleName': role_definition.role_name,
+        'roleType': role_definition.role_type,
+        'type': role_definition.type,
+    }
+
+    return ret
+
+
 def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable=unused-argument
     """ List role definitions. """
     query_scope = scope
     if query_scope is None:
         query_scope = ''
-    return client.list_role_definitions(role_scope=query_scope)
+    role_definitions = client.list_role_definitions(role_scope=query_scope)
+    return [_reconstruct_role_definition(role) for role in role_definitions]
 # endregion
 
 
@@ -2041,7 +2067,7 @@ def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_n
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_full_backup(storage_resource_uri, token)
+    return client.begin_backup(storage_resource_uri, token)
 
 
 def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
@@ -2050,7 +2076,8 @@ def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=Non
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_full_restore(storage_resource_uri, token, folder_to_restore)
+    folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
+    return client.begin_restore(folder_url, token)
 # endregion
 
 

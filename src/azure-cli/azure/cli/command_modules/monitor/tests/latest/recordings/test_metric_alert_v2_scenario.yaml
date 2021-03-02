@@ -17,14 +17,11 @@ interactions:
       Content-Length:
       - '331'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1?api-version=2019-06-01
   response:
@@ -38,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:55:27 GMT
+      - Mon, 01 Feb 2021 07:57:11 GMT
       expires:
       - '-1'
       pragma:
@@ -50,7 +47,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -72,14 +69,11 @@ interactions:
       Content-Length:
       - '331'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2?api-version=2019-06-01
   response:
@@ -93,7 +87,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:55:39 GMT
+      - Mon, 01 Feb 2021 07:57:17 GMT
       expires:
       - '-1'
       pragma:
@@ -105,23 +99,23 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1197'
     status:
       code: 201
       message: Created
 - request:
     body: '{"location": "global", "properties": {"description": "Test", "severity":
       2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceType": "Microsoft.Storage/storageAccounts",
-      "targetResourceRegion": "global", "criteria": {"odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
-      "allOf": [{"name": "cond0", "metricName": "transactions", "timeAggregation":
-      "Total", "dimensions": [{"name": "ResponseType", "operator": "Include", "values":
-      ["Success"]}, {"name": "ApiName", "operator": "Include", "values": ["GetBlob"]}],
-      "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan", "threshold":
-      5.0}, {"name": "cond1", "metricName": "SuccessE2ELatency", "timeAggregation":
-      "Average", "dimensions": [{"name": "ApiName", "operator": "Include", "values":
-      ["GetBlob"]}], "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan",
-      "threshold": 250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "transactions", "timeAggregation": "Total", "dimensions": [{"name": "ResponseType",
+      "operator": "Include", "values": ["Success"]}, {"name": "ApiName", "operator":
+      "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      5.0}, {"criterionType": "StaticThresholdCriterion", "name": "cond1", "metricName":
+      "SuccessE2ELatency", "timeAggregation": "Average", "dimensions": [{"name": "ApiName",
+      "operator": "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
     headers:
       Accept:
       - application/json
@@ -132,16 +126,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1376'
+      - '1315'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n --scopes --action --description --condition --condition
+      - -g -n --scopes --action --region --description --condition --condition
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -153,7 +144,7 @@ interactions:
         [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
         \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
-        5.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\": \"Microsoft.Storage/storageAccounts\",\r\n
+        5.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\": \"microsoft.storage/storageaccounts\",\r\n
         \         \"metricName\": \"transactions\",\r\n          \"dimensions\": [\r\n
         \           {\r\n              \"name\": \"ResponseType\",\r\n              \"operator\":
         \"Include\",\r\n              \"values\": [\r\n                \"Success\"\r\n
@@ -163,16 +154,16 @@ interactions:
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Total\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
         \       },\r\n        {\r\n          \"threshold\": 250.0,\r\n          \"name\":
-        \"cond1\",\r\n          \"metricNamespace\": \"Microsoft.Storage/storageAccounts\",\r\n
+        \"cond1\",\r\n          \"metricNamespace\": \"microsoft.storage/storageaccounts\",\r\n
         \         \"metricName\": \"SuccessE2ELatency\",\r\n          \"dimensions\":
         [\r\n            {\r\n              \"name\": \"ApiName\",\r\n              \"operator\":
         \"Include\",\r\n              \"values\": [\r\n                \"GetBlob\"\r\n
         \             ]\r\n            }\r\n          ],\r\n          \"operator\":
         \"GreaterThan\",\r\n          \"timeAggregation\": \"Average\",\r\n          \"criterionType\":
         \"StaticThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
-        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n    },\r\n
-        \   \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n    \"targetResourceRegion\":
-        \"global\",\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n    },\r\n
+        \   \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n    \"targetResourceRegion\":
+        \"westus\",\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
@@ -181,11 +172,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2462'
+      - '2460'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:55:52 GMT
+      - Mon, 01 Feb 2021 07:57:31 GMT
       expires:
       - '-1'
       pragma:
@@ -203,7 +194,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
+      - '298'
       x-powered-by:
       - ASP.NET
     status:
@@ -224,10 +215,7 @@ interactions:
       - -g -n --severity --description --add-action --remove-action --remove-conditions
         --evaluation-frequency --window-size --tags --auto-mitigate
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -239,7 +227,7 @@ interactions:
         [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
         \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
-        5.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\": \"Microsoft.Storage/storageAccounts\",\r\n
+        5.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\": \"microsoft.storage/storageaccounts\",\r\n
         \         \"metricName\": \"transactions\",\r\n          \"dimensions\": [\r\n
         \           {\r\n              \"name\": \"ResponseType\",\r\n              \"operator\":
         \"Include\",\r\n              \"values\": [\r\n                \"Success\"\r\n
@@ -249,16 +237,16 @@ interactions:
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Total\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
         \       },\r\n        {\r\n          \"threshold\": 250.0,\r\n          \"name\":
-        \"cond1\",\r\n          \"metricNamespace\": \"Microsoft.Storage/storageAccounts\",\r\n
+        \"cond1\",\r\n          \"metricNamespace\": \"microsoft.storage/storageaccounts\",\r\n
         \         \"metricName\": \"SuccessE2ELatency\",\r\n          \"dimensions\":
         [\r\n            {\r\n              \"name\": \"ApiName\",\r\n              \"operator\":
         \"Include\",\r\n              \"values\": [\r\n                \"GetBlob\"\r\n
         \             ]\r\n            }\r\n          ],\r\n          \"operator\":
         \"GreaterThan\",\r\n          \"timeAggregation\": \"Average\",\r\n          \"criterionType\":
         \"StaticThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
-        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n    },\r\n
-        \   \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n    \"targetResourceRegion\":
-        \"global\",\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n    },\r\n
+        \   \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n    \"targetResourceRegion\":
+        \"westus\",\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
@@ -267,11 +255,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2462'
+      - '2460'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:55:53 GMT
+      - Mon, 01 Feb 2021 07:57:32 GMT
       expires:
       - '-1'
       pragma:
@@ -297,13 +285,13 @@ interactions:
     body: '{"location": "global", "tags": {"foo": "boo"}, "properties": {"description":
       "alt desc", "severity": 3, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
       "evaluationFrequency": "PT5M", "windowSize": "PT15M", "targetResourceType":
-      "Microsoft.Storage/storageAccounts", "targetResourceRegion": "global", "criteria":
-      {"odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
-      "allOf": [{"name": "cond1", "metricName": "SuccessE2ELatency", "metricNamespace":
-      "Microsoft.Storage/storageAccounts", "timeAggregation": "Average", "dimensions":
-      [{"name": "ApiName", "operator": "Include", "values": ["GetBlob"]}], "criterionType":
-      "StaticThresholdCriterion", "operator": "GreaterThan", "threshold": 250.0}]},
-      "autoMitigate": true, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2",
+      "microsoft.storage/storageaccounts", "targetResourceRegion": "westus", "criteria":
+      {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond1", "metricName":
+      "SuccessE2ELatency", "metricNamespace": "microsoft.storage/storageaccounts",
+      "timeAggregation": "Average", "dimensions": [{"name": "ApiName", "operator":
+      "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      250.0}]}, "autoMitigate": true, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2",
       "webHookProperties": {"test": "best"}}]}}'
     headers:
       Accept:
@@ -315,17 +303,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1200'
+      - '1198'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --severity --description --add-action --remove-action --remove-conditions
         --evaluation-frequency --window-size --tags --auto-mitigate
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -338,15 +323,15 @@ interactions:
         \   ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\": \"PT15M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
         250.0,\r\n          \"name\": \"cond1\",\r\n          \"metricNamespace\":
-        \"Microsoft.Storage/storageAccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \"microsoft.storage/storageaccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
         \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
         \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
         \               \"GetBlob\"\r\n              ]\r\n            }\r\n          ],\r\n
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \   \"targetResourceRegion\": \"global\",\r\n    \"actions\": [\r\n      {\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n
+        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
         \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
         \       \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n        }\r\n
         \     }\r\n    ]\r\n  }\r\n}"
@@ -356,11 +341,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1888'
+      - '1886'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:09 GMT
+      - Mon, 01 Feb 2021 07:57:47 GMT
       expires:
       - '-1'
       pragma:
@@ -378,7 +363,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
+      - '298'
       x-powered-by:
       - ASP.NET
     status:
@@ -398,10 +383,7 @@ interactions:
       ParameterSetName:
       - -g -n --enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -414,15 +396,15 @@ interactions:
         \   ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\": \"PT15M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
         250.0,\r\n          \"name\": \"cond1\",\r\n          \"metricNamespace\":
-        \"Microsoft.Storage/storageAccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \"microsoft.storage/storageaccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
         \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
         \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
         \               \"GetBlob\"\r\n              ]\r\n            }\r\n          ],\r\n
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \   \"targetResourceRegion\": \"global\",\r\n    \"actions\": [\r\n      {\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n
+        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
         \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
         \       \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n        }\r\n
         \     }\r\n    ]\r\n  }\r\n}"
@@ -432,11 +414,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1888'
+      - '1886'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:10 GMT
+      - Mon, 01 Feb 2021 07:57:47 GMT
       expires:
       - '-1'
       pragma:
@@ -462,13 +444,13 @@ interactions:
     body: '{"location": "global", "tags": {"foo": "boo"}, "properties": {"description":
       "alt desc", "severity": 3, "enabled": false, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
       "evaluationFrequency": "PT5M", "windowSize": "PT15M", "targetResourceType":
-      "Microsoft.Storage/storageAccounts", "targetResourceRegion": "global", "criteria":
-      {"odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
-      "allOf": [{"name": "cond1", "metricName": "SuccessE2ELatency", "metricNamespace":
-      "Microsoft.Storage/storageAccounts", "timeAggregation": "Average", "dimensions":
-      [{"name": "ApiName", "operator": "Include", "values": ["GetBlob"]}], "criterionType":
-      "StaticThresholdCriterion", "operator": "GreaterThan", "threshold": 250.0}]},
-      "autoMitigate": true, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2",
+      "microsoft.storage/storageaccounts", "targetResourceRegion": "westus", "criteria":
+      {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond1", "metricName":
+      "SuccessE2ELatency", "metricNamespace": "microsoft.storage/storageaccounts",
+      "timeAggregation": "Average", "dimensions": [{"name": "ApiName", "operator":
+      "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      250.0}]}, "autoMitigate": true, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2",
       "webHookProperties": {"test": "best"}}]}}'
     headers:
       Accept:
@@ -480,16 +462,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1201'
+      - '1199'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -502,15 +481,15 @@ interactions:
         \   ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\": \"PT15M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
         250.0,\r\n          \"name\": \"cond1\",\r\n          \"metricNamespace\":
-        \"Microsoft.Storage/storageAccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \"microsoft.storage/storageaccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
         \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
         \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
         \               \"GetBlob\"\r\n              ]\r\n            }\r\n          ],\r\n
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \   \"targetResourceRegion\": \"global\",\r\n    \"actions\": [\r\n      {\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n
+        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
         \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
         \       \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n        }\r\n
         \     }\r\n    ]\r\n  }\r\n}"
@@ -520,11 +499,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1889'
+      - '1887'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:15 GMT
+      - Mon, 01 Feb 2021 07:57:54 GMT
       expires:
       - '-1'
       pragma:
@@ -562,10 +541,7 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts?api-version=2018-03-01
   response:
@@ -579,16 +555,16 @@ interactions:
         \       ],\r\n        \"evaluationFrequency\": \"PT5M\",\r\n        \"windowSize\":
         \"PT15M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
         \             \"threshold\": 250.0,\r\n              \"name\": \"cond1\",\r\n
-        \             \"metricNamespace\": \"Microsoft.Storage/storageAccounts\",\r\n
+        \             \"metricNamespace\": \"microsoft.storage/storageaccounts\",\r\n
         \             \"metricName\": \"SuccessE2ELatency\",\r\n              \"dimensions\":
         [\r\n                {\r\n                  \"name\": \"ApiName\",\r\n                  \"operator\":
         \"Include\",\r\n                  \"values\": [\r\n                    \"GetBlob\"\r\n
         \                 ]\r\n                }\r\n              ],\r\n              \"operator\":
         \"GreaterThan\",\r\n              \"timeAggregation\": \"Average\",\r\n              \"criterionType\":
         \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
-        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
-        \       \"autoMitigate\": true,\r\n        \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \       \"targetResourceRegion\": \"global\",\r\n        \"actions\": [\r\n
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"autoMitigate\": true,\r\n        \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
         \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
         \           \"webHookProperties\": {\r\n              \"test\": \"best\"\r\n
         \           }\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"
@@ -598,11 +574,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2126'
+      - '2124'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:16 GMT
+      - Mon, 01 Feb 2021 07:57:55 GMT
       expires:
       - '-1'
       pragma:
@@ -638,10 +614,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -654,15 +627,15 @@ interactions:
         \   ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\": \"PT15M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
         250.0,\r\n          \"name\": \"cond1\",\r\n          \"metricNamespace\":
-        \"Microsoft.Storage/storageAccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \"microsoft.storage/storageaccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
         \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
         \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
         \               \"GetBlob\"\r\n              ]\r\n            }\r\n          ],\r\n
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \   \"targetResourceRegion\": \"global\",\r\n    \"actions\": [\r\n      {\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n
+        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
         \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
         \       \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n        }\r\n
         \     }\r\n    ]\r\n  }\r\n}"
@@ -672,11 +645,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1889'
+      - '1887'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:17 GMT
+      - Mon, 01 Feb 2021 07:57:55 GMT
       expires:
       - '-1'
       pragma:
@@ -702,7 +675,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -714,10 +687,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -731,7 +701,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 10 Dec 2020 07:56:29 GMT
+      - Mon, 01 Feb 2021 07:58:00 GMT
       expires:
       - '-1'
       pragma:
@@ -745,7 +715,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
       x-powered-by:
       - ASP.NET
     status:
@@ -765,10 +735,7 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts?api-version=2018-03-01
   response:
@@ -784,7 +751,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:29 GMT
+      - Mon, 01 Feb 2021 07:58:01 GMT
       expires:
       - '-1'
       pragma:
@@ -809,11 +776,11 @@ interactions:
 - request:
     body: '{"location": "global", "properties": {"description": "Test2", "severity":
       2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceType": "Microsoft.Storage/storageAccounts",
-      "targetResourceRegion": "global", "criteria": {"odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
-      "allOf": [{"name": "cond0", "metricName": "SuccessE2ELatency", "timeAggregation":
-      "Average", "dimensions": [{"name": "ApiName", "operator": "Include", "values":
-      ["GetBlob:"]}], "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan",
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "SuccessE2ELatency", "timeAggregation": "Average", "dimensions": [{"name": "ApiName",
+      "operator": "Include", "values": ["GetBlob:"]}], "operator": "GreaterThan",
       "threshold": 250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
     headers:
       Accept:
@@ -825,16 +792,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1056'
+      - '995'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n --scopes --action --description --condition
+      - -g -n --scopes --region --action --description --condition
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -847,15 +811,15 @@ interactions:
         \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
         250.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\":
-        \"Microsoft.Storage/storageAccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \"microsoft.storage/storageaccounts\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
         \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
         \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
         \               \"GetBlob:\"\r\n              ]\r\n            }\r\n          ],\r\n
         \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
         \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \   \"targetResourceRegion\": \"global\",\r\n    \"actions\": [\r\n      {\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"targetResourceType\": \"microsoft.storage/storageaccounts\",\r\n
+        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
         \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
@@ -864,11 +828,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1751'
+      - '1749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:48 GMT
+      - Mon, 01 Feb 2021 07:58:13 GMT
       expires:
       - '-1'
       pragma:
@@ -886,7 +850,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '297'
+      - '296'
       x-powered-by:
       - ASP.NET
     status:
@@ -906,15 +870,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-10T07:54:44Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-01T07:56:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -923,7 +887,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:52 GMT
+      - Mon, 01 Feb 2021 07:58:16 GMT
       expires:
       - '-1'
       pragma:
@@ -956,8 +920,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: POST
@@ -973,7 +937,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:56:53 GMT
+      - Mon, 01 Feb 2021 07:58:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1011,15 +975,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-10T07:54:44Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-02-01T07:56:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1028,7 +992,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:56:54 GMT
+      - Mon, 01 Feb 2021 07:58:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1061,26 +1025,27 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1?api-version=2019-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":40437,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-137_40437","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"azBalancing":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"westus","properties":{"serverFarmId":49825,"name":"plan1","sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-141_49825","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"azBalancing":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1487'
+      - '1559'
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:57:04 GMT
+      - Mon, 01 Feb 2021 07:58:31 GMT
+      etag:
+      - '"1D6F87007883180"'
       expires:
       - '-1'
       pragma:
@@ -1118,8 +1083,8 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
@@ -1127,8 +1092,8 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":40437,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-137_40437","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"azBalancing":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+        US","properties":{"serverFarmId":49825,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-141_49825","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"azBalancing":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -1137,7 +1102,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:57:06 GMT
+      - Mon, 01 Feb 2021 07:58:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1178,8 +1143,8 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: POST
@@ -1195,7 +1160,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:57:06 GMT
+      - Mon, 01 Feb 2021 07:58:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1233,8 +1198,8 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: GET
@@ -1242,8 +1207,8 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":40437,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-137_40437","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"azBalancing":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+        US","properties":{"serverFarmId":49825,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-141_49825","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"azBalancing":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -1252,7 +1217,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:57:08 GMT
+      - Mon, 01 Feb 2021 07:58:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1292,8 +1257,8 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: POST
@@ -1309,7 +1274,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:57:09 GMT
+      - Mon, 01 Feb 2021 07:58:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1353,8 +1318,8 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: PUT
@@ -1362,20 +1327,20 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/sites/app000003","name":"app000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"app000003","state":"Running","hostNames":["app000003.azurewebsites.net"],"webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","selfLink":"https://waws-prod-bay-137.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_metric_alert_v2000001-WestUSwebspace/sites/app000003","repositorySiteName":"app000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["app000003.azurewebsites.net","app000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"app000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"app000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2020-12-10T07:57:15.57","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":null,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":null,"windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"azureStorageAccounts":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":null,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        US","properties":{"name":"app000003","state":"Running","hostNames":["app000003.azurewebsites.net"],"webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","selfLink":"https://waws-prod-bay-141.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_metric_alert_v2000001-WestUSwebspace/sites/app000003","repositorySiteName":"app000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["app000003.azurewebsites.net","app000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"app000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"app000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-02-01T07:58:42.6966667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":null,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":null,"windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"azureStorageAccounts":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":null,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":null,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0},"deploymentId":"app000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"40.112.243.6","possibleInboundIpAddresses":"40.112.243.6","ftpUsername":"app000003\\$app000003","ftpsHostName":"ftps://waws-prod-bay-137.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.112.243.6,13.93.220.248,13.93.221.96,13.93.221.41,13.93.220.182","possibleOutboundIpAddresses":"40.112.243.6,13.93.220.248,13.93.221.96,13.93.221.41,13.93.220.182,13.93.221.147,13.93.220.112,13.91.111.88,13.93.220.5,13.93.220.231","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-137","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_metric_alert_v2000001","defaultHostName":"app000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":null,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0},"deploymentId":"app000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"40.112.243.8","possibleInboundIpAddresses":"40.112.243.8","ftpUsername":"app000003\\$app000003","ftpsHostName":"ftps://waws-prod-bay-141.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.112.243.8,52.160.87.144,52.160.81.29,40.83.173.84,52.160.87.145","possibleOutboundIpAddresses":"40.112.243.8,52.160.87.144,52.160.81.29,40.83.173.84,52.160.87.145,52.160.69.205,40.118.207.199,52.160.67.221,52.160.67.220,52.160.67.45","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-141","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_metric_alert_v2000001","defaultHostName":"app000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5761'
+      - '5962'
       content-type:
       - application/json
       date:
-      - Thu, 10 Dec 2020 07:57:38 GMT
+      - Mon, 01 Feb 2021 07:59:00 GMT
       etag:
-      - '"1D6CECA1384E340"'
+      - '"1D6F8700F686355"'
       expires:
       - '-1'
       pragma:
@@ -1417,8 +1382,8 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-web/0.48.0 Azure-SDK-For-Python AZURECLI/2.18.0
       accept-language:
       - en-US
     method: POST
@@ -1427,22 +1392,22 @@ interactions:
     body:
       string: <publishData><publishProfile profileName="app000003 - Web Deploy" publishMethod="MSDeploy"
         publishUrl="app000003.scm.azurewebsites.net:443" msdeploySite="app000003"
-        userName="$app000003" userPWD="iESA9CfDxPjsnjinKfSEFdmzHhjjt45B44e83BPujucPetek5GMiisPieKuc"
+        userName="$app000003" userPWD="pKrEgkFozHm8WtJ0tl0RfRLyDbaPvPAyupA7ASJm3cGxug51MGJQNl8oz7Ey"
         destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="app000003
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-137.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="app000003\$app000003" userPWD="iESA9CfDxPjsnjinKfSEFdmzHhjjt45B44e83BPujucPetek5GMiisPieKuc"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-141.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="app000003\$app000003" userPWD="pKrEgkFozHm8WtJ0tl0RfRLyDbaPvPAyupA7ASJm3cGxug51MGJQNl8oz7Ey"
         destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="app000003
         - Zip Deploy" publishMethod="ZipDeploy" publishUrl="app000003.scm.azurewebsites.net:443"
-        userName="$app000003" userPWD="iESA9CfDxPjsnjinKfSEFdmzHhjjt45B44e83BPujucPetek5GMiisPieKuc"
+        userName="$app000003" userPWD="pKrEgkFozHm8WtJ0tl0RfRLyDbaPvPAyupA7ASJm3cGxug51MGJQNl8oz7Ey"
         destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="app000003
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-137dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="app000003\$app000003" userPWD="iESA9CfDxPjsnjinKfSEFdmzHhjjt45B44e83BPujucPetek5GMiisPieKuc"
+        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-141dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="app000003\$app000003" userPWD="pKrEgkFozHm8WtJ0tl0RfRLyDbaPvPAyupA7ASJm3cGxug51MGJQNl8oz7Ey"
         destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>
@@ -1454,7 +1419,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 10 Dec 2020 07:57:40 GMT
+      - Mon, 01 Feb 2021 07:59:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1477,12 +1442,12 @@ interactions:
 - request:
     body: '{"location": "global", "properties": {"description": "Test *", "severity":
       2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/sites/app000003"],
-      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceType": "Microsoft.Web/sites",
-      "targetResourceRegion": "global", "criteria": {"odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
-      "allOf": [{"name": "cond0", "metricName": "Http4xx", "timeAggregation": "Total",
-      "dimensions": [{"name": "Instance", "operator": "Include", "values": ["*"]}],
-      "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan", "threshold":
-      10.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "West US", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "Http4xx", "timeAggregation": "Total", "dimensions": [{"name": "Instance", "operator":
+      "Include", "values": ["*"]}], "operator": "GreaterThan", "threshold": 10.0}]},
+      "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
     headers:
       Accept:
       - application/json
@@ -1493,16 +1458,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1001'
+      - '955'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n --scopes --action --description --condition
+      - -g -n --scopes --region --action --description --condition
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert12?api-version=2018-03-01
   response:
@@ -1515,15 +1477,15 @@ interactions:
         \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
         \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
         10.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\":
-        \"Microsoft.Web/sites\",\r\n          \"metricName\": \"Http4xx\",\r\n          \"dimensions\":
+        \"microsoft.web/sites\",\r\n          \"metricName\": \"Http4xx\",\r\n          \"dimensions\":
         [\r\n            {\r\n              \"name\": \"Instance\",\r\n              \"operator\":
         \"Include\",\r\n              \"values\": [\r\n                \"*\"\r\n              ]\r\n
         \           }\r\n          ],\r\n          \"operator\": \"GreaterThan\",\r\n
         \         \"timeAggregation\": \"Total\",\r\n          \"criterionType\":
         \"StaticThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
-        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n    },\r\n
-        \   \"targetResourceType\": \"Microsoft.Web/sites\",\r\n    \"targetResourceRegion\":
-        \"global\",\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n    },\r\n
+        \   \"targetResourceType\": \"microsoft.web/sites\",\r\n    \"targetResourceRegion\":
+        \"westus\",\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
@@ -1532,11 +1494,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1684'
+      - '1682'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Dec 2020 07:57:54 GMT
+      - Mon, 01 Feb 2021 07:59:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1554,7 +1516,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '296'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:

@@ -392,7 +392,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
                    fileupload_storage_container_uri=None,
-                   min_tls_version=None):
+                   min_tls_version=None,
+                   tags=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
@@ -439,7 +440,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
 
     hub_description = IotHubDescription(location=location,
                                         sku=sku,
-                                        properties=properties)
+                                        properties=properties,
+                                        tags=tags)
 
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
 
@@ -479,8 +481,11 @@ def update_iot_hub_custom(instance,
                           fileupload_storage_container_name=None,
                           fileupload_sas_ttl=None,
                           fileupload_storage_authentication_type=None,
-                          fileupload_storage_container_uri=None):
+                          fileupload_storage_container_uri=None,
+                          tags=None):
     from datetime import timedelta
+    if tags is not None:
+        instance.tags = tags
     if sku is not None:
         instance.sku.name = sku
     if unit is not None:
@@ -1086,8 +1091,7 @@ def iot_central_app_list(client, resource_group_name=None):
 
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
-    etag = parameters.additional_properties['etag']
-    return client.apps.update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
+    return client.apps.update(resource_group_name, app_name, parameters)
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):

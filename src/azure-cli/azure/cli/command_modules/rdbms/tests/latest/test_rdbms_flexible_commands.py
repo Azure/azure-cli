@@ -65,20 +65,27 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_mgmt(self, resource_group):
-        self._test_flexible_server_mgmt('postgres', resource_group)
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_mgmt(self, resource_group):
-        self._test_flexible_server_mgmt('mysql', resource_group)
+    def test_mysql_flexible_server_iops_mgmt(self, resource_group):
+        self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-    def _test_flexible_server_mgmt(self, database_engine, resource_group):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group, server):
+        self._test_flexible_server_mgmt('postgres', resource_group, server)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    @ServerPreparer(engine_type='mysql', location=mysql_location)
+    def test_mysql_flexible_server_mgmt(self, resource_group, server):
+        self._test_flexible_server_mgmt('mysql', resource_group, server)
+
+    def _test_flexible_server_mgmt(self, database_engine, resource_group, server_name):
 
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
@@ -95,10 +102,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             storage_size = 10
             version = '5.7'
             location = self.mysql_location
-        location_result = 'Southeast Asia'
+        location_result = 'East US 2 EUAP'
 
         # flexible-server create with user input
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        random_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        random_name2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         storage_size_mb = storage_size * 1024
         backup_retention = 7
 
@@ -111,20 +119,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
-                 .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
-            self.cmd('postgres flexible-server create -g {} -l {} --tier Burstable --sku-name Standard_B1ms --public-access none'
-                     .format(resource_group, location))
-            self.cmd('postgres flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
-                     .format(resource_group, location))
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier Burstable --sku-name Standard_B1ms --public-access none'
+                     .format(resource_group, location, random_name))
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
+                     .format(resource_group, location, random_name2))
         elif database_engine == 'mysql':
-            self.cmd('mysql flexible-server create -g {} -l {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --public-access none'
-                     .format(resource_group, location))
-            self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2ds_v4 --public-access none'
-                     .format(resource_group, location))
+            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
+                     .format(resource_group, location, random_name))
+            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
+                     .format(resource_group, location, random_name2))
 
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=list_checks)
@@ -132,6 +138,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'mysql':
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
                      .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('name', 'flexibleserverdb')])
+
+        self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
+                 .format(database_engine, resource_group, server_name))
 
         self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
                  .format(database_engine, resource_group, server_name),
@@ -146,7 +155,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             sku_name = 'Standard_B1ms'
         elif database_engine == 'mysql':
             tier = 'GeneralPurpose'
-            sku_name = 'Standard_D2ds_v4'
+            sku_name = 'Standard_D2s_v3'
 
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
                  .format(database_engine, resource_group, server_name, tier, sku_name),
@@ -166,10 +175,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         restore_server_name = 'restore-' + server_name
         restore_time = (current_time + timedelta(minutes=10)).replace(tzinfo=tzutc()).isoformat()
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
-                 .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
-                 checks=[JMESPathCheck('name', restore_server_name),
-                         JMESPathCheck('resourceGroup', resource_group)])
+
+        if database_engine == 'postgres':
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {} --zone 2'
+                     .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
+                     checks=[JMESPathCheck('name', restore_server_name),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('availabilityZone', 2)])
+        else:
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
+                     .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
+                     checks=[JMESPathCheck('name', restore_server_name),
+                             JMESPathCheck('resourceGroup', resource_group)])
 
         self.cmd('{} flexible-server restart -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
@@ -195,13 +212,64 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
+    def _test_flexible_server_iops_mgmt(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
+        location = self.mysql_location
+
+        # flexible-server create with user input
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
+        server_name_3 = self.create_random_name(SERVER_NAME_PREFIX + '3', SERVER_NAME_MAX_LENGTH)
+
+        # IOPS passed is within limit of max allowed by SKU but smaller than storage*3
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 200 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name, location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+
+        # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 400'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 600)])
+
+        # SKU downgraded and IOPS not specified
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+
+        # IOPS passed is within limit of max allowed by SKU but smaller than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name_2, location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 100)])
+
+        # SKU upgraded and IOPS value set bigger than max iops for the sku
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 700'
+                 .format(database_engine, resource_group, server_name_2),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+
+        # IOPS passed is within limit of max allowed by SKU and bigger than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name_3, location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 120)])
+
+        # SKU upgraded and IOPS value set lower than max iops for the sku but bigger than free iops
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --storage-size 300 --iops 500'
+                 .format(database_engine, resource_group, server_name_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -313,8 +381,8 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -363,7 +431,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             tier = 'GeneralPurpose'
             version = 5.7
-            sku_name = 'Standard_D2ds_v4'
+            sku_name = 'Standard_D2s_v3'
             storage_size = 20
         storage_size_mb = storage_size * 1024
         backup_retention = 10
@@ -395,7 +463,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    mysql_location = 'southeastasia'
+    mysql_location = 'eastus2euap'
 
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
@@ -413,6 +481,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
+        time.sleep(5 * 60)
 
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
@@ -480,12 +549,12 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    @VirtualNetworkPreparer()
+    @VirtualNetworkPreparer(location=mysql_location)
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
@@ -494,7 +563,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @VirtualNetworkPreparer()
+    @VirtualNetworkPreparer(location=postgres_location)
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
@@ -513,13 +582,13 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @VirtualNetworkPreparer(parameter_name='virtual_network')
+    @VirtualNetworkPreparer(parameter_name='virtual_network', location=postgres_location)
     def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group, virtual_network)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    @VirtualNetworkPreparer(parameter_name='virtual_network')
+    @VirtualNetworkPreparer(parameter_name='virtual_network', location=mysql_location)
     def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group, virtual_network)
 
@@ -541,15 +610,20 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
-        server = 'testvnetserver1' + database_engine
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
+
+        server = 'testvnetserver10' + database_engine
 
         # Scenario : Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
 
         subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
 
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
-                 .format(database_engine, resource_group, server, subnet_id))
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {}'
+                 .format(database_engine, resource_group, server, subnet_id, location))
 
         # flexible-server show to validate delegation is added to both the created server
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
@@ -565,14 +639,19 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
+
         vnet_name_2 = 'clitestvnet1'
         subnet_name_2 = 'clitestsubnet1'
         server = 'testvnetserver2' + database_engine
 
         # Scenario : Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
         # The subnet name is the default created one, not the one in subnet ID
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
-                 .format(database_engine, resource_group, server, '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.get_subscription_id(), resource_group, vnet_name_2, subnet_name_2)))
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --subnet {}'
+                 .format(database_engine, resource_group, server, location, '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.get_subscription_id(), resource_group, vnet_name_2, subnet_name_2)))
 
         # flexible-server show to validate delegation is added to both the created server
         show_result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server)).get_output_in_json()
@@ -618,12 +697,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                                .format(vnet_name, resource_group, location, address_prefix, 'Subnet' + servers[0][6:], subnet_prefix_1)).get_output_in_json()
 
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --vnet {}'
-                 .format(database_engine, resource_group, servers[0], vnet_result['newVNet']['name']))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} -l {}'
+                 .format(database_engine, resource_group, servers[0], vnet_result['newVNet']['name'], location))
 
         # Case 2 : Provision a server with a supplied Vname that does not exist.
-        self.cmd('{} flexible-server create -g {} -n {} --vnet {}'
-                 .format(database_engine, resource_group, servers[1], vnet_name_2))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} -l {}'
+                 .format(database_engine, resource_group, servers[1], vnet_name_2, location))
 
         # flexible-server show to validate delegation is added to both the created server
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
@@ -669,22 +748,25 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         vnet_name_2 = 'clitestvnet6'
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
 
         # flexible-servers
         servers = ['testvnetserver5' + database_engine, 'testvnetserver6' + database_engine]
-
         # Case 1 : Provision a server with supplied Vname and subnet name that exists.
 
         # create vnet and subnet. When vnet name is supplied, the subnet created will be given the default name.
         subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()[
             'id']
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet default'
-                 .format(database_engine, resource_group, servers[0], virtual_network))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} -l {} --subnet default'
+                 .format(database_engine, resource_group, servers[0], virtual_network, location))
 
         # Case 2 : Provision a server with a supplied Vname and subnet name that does not exist.
-        self.cmd('{} flexible-server create -g {} -n {} --vnet {}'
-                 .format(database_engine, resource_group, servers[1], vnet_name_2))
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --vnet {}'
+                 .format(database_engine, resource_group, servers[1], location, vnet_name_2))
 
         # flexible-server show to validate delegation is added to both the created server
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
@@ -744,12 +826,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                     subnet_prefix_1)).get_output_in_json()
 
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
-                 .format(database_engine, resource_group_2, servers[0], vnet_result['newVNet']['subnets'][0]['id']))
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {}'
+                 .format(database_engine, resource_group_2, servers[0], vnet_result['newVNet']['subnets'][0]['id'], location))
 
         # Case 2 : Provision a server with supplied subnetid that has a different RG in the ID but does not exist. The vnet and subnet is then created in the RG of the server
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
-                 .format(database_engine, resource_group_2, servers[1], '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --subnet {}'
+                 .format(database_engine, resource_group_2, servers[1], location, '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                          self.get_subscription_id(), resource_group_1, vnet_name_2, subnet_name_2)))
 
         # flexible-server show to validate delegation is added to both the created server
@@ -792,8 +874,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -814,8 +896,10 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         if database_engine == 'postgres':
             sku_name = 'Standard_D2s_v3'
+            location = self.postgres_location
         elif database_engine == 'mysql':
             sku_name = 'Standard_B1ms'
+            location = self.mysql_location
 
         # flexible-servers
         servers = [self.create_random_name('azuredbpaccess', SERVER_NAME_MAX_LENGTH),
@@ -823,15 +907,15 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         # Case 1 : Provision a server with public access all
         # create server
-        self.cmd('{} flexible-server create -g {} -n {} --public-access {}'
-                 .format(database_engine, resource_group, servers[0], 'all'),
+        self.cmd('{} flexible-server create -g {} -n {} --public-access {} -l {}'
+                 .format(database_engine, resource_group, servers[0], 'all', location),
                  checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
                          StringContainCheck('AllowAll_'),
                          StringContainCheck(servers[0])])
 
         # Case 2 : Provision a server with public access allowing all azure services
-        self.cmd('{} flexible-server create -g {} -n {} --public-access {}'
-                 .format(database_engine, resource_group, servers[1], '0.0.0.0'),
+        self.cmd('{} flexible-server create -g {} -n {} --public-access {} -l {}'
+                 .format(database_engine, resource_group, servers[1], '0.0.0.0', location),
                  checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
                          StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_'),
                          StringContainCheck(servers[1])])
@@ -842,54 +926,3 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
-
-
-class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
-
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_local_context(self, resource_group):
-        self._test_flexible_server_local_context('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_local_context(self, resource_group):
-        self._test_flexible_server_local_context('mysql', resource_group)
-
-    def _test_flexible_server_local_context(self, database_engine, resource_group):
-        self.cmd('config param-persist on')
-        from knack.util import CLIError
-        if database_engine == 'mysql':
-            location = self.mysql_location
-        else:
-            location = self.postgres_location
-
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-
-        self.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group)
-        self.cli_ctx.local_context.set(['all'], 'location', location)
-
-        self.cmd('{} flexible-server create -n {} --public-access none'.format(database_engine, server_name))
-
-        self.cmd('{} flexible-server show'.format(database_engine))
-
-        self.cmd('{} flexible-server update --backup-retention {}'
-                 .format(database_engine, 10))
-
-        self.cmd('{} flexible-server stop'.format(database_engine))
-
-        self.cmd('{} flexible-server start'.format(database_engine))
-
-        self.cmd('{} flexible-server restart'.format(database_engine))
-
-        self.cmd('{} flexible-server list'.format(database_engine))
-
-        self.cmd('{} flexible-server show-connection-string'.format(database_engine))
-
-        self.cmd('{} flexible-server list-skus'.format(database_engine))
-
-        self.cmd('{} flexible-server delete --yes'.format(database_engine))
-        self.cmd('config param-persist off')
