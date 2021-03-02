@@ -173,3 +173,372 @@ The schema is also a tree composed of `command group` nodes and `command` nodes.
 }
 ```
 
+## Code adaptions
+
+In order to support configuration, some adjustments to existing code are required.
+
+### Add decorators for special functions and classes
+
+This decorators can be import from package `azure.cli.core.translator`.
+
+#### For `action` property
+
+The `action` property is used in argument definition.
+
+If the value of `action` is a class
+```python
+with self.argument_context('network application-gateway') as c:
+    c.argument('trusted_client_cert', action=TrustedClientCertificateCreate)
+```
+This class should be decorated by decorator `action_class`
+```python
+from azure.cli.core.translator import action_class
+
+
+@action_class
+class TrustedClientCertificateCreate(argparse._AppendAction):
+    pass
+```
+
+If the value of `action` is a class which return by a function
+```python
+with self.argument_context('network application-gateway') as c:
+    c.argument('trusted_client_cert', action=build_client_certification_action('special_value'))
+```
+This function should be decorated by decorator `action_class_by_factory`
+```python
+from azure.cli.core.translator import action_class_by_factory
+
+
+@action_class_by_factory
+def build_client_certification_action(special_value):
+    class TrustedClientCertificateCreate(argparse._AppendAction):
+        pass
+    return TrustedClientCertificateCreate
+```
+
+#### For `arg_type` property
+
+The `arg_type` property to define common used arguments.
+
+If the value of `arg_type` is the instance which defined in previous.
+```python
+name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
+
+with self.argument_context('network application-gateway ssl-policy predefined', min_api='2017-06-01') as c:
+    c.argument('predefined_policy_name', name_arg_type)
+
+with self.argument_context('network application-gateway ssl-policy', min_api='2017-06-01') as c:
+    c.argument('policy_name', name_arg_type)
+```
+`CLIArgumentType` should be replaced by `register_arg_type`, and `register_arg_type` function needs a unique name in module to register this arg_type definition.
+```python
+from azure.cli.core.translator import register_arg_type
+name_arg_type = register_arg_type('name_arg_type', options_list=['--name', '-n'], metavar='NAME')
+
+with self.argument_context('network application-gateway ssl-policy predefined', min_api='2017-06-01') as c:
+    c.argument('predefined_policy_name',  arg_type=name_arg_type)
+
+with self.argument_context('network application-gateway ssl-policy', min_api='2017-06-01') as c:
+    c.argument('policy_name',  arg_type=name_arg_type)
+```
+
+If the value of `arg_type` is the return value of a function
+```python
+    with self.argument_context('network application-gateway rewrite-rule', arg_group='URL Configuration') as c:
+        c.argument('enable_reroute', arg_type=get_three_state_flag())
+
+```
+That function should be decorated by `arg_type_by_factory`
+```python
+from azure.cli.core.translator import arg_type_by_factory
+
+
+@arg_type_by_factory
+def get_three_state_flag(positive_label='true', negative_label='false', invert=False, return_label=False):
+    choices = [positive_label, negative_label]
+    action = get_three_state_action(positive_label=positive_label, negative_label=negative_label, invert=invert,
+                                    return_label=return_label)
+    params = {
+        'choices': CaseInsensitiveList(choices),
+        'nargs': '?',
+        'action': action
+    }
+    return CLIArgumentType(**params)
+```
+
+
+#### `type` property
+
+The `type` property used in argument definition to convert the value of input argument.
+
+If the value of `type` is a function
+```python
+from azure.cli.core.commands.parameters import file_type
+
+with self.argument_context('network application-gateway create', arg_group='Gateway') as c:
+    c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter())
+```
+That function should be decorated by `type_converter_func`
+```python
+from azure.cli.core.translator import type_converter_func
+
+
+@type_converter_func
+def file_type(path):
+    import os
+    return os.path.expanduser(path)
+```
+
+If the value of `type` is a return value of a function
+```python
+from azure.cli.command_modules.monitor.actions import get_period_type
+
+
+with self.argument_context('monitor alert update', arg_group='Condition') as c:
+    c.argument('period', type=get_period_type())
+```
+That function should be decorated by `type_converter_by_factory`
+```python
+from azure.cli.core.translator import type_converter_by_factory
+
+
+@type_converter_by_factory
+def get_period_type(as_timedelta=False):
+
+    def period_type(value):
+        pass
+
+    return period_type
+```
+
+Warning: Please use `json_object_type` defined in `azure.cli.core.commands` instead of `get_json_object` defined in `azure.cli.core.util`
+
+
+#### `completer` property
+
+The `completer` property used in argument definition.
+
+If the value of `completer` is a function
+```python
+from azure.cli.command_modules.network._completers import subnet_completion_list
+
+with self.argument_context('network lb create', arg_group='Subnet') as c:
+    c.argument('subnet', completer=subnet_completion_list)
+```
+That function should be decorated by `completer_func` instead of `Completer`
+```python
+from azure.cli.core.translator import completer_func
+
+
+@completer_func
+def subnet_completion_list(cmd, prefix, namespace, **kwargs):
+    client = network_client_factory(cmd.cli_ctx)
+    if namespace.resource_group_name and namespace.virtual_network_name:
+        rg = namespace.resource_group_name
+        vnet = namespace.virtual_network_name
+        return [r.name for r in client.subnets.list(resource_group_name=rg, virtual_network_name=vnet)]
+
+```
+
+If the value of `completer` is a return value of a function
+```python
+from azure.cli.command_modules.network._completers import get_lb_subresource_completion_list
+
+with self.argument_context('network lb rule') as c:
+    c.argument('item_name', options_list=['--name', '-n'], completer=get_lb_subresource_completion_list('load_balancing_rules'))
+```
+That function should be decorated by `completer_by_factory`
+```python
+from azure.cli.core.translator import completer_by_factory
+
+
+@completer_by_factory
+def get_lb_subresource_completion_list(prop):
+
+    # @Completer # The 'Completer' decorator should be removed.
+    def completer(cmd, prefix, namespace, **kwargs): 
+        client = network_client_factory(cmd.cli_ctx)
+        try:
+            lb_name = namespace.load_balancer_name
+        except AttributeError:
+            lb_name = namespace.resource_name
+        if namespace.resource_group_name and lb_name:
+            lb = client.load_balancers.get(namespace.resource_group_name, lb_name)
+            return [r.name for r in getattr(lb, prop)]
+    return completer
+```
+
+If the value of `completer` is provided by external library
+```python
+from argcomplete.completers import FilesCompleter
+from argcomplete.completers import DirectoriesCompleter
+
+
+with self.argument_context('network vnet-gateway root-cert create') as c:
+    c.argument('public_cert_data', type=file_type, completer=FilesCompleter())
+    c.argument('cert_dir', type=file_type, completer=DirectoriesCompleter())
+
+```
+Those import should be registered in package `azure.cli.core.translator.external_completer` and import from that package.
+`FilesCompleter` and `DirectoriesCompleter` are the most used external completer. These two have covered most of cases.
+
+#### `client_factory` property
+
+The `client_factory` property used in command definition.
+
+If the value of `client_factory` is a function
+```python
+from azure.cli.command_modules.network._client_factory import cf_application_gateways
+
+network_ag_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
+    client_factory=cf_application_gateways
+)
+
+with self.command_group('network application-gateway waf-config') as g:
+    g.custom_show_command('show', 'show_ag_waf_config')
+    g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', client_factory=cf_application_gateways)
+```
+That function should be decorated by `client_factory_func`
+```python
+from azure.cli.core.translator import client_factory_func
+
+
+@client_factory_func
+def cf_application_gateways(cli_ctx, _):
+    return network_client_factory(cli_ctx).application_gateways
+```
+
+#### `exception_handler` property
+The `exception_handler` property used in command definition.
+
+If the value of `exception_handler` is a function
+```python
+from azure.cli.core.commands.arm import handle_template_based_exception
+
+with self.command_group('network lb', network_lb_sdk) as g:
+    g.custom_command('create', 'create_load_balancer', exception_handler=handle_template_based_exception)
+```
+That function should be decorated by `exception_handler_func`
+```python
+from azure.cli.core.translator import exception_handler_func
+
+
+@exception_handler_func
+def handle_template_based_exception(ex):
+    try:
+        raise CLIError(ex.inner_exception.error.message)
+    except AttributeError:
+        raise CLIError(ex)
+```
+
+#### `transformer` and `table_transformer` properties
+The `transformer` and `table_transformer` properties used in command definition.
+
+If the value is a function
+```python
+from azure.cli.command_modules.network._format import transform_network_usage_list, transform_network_usage_table
+
+with self.command_group('network') as g:
+    g.command('list-usages', 'list', transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
+```
+Those function should be decorated by `transformer_func`
+```python
+from azure.cli.core.translator import transformer_func
+
+
+@transformer_func
+def transform_network_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
+@transformer_func
+def transform_network_usage_table(result):
+    transformed = []
+    for item in result:
+        transformed.append(OrderedDict([
+            ('Name', item['localName']),
+            ('CurrentValue', item['currentValue']),
+            ('Limit', item['limit'])
+        ]))
+    return transformed
+```
+
+#### `validator` property
+
+The `validator` property used both in argument definition and command definition.
+
+If the value of `validator` is a function
+```python
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
+
+with self.argument_context('network') as c:
+    c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+```
+That function should be decorated by `validator_func`
+```python
+from azure.cli.core.translator import validator_func
+
+
+@validator_func
+def get_default_location_from_resource_group(cmd, namespace):
+    if not namespace.location:
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        from msrestazure.azure_exceptions import CloudError
+        from knack.util import CLIError
+
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        try:
+            rg = resource_client.resource_groups.get(namespace.resource_group_name)
+        except CloudError as ex:
+            raise CLIError('error retrieving default location: {}'.format(ex.message))
+        namespace.location = rg.location  # pylint: disable=no-member
+        logger.debug("using location '%s' from resource group '%s'", namespace.location, rg.name)
+
+```
+
+If the value of `validator` is a return value of a function
+```python
+from azure.cli.command_modules.network._validators import get_public_ip_validator
+
+
+with self.argument_context('network application-gateway frontend-ip create') as c:
+    c.argument('public_ip_address', validator=get_public_ip_validator())
+
+```
+That function should be decorated by `validator_by_factory`
+```python
+from azure.cli.core.translator import validator_by_factory
+
+
+@validator_by_factory
+def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False, default_none=False):
+    def simple_validator(cmd, namespace):
+        pass
+
+    def complex_validator_with_type(cmd, namespace):
+        pass
+
+    return complex_validator_with_type if has_type_field else simple_validator
+```
+
+
+#### Use `register_custom_resource_type` instead of `CustomResourceType`
+
+`CustomResourceType` are used in extension modules.
+```python
+from azure.cli.core.profiles import CustomResourceType
+CUSTOM_MGMT_AKS_PREVIEW = CustomResourceType('azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks', 'ContainerServiceClient')
+```
+It should be replaced by `register_custom_resource_type` with unique registered name.
+```python
+from azure.cli.core.translator import register_custom_resource_type
+CUSTOM_MGMT_AKS_PREVIEW = register_custom_resource_type(
+    'CUSTOM_MGMT_AKS_PREVIEW', 'azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks', 'ContainerServiceClient')
+```

@@ -6,6 +6,9 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.profiles import CustomResourceType
 from azure.cli.core.decorators import Completer
 
+# The following functions will be hooked by functions defined in azdev.operations.translator.hook,
+# when config generation task is launched.
+
 
 # action
 def action_class(action_cls):
