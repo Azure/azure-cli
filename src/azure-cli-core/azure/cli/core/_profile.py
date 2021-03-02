@@ -762,45 +762,15 @@ class Profile:
 
     def get_msal_token(self, scopes, data):
         """
-        This is added only for vmssh feature.
-        It is a temporary solution and will deprecate after MSAL adopted completely.
+        This is added for vmssh feature with backward compatible interface.
+        data contains token_type (ssh-cert), key_id and JWK.
         """
-        from msal import ClientApplication
-        import posixpath
         account = self.get_subscription()
         username = account[_USER_ENTITY][_USER_NAME]
-        tenant = account[_TENANT_ID] or 'common'
-        _, refresh_token, _, _ = self.get_refresh_token()
-        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
-        app = ClientApplication(_CLIENT_ID, authority=authority)
-        result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
-        return username, result["access_token"]
-
-    def get_refresh_token(self, resource=None,
-                          subscription=None):
-        account = self.get_subscription(subscription)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        # Use ARM as the default scopes
-        if not scopes:
-            scopes = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
-
-        if subscription and tenant:
-            raise CLIError("Please specify only one of subscription and tenant, not both")
-
-        account = self.get_subscription(subscription)
-        identity_credential = self._create_identity_credential(account, tenant)
-
-        from azure.cli.core.credential import CredentialAdaptor, _convert_token_entry
-        auth = CredentialAdaptor(identity_credential)
-        token = auth.get_token(*scopes)
-        # (tokenType, accessToken, tokenEntry)
-        cred = 'Bearer', token.token, _convert_token_entry(token)
-        return (cred,
-                None if tenant else str(account[_SUBSCRIPTION_ID]),
-                str(tenant if tenant else account[_TENANT_ID]))
+        subscription_id = account[_SUBSCRIPTION_ID]
+        credential, _, _ = self.get_login_credentials(subscription_id=subscription_id)
+        certificate = credential.get_token(*scopes, data=data)
+        return username, certificate.token
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()

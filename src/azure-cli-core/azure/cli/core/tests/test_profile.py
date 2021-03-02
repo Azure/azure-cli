@@ -1853,13 +1853,8 @@ class TestProfile(unittest.TestCase):
         credential_mock.get_token.assert_called_with(*self.msal_scopes)
         self.assertEqual(token, self.raw_token1)
 
-        self.assertEqual(len(all_subscriptions), 1)
-        self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
-        self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
-
-    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
-    @mock.patch('msal.ClientApplication.acquire_token_by_refresh_token', autospec=True)
-    def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
+    @mock.patch('azure.cli.core._identity.Identity.get_user_credential', autospec=True)
+    def test_get_msal_token(self, get_user_credential_mock):
         """
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
