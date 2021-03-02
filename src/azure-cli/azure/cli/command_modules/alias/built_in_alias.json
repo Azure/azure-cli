@@ -1,9 +1,12 @@
 {
-  "sa": {
-    "command": "storage account"
+  "aro": {
+    "command": "azure-redhat-openshift"
   },
-  "storage account bsp": {
-    "command": "storage account blob-service-properties"
+  "managedservices": {
+    "command": "managed-services"
+  },
+  "ms": {
+    "command": "managed-services"
   },
   "tsi": {
     "command": "timeseriesinsights"
@@ -15,15 +18,6 @@
     "command": "timeseriesinsights environment longterm create",
     "--type {{type}}": {
       "command": "timeseriesinsights environment {{type}} create"
-    }
-  },
-  "example configure": {
-    "command": "config",
-    "--list-defaults {{defaults_flag}}": {
-      "command": "config get{% if defaults_flag!=\"false\" %} defaults{% endif %}"
-    },
-    "--list-defaults {{defaults_flag}} --scope {{scope}}": {
-      "command": "config get {% if defaults_flag!=\"false\" %} defaults{% endif %}{% if scope=='local'%} --local{% endif %}"
     }
   }
 }

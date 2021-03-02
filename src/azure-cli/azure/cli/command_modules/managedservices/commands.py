@@ -18,13 +18,13 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.managedservices.operations#RegistrationAssignmentsOperations.{}',
         client_factory=cf_registration_assignments)
 
-    with self.command_group('managedservices definition', msp_registration_definitions, client_factory=cf_registration_definitions) as g:
+    with self.command_group('managed-services definition', msp_registration_definitions, client_factory=cf_registration_definitions) as g:
         g.custom_command('create', 'cli_definition_create')
         g.custom_command('list', 'cli_definition_list')
         g.custom_command('delete', 'cli_definition_delete')
         g.custom_show_command('show', 'cli_definition_get')
 
-    with self.command_group('managedservices assignment', msp_registration_assignments, client_factory=cf_registration_assignments) as g:
+    with self.command_group('managed-services assignment', msp_registration_assignments, client_factory=cf_registration_assignments) as g:
         g.custom_command('create', 'cli_assignment_create')
         g.custom_show_command('show', 'cli_assignment_get')
         g.custom_command('delete', 'cli_assignment_delete')

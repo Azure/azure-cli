@@ -23,7 +23,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 
 
 def load_arguments(self, _):
-    with self.argument_context('aro') as c:
+    with self.argument_context('azure-redhat-openshift') as c:
         c.argument('location',
                    validator=get_default_location_from_resource_group)
         c.argument('resource_name',
