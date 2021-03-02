@@ -31,7 +31,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
@@ -602,6 +602,7 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(name))
+    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
     return webapp
@@ -2972,6 +2973,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
+    # temporary workaround for dotnet-isolated linux consumption apps
+    if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
+        site_config.linux_fx_version = ''
+
     # adding app settings
     for app_setting, value in app_settings_json.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
@@ -3575,6 +3580,83 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     client = web_client_factory(cmd.cli_ctx)
     vnet_client = network_client_factory(cmd.cli_ctx)
 
+    subnet_resource_id = _validate_subnet(cmd.cli_ctx, subnet, vnet, resource_group_name)
+
+    if slot is None:
+        swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
+    else:
+        swift_connection_info = client.web_apps.get_swift_virtual_network_connection_slot(resource_group_name,
+                                                                                          name, slot)
+    # check to see if the connection would be supported
+    if swift_connection_info.swift_supported is not True:
+        return logger.warning("""Your app must be in an Azure App Service deployment that is
+              capable of scaling up to Premium v2\nLearn more:
+              https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
+
+    subnet_id_parts = parse_resource_id(subnet_resource_id)
+    vnet_name = subnet_id_parts['name']
+    vnet_resource_group = subnet_id_parts['resource_group']
+    subnet_name = subnet_id_parts['child_name_1']
+
+    subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+    delegations = subnetObj.delegations
+    delegated = False
+    for d in delegations:
+        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+            delegated = True
+
+    if not delegated:
+        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
+        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
+                                                   subnet_parameters=subnetObj)
+
+    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
+                                    swift_supported=True)
+
+    if slot is None:
+        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group_name, name,
+                                                                                        swiftVnet)
+    else:
+        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
+                                                                                             swiftVnet, slot)
+
+    # reformats the vnet entry, removing unnecessary information
+    id_strings = return_vnet.id.split('/')
+    resourceGroup = id_strings[4]
+    mod_vnet = {
+        "id": return_vnet.id,
+        "location": return_vnet.additional_properties["location"],
+        "name": return_vnet.name,
+        "resourceGroup": resourceGroup,
+        "subnetResourceId": return_vnet.subnet_resource_id
+    }
+
+    return mod_vnet
+
+
+def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
+    subnet_is_id = is_valid_resource_id(subnet)
+    if subnet_is_id:
+        subnet_id_parts = parse_resource_id(subnet)
+        vnet_name = subnet_id_parts['name']
+        if not (vnet_name.lower() == vnet.lower() or subnet.startswith(vnet)):
+            logger.warning('Subnet ID is valid. Ignoring vNet input.')
+        return subnet
+
+    vnet_is_id = is_valid_resource_id(vnet)
+    if vnet_is_id:
+        vnet_id_parts = parse_resource_id(vnet)
+        return resource_id(
+            subscription=vnet_id_parts['subscription'],
+            resource_group=vnet_id_parts['resource_group'],
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet_id_parts['name'],
+            child_type_1='subnets',
+            child_name_1=subnet)
+
+    # Reuse logic from existing command to stay backwards compatible
+    vnet_client = network_client_factory(cli_ctx)
     list_all_vnets = vnet_client.virtual_networks.list_all()
 
     vnets = []
@@ -3597,54 +3679,15 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
         logger.warning("Multiple virtual networks of name %s were found. Using virtual network with resource ID: %s. "
                        "To use a different virtual network, specify the virtual network resource ID using --vnet.",
                        vnet, vnet_id)
-    if slot is None:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
-    else:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection_slot(resource_group_name,
-                                                                                          name, slot)
-
-    # check to see if the connection would be supported
-    if swift_connection_info.swift_supported is not True:
-        return logger.warning("""Your app must be in an Azure App Service deployment that is
-              capable of scaling up to Premium v2\nLearn more:
-              https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
-
-    subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
-    delegations = subnetObj.delegations
-    delegated = False
-    for d in delegations:
-        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
-            delegated = True
-
-    if not delegated:
-        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet, subnet,
-                                                   subnet_parameters=subnetObj)
-
-    id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
-    subnet_resource_id = id_subnet.id
-    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
-                                    swift_supported=True)
-
-    if slot is None:
-        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group_name, name,
-                                                                                        swiftVnet)
-    else:
-        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
-                                                                                             swiftVnet, slot)
-
-    # reformats the vnet entry, removing unecessary information
-    id_strings = return_vnet.id.split('/')
-    resourceGroup = id_strings[4]
-    mod_vnet = {
-        "id": return_vnet.id,
-        "location": return_vnet.additional_properties["location"],
-        "name": return_vnet.name,
-        "resourceGroup": resourceGroup,
-        "subnetResourceId": return_vnet.subnet_resource_id
-    }
-
-    return mod_vnet
+    vnet_id_parts = parse_resource_id(vnet_id)
+    return resource_id(
+        subscription=vnet_id_parts['subscription'],
+        resource_group=vnet_id_parts['resource_group'],
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_id_parts['name'],
+        child_type_1='subnets',
+        child_name_1=subnet)
 
 
 def remove_vnet_integration(cmd, name, resource_group_name, slot=None):
@@ -4301,7 +4344,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
     if ase_is_id:
         return ase
 
-    from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=get_subscription_id(cli_ctx),
@@ -4328,7 +4370,6 @@ def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
     if key_vault_is_id:
         return key_vault
 
-    from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=get_subscription_id(cli_ctx),

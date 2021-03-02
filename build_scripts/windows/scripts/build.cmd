@@ -83,6 +83,7 @@ if not exist %PYTHON_DIR% (
     popd
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
+%PYTHON_EXE% -m pip install --upgrade pip==21.0.1
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
