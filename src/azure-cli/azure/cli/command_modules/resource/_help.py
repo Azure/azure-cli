@@ -253,7 +253,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -278,7 +278,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -392,7 +392,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -420,7 +420,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -456,7 +456,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -564,7 +564,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -594,7 +594,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -640,7 +640,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicpe file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -750,7 +750,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -780,7 +780,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -815,7 +815,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -920,7 +920,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -948,7 +948,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -981,7 +981,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -1417,6 +1417,22 @@ examples:
   - name: Create a managed application defintion with inline values for createUiDefinition and mainTemplate.
     text: >
         az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
+            --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
+"""
+
+helps['managedapp definition update'] = """
+type: command
+short-summary: Update a managed application definition.
+examples:
+  - name: Update a managed application defintion.
+    text: >
+        az managedapp definition update -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
+            --package-file-uri "https://path/to/myPackage.zip"
+  - name: Update a managed application defintion with inline values for createUiDefinition and mainTemplate.
+    text: >
+        az managedapp definition update -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
             --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
@@ -2294,4 +2310,58 @@ examples:
     text: az ts list -g MyResourceGroup
   - name: List all versions of parent template spec.
     text: az ts list -g MyResourceGroup -n TemplateSpecName
+"""
+
+helps['bicep'] = """
+type: group
+short-summary: Bicep CLI command group.
+"""
+
+helps['bicep install'] = """
+type: command
+short-summary: Install Bicep CLI.
+examples:
+  - name: Install Bicep CLI.
+    text: az bicep install
+  - name: Install a specific version of Bicep CLI.
+    text: az bicep install --version v0.2.212
+"""
+
+helps['bicep upgrade'] = """
+type: command
+short-summary: Upgrade Bicep CLI to the latest version.
+"""
+
+helps['bicep build'] = """
+type: command
+short-summary: Build one or more Bicep files.
+examples:
+  - name: Build a Bicep file.
+    text: az bicep build --files {bicep_file}
+  - name: Build multiple Bicep files.
+    text: az bicep build --files {bicep_file1} {bicep_file2}
+  - name: Build a Bicep file and prints all output to stdout.
+    text: az bicep build --files {bicep_file} --stdout
+  - name: Build multiple Bicep files and prints all output to stdout.
+    text: az bicep build --files {bicep_file1} {bicep_file2} --stdout
+"""
+
+helps['bicep decompile'] = """
+type: command
+short-summary: Attempt to decompile one or more ARM template files to Bicep files
+examples:
+  - name: Decompile an ARM template file.
+    text: az bicep decompile --files {json_template_file}
+  - name: Decompile multiple ARM template files.
+    text: az bicep decompile --files {json_template_file1} {json_template_file2}
+"""
+
+helps['bicep version'] = """
+type: command
+short-summary: Show the installed version of Bicep CLI.
+"""
+
+helps['bicep list-versions'] = """
+type: command
+short-summary: List out all available versions of Bicep CLI.
 """

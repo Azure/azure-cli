@@ -498,12 +498,16 @@ def update_management_policies(cmd, client, resource_group_name, account_name, p
 
 
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
-def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
-                                   delete_retention_days=None, enable_restore_policy=None, restore_days=None,
+def update_blob_service_properties(cmd, instance, enable_change_feed=None, change_feed_retention_days=None,
+                                   enable_delete_retention=None, delete_retention_days=None,
+                                   enable_restore_policy=None, restore_days=None,
                                    enable_versioning=None, enable_container_delete_retention=None,
                                    container_delete_retention_days=None, default_service_version=None):
     if enable_change_feed is not None:
-        instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+        if enable_change_feed is False:
+            change_feed_retention_days = None
+        instance.change_feed = cmd.get_models('ChangeFeed')(
+            enabled=enable_change_feed, retention_in_days=change_feed_retention_days)
 
     if enable_container_delete_retention is not None:
         if enable_container_delete_retention is False:
@@ -571,7 +575,7 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
-                            key_source=None, key_uri=None):
+                            key_source=None, key_uri=None, require_infrastructure_encryption=None):
     EncryptionScope = cmd.get_models('EncryptionScope')
 
     if key_source:
@@ -580,6 +584,9 @@ def create_encryption_scope(cmd, client, resource_group_name, account_name, encr
     if key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
         encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
+
+    if require_infrastructure_encryption is not None:
+        encryption_scope.require_infrastructure_encryption = require_infrastructure_encryption
 
     return client.put(resource_group_name=resource_group_name, account_name=account_name,
                       encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)

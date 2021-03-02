@@ -738,7 +738,7 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, start_range, end_range, storage_account, resource_group))
 
-        time.sleep(90)
+        time.sleep(300)
 
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
         # c1/b2 -> c2/b3
