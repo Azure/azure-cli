@@ -260,3 +260,25 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.WARNING, "WARNING: The subscription has been disabled!")
     ]
     print_styled_text(styled_text)
+
+
+def demo_hint(cmd):  # pylint: disable=unused-argument
+    test_dict = {
+        "cloudName": "AzureCloud",
+        "homeTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        "id": "0b1f6471-1bf0-4dda-aec3-cb9272f09590",
+        "isDefault": True,
+        "managedByTenants": [
+            {
+                "tenantId": "2f4a9838-26b7-47ee-be60-ccc1fdec5953"
+            }
+        ],
+        "name": "AzureSDKTest",
+        "state": "Enabled",
+        "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        "user": {
+            "name": "rolelivetest@azuresdkteam.onmicrosoft.com",
+            "type": "user"
+        }
+    }
+    return test_dict

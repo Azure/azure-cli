@@ -33,7 +33,7 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
 # [Reserved, in case of future usage]
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_MODULES = []
+ALWAYS_LOADED_MODULES = ['hint']
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
 

@@ -55,3 +55,8 @@ helps['demo style'] = """
 type: command
 short-summary: A demo showing supported text styles.
 """
+
+helps['demo hint'] = """
+type: command
+short-summary: A demo showing post-output hint.
+"""
