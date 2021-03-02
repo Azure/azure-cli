@@ -775,6 +775,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
 
 
 class LinuxWebappSSHScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_ssh(self, resource_group):
         # On Windows, test 'webapp ssh' throws error
