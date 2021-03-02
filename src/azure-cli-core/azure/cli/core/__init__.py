@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.19.0"
+__version__ = "2.20.0"
 
 import os
 import sys
@@ -35,10 +35,7 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
-# Configure the commands that need to skip command index
-# `az next` needs to search commands from all modules and extensions.
-SKIP_COMMAND_INDEX_FOR = ['next']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
 
 
 def _configure_knack():
@@ -103,8 +100,11 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        if not self.enable_color:
-            format_styled_text.theme = 'none'
+        if self.enable_color:
+            theme = self.config.get('core', 'theme', fallback='dark')
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -409,14 +409,9 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
-        need_skip_command_index = False
-        if isinstance(args, list) and args:
-            need_skip_command_index = args[0] in SKIP_COMMAND_INDEX_FOR
-
         command_index = None
         # Set fallback=False to turn off command index in case of regression
-        use_command_index = (self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True) and
-                             not need_skip_command_index)
+        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)

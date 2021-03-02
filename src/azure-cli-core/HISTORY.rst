@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.20.0
+++++++
+* Minor fixes
+
+2.19.1
+++++++
+* No changes
+
 2.19.0
 ++++++
 * New error output: Support multiple failure recommendations with colorization (#16257)
