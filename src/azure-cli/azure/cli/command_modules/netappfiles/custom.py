@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -28,8 +28,9 @@ def _update_mapper(existing, new, keys):
 
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
-def create_account(cmd, client, account_name, resource_group_name, location, tags=None):
-    body = NetAppAccount(location=location, tags=tags)
+def create_account(cmd, client, account_name, resource_group_name, location, tags=None, encryption=None):
+    account_encryption = AccountEncryption(key_source=encryption)
+    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return client.create_or_update(body, resource_group_name, account_name)
 
 
@@ -39,13 +40,14 @@ def create_account(cmd, client, account_name, resource_group_name, location, tag
 def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
-                         security_operators=None, tags=None):
+                         security_operators=None, ldap_over_tls=None, tags=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
-                                       ldap_signing=ldap_signing, security_operators=security_operators)
+                                       ldap_signing=ldap_signing, security_operators=security_operators,
+                                       ldap_over_tls=ldap_over_tls)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -77,8 +79,9 @@ def remove_active_directory(cmd, client, account_name, resource_group_name, acti
 
 
 # account update, active_directory is amended with subgroup commands
-def patch_account(cmd, instance, account_name, resource_group_name, tags=None):
-    body = NetAppAccountPatch(tags=tags)
+def patch_account(cmd, instance, account_name, resource_group_name, tags=None, encryption=None):
+    account_encryption = AccountEncryption(key_source=encryption)
+    body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
     _update_mapper(instance, body, ['tags'])
     return body
 
@@ -110,7 +113,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None,
                   kerberos5i_rw=None, kerberos5p_r=None, kerberos5p_rw=None,
                   has_root_access=None, snapshot_dir_visible=None,
-                  smb_encryption=None, smb_continuously_available=None):
+                  smb_encryption=None, smb_continuously_avl=None, encryption_key_source=None,
+                  rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
+                  allowed_clients=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -129,13 +134,17 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         subnet_rg = resource_parts['resource_group']
 
     # if NFSv4 is specified then the export policy must reflect this
-    # the RP ordinarily only creates a default setting NFSv3. Export
-    # policy is not settable directly on creation in CLI only via the
-    # add export policy subcommand
+    # the RP ordinarily only creates a default setting NFSv3.
     if (protocol_types is not None) and ("NFSv4.1" in protocol_types):
         rules = []
-        export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, cifs=False,
-                                         nfsv3=False, nfsv41=True, allowed_clients="0.0.0.0/0",
+        if allowed_clients is None:
+            raise Exception("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
+        if rule_index is None:
+            raise Exception("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+
+        export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
+                                         unix_read_write=unix_read_write, cifs=cifs,
+                                         nfsv3=False, nfsv41=True, allowed_clients=allowed_clients,
                                          kerberos5_read_only=kerberos5_r,
                                          kerberos5_read_write=kerberos5_rw,
                                          kerberos5i_read_only=kerberos5i_r,
@@ -153,6 +162,10 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     replication = None
     snapshot = None
     backup = None
+
+    # Make sure volume_type is set correctly if replication parameters are set
+    if endpoint_type is not None and replication_schedule is not None and remote_volume_resource_id is not None:
+        volume_type = "DataProtection"
 
     if volume_type == "DataProtection":
         replication = ReplicationObject(endpoint_type=endpoint_type, replication_schedule=replication_schedule,
@@ -184,7 +197,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         tags=tags,
         snapshot_id=snapshot_id,
         smb_encryption=smb_encryption,
-        smb_continuously_available=smb_continuously_available)
+        smb_continuously_available=smb_continuously_avl,
+        encryption_key_source=encryption_key_source)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
@@ -337,9 +351,9 @@ def create_backup_policy(client, resource_group_name, account_name, backup_polic
     return client.create(resource_group_name, account_name, backup_policy_name, body)
 
 
-def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
-                        daily_backups=0, weekly_backups=0, monthly_backups=0,
-                        yearly_backups=0, enabled=False, tags=None):
+def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
+                        daily_backups=None, weekly_backups=None, monthly_backups=None,
+                        yearly_backups=None, enabled=False, tags=None):
     body = BackupPolicyPatch(
         location=location,
         daily_backups_to_keep=daily_backups,
