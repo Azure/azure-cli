@@ -766,7 +766,7 @@ class Profile:
                 logger.warning(result['error_description'])
 
             # Retry login with VM SSH as resource
-            result = app.acquire_token_interactive(scopes, prompt='select_account')
+            result = app.acquire_token_interactive(scopes, prompt='select_account', data=data)
 
             if 'error' in result:
                 from azure.cli.core.credential import aad_error_handler
