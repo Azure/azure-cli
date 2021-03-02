@@ -7,15 +7,25 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
 from azure.cli.core.commands.parameters import (
     tags_type,
+    get_three_state_flag,
+    get_enum_type,
     resource_group_name_type,
     get_location_type
 )
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group,
+    validate_file_or_dict
+)
+from .._actions import (
+    AddSubstatuses,
+    AddStatuses
+)
 
 
 def load_arguments(self, _):
@@ -59,3 +69,180 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
+
+    with self.argument_context('vm virtual-machine reimage') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_name', type=str, help='The name of the virtual machine.', id_part='name')
+        c.argument('temp_disk', arg_type=get_three_state_flag(), help='Specifies whether to reimage temp disk. Default '
+                   'value: false. Note: This temp disk reimage parameter is only supported for VM/VMSS with Ephemeral '
+                   'OS disk.')
+
+    with self.argument_context('vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('platform_update_domain', type=int, help='The platform update domain for which a manual recovery '
+                   'walk is requested')
+
+    with self.argument_context('vm virtual-machine-scale-set redeploy') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_ids', nargs='+', help='The virtual machine scale set instance ids. Omitting the virtual '
+                   'machine scale set instance ids will result in the operation being performed on all virtual '
+                   'machines in the virtual machine scale set.')
+
+    with self.argument_context('vm virtual-machine-scale-set reimage-all') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_ids', nargs='+', help='The virtual machine scale set instance ids. Omitting the virtual '
+                   'machine scale set instance ids will result in the operation being performed on all virtual '
+                   'machines in the virtual machine scale set.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+        c.argument('vm_extension_name', type=str, help='The name of the virtual machine extension.',
+                   id_part='child_name_2')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension create') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+        c.argument('vm_extension_name', type=str, help='The name of the virtual machine extension.')
+        c.argument('force_update_tag', type=str, help='How the extension handler should be forced to update even if '
+                   'the extension configuration has not changed.')
+        c.argument('publisher', type=str, help='The name of the extension handler publisher.')
+        c.argument('type_properties_type', type=str, help='Specifies the type of the extension; an example is '
+                   '"CustomScriptExtension".')
+        c.argument('type_handler_version', type=str, help='Specifies the version of the script handler.')
+        c.argument('auto_upgrade_minor_version', arg_type=get_three_state_flag(), help='Indicates whether the '
+                   'extension should use a newer minor version if one is available at deployment time. Once deployed, '
+                   'however, the extension will not upgrade minor versions unless redeployed, even with this property '
+                   'set to true.')
+        c.argument('enable_automatic_upgrade', arg_type=get_three_state_flag(), help='Indicates whether the extension '
+                   'should be automatically upgraded by the platform if there is a newer version of the extension '
+                   'available.')
+        c.argument('settings', type=validate_file_or_dict, help='Json formatted public settings for the extension. '
+                   'Expected value: json-string/@json-file.')
+        c.argument('protected_settings', type=validate_file_or_dict, help='The extension can contain either '
+                   'protectedSettings or protectedSettingsFromKeyVault or no protected settings at all. Expected '
+                   'value: json-string/@json-file.')
+        c.argument('name', type=str, help='The virtual machine extension name.', arg_group='Instance View')
+        c.argument('type_', options_list=['--type'], type=str, help='Specifies the type of the extension; an example '
+                   'is "CustomScriptExtension".', arg_group='Instance View')
+        c.argument('virtual_machine_extension_instance_view_type_handler_version_type_handler_version', type=str,
+                   help='Specifies the version of the script handler.', arg_group='Instance View')
+        c.argument('substatuses', action=AddSubstatuses, nargs='+', help='The resource status information.',
+                   arg_group='Instance View')
+        c.argument('statuses', action=AddStatuses, nargs='+', help='The resource status information.',
+                   arg_group='Instance View')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension wait') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+        c.argument('vm_extension_name', type=str, help='The name of the virtual machine extension.',
+                   id_part='child_name_2')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm virtual-machine-scale-set-v-ms redeploy') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+
+    with self.argument_context('vm virtual-machine-scale-set-v-ms reimage-all') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+
+    with self.argument_context('vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+        c.argument('sas_uri_expiration_time_in_minutes', type=int, help='Expiration duration in minutes for the SAS '
+                   'URIs with a value between 1 to 1440 minutes. <br><br>NOTE: If not specified, SAS URIs will be '
+                   'generated with a default expiration duration of 120 minutes.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-run-command list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm disk-access delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('disk_access_name', options_list=['--name', '-n', '--disk-access-name'], type=str, help='The name '
+                   'of the disk access resource that is being created. The name can\'t be changed after the disk '
+                   'encryption set is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum '
+                   'name length is 80 characters.', id_part='name')
+        c.argument('private_endpoint_connection_name', type=str, help='The name of the private endpoint connection',
+                   id_part='child_name_1')
+
+    with self.argument_context('vm disk-access show-private-link-resource') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('disk_access_name', options_list=['--name', '-n', '--disk-access-name'], type=str, help='The name '
+                   'of the disk access resource that is being created. The name can\'t be changed after the disk '
+                   'encryption set is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum '
+                   'name length is 80 characters.', id_part='name')
+
+    with self.argument_context('vm gallery-application list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery from which Application '
+                   'Definitions are to be listed.')
+
+    with self.argument_context('vm gallery-application show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery from which the '
+                   'Application Definitions are to be retrieved.', id_part='name')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be retrieved.', id_part='child_name_1')
+
+    with self.argument_context('vm gallery-application create') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery in which the Application '
+                   'Definition is to be created.')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be created or updated. The allowed '
+                   'characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The '
+                   'maximum length is 80 characters.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('description', type=str, help='The description of this gallery Application Definition resource. '
+                   'This property is updatable.')
+        c.argument('eula', type=str, help='The Eula agreement for the gallery Application Definition.')
+        c.argument('privacy_statement_uri', type=str, help='The privacy statement uri.')
+        c.argument('release_note_uri', type=str, help='The release note uri.')
+        c.argument('end_of_life_date', help='The end of life date of the gallery Application Definition. This property '
+                   'can be used for decommissioning purposes. This property is updatable.')
+        c.argument('supported_os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='This property allows you '
+                   'to specify the supported type of the OS that application is built for. <br><br> Possible values '
+                   'are: <br><br> **Windows** <br><br> **Linux**')
+
+    with self.argument_context('vm gallery-application delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery in which the Application '
+                   'Definition is to be deleted.', id_part='name')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be deleted.', id_part='child_name_1')
+
+    with self.argument_context('vm gallery-application wait') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery from which the '
+                   'Application Definitions are to be retrieved.', id_part='name')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be retrieved.', id_part='child_name_1')
+
+    with self.argument_context('vm gallery-application-version list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery in which the Application '
+                   'Definition resides.')
+        c.argument('gallery_application_name', type=str, help='The name of the Shared Application Gallery Application '
+                   'Definition from which the Application Versions are to be listed.')
