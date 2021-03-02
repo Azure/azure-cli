@@ -912,7 +912,9 @@ examples:
   - name: Add a regional virtual network integration to a functionapp
     text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a functionapp using vnet resource id
-    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Network/virtualNetworks/[virtual network name]' --subnet MySubnetName -s [slot]
+    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnetName -s [slot]
+  - name: Add a regional virtual network integration to a functionapp using subnet resource id
+    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName' -s [slot]
 """
 
 helps['functionapp vnet-integration list'] = """
@@ -929,6 +931,16 @@ short-summary: remove a regional virtual network integration from functionapp
 examples:
   - name: remove a regional virtual network integration from functionapp
     text: az functionapp vnet-integration remove -g MyResourceGroup -n MyFunctionapp -s [slot]
+"""
+
+helps['functionapp deploy'] = """
+    type: command
+    short-summary: Deploys a provided artifact to Azure functionapp.
+    examples:
+    - name: Deploy a war file asynchronously.
+      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+    - name: Deploy a static text file to wwwroot/staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
 
 helps['webapp'] = """
@@ -2008,7 +2020,9 @@ examples:
   - name: Add a regional virtual network integration to a webapp
     text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a webapp using vnet resource id
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Network/virtualNetworks/[virtual network name]' --subnet MySubnetName -s [slot]
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnetName -s [slot]
+  - name: Add a regional virtual network integration to a webapp using subnet resource id
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName' -s [slot]
 """
 
 helps['webapp vnet-integration list'] = """
@@ -2425,4 +2439,14 @@ helps['staticwebapp users update'] = """
     examples:
     - name: Updates a user entry with the listed roles.
       text: az staticwebapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
+"""
+
+helps['webapp deploy'] = """
+    type: command
+    short-summary: Deploys a provided artifact to Azure Web Apps.
+    examples:
+    - name: Deploy a war file asynchronously.
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+    - name: Deploy a static text file to wwwroot/staticfiles/test.txt
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """

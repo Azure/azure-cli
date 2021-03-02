@@ -2236,7 +2236,10 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         database_name = "cliautomationdb01"
         target_database_name = "cliautomationdb02"
+        hs_database_name = "cliautomationhs03"
+        hs_target_database_name = "cliautomationnr04"
         service_objective = 'GP_Gen5_8'
+        hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
         class ServerInfo(object):  # pylint: disable=too-few-public-methods
@@ -2264,8 +2267,15 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s1.group)])
 
+        # create hs db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
+                 checks=[
+                     JMESPathCheck('name', hs_database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
         # create replica in second server with min params
-        # partner resouce group unspecified because s1.group == s2.group
+        # partner resource group unspecified because s1.group == s2.group
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
                  .format(s1.group, s1.name, database_name,
                          s2.name),
@@ -2294,14 +2304,28 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db delete -g {} -s {} -n {} --yes'
                  .format(s2.group, s2.name, database_name))
 
+        secondary_type = "Geo"
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {} --partner-database {}'
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
                  .format(s1.group, s1.name, database_name,
-                         s2.name, service_objective, target_database_name),
+                         s2.name, service_objective, target_database_name, secondary_type),
                  checks=[
                      JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
+
+        # Create a named replica
+        secondary_type = "Named"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, hs_database_name,
+                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', hs_target_database_name),
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'pool1'
@@ -3657,6 +3681,155 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('name', pool_name_4),
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
+
+
+class SqlDBMaintenanceScenarioTest(ScenarioTest):
+    DEFAULT_MC = "SQL_Default"
+    MDB1 = "SQL_EastUS2_DB_1"
+    MDB2 = "SQL_EastUS2_DB_2"
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(self.get_subscription_id(), name)
+
+    @ResourceGroupPreparer(location='eastus2')
+    @SqlServerPreparer(location='eastus2')
+    @AllowLargeResponse()
+    def test_sql_db_maintenance(self, resource_group, resource_group_location, server):
+        database_name_1 = "createDb1maintenance"
+        database_name_2 = "createDb2maintenance"
+        database_name_3 = "updateEnrollAndSwitchDb1maintenance"
+
+        # Test creating database with maintenance set to DB_1
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --maint-config-id {}'
+                 .format(resource_group, server, database_name_1, "Premium", self.MDB1),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
+
+        # Test creating database with maintenance set to DB_2 (full id)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --capacity {} --maint-config-id {}'
+                 .format(resource_group, server, database_name_2, "Standard", 50, self._get_full_maintenance_id(self.MDB2)),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('edition', 'Standard'),
+                     JMESPathCheck('sku.tier', 'Standard'),
+                     JMESPathCheck('sku.capacity', 50),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB2))])
+
+        # Test creating database with no maintenance specified
+        self.cmd('sql db create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, database_name_3, "Standard"),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('edition', 'Standard'),
+                     JMESPathCheck('sku.tier', 'Standard'),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.DEFAULT_MC))])
+
+        # Test enrolling into maintenance
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --capacity {} -m {}'
+                 .format(resource_group, server, database_name_3, "Premium", 125, self.MDB2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('sku.capacity', 125),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB2))])
+
+        # Test switching maintenance and enrolling into zone redundancy
+        self.cmd('sql db update -g {} --server {} --name {} -m {} --zone-redundant'
+                 .format(resource_group, server, database_name_3, self._get_full_maintenance_id(self.MDB1)),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
+
+    @ResourceGroupPreparer(location='eastus2')
+    @SqlServerPreparer(location='eastus2')
+    @AllowLargeResponse()
+    def test_sql_elastic_pool_maintenance(self, resource_group, resource_group_location, server):
+        pool_name_1 = "createDb1maintenance"
+        pool_name_2 = "createDb2maintenance"
+        pool_name_3 = "updateEnrollAndSwitchDb1maintenance"
+
+        # Test creating elastic pool with maintenance set to DB_1
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --maint-config-id {}'
+                 .format(resource_group, server, pool_name_1, "Premium", self.MDB1),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
+
+        # Test creating elastic pool with maintenance set to DB_2 (full id)
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --capacity {} --maint-config-id {}'
+                 .format(resource_group, server, pool_name_2, "Standard", 100, self._get_full_maintenance_id(self.MDB2)),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('sku.tier', 'Standard'),
+                     JMESPathCheck('sku.capacity', 100),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB2))])
+
+        # Test creating elastic pool with no maintenance specified
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, pool_name_3, "Premium"),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.DEFAULT_MC))])
+
+        # Test enrolling into maintenance
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --edition {} -m {}'
+                 .format(resource_group, server, pool_name_3, "Premium", self.MDB2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('sku.capacity', 125),
+                     JMESPathCheck('zoneRedundant', False),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB2))])
+
+        # Test switching maintenance and enrolling into zone redundancy
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --maint-config-id {} --zone-redundant'
+                 .format(resource_group, server, pool_name_3, self._get_full_maintenance_id(self.MDB1)),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True),
+                     JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):

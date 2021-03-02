@@ -246,3 +246,12 @@ def transform_restore_policy_output(result):
     if hasattr(result, 'restore_policy') and hasattr(result.restore_policy, 'last_enabled_time'):
         del result.restore_policy.last_enabled_time
     return result
+
+
+def transform_response_with_bytearray(response):
+    """ transform bytearray to string """
+    from msrest import Serializer
+    for item in response:
+        if response[item] and isinstance(response[item], (bytes, bytearray)):
+            response[item] = Serializer.serialize_bytearray(response[item])
+    return response
