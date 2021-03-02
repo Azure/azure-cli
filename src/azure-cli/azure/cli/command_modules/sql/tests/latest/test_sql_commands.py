@@ -3831,6 +3831,12 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', True),
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
 
+class SqlServerTrustGroupsScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse
+    def test_sql_server_trust_groups(self):
+        managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 

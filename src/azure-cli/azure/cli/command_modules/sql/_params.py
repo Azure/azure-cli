@@ -59,7 +59,8 @@ from .custom import (
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
-    AuthenticationType
+    AuthenticationType,
+    AddMemberAction
 )
 
 from ._validators import (
@@ -1601,6 +1602,48 @@ def load_arguments(self, _):
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
                 help='The virtual network name')
+
+    ###############################################
+    #           sql server trust groups           #
+    ###############################################
+
+    with self.argument_context('sql stg') as c:
+        c.argument('resource_group_name',
+                   help='The resource group name')
+
+    with self.argument_context('sql stg create') as c:
+        c.argument('server_trust_group_name',
+                   help='The name of the Server Trust Group.')
+
+        c.argument('location',
+                   help='The location name of the Server Trust Group.')
+
+        c.argument('member',
+                   options_list=['--member','-m'],
+                   help='Managed Instance that is to be a member of the group. Specify resource group, subscription id and the name of the instance.',
+                   action=AddMemberAction,
+                   nargs='+')
+
+        c.argument('trust_scope',
+                   help='The trust scope of the Server Trust Group.',
+                   nargs='+')
+
+    with self.argument_context('sql stg get') as c:
+        c.argument('location',
+                   help='The location name of the Server Trust Group.')
+
+        c.argument('server_trust_group_name', 
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg list') as c:
+        c.argument('location',
+                   help='The location name of the Server Trust Group.',
+                   arg_group='List By Location')
+
+        c.argument('instance_name',
+                   help='Managed Instance name.',
+                   arg_group='List By Instance')
+
 
     ###############################################
     #                sql managed instance         #

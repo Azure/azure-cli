@@ -6,6 +6,7 @@
 # pylint: disable=C0302
 from enum import Enum
 import calendar
+import argparse
 from datetime import datetime
 from dateutil.parser import parse
 
@@ -40,7 +41,8 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess
+    ServerPublicNetworkAccess,
+    ServerInfo
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -3642,6 +3644,55 @@ def server_aad_only_enable(
         server_name=server_name,
         azure_ad_only_authentication=True
     )
+
+###############################################
+#           sql server trust groups           #
+###############################################
+
+def server_trust_group_create(
+        client,
+        resource_group_name,
+        server_trust_group_name,
+        location,
+        member,
+        trust_scope):
+
+    print(trust_scope)
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   location_name=location,
+                                   server_trust_group_name=server_trust_group_name,
+                                   group_members=member,
+                                   trust_scopes=trust_scope)
+
+class AddMemberAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            kwargs = {}
+            for item in values:
+                try:
+                    key, value = item.split('=', 1)
+                    kwargs[key] = value
+                except ValueError:
+                    raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+            server_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}".format(kwargs['subscription-id'], kwargs['resource-group-name'], kwargs['name'])
+            server_info = ServerInfo(server_id=server_id)
+            if namespace.member is None:
+                namespace.member = []
+            namespace.member.append(server_info)
+        except ValueError:
+            raise CLIError('usage error: {} NAME METRIC OPERATION VALUE'.format(option_string))
+
+def server_trust_group_list(
+        client,
+        resource_group_name,
+        instance_name=None,
+        location=None):
+    if instance_name:
+        return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=instance_name)
+    elif location:
+        return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
 
 
 ###############################################

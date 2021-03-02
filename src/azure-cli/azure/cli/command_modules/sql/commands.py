@@ -55,6 +55,7 @@ from ._util import (
     get_sql_managed_instance_keys_operations,
     get_sql_managed_instance_operations_operations,
     get_sql_managed_instances_operations,
+    get_sql_server_trust_groups_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
     get_sql_restorable_dropped_managed_databases_operations,
@@ -594,6 +595,20 @@ def load_command_table(self, _):
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')
         g.show_command('get', 'get')
+
+    ###############################################
+    #           sql server trust groups           #
+    ###############################################
+
+    server_trust_groups_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ServerTrustGroupsOperations.{}',
+        client_factory=get_sql_server_trust_groups_operations)
+
+    with self.command_group('sql stg', server_trust_groups_operations, client_factory=get_sql_server_trust_groups_operations) as g:
+        g.custom_command('create', 'server_trust_group_create')
+        g.command('delete', 'delete')
+        g.command('get', 'get')
+        g.custom_command('list', 'server_trust_group_list')
 
     ###############################################
     #                sql managed instance         #
