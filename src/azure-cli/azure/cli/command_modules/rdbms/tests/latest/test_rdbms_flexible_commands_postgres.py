@@ -127,39 +127,34 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_start'])
     def test_postgres_flexible_server_list(self):
         self._test_flexible_server_list('postgres', self.resource_group)
+        self._test_flexible_server_connection_string('postgres', self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(14)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_list'])
-    def test_postgres_flexible_server_connection_string(self):
-        self._test_flexible_server_connection_string('postgres', self.server)
-
-    @AllowLargeResponse()
-    @pytest.mark.order(15)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_connection_string'])
     def test_postgres_flexible_server_list_skus(self):
         self._test_flexible_server_list_skus('postgres', self.location)
 
     @AllowLargeResponse()
-    @pytest.mark.order(16)
+    @pytest.mark.order(15)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_list_skus'])
     def test_postgres_flexible_server_create_non_default_tiers_select_zone(self):
         self._test_flexible_server_create_non_default_tiers('postgres', self.resource_group)
 
     @AllowLargeResponse()
-    @pytest.mark.order(17)
+    @pytest.mark.order(16)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create_non_default_tiers_select_zone'])
     def test_postgres_flexible_server_create_different_version(self):
         self._test_flexible_server_create_different_version('postgres', self.resource_group)
 
     @AllowLargeResponse()
-    @pytest.mark.order(18)
+    @pytest.mark.order(17)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create_different_version'])
     def test_postgres_flexible_server_restore(self):
         self._test_flexible_server_restore('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(19)
+    @pytest.mark.order(18)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_restore'])
     def test_postgres_flexible_server_delete(self):
         self.cmd('az group delete --name {} --yes --no-wait'.format(self.resource_group))
