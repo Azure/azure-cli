@@ -25,9 +25,15 @@ Each profile named folder contains two json files named `commands.json` and `exa
 
 ### Simple Schema of `commands.json`
 
+The schema of commands is a tree composed of `command group` nodes, `command` nodes and `argument` nodes.
+Its root is a command group node names `az`. In our example, it's the father of sub command group names `network`,
+and `network` is the father of command nodes (`list-service-aliases` and `list-service-tags`) and
+command group nodes (`application-gateway`, `dns` and `lb`), and a command node, such as `create`, is the father of argument nodes.
+
 ```
 {
   "az": {
+    "full-name": "",
     "command-groups": {
       "network": {
         "full-name": "network",
@@ -100,6 +106,8 @@ Each profile named folder contains two json files named `commands.json` and `exa
 ```
 
 ### Simple Schema of `examples.json`
+
+The schema is also a tree composed of `command group` nodes and `command` nodes. The examples will be in the corresponding command node.
 
 ```
 {
