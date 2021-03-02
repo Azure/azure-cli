@@ -22,9 +22,10 @@ from .test_rdbms_flexible_commands_local_context import (
 from .test_rdbms_flexible_commands import (
     ServerPreparer
 )
-
-
 from .conftest import mysql_location
+
+if mysql_location is None:
+    mysql_location = 'eastus2euap'
 
 # Local context test is separated out from the rest of the test due to daily pipeline run issue
 

@@ -36,6 +36,9 @@ SERVER_NAME_MAX_LENGTH = 20
 RG_NAME_PREFIX = 'clitest.rg'
 RG_NAME_MAX_LENGTH = 75
 
+if mysql_location is None:
+    mysql_location = 'eastus2euap'
+
 
 class MySqlFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
 

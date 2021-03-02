@@ -35,6 +35,9 @@ SERVER_NAME_MAX_LENGTH = 20
 RG_NAME_PREFIX = 'clitest.rg'
 RG_NAME_MAX_LENGTH = 75
 
+if postgres_location is None:
+    postgres_location = 'eastus2euap'
+
 
 class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
 
@@ -140,12 +143,12 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     @AllowLargeResponse()
     @pytest.mark.order(16)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_list_skus'])
-    def test_postgres_flexible_server_create_non_default_tiers(self):
+    def test_postgres_flexible_server_create_non_default_tiers_select_zone(self):
         self._test_flexible_server_create_non_default_tiers('postgres', self.resource_group)
 
     @AllowLargeResponse()
     @pytest.mark.order(17)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create_non_default_tiers'])
+    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create_non_default_tiers_select_zone'])
     def test_postgres_flexible_server_create_different_version(self):
         self._test_flexible_server_create_different_version('postgres', self.resource_group)
 

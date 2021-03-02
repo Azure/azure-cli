@@ -24,6 +24,9 @@ from .test_rdbms_flexible_commands import (
 )
 from .conftest import postgres_location
 
+if postgres_location is None:
+    postgres_location = 'eastus2euap'
+
 
 # Local context test is separated out from the rest of the test due to daily pipeline run issue
 @pytest.fixture(autouse=True, scope='class')
