@@ -116,6 +116,9 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         assert len(backup_list) == 1
 
+        if self.is_live or self.in_recording:
+            time.sleep(10)
+
         # create backup 2
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name, True)
@@ -200,8 +203,8 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         # disable backup for volume
         vaults = self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
-        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
-                 (account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
+        backup = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
+                          (account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
 
         # Backup not completely ready, not able to retrieve backupId at the moment since swagger is not updated
         # create new volume and restore backup
