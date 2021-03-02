@@ -602,6 +602,7 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(name))
+    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
     return webapp
