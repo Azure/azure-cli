@@ -89,7 +89,7 @@ class CommandOperation(BaseCommandOperation):
 
     def __init__(self, ctx, operation, **kwargs):
         if not isinstance(operation, string_types):
-            raise TypeError("operation must be a string. Got '{}'".format(operation))
+            raise TypeError("Operation must be a string. Got '{}'".format(operation))
         super(CommandOperation, self).__init__(ctx, **kwargs)
         self.operation = operation
 
