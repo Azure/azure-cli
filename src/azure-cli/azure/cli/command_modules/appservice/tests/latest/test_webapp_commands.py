@@ -1492,7 +1492,6 @@ class WebappSSLSyncCertTest(ScenarioTest):
                 webapp_name), cert_thumbprint2)
         ])
 
-    
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP)
     @live_only()
     def test_webapp_ssl_sync_national_clouds(self, resource_group):
@@ -1520,7 +1519,7 @@ class WebappSSLSyncCertTest(ScenarioTest):
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
             cert_name, kv_name, pfx_file, cert_password))
 
-        name = self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name)).get_output_in_json()['name']
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name))
 
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
             cert_name, kv_name, pfx_file2, cert_password2), checks=[
