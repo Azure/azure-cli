@@ -31,6 +31,8 @@ if postgres_location is None:
 # Local context test is separated out from the rest of the test due to daily pipeline run issue
 class PostgresFlexibleServerLocalContextScenarioTest(FlexibleServerLocalContextScenarioTest):
 
+    postgres_location = postgres_location
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_local_context(self, resource_group):
