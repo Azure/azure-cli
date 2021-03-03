@@ -716,7 +716,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             location = self.mysql_location
 
-        server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server = 'testvnetserver10' + database_engine
 
         # Scenario : Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
 
@@ -746,9 +746,9 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             location = self.mysql_location
 
-        server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        vnet_name_2 = 'clitestvnet1' + server
-        subnet_name_2 = 'clitestsubnet1' + server
+        vnet_name_2 = 'clitestvnet1'
+        subnet_name_2 = 'clitestsubnet1'
+        server = 'testvnetserver2' + database_engine
 
         # Scenario : Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
         # The subnet name is the default created one, not the one in subnet ID
@@ -784,14 +784,13 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             location = self.mysql_location
 
-        # flexible-servers
-        server1 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        server2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        servers = [server1, server2]
-        vnet_name = 'clitestvnet2' + server1
-        vnet_name_2 = 'clitestvnet3' + server2
+        vnet_name = 'clitestvnet2'
         address_prefix = '10.0.0.0/16'
         subnet_prefix_1 = '10.0.0.0/24'
+        vnet_name_2 = 'clitestvnet3'
+
+        # flexible-servers
+        servers = ['testvnetserver3' + database_engine, 'testvnetserver4' + database_engine]
 
         # Case 1 : Provision a server with supplied Vname that exists.
 
@@ -850,17 +849,14 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
+        vnet_name_2 = 'clitestvnet6'
         if database_engine == 'postgres':
             location = self.postgres_location
         elif database_engine == 'mysql':
             location = self.mysql_location
 
         # flexible-servers
-        server1 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        server2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        servers = [server1, server2]
-        vnet_name_2 = 'clitestvnet6' + server1
-
+        servers = ['testvnetserver5' + database_engine, 'testvnetserver6' + database_engine]
         # Case 1 : Provision a server with supplied Vname and subnet name that exists.
 
         # create vnet and subnet. When vnet name is supplied, the subnet created will be given the default name.
@@ -913,18 +909,15 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             location = self.mysql_location
 
-        # flexible servers
-        server1 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        server2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        servers = [server1, server2]
-
-        vnet_name = 'clitestvnet7' + server1
-        subnet_name = 'clitestsubnet7' + server1
-        vnet_name_2 = 'clitestvnet8' + server2
-        subnet_name_2 = 'clitestsubnet8' + server2
-
+        vnet_name = 'clitestvnet7'
+        subnet_name = 'clitestsubnet7'
         address_prefix = '10.0.0.0/16'
         subnet_prefix_1 = '10.0.0.0/24'
+        vnet_name_2 = 'clitestvnet8'
+        subnet_name_2 = 'clitestsubnet8'
+
+        # flexible-servers
+        servers = ['testvnetserver7' + database_engine, 'testvnetserver8' + database_engine]
 
         # Case 1 : Provision a server with supplied subnetid that exists in a different RG
 
