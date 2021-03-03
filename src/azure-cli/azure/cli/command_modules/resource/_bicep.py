@@ -143,6 +143,9 @@ def _run_command(bicep_installation_path, args):
 
     try:
         process.check_returncode()
+        command_warnings = process.stderr.decode("utf-8")
+        if command_warnings:
+            _logger.warning(command_warnings)
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
         raise UnclassifiedUserFault(process.stderr.decode("utf-8"))
