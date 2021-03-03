@@ -29,7 +29,6 @@ if postgres_location is None:
 
 
 # Local context test is separated out from the rest of the test due to daily pipeline run issue
-@pytest.mark.usefixtures("postgres_location")
 class PostgresFlexibleServerLocalContextScenarioTest(FlexibleServerLocalContextScenarioTest):
 
     @AllowLargeResponse()
