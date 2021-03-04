@@ -488,6 +488,7 @@ def load_arguments(self, _):
                    help='Path to a file where the JSON blob returned by this command is stored.')
         c.argument('sd_quorum', type=int, help='The minimum number of shares required to decrypt the security domain '
                                                'for recovery.')
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain wait') as c:
         c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
@@ -710,6 +711,9 @@ def load_arguments(self, _):
                         'use the object id and not the app id.')
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('role', help='role name or id')
+
+    with self.argument_context('keyvault role definition list') as c:
+        c.argument('custom_role_only', arg_type=get_three_state_flag(), help='Only show custom role definitions.')
 
     class PrincipalType(str, Enum):  # Copied from azure.mgmt.authorization v2018_09_01_preview
         user = "User"

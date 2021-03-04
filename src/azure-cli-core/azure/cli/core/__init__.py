@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.19.1"
+__version__ = "2.20.0"
 
 import os
 import sys
@@ -100,8 +100,11 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        if not self.enable_color:
-            format_styled_text.theme = 'none'
+        if self.enable_color:
+            theme = self.config.get('core', 'theme', fallback='dark')
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
