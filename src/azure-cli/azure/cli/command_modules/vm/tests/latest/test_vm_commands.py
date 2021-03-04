@@ -4866,17 +4866,19 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             'vm': 'vm1'
         })
 
+        # --platform-fault-domain-count, only 1 is allowed
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys',
+                 '--ppg {ppg} --platform-fault-domain-count 1 --generate-ssh-keys',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
-                     self.check('vmss.platformFaultDomainCount', 3)
+                     self.check('vmss.platformFaultDomainCount', 1)
                  ])
-        self.cmd('vm create -g {rg} -n {vm} --image centos --platform-fault-domain 1 --vmss {vmss1} --generate-ssh-keys --nsg-rule None')
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('platformFaultDomain', 1)
-        ])
+        # Cannot set 'platformFaultDomain' on Virtual Machine 'vm1' because the Virtual Machine Scale Set 'vmss1' that it references, has 'platformFaultDomainCount' = 1
+        # self.cmd('vm create -g {rg} -n {vm} --image centos --platform-fault-domain 0 --vmss {vmss} --generate-ssh-keys --nsg-rule None')
+        # self.cmd('vm show -g {rg} -n {vm}', checks=[
+        #     self.check('platformFaultDomain', 0)
+        # ])
 
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
