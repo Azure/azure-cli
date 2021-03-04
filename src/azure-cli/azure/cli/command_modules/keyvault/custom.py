@@ -2031,12 +2031,14 @@ def _reconstruct_role_definition(role_definition):
     return ret
 
 
-def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, hsm_name=None, custom_role_only=False):  # pylint: disable=unused-argument
     """ List role definitions. """
     query_scope = scope
     if query_scope is None:
         query_scope = ''
     role_definitions = client.list_role_definitions(role_scope=query_scope)
+    if custom_role_only:
+        role_definitions = [role for role in role_definitions if role.role_type == 'CustomRole']
     return [_reconstruct_role_definition(role) for role in role_definitions]
 # endregion
 
