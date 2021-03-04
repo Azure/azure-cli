@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -141,6 +142,9 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+
+    restore_point_in_time = datetime.fromisoformat(restore_point_in_time)
+    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
 
     parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,
@@ -289,6 +293,7 @@ def flexible_server_update_custom_func(cmd, instance,
         instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
     if maintenance_window:
+        logger.warning('If you are updating maintenancw window with other parameter, maintenance window will be updated first. Please update the other parameters later.')
         # if disabled is pass in reset to default values
         if maintenance_window.lower() == "disabled":
             day_of_week = start_hour = start_minute = 0
@@ -311,6 +316,8 @@ def flexible_server_update_custom_func(cmd, instance,
             instance.maintenance_window.start_minute = start_minute
             instance.maintenance_window.custom_window = custom_window
 
+        return ServerForUpdate(maintenance_window=instance.maintenance_window)
+
     params = ServerForUpdate(sku=instance.sku,
                              storage_profile=instance.storage_profile,
                              administrator_login_password=administrator_login_password,
@@ -318,8 +325,7 @@ def flexible_server_update_custom_func(cmd, instance,
                              delegated_subnet_arguments=instance.delegated_subnet_arguments,
                              tags=tags,
                              ha_enabled=ha_enabled,
-                             replication_role=replication_role,
-                             maintenance_window=instance.maintenance_window)
+                             replication_role=replication_role)
 
     if assign_identity:
         if server_module_path.find('mysql'):
@@ -351,7 +357,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
             raise CLIError(ex)
-    return result
+    return result.result()
 
 
 # Parameter update command

@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -141,13 +142,15 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
+    restore_point_in_time = datetime.fromisoformat(restore_point_in_time)
+    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
+
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
         availability_zone=zone,
-        location=location,
-        server_name=server_name)
+        location=location)
 
     # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server_id)
@@ -256,7 +259,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
             raise CLIError(ex)
-    return result
+    return result.result()
 
 
 # Wait command

@@ -91,7 +91,7 @@ def firewall_rule_delete_func(client, resource_group_name, server_name, firewall
             result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
-    return result
+    return result.result()
 
 
 def flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
@@ -132,7 +132,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
             result = client.begin_delete(resource_group_name, server_name, database_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
-    return result
+    return result.result()
 
 
 def user_confirmation(message, yes=False):

@@ -109,7 +109,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
                                          start_ip_address=start_ip, end_ip_address=end_ip)
 
-    return firewall.name
+    return firewall.result()
 
 
 # pylint: disable=inconsistent-return-statements

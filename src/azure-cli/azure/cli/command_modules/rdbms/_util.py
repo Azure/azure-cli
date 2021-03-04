@@ -99,4 +99,4 @@ def create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip
 
     firewall = firewall_client.begin_create_or_update(resource_group_name, server_name, firewall_name, parameters)
 
-    return firewall.name
+    return firewall.result().name

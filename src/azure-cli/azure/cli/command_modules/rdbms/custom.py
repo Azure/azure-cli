@@ -475,7 +475,7 @@ def _server_delete(cmd, client, resource_group_name, server_name):
         local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
         local_context_file.remove_option('{}'.format(database_engine), 'server_name')
 
-    return result
+    return result.result()
 
 
 def _get_sku_name(tier, family, capacity):

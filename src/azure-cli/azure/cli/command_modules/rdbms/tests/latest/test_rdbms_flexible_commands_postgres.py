@@ -95,12 +95,12 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     @AllowLargeResponse()
     @pytest.mark.order(8)
     @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_scale_down'])
-    def test_postgres_flexible_server_upadte_mmw(self):
-        self._test_flexible_server_upadte_mmw('postgres', self.resource_group, self.server)
+    def test_postgres_flexible_server_update_mmw(self):
+        self._test_flexible_server_update_mmw('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(9)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_upadte_mmw'])
+    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_mmw'])
     def test_postgres_flexible_server_update_tag(self):
         self._test_flexible_server_update_tag('postgres', self.resource_group, self.server)
 

@@ -93,14 +93,14 @@ class MySqlFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     def test_mysql_flexible_server_update_scale_down(self):
         self._test_flexible_server_update_scale_down('mysql', self.resource_group, self.server)
 
-    # @AllowLargeResponse()
-    # @pytest.mark.depends(on=['MySqlFlexibleServerMgmtScenarioTest::test_mysql_flexible_server_update_scale_down'])
-    # def test_mysql_flexible_server_upadte_mmw(self):
-    #     self._test_flexible_server_upadte_mmw('mysql', self.resource_group, self.server)
+    @AllowLargeResponse()
+    @pytest.mark.depends(on=['MySqlFlexibleServerMgmtScenarioTest::test_mysql_flexible_server_update_scale_down'])
+    def test_mysql_flexible_server_update_mmw(self):
+        self._test_flexible_server_update_mmw('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(8)
-    @pytest.mark.depends(on=['MySqlFlexibleServerMgmtScenarioTest::test_mysql_flexible_server_update_scale_down'])
+    @pytest.mark.depends(on=['MySqlFlexibleServerMgmtScenarioTest::test_mysql_flexible_server_update_mmw'])
     def test_mysql_flexible_server_update_tag(self):
         self._test_flexible_server_update_tag('mysql', self.resource_group, self.server)
 
