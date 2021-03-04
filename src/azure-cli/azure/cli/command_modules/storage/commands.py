@@ -77,11 +77,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_sa)
 
-    cloud_data_plane_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.common#CloudStorageAccount.{}',
-        client_factory=cloud_storage_account_service_factory
-    )
-
     block_blob_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
         client_factory=blob_data_service_factory,

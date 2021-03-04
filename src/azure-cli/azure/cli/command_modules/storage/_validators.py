@@ -188,7 +188,6 @@ def validate_client_parameters(cmd, namespace):
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("\nSkip querying account key due to failure: %s", ex)
-            pass
 
 
 def validate_encryption_key(cmd, namespace):
