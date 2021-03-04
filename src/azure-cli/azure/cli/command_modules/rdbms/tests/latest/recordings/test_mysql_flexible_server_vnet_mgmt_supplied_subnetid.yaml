@@ -1344,8 +1344,8 @@ interactions:
       x-content-type-options:
       - nosniff
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: Ok
 - request:
     body: '{"properties": {"charset": "utf8"}}'
     headers:
@@ -1971,8 +1971,52 @@ interactions:
       x-ms-failure-cause:
       - gateway
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --subnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet1/subnets/clitestsubnet1?api-version=2020-08-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/virtualNetworks/clitestvnet1''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '293'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 19:27:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 200
+      message: Ok
 - request:
     body: null
     headers:
@@ -2015,8 +2059,8 @@ interactions:
       x-ms-failure-cause:
       - gateway
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: Ok
 - request:
     body: '{"location": "eastus2euap", "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
@@ -3220,8 +3264,8 @@ interactions:
       x-content-type-options:
       - nosniff
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: Ok
 - request:
     body: '{"properties": {"charset": "utf8"}}'
     headers:
