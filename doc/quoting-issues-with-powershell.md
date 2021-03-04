@@ -104,6 +104,8 @@ Command arguments: ['a&b ', '--debug']
 Command arguments: ['a&b', '--debug']
 ```
 
+This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
+
 ### Double quotes `"` are lost
 
 This typically happens when passing a JSON to `az`. This is because double quotes within the JSON string are lost when calling a native `.exe` file within PowerShell.
@@ -167,12 +169,18 @@ Command arguments: ['{"key": "value"}', '--debug']
 Command arguments: ['{"key": "value"}', '--debug']
 ```
 
-This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
+## Best practice: use file input for JSON
 
-## Workaround: use file input
+For complex arguments like JSON string, the best practice is to use Azure CLI's `@<file>` convention to load from a file to bypass the shell's interpretation.
 
-You may use CLI's `@<file>` convention to load from a file to bypass the shell's interpretation mechanisms:
+Note that At symbol (`@`) is [splatting operator](https://docs.microsoft.com/powershell/module/microsoft.powershell.core/about/about_splatting) in PowerShell, so it should be quoted.
 
 ```powershell
-az ad app create --display-name my-native --native-app --required-resource-accesses @manifest.json
+az ad app create ... --required-resource-accesses "@manifest.json"
+```
+
+You may also use `@-` to read from `stdin`:
+
+```powershell
+Get-Content -Path manifest.json | az ad app create ... --required-resource-accesses "@-"
 ```
