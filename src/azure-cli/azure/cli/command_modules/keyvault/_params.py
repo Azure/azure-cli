@@ -711,6 +711,9 @@ def load_arguments(self, _):
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('role', help='role name or id')
 
+    with self.argument_context('keyvault role definition list') as c:
+        c.argument('custom_role_only', arg_type=get_three_state_flag(), help='Only show custom role definitions.')
+
     class PrincipalType(str, Enum):  # Copied from azure.mgmt.authorization v2018_09_01_preview
         user = "User"
         group = "Group"
