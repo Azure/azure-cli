@@ -255,7 +255,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
-        enable_hotpatching=None, platform_fault_domain=None):
+        enable_hotpatching=None, platform_fault_domain=None, linux_patch_mode=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -304,10 +304,17 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
             os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
 
+        # Windows patch settings
         if patch_mode is not None and custom_image_os_type.lower() == 'windows':
             os_profile['windowsConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode,
                 'enableHotpatching': enable_hotpatching
+            }
+
+        # Linux patch settings
+        if linux_patch_mode is not None and custom_image_os_type.lower() == 'linux':
+            os_profile['linuxConfiguration']['patchSettings'] = {
+                'patchMode': linux_patch_mode
             }
 
         return os_profile
