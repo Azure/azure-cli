@@ -2579,7 +2579,7 @@ def aks_update(cmd, client, resource_group_name, name,
             name="Basic",
             tier="Paid"
         )
-    
+
     if no_uptime_sla:
         instance.sku = ManagedClusterSKU(
             name="Basic",
