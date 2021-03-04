@@ -2040,6 +2040,94 @@ def list_role_definitions(client, scope=None, hsm_name=None, custom_role_only=Fa
     if custom_role_only:
         role_definitions = [role for role in role_definitions if role.role_type == 'CustomRole']
     return [_reconstruct_role_definition(role) for role in role_definitions]
+
+
+def create_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=False)
+
+
+def update_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=True)
+
+
+def _create_update_role_definition(client, role_definition, for_update):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from azure.keyvault.administration import KeyVaultPermission
+
+    if os.path.exists(role_definition):
+        role_definition = get_file_json(role_definition)
+    else:
+        role_definition = shell_safe_json_parse(role_definition)
+
+    if not isinstance(role_definition, dict):
+        raise InvalidArgumentValueError('Invalid role definition. A valid dictionary JSON representation is expected.')
+    # to workaround service defects, ensure property names are camel case
+    # e.g. NotActions -> notActions
+    names = [p for p in role_definition if p[:1].isupper()]
+    for n in names:
+        new_name = n[:1].lower() + n[1:]
+        role_definition[new_name] = role_definition.pop(n)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    role_definition_name = None
+    role_name = role_definition.get('roleName', None)
+    description = role_definition.get('description', None)
+    permissions = [KeyVaultPermission(
+        allowed_actions=role_definition.get('actions', None),
+        denied_actions=role_definition.get('notActions', None),
+        allowed_data_actions=role_definition.get('dataActions', None),
+        denied_data_actions=role_definition.get('notDataActions', None)
+    )]
+
+    if for_update:
+        role_definition_name = role_definition.get('name', None)
+        role_id = role_definition.get('id', None)
+
+        if role_definition_name is None and role_id is None:
+            raise InvalidArgumentValueError('Please provide "name" or "id" property in'
+                                            ' your role definition JSON content.')
+
+        role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    result_role_definition = client.set_role_definition(
+        role_scope=role_scope,
+        permissions=permissions,
+        role_definition_name=role_definition_name,
+        role_name=role_name,
+        description=description
+    )
+
+    return _reconstruct_role_definition(result_role_definition)
+
+
+def _get_role_definition_name(role_definition_name, role_id):
+    if role_definition_name is None and role_id is None:
+        raise InvalidArgumentValueError('Please specify either --role-definition-name or --role-id.')
+
+    if role_definition_name is None:
+        if '/' not in role_id:
+            raise InvalidArgumentValueError('The role resource id is invalid: {}'.format(role_id))
+        role_definition_name = role_id.split('/')[-1]
+
+    return role_definition_name
+
+
+def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    client.delete_role_definition(role_scope, role_definition_name)
+
+
+def show_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    result_role_definition = client.get_role_definition(role_scope, role_definition_name)
+
+    return _reconstruct_role_definition(result_role_definition)
 # endregion
 
 
