@@ -4862,16 +4862,21 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
     def test_vmss_orchestration_mode(self, resource_group):
         self.kwargs.update({
             'ppg': 'ppg1',
-            'vmss': 'vmss1'
+            'vmss': 'vmss1',
+            'vm': 'vm1'
         })
 
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 1 --generate-ssh-keys',
+                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
-                     self.check('vmss.platformFaultDomainCount', 1)
+                     self.check('vmss.platformFaultDomainCount', 3)
                  ])
+        self.cmd('vm create -g {rg} -n {vm} --image centos --platform-fault-domain 1 --vmss {vmss1} --generate-ssh-keys --nsg-rule None')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('platformFaultDomain', 1)
+        ])
 
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
