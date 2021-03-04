@@ -538,6 +538,16 @@ parameters:
     short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
   - name: --encryption-key-source
     short-summary: Encryption Key Source
+  - name: --allowed-clients
+    short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
+  - name: --cifs
+    short-summary: Allows NFSv3 protocol. Enable only for NFSv3 type volumes
+  - name: --rule-index
+    short-summary: Order index
+  - name: --unix-read-only
+    short-summary: Read only access
+  - name: --unix-read-write
+    short-summary: Read and write access
 examples:
   - name: Create an ANF volume
     text: >
