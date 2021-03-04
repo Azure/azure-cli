@@ -139,8 +139,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
-    with self.command_group('storage account', cloud_data_plane_sdk) as g:
-        g.storage_command('generate-sas', 'generate_shared_access_signature')
+    with self.command_group('storage account',
+                            command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
+        g.storage_command('generate-sas', 'generate_sas')
 
     encryption_scope_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#EncryptionScopesOperations.{}',
