@@ -2275,7 +2275,7 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
-                             identifier=None):  # pylint: disable=unused-argument
+                             identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
@@ -2319,7 +2319,7 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
         certificates.append(sd_jwk)
 
     ret = client.download(
-        vault_base_url=hsm_name,
+        vault_base_url=hsm_name or vault_base_url,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
 
