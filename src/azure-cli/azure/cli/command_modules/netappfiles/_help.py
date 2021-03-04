@@ -54,7 +54,7 @@ parameters:
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
   - name: --security-operators
     short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
-  - name; --ldap-over-tls
+  - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
 examples:
   - name: Add an active directory to the account
