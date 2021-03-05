@@ -43,24 +43,9 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
                 AdalAuthentication._log_hostname()
             raise err
         except adal.AdalError as err:
-            # pylint: disable=no-member
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
-
-            err = (getattr(err, 'error_response', None) or {}).get('error_description') or str(err)
-            if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
-                raise CLIError("Credentials have expired due to inactivity. {}".format(
-                    "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50079' in err:
-                raise CLIError("Configuration of your account was changed. {}".format(
-                    "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50173' in err:
-                raise CLIError("The credential data used by CLI has been expired because you might have changed or "
-                               "reset the password. {}".format(
-                                   "Please clear browser's cookies and run 'az login'"
-                                   if not in_cloud_console() else ''))
-
-            raise CLIError(err)
+            adal_error_handler(err)
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
@@ -246,3 +231,29 @@ def _timestamp(dt):
     # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
     # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
     return dt.timestamp()
+
+
+def aad_error_handler(error: dict):
+    """ Handle the error from AAD server returned by ADAL or MSAL. """
+    login_message = ("To re-authenticate, please {}. If the problem persists, "
+                     "please contact your tenant administrator."
+                     .format("refresh Azure Portal" if in_cloud_console() else "run `az login`"))
+
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
+    # Search for an error code at https://login.microsoftonline.com/error
+    msg = error.get('error_description')
+
+    from azure.cli.core.azclierror import AuthenticationError
+    raise AuthenticationError(msg, login_message)
+
+
+def adal_error_handler(err: adal.AdalError):
+    """ Handle AdalError. """
+    try:
+        aad_error_handler(err.error_response)
+    except AttributeError:
+        # In case of AdalError created as
+        #   AdalError('More than one token matches the criteria. The result is ambiguous.')
+        # https://github.com/Azure/azure-cli/issues/15320
+        from azure.cli.core.azclierror import UnknownError
+        raise UnknownError(str(err), recommendation="Please run `az account clear`, then `az login`.")
