@@ -176,7 +176,7 @@ def _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, subnet_
                                                                              location=location,
                                                                              address_space=AddressSpace(
                                                                                  address_prefixes=[
-                                                                                     vnet_address_pref])))
+                                                                                     vnet_address_pref]))).result()
         subnet_result = Subnet(
             name=subnet_name,
             location=location,
@@ -216,7 +216,7 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
     client.virtual_networks.begin_create_or_update(resource_group_name, vnet_name,
                                                    VirtualNetwork(name=vnet_name, location=location,
                                                                   address_space=AddressSpace(
-                                                                      address_prefixes=[vnet_address_prefix])))
+                                                                      address_prefixes=[vnet_address_prefix]))).result()
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
     service_endpoint = ServiceEndpoint(service='Microsoft.Storage')
     subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation], service_endpoints=[service_endpoint])
