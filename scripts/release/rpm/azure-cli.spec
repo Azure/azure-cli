@@ -41,7 +41,7 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 # Create a fully instantiated virtual environment, ready to use the CLI.
 %{python_cmd} -m venv %{buildroot}%{cli_lib_dir}
 source %{buildroot}%{cli_lib_dir}/bin/activate
-
+%{python_cmd} -m pip install --upgrade pip==21.0.1
 source %{repo_path}/scripts/install_full.sh
 
 deactivate
