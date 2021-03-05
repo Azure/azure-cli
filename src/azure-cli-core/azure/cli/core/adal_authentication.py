@@ -254,4 +254,6 @@ def adal_error_handler(err: adal.AdalError):
     except AttributeError:
         # In case of AdalError created as
         #   AdalError('More than one token matches the criteria. The result is ambiguous.')
-        raise CLIError(str(err))
+        # https://github.com/Azure/azure-cli/issues/15320
+        from azure.cli.core.azclierror import UnknownError
+        raise UnknownError(str(err), recommendation="Please run `az account clear`, then `az login`.")
