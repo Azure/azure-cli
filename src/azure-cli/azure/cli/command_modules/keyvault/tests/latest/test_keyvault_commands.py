@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from dateutil import tz
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure_devtools.scenario_tests import RecordingProcessor
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
 
 from knack.util import CLIError
@@ -673,6 +674,123 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
 
         # check final result
         self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 1))
+
+
+class RoleDefinitionNameReplacer(RecordingProcessor):
+
+    def process_request(self, request):
+        if 'providers/Microsoft.Authorization/roleDefinitions/' in request.uri:
+            uri_pieces = request.uri.split('/')
+            uri_pieces[-1] = '00000000-0000-0000-0000-000000000000'
+            request.uri = '/'.join(uri_pieces)
+        return request
+
+
+class KeyVaultHSMRoleDefintionTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super(KeyVaultHSMRoleDefintionTest, self).__init__(
+            method_name,
+            recording_processors=[RoleDefinitionNameReplacer()],
+            replay_processors=[RoleDefinitionNameReplacer()]
+        )
+
+    # @record_only()
+    def test_keyvault_role_definition(self):
+
+        def role_definition_checks():
+            checks = [
+                self.check('roleName', '{roleName}'),
+                self.check('description', '{description}'),
+                self.check('roleType', 'CustomRole'),
+                self.check('type', 'Microsoft.Authorization/roleDefinitions'),
+                self.check('assignableScopes', ['/']),
+                self.check('permissions[0].actions', self.kwargs.get('actions', None)),
+                self.check('permissions[0].notActions', self.kwargs.get('notActions', None)),
+                self.check('permissions[0].dataActions', self.kwargs.get('dataActions', None)),
+                self.check('permissions[0].notDataActions', self.kwargs.get('notDataActions', None))
+            ]
+            return checks
+
+        self.kwargs.update({
+            'hsm_name': 'clitest-hsm',
+            'roleName': 'TestCustomRole',
+            'description': 'Custom role description',
+            'actions': [],
+            'notActions': [],
+            'dataActions': ['Microsoft.KeyVault/managedHsm/keys/sign/action'],
+            'notDataActions': []
+        })
+
+        role_definition = {
+            'roleName': self.kwargs.get('roleName', None),
+            'description': self.kwargs.get('description', None),
+            'actions': self.kwargs.get('actions', None),
+            'notActions': self.kwargs.get('notActions', None),
+            'dataActions': self.kwargs.get('dataActions', None),
+            'notDataActions': self.kwargs.get('notDataActions', None),
+        }
+
+        _, temp_file = tempfile.mkstemp()
+        with open(temp_file, 'w') as f:
+            json.dump(role_definition, f)
+
+        self.kwargs.update({
+            'role_definition': temp_file.replace('\\', '\\\\')
+        })
+
+        # record existing role definition number
+        results = self.cmd('keyvault role definition list --hsm-name {hsm_name}').get_output_in_json()
+        self.kwargs.update({
+            'role_number': len(results)
+        })
+
+        # check create a role defintion
+        custom_role_definition = self.cmd('keyvault role definition create --hsm-name {hsm_name} --role-definition {role_definition}',
+                                          checks=role_definition_checks()).get_output_in_json()
+
+        self.kwargs.update({
+            'name': custom_role_definition.get('name', None),
+            'id': custom_role_definition.get('id', None)
+        })
+        self.cmd('keyvault role definition show --hsm-name {hsm_name} --name {name}',
+                 checks=role_definition_checks())
+
+        # update the role definition
+        self.kwargs.update({
+            'dataActions': [
+                'Microsoft.KeyVault/managedHsm/keys/read/action',
+                'Microsoft.KeyVault/managedHsm/keys/write/action',
+                'Microsoft.KeyVault/managedHsm/keys/backup/action',
+                'Microsoft.KeyVault/managedHsm/keys/create'
+            ]
+        })
+        role_definition['name'] = self.kwargs.get('name', None)
+        role_definition['id'] = self.kwargs.get('id', None)
+        role_definition['dataActions'] = self.kwargs.get('dataActions', None)
+
+        _, temp_file = tempfile.mkstemp()
+        with open(temp_file, 'w') as f:
+            json.dump(role_definition, f)
+
+        self.kwargs.update({
+            'updated_role_definition': temp_file.replace('\\', '\\\\')
+        })
+
+        # check update a role definition
+        self.cmd('keyvault role definition update --hsm-name {hsm_name} --role-definition {updated_role_definition}',
+                 checks=role_definition_checks())
+        self.cmd('keyvault role definition show --hsm-name {hsm_name} --name {name}',
+                 checks=role_definition_checks())
+
+        # check list role definitions
+        self.cmd('keyvault role definition list --hsm-name {hsm_name}',
+                 checks=[self.check('length(@)', self.kwargs.get('role_number') + 1)])
+
+        # check delete a role definition
+        self.cmd('keyvault role definition delete --hsm-name {hsm_name} --name {name}')
+        self.cmd('keyvault role definition list --hsm-name {hsm_name}',
+                 checks=[self.check('length(@)', self.kwargs.get('role_number'))])
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
