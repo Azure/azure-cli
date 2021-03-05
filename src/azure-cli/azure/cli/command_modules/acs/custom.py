@@ -2445,6 +2445,7 @@ def aks_update(cmd, client, resource_group_name, name,
                cluster_autoscaler_profile=None,
                min_count=None, max_count=None,
                uptime_sla=False,
+               no_uptime_sla=False,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -2472,6 +2473,7 @@ def aks_update(cmd, client, resource_group_name, name,
             not attach_acr and
             not detach_acr and
             not uptime_sla and
+            not no_uptime_sla and
             api_server_authorized_ip_ranges is None and
             not enable_aad and
             not update_aad_profile and
@@ -2488,6 +2490,7 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-idle-timeout" or'
                        '"--attach-acr" or "--detach-acr" or'
                        '"--uptime-sla" or'
+                       '"--no-uptime-sla" or '
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
                        '"--aad-tenant-id" or '
@@ -2568,10 +2571,19 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
+    if uptime_sla and no_uptime_sla:
+        raise CLIError('Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.')
+
     if uptime_sla:
         instance.sku = ManagedClusterSKU(
             name="Basic",
             tier="Paid"
+        )
+
+    if no_uptime_sla:
+        instance.sku = ManagedClusterSKU(
+            name="Basic",
+            tier="Free"
         )
 
     if update_lb_profile:
