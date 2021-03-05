@@ -712,6 +712,13 @@ def load_arguments(self, _):
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('role', help='role name or id')
 
+    with self.argument_context('keyvault role definition') as c:
+        c.argument('hsm_name', hsm_url_type)
+        c.argument('role_definition', help='Description of a role as JSON, or a path to a file containing a JSON description.')
+        c.argument('role_id', help='The role definition ID.')
+        c.argument('role_definition_name', options_list=['--name', '-n'], help='The role definition name. '
+                   'This is a GUID in the "name" property of a role definition.')
+
     with self.argument_context('keyvault role definition list') as c:
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='Only show custom role definitions.')
 
