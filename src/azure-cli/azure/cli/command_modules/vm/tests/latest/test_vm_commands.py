@@ -768,11 +768,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
 
         self.cmd('sig create -g {rg} --gallery-name {g1}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsSecureBootSupported=false IsMeasuredBootSupported=false" --hyper-v-generation V2', checks=[
-            self.check('features[0].name', 'IsSecureBootSupported'),
-            self.check('features[0].value', 'false', False),
-            self.check('features[1].name', 'IsMeasuredBootSupported'),
-            self.check('features[1].value', 'false', False),
+        self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true" --hyper-v-generation V2', checks=[
+            self.check('features[0].name', 'IsAcceleratedNetworkSupported'),
+            self.check('features[0].value', 'true', False)
         ])
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
         self.cmd('snapshot create -g {rg} -n s1 --source disk')
