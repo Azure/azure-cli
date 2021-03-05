@@ -851,7 +851,7 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         self.cmd('extension add -n eventgrid')
 
     def tearDown(self):
-        self.cmd('extension remove -n eventgrid')
+        # self.cmd('extension remove -n eventgrid')
         super(NetworkPrivateLinkEventGridScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(name_prefix='cli_test_event_grid_plr')

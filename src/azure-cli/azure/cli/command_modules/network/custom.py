@@ -6623,6 +6623,8 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
     gateway.vpn_client_configuration.aad_tenant = None
     gateway.vpn_client_configuration.aad_audience = None
     gateway.vpn_client_configuration.aad_issuer = None
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        gateway.vpn_client_configuration.vpn_authentication_types = None
 
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 # endregion
