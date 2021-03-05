@@ -5,6 +5,7 @@
 import pytest
 import os
 import time
+import unittest
 from datetime import datetime, timedelta, tzinfo
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
@@ -249,6 +250,7 @@ class PostgresFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerM
     def test_postgres_flexible_server_vnet_server_prepare(self):
         self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group))
 
+    @unittest.skip("Takes too long. Need to re-record.")
     @AllowLargeResponse()
     @pytest.mark.order(2)
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_prepare'])
@@ -273,6 +275,7 @@ class PostgresFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerM
     def test_postgres_flexible_server_vnet_server_delete(self):
         self._test_flexible_server_vnet_server_delete('postgres', self.resource_group, self.server, self.restore_server)
 
+    @unittest.skip("Takes too long. Need to re-record.")
     @AllowLargeResponse()
     @pytest.mark.order(6)
     @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_prepare'])
