@@ -255,7 +255,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
-        enable_hotpatching=None):
+        enable_hotpatching=None, count=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -472,6 +472,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     }
     if zone:
         vm['zones'] = zone
+    if count:
+        vm['copy'] = {
+            'name': 'vmcopy',
+            'count': count
+        }
+        vm['name'] = "[concat('{}', copyIndex())]".format(name)
     return vm
 
 
