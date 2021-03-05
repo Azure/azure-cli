@@ -22,8 +22,6 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 apt-get update
 apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev
 apt-get install -y wget
-apt-get install -y libgirepository1.0-dev libcairo2-dev gir1.2-secret-1 pkg-config gnome-keyring libgtk2.0-dev
-apt-get install -y glib-2.0 gir1.2-gtk-3.0
 
 # Download Python source code
 PYTHON_SRC_DIR=$(mktemp -d)
@@ -35,22 +33,16 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip==21.0.1
+
 export PATH=$PATH:$WORKDIR/python_env/bin
 
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
-if [[ -f "${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt" && "${CLI_VERSION_REVISION:=1}" != *"trusty" && "${CLI_VERSION_REVISION:=1}" != *"jessie" ]]; then
-    pip3 install -r ${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt
-fi
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
-if [[ "${CLI_VERSION_REVISION:=1}" == *"trusty" || "${CLI_VERSION_REVISION:=1}" == *"jessie" ]]; then
-    $SCRIPT_DIR/prepare.sh $WORKDIR/debian $WORKDIR/az.completion $WORKDIR
-else
-    PYOBJECT_DEPENDENCY="gir1.2-secret-1, gnome-keyring"
-    $SCRIPT_DIR/prepare.sh $WORKDIR/debian $WORKDIR/az.completion $WORKDIR $PYOBJECT_DEPENDENCY
-fi
+$SCRIPT_DIR/prepare.sh $WORKDIR/debian $WORKDIR/az.completion $WORKDIR
 
 cd $WORKDIR
 dpkg-buildpackage -us -uc
