@@ -142,7 +142,10 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
+    try:
+        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
+    except:
+        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
     restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
 
     parameters = postgresql_flexibleservers.models.Server(
