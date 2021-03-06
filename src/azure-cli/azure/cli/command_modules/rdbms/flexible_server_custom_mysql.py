@@ -145,7 +145,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
     try:
         restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
-    except:
+    except ValueError:
         restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
     restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
 
