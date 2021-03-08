@@ -782,7 +782,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     nic_name = None
     if nic_type == 'new':
         nic_name = '{}VMNic'.format(vm_name)
-        vm_dependencies.append('Microsoft.Network/networkInterfaces/{}'.format(nic_name))
+        nic_full_name = 'Microsoft.Network/networkInterfaces/{}'.format(nic_name)
+        if count:
+            vm_dependencies.extend([nic_full_name + str(i) for i in range(count)])
+        else:
+            vm_dependencies.append(nic_full_name)
 
         nic_dependencies = []
         if vnet_type == 'new':
@@ -832,7 +836,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location, tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name,
-                                                                  public_ip_sku, zone))
+                                                                  public_ip_sku, zone, count))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
@@ -847,9 +851,17 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
                 else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
 
-        nics = [
-            {'id': '{}/networkInterfaces/{}'.format(network_id_template, nic_name)}
-        ]
+        nics_id = '{}/networkInterfaces/{}'.format(network_id_template, nic_name)
+
+        if count:
+            nics = [
+                {'id': "[concat('{}', copyIndex())]".format(nics_id)}
+            ]
+        else:
+            nics = [
+                {'id': nics_id}
+            ]
+
         nic_resource = build_nic_resource(
             cmd, nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
             public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking)
