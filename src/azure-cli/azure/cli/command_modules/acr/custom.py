@@ -258,6 +258,8 @@ def acr_login(cmd,
                        'docker commands, to avoid authentication errors, use all lowercase.')
 
     from subprocess import PIPE, Popen
+    logger.debug("Invoking '%s --username %s --password <redacted> %s'",
+                 docker_command, username, login_server)
     p = Popen([docker_command, "login",
                "--username", username,
                "--password", password,
