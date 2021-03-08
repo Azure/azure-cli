@@ -1881,8 +1881,8 @@ long-summary: >
 examples:
   - name: Open all ports on a VM to inbound traffic.
     text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
-  - name: Open multiple non sequential ports.
-    text: az vm open-port -g MyResourceGroup -n MyVm --port 555,557,559
+  - name: Open multiple nonsequential ports or ranges.
+    text: az vm open-port -g MyResourceGroup -n MyVm --port 555,557,559-561
   - name: Open a range of ports on a VM to inbound traffic with the highest priority.
     text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
   - name: Open all ports for all VMs in a resource group.
