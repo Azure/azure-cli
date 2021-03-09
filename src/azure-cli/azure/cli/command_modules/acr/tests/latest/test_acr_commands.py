@@ -525,7 +525,7 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs.update({
             'registry_name': self.create_random_name('testreg', 20)
         })
-        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l centraluseuap',
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus',
                  checks=[self.check('anonymousPullEnabled', False)])
         self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled true',
                  checks=[self.check('anonymousPullEnabled', True)])
