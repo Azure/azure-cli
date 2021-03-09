@@ -211,7 +211,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
         ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
+        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_HYBRIDKUBERNETES: '2021-03-01'
     },
     '2020-09-01-hybrid': {
