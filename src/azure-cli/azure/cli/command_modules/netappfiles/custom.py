@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
+from knack.util import CLIError
 from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
@@ -138,9 +139,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     if (protocol_types is not None) and ("NFSv4.1" in protocol_types):
         rules = []
         if allowed_clients is None:
-            raise Exception("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
+            raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
         if rule_index is None:
-            raise Exception("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+            raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
 
         export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
                                          unix_read_write=unix_read_write, cifs=cifs,

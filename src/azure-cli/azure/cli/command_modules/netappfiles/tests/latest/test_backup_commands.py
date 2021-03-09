@@ -116,9 +116,6 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         assert len(backup_list) == 1
 
-        if self.is_live or self.in_recording:
-            time.sleep(10)
-
         # create backup 2
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name, True)

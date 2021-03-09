@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
+from knack.util import CLIError
 import time
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
@@ -342,7 +343,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
 
         # Error when allowed-clients not set on NFSv4.1
-        with self.assertRaises(Exception):
+        with self.assertRaises(CLIError):
             self.cmd("az netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
                      "--subnet %s --protocol-types %s --tags %s --rule-index %s --unix-read-only %s "
                      "--unix-read-write %s --cifs %s" %
@@ -350,7 +351,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
                       subnet_name, protocol_types, tag, rule_index, unix_read_only, unix_read_write, cifs))
 
         # Error when rule-index not set on NFSv4.1
-        with self.assertRaises(Exception):
+        with self.assertRaises(CLIError):
             self.cmd("az netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
                      "--subnet %s --protocol-types %s --tags %s --unix-read-only %s --unix-read-write %s --cifs %s "
                      "--allowed-clients %s" %

@@ -125,7 +125,7 @@ def load_account_backup_command_groups(self, netappfiles_account_backups_sdk):
     with self.command_group('netappfiles account backup', netappfiles_account_backups_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
 
 
 def load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk):
