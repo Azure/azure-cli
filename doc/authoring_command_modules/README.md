@@ -38,8 +38,7 @@ After this, you should be able to run the CLI with `az`.
 
 [Author your command module...](#heading_author_command_mod)
 
-
-Also, you can run `az` and if your command module contributes any commands, they should appear.
+If your command module contributes any commands, they should appear with `az`.
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
 thrown whilst attempting to load your module.
 
