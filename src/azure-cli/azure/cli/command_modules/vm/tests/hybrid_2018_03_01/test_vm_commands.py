@@ -86,12 +86,6 @@ class VMOpenPortTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} -l westus -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password @PasswordPassword1! --public-ip-address-allocation dynamic --authentication-type password')
 
-        # min params - test list of ports
-        self.kwargs['nsg_id'] = self.cmd('vm open-port -g {rg} -n {vm} --port "555,556,557-559" --priority 800').get_output_in_json()['id']
-        self.kwargs['nsg'] = os.path.split(self.kwargs['nsg_id'])[1]
-        self.cmd('network nsg show -g {rg} -n {nsg}',
-                 checks=self.check("length(securityRules[?name == 'open-port-555_556_557-559'])", 1))
-
         # min params - apply to existing NIC (updates existing NSG)
         self.kwargs['nsg_id'] = self.cmd('vm open-port -g {rg} -n {vm} --port "*" --priority 900').get_output_in_json()['id']
         self.kwargs['nsg'] = os.path.split(self.kwargs['nsg_id'])[1]
