@@ -32,24 +32,12 @@ python -m venv env
 source env/bin/activate
 azdev setup -c
 ```
+For more information, see https://github.com/Azure/azure-cli-dev-tools#setting-up-your-development-environment.
 
 After this, you should be able to run the CLI with `az`.
 
 [Author your command module...](#heading_author_command_mod)
 
-Now, install your command module into the environment with pip in editable mode.  
-Where `<path_to_your_command_module>` is the path to the directory containing your `setup.py` file.
-```
-pip install -e <path_to_your_command_module>
-```
-
-If installation was successful, you should be able to run `pip list` and see your command module.
-```
-$ pip list
-...
-azure-cli-example (0.0.1, /Users/myuser/Repos/azure-cli-example)
-...
-```
 
 Also, you can run `az` and if your command module contributes any commands, they should appear.
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
@@ -58,9 +46,6 @@ thrown whilst attempting to load your module.
 
 <a name="heading_author_command_mod"></a>Authoring command modules
 ------
-Currently, all command modules should start with `azure-cli-`.  
-When the CLI loads, it search for packages installed that start with that prefix.
-
 The `example_module_template` directory gives an example command module with other useful examples.
 
 Command modules should have the following structure:
@@ -78,6 +63,12 @@ Command modules should have the following structure:
 `-- setup.py
 `-- HISTORY.rst
 ```
+
+You could create these files manually, or [create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
+
+You also could consider using [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
+
+
 
 **Create an \_\_init__.py for your module**
 
