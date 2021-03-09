@@ -111,8 +111,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None):
-
+                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None,
+                       count=None):
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
         'privateIPAllocationMethod': private_ip_allocation,
@@ -124,15 +124,20 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     if public_ip_id:
         ip_config_properties['publicIPAddress'] = {'id': public_ip_id}
+        if count:
+            ip_config_properties['publicIPAddress']['id'] = "[concat('{}', copyIndex())]".format(public_ip_id)
 
+    ipconfig_name = 'ipconfig{}'.format(vm_name)
     nic_properties = {
         'ipConfigurations': [
             {
-                'name': 'ipconfig{}'.format(vm_name),
+                'name': ipconfig_name,
                 'properties': ip_config_properties
             }
         ]
     }
+    if count:
+        nic_properties['ipConfigurations']['name'] = "[concat('{}', copyIndex())]".format(ipconfig_name)
 
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
@@ -156,6 +161,14 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         'dependsOn': [],
         'properties': nic_properties
     }
+
+    if count:
+        nic['name'] = "[concat('{}', copyIndex())]".format(name)
+        nic['copy'] = {
+            'name': 'niccopy',
+            'count': count
+        }
+
     return nic
 
 

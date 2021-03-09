@@ -831,8 +831,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
-            nic_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(
-                public_ip_address))
+            public_ip_address_full_name = 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address)
+            if count:
+                nic_dependencies.extend([public_ip_address_full_name + str(i) for i in range(count)])
+            else:
+                nic_dependencies.append(public_ip_address_full_name)
             master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location, tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name,
@@ -864,7 +867,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         nic_resource = build_nic_resource(
             cmd, nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
-            public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking)
+            public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking,
+            count=count)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
     else:
