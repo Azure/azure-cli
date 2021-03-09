@@ -137,7 +137,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         ]
     }
     if count:
-        nic_properties['ipConfigurations']['name'] = "[concat('{}', copyIndex())]".format(ipconfig_name)
+        nic_properties['ipConfigurations'][0]['name'] = "[concat('{}', copyIndex())]".format(ipconfig_name)
 
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
