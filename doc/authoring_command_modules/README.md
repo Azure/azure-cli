@@ -28,9 +28,9 @@ For example:
 ```
 git clone https://github.com/Azure/azure-cli.git
 cd azure-cli
-virtualenv env
+python -m venv env
 source env/bin/activate
-python scripts/dev_setup.py
+azdev setup -c
 ```
 
 After this, you should be able to run the CLI with `az`.
