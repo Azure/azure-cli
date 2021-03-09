@@ -3337,12 +3337,14 @@ type: command
 short-summary: Create an address pool.
 parameters:
   - name: --backend-address
-    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is also required.
+    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
     long-summary: |
-        Usage: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
+        Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
+        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet==/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
 
         name: Required. The name of the backend address.
         ip-address: Required. Ip Address within the Virtual Network.
+        subnet: Id of the subnet.(Required if --vnet lacks)
 
         Multiple backend addresses can be specified by using more than one `--backend-address` argument.
   - name: --backend-addresses-config-file
@@ -3361,7 +3363,12 @@ parameters:
             "name": "address2",
             "virtualNetwork": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/virtualNetworks/clitestvnet",
             "ipAddress": "10.0.0.5"
-          }
+          },
+          {
+            "name": "address3",
+            "subnet": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2",
+            "ipAddress": "10.0.0.6"
+          },
         ]
 examples:
   - name: Create an address pool.
@@ -3407,6 +3414,8 @@ short-summary: Add one backend address into the load balance backend address poo
 examples:
   - name: Add one backend address into the load balance backend address pool.
     text: az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --vnet MyVnet --ip-address 10.0.0.1
+  - name: Add one backend address into the load balance backend address pool with subnet.
+    text: az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2 --ip-address 10.0.0.1    
 """
 
 helps['network lb address-pool address remove'] = """

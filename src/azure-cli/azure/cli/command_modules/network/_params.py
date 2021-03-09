@@ -37,7 +37,7 @@ from azure.cli.command_modules.network._validators import (
     validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
-    process_vnet_name_or_id, validate_trusted_client_cert)
+    process_vnet_name_or_id, validate_trusted_client_cert, validator_subnet_id)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -974,6 +974,8 @@ def load_arguments(self, _):
         c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
         c.argument('vnet', help='Name or Id of the virtual network.', validator=process_vnet_name_or_id)
         c.argument('ip_address', help='Ip Address within the Virtual Network.')
+        c.argument('subnet', help='Id of the existing subnet.', validator=validator_subnet_id, min_api='2020-11-01')
+
 
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01')

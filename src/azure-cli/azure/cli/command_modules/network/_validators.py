@@ -19,7 +19,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, UnrecognizedArgumentError
 
 logger = get_logger(__name__)
 
@@ -1961,6 +1961,12 @@ def process_vnet_name_or_id(cmd, namespace):
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=namespace.vnet)
+
+
+def validator_subnet_id(namespace):
+    from azure.mgmt.core.tools import is_valid_resource_id
+    if namespace.subnet and not is_valid_resource_id(namespace.subnet):
+        raise UnrecognizedArgumentError(f'{namespace.subnet} in not valid')
 
 
 def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused-argument
