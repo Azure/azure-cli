@@ -57,8 +57,7 @@ def load_arguments(self, _):
     )
     identities_arg_type = CLIArgumentType(
         nargs='*',
-        validator=validate_identity,
-        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Use system assigned identity if not specified."
+        validator=validate_identity
     )
 
     with self.argument_context('appconfig') as c:
@@ -82,7 +81,8 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('assign_identity', arg_type=identities_arg_type, is_preview=True)
+        c.argument('assign_identity', arg_type=identities_arg_type,
+                   help='Space-separated list of managed identities to be assigned. Use "[system]" to refer to system-assigned managed identity or a resource ID to refer to user-assigned managed identity. If this argument is provided without any value, system-assigned managed identity will be assigned by default. If this argument is not provided, no managed identities will be assigned to this App Configuration store.')
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
 
@@ -91,17 +91,17 @@ def load_arguments(self, _):
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
 
-    with self.argument_context('appconfig update', arg_group='Customer Managed Key', is_preview=True) as c:
+    with self.argument_context('appconfig update', arg_group='Customer Managed Key') as c:
         c.argument('encryption_key_name', help='The name of the KeyVault key.')
         c.argument('encryption_key_vault', help='The URI of the KeyVault.')
         c.argument('encryption_key_version', help='The version of the KeyVault key. Use the latest version by default.')
-        c.argument('identity_client_id', help='Client ID of the managed identity with wrap and unwrap access to encryption key. Use system assigned identity by default.')
+        c.argument('identity_client_id', help='Client ID of the managed identity with wrap and unwrap access to encryption key. Use system-assigned managed identity by default.')
 
     with self.argument_context('appconfig identity assign') as c:
-        c.argument('identities', arg_type=identities_arg_type)
+        c.argument('identities', arg_type=identities_arg_type, help="Accept system-assigned or user-assigned managed identities separated by spaces. Use '[system]' to refer to system-assigned managed identity or a resource ID to refer to user-assigned managed identity. If this argument is not provided or this argument is provided without any value, system-assigned managed identity will be used by default.")
 
     with self.argument_context('appconfig identity remove') as c:
-        c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, '[all]' for all identities or a resource id to refer user assigned identity. Remove system assigned identity if not specified.")
+        c.argument('identities', arg_type=identities_arg_type, help="Accept system-assigned or user-assigned managed identities separated by spaces. Use '[system]' to refer to system-assigned managed identity, '[all]' for all managed identities or a resource ID to refer user-assigned managed identity. If this argument is not provided or this argument is provided without any value, system-assigned managed identity will be removed by default.")
 
     with self.argument_context('appconfig credential regenerate') as c:
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')
