@@ -317,6 +317,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             if command_group == 'postgres':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name of the source server to restore from.')
+                c.argument('source_subscription_id', options_list=['--source-subscription-id'],
+                           help='The subscription id of the source server.')
+                c.argument('source_resource_group_name', options_list=['--source-resource-group'],
+                           help='The name of the source resource group.')
                 c.argument('zone', options_list=['--zone'],
                            help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
