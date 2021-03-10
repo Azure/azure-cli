@@ -11,8 +11,8 @@
 import os
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk import ResourceGroupPreparer
-from .example_steps import step_express_route_circuit_show_peering_stat
-from .example_steps import step_express_route_circuit
+from .example_steps import step_express_route_show_peering_stat
+from .example_steps import step_express_route_list_route_table_summary
 from .. import (
     try_manual,
     raise_if,
@@ -42,12 +42,12 @@ def call_scenario(test):
     # STEP NOT FOUND: /ExpressRouteCircuits/put/Create ExpressRouteCircuit
     # STEP NOT FOUND: /ExpressRouteCircuitPeerings/put/Create ExpressRouteCircuit Peerings
     # STEP NOT FOUND: /ExpressRouteCircuits/put/Create ExpressRouteCircuit on ExpressRoutePort
-    step_express_route_circuit_show_peering_stat(test, checks=[])
+    step_express_route_show_peering_stat(test, checks=[])
     # STEP NOT FOUND: /ExpressRouteCircuits/get/Get ExpressRoute Circuit Traffic Stats
     # STEP NOT FOUND: /ExpressRouteCircuits/get/Get ExpressRouteCircuit
     # STEP NOT FOUND: /ExpressRouteCircuits/get/List ExpressRouteCircuits in a resource group
     # STEP NOT FOUND: /ExpressRouteCircuits/get/List ExpressRouteCircuits in a subscription
-    step_express_route_circuit(test, checks=[])
+    step_express_route_list_route_table_summary(test, checks=[])
     # STEP NOT FOUND: /ExpressRouteCircuits/post/List Route Tables
     # STEP NOT FOUND: /ExpressRouteCircuits/post/List ARP Table
     # STEP NOT FOUND: /ExpressRouteCircuits/patch/Update Express Route Circuit Tags

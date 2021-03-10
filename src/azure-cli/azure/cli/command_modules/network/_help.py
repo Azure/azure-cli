@@ -14,6 +14,11 @@ try:
     from .manual._help import helps  # pylint: disable=reimported
 except ImportError:
     pass
+from .generated._help import helps  # pylint: disable=reimported
+try:
+    from .manual._help import helps  # pylint: disable=reimported
+except ImportError:
+    pass
 
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines

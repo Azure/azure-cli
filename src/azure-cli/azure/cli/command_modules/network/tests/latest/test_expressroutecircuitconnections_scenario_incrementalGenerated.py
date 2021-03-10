@@ -11,7 +11,7 @@
 import os
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk import ResourceGroupPreparer
-from .example_steps import step_express_route_circuit_connection_list
+from .example_steps import step_express_route_peering_connection_list
 from .. import (
     try_manual,
     raise_if,
@@ -40,7 +40,7 @@ def call_scenario(test):
     setup_scenario(test)
     # STEP NOT FOUND: /ExpressRouteCircuitConnections/put/ExpressRouteCircuitConnectionCreate
     # STEP NOT FOUND: /ExpressRouteCircuitConnections/get/ExpressRouteCircuitConnectionGet
-    step_express_route_circuit_connection_list(test, checks=[])
+    step_express_route_peering_connection_list(test, checks=[])
     # STEP NOT FOUND: /ExpressRouteCircuitConnections/delete/Delete ExpressRouteCircuit
     cleanup_scenario(test)
 

@@ -15,18 +15,18 @@ from azure.cli.core.commands.parameters import resource_group_name_type
 
 def load_arguments(self, _):
 
-    with self.argument_context('network express-route-circuit-connection list') as c:
+    with self.argument_context('network express-route peering connection list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('circuit_name', type=str, help='The name of the circuit.')
         c.argument('peering_name', type=str, help='The name of the peering.')
 
-    with self.argument_context('network express-route-circuit list-route-table-summary') as c:
+    with self.argument_context('network express-route list-route-table-summary') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('circuit_name', type=str, help='The name of the express route circuit.')
         c.argument('peering_name', type=str, help='The name of the peering.')
         c.argument('device_path', type=str, help='The path of the device.')
 
-    with self.argument_context('network express-route-circuit show-peering-stat') as c:
+    with self.argument_context('network express-route show-peering-stat') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('circuit_name', type=str, help='The name of the express route circuit.', id_part='name')
         c.argument('peering_name', type=str, help='The name of the peering.', id_part='child_name_1')

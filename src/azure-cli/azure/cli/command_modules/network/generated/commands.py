@@ -23,11 +23,11 @@ def load_command_table(self, _):
         client_factory=cf_express_route_circuit_connection,
     )
     with self.command_group(
-        'network express-route-circuit-connection',
+        'network express-route peering connection',
         network_express_route_circuit_connection,
         client_factory=cf_express_route_circuit_connection,
     ) as g:
-        g.custom_command('list', 'network_express_route_circuit_connection_list')
+        g.custom_command('list', 'network_express_route_peering_connection_list')
 
     from ..generated._client_factory import cf_express_route_circuit
 
@@ -38,10 +38,10 @@ def load_command_table(self, _):
         client_factory=cf_express_route_circuit,
     )
     with self.command_group(
-        'network express-route-circuit', network_express_route_circuit, client_factory=cf_express_route_circuit
+        'network express-route', network_express_route_circuit, client_factory=cf_express_route_circuit
     ) as g:
-        g.custom_command('list-route-table-summary', 'network_express_route_circuit_list_route_table_summary')
-        g.custom_command('show-peering-stat', 'network_express_route_circuit_show_peering_stat')
+        g.custom_command('list-route-table-summary', 'network_express_route_list_route_table_summary')
+        g.custom_command('show-peering-stat', 'network_express_route_show_peering_stat')
 
     with self.command_group('network', is_experimental=True):
         pass

@@ -12,7 +12,7 @@
 from azure.cli.core.util import sdk_no_wait
 
 
-def network_express_route_circuit_connection_list(client,
+def network_express_route_peering_connection_list(client,
                                                   resource_group_name,
                                                   circuit_name,
                                                   peering_name):
@@ -21,12 +21,12 @@ def network_express_route_circuit_connection_list(client,
                        peering_name=peering_name)
 
 
-def network_express_route_circuit_list_route_table_summary(client,
-                                                           resource_group_name,
-                                                           circuit_name,
-                                                           peering_name,
-                                                           device_path,
-                                                           no_wait=False):
+def network_express_route_list_route_table_summary(client,
+                                                   resource_group_name,
+                                                   circuit_name,
+                                                   peering_name,
+                                                   device_path,
+                                                   no_wait=False):
     return sdk_no_wait(no_wait,
                        client.begin_list_routes_table_summary,
                        resource_group_name=resource_group_name,
@@ -35,10 +35,10 @@ def network_express_route_circuit_list_route_table_summary(client,
                        device_path=device_path)
 
 
-def network_express_route_circuit_show_peering_stat(client,
-                                                    resource_group_name,
-                                                    circuit_name,
-                                                    peering_name):
+def network_express_route_show_peering_stat(client,
+                                            resource_group_name,
+                                            circuit_name,
+                                            peering_name):
     return client.get_peering_stats(resource_group_name=resource_group_name,
                                     circuit_name=circuit_name,
                                     peering_name=peering_name)
