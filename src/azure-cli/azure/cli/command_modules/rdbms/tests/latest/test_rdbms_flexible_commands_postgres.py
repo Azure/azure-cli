@@ -1,9 +1,7 @@
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 import pytest
 import os
 import time
@@ -339,7 +337,7 @@ class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyRes
 
     @AllowLargeResponse()
     @pytest.mark.order(4)
-    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_parameter_mgmt']))
+    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_parameter_mgmt'])
     def test_postgres_flexible_server_database_mgmt(self):
         self._test_database_mgmt('postgres', self.resource_group, self.server)
 
