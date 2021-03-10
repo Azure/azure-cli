@@ -103,10 +103,10 @@ class ProgressHook:
 
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
-    def __init__(self, out=None):
+    def __init__(self, out=None, spinner=None):
         super(IndeterminateStandardOut, self).__init__(
             out if out else sys.stderr)
-        self.spinner = None
+        self.spinner = spinner
 
     def write(self, args):
         """
@@ -166,8 +166,27 @@ class DeterminateStandardOut(ProgressViewBase):
         self.out.flush()
 
 
-def get_progress_view(determinant=False, outstream=sys.stderr):
+def get_progress_view(determinant=False, outstream=sys.stderr, spinner=None):
     """ gets your view """
     if determinant:
         return DeterminateStandardOut(out=outstream)
-    return IndeterminateStandardOut(out=outstream)
+    return IndeterminateStandardOut(out=outstream, spinner=spinner)
+
+
+class IndeterminateProgressBar:
+    """ Define progress bar update view """
+    def __init__(self, cli_ctx, message="Running"):
+        self.cli_ctx = cli_ctx
+        self.message = message
+        self.hook = self.cli_ctx.get_progress_controller(
+            det=False,
+            spinner=humanfriendly.Spinner(  # pylint: disable=no-member
+                label='Running',
+                stream=sys.stderr,
+                hide_cursor=False))
+
+    def update_progress(self):
+        self.hook.add(message=self.message)
+
+    def end(self):
+        self.hook.end()
