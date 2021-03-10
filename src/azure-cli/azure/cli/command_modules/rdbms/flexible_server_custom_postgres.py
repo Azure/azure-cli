@@ -18,7 +18,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG
+    DEFAULT_LOCATION_PG, change_str_to_datetime
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
 from .validators import pg_arguments_validator
 from ._client_factory import resource_client_factory
@@ -127,54 +127,41 @@ def flexible_server_create(cmd, client,
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, source_subscription_id=None, source_resource_group_name=None,
-                            restore_point_in_time=None, location=None, zone=None, no_wait=False):
+                            source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
- 
-    if not source_subscription_id:
-        resource_client = resource_client_factory(cmd.cli_ctx)
 
-        filters = []
-        filters.append("name eq '{}'".format(source_server))
-        filters.append("resourceType eq " + "'{}/flexibleServers'".format(provider))
-        if source_resource_group_name:
-            filters.append("resourceGroup eq '{}'".format(source_resource_group_name))
-        odata_filter = ' and '.join(filters)
-
-        resources = list(resource_client.resources.list(filter=odata_filter))
-        
-        if not resources and source_resource_group_name is not None:
-            raise ResourceNotFoundError("The source server does not exist in the resource group. Please check the name of the source resource group.")
-        elif not resources:
-            raise ResourceNotFoundError("The source server does not exist in your current subscription. Please explicitly specify subscription Id for the source server.")
-        
-        source_resource_group_name = parse_resource_id(resources[0].id)['resource_group']
-        source_subscription_id = get_subscription_id(cmd.cli_ctx)
-        location = resources[0].location
+    if not is_valid_resource_id(source_server):
+        if len(source_server.split('/')) == 1:
+            source_server_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace=provider,
+                type='flexibleServers',
+                name=source_server)
+        else:
+            raise ValueError('The provided source-server {} is invalid.'.format(source_server))
     else:
-        if source_resource_group_name is None:
-            raise RequiredArgumentMissingError("It is required to specify the source resource group when restoring the server from different subscription.\n"
-                                               "Use ---source-resource-group parameter.")
-        if location is None:
-            raise RequiredArgumentMissingError("It is required to specify location for the restoring server. The location should be same as that of the source server\n"
-                                               "Use ---location parameter.")
-    
-    try:
-        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
-    except ValueError:
-        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
-    except:
-        raise ValidationError("The format of restore time should be %Y-%m-%dT%H:%M:%S+00:00")
+        source_server_id = source_server
+
+    restore_point_in_time = change_str_to_datetime(restore_point_in_time)
     restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
 
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,  # this should be the source server name, not id
-        source_subscription_id=source_subscription_id,
-        source_resource_group_name=source_resource_group_name,
         create_mode="PointInTimeRestore",
         availability_zone=zone,
+        source_resource_group_name = resource_group_name,
+        source_subscription_id = get_subscription_id(cmd.cli_ctx),
         location=location)
+
+    # Retrieve location from same location as source server
+    id_parts = parse_resource_id(source_server_id)
+    try:
+        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        parameters.location = source_server_object.location
+    except Exception as e:
+        raise ResourceNotFoundError(e)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 

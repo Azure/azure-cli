@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 import random
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
-
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
@@ -296,3 +297,13 @@ def _map_maintenance_window(day_of_week):
 def get_current_time():
     import datetime
     return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc, microsecond=0).isoformat()
+
+
+def change_str_to_datetime(date_str):
+    for fmt in ("%Y-%m-%dT%H:%M:%S+00:00", "%Y-%m-%dT%H:%M:%S.%f+00:00"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+
+    raise ValidationError("The format of restore time should be %Y-%m-%dT%H:%M:%S+00:00")
