@@ -5,26 +5,26 @@
 
 # pylint: disable=unused-argument, line-too-long
 import datetime as dt
-from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ResourceNotFoundError, ValidationError
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
     DEFAULT_LOCATION_PG, change_str_to_datetime
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
 from .validators import pg_arguments_validator
-from ._client_factory import resource_client_factory
 
 
 logger = get_logger(__name__)
+DEFAULT_DB_NAME = 'flexibleserverdb'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 
 
@@ -37,7 +37,7 @@ def flexible_server_create(cmd, client,
                            sku_name=None, tier=None,
                            storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
-                           tags=None, public_access=None,
+                           tags=None, public_access=None, database_name=None,
                            assign_identity=False, subnet_arm_resource_id=None,
                            high_availability=None, zone=None, vnet_resource_id=None,
                            vnet_address_prefix=None, subnet_address_prefix=None):
@@ -49,7 +49,7 @@ def flexible_server_create(cmd, client,
     storage_mb *= 1024
 
     db_context = DbContext(
-        azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
     # Raise error when user passes values for both parameters
@@ -106,6 +106,11 @@ def flexible_server_create(cmd, client,
                 start_ip, end_ip = parse_public_access_input(public_access)
             firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
+        # Create mysql database if it does not exist
+        if database_name is None:
+            database_name = DEFAULT_DB_NAME
+        _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+
     user = server_result.administrator_login
     server_id = server_result.id
     loc = server_result.location
@@ -151,8 +156,8 @@ def flexible_server_restore(cmd, client,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
         availability_zone=zone,
-        source_resource_group_name = resource_group_name,
-        source_subscription_id = get_subscription_id(cmd.cli_ctx),
+        source_resource_group_name=resource_group_name,
+        source_subscription_id=get_subscription_id(cmd.cli_ctx),
         location=location)
 
     # Retrieve location from same location as source server
@@ -332,6 +337,46 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
+def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
+    # check for existing database, create if not
+    cf_db, logging_name = db_context.cf_db, db_context.logging_name
+    database_client = cf_db(cmd.cli_ctx, None)
+    try:
+        database_client.get(resource_group_name, server_name, database_name)
+    except ResourceNotFoundError:
+        logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+        parameters = {
+            'name': database_name,
+            'charset': 'utf8',
+            'collation': 'en_US.utf8'
+        }
+        resolve_poller(
+            database_client.begin_create(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
+            '{} Database Create/Update'.format(logging_name))
+
+
+def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+
+    if charset is None and collation is None:
+        charset = 'utf8'
+        collation = 'en_US.utf8'
+        logger.warning("Creating database with utf8 charset and en_US.utf8 collation")
+    elif charset or collation:
+        raise RequiredArgumentMissingError("charset and collation have to be input together.")
+
+    parameters = {
+        'name': database_name,
+        'charset': charset,
+        'collation': collation
+    }
+
+    return client.begin_create(
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters)
+
+
 def flexible_server_connection_string(
         server_name='{server}', database_name='{database}', administrator_login='{login}',
         administrator_login_password='{password}'):
@@ -427,10 +472,11 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location, user
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
-    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None,
+    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
                  command_group=None, server_client=None):
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
         self.logging_name = logging_name
+        self.cf_db = cf_db
         self.command_group = command_group
         self.server_client = server_client

@@ -262,16 +262,6 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
     def _test_flexible_server_list_skus(self, database_engine, location):
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
                  checks=[JMESPathCheck('type(@)', 'array')])
-    
-    def _test_flexible_server_restore_from_different_rg(self, database_engine, resource_group, resource_group_2, server):
-        restore_server = 'restore-2-' + server[:45]
-        restore_time = (datetime.utcnow() - timedelta(minutes=20)).replace(tzinfo=tzutc()).isoformat()
-
-        
-        self.cmd('{} flexible-server restore -g {} --name {} --source-resource-group {} --source-server {} --restore-time {}'
-                    .format(database_engine, resource_group_2, restore_server, resource_group, server, restore_time),
-                    checks=[JMESPathCheck('name', restore_server),
-                            JMESPathCheck('resourceGroup', resource_group_2)])
 
 
 class FlexibleServerIopsMgmtScenarioTest(RdbmsScenarioTest):
@@ -540,7 +530,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(RdbmsScenarioTest):
 
         database_name = 'flexibleserverdbtest'
 
-        self.cmd('{} flexible-server db create -g {} -s {} -d {} --collation utf8'.format(database_engine, resource_group, server, database_name),
+        self.cmd('{} flexible-server db create -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
                  checks=[JMESPathCheck('name', database_name)])
 
         self.cmd('{} flexible-server db show -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),

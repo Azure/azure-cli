@@ -79,7 +79,6 @@ def generate_password(administrator_login_password):
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
-    from datetime import datetime
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
     now = datetime.now()
@@ -295,8 +294,7 @@ def _map_maintenance_window(day_of_week):
 
 
 def get_current_time():
-    import datetime
-    return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc, microsecond=0).isoformat()
+    return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
 
 
 def change_str_to_datetime(date_str):

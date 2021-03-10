@@ -50,6 +50,46 @@ examples:
     text: az postgres flexible-server delete --resource-group testGroup --name testServer --yes
 """
 
+helps['postgres flexible-server db'] = """
+type: group
+short-summary: Manage PostgreSQL databases on a flexible server.
+"""
+
+helps['postgres flexible-server db create'] = """
+type: command
+short-summary: Create a PostgreSQL database on a flexible server.
+examples:
+  - name: Create database 'testDatabase' in the flexible server 'testServer' with the default parameters.
+    text: az postgres flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase
+  - name: Create database 'testDatabase' in the flexible server 'testServer' with a given character set and collation rules.
+    text: az postgres flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase//
+            --charset validCharset --collation validCollation
+"""
+
+helps['postgres flexible-server db delete'] = """
+type: command
+short-summary: Delete a database on a flexible server.
+examples:
+  - name: Delete database 'testDatabase' in the flexible server 'testServer'.
+    text: az postgres flexible-server db delete --resource-group testGroup --server-name testServer --database-name testDatabase
+"""
+
+helps['postgres flexible-server db list'] = """
+type: command
+short-summary: List the databases for a flexible server.
+examples:
+  - name: List databases in the flexible server 'testServer'.
+    text: az postgres flexible-server db list --resource-group testGroup --server-name testServer
+"""
+
+helps['postgres flexible-server db show'] = """
+type: command
+short-summary: Show the details of a database.
+examples:
+  - name: Show database 'testDatabase' in the server 'testServer'.
+    text: az postgres flexible-server db show --resource-group testGroup --server-name testServer --database-name testDatabase
+"""
+
 helps['postgres flexible-server firewall-rule'] = """
 type: group
 short-summary: Manage firewall rules for a server.
