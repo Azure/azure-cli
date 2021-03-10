@@ -26,11 +26,11 @@ def get_mariadb_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -54,11 +54,11 @@ def get_mysql_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -82,11 +82,11 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -110,11 +110,11 @@ def get_postgresql_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -137,11 +137,11 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
     if rm_uri_override:
         client_id = getenv(CLIENT_ID)
         if client_id:
-            from azure.common.credentials import ServicePrincipalCredentials
-            credentials = ServicePrincipalCredentials(
+            from azure.identity import ClientSecretCredential
+            credentials = ClientSecretCredential(
                 client_id=client_id,
-                secret=getenv(CLIENT_SECRET),
-                tenant=getenv(TENANT_ID))
+                client_secret=getenv(CLIENT_SECRET),
+                tenant_id=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()

@@ -8,13 +8,6 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.mgmt.rdbms.mysql_flexibleservers import models as mysql_models
-from azure.mgmt.rdbms.postgresql_flexibleservers import models as postgres_models
-
-from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations as MySqlFirewallRulesOperations
-from azure.mgmt.rdbms.postgresql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations as PostgresFirewallRulesOperations
-
-
 logger = get_logger(__name__)
 
 
@@ -58,19 +51,11 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
             logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
                            end_ip_address)
 
-    if isinstance(client, MySqlFirewallRulesOperations):
-        parameters = mysql_models.FirewallRule(
-            name=firewall_rule_name,
-            start_ip_address=start_ip_address,
-            end_ip_address=end_ip_address
-        )
-
-    elif isinstance(client, PostgresFirewallRulesOperations):
-        parameters = postgres_models.FirewallRule(
-            name=firewall_rule_name,
-            start_ip_address=start_ip_address,
-            end_ip_address=end_ip_address
-        )
+    parameters = {
+        'name': firewall_rule_name,
+        'start_ip_address': start_ip_address,
+        'end_ip_address': end_ip_address
+    }
 
     return client.begin_create_or_update(
         resource_group_name,
@@ -91,7 +76,7 @@ def firewall_rule_delete_func(client, resource_group_name, server_name, firewall
             result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
-    return result.result()
+    return result
 
 
 def flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
@@ -132,7 +117,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
             result = client.begin_delete(resource_group_name, server_name, database_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
-    return result.result()
+    return result
 
 
 def user_confirmation(message, yes=False):

@@ -115,7 +115,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
-            c.argument('configuration_name', options_list=['--name', '-n'], help='The name of the configuration')
+            c.argument('configuration_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the configuration')
             c.ignore('source')
 
         with self.argument_context('{} server wait'.format(command_group)) as c:
@@ -134,7 +134,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', id_part=None, help='Name of the Server.')
 
         with self.argument_context('{} db'.format(command_group)) as c:
-            c.argument('database_name', options_list=['--name', '-n'], help='The name of the database')
+            c.argument('database_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the database')
             c.argument('charset', options_list=['--charset'], help='The charset of the database')
             c.argument('collation', options_list=['--collation'], help='The collation of the database')
 
@@ -162,7 +162,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server configuration'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
-            c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
+            c.argument('configuration_name', options_list=['--name', '-n'], id_part='child_name_1')
 
         with self.argument_context('{} server replica list'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
