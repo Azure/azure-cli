@@ -951,7 +951,6 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
-        self.progress_bar.start_time = datetime.datetime.utcnow()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
