@@ -993,6 +993,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     else:
         vm_names = [vm_name]
     vms = []
+    # Use vm_name2 to avoid R1704: Redefining argument with the local name 'vm_name' (redefined-argument-from-local)
     for vm_name2 in vm_names:
         vm = get_vm_details(cmd, resource_group_name, vm_name2)
         if assign_identity is not None:
