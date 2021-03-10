@@ -1176,6 +1176,7 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+    _validate_count(cmd, namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
@@ -1760,3 +1761,7 @@ def _validate_vmss_create_host_group(cmd, namespace):
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
             )
+
+
+def _validate_count(cmd, namespace):
+    pass
