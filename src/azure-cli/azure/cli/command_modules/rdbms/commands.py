@@ -389,7 +389,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
-    with self.command_group('mariadb server-logs', mariadb_log_sdk, client_factory=cf_mariadb_log,) as g:
+    with self.command_group('mariadb server-logs', mariadb_log_sdk, client_factory=cf_mariadb_log) as g:
         g.custom_command('list', '_list_log_files_with_filter')
         g.custom_command('download', '_download_log_files')
 
@@ -490,7 +490,6 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('delete', 'begin_delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_wait_command('wait', 'server_ad_admin_get')
         g.wait_command('wait')
 
     with self.command_group('postgres server ad-admin',

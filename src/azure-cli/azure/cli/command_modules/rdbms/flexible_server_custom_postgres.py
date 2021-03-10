@@ -262,7 +262,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
             raise CLIError(ex)
-    return result.result()
+    return result
 
 
 # Wait command
