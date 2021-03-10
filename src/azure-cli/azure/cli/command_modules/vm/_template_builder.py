@@ -283,17 +283,17 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         special_chars = '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
 
-        # 2 is used to avoid shadow names
-        computer_name2 = computer_name or ''.join(filter(lambda x: x not in special_chars, name))
+        # _computer_name is used to avoid shadow names
+        _computer_name = computer_name or ''.join(filter(lambda x: x not in special_chars, name))
 
         os_profile = {
             # Use name as computer_name if it's not provided. Remove special characters from name.
-            'computerName': computer_name2,
+            'computerName': _computer_name,
             'adminUsername': admin_username
         }
 
         if count:
-            os_profile['computerName'] = "[concat('{}', copyIndex())]".format(computer_name2)
+            os_profile['computerName'] = "[concat('{}', copyIndex())]".format(_computer_name)
 
         if admin_password:
             os_profile['adminPassword'] = "[parameters('adminPassword')]"

@@ -993,19 +993,18 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     else:
         vm_names = [vm_name]
     vms = []
-    for vm_name in vm_names:
-        vm = get_vm_details(cmd, resource_group_name, vm_name)
+    for vm_name2 in vm_names:
+        vm = get_vm_details(cmd, resource_group_name, vm_name2)
         if assign_identity is not None:
             if enable_local_identity and not identity_scope:
-                _show_missing_access_warning(resource_group_name, vm_name, 'vm')
+                _show_missing_access_warning(resource_group_name, vm_name2, 'vm')
             setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
                                                              vm.identity.user_assigned_identities))
-
-        if workspace is not None:
-            workspace_name = parse_resource_id(workspace_id)['name']
-            _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
-
         vms.append(vm)
+
+    if workspace is not None:
+        workspace_name = parse_resource_id(workspace_id)['name']
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     if len(vms) == 1:
         return vms[0]
