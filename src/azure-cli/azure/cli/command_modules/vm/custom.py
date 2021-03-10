@@ -988,18 +988,28 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
         LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
 
-    vm = get_vm_details(cmd, resource_group_name, vm_name)
-    if assign_identity is not None:
-        if enable_local_identity and not identity_scope:
-            _show_missing_access_warning(resource_group_name, vm_name, 'vm')
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
-                                                         vm.identity.user_assigned_identities))
+    if count:
+        vm_names = [vm_name + str(i) for i in range(count)]
+    else:
+        vm_names = [vm_name]
+    vms = []
+    for vm_name in vm_names:
+        vm = get_vm_details(cmd, resource_group_name, vm_name)
+        if assign_identity is not None:
+            if enable_local_identity and not identity_scope:
+                _show_missing_access_warning(resource_group_name, vm_name, 'vm')
+            setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
+                                                             vm.identity.user_assigned_identities))
 
-    if workspace is not None:
-        workspace_name = parse_resource_id(workspace_id)['name']
-        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
+        if workspace is not None:
+            workspace_name = parse_resource_id(workspace_id)['name']
+            _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    return vm
+        vms.append(vm)
+
+    if len(vms) == 1:
+        return vms[0]
+    return vms
 
 
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
