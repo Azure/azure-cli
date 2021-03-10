@@ -5,6 +5,7 @@
 import pytest
 import os
 import time
+import unittest
 from datetime import datetime, timedelta, tzinfo
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
@@ -210,6 +211,7 @@ class MySqlFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerMgmt
     def test_mysql_flexible_server_vnet_server_prepare(self):
         self.cmd('az group create --location {} --name {}'.format(mysql_location, self.resource_group))
 
+    @unittest.skip("Service is temporarily busy and the operation cannot be performed. Please try again later.")
     @AllowLargeResponse()
     @pytest.mark.order(2)
     @pytest.mark.depends(on=['MySqlFlexibleServerVnetServerMgmtScenarioTest::test_mysql_flexible_server_vnet_server_prepare'])
