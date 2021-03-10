@@ -520,6 +520,18 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('publicNetworkAccess', 'Disabled'),
                          self.check('networkRuleBypassOptions', 'None')])
 
+    @ResourceGroupPreparer()
+    def test_acr_with_anonymous_pull(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus',
+                 checks=[self.check('anonymousPullEnabled', False)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled true',
+                 checks=[self.check('anonymousPullEnabled', True)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled false',
+                 checks=[self.check('anonymousPullEnabled', False)])
+
     @ResourceGroupPreparer(location='centraluseuap')
     def test_acr_with_private_endpoint(self, resource_group):
         self.kwargs.update({

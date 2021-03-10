@@ -15,7 +15,6 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ServiceFabricClusterTests(ScenarioTest):
-    @unittest.skip('Update api version')
     @ResourceGroupPreparer()
     def test_cluster_certs(self):
         self.kwargs.update({
@@ -38,11 +37,11 @@ class ServiceFabricClusterTests(ScenarioTest):
         self.cmd('keyvault certificate create --vault-name {kv_name} -n {cert_name2} -p @"{policy_path}"')
 
         while True:
-            cert = self.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name}').get_output_in_json()
-            if cert:
+            cert2 = self.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name2}').get_output_in_json()
+            if cert2:
                 break
-        assert cert['sid'] is not None
-        secondary_cert = cert
+        assert cert2['sid'] is not None
+        secondary_cert = cert2
         secondary_cert_secret_id = secondary_cert['sid']
         secondary_cert_tp = secondary_cert['x509ThumbprintHex']
         self.kwargs.update({'secondary_cert_secret_id': secondary_cert_secret_id})
@@ -50,6 +49,10 @@ class ServiceFabricClusterTests(ScenarioTest):
                  checks=[self.check('certificate.thumbprintSecondary', secondary_cert_tp)])
 
         _wait_for_cluster_state_ready(self, self.kwargs)
+
+        self.cmd('vmss show --resource-group {rg} --name nt1vm',
+                 checks=[self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.certificateSecondary.thumbprint', secondary_cert_tp),
+                         self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.certificate.thumbprint', primary_cert_tp)])
 
         # remove primary cert
         self.cmd('sf cluster certificate remove --resource-group {rg} --cluster-name {cluster_name} --thumbprint {primary_cert_tp}',
