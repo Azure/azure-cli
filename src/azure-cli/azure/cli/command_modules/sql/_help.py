@@ -641,6 +641,45 @@ examples:
     text: az sql instance-pool wait -n myinstancepool -g mygroup --created
 """
 
+helps['sql stg'] = """
+type: group
+short-summary: Manage Server Trust Groups.
+"""
+
+helps['sql stg create'] = """
+type: command
+short-summary: Create a Server Trust Group.
+examples:
+  - name: Create a Server Trust Group with specified resource ids of its members.
+    text: az sql stg create -g resourcegroup -l location -server-trust-group-name stg-name --trust-scope GlobalTransactions -gm $mi1-id $mi2-id
+"""
+
+helps['sql stg get'] = """
+type: command
+short-summary: Retrieve a Server Trust Group.
+examples:
+  - name: Retrieve a Server Trust Group.
+    text: az sql stg get -g resourcegroup -l location -server-trust-group-name stg-name
+"""
+
+helps['sql stg delete'] = """
+type: command
+short-summary: Delete a Server Trust Group.
+examples:
+  - name: Delete a Server Trust Group.
+    text: az sql stg delete -g resourcegroup -l location -server-trust-group-name stg-name
+"""
+
+helps['sql stg list'] = """
+type: command
+short-summary: Retrieve a list of Server Trust Groups.
+examples:
+  - name: Retrieve a list of Server Trust Groups by instance.
+    text: az sql stg list -g resourcegroup --instance-name mi1-name
+  - name: Retrieve a list of Server Trust Groups by location.
+    text: az sql stg list -g resourcegroup -l location
+"""
+
 helps['sql mi'] = """
 type: group
 short-summary: Manage SQL managed instances.

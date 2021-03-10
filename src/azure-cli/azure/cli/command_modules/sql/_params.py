@@ -59,8 +59,7 @@ from .custom import (
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
-    AuthenticationType,
-    AddMemberAction
+    AuthenticationType
 )
 
 from ._validators import (
@@ -1618,10 +1617,9 @@ def load_arguments(self, _):
         c.argument('location',
                    help='The location name of the Server Trust Group.')
 
-        c.argument('member',
-                   options_list=['--member','-m'],
+        c.argument('group_member',
+                   options_list=['--group_member','-gm'],
                    help='Managed Instance that is to be a member of the group. Specify resource group, subscription id and the name of the instance.',
-                   action=AddMemberAction,
                    nargs='+')
 
         c.argument('trust_scope',
@@ -1630,14 +1628,14 @@ def load_arguments(self, _):
 
     with self.argument_context('sql stg get') as c:
         c.argument('location',
-                   help='The location name of the Server Trust Group.')
+                   help='The location of the Server Trust Group.')
 
         c.argument('server_trust_group_name', 
                    help='The name of the Server Trust Group.')
 
     with self.argument_context('sql stg list') as c:
         c.argument('location',
-                   help='The location name of the Server Trust Group.',
+                   help='The location of the Server Trust Group.',
                    arg_group='List By Location')
 
         c.argument('instance_name',

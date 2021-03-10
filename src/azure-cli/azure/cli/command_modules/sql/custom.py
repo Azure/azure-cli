@@ -3654,35 +3654,15 @@ def server_trust_group_create(
         resource_group_name,
         server_trust_group_name,
         location,
-        member,
+        group_member,
         trust_scope):
 
-    print(trust_scope)
-
+    members = [ServerInfo(server_id=member) for member in group_member]
     return client.create_or_update(resource_group_name=resource_group_name,
                                    location_name=location,
                                    server_trust_group_name=server_trust_group_name,
-                                   group_members=member,
+                                   group_members=members,
                                    trust_scopes=trust_scope)
-
-class AddMemberAction(argparse._AppendAction):
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        try:
-            kwargs = {}
-            for item in values:
-                try:
-                    key, value = item.split('=', 1)
-                    kwargs[key] = value
-                except ValueError:
-                    raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
-            server_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}".format(kwargs['subscription-id'], kwargs['resource-group-name'], kwargs['name'])
-            server_info = ServerInfo(server_id=server_id)
-            if namespace.member is None:
-                namespace.member = []
-            namespace.member.append(server_info)
-        except ValueError:
-            raise CLIError('usage error: {} NAME METRIC OPERATION VALUE'.format(option_string))
 
 def server_trust_group_list(
         client,
