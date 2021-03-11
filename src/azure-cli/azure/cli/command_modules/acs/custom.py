@@ -772,7 +772,7 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
 
 
 def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)' # pylint: disable=line-too-long
+    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
     resource_id = resource_id.lower()
     match = re.search(pattern, resource_id)
     if match:
