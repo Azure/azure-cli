@@ -30,7 +30,7 @@ git clone https://github.com/Azure/azure-cli.git
 cd azure-cli
 python -m venv env
 source env/bin/activate
-azdev setup -c
+azdev setup -c azure-cli -r azure-cli-extensions
 ```
 For more information, see https://github.com/Azure/azure-cli-dev-tools#setting-up-your-development-environment.
 
