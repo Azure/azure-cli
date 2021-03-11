@@ -6,7 +6,6 @@
 # pylint: disable=C0302
 from enum import Enum
 import calendar
-import argparse
 from datetime import datetime
 from dateutil.parser import parse
 
@@ -3649,10 +3648,11 @@ def server_aad_only_enable(
 #           sql server trust groups           #
 ###############################################
 
+
 def server_trust_group_create(
         client,
         resource_group_name,
-        server_trust_group_name,
+        name,
         location,
         group_member,
         trust_scope):
@@ -3660,9 +3660,32 @@ def server_trust_group_create(
     members = [ServerInfo(server_id=member) for member in group_member]
     return client.create_or_update(resource_group_name=resource_group_name,
                                    location_name=location,
-                                   server_trust_group_name=server_trust_group_name,
+                                   server_trust_group_name=name,
                                    group_members=members,
                                    trust_scopes=trust_scope)
+
+
+def server_trust_group_delete(
+        client,
+        resource_group_name,
+        name,
+        location):
+
+    return client.delete(resource_group_name=resource_group_name,
+                         location_name=location,
+                         server_trust_group_name=name)
+
+
+def server_trust_group_get(
+        client,
+        resource_group_name,
+        name,
+        location):
+
+    return client.get(resource_group_name=resource_group_name,
+                      location_name=location,
+                      server_trust_group_name=name)
+
 
 def server_trust_group_list(
         client,
@@ -3671,8 +3694,7 @@ def server_trust_group_list(
         location=None):
     if instance_name:
         return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=instance_name)
-    elif location:
-        return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
+    return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
 
 
 ###############################################

@@ -606,8 +606,8 @@ def load_command_table(self, _):
 
     with self.command_group('sql stg', server_trust_groups_operations, client_factory=get_sql_server_trust_groups_operations) as g:
         g.custom_command('create', 'server_trust_group_create')
-        g.command('delete', 'delete')
-        g.command('get', 'get')
+        g.custom_command('delete', 'server_trust_group_delete')
+        g.custom_command('get', 'server_trust_group_get')
         g.custom_command('list', 'server_trust_group_list')
 
     ###############################################

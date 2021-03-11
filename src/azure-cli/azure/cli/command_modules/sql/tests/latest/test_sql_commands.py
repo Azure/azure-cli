@@ -3831,6 +3831,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', True),
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
 
+
 class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -3845,7 +3846,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
             'loc': 'westeurope',
             'vnet_name': 'stgCliTestVname',
             'subnet_name': 'stgCliTestSubnet',
-            'nsg' : 'stgCliTestNsg',
+            'nsg': 'stgCliTestNsg',
             'route_table_name': 'stgCliTestRouteTable',
             'route_name_default': 'default',
             'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
@@ -3861,8 +3862,8 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
-            'delegations' : 'Microsoft.Sql/managedInstances',
-            'subscription_id' : account['id']
+            'delegations': 'Microsoft.Sql/managedInstances',
+            'subscription_id': account['id']
         })
 
         self.cmd('az network nsg create --name {nsg} --resource-group {rg} --location {loc}')
@@ -3876,7 +3877,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --delegations {delegations}')
 
-        ## Create and prepare VNet and subnet for new virtual cluster
+        # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {rg} -n {route_table_name}')
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
@@ -3888,57 +3889,56 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
             'subnet_id': subnet['id']
         })
 
-        ## create sql managed_instance
+        # Create sql managed_instance
         managed_instance_1 = self.cmd('sql mi create -g {rg} -n {managed_instance_name_1} -l {loc} '
-                                    '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                                    '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                                    '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
-                                    checks=[
-                                        self.check('name', '{managed_instance_name_1}'),
-                                        self.check('resourceGroup', '{rg}'),
-                                        self.check('administratorLogin', '{admin_login}'),
-                                        self.check('vCores', '{v_cores}'),
-                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                                        self.check('licenseType', '{license_type}'),
-                                        self.check('sku.tier', '{edition}'),
-                                        self.check('sku.family', '{family}'),
-                                        self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
+                                      '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                                      '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                                      '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                                      checks=[
+                                          self.check('name', '{managed_instance_name_1}'),
+                                          self.check('resourceGroup', '{rg}'),
+                                          self.check('administratorLogin', '{admin_login}'),
+                                          self.check('vCores', '{v_cores}'),
+                                          self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                          self.check('licenseType', '{license_type}'),
+                                          self.check('sku.tier', '{edition}'),
+                                          self.check('sku.family', '{family}'),
+                                          self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
 
         managed_instance_2 = self.cmd('sql mi create -g {rg} -n {managed_instance_name_2} -l {loc} '
-                                    '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                                    '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                                    '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
-                                    checks=[
-                                        self.check('name', '{managed_instance_name_2}'),
-                                        self.check('resourceGroup', '{rg}'),
-                                        self.check('administratorLogin', '{admin_login}'),
-                                        self.check('vCores', '{v_cores}'),
-                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                                        self.check('licenseType', '{license_type}'),
-                                        self.check('sku.tier', '{edition}'),
-                                        self.check('sku.family', '{family}'),
-                                        self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
+                                      '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                                      '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                                      '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                                      checks=[
+                                          self.check('name', '{managed_instance_name_2}'),
+                                          self.check('resourceGroup', '{rg}'),
+                                          self.check('administratorLogin', '{admin_login}'),
+                                          self.check('vCores', '{v_cores}'),
+                                          self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                          self.check('licenseType', '{license_type}'),
+                                          self.check('sku.tier', '{edition}'),
+                                          self.check('sku.family', '{family}'),
+                                          self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
 
         self.kwargs.update({
-            'stg_name' : 'stg-test',
-            'trust_scope' : 'GlobalTransactions',
-            'mi1' : managed_instance_1['id'],
-            'mi2' : managed_instance_2['id'],
+            'stg_name': 'stg-test',
+            'trust_scope': 'GlobalTransactions',
+            'mi1': managed_instance_1['id'],
+            'mi2': managed_instance_2['id'],
         })
 
-
-        stg = self.cmd('az sql stg create -g {rg} -l {loc} --trust-scope {trust_scope} --server-trust-group-name {stg_name} -gm {mi1} {mi2}').get_output_in_json()
+        stg = self.cmd('az sql stg create -g {rg} -l {loc} --trust-scope {trust_scope} -n {stg_name} -m {mi1} {mi2}').get_output_in_json()
         assert stg['name'] == 'stg-test'
 
-        self.cmd('az sql stg get -g {rg} -l {loc} --server-trust-group-name {stg_name}').get_output_in_json()
+        self.cmd('az sql stg get -g {rg} -l {loc} -n {stg_name}').get_output_in_json()
 
         stg_list = self.cmd('az sql stg list -g {rg} --instance-name {managed_instance_name_1}').get_output_in_json()
         assert len(stg_list) == 1
 
         stg_list = self.cmd('az sql stg list -g {rg} -l {loc}').get_output_in_json()
-        assert len(stg_list)== 1
+        assert len(stg_list) == 1
 
-        self.cmd('az sql stg delete -g {rg} -l {loc} --server-trust-group-name {stg_name}')
+        self.cmd('az sql stg delete -g {rg} -l {loc} -n {stg_name}')
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):

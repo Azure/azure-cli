@@ -651,7 +651,7 @@ type: command
 short-summary: Create a Server Trust Group.
 examples:
   - name: Create a Server Trust Group with specified resource ids of its members.
-    text: az sql stg create -g resourcegroup -l location -server-trust-group-name stg-name --trust-scope GlobalTransactions -gm $mi1-id $mi2-id
+    text: az sql stg create -g resourcegroup -l location -n stg-name --trust-scope GlobalTransactions -m $mi1-id $mi2-id
 """
 
 helps['sql stg get'] = """
@@ -659,7 +659,7 @@ type: command
 short-summary: Retrieve a Server Trust Group.
 examples:
   - name: Retrieve a Server Trust Group.
-    text: az sql stg get -g resourcegroup -l location -server-trust-group-name stg-name
+    text: az sql stg get -g resourcegroup -l location -n stg-name
 """
 
 helps['sql stg delete'] = """
@@ -667,7 +667,7 @@ type: command
 short-summary: Delete a Server Trust Group.
 examples:
   - name: Delete a Server Trust Group.
-    text: az sql stg delete -g resourcegroup -l location -server-trust-group-name stg-name
+    text: az sql stg delete -g resourcegroup -l location -n stg-name
 """
 
 helps['sql stg list'] = """

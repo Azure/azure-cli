@@ -1611,15 +1611,17 @@ def load_arguments(self, _):
                    help='The resource group name')
 
     with self.argument_context('sql stg create') as c:
-        c.argument('server_trust_group_name',
+        c.argument('name',
+                   options_list=['--name', '-n'],
                    help='The name of the Server Trust Group.')
 
         c.argument('location',
                    help='The location name of the Server Trust Group.')
 
         c.argument('group_member',
-                   options_list=['--group_member','-gm'],
-                   help='Managed Instance that is to be a member of the group. Specify resource group, subscription id and the name of the instance.',
+                   options_list=['--group-member', '-m'],
+                   help="""Managed Instance that is to be a member of the group.
+                   Specify resource group, subscription id and the name of the instance.""",
                    nargs='+')
 
         c.argument('trust_scope',
@@ -1630,7 +1632,16 @@ def load_arguments(self, _):
         c.argument('location',
                    help='The location of the Server Trust Group.')
 
-        c.argument('server_trust_group_name', 
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg delete') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
                    help='The name of the Server Trust Group.')
 
     with self.argument_context('sql stg list') as c:
@@ -1641,7 +1652,6 @@ def load_arguments(self, _):
         c.argument('instance_name',
                    help='Managed Instance name.',
                    arg_group='List By Instance')
-
 
     ###############################################
     #                sql managed instance         #
