@@ -296,7 +296,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        arg_group='Authentication')
             c.argument('tags', tags_type)
             c.argument('public_access', options_list=['--public-access'],
-                       help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
+                       help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Setting it to "none" sets the server in public access mode but does not create a firewall rule. ',
                        validator=public_access_validator)
             c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
             c.argument('assign_identity', options_list=['--assign-identity'],

@@ -16,6 +16,12 @@ def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
 
+def flexible_server_stop(cmd, client, resource_group_name=None, server_name=None):
+    logger.warning("Server will be automatically started after 7 days "
+                   "if you do not perform a manual start operation")
+    return client.begin_stop(resource_group_name, server_name)
+
+
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
     return client.begin_update(resource_group_name, server_name, parameters)
 

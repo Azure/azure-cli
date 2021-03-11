@@ -45,7 +45,6 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     def __init__(self, method_name):
         super(PostgresFlexibleServerMgmtScenarioTest, self).__init__(method_name)
         self.resource_group = self.create_random_name(RG_NAME_PREFIX, RG_NAME_MAX_LENGTH)
-        self.resource_group_2 = self.create_random_name(RG_NAME_PREFIX + '2', RG_NAME_MAX_LENGTH)
         self.server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         self.random_name_1 = self.create_random_name(SERVER_NAME_PREFIX + '4', SERVER_NAME_MAX_LENGTH)
         self.random_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '5', SERVER_NAME_MAX_LENGTH)
@@ -56,7 +55,6 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     @pytest.mark.order(1)
     def test_postgres_flexible_server_mgmt_prepare(self):
         self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group))
-        self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group_2))
         self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('postgres', postgres_location, self.resource_group, self.server))
 
     @AllowLargeResponse()
