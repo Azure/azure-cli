@@ -2219,7 +2219,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
 
     ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
+                                  type_properties_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
                                   type_handler_version=version,
                                   settings={'UserName': username},
@@ -2228,9 +2228,8 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
     if no_wait:
         return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
                            resource_group_name, vm_instance.name, instance_name, ext)
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                vm_instance.name,
-                                                                instance_name, ext)
+    poller = client.virtual_machine_extensions.begin_create_or_update(
+        resource_group_name, vm_instance.name, instance_name, ext)
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
