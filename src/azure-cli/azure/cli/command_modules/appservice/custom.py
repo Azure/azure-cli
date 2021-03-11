@@ -2091,6 +2091,7 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
         fs_log = None
         blob_log = None
         level = level if application_logging != 'off' else False
+        level = True if level is None else level
         if application_logging in ['filesystem', 'off']:
             fs_log = FileSystemApplicationLogsConfig(level=level)
         if application_logging in ['azureblobstorage', 'off']:
