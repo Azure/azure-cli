@@ -416,7 +416,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-01-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_account_with_shared_key_access(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
@@ -476,6 +476,29 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {name} -g {rg} --default-share-permission None',
                  checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication.defaultSharePermission',
                                        'None')])
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-01-01')
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='cli_storage_account')
+    def test_storage_account_with_nfs(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} '.format(name, resource_group),
+                 checks=[JMESPathCheck('enableNfsV3', None)])
+
+        self.cmd('az storage account create -n {} -g {} --enable-nfs-v3 true'.format(name, resource_group),
+                 checks=[JMESPathCheck('enableNfsV3', True)])
+
+        self.cmd('az storage account create -n {} -g {} --enable-nfs-v3 false'.format(name, resource_group),
+                 checks=[JMESPathCheck('enableNfsV3', False)])
+
+        self.cmd('az storage account create -n {} -g {} --enable-nfs-v3 true'.format(name, resource_group),
+                 checks=[JMESPathCheck('enableNfsV3', True)])
+
+        self.cmd('az storage account update -n {} --enable-nfs-v3 false'.format(name),
+                 checks=[JMESPathCheck('enableNfsV3', False)])
+
+        self.cmd('az storage account update -n {} --enable-nfs-v3 true'.format(name),
+                 checks=[JMESPathCheck('enableNfsV3', True)])
 
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
