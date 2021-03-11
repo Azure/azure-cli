@@ -65,7 +65,7 @@ Command modules should have the following structure:
 
 You could create these files manually, or [create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
 
-You also could consider using [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
+You could also consider using [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
 
 **Create an \_\_init__.py for your module**
 
