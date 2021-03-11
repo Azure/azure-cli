@@ -207,6 +207,7 @@ jobs:
           Start-Process powershell -Verb runAs -ArgumentList $arguments
           Break
         }
+        az --version
         $pre_installed_version=az version --query '\"azure-cli\"' -o tsv
         $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
         if ($pre_installed_version -eq $to_be_installed_version){

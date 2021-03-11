@@ -83,7 +83,7 @@ if not exist %PYTHON_DIR% (
     popd
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
-%PYTHON_EXE% -m pip install --upgrade pip==21.0.1
+%PYTHON_EXE% -m pip install --upgrade pip==21.0.1 setuptools==52.0.0
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
@@ -146,9 +146,25 @@ for /f %%f in ('dir /b /s *.pyc') do (
 )
 popd
 
+:: Remove __pycache__
+echo remove pycache
 for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
+
+:: Remove aio
+echo remove aio
+for /d /r %BUILDING_DIR%\Lib\site-packages\azure\mgmt %%d in (aio) do (
+    if exist %%d rmdir /s /q "%%d"
+)
+
+:: Remove dist-info
+echo remove dist-info
+pushd %BUILDING_DIR%\Lib\site-packages
+for /d %%d in ("*.dist-info") do (
+    if exist %%d rmdir /s /q "%%d"
+)
+popd
 
 if %errorlevel% neq 0 goto ERROR
 
