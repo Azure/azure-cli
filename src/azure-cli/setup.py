@@ -138,12 +138,12 @@ DEPENDENCIES = [
     'jsondiff==1.2.0',
     'pytz==2019.1',
     'scp~=0.13.2',
-    'semver==2.13.0'
+    'semver==2.13.0',
     'sshtunnel~=0.1.4',
     'urllib3[secure]>=1.25.9,<2.0.0',
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
-    'xmltodict~=0.12',
+    'xmltodict~=0.12'
 ]
 
 TESTS_REQUIRE = [
