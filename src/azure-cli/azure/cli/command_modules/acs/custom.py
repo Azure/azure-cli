@@ -4074,4 +4074,4 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
 def _is_msi_cluster(managed_cluster):
     return (managed_cluster and managed_cluster.identity and
             (managed_cluster.identity.type.casefold() == "systemassigned" or
-            managed_cluster.identity.type.casefold() == "userassigned"))
+             managed_cluster.identity.type.casefold() == "userassigned"))
