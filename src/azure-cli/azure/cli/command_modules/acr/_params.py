@@ -94,6 +94,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr update', arg_group='Network Rule') as c:
         c.argument('data_endpoint_enabled', get_three_state_flag(), help="Enable dedicated data endpoint for client firewall configuration")
 
+    with self.argument_context('acr update') as c:
+        c.argument('anonymous_pull_enabled', get_three_state_flag(), help="Enable registry-wide pull from unauthenticated clients")
+
     with self.argument_context('acr import') as c:
         c.argument('source_image', options_list=['--source'], help="Source image name or fully qualified source containing the registry login server. If `--registry` is used, `--source` will always be interpreted as a source image, even if it contains the login server.")
         c.argument('source_registry', options_list=['--registry', '-r'], help='The source Azure container registry. This can be name, login server or resource ID of the source registry.')
