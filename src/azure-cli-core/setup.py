@@ -53,7 +53,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack==0.8.0rc2',
-    'msal~=1.9',
+    'msal>=1.10.0,<2.0.0',
     # Dependencies of the vendored subscription SDK
     # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
     'msrest>=0.5.0',
