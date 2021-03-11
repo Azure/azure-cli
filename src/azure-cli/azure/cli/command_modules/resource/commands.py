@@ -33,8 +33,6 @@ def transform_resource_group_list(result):
 
 def transform_resource_list(result):
     transformed = []
-    print("TRANSFPRMERERERER")
-    
     for r in result:
         res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), ('Location', r['location']), ('Type', r['type'])])
         try:
