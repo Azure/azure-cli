@@ -67,8 +67,6 @@ You could create these files manually, or [create a module with `azdev cli creat
 
 You also could consider using [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
 
-
-
 **Create an \_\_init__.py for your module**
 
 In the \_\_init__ file, you will declare a command loader class that inherits from AzCommandsLoader. You will typically override the following three methods:
