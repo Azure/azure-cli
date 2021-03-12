@@ -1177,7 +1177,7 @@ def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
     if namespace.count:
-        _validate_count(cmd, namespace)
+        _validate_count(namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
@@ -1764,7 +1764,7 @@ def _validate_vmss_create_host_group(cmd, namespace):
             )
 
 
-def _validate_count(cmd, namespace):
+def _validate_count(namespace):
     banned_params = [
         namespace.attach_data_disks,
         namespace.attach_os_disk,
