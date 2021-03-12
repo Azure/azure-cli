@@ -88,14 +88,9 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
 
     # process action additions
     if add_actions is not None:
-        for action in add_actions:
-            match = next(
-                (x for x in instance.actions if action.action_group_id.lower() == x.action_group_id.lower()), None
-            )
-            if match:
-                match.webhook_properties = action.webhook_properties
-            else:
-                instance.actions.append(action)
+        add_action_ids = {x.action_group_id.lower() for x in add_actions}
+        instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in add_action_ids]
+        instance.actions.extend(add_actions)
 
     # process condition removals
     if remove_conditions is not None:

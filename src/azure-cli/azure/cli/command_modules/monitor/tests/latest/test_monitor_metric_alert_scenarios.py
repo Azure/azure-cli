@@ -59,6 +59,11 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert update -g {rg} -n {alert} --enabled false', checks=[
             self.check('enabled', False)
         ])
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --add-action ag2 test=best2', checks=[
+            self.check("contains(actions[0].actionGroupId, 'actionGroups/ag2')", True),
+            self.check('length(actions)', 1)
+        ])
+
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 1))
         self.cmd('monitor metrics alert show -g {rg} -n {alert}')
