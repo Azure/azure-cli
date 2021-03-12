@@ -75,7 +75,7 @@ helps['vm virtual-machine reimage'] = """
     examples:
       - name: Reimage a Virtual Machine.
         text: |-
-               az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --name "myVMName"
+               az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --vm-name "myVMName"
 """
 
 helps['vm virtual-machine wait'] = """
@@ -252,14 +252,14 @@ helps['vm disk-access'] = """
     short-summary: Manage disk access with vm
 """
 
-helps['vm disk-access delete'] = """
+helps['vm disk-access delete-a-private-endpoint-connection'] = """
     type: command
     short-summary: "Deletes a private endpoint connection under a disk access resource."
     examples:
       - name: Delete a private endpoint connection under a disk access resource.
         text: |-
-               az vm disk-access delete --name "myDiskAccess" --private-endpoint-connection-name \
-"myPrivateEndpointConnection" --resource-group "myResourceGroup"
+               az vm disk-access delete-a-private-endpoint-connection --name "myDiskAccess" \
+--private-endpoint-connection-name "myPrivateEndpointConnection" --resource-group "myResourceGroup"
 """
 
 helps['vm disk-access show-private-link-resource'] = """
@@ -275,10 +275,10 @@ helps['vm disk-access wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the vm disk-access is met.
     examples:
-      - name: Pause executing next line of CLI script until the vm disk-access is successfully deleted.
+      - name: Pause executing next line of CLI script until the vm disk-access is successfully created.
         text: |-
                az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
---vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --deleted
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
 """
 
 helps['vm gallery-application'] = """

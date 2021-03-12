@@ -158,7 +158,7 @@ def vm_virtual_machine_scale_set_vm_extension_create(client,
     extension_parameters = {}
     extension_parameters['force_update_tag'] = force_update_tag
     extension_parameters['publisher'] = publisher
-    extension_parameters = type_properties_type
+    extension_parameters['type_properties_type'] = type_properties_type
     extension_parameters['type_handler_version'] = type_handler_version
     extension_parameters['auto_upgrade_minor_version'] = auto_upgrade_minor_version
     extension_parameters['enable_automatic_upgrade'] = enable_automatic_upgrade
@@ -225,11 +225,11 @@ def vm_virtual_machine_scale_set_vm_run_command_list(client,
                        expand=expand)
 
 
-def vm_disk_access_delete(client,
-                          resource_group_name,
-                          disk_access_name,
-                          private_endpoint_connection_name,
-                          no_wait=False):
+def vm_disk_access_delete_a_private_endpoint_connection(client,
+                                                        resource_group_name,
+                                                        disk_access_name,
+                                                        private_endpoint_connection_name,
+                                                        no_wait=False):
     return sdk_no_wait(no_wait,
                        client.delete_a_private_endpoint_connection,
                        resource_group_name=resource_group_name,

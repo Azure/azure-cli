@@ -110,7 +110,7 @@ def load_command_table(self, _):
         client_factory=cf_disk_access,
     )
     with self.command_group('vm disk-access', vm_disk_access, client_factory=cf_disk_access) as g:
-        g.custom_command('delete', 'vm_disk_access_delete', confirmation=True)
+        g.custom_command('delete-a-private-endpoint-connection', 'vm_disk_access_delete_a_private_endpoint_connection')
         g.custom_command('show-private-link-resource', 'vm_disk_access_show_private_link_resource')
 
     from ..generated._client_factory import cf_gallery_application

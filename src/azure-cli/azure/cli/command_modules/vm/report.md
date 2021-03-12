@@ -23,7 +23,7 @@
 ### <a name="CommandsInDiskAccesses">Commands in `az vm disk-access` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az vm disk-access delete](#DiskAccessesDeleteAPrivateEndpointConnection)|DeleteAPrivateEndpointConnection|[Parameters](#ParametersDiskAccessesDeleteAPrivateEndpointConnection)|[Example](#ExamplesDiskAccessesDeleteAPrivateEndpointConnection)|
+|[az vm disk-access delete-a-private-endpoint-connection](#DiskAccessesDeleteAPrivateEndpointConnection)|DeleteAPrivateEndpointConnection|[Parameters](#ParametersDiskAccessesDeleteAPrivateEndpointConnection)|[Example](#ExamplesDiskAccessesDeleteAPrivateEndpointConnection)|
 |[az vm disk-access show-private-link-resource](#DiskAccessesGetPrivateLinkResources)|GetPrivateLinkResources|[Parameters](#ParametersDiskAccessesGetPrivateLinkResources)|[Example](#ExamplesDiskAccessesGetPrivateLinkResources)|
 
 ### <a name="CommandsInGalleryApplications">Commands in `az vm gallery-application` group</a>
@@ -85,12 +85,12 @@
 ## COMMAND DETAILS
 
 ### group `az vm disk-access`
-#### <a name="DiskAccessesDeleteAPrivateEndpointConnection">Command `az vm disk-access delete`</a>
+#### <a name="DiskAccessesDeleteAPrivateEndpointConnection">Command `az vm disk-access delete-a-private-endpoint-connection`</a>
 
 ##### <a name="ExamplesDiskAccessesDeleteAPrivateEndpointConnection">Example</a>
 ```
-az vm disk-access delete --name "myDiskAccess" --private-endpoint-connection-name "myPrivateEndpointConnection" \
---resource-group "myResourceGroup"
+az vm disk-access delete-a-private-endpoint-connection --name "myDiskAccess" --private-endpoint-connection-name \
+"myPrivateEndpointConnection" --resource-group "myResourceGroup"
 ```
 ##### <a name="ParametersDiskAccessesDeleteAPrivateEndpointConnection">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -267,7 +267,7 @@ az vm ssh-public-key generate-key-pair --resource-group "myResourceGroup" --name
 
 ##### <a name="ExamplesVirtualMachinesReimage">Example</a>
 ```
-az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --name "myVMName"
+az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --vm-name "myVMName"
 ```
 ##### <a name="ParametersVirtualMachinesReimage">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|

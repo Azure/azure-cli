@@ -176,7 +176,7 @@ def load_arguments(self, _):
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
         c.argument('expand', type=str, help='The expand expression to apply on the operation.')
 
-    with self.argument_context('vm disk-access delete') as c:
+    with self.argument_context('vm disk-access delete-a-private-endpoint-connection') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('disk_access_name', options_list=['--name', '-n', '--disk-access-name'], type=str, help='The name '
                    'of the disk access resource that is being created. The name can\'t be changed after the disk '
