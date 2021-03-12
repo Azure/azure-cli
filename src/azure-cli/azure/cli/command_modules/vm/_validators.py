@@ -1801,5 +1801,5 @@ def _validate_count(namespace):
         '--use-unmanaged-disk',
         '--vnet-name'
     ]
-    if any(param is not None for param in banned_params):
+    if any(param for param in banned_params):
         raise ValidationError('When --count is specified, {} are not allowed'.format(', '.join(params_str)))
