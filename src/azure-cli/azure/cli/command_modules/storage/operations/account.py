@@ -46,7 +46,9 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
-                           tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
+                           tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
+                           encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
+                           access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
@@ -54,7 +56,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
-                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None):
+                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
+                           identity_type=None, user_identity_id=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -70,8 +73,36 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
+
+    # Encryption
     if encryption_services:
         params.encryption = Encryption(services=encryption_services)
+
+    if encryption_key_source is not None:
+        params.encryption.key_source = encryption_key_source
+
+    KeySource = cmd.get_models('KeySource')
+    if params.encryption.key_source == KeySource.microsoft_keyvault:
+        if params.encryption.key_vault_properties is None:
+            KeyVaultProperties = cmd.get_models('KeyVaultProperties')
+            params.encryption.key_vault_properties = KeyVaultProperties(key_name=encryption_key_name,
+                                                                        key_vault_uri=encryption_key_vault,
+                                                                        key_version=encryption_key_version)
+
+    if 'UserAssigned' in identity_type and user_identity_id is not None:
+        params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
+        EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        params.encryption.encryption_identity = EncryptionIdentity(
+            encryption_user_assigned_identity=user_identity_id)
+
+    if access_tier:
+        params.access_tier = AccessTier(access_tier)
+    if assign_identity:
+        params.identity = Identity(type='SystemAssigned')
+    if https_only is not None:
+        params.enable_https_traffic_only = https_only
+    if enable_hierarchical_namespace is not None:
+        params.is_hns_enabled = enable_hierarchical_namespace
     if access_tier:
         params.access_tier = AccessTier(access_tier)
     if assign_identity:

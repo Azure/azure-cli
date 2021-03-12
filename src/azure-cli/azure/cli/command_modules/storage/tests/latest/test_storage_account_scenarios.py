@@ -694,6 +694,49 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_user_assigned_identity(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'sa': self.create_random_name(prefix='sa', length=24),
+            'identity': self.create_random_name(prefix='id', length=24),
+            'vt': self.create_random_name('clitest', 24)
+        }
+        # Prepare managed identity
+        identity = self.cmd('az identity create -n {identity} -g {rg}').get_output_in_json()
+        self.kwargs['iid'] = identity['id']
+        self.kwargs['oid'] = identity['principalId']
+
+        # Prepare key vault
+        keyvault = self.cmd('az keyvault create -n {vt} -g {rg} ').get_output_in_json()
+        self.kwargs['vid'] = keyvault['id']
+        self.kwargs['vtn'] = keyvault['properties']['vaultUri']
+
+        self.kwargs['ver'] = self.cmd("az keyvault key create -n testkey -p software --vault-name {vt} "
+                                      "-otsv --query 'key.kid'").output.rsplit('/', 1)[1].rstrip('\n')
+
+        self.cmd('az keyvault set-policy -n {vt} --object-id {oid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+        self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
+        self.cmd('az resource update --id {vid} --set properties.enablePurgeProtection=true')
+
+        # Configure user assigned identity for storage account
+        result = self.cmd('az storage account create -n {sa} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {iid}').get_output_in_json()
+
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_account_show_exit_codes(self, resource_group, storage_account):

@@ -211,7 +211,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_account_type, t_sku_name, t_kind, t_tls_version = \
             self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
                             resource_type=ResourceType.MGMT_STORAGE)
-
+        t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
@@ -271,6 +271,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
+        c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
+                   help='The identity type.')
+        c.argument('user_identity_id', arg_group='Identity',
+                   help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
+                   'permitted here.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
