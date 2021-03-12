@@ -358,7 +358,7 @@ def load_arguments(self, _):
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
         c.argument('network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
         c.argument('apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
-        c.argument('port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports.")
+        c.argument('port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports. Use comma separated values to specify more than one port or port range.")
         c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
     for scope in ['vm show', 'vm list']:
