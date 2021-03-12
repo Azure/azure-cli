@@ -65,6 +65,10 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     azcopy.remove(_add_url_sas(target, sas_token), flags=flags)
 
 
+def storage_fs_directory_copy(source, destination, recursive=None, **kwargs):
+    storage_copy(source, destination, recursive=recursive, **kwargs)
+
+
 def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, include_pattern=None,
                       exclude_path=None):
     azcopy = _azcopy_blob_client(cmd, client)

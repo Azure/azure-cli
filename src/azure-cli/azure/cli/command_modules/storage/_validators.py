@@ -1577,6 +1577,24 @@ def validate_azcopy_credential(cmd, namespace):
                                             service=service, resource_types='sco', permissions='rl')
 
 
+def validate_fs_directory_upload_destination_url(cmd, namespace):
+    service, url = get_url_with_sas(cmd, namespace, container=namespace.destination_fs, blob=namespace.destination_path)
+    namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                             account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                             service=service, resource_types='co', permissions='rwdlac')
+    del namespace.destination_fs
+    del namespace.destination_path
+
+
+def validate_fs_directory_download_source_url(cmd, namespace):
+    service, url = get_url_with_sas(cmd, namespace, container=namespace.source_fs, blob=namespace.source_path)
+    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                        service=service, resource_types='co', permissions='rl')
+    del namespace.source_fs
+    del namespace.source_path
+
+
 def validate_text_configuration(cmd, ns):
     DelimitedTextDialect = cmd.get_models('_models#DelimitedTextDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
     DelimitedJSON = cmd.get_models('_models#DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
