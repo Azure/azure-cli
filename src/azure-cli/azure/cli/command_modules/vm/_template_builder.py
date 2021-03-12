@@ -8,6 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -306,6 +307,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         # Windows patch settings
         if patch_mode is not None and custom_image_os_type.lower() == 'windows':
+            if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Windows VM. Valid values are AutomaticByOS, '
+                    'AutomaticByPlatform, Manual.')
             os_profile['windowsConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode,
                 'enableHotpatching': enable_hotpatching
@@ -313,6 +318,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         # Linux patch settings
         if patch_mode is not None and custom_image_os_type.lower() == 'linux':
+            if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Linux VM. Valid values are AutomaticByPlatform, ImageDefault.')
             os_profile['linuxConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode
             }
