@@ -134,7 +134,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', id_part=None, help='Name of the Server.')
 
         with self.argument_context('{} db'.format(command_group)) as c:
-            c.argument('database_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the database')
+            c.argument('database_name', options_list=['--name', '-n'], help='The name of the database')
             c.argument('charset', options_list=['--charset'], help='The charset of the database')
             c.argument('collation', options_list=['--collation'], help='The collation of the database')
 
@@ -424,7 +424,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         if command_group == "mysql":
             with self.argument_context('{} flexible-server db'.format(command_group)) as c:
                 c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the server.')
-                c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
+                c.argument('database_name', id_part='child_name_1', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
 
             with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
                 c.argument('charset', options_list=['--charset'], help='The charset of the database')
