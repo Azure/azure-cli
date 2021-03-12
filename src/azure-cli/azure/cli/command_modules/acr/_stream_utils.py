@@ -78,7 +78,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     if not no_format:
         colorama.init()
 
-    log_exist = false
+    log_exist = False
     stream = BytesIO()
     metadata = {}
     start = 0
