@@ -156,7 +156,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
               available = props.properties.content_length
             else:
               log_exist = blob_service.exists(
-                container_name=container_name, blob_name=blob_name)
+                  container_name=container_name, blob_name=blob_name)
         except AzureHttpError as ae:
             if ae.status_code != 404:
                 raise CLIError(ae)
