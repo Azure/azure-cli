@@ -6,7 +6,7 @@
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
 
-Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#cloudshell/)!
+Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#cloudshell)!
 
 ## Installation
 
