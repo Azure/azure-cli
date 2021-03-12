@@ -2214,7 +2214,7 @@ def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
             if target_operation == 'upload':
                 ret = client.upload_pending(vault_base_url=hsm_name)
             elif target_operation == 'download':
-                ret = client.upload_pending(vault_base_url=hsm_name)
+                ret = client.download_pending(vault_base_url=hsm_name)
 
             # v7.2-preview and v7.2 will change the upload operation from Sync to Async
             # due to service defects, it returns 'Succeeded' before the change and 'Success' after the change
