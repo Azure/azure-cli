@@ -334,6 +334,18 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
             self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddressVersion', 'IPv6')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_lb_frontend_ip_zone', location='eastus2')
+    def test_network_lb_frontend_ip_zone(self, resource_group):
+        self.kwargs.update({
+            'location': 'eastus2',
+        })
+
+        # LB with subnet : internal LB
+        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+            self.check("length(zones)", 3)
+        ])
+
 
 class NetworkPublicIpWithSku(ScenarioTest):
 
@@ -425,6 +437,18 @@ class NetworkPublicIpPrefix(ScenarioTest):
         # Check with unsupported IP address version: IPv5
         with self.assertRaisesRegexp(SystemExit, '2'):
             self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
+    def test_network_public_ip_prefix_zone(self, resource_group):
+        self.kwargs.update({
+            'prefix': 'prefix1',
+        })
+
+        # Test prefix with multi zones
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --zone 1 2 3', checks=[
+            self.check('prefixLength', 30),
+            self.check('length(zones)', 3)
+        ])
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
