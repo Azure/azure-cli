@@ -1883,6 +1883,8 @@ examples:
     text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
   - name: Open a range of ports on a VM to inbound traffic with the highest priority.
     text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
+  - name: Open ports 555, 557, 558, and 559 to inbound traffic with the highest priority.
+    text: az vm open-port -g MyResourceGroup -n MyVm --port 555,557-559 --priority 100
   - name: Open all ports for all VMs in a resource group.
     text: >
         az vm open-port --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv) --port '*'

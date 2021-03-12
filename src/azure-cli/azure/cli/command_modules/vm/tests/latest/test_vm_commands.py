@@ -86,6 +86,12 @@ class VMOpenPortTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} -l westus -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password @PasswordPassword1! --public-ip-address-allocation dynamic --authentication-type password --nsg-rule NONE')
 
+        # min params - test list of ports
+        self.kwargs['nsg_list_id'] = self.cmd('vm open-port -g {rg} -n {vm} --port 555,556,557-559 --priority 800').get_output_in_json()['id']
+        self.kwargs['nsg_list'] = os.path.split(self.kwargs['nsg_list_id'])[1]
+        self.cmd('network nsg show -g {rg} -n {nsg_list}',
+                 checks=self.check("length(securityRules[?name == 'open-port-555_556_557-559'])", 1))
+
         # min params - apply to existing NIC (updates existing NSG)
         self.kwargs['nsg_id'] = self.cmd('vm open-port -g {rg} -n {vm} --port "*" --priority 900').get_output_in_json()['id']
         self.kwargs['nsg'] = os.path.split(self.kwargs['nsg_id'])[1]
@@ -889,6 +895,11 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self.cmd('vm delete --resource-group {rg} --name {vm} --yes')
         # Expecting no results
         self.cmd('vm list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_')
+    def test_vm_user_update_win(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm user update -g {rg} -n vm --username AzureUser --password testPassword1')
 
 
 class VMSimulateEvictionScenarioTest(ScenarioTest):

@@ -470,6 +470,9 @@ parameters:
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
+  - name: --no-uptime-sla
+    type: bool
+    short-summary: Change a paid managed cluster to a free one.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.

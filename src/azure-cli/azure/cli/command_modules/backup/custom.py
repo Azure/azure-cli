@@ -256,7 +256,15 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
     return _get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def check_protection_enabled_for_vm(cmd, vm_id):
+def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    if vm_id is None:
+        if is_valid_resource_id(vm):
+            vm_id = vm
+        else:
+            if vm is None or resource_group_name is None:
+                raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required "
+                                                   "arguments.")
+            vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
     vaults = list_vaults(vaults_cf(cmd.cli_ctx))
     for vault in vaults:
         vault_rg = _get_resource_group_from_id(vault.id)

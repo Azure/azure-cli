@@ -3328,7 +3328,7 @@ def lb_get(client, resource_group_name, load_balancer_name):
 # workaround for : https://github.com/Azure/azure-cli/issues/17071
 def lb_get_operation(lb):
     for item in lb.frontend_ip_configurations:
-        if item.zones is not None and len(item.zones) >= 3:
+        if item.zones is not None and len(item.zones) >= 3 and item.subnet is None:
             item.zones = None
 
     return lb
