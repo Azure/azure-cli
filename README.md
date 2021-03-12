@@ -11,7 +11,7 @@ Take a test run now from Azure Cloud Shell!
 - **Direct link**: Open a browser to https://shell.azure.com
 - **Azure portal**: Select the Cloud Shell icon on the [Azure portal](https://portal.azure.com):
   
-  ![CloudShellLaunchIcon](https://docs.microsoft.com/en-us/azure/cloud-shell/media/overview/portal-launch-icon.png)
+  [![CloudShellLaunchIcon](https://docs.microsoft.com/en-us/azure/cloud-shell/media/overview/portal-launch-icon.png)](https://portal.azure.com/)
 
 ## Installation
 
