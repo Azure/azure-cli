@@ -8,7 +8,10 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI*, our nex
 
 Take a test run now from Azure Cloud Shell!
 
-[![](https://shell.azure.com/images/launchcloudshell.png "Launch Azure Cloud Shell")](https://shell.azure.com)
+- **Direct link**: Open a browser to https://shell.azure.com
+- **Azure portal**: Select the Cloud Shell icon on the [Azure portal](https://portal.azure.com):
+  
+  ![CloudShellLaunchIcon](https://docs.microsoft.com/en-us/azure/cloud-shell/media/overview/portal-launch-icon.png)
 
 ## Installation
 
