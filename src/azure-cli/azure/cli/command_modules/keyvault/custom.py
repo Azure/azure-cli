@@ -2418,9 +2418,11 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
         try:
             with open(file_path, 'w') as f:
                 f.write(security_domain.value)
-        except:  # pylint: disable=bare-except
+        except Exception as ex:  # pylint: disable=bare-except
             if os.path.isfile(file_path):
                 os.remove(file_path)
+            from azure.cli.core.azclierror import FileOperationError
+            raise FileOperationError(str(ex))
 
     ret = client.download(
         vault_base_url=hsm_name or vault_base_url,
