@@ -1198,9 +1198,21 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # update the NSG with the new rule to allow inbound traffic
     SecurityRule = cmd.get_models('SecurityRule', resource_type=ResourceType.MGMT_NETWORK)
-    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
+
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
+
+    # use portranges if multiple ports are entered
+    if "," not in port:
+        port_arg = {
+            'destination_port_range': port
+        }
+    else:
+        port_arg = {
+            'destination_port_ranges': port.split(',')
+        }
+
     rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
-                        source_port_range='*', destination_port_range=port, priority=priority,
+                        source_port_range='*', **port_arg, priority=priority,
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
