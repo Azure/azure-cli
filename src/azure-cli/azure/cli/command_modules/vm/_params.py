@@ -345,7 +345,8 @@ def load_arguments(self, _):
                    help='Mode of in-guest patching to IaaS virtual machine. Possible values are: Manual - You  control the application of patches to a virtual machine. You do this by applying patches manually inside the VM. In this mode, automatic updates are disabled; the paramater --enable-auto-update must be false. AutomaticByOS - The virtual machine will automatically be updated by the OS. The parameter --enable-auto-update must be true. AutomaticByPlatform - the virtual machine will automatically updated by the OS. The parameter --enable-agent and --enable-auto-update must be true')
         c.argument('ssh_key_name', help='Use it as public key in virtual machine. It should be an existing SSH key resource in Azure.')
         c.argument('enable_hotpatching', arg_type=get_three_state_flag(), help='Patch VMs without requiring a reboot. --enable-agent must be set and --patch-mode must be set to AutomaticByPlatform', min_api='2020-12-01')
-        c.argument('count', type=int, help='Number of virtual machines to create.')
+        c.argument('count', type=int, is_preview=True,
+                   help='Number of virtual machines to create. Configuration of each VM is identical. When --count is specified, --attach-data-disks, --attach-os-disk, --boot-diagnostics-storage, --computer-name, --host, --host-group, --nics, --os-disk-name, --private-ip-address, --public-ip-address, --public-ip-address-dns-name, --storage-account, --storage-container-name, --subnet, --use-unmanaged-disk, --vnet-name are not allowed.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')

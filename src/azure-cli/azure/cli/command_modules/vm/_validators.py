@@ -1176,7 +1176,8 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
-    _validate_count(cmd, namespace)
+    if namespace.count:
+        _validate_count(cmd, namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
@@ -1764,4 +1765,41 @@ def _validate_vmss_create_host_group(cmd, namespace):
 
 
 def _validate_count(cmd, namespace):
-    pass
+    banned_params = [
+        namespace.attach_data_disks,
+        namespace.attach_os_disk,
+        namespace.boot_diagnostics_storage,
+        namespace.computer_name,
+        namespace.dedicated_host,
+        namespace.dedicated_host_group,
+        namespace.nics,
+        namespace.os_disk_name,
+        namespace.private_ip_address,
+        namespace.public_ip_address,
+        namespace.public_ip_address_dns_name,
+        namespace.storage_account,
+        namespace.storage_container_name,
+        namespace.subnet,
+        namespace.use_unmanaged_disk,
+        namespace.vnet_name
+    ]
+    params_str = [
+        '--attach-data-disks',
+        '--attach-os-disk',
+        '--boot-diagnostics-storage',
+        '--computer-name',
+        '--host',
+        '--host-group',
+        '--nics',
+        '--os-disk-name',
+        '--private-ip-address',
+        '--public-ip-address',
+        '--public-ip-address-dns-name',
+        '--storage-account',
+        '--storage-container-name',
+        '--subnet',
+        '--use-unmanaged-disk',
+        '--vnet-name'
+    ]
+    if any(param is not None for param in banned_params):
+        raise ValidationError('When --count is specified, {} are not allowed'.format(', '.join(params_str)))
