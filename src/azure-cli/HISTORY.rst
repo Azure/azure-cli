@@ -364,7 +364,8 @@ Release History
 **Compute**
 
 * New license type RHEL_ELS_6 (#16012)
-* Adopt track2 SDK, azure-mgmt-compute==18.0.0, including breaking changes such as property name change (#15750)
+* Adopt track2 SDK, azure-mgmt-compute==18.0.0 (#15750)
+* [BREAKING CHANGE] Property names change due to track2 SDK. For example, `virtual_machine_extension_type` becomes `type_properties_type` in VM resource.
 
 **Container**
 
