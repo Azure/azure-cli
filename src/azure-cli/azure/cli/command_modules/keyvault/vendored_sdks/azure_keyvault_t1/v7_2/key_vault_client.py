@@ -123,34 +123,9 @@ class KeyVaultClient(SDKClient):
 
         deserialized = None
 
-        # for both old response, and new response
-        deserialized = self._deserialize('SecurityDomainObject', response)
-
-        # for new response
-        if response.status_code == 202:
-            polling_interval = int(response.headers.get('retry-after', 1))
-            status = 'InProgress'
-
-            # keep polling if status is 'InProgress'
-            while status == 'InProgress':
-                # flush
-                time.sleep(0.5*polling_interval)
-                print('\r - Running .. ', end='')
-                time.sleep(0.5*polling_interval)
-                print('\r              ', end='')
-
-                # polling
-                operation_status = self.download_pending(
-                    vault_base_url,
-                    custom_headers=custom_headers,
-                    raw=False,
-                    **operation_config
-                )
-                status = operation_status.status
-
-            # Response won't be returned if the deployment fails
-            if status != 'Success':
-                raise models.KeyVaultErrorException(self._deserialize, response)
+        # for both old response and new response
+        if response.status_code in [200, 202]:
+            deserialized = self._deserialize('SecurityDomainObject', response)
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)

@@ -2204,14 +2204,21 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
         raise ex
 
 
-def _wait_security_domain_operation(client, hsm_name, identifier=None):  # pylint: disable=unused-argument
+def _wait_security_domain_operation(client, hsm_name, target_operation='upload', identifier=None):  # pylint: disable=unused-argument
     retries = 0
     max_retries = 30
     wait_second = 5
     while retries < max_retries:
         try:
-            ret = client.upload_pending(vault_base_url=hsm_name)
-            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Failed']:
+            ret = None
+            if target_operation == 'upload':
+                ret = client.upload_pending(vault_base_url=hsm_name)
+            elif target_operation == 'download':
+                ret = client.upload_pending(vault_base_url=hsm_name)
+
+            # v7.2-preview and v7.2 will change the upload operation from Sync to Async
+            # due to service defects, it returns 'Succeeded' before the change and 'Success' after the change
+            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Success', 'Failed']:
                 return ret
         except:  # pylint: disable=bare-except
             pass
@@ -2356,14 +2363,14 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     if no_wait:
         return retval
 
-    new_retval = _wait_security_domain_operation(client, hsm_name)
+    new_retval = _wait_security_domain_operation(client, hsm_name, 'upload')
     if new_retval:
         return new_retval
     return retval
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
-                             identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
+                             identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
@@ -2406,15 +2413,26 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
         certificates.append(sd_jwk)
 
+    # save security-domain backup value to local file
+    def _save_to_local_file(file_path, security_domain):
+        try:
+            with open(file_path, 'w') as f:
+                f.write(security_domain.value)
+        except:  # pylint: disable=bare-except
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
     ret = client.download(
         vault_base_url=hsm_name or vault_base_url,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
 
-    try:
-        with open(security_domain_file, 'w') as f:
-            f.write(ret.value)
-    except:  # pylint: disable=bare-except
-        if os.path.isfile(security_domain_file):
-            os.remove(security_domain_file)
+    if not no_wait:
+        polling_ret = _wait_security_domain_operation(client, hsm_name, 'download')
+        # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
+        if polling_ret and getattr(polling_ret, 'status', None) != 'Failed':
+            _save_to_local_file(security_domain_file, ret)
+        return polling_ret
+
+    _save_to_local_file(security_domain_file, ret)
 # endregion

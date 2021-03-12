@@ -77,6 +77,10 @@ def load_arguments(self, _):
         p_384 = "P-384"  #: The NIST P-384 elliptic curve, AKA SECG curve SECP384R1.
         p_521 = "P-521"  #: The NIST P-521 elliptic curve, AKA SECG curve SECP521R1.
 
+    class CLISecurityDomainOperation(str, Enum):
+        download = "download"  #: Download operation
+        upload = "upload"  #: Upload operation
+
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
          'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
@@ -496,6 +500,8 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
         c.argument('resource_group_name', options_list=['--resource-group', '-g'],
                    help='Proceed only if HSM belongs to the specified resource group.')
+        c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
+                   help='Target operation that needs waiting.')
     # endregion
 
     # region keyvault backup/restore
