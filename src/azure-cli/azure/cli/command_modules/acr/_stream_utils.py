@@ -98,13 +98,13 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
             container_name=container_name, blob_name=blob_name)
 
         if log_exist:
-          props = blob_service.get_blob_properties(
-              container_name=container_name, blob_name=blob_name)
-          metadata = props.metadata
-          available = props.properties.content_length
+            props = blob_service.get_blob_properties(
+                container_name=container_name, blob_name=blob_name)
+            metadata = props.metadata
+            available = props.properties.content_length
         else:
-          # Wait a little bit before checking the existence again
-          time.sleep(1)
+            # Wait a little bit before checking the existence again
+            time.sleep(1)
     except (AttributeError, AzureHttpError):
         pass
 
@@ -150,13 +150,13 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
 
         try:
             if log_exist:
-              props = blob_service.get_blob_properties(
-                  container_name=container_name, blob_name=blob_name)
-              metadata = props.metadata
-              available = props.properties.content_length
+                props = blob_service.get_blob_properties(
+                    container_name=container_name, blob_name=blob_name)
+                metadata = props.metadata
+                available = props.properties.content_length
             else:
-              log_exist = blob_service.exists(
-                  container_name=container_name, blob_name=blob_name)
+                log_exist = blob_service.exists(
+                    container_name=container_name, blob_name=blob_name)
         except AzureHttpError as ae:
             if ae.status_code != 404:
                 raise CLIError(ae)
