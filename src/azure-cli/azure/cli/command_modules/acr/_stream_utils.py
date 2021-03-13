@@ -95,7 +95,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     try:
         # Need to call "exists" API to prevent storage SDK logging BlobNotFound error
         log_exist = blob_service.exists(
-          container_name=container_name, blob_name=blob_name)
+            container_name=container_name, blob_name=blob_name)
 
         if log_exist:
           props = blob_service.get_blob_properties(
