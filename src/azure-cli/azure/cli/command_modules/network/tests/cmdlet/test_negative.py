@@ -52,3 +52,48 @@ class NegativeTest(ScenarioTest):
             raise Exception("Error Expected!")
         except ResourceNotFoundError as e:
             assert e.message.startswith("(500)")
+# Test class for Scenario
+class NegativeTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        super(NegativeTest, self).__init__(*args, **kwargs)
+
+    # EXAMPLE: /ExpressRouteCircuitConnections/get/List ExpressRouteCircuit Connection
+    def test_express_route_peering_connection_list(self):
+        try:
+            self.cmd('az network express-route peering connection list '
+                     '--circuit-name "ExpressRouteARMCircuitA" '
+                     '--peering-name "AzurePrivatePeering" '
+                     '--resource-group "rg1"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /ExpressRouteCircuits/post/List Route Table Summary
+    def test_express_route_list_route_table_summary(self):
+        try:
+            self.cmd('az network express-route list-route-table-summary '
+                     '--circuit-name "circuitName" '
+                     '--device-path "devicePath" '
+                     '--peering-name "peeringName" '
+                     '--resource-group "rg1"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /ExpressRouteCircuits/get/Get ExpressRoute Circuit Peering Traffic Stats
+    def test_express_route_show_peering_stat(self):
+        try:
+            self.cmd('az network express-route show-peering-stat '
+                     '--circuit-name "circuitName" '
+                     '--peering-name "peeringName" '
+                     '--resource-group "rg1"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
