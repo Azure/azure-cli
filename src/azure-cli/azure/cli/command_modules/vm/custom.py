@@ -1198,9 +1198,21 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # update the NSG with the new rule to allow inbound traffic
     SecurityRule = cmd.get_models('SecurityRule', resource_type=ResourceType.MGMT_NETWORK)
-    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
+
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
+
+    # use portranges if multiple ports are entered
+    if "," not in port:
+        port_arg = {
+            'destination_port_range': port
+        }
+    else:
+        port_arg = {
+            'destination_port_ranges': port.split(',')
+        }
+
     rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
-                        source_port_range='*', destination_port_range=port, priority=priority,
+                        source_port_range='*', **port_arg, priority=priority,
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
@@ -2219,7 +2231,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
 
     ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
+                                  type_properties_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
                                   type_handler_version=version,
                                   settings={'UserName': username},
@@ -2228,9 +2240,8 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
     if no_wait:
         return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
                            resource_group_name, vm_instance.name, instance_name, ext)
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                vm_instance.name,
-                                                                instance_name, ext)
+    poller = client.virtual_machine_extensions.begin_create_or_update(
+        resource_group_name, vm_instance.name, instance_name, ext)
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
@@ -2702,8 +2713,10 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
+    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
+    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):

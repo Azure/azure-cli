@@ -300,6 +300,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
         logger.warning("Registry name must be provided to check connectivity.")
         return
 
+    registry = None
     # Connectivity
     try:
         registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
@@ -320,7 +321,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
     # CMK settings
-    if registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
+    if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
         client_id = registry.encryption.key_vault_properties.identity
         valid_identity = False
         if registry.identity:
