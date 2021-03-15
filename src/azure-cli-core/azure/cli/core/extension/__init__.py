@@ -36,7 +36,7 @@ EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
 # If this Azure CLI core version has breaking changes that do not support older versions of extensions,
 # put the requirements of the minimum extension versions here.
 # Example:
-# {'interactive': {'minExtVersion': '1.0.0'}}
+# {'azure-devops': {'minExtVersion': '1.0.0'}}
 EXTENSION_VERSION_REQUIREMENTS = {}
 MIN_EXT_VERSION = 'minExtVersion'
 
