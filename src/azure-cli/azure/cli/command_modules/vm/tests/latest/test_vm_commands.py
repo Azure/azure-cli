@@ -5072,5 +5072,14 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('sshkey show -g {rg} -n k3')
 
 
+class VMCreateCountScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_')
+    def test_vm_create_count(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image centos --count 3 --nsg-rule None --generate-ssh-keys')
+        self.cmd('vm show -g {rg} -n vm0')
+        self.cmd('vm show -g {rg} -n vm1')
+        self.cmd('vm show -g {rg} -n vm2')
+
+
 if __name__ == '__main__':
     unittest.main()
