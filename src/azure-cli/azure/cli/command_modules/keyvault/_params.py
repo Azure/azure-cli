@@ -471,6 +471,7 @@ def load_arguments(self, _):
             c.argument('hsm_name', hsm_url_type, required=False,
                        help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+            c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain init-recovery') as c:
         c.argument('sd_exchange_key', help='Local file path to store the exported key.')
@@ -492,7 +493,6 @@ def load_arguments(self, _):
                    help='Path to a file where the JSON blob returned by this command is stored.')
         c.argument('sd_quorum', type=int, help='The minimum number of shares required to decrypt the security domain '
                                                'for recovery.')
-        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain wait') as c:
         c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
@@ -502,6 +502,7 @@ def load_arguments(self, _):
                    help='Proceed only if HSM belongs to the specified resource group.')
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
                    help='Target operation that needs waiting.')
+        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
