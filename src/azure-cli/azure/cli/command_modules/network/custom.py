@@ -2760,7 +2760,8 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
 
     propagated_route_tables = PropagatedRouteTable(
         labels=labels,
-        ids=[SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]
+        ids=[SubResource(id=propagated_route_table) for propagated_route_table in
+             propagated_route_tables] if propagated_route_tables else None
     )
     routing_configuration = RoutingConfiguration(
         associated_route_table=SubResource(id=associated_route_table),
