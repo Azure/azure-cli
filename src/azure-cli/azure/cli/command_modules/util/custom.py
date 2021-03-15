@@ -118,7 +118,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         elif installer == 'HOMEBREW':
             logger.debug("Update homebrew formulae")
             az_env = os.environ.copy()
-            az_env['HOMEBREW_NO_INSTALL_CLEANUP'] = 1
+            az_env['HOMEBREW_NO_INSTALL_CLEANUP'] = "1"
             exit_code = subprocess.call(['brew', 'update'], env=az_env)
             if exit_code == 0:
                 update_cmd = ['brew', 'upgrade', 'azure-cli']
