@@ -88,7 +88,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 az_update_cmd.insert(0, 'sudo')
             exit_code = subprocess.call(apt_update_cmd)
             if exit_code == 0:
-                logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
+                logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
                 exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
@@ -174,7 +174,8 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text, format_styled_text
-    format_styled_text.theme = theme
+    if theme:
+        format_styled_text.theme = theme
     print_styled_text("[How to call print_styled_text]")
     # Print an empty line
     print_styled_text()

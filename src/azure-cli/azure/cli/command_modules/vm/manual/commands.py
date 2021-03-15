@@ -26,6 +26,3 @@ def load_command_table(self, _):
         g.custom_command('update', 'vm_ssh_public_key_update')
         g.custom_command('delete', 'vm_ssh_public_key_delete', confirmation=True)
         # g.custom_command('generate', 'vm_ssh_public_key_generate_key_pair')
-
-    with self.command_group('vm', is_experimental=True):
-        pass

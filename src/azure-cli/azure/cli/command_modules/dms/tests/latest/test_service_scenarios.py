@@ -5,6 +5,7 @@
 
 
 import json
+import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, VirtualNetworkPreparer, JMESPathCheck, JMESPathCheckGreaterThan
 
@@ -18,6 +19,7 @@ class DmsServiceTests(ScenarioTest):
                           JMESPathCheck('reason', 'AlreadyExists')]
     name_available_checks = [JMESPathCheck('nameAvailable', True)]
 
+    @unittest.skip('The virtual network must be in the same location as the service')
     @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_service_commands(self, resource_group):

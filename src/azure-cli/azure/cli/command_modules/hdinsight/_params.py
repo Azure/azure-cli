@@ -224,6 +224,12 @@ def load_arguments(self, _):
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
 
+        # compute isolation
+        c.argument('enable_compute_isolation', options_list=['--enable-compute-isolation', '--compute-isolation'],
+                   arg_group="Compute Isolation", arg_type=get_three_state_flag(),
+                   help='Indicate whether enable compute isolation or not.')
+        c.argument('host_sku', arg_group='Compute Isolation', help="The dedicated host sku of compute isolation.")
+
         # resize
         with self.argument_context('hdinsight resize') as c:
             c.argument('target_instance_count', options_list=['--workernode-count', '-c'],

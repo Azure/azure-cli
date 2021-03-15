@@ -22,12 +22,12 @@ from azure.cli.command_modules.keyvault._validators import (
 
 def transform_assignment_list(result):
     return [OrderedDict([('Principal', r['principalName']),
-                         ('Role', r['roleDefinitionName']),
+                         ('RoleName', r['roleName']),
                          ('Scope', r['scope'])]) for r in result]
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+    return [OrderedDict([('Name', r['name']), ('RoleName', r['roleName']), ('Type', r['type']),
                          ('Description', r['description'])]) for r in result]
 
 
@@ -128,12 +128,12 @@ def load_command_table(self, _):
         with self.command_group('keyvault backup', data_backup_entity.command_type,
                                 is_preview=True) as g:
             g.keyvault_custom('start', 'full_backup',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_backup'))
 
         with self.command_group('keyvault restore', data_backup_entity.command_type,
                                 is_preview=True) as g:
             g.keyvault_custom('start', 'full_restore',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_restore'))
 
         with self.command_group('keyvault security-domain', private_data_entity.command_type,
                                 is_preview=True) as g:
@@ -279,6 +279,10 @@ def load_command_table(self, _):
 
         with self.command_group('keyvault role definition', data_access_control_entity.command_type) as g:
             g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
+            g.keyvault_custom('create', 'create_role_definition')
+            g.keyvault_custom('update', 'update_role_definition')
+            g.keyvault_custom('delete', 'delete_role_definition')
+            g.keyvault_custom('show', 'show_role_definition')
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')

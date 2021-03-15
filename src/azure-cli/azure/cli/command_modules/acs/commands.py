@@ -97,6 +97,8 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.wait_command('wait')
+        g.command('stop', 'stop', supports_no_wait=True)
+        g.command('start', 'start', supports_no_wait=True)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)
@@ -114,7 +116,8 @@ def load_command_table(self, _):
 
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,
-                            client_factory=cf_openshift_managed_clusters) as g:
+                            client_factory=cf_openshift_managed_clusters,
+                            deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)

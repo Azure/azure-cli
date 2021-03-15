@@ -1939,7 +1939,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
 
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
-    @mock.patch('azure.cli.core._msal.AdalRefreshTokenBasedClientApplication._acquire_token_silent_by_finding_specific_refresh_token', autospec=True)
+    @mock.patch('msal.ClientApplication.acquire_token_by_refresh_token', autospec=True)
     def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
         """
         This is added only for vmssh feature.

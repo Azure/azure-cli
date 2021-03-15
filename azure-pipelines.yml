@@ -180,7 +180,7 @@ jobs:
   displayName: Test Windows MSI
 
   dependsOn: BuildWindowsMSI
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   condition: false
   pool:
     vmImage: 'vs2017-win2016'
@@ -364,7 +364,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip==20.2.4 tox
+    - bash: pip install --upgrade pip tox
       displayName: 'Install pip and tox'
     - bash: ./scripts/ci/unittest.sh
       displayName: 'Run Unit Test'
@@ -390,7 +390,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip==20.2.4 wheel
+    - bash: pip install --upgrade pip wheel
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
@@ -479,7 +479,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip==20.2.4 wheel
+    - bash: pip install --upgrade pip wheel
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_extensions.sh
       displayName: 'Load extensions'
@@ -488,7 +488,7 @@ jobs:
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -576,7 +576,7 @@ jobs:
   displayName: Test Homebrew Package
   timeoutInMinutes: 180
   dependsOn: BuildHomebrewFormula
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   condition: false
   pool:
     vmImage: 'macOS-10.14'
@@ -604,7 +604,7 @@ jobs:
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -625,7 +625,7 @@ jobs:
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -661,7 +661,7 @@ jobs:
   displayName: Build Deb Packages
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -717,7 +717,7 @@ jobs:
 
   dependsOn:
    - BuildDebPackages
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
       Focal:
@@ -846,7 +846,7 @@ jobs:
       displayName: 'Use Python 3.6'
       inputs:
         versionSpec: 3.6
-    - bash: pip install --upgrade pip==20.2.4 wheel
+    - bash: pip install --upgrade pip wheel
       displayName: "Install pip and wheel"
     - bash: ./scripts/ci/test_ref_doc.sh
       displayName: "Verify Sphinx Document Generator"

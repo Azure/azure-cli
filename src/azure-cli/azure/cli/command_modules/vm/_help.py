@@ -51,6 +51,9 @@ examples:
   - name: Create an empty managed disk.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10
+  - name: Create an empty managed disk with bursting enabled.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 1024 --location centraluseuap --enable-bursting
   - name: Create a managed disk by copying an existing disk or snapshot.
     text: >
         az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
@@ -632,7 +635,7 @@ examples:
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/images/MyManagedImage
   - name: Add a new image version from a virtual machine
     text: |
-        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
   - name: Add a new image version from another image version
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/galleries/MyGallery/images/MyImageDefinition/versions/1.0.0
@@ -648,7 +651,7 @@ examples:
   - name: Add a new image version from a managed disk and add additional data disks
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk --data-snapshot-luns 0
-  - name: You can Add a new image version containing a mix of snapshots and managed disks
+  - name: Add a new image version containing a mix of snapshots and managed disks
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/snapshots/MyDiskSnapshot1 /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk2 --data-snapshot-luns 1 2
   - name: Add a new image version replicated across multiple regions with different replication counts each. Eastus2 will have it's replica count set to the default replica count.
@@ -687,6 +690,12 @@ examples:
   - name: Replicate to one more region
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+  - name: Add a region with a different regional replica count
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus regionalReplicaCount=3
+  - name: Remove a region
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --remove publishingProfile.targetRegions name=westcentralus
   - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --set publishingProfile.excludeFromLatest=true
@@ -1060,14 +1069,14 @@ examples:
           --image debian --secrets "$vm_secrets"
   - name: Create a CentOS VM with a system assigned identity. The VM will have a 'Contributor' role with access to a storage account.
     text: >
-        az vm create -n MyVm -g rg1 --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        az vm create -n MyVm -g rg1 --image centos --assign-identity [system] --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
   - name: Create a debian VM with a user assigned identity.
     text: >
-        az vm create -n MyVm -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        az vm create -n MyVm -g rg1 --image debian --assign-identity /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
   - name: Create a debian VM with both system and user assigned identity.
     text: >
-        az vm create -n MyVm -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-  - name: Create a VM in an availability zone in the current resource group's region
+        az vm create -n MyVm -g rg1 --image debian --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  - name: Create a VM in an availability zone in the current resource group's region.
     supported-profiles: latest
     text: >
         az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
@@ -1250,7 +1259,7 @@ type: command
 short-summary: Disable disk encryption on the OS disk and/or data disks. Decrypt mounted disks.
 long-summary: |
     For Linux VMs, disabling encryption is only permitted on data volumes.
-    For Windows VMS, disabling encryption is permitted on both OS and data volumes.
+    For Windows VMs, disabling encryption is permitted on both OS and data volumes.
 examples:
   - name: Disable disk encryption on the OS disk and/or data disks. (autogenerated)
     text: |
@@ -1874,6 +1883,8 @@ examples:
     text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
   - name: Open a range of ports on a VM to inbound traffic with the highest priority.
     text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
+  - name: Open ports 555, 557, 558, and 559 to inbound traffic with the highest priority.
+    text: az vm open-port -g MyResourceGroup -n MyVm --port 555,557-559 --priority 100
   - name: Open all ports for all VMs in a resource group.
     text: >
         az vm open-port --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv) --port '*'

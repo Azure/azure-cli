@@ -22,7 +22,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
-    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
+    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
@@ -180,11 +180,16 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
-    item_properties = item.properties
-    item_properties.policy_id = policy.id
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise InvalidArgumentValueError("Item must be either of type SQLDataBase or SAPHanaDatabase.")
+
+    item_properties = _get_protected_item_instance(backup_item_type)
+    item_properties.policy_id = policy.id
 
     param = ProtectedItemResource(properties=item_properties)
 
@@ -273,18 +278,21 @@ def show_protectable_instance(items, server_name, protectable_item_type):
         raise az_error
 
     protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
-    # Server Name filter
-    filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
-
     # Protectable Item Type filter
-    filtered_items = [item for item in filtered_items if
+    filtered_items = [item for item in items if
+                      item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    # Server Name filter
+    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
 
-def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
+def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None,
+                           protectable_item_type=None):
     workload_type = _check_map(workload_type, workload_type_map)
+    if protectable_item_type is not None:
+        protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': "AzureWorkload",
@@ -294,14 +302,19 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
 
+    if protectable_item_type is not None:
+        # Protectable Item Type filter
+        paged_items = [item for item in paged_items if
+                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     if container_uri:
         return [item for item in paged_items if
                 cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+
     return paged_items
 
 
 def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                            extended_info=None):
+                            extended_info=None, use_secondary_region=None):
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -321,6 +334,9 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
             'startDate': query_start_date,
             'endDate': query_end_date,
             'extendedInfo': extended_info})
+
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
@@ -358,6 +374,9 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until, backup_type,
                enable_compression=False):
+    if backup_type is None:
+        raise RequiredArgumentMissingError("Backup type missing. Please provide a valid backup type using "
+                                           "--backup-type argument.")
     message = "For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy"
     if retain_until is not None:
         logger.warning(message)

@@ -223,6 +223,7 @@ def load_arguments(self, _):
         c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
         c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_sgxquotehelper', action='store_true')
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -236,6 +237,7 @@ def load_arguments(self, _):
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('uptime_sla', action='store_true')
+        c.argument('no_uptime_sla', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
@@ -256,6 +258,7 @@ def load_arguments(self, _):
         c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
         c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
         c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
+        c.argument('enable_sgxquotehelper', action='store_true')
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)

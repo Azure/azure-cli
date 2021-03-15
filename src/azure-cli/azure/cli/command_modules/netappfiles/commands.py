@@ -83,7 +83,7 @@ def load_command_table(self, _):
     )
     load_vaults_command_groups(self, netappfiles_vaults_sdk)
 
-    with self.command_group('netappfiles', is_preview=True):
+    with self.command_group('netappfiles', is_preview=False):
         pass
 
 
@@ -123,7 +123,9 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
 
 def load_account_backup_command_groups(self, netappfiles_account_backups_sdk):
     with self.command_group('netappfiles account backup', netappfiles_account_backups_sdk) as g:
+        g.show_command('show', 'get')
         g.command('list', 'list')
+        g.command('delete', 'delete', confirmation=True)
 
 
 def load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk):

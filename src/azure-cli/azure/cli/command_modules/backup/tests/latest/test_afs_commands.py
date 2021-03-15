@@ -6,7 +6,7 @@
 import json
 from datetime import datetime, timedelta
 import unittest
-
+import time
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, record_only
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
@@ -54,6 +54,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Disable Protection
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureStorage --delete-backup-data true --yes')
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -101,6 +102,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {sa2} -i {item2} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {sa1} --yes --backup-management-type AzureStorage')
         self.cmd('backup container unregister -g {rg} -v {vault} -c {sa2} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -168,6 +170,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item2} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -208,6 +211,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(rp_count1 + 1 == rp_count2)
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -328,6 +332,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -380,6 +385,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.assertTrue(protected_item_count1 == protected_item_count2 + 1)
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -436,6 +442,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['afsitem'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureStorage --query [0].name').get_output_in_json()
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {afsitem} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
 
     @record_only()
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
@@ -471,3 +478,4 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type {type}', checks=[
             self.check("length([?properties.friendlyName == '{container}'])", 0)])
+        time.sleep(100)
