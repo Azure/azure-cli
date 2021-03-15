@@ -134,7 +134,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', id_part=None, help='Name of the Server.')
 
         with self.argument_context('{} db'.format(command_group)) as c:
-            c.argument('database_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the database')
+            c.argument('database_name', options_list=['--name', '-n'], help='The name of the database')
             c.argument('charset', options_list=['--charset'], help='The charset of the database')
             c.argument('collation', options_list=['--collation'], help='The collation of the database')
 
@@ -429,13 +429,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                if scope == "list":
-                    c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-                else:
-                    c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('database_name', id_part='child_name_1', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
 
-        with self.argument_context('{} flexible-server db'.format(command_group)) as c:
-            c.argument('database_name', id_part='child_name_1', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+        with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+            c.argument('database_name', id_part=None, arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of the database.')
 
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('database_name', id_part='child_name_1', arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
