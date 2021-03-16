@@ -341,8 +341,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     def test_adls_directory_upload(self, resource_group, storage_account, test_dir):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_string = self.get_connection_string(resource_group, storage_account)
-        filesystem = self.create_random_name(prefix='filesystem', length=24)
-        directory = self.create_random_name(prefix='dir', length=12)
+        filesystem = 'testfilesystem'
+        directory = 'testdir'
         self.storage_cmd('storage fs create -n {}', account_info, filesystem)
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
 
@@ -385,8 +385,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     def test_adls_directory_download(self, resource_group, storage_account, test_dir):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_string = self.get_connection_string(resource_group, storage_account)
-        filesystem = self.create_random_name(prefix='filesystem', length=24)
-        directory = self.create_random_name(prefix='dir', length=12)
+        filesystem = 'testfilesystem'
+        directory = 'testdir'
         self.storage_cmd('storage fs create -n {}', account_info, filesystem)
         self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
                          directory, os.path.join(test_dir, 'readme'))
