@@ -7,13 +7,13 @@
 
 import random
 from knack.log import get_logger
-from msrest.paging import Paged
+from azure.core.paging import ItemPaged
 
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
-
+from .flexible_server_custom_common import firewall_rule_create_func
 logger = get_logger(__name__)
 
 DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
@@ -106,9 +106,10 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
     #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
 
-    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip,
-                                                end_ip).result()
-    return firewall.name
+    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
+                                         start_ip_address=start_ip, end_ip_address=end_ip)
+
+    return firewall.result().name
 
 
 # pylint: disable=inconsistent-return-statements
@@ -253,7 +254,7 @@ def _get_available_values(sku_info, argument, tier=None):
 
 
 def _get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
+    return list(obj_list) if isinstance(obj_list, ItemPaged) else obj_list
 
 
 def _update_location(cmd, resource_group_name):
