@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import unittest,os
+import unittest
+import os
 
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck,
                                api_version_constraint, RoleBasedServicePrincipalPreparer)
@@ -340,8 +341,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     def test_adls_directory_upload(self, resource_group, storage_account, test_dir):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_string = self.get_connection_string(resource_group, storage_account)
-        filesystem = self.create_file_system(account_info)
-        directory = 'dir'
+        filesystem = self.create_random_name(prefix='filesystem', length=24)
+        directory = self.create_random_name(prefix='dir', length=12)
+        self.storage_cmd('storage fs create -n {}', account_info, filesystem)
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
 
         # Upload a single file to the fs directory
@@ -383,9 +385,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     def test_adls_directory_download(self, resource_group, storage_account, test_dir):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_string = self.get_connection_string(resource_group, storage_account)
-        filesystem = self.create_file_system(account_info)
-        directory = 'dir'
-        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+        filesystem = self.create_random_name(prefix='filesystem', length=24)
+        directory = self.create_random_name(prefix='dir', length=12)
+        self.storage_cmd('storage fs create -n {}', account_info, filesystem)
         self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
                          directory, os.path.join(test_dir, 'readme'))
         self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
