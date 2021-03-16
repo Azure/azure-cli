@@ -604,9 +604,9 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ServerTrustGroupsOperations.{}',
         client_factory=get_sql_server_trust_groups_operations)
 
-    with self.command_group('sql stg', server_trust_groups_operations, client_factory=get_sql_server_trust_groups_operations) as g:
+    with self.command_group('sql stg', server_trust_groups_operations, client_factory=get_sql_server_trust_groups_operations, is_preview=True) as g:
         g.custom_command('create', 'server_trust_group_create')
-        g.custom_command('delete', 'server_trust_group_delete')
+        g.custom_command('delete', 'server_trust_group_delete', confirmation=True)
         g.custom_command('get', 'server_trust_group_get')
         g.custom_command('list', 'server_trust_group_list')
 
