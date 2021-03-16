@@ -58,7 +58,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
-    from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
