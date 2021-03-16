@@ -55,7 +55,7 @@ sku_type = CLIArgumentType(
 )
 
 identity_type = CLIArgumentType(
-    help="The identity type of the resource (e.g., topic or domain).",
+    help="The identity type of the resource.",
     arg_type=get_enum_type(['noidentity', 'systemassigned']),
     options_list=['--identity'],
     is_preview=True
@@ -153,6 +153,31 @@ phone_number_type = CLIArgumentType(
 phone_extension_type = CLIArgumentType(
     help='The extension of the customer service number of the publisher. Only digits are allowed and number of digits should not exceed 10.')
 
+kind_type = CLIArgumentType(
+    help="The Kind of resource.",
+    arg_type=get_enum_type(['azure', 'azurearc']),
+    options_list=['--kind'],
+    is_preview=True
+)
+
+extended_location_name = CLIArgumentType(
+    help="The extended location name if kind==azurearc.",
+    options_list=['--extended-location-name'],
+    is_preview=True
+)
+
+extended_location_type = CLIArgumentType(
+    help="The extended location type if kind==azurearc.",
+    arg_type=get_enum_type(['customlocation']),
+    options_list=['--extended-location-type'],
+    is_preview=True
+)
+
+storage_queue_msg_ttl = CLIArgumentType(
+    help="Storage queue message time to live in seconds.",
+    options_list=['--storage-queue-msg-ttl'],
+    is_preview=True
+)
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid') as c:
@@ -183,6 +208,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('inbound_ip_rules', action=AddInboundIpRule, nargs='+')
         c.argument('sku', arg_type=sku_type)
         c.argument('identity', arg_type=identity_type)
+        c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
         c.argument('delivery_identity', arg_type=delivery_identity_type)
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('partner_registration_name', arg_type=partner_registration_name_type)
@@ -198,10 +224,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('setup_uri', help="URI of the partner website that can be used by Azure customers to setup Event Grid integration on an event source.")
         c.argument('partner_registration_id', help="The fully qualified ARM Id of the partner registration that should be associated with this partner namespace. This takes the following format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/partnerRegistrations/{partnerRegistrationName}.")
         c.argument('partner_topic_source', arg_type=partner_topic_source_type)
-        c.argument('desination_topic_name', help="Name of the partner topic associated with the event channel.")
+        c.argument('destination_topic_name', help="Name of the partner topic associated with the event channel.")
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
+        c.argument('kind', arg_type=kind_type)
+        c.argument('extended_location_name', arg_type=extended_location_name)
+        c.argument('extended_location_type', arg_type=extended_location_type)
+        c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
@@ -234,6 +264,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid system-topic create') as c:
         c.argument('source', help="The ARM Id for the topic, e.g., /subscriptions/{SubId}/resourceGroups/{RgName}/providers/Microsoft.Storage/storageAccounts/{AccountName}")
+        c.argument('identity', arg_type=identity_type)
+
+    with self.argument_context('eventgrid system-topic update') as c:
+        c.argument('identity', arg_type=identity_type)
 
     with self.argument_context('eventgrid system-topic list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -298,6 +332,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('delivery_identity_endpoint', help="Endpoint with identity where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.", is_preview=True)
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
+        c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -320,6 +355,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -343,6 +379,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)

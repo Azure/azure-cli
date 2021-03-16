@@ -323,6 +323,8 @@ short-summary: Create a system topic.
 examples:
   - name: Create a new system topic for storage account source.
     text: az eventgrid system-topic create -g rg1 --name systemtopic1 --location westus2 --topic-type microsoft.storage.storageaccounts --source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname
+  - name: Create a new system topic for storage account source with systemassigned identity
+    text: az eventgrid system-topic create -g rg1 --name systemtopic1 --location westus2 --topic-type microsoft.storage.storageaccounts --source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname --identity systemassigned
 
 """
 
@@ -364,6 +366,8 @@ short-summary: Update a system topic.
 examples:
   - name: Update the properties of an existing system topic.
     text: az eventgrid system-topic update -g rg1 --name systemtopic1 --tags Dept=IT
+  - name: Update the properties of an existing system topic.
+    text: az eventgrid system-topic update -g rg1 --name systemtopic1 --tags Dept=IT --identity systemassigned
 """
 
 helps['eventgrid partner topic list'] = """
@@ -483,7 +487,13 @@ examples:
         az eventgrid system-topic event-subscription create -n es1 \\
             -g rg1 --system-topic-name systemtopic1 \\
             --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} --endpoint-type azurefunction
-
+  - name: Create a new event subscription for an Event Grid system topic, using Storage Queue as destination with a ttl of 5 mins
+    text: |
+        az eventgrid system-topic event-subscription create -n es1 \\
+            -g rg1 --system-topic-name systemtopic1 \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --storage-queue-msg-ttl 300
 """
 
 helps['eventgrid system-topic event-subscription delete'] = """
@@ -567,7 +577,13 @@ examples:
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --advanced-filter data.blobType StringIn BlockBlob
             --advanced-filter data.url StringBeginsWith https://myaccount.blob.core.windows.net
-
+  - name: Update an event subscription for an Event Grid system topic, with storage queue ttl of 5 mins
+    text: |
+        az eventgrid system-topic event-subscription update -n es1 \\
+            -g rg1 --system-topic-name systemtopic1 \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --storage-queue-msg-ttl 300
 """
 
 helps['eventgrid partner topic event-subscription'] = """
@@ -640,6 +656,13 @@ examples:
             -g rg1 --partner-topic-name partnertopic1 \\
             --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} --endpoint-type azurefunction
 
+  - name: Create a new event subscription for an Event Grid partner topic, using Storage Queue as destination with message ttl at 5 mins
+    text: |
+        az eventgrid partner topic event-subscription create -n es1 \\
+            -g rg1 --partner-topic-name partnertopic1 \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --storage-queue-msg-ttl 300
 """
 
 helps['eventgrid partner topic event-subscription delete'] = """
@@ -723,6 +746,13 @@ examples:
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --advanced-filter data.blobType StringIn BlockBlob
             --advanced-filter data.url StringBeginsWith https://myaccount.blob.core.windows.net
+  - name: Update an event subscription for an Event Grid partner topic, using Storage Queue as destination with message ttl at 5 mins
+    text: |
+        az eventgrid partner topic event-subscription update -n es1 \\
+            -g rg1 --partner-topic-name partnertopic1 \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --storage-queue-msg-ttl 300
 
 """
 
@@ -823,6 +853,13 @@ examples:
             --source-resource-id /subscriptions/{SubID} \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1
+  - name: Create a new event subscription for an Azure subscription, using default filters, and an Azure Storage queue as a destination with message ttl set to 5 mins.
+    text: |
+        az eventgrid event-subscription create --name es2 \\
+            --source-resource-id /subscriptions/{SubID} \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --storage-queue-msg-ttl 300
   - name: Create a new event subscription for an Azure subscription, using default filters, and an Azure ServiceBusQueue as a destination.
     text: |
         az eventgrid event-subscription create --name es2 \\
@@ -1086,7 +1123,11 @@ examples:
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --advanced-filter data.blobType StringIn BlockBlob
             --advanced-filter data.url StringBeginsWith https://myaccount.blob.core.windows.net
-
+  - name: Update an event subscription for a storage account to include message ttl set to 5 mins.
+    text: |
+        az eventgrid event-subscription update --name es2 \\
+            --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/kalsegblob" \\
+            --storage-queue-msg-ttl 300
 """
 
 helps['eventgrid extension-topic'] = """
@@ -1115,6 +1156,7 @@ parameters:
     short-summary: List of inbound IP rules.
     long-summary: |
         List of inbound IP rules specifying IP Address in CIDR notation e.g., 10.0.0.0/8 along with corresponding Action to perform based on the match or no match of the IpMask. Possible values include - Allow.
+
 examples:
   - name: Create a new topic.
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2
@@ -1124,6 +1166,8 @@ examples:
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --input-schema cloudeventschemav1_0
   - name: Create a new topic which allows specific inbound ip rules with Basic Sku and system assigned identity
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --public-network-access enabled --inbound-ip-rules 10.0.0.0/8 Allow --inbound-ip-rules 10.2.0.0/8 Allow --sku Basic --identity systemassigned
+  - name: Create a new topic as an AzureArc resource in extended location specified
+    text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --kind AzureArc --extended-location-name your-custom-location-resource-id --extended-location-type customlocation
 """
 
 helps['eventgrid topic delete'] = """
