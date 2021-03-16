@@ -53,6 +53,13 @@ except ImportError:
     pass
 
 
+from .generated.custom import *  # noqa: F403
+try:
+    from .manual.custom import *  # noqa: F403
+except ImportError:
+    pass
+
+
 from collections import Counter, OrderedDict
 
 from msrestazure.azure_exceptions import CloudError
