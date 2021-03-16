@@ -170,6 +170,7 @@ examples:
 
 helps['storage account generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the storage account.
 parameters:
   - name: --services
     short-summary: 'The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.'
