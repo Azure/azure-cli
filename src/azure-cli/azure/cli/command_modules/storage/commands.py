@@ -784,11 +784,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=transform_metadata)
 
     with self.command_group('storage fs directory', custom_command_type=get_custom_sdk('azcopy', None))as g:
-        from ._validators import validate_fs_directory_upload_destination_url, validate_fs_directory_download_source_url
-        g.storage_custom_command_oauth('upload', 'storage_fs_directory_copy', is_preview=True,
-                                       validator=validate_fs_directory_upload_destination_url)
-        g.storage_custom_command_oauth('download', 'storage_fs_directory_copy', is_preview=True,
-                                       validator=validate_fs_directory_download_source_url)
+        g.storage_custom_command_oauth('upload', 'storage_fs_directory_copy', is_preview=True)
+        g.storage_custom_command_oauth('download', 'storage_fs_directory_copy', is_preview=True)
 
     with self.command_group('storage fs file', adls_file_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file), min_api='2018-11-09') as g:

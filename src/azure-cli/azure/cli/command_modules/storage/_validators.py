@@ -1577,20 +1577,51 @@ def validate_azcopy_credential(cmd, namespace):
                                             service=service, resource_types='sco', permissions='rl')
 
 
+def is_directory(props):
+    return 'hdi_isfolder' in props.metadata.keys() and props.metadata['hdi_isfolder'] == 'true'
+
+
 def validate_fs_directory_upload_destination_url(cmd, namespace):
-    service, url = get_url_with_sas(cmd, namespace, container=namespace.destination_fs, blob=namespace.destination_path)
+    destination = namespace.destination_path
+    container = namespace.destination_fs
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token}
+    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+    destination = destination[1:] if destination.startswith('/') else destination
+    from azure.common import AzureException
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    try:
+        props = client.get_blob_properties(container, destination)
+        if not is_directory(props):
+            raise InvalidArgumentValueError('usage error: You are specifying --destination-path with a file name, '
+                                            'not directory name. Please change to a valid directory name. '
+                                            'If you want to upload to a file, please use '
+                                            '`az storage fs file upload` command.')
+    except AzureException:
+        pass
+
+    if not destination.endswith('/'):
+        destination += '/'
+    url = client.make_blob_url(container, destination)
     namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
                                              account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                             service=service, resource_types='co', permissions='rwdlac')
+                                             service='blob', resource_types='co', permissions='rwdlac')
     del namespace.destination_fs
     del namespace.destination_path
 
 
 def validate_fs_directory_download_source_url(cmd, namespace):
-    service, url = get_url_with_sas(cmd, namespace, container=namespace.source_fs, blob=namespace.source_path)
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token}
+    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+    url = client.make_blob_url(namespace.source_fs, namespace.source_path)
     namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
                                         account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                        service=service, resource_types='co', permissions='rl')
+                                        service='blob', resource_types='co', permissions='rl')
     del namespace.source_fs
     del namespace.source_path
 

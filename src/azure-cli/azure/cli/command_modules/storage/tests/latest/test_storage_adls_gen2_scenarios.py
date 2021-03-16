@@ -2,12 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import unittest
+import unittest,os
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck,
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck,
                                api_version_constraint, RoleBasedServicePrincipalPreparer)
 from azure.cli.core.profiles import ResourceType
-from ..storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
 
 
@@ -336,6 +336,80 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
+    @StorageTestFilesPreparer()
+    def test_adls_directory_upload(self, resource_group, storage_account, test_dir):
+        account_info = self.get_account_info(resource_group, storage_account)
+        connection_string = self.get_connection_string(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'dir'
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+
+        # Upload a single file to the fs directory
+        self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}"', account_info, filesystem, directory,
+                         os.path.join(test_dir, 'readme'))
+        self.storage_cmd('storage fs file list -f {} --path {}', account_info, filesystem, directory) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Upload a local directory to the fs directory
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}', filesystem,
+                       directory, os.path.join(test_dir, 'apple'), storage_account)
+        self.oauth_cmd('storage fs file list -f {} --path {} --account-name {}',
+                       filesystem, directory, storage_account)\
+            .assert_with_checks(JMESPathCheck('length(@)', 12))
+
+        # Upload files in a local directory to the fs directory
+        self.cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --connection-string {}'
+                 .format(filesystem, directory, os.path.join(test_dir, 'butter/file_*'), connection_string))
+        self.cmd('storage fs file list -f {} --path {} --connection-string {}'
+                 .format(filesystem, directory, connection_string), checks=[JMESPathCheck('length(@)', 22)])
+
+        # Upload files in a local directory to the fs subdirectory
+        self.cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}'
+                 .format(filesystem, '/'.join([directory, 'subdir']),
+                         os.path.join(test_dir, 'butter/file_*'), storage_account))
+        self.cmd('storage fs file list -f {} --path {} --account-name {}'
+                 .format(filesystem, '/'.join([directory, 'subdir']), storage_account),
+                 checks=[JMESPathCheck('length(@)', 10)])
+
+        # Argument validation: Throw error when destination path is file name
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage fs directory upload -f {} -d {} -s {} --account-name {}'.format(
+                filesystem, '/'.join([directory, 'readme']), test_dir, storage_account))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    @StorageTestFilesPreparer()
+    def test_adls_directory_download(self, resource_group, storage_account, test_dir):
+        account_info = self.get_account_info(resource_group, storage_account)
+        connection_string = self.get_connection_string(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'dir'
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+        self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
+                         directory, os.path.join(test_dir, 'readme'))
+        self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
+                         directory, os.path.join(test_dir, 'apple'))
+
+        local_folder = self.create_temp_dir()
+        # Download a single file
+        self.storage_cmd('storage fs directory download -f {} -s "{}" -d "{}" --recursive', account_info, filesystem,
+                         '/'.join([directory, 'readme']), local_folder)
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download entire directory
+        self.oauth_cmd('storage fs directory download -f {} -s {} -d "{}" --recursive --account-name {}',
+                       filesystem, directory, local_folder, storage_account)
+        self.assertEqual(2, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(12, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download an entire subdirectory of a storage blob directory.
+        self.cmd('storage fs directory download -f {} -s {} -d "{}" --recursive --connection-string {}'
+                 .format(filesystem, '/'.join([directory, 'apple']), local_folder, connection_string))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_file_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
@@ -448,3 +522,31 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, file, filesystem)
         self.storage_cmd('storage fs file metadata show -p {} -f {}', account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('test', 'beta'), JMESPathCheck('cat', 'file'))
+
+
+class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    @StorageTestFilesPreparer()
+    def test_adls_directory_using_sas_token(self, resource_group, storage_account, test_dir):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'dir'
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        sas = self.storage_cmd('storage container generate-sas -n {} --https-only --permissions dlrw --expiry {} -otsv',
+                               account_info, filesystem, expiry).output.strip()
+        self.cmd('storage fs directory create -n {} -f {} --account-name {} --sas-token {}'
+                 .format(directory, filesystem, storage_account, sas))
+
+        # Upload a single file to the fs directory
+        self.cmd('storage fs directory upload -f {} -d {} -s "{}" --account-name {} --sas-token {}'
+                 .format(filesystem, directory, os.path.join(test_dir, 'readme'), storage_account, sas))
+        self.cmd('storage fs file list -f {} --path {} --account-name {} --sas-token {}'
+                 .format(filesystem, directory, storage_account, sas), checks=[JMESPathCheck('length(@)', 1)])
+        local_folder = self.create_temp_dir()
+        # Download a single file
+        self.storage_cmd('storage fs directory download -f {} -s "{}" -d "{}" --recursive', account_info, filesystem,
+                         '/'.join([directory, 'readme']), local_folder)
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))

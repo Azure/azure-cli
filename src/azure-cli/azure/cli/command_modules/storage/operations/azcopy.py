@@ -65,8 +65,16 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     azcopy.remove(_add_url_sas(target, sas_token), flags=flags)
 
 
-def storage_fs_directory_copy(source, destination, recursive=None, **kwargs):
-    storage_copy(source, destination, recursive=recursive, **kwargs)
+# pylint: disable=unused-argument
+def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs):
+    azcopy = AzCopy()
+    if kwargs.get('token_credential'):
+        azcopy = _azcopy_login_client(cmd)
+
+    flags = []
+    if recursive is not None:
+        flags.append('--recursive')
+    azcopy.copy(source, destination, flags=flags)
 
 
 def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, include_pattern=None,

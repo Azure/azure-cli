@@ -1564,9 +1564,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         '"{filesystem}/{directory}/{subdirectory}".')
 
     with self.argument_context('storage fs directory upload') as c:
+        from ._validators import validate_fs_directory_upload_destination_url
         c.extra('destination_fs', options_list=['--file-system', '-f'], required=True,
                 help='The upload destination file system.')
         c.extra('destination_path', options_list=['--destination-path', '-d'], required=True,
+                validator=validate_fs_directory_upload_destination_url,
                 help='The upload destination directory path. It should be an absolute path to file system. If the '
                      'specified destination path does not exist, a new directory path will be created.')
         c.argument('source', options_list=['--source', '-s'],
@@ -1577,9 +1579,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('destination')
 
     with self.argument_context('storage fs directory download') as c:
+        from ._validators import validate_fs_directory_download_source_url
         c.extra('source_fs', options_list=['--file-system', '-f'], required=True,
                 help='The download source file system.')
         c.extra('source_path', options_list=['--source-path', '-s'], required=True,
+                validator=validate_fs_directory_download_source_url,
                 help='The download source directory path. It should be an absolute path to file system.')
         c.argument('destination', options_list=['--destination-path', '-d'],
                    help='The destination local directory path to download.')
