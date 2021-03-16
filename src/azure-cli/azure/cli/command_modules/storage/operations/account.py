@@ -26,6 +26,24 @@ def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None
     return client.regenerate_key(resource_group_name, account_name, regenerate_key_parameters)
 
 
+def generate_sas(client, services, resource_types, permission, expiry, start=None, ip=None, protocol=None):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
+    if not client.account_name or not client.account_key:
+        error_msg = """
+        Missing/Invalid credentials to access storage service. The following variations are accepted:
+            (1) account name and key (--account-name and --account-key options or
+                set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
+            (2) account name (--account-name option or AZURE_STORAGE_ACCOUNT environment variable;
+                this will make calls to query for a storage account key using login credentials)
+            (3) connection string (--connection-string option or
+                set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
+                quoting to preserve literal character interpretation.
+        """
+        raise RequiredArgumentMissingError(error_msg)
+    return client.generate_shared_access_signature(services, resource_types, permission, expiry,
+                                                   start=start, ip=ip, protocol=protocol)
+
+
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
