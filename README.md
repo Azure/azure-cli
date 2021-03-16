@@ -114,6 +114,7 @@ With the [Azure CLI Tools](https://marketplace.visualstudio.com/items?itemName=m
 - Run the current command and show its output in a side-by-side editor.
 - Show documentation on mouse hover.
 - Display current subscription and defaults in status bar.
+- To enable IntelliSense for other file types like `.ps1` or `.sh`, see [microsoft/vscode-azurecli#48](https://github.com/microsoft/vscode-azurecli/issues/48).
 
 ![Azure CLI Tools in Action](https://github.com/microsoft/vscode-azurecli/blob/main/images/in_action.gif?raw=true)
 
