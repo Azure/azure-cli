@@ -296,7 +296,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        arg_group='Authentication')
             c.argument('tags', tags_type)
             c.argument('public_access', options_list=['--public-access'],
-                       help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Setting it to "none" sets the server in public access mode but does not create a firewall rule. ',
+                       help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
                        validator=public_access_validator)
             c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
             c.argument('assign_identity', options_list=['--assign-identity'],
@@ -317,10 +317,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             if command_group == 'postgres':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name of the source server to restore from.')
-                c.argument('source_subscription_id', options_list=['--source-subscription-id'],
-                           help='The subscription id of the source server.')
-                c.argument('source_resource_group_name', options_list=['--source-resource-group'],
-                           help='The name of the source resource group.')
                 c.argument('zone', options_list=['--zone'],
                            help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
