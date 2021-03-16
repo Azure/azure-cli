@@ -34,6 +34,13 @@ except ImportError:
     pass
 
 
+from .generated.custom import *  # noqa: F403
+try:
+    from .manual.custom import *  # noqa: F403
+except ImportError:
+    pass
+
+
 # from .generated.custom import *  # noqa: F403
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-import,unused-wildcard-import,wildcard-import

@@ -31,6 +31,13 @@ except ImportError:
     pass
 
 
+from .generated.action import *  # noqa: F403
+try:
+    from .manual.action import *  # noqa: F403
+except ImportError:
+    pass
+
+
 import json
 
 from knack.util import CLIError

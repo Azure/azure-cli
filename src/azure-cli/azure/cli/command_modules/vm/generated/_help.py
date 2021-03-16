@@ -12,48 +12,48 @@
 from knack.help_files import helps
 
 
-helps['sshkey'] = """
+helps['vm ssh-public-key'] = """
     type: group
     short-summary: Manage ssh public key with vm
 """
 
-helps['sshkey list'] = """
+helps['vm ssh-public-key list'] = """
     type: command
     short-summary: "Lists all of the SSH public keys in the specified resource group. Use the nextLink property in the \
 response to get the next page of SSH public keys. And Lists all of the SSH public keys in the subscription. Use the \
 nextLink property in the response to get the next page of SSH public keys."
 """
 
-helps['sshkey show'] = """
+helps['vm ssh-public-key show'] = """
     type: command
     short-summary: "Retrieves information about an SSH public key."
     examples:
       - name: Get an ssh public key.
         text: |-
-               az sshkey show --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+               az vm ssh-public-key show --resource-group "myResourceGroup" --name "mySshPublicKeyName"
 """
 
-helps['sshkey create'] = """
+helps['vm ssh-public-key create'] = """
     type: command
     short-summary: "Creates a new SSH public key resource."
     examples:
       - name: Create a new SSH public key resource.
         text: |-
-               az sshkey create --location "westus" --public-key "{ssh-rsa public key}" --resource-group \
+               az vm ssh-public-key create --location "westus" --public-key "{ssh-rsa public key}" --resource-group \
 "myResourceGroup" --name "mySshPublicKeyName"
 """
 
-helps['sshkey update'] = """
+helps['vm ssh-public-key update'] = """
     type: command
     short-summary: "Updates a new SSH public key resource."
 """
 
-helps['sshkey delete'] = """
+helps['vm ssh-public-key delete'] = """
     type: command
     short-summary: "Delete an SSH public key."
 """
 
-helps['sshkey generate-key-pair'] = """
+helps['vm ssh-public-key generate-key-pair'] = """
     type: command
     short-summary: "Generates and returns a public/private key pair and populates the SSH public key resource with the \
 public key. The length of the key will be 3072 bits. This operation can only be performed once per SSH public key \
@@ -61,90 +61,90 @@ resource."
     examples:
       - name: Generate an SSH key pair.
         text: |-
-               az sshkey generate-key-pair --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+               az vm ssh-public-key generate-key-pair --resource-group "myResourceGroup" --name "mySshPublicKeyName"
 """
 
-helps['vm'] = """
+helps['vm virtual-machine'] = """
     type: group
     short-summary: Manage virtual machine with vm
 """
 
-helps['vm reimage'] = """
+helps['vm virtual-machine reimage'] = """
     type: command
     short-summary: "Reimages the virtual machine which has an ephemeral OS disk back to its initial state."
     examples:
       - name: Reimage a Virtual Machine.
         text: |-
-               az vm reimage --temp-disk true --resource-group "myResourceGroup" --vm-name "myVMName"
+               az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --name "myVMName"
 """
 
-helps['vm wait'] = """
+helps['vm virtual-machine wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the vm is met.
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine is met.
     examples:
-      - name: Pause executing next line of CLI script until the vm is successfully created.
+      - name: Pause executing next line of CLI script until the vm virtual-machine is successfully created.
         text: |-
-               az sshkey wait --resource-group "myResourceGroup" --name "mySshPublicKeyName" --created
+               az vm ssh-public-key wait --resource-group "myResourceGroup" --name "mySshPublicKeyName" --created
 """
 
-helps['vmss'] = """
+helps['vm virtual-machine-scale-set'] = """
     type: group
     short-summary: Manage virtual machine scale set with vm
 """
 
-helps['vmss force-recovery-service-fabric-platform-update-domain-walk'] = """
+helps['vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk'] = """
     type: command
     short-summary: "Manual platform update domain walk to update virtual machines in a service fabric virtual machine \
 scale set."
 """
 
-helps['vmss redeploy'] = """
+helps['vm virtual-machine-scale-set redeploy'] = """
     type: command
     short-summary: "Shuts down all the virtual machines in the virtual machine scale set, moves them to a new node, \
 and powers them back on."
 """
 
-helps['vmss reimage-all'] = """
+helps['vm virtual-machine-scale-set reimage-all'] = """
     type: command
     short-summary: "Reimages all the disks ( including data disks ) in the virtual machines in a VM scale set. This \
 operation is only supported for managed disks."
 """
 
-helps['vmss wait'] = """
+helps['vm virtual-machine-scale-set wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the vmss is met.
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine-scale-set is met.
     examples:
-      - name: Pause executing next line of CLI script until the vmss is successfully created.
+      - name: Pause executing next line of CLI script until the vm virtual-machine-scale-set is successfully created.
         text: |-
-               az sshkey wait --resource-group "myResourceGroup" --name "mySshPublicKeyName" --created
+               az vm ssh-public-key wait --resource-group "myResourceGroup" --name "mySshPublicKeyName" --created
 """
 
-helps['vmss vm-extension'] = """
+helps['vm virtual-machine-scale-set-vm-extension'] = """
     type: group
     short-summary: Manage virtual machine scale set vm extension with vm
 """
 
-helps['vmss vm-extension list'] = """
+helps['vm virtual-machine-scale-set-vm-extension list'] = """
     type: command
     short-summary: "The operation to get all extensions of an instance in Virtual Machine Scaleset."
     examples:
       - name: List extensions in Vmss instance.
         text: |-
-               az vmss vm-extension list --instance-id "0" --resource-group "myResourceGroup" --vm-scale-set-name \
-"myvmScaleSet"
+               az vm virtual-machine-scale-set-vm-extension list --instance-id "0" --resource-group "myResourceGroup" \
+--vm-scale-set-name "myvmScaleSet"
 """
 
-helps['vmss vm-extension show'] = """
+helps['vm virtual-machine-scale-set-vm-extension show'] = """
     type: command
     short-summary: "The operation to get the VMSS VM extension."
     examples:
       - name: Get VirtualMachineScaleSet VM extension.
         text: |-
-               az vmss vm-extension show --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name \
-"myVMExtension" --vm-scale-set-name "myvmScaleSet"
+               az vm virtual-machine-scale-set-vm-extension show --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet"
 """
 
-helps['vmss vm-extension create'] = """
+helps['vm virtual-machine-scale-set-vm-extension create'] = """
     type: command
     short-summary: "The operation to Create the VMSS VM extension."
     parameters:
@@ -175,73 +175,76 @@ helps['vmss vm-extension create'] = """
     examples:
       - name: Create VirtualMachineScaleSet VM extension.
         text: |-
-               az vmss vm-extension create --type-properties-type "extType" --auto-upgrade-minor-version true \
---publisher "extPublisher" --settings "{\\"UserName\\":\\"xyz@microsoft.com\\"}" --type-handler-version "1.2" \
---instance-id "0" --resource-group "myResourceGroup" --vm-extension-name "myVMExtension" --vm-scale-set-name \
-"myvmScaleSet"
+               az vm virtual-machine-scale-set-vm-extension create --type-properties-type "extType" \
+--auto-upgrade-minor-version true --publisher "extPublisher" --settings "{\\"UserName\\":\\"xyz@microsoft.com\\"}" \
+--type-handler-version "1.2" --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name "myVMExtension" \
+--vm-scale-set-name "myvmScaleSet"
 """
 
-helps['vmss vm-extension wait'] = """
+helps['vm virtual-machine-scale-set-vm-extension wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the vmss vm-extension is met.
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine-scale-set-vm-extension \
+is met.
     examples:
-      - name: Pause executing next line of CLI script until the vmss vm-extension is successfully created.
+      - name: Pause executing next line of CLI script until the vm virtual-machine-scale-set-vm-extension is \
+successfully created.
         text: |-
-               az vmss vm-extension wait --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name \
-"myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
+               az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
 """
 
-helps['vmss v-ms'] = """
+helps['vm virtual-machine-scale-set-v-ms'] = """
     type: group
     short-summary: Manage virtual machine scale set v ms with vm
 """
 
-helps['vmss v-ms redeploy'] = """
+helps['vm virtual-machine-scale-set-v-ms redeploy'] = """
     type: command
     short-summary: "Shuts down the virtual machine in the virtual machine scale set, moves it to a new node, and \
 powers it back on."
 """
 
-helps['vmss v-ms reimage-all'] = """
+helps['vm virtual-machine-scale-set-v-ms reimage-all'] = """
     type: command
     short-summary: "Allows you to re-image all the disks ( including data disks ) in the a VM scale set instance. This \
 operation is only supported for managed disks."
 """
 
-helps['vmss v-ms retrieve-boot-diagnostic-data'] = """
+helps['vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data'] = """
     type: command
     short-summary: "The operation to retrieve SAS URIs of boot diagnostic logs for a virtual machine in a VM scale \
 set."
     examples:
       - name: RetrieveBootDiagnosticsData of a virtual machine.
         text: |-
-               az vmss v-ms retrieve-boot-diagnostic-data --instance-id "0" --resource-group "ResourceGroup" \
---sas-uri-expiration-time-in-minutes 60 --vm-scale-set-name "myvmScaleSet"
+               az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data --instance-id "0" --resource-group \
+"ResourceGroup" --sas-uri-expiration-time-in-minutes 60 --vm-scale-set-name "myvmScaleSet"
 """
 
-helps['vmss v-ms wait'] = """
+helps['vm virtual-machine-scale-set-v-ms wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the vmss v-ms is met.
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine-scale-set-v-ms is met.
     examples:
-      - name: Pause executing next line of CLI script until the vmss v-ms is successfully created.
+      - name: Pause executing next line of CLI script until the vm virtual-machine-scale-set-v-ms is successfully \
+created.
         text: |-
-               az vmss vm-extension wait --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name \
-"myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
+               az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
 """
 
-helps['vmss vm-run'] = """
+helps['vm virtual-machine-scale-set-vm-run-command'] = """
     type: group
     short-summary: Manage virtual machine scale set vm run command with vm
 """
 
-helps['vmss vm-run list'] = """
+helps['vm virtual-machine-scale-set-vm-run-command list'] = """
     type: command
     short-summary: "The operation to get all run commands of an instance in Virtual Machine Scaleset."
     examples:
       - name: List run commands in Vmss instance.
         text: |-
-               az vmss vm-run list --instance-id "0" --resource-group "myResourceGroup" --vm-scale-set-name \
-"myvmScaleSet"
+               az vm virtual-machine-scale-set-vm-run-command list --instance-id "0" --resource-group \
+"myResourceGroup" --vm-scale-set-name "myvmScaleSet"
 """
 
 helps['vm disk-access'] = """
@@ -274,8 +277,8 @@ helps['vm disk-access wait'] = """
     examples:
       - name: Pause executing next line of CLI script until the vm disk-access is successfully created.
         text: |-
-               az vmss vm-extension wait --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name \
-"myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
+               az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
 """
 
 helps['vm gallery-application'] = """

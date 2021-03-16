@@ -102,10 +102,10 @@ def step_gallery_application_delete(test, checks=None):
 
 # EXAMPLE: /SshPublicKeys/put/Create a new SSH public key resource.
 @try_manual
-def step_create(test, checks=None):
+def step_ssh_public_key_create(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sshkey create '
+    test.cmd('az vm ssh-public-key create '
              '--location "westus" '
              '--public-key "{{ssh-rsa public key}}" '
              '--resource-group "{rg}" '
@@ -115,10 +115,10 @@ def step_create(test, checks=None):
 
 # EXAMPLE: /SshPublicKeys/get/Get an ssh public key.
 @try_manual
-def step_show(test, checks=None):
+def step_ssh_public_key_show(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sshkey show '
+    test.cmd('az vm ssh-public-key show '
              '--resource-group "{rg}" '
              '--name "{mySshPublicKey}"',
              checks=checks)
@@ -126,10 +126,10 @@ def step_show(test, checks=None):
 
 # EXAMPLE: /SshPublicKeys/post/Generate an SSH key pair.
 @try_manual
-def step_generate_key_pair(test, checks=None):
+def step_ssh_public_key_generate_key_pair(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sshkey generate-key-pair '
+    test.cmd('az vm ssh-public-key generate-key-pair '
              '--resource-group "{rg}" '
              '--name "{mySshPublicKey}"',
              checks=checks)
@@ -137,22 +137,22 @@ def step_generate_key_pair(test, checks=None):
 
 # EXAMPLE: /VirtualMachines/post/Reimage a Virtual Machine.
 @try_manual
-def step_reimage(test, checks=None):
+def step_virtual_machine_reimage(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vm reimage '
+    test.cmd('az vm virtual-machine reimage '
              '--temp-disk true '
              '--resource-group "{rg}" '
-             '--vm-name "myVMName"',
+             '--name "myVMName"',
              checks=checks)
 
 
 # EXAMPLE: /VirtualMachineScaleSetVMExtensions/put/Create VirtualMachineScaleSet VM extension.
 @try_manual
-def step_vm_extension_create(test, checks=None):
+def step_virtual_machine_scale_set_vm_extension_create(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vmss vm-extension create '
+    test.cmd('az vm virtual-machine-scale-set-vm-extension create '
              '--type-properties-type "extType" '
              '--auto-upgrade-minor-version true '
              '--publisher "extPublisher" '
@@ -167,10 +167,10 @@ def step_vm_extension_create(test, checks=None):
 
 # EXAMPLE: /VirtualMachineScaleSetVMExtensions/get/Get VirtualMachineScaleSet VM extension.
 @try_manual
-def step_vm_extension_show(test, checks=None):
+def step_virtual_machine_scale_set_vm_extension_show(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vmss vm-extension show '
+    test.cmd('az vm virtual-machine-scale-set-vm-extension show '
              '--instance-id "0" '
              '--resource-group "{rg}" '
              '--vm-extension-name "myVMExtension" '
@@ -180,10 +180,10 @@ def step_vm_extension_show(test, checks=None):
 
 # EXAMPLE: /VirtualMachineScaleSetVMExtensions/get/List extensions in Vmss instance.
 @try_manual
-def step_vm_extension_list(test, checks=None):
+def step_virtual_machine_scale_set_vm_extension_list(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vmss vm-extension list '
+    test.cmd('az vm virtual-machine-scale-set-vm-extension list '
              '--instance-id "0" '
              '--resource-group "{rg}" '
              '--vm-scale-set-name "myvmScaleSet"',
@@ -192,10 +192,10 @@ def step_vm_extension_list(test, checks=None):
 
 # EXAMPLE: /VirtualMachineScaleSetVMRunCommands/get/List run commands in Vmss instance.
 @try_manual
-def step_vm_run_list(test, checks=None):
+def step_virtual_machine_scale_set_vm_run_command_list(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vmss vm-run list '
+    test.cmd('az vm virtual-machine-scale-set-vm-run-command list '
              '--instance-id "0" '
              '--resource-group "{rg}" '
              '--vm-scale-set-name "myvmScaleSet"',
@@ -204,10 +204,10 @@ def step_vm_run_list(test, checks=None):
 
 # EXAMPLE: /VirtualMachineScaleSetVMs/post/RetrieveBootDiagnosticsData of a virtual machine.
 @try_manual
-def step_v_ms_retrieve_boot_diagnostic_data(test, checks=None):
+def step_virtual_machine_scale(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vmss v-ms retrieve-boot-diagnostic-data '
+    test.cmd('az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data '
              '--instance-id "0" '
              '--resource-group "{rg_2}" '
              '--sas-uri-expiration-time-in-minutes 60 '

@@ -18,15 +18,15 @@ from .example_steps import step_gallery_application_show
 from .example_steps import step_gallery_application_list
 from .example_steps import step_gallery_application_version_list
 from .example_steps import step_gallery_application_delete
-from .example_steps import step_create
-from .example_steps import step_show
-from .example_steps import step_generate_key_pair
-from .example_steps import step_reimage
-from .example_steps import step_vm_extension_create
-from .example_steps import step_vm_extension_show
-from .example_steps import step_vm_extension_list
-from .example_steps import step_vm_run_list
-from .example_steps import step_v_ms_retrieve_boot_diagnostic_data
+from .example_steps import step_ssh_public_key_create
+from .example_steps import step_ssh_public_key_show
+from .example_steps import step_ssh_public_key_generate_key_pair
+from .example_steps import step_virtual_machine_reimage
+from .example_steps import step_virtual_machine_scale_set_vm_extension_create
+from .example_steps import step_virtual_machine_scale_set_vm_extension_show
+from .example_steps import step_virtual_machine_scale_set_vm_extension_list
+from .example_steps import step_virtual_machine_scale_set_vm_run_command_list
+from .example_steps import step_virtual_machine_scale
 from .. import (
     try_manual,
     raise_if,
@@ -78,23 +78,23 @@ def call_scenario(test):
     ])
     step_gallery_application_version_list(test, checks=[])
     step_gallery_application_delete(test, checks=[])
-    step_create(test, checks=[
+    step_ssh_public_key_create(test, checks=[
         test.check("location", "westus", case_sensitive=False),
         test.check("publicKey", "{{ssh-rsa public key}}", case_sensitive=False),
         test.check("name", "{mySshPublicKey}", case_sensitive=False),
     ])
-    step_show(test, checks=[
+    step_ssh_public_key_show(test, checks=[
         test.check("location", "westus", case_sensitive=False),
         test.check("publicKey", "{{ssh-rsa public key}}", case_sensitive=False),
         test.check("name", "{mySshPublicKey}", case_sensitive=False),
     ])
-    step_generate_key_pair(test, checks=[])
-    step_reimage(test, checks=[])
-    step_vm_extension_create(test, checks=[])
-    step_vm_extension_show(test, checks=[])
-    step_vm_extension_list(test, checks=[])
-    step_vm_run_list(test, checks=[])
-    step_v_ms_retrieve_boot_diagnostic_data(test, checks=[])
+    step_ssh_public_key_generate_key_pair(test, checks=[])
+    step_virtual_machine_reimage(test, checks=[])
+    step_virtual_machine_scale_set_vm_extension_create(test, checks=[])
+    step_virtual_machine_scale_set_vm_extension_show(test, checks=[])
+    step_virtual_machine_scale_set_vm_extension_list(test, checks=[])
+    step_virtual_machine_scale_set_vm_run_command_list(test, checks=[])
+    step_virtual_machine_scale(test, checks=[])
     cleanup_scenario(test)
 
 

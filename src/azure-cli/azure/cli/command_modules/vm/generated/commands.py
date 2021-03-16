@@ -22,13 +22,13 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
         client_factory=cf_ssh_public_key,
     )
-    with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
-        g.custom_command('list', 'sshkey_list')
-        g.custom_show_command('show', 'sshkey_show')
-        g.custom_command('create', 'sshkey_create')
-        g.custom_command('update', 'sshkey_update')
-        g.custom_command('delete', 'sshkey_delete', confirmation=True)
-        g.custom_command('generate-key-pair', 'sshkey_generate_key_pair')
+    with self.command_group('vm ssh-public-key', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
+        g.custom_command('list', 'vm_ssh_public_key_list')
+        g.custom_show_command('show', 'vm_ssh_public_key_show')
+        g.custom_command('create', 'vm_ssh_public_key_create')
+        g.custom_command('update', 'vm_ssh_public_key_update')
+        g.custom_command('delete', 'vm_ssh_public_key_delete', confirmation=True)
+        g.custom_command('generate-key-pair', 'vm_ssh_public_key_generate_key_pair')
 
     from ..generated._client_factory import cf_virtual_machine
 
@@ -36,8 +36,8 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations._virtual_machines_operations#VirtualMachinesOperations.{}',
         client_factory=cf_virtual_machine,
     )
-    with self.command_group('vm', vm_virtual_machine, client_factory=cf_virtual_machine, is_experimental=True) as g:
-        g.custom_command('reimage', 'vm_reimage')
+    with self.command_group('vm virtual-machine', vm_virtual_machine, client_factory=cf_virtual_machine) as g:
+        g.custom_command('reimage', 'vm_virtual_machine_reimage')
 
     from ..generated._client_factory import cf_virtual_machine_scale_set
 
@@ -47,13 +47,15 @@ def load_command_table(self, _):
         ),
         client_factory=cf_virtual_machine_scale_set,
     )
-    with self.command_group('vmss', vm_virtual_machine_scale_set, client_factory=cf_virtual_machine_scale_set) as g:
+    with self.command_group(
+        'vm virtual-machine-scale-set', vm_virtual_machine_scale_set, client_factory=cf_virtual_machine_scale_set
+    ) as g:
         g.custom_command(
             'force-recovery-service-fabric-platform-update-domain-walk',
-            'vmss_force_recovery_service_fabric_platform_update_domain_walk',
+            'vm_virtual_machine_scale_set_force_recovery_service_fabric_platform_update_domain_walk',
         )
-        g.custom_command('redeploy', 'vmss_redeploy')
-        g.custom_command('reimage-all', 'vmss_reimage_all')
+        g.custom_command('redeploy', 'vm_virtual_machine_scale_set_redeploy')
+        g.custom_command('reimage-all', 'vm_virtual_machine_scale_set_reimage_all')
 
     from ..generated._client_factory import cf_virtual_machine_scale_set_vm_extension
 
@@ -62,14 +64,14 @@ def load_command_table(self, _):
         client_factory=cf_virtual_machine_scale_set_vm_extension,
     )
     with self.command_group(
-        'vmss vm-extension',
+        'vm virtual-machine-scale-set-vm-extension',
         vm_virtual_machine_scale_set_vm_extension,
         client_factory=cf_virtual_machine_scale_set_vm_extension,
     ) as g:
-        g.custom_command('list', 'vmss_vm_extension_list')
-        g.custom_show_command('show', 'vmss_vm_extension_show')
-        g.custom_command('create', 'vmss_vm_extension_create', supports_no_wait=True)
-        g.custom_wait_command('wait', 'vmss_vm_extension_show')
+        g.custom_command('list', 'vm_virtual_machine_scale_set_vm_extension_list')
+        g.custom_show_command('show', 'vm_virtual_machine_scale_set_vm_extension_show')
+        g.custom_command('create', 'vm_virtual_machine_scale_set_vm_extension_create', supports_no_wait=True)
+        g.custom_wait_command('wait', 'vm_virtual_machine_scale_set_vm_extension_show')
 
     from ..generated._client_factory import cf_virtual_machine_scale_set_vms
 
@@ -78,11 +80,15 @@ def load_command_table(self, _):
         client_factory=cf_virtual_machine_scale_set_vms,
     )
     with self.command_group(
-        'vmss v-ms', vm_virtual_machine_scale_set_vms, client_factory=cf_virtual_machine_scale_set_vms
+        'vm virtual-machine-scale-set-v-ms',
+        vm_virtual_machine_scale_set_vms,
+        client_factory=cf_virtual_machine_scale_set_vms,
     ) as g:
-        g.custom_command('redeploy', 'vmss_v_ms_redeploy')
-        g.custom_command('reimage-all', 'vmss_v_ms_reimage_all')
-        g.custom_command('retrieve-boot-diagnostic-data', 'vmss_v_ms_retrieve_boot_diagnostic_data')
+        g.custom_command('redeploy', 'vm_virtual_machine_scale_set_v_ms_redeploy')
+        g.custom_command('reimage-all', 'vm_virtual_machine_scale_set_v_ms_reimage_all')
+        g.custom_command(
+            'retrieve-boot-diagnostic-data', 'vm_virtual_machine_scale_set_v_ms_retrieve_boot_diagnostic_data'
+        )
 
     from ..generated._client_factory import cf_virtual_machine_scale_set_vm_run_command
 
@@ -91,11 +97,11 @@ def load_command_table(self, _):
         client_factory=cf_virtual_machine_scale_set_vm_run_command,
     )
     with self.command_group(
-        'vmss vm-run',
+        'vm virtual-machine-scale-set-vm-run-command',
         vm_virtual_machine_scale_set_vm_run_command,
         client_factory=cf_virtual_machine_scale_set_vm_run_command,
     ) as g:
-        g.custom_command('list', 'vmss_vm_run_list')
+        g.custom_command('list', 'vm_virtual_machine_scale_set_vm_run_command_list')
 
     from ..generated._client_factory import cf_disk_access
 
@@ -134,3 +140,6 @@ def load_command_table(self, _):
         'vm gallery-application-version', vm_gallery_application_version, client_factory=cf_gallery_application_version
     ) as g:
         g.custom_command('list', 'vm_gallery_application_version_list')
+
+    with self.command_group('vm', is_experimental=True):
+        pass
