@@ -772,13 +772,14 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
 
 
 def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    msi_client = get_msi_client(cli_ctx)
-    pattern = '/subscriptions/.*?/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'
+    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
     resource_id = resource_id.lower()
     match = re.search(pattern, resource_id)
     if match:
-        resource_group_name = match.group(1)
-        identity_name = match.group(2)
+        subscription_id = match.group(1)
+        resource_group_name = match.group(2)
+        identity_name = match.group(3)
+        msi_client = get_msi_client(cli_ctx, subscription_id)
         try:
             identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                                resource_name=identity_name)
@@ -2546,7 +2547,7 @@ def aks_update(cmd, client, resource_group_name, name,
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     client_id = ""
-    if instance.identity is not None and instance.identity.type == "SystemAssigned":
+    if _is_msi_cluster(instance):
         if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
             raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
                            'Please do not set --attach-acr or --detach-acr. '
@@ -4069,3 +4070,9 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def _is_msi_cluster(managed_cluster):
+    return (managed_cluster and managed_cluster.identity and
+            (managed_cluster.identity.type.casefold() == "systemassigned" or
+             managed_cluster.identity.type.casefold() == "userassigned"))
