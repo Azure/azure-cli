@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
@@ -44,9 +46,6 @@ def flexible_server_create(cmd, client,
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
     storage_mb *= 1024
 
-    from azure.mgmt.rdbms import postgresql_flexibleservers
-
-    # try:
     db_context = DbContext(
         azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
@@ -143,14 +142,18 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    from azure.mgmt.rdbms import postgresql_flexibleservers
+    try:
+        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
+    except ValueError:
+        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
+    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
+
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
         availability_zone=zone,
-        location=location,
-        server_name=server_name)
+        location=location)
 
     # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server_id)
@@ -164,7 +167,7 @@ def flexible_server_restore(cmd, client,
         raise CLIError("Check if the source server exists in the same resource group you entered. \
                         The source server and the restored server should be in the same resource group. ")
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 # Update Flexible server command
@@ -213,7 +216,6 @@ def flexible_server_update_custom_func(cmd, instance,
 
         # set values - if maintenance_window when is None when created then create a new object
         if instance.maintenance_window is None:
-            from azure.mgmt.rdbms import postgresql_flexibleservers
             instance.maintenance_window = postgresql_flexibleservers.models.MaintenanceWindow(
                 day_of_week=day_of_week,
                 start_hour=start_hour,
@@ -235,10 +237,8 @@ def flexible_server_update_custom_func(cmd, instance,
 
     if assign_identity:
         if server_module_path.find('postgres'):
-            from azure.mgmt.rdbms import postgresql_flexibleservers
             if instance.identity is None:
-                instance.identity = postgresql_flexibleservers.models.Identity(
-                    type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+                instance.identity = postgresql_flexibleservers.models.Identity()
             params.identity = instance.identity
     return params
 
@@ -253,7 +253,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
             yes=yes)
     if confirm:
         try:
-            result = client.delete(resource_group_name, server_name)
+            result = client.begin_delete(resource_group_name, server_name)
             if cmd.cli_ctx.local_context.is_on:
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('postgres flexible-server', 'server_name')
@@ -286,7 +286,13 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     elif source is None:
         source = "user-override"
 
-    return client.update(resource_group_name, server_name, configuration_name, value, source)
+    parameters = postgresql_flexibleservers.models.Configuration(
+        configuration_name=configuration_name,
+        value=value,
+        source=source
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 
 
 def flexible_list_skus(cmd, client, location):
@@ -303,8 +309,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku_name)
-
-    from azure.mgmt.rdbms import postgresql_flexibleservers
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
@@ -325,11 +329,10 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = postgresql_flexibleservers.models.Identity(
-            type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+        parameters.identity = postgresql_flexibleservers.models.Identity()
 
     return resolve_poller(
-        server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(logging_name))
 
 

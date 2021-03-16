@@ -204,7 +204,7 @@ examples:
   - name: Create a rule for http to https redirect
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
-        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS
+        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP
         --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
 
@@ -1526,6 +1526,11 @@ examples:
         az afd rule action list -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
 """
 
+helps['afd log-analytic'] = """
+type: group
+short-summary: Manage afd log analytic results.
+"""
+
 helps['afd log-analytic location'] = """
 type: group
 short-summary: Manage available location names for AFD log analysis.
@@ -1539,6 +1544,11 @@ short-summary: Manage metric statistics for AFD profile.
 helps['afd log-analytic ranking'] = """
 type: group
 short-summary: Manage ranking statistics for AFD profile.
+"""
+
+helps['afd waf-log-analytic'] = """
+type: group
+short-summary: Manage afd WAF related log analytic results.
 """
 
 helps['afd log-analytic resource'] = """
