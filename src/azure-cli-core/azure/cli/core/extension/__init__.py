@@ -33,6 +33,13 @@ EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 EXT_METADATA_ISPREVIEW = 'azext.isPreview'
 EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
 
+# If this Azure CLI core version has breaking changes that do not support older versions of extensions,
+# put the requirements of the minimum extension versions here.
+# Example:
+# {'azure-devops': {'minExtVersion': '1.0.0'}}
+EXTENSION_VERSION_REQUIREMENTS = {}
+MIN_EXT_VERSION = 'minExtVersion'
+
 WHEEL_INFO_RE = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
     ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
@@ -283,7 +290,14 @@ def ext_compat_with_cli(azext_metadata):
             is_compatible = False
         elif max_required and parsed_cli_version > parse_version(max_required):
             is_compatible = False
-    return is_compatible, core_version, min_required, max_required
+
+    try:
+        min_ext_required = EXTENSION_VERSION_REQUIREMENTS.get(azext_metadata.get('name')).get(MIN_EXT_VERSION)
+        if parse_version(azext_metadata.get('version')) < parse_version(min_ext_required):
+            is_compatible = False
+    except AttributeError:
+        min_ext_required = None
+    return is_compatible, core_version, min_required, max_required, min_ext_required
 
 
 def get_extension_modname(ext_name=None, ext_dir=None):

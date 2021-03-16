@@ -721,7 +721,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
-              enable_hotpatching=None):
+              enable_hotpatching=None, platform_fault_domain=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -893,7 +893,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
-        enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching)
+        enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
+        platform_fault_domain=platform_fault_domain)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2713,8 +2714,10 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
+    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
+    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
