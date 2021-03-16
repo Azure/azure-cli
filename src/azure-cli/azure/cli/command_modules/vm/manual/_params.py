@@ -10,12 +10,7 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
-from azure.cli.core.commands.parameters import (
-    tags_type,
-    resource_group_name_type,
-    get_location_type
-)
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.parameters import resource_group_name_type
 
 
 def load_arguments(self, _):
