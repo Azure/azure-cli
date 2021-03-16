@@ -3938,7 +3938,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
         stg_list = self.cmd('az sql stg list -g {rg} -l {loc}').get_output_in_json()
         assert len(stg_list) == 1
 
-        self.cmd('az sql stg delete -g {rg} -l {loc} -n {stg_name}')
+        self.cmd('az sql stg delete -g {rg} -l {loc} -n {stg_name} --yes')
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
