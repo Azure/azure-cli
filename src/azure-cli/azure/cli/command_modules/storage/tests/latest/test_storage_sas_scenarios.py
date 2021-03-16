@@ -132,3 +132,22 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
 
         self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas),
                  checks=JMESPathCheck('exists', True))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_account_sas_scenario(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        connection_str = self.cmd('storage account show-connection-string -n {} -otsv'.format(storage_account)).output
+        sas = self.cmd('storage account generate-sas --resource-types co --services b '
+                       '--expiry {} --permissions r --https-only --connection-string {}'
+                       .format(expiry, connection_str)).output.strip()
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info)
+        blob_name = self.create_random_name('blob', 16)
+        self.cmd('storage blob exists -c {} -n {} --account-name {} --sas-token {}'
+                 .format(container, blob_name, storage_account, sas),
+                 checks=JMESPathCheck('exists', False))
