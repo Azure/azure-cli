@@ -2664,7 +2664,8 @@ def aks_upgrade(cmd,
                 raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets cluster.')
             agent_pool_client = cf_agent_pools(cmd.cli_ctx)
-            _upgrade_single_nodepool_image_version(True, agent_pool_client, resource_group_name, name, agent_pool_profile.name)
+            _upgrade_single_nodepool_image_version(True, agent_pool_client,
+                                                   resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
 
