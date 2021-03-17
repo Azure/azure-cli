@@ -250,14 +250,16 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
+    i = 0
     # pylint: disable=too-many-nested-blocks
     for src, dest in [(settings, result), (slot_settings, slot_result)]:
+        i += 1
         for s in src:
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
                     for t in temp:
-                        if t.get('slotSetting', True):
+                        if i != 1:
                             slot_result[t['name']] = t['value']
                             # Mark each setting as the slot setting
                         else:
@@ -282,7 +284,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
-        slot_cfg_names.app_setting_names += new_slot_setting_names
+        slot_cfg_names.app_setting_names = new_slot_setting_names
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
