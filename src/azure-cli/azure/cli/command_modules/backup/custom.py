@@ -7,7 +7,7 @@ import time
 import json
 import re
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 # pylint: disable=too-many-lines
 from knack.log import get_logger
@@ -446,6 +446,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
