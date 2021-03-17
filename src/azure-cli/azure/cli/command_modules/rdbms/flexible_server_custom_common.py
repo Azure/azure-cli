@@ -8,7 +8,6 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-
 logger = get_logger(__name__)
 
 
@@ -18,7 +17,7 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
-    return client.update(resource_group_name, server_name, parameters)
+    return client.begin_update(resource_group_name, server_name, parameters)
 
 
 def server_list_custom_func(client, resource_group_name=None):
@@ -52,12 +51,17 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
             logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
                            end_ip_address)
 
-    return client.create_or_update(
+    parameters = {
+        'name': firewall_rule_name,
+        'start_ip_address': start_ip_address,
+        'end_ip_address': end_ip_address
+    }
+
+    return client.begin_create_or_update(
         resource_group_name,
         server_name,
         firewall_rule_name,
-        start_ip_address,
-        end_ip_address)
+        parameters)
 
 
 def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
@@ -69,7 +73,7 @@ def firewall_rule_delete_func(client, resource_group_name, server_name, firewall
                 firewall_rule_name, server_name, resource_group_name))
     if confirm:
         try:
-            result = client.delete(resource_group_name, server_name, firewall_rule_name)
+            result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
     return result
@@ -80,12 +84,11 @@ def flexible_firewall_rule_custom_getter(client, resource_group_name, server_nam
 
 
 def flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         server_name,
         firewall_rule_name,
-        parameters.start_ip_address,
-        parameters.end_ip_address)
+        parameters)
 
 
 def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
@@ -111,7 +114,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
             yes=yes)
     if confirm:
         try:
-            result = client.delete(resource_group_name, server_name, database_name)
+            result = client.begin_delete(resource_group_name, server_name, database_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
     return result

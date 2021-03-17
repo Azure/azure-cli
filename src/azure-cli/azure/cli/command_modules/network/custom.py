@@ -3329,7 +3329,7 @@ def lb_get(client, resource_group_name, load_balancer_name):
 # workaround for : https://github.com/Azure/azure-cli/issues/17071
 def lb_get_operation(lb):
     for item in lb.frontend_ip_configurations:
-        if item.zones is not None and len(item.zones) >= 3:
+        if item.zones is not None and len(item.zones) >= 3 and item.subnet is None:
             item.zones = None
 
     return lb
@@ -6644,6 +6644,8 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
     gateway.vpn_client_configuration.aad_tenant = None
     gateway.vpn_client_configuration.aad_audience = None
     gateway.vpn_client_configuration.aad_issuer = None
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        gateway.vpn_client_configuration.vpn_authentication_types = None
 
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 # endregion
