@@ -653,3 +653,227 @@ class NegativeTest(ScenarioTest):
             assert e.message.startswith("(500)")
         except SystemExit as e:
             assert e.__context__.message.startswith("(500)")
+# Test class for Scenario
+class NegativeTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        super(NegativeTest, self).__init__(*args, **kwargs)
+
+    # EXAMPLE: /SshPublicKeys/get/Get an ssh public key.
+    def test_show(self):
+        try:
+            self.cmd('az sshkey show '
+                     '--resource-group "myResourceGroup" '
+                     '--name "mySshPublicKeyName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /SshPublicKeys/put/Create a new SSH public key resource.
+    def test_create(self):
+        try:
+            self.cmd('az sshkey create '
+                     '--location "westus" '
+                     '--public-key "{{ssh-rsa public key}}" '
+                     '--resource-group "myResourceGroup" '
+                     '--name "mySshPublicKeyName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /SshPublicKeys/post/Generate an SSH key pair.
+    def test_generate_key_pair(self):
+        try:
+            self.cmd('az sshkey generate-key-pair '
+                     '--resource-group "myResourceGroup" '
+                     '--name "mySshPublicKeyName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /VirtualMachines/post/Reimage a Virtual Machine.
+    def test_reimage(self):
+        try:
+            self.cmd('az vm reimage '
+                     '--temp-disk true '
+                     '--resource-group "myResourceGroup" '
+                     '--name "myVMName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /VirtualMachineScaleSetVMExtensions/get/List extensions in Vmss instance.
+    def test_vm_extension_list(self):
+        try:
+            self.cmd('az vmss vm-extension list '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /VirtualMachineScaleSetVMExtensions/get/Get VirtualMachineScaleSet VM extension.
+    def test_vm_extension_show(self):
+        try:
+            self.cmd('az vmss vm-extension show '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-extension-name "myVMExtension" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /VirtualMachineScaleSetVMExtensions/put/Create VirtualMachineScaleSet VM extension.
+    def test_vm_extension_create(self):
+        try:
+            self.cmd('az vmss vm-extension create '
+                     '--type-properties-type "extType" '
+                     '--auto-upgrade-minor-version true '
+                     '--publisher "extPublisher" '
+                     '--settings "{{\\"UserName\\":\\"xyz@microsoft.com\\"}}" '
+                     '--type-handler-version "1.2" '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-extension-name "myVMExtension" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /VirtualMachineScaleSetVMs/post/RetrieveBootDiagnosticsData of a virtual machine.
+    def test_v_ms_retrieve_boot_diagnostic_data(self):
+        try:
+            self.cmd('az vmss v-ms retrieve-boot-diagnostic-data '
+                     '--instance-id "0" '
+                     '--resource-group "ResourceGroup" '
+                     '--sas-uri-expiration-time-in-minutes 60 '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /VirtualMachineScaleSetVMRunCommands/get/List run commands in Vmss instance.
+    def test_vm_run_list(self):
+        try:
+            self.cmd('az vmss vm-run list '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /DiskAccesses/delete/Delete a private endpoint connection under a disk access resource.
+    def test_disk_access_delete(self):
+        try:
+            self.cmd('az vm disk-access delete-a-private-endpoint-connection -y '
+                     '--name "myDiskAccess" '
+                     '--private-endpoint-connection-name "myPrivateEndpointConnection" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /DiskAccesses/get/List all possible private link resources under disk access resource.
+    def test_disk_access_show_private_link_resource(self):
+        try:
+            self.cmd('az vm disk-access show-private-link-resource '
+                     '--name "myDiskAccess" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /GalleryApplications/get/List gallery Applications in a gallery.
+    def test_gallery_application_list(self):
+        try:
+            self.cmd('az vm gallery-application list '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /GalleryApplications/get/Get a gallery Application.
+    def test_gallery_application_show(self):
+        try:
+            self.cmd('az vm gallery-application show '
+                     '--name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /GalleryApplications/put/Create or update a simple gallery Application.
+    def test_gallery_application_create(self):
+        try:
+            self.cmd('az vm gallery-application create '
+                     '--location "West US" '
+                     '--description "This is the gallery application description." '
+                     '--eula "This is the gallery application EULA." '
+                     '--privacy-statement-uri "myPrivacyStatementUri}}" '
+                     '--release-note-uri "myReleaseNoteUri" '
+                     '--supported-os-type "Windows" '
+                     '--name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /GalleryApplications/delete/Delete a gallery Application.
+    def test_gallery_application_delete(self):
+        try:
+            self.cmd('az vm gallery-application delete -y '
+                     '--name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    # EXAMPLE: /GalleryApplicationVersions/get/List gallery Application Versions in a gallery Application Definition.
+    def test_gallery_application_version_list(self):
+        try:
+            self.cmd('az vm gallery-application-version list '
+                     '--gallery-application-name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")

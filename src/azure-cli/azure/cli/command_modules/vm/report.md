@@ -9,17 +9,33 @@
 ### <a name="CommandGroups">Command groups in `az vm` extension </a>
 |CLI Command Group|Group Swagger name|Commands|
 |---------|------------|--------|
-|az vm ssh-public-key|SshPublicKeys|[commands](#CommandsInSshPublicKeys)|
-|az vm virtual-machine|VirtualMachines|[commands](#CommandsInVirtualMachines)|
-|az vm virtual-machine-scale-set|VirtualMachineScaleSets|[commands](#CommandsInVirtualMachineScaleSets)|
-|az vm virtual-machine-scale-set-vm-extension|VirtualMachineScaleSetVMExtensions|[commands](#CommandsInVirtualMachineScaleSetVMExtensions)|
-|az vm virtual-machine-scale-set-v-ms|VirtualMachineScaleSetVMs|[commands](#CommandsInVirtualMachineScaleSetVMs)|
-|az vm virtual-machine-scale-set-vm-run-command|VirtualMachineScaleSetVMRunCommands|[commands](#CommandsInVirtualMachineScaleSetVMRunCommands)|
+|az sshkey|SshPublicKeys|[commands](#CommandsInSshPublicKeys)|
+|az vm|VirtualMachines|[commands](#CommandsInVirtualMachines)|
+|az vmss|VirtualMachineScaleSets|[commands](#CommandsInVirtualMachineScaleSets)|
+|az vmss vm-extension|VirtualMachineScaleSetVMExtensions|[commands](#CommandsInVirtualMachineScaleSetVMExtensions)|
+|az vmss v-ms|VirtualMachineScaleSetVMs|[commands](#CommandsInVirtualMachineScaleSetVMs)|
+|az vmss vm-run|VirtualMachineScaleSetVMRunCommands|[commands](#CommandsInVirtualMachineScaleSetVMRunCommands)|
 |az vm disk-access|DiskAccesses|[commands](#CommandsInDiskAccesses)|
 |az vm gallery-application|GalleryApplications|[commands](#CommandsInGalleryApplications)|
 |az vm gallery-application-version|GalleryApplicationVersions|[commands](#CommandsInGalleryApplicationVersions)|
 
 ## COMMANDS
+### <a name="CommandsInSshPublicKeys">Commands in `az sshkey` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az sshkey list](#SshPublicKeysListByResourceGroup)|ListByResourceGroup|[Parameters](#ParametersSshPublicKeysListByResourceGroup)|Not Found|
+|[az sshkey list](#SshPublicKeysListBySubscription)|ListBySubscription|[Parameters](#ParametersSshPublicKeysListBySubscription)|Not Found|
+|[az sshkey show](#SshPublicKeysGet)|Get|[Parameters](#ParametersSshPublicKeysGet)|[Example](#ExamplesSshPublicKeysGet)|
+|[az sshkey create](#SshPublicKeysCreate)|Create|[Parameters](#ParametersSshPublicKeysCreate)|[Example](#ExamplesSshPublicKeysCreate)|
+|[az sshkey update](#SshPublicKeysUpdate)|Update|[Parameters](#ParametersSshPublicKeysUpdate)|Not Found|
+|[az sshkey delete](#SshPublicKeysDelete)|Delete|[Parameters](#ParametersSshPublicKeysDelete)|Not Found|
+|[az sshkey generate-key-pair](#SshPublicKeysGenerateKeyPair)|GenerateKeyPair|[Parameters](#ParametersSshPublicKeysGenerateKeyPair)|[Example](#ExamplesSshPublicKeysGenerateKeyPair)|
+
+### <a name="CommandsInVirtualMachines">Commands in `az vm` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az vm reimage](#VirtualMachinesReimage)|Reimage|[Parameters](#ParametersVirtualMachinesReimage)|[Example](#ExamplesVirtualMachinesReimage)|
+
 ### <a name="CommandsInDiskAccesses">Commands in `az vm disk-access` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
@@ -39,50 +55,119 @@
 |---------|------------|--------|-----------|
 |[az vm gallery-application-version list](#GalleryApplicationVersionsListByGalleryApplication)|ListByGalleryApplication|[Parameters](#ParametersGalleryApplicationVersionsListByGalleryApplication)|[Example](#ExamplesGalleryApplicationVersionsListByGalleryApplication)|
 
-### <a name="CommandsInSshPublicKeys">Commands in `az vm ssh-public-key` group</a>
+### <a name="CommandsInVirtualMachineScaleSets">Commands in `az vmss` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az vm ssh-public-key list](#SshPublicKeysListByResourceGroup)|ListByResourceGroup|[Parameters](#ParametersSshPublicKeysListByResourceGroup)|Not Found|
-|[az vm ssh-public-key list](#SshPublicKeysListBySubscription)|ListBySubscription|[Parameters](#ParametersSshPublicKeysListBySubscription)|Not Found|
-|[az vm ssh-public-key show](#SshPublicKeysGet)|Get|[Parameters](#ParametersSshPublicKeysGet)|[Example](#ExamplesSshPublicKeysGet)|
-|[az vm ssh-public-key create](#SshPublicKeysCreate)|Create|[Parameters](#ParametersSshPublicKeysCreate)|[Example](#ExamplesSshPublicKeysCreate)|
-|[az vm ssh-public-key update](#SshPublicKeysUpdate)|Update|[Parameters](#ParametersSshPublicKeysUpdate)|Not Found|
-|[az vm ssh-public-key delete](#SshPublicKeysDelete)|Delete|[Parameters](#ParametersSshPublicKeysDelete)|Not Found|
-|[az vm ssh-public-key generate-key-pair](#SshPublicKeysGenerateKeyPair)|GenerateKeyPair|[Parameters](#ParametersSshPublicKeysGenerateKeyPair)|[Example](#ExamplesSshPublicKeysGenerateKeyPair)|
+|[az vmss force-recovery-service-fabric-platform-update-domain-walk](#VirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk)|ForceRecoveryServiceFabricPlatformUpdateDomainWalk|[Parameters](#ParametersVirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk)|Not Found|
+|[az vmss redeploy](#VirtualMachineScaleSetsRedeploy)|Redeploy|[Parameters](#ParametersVirtualMachineScaleSetsRedeploy)|Not Found|
+|[az vmss reimage-all](#VirtualMachineScaleSetsReimageAll)|ReimageAll|[Parameters](#ParametersVirtualMachineScaleSetsReimageAll)|Not Found|
 
-### <a name="CommandsInVirtualMachines">Commands in `az vm virtual-machine` group</a>
+### <a name="CommandsInVirtualMachineScaleSetVMs">Commands in `az vmss v-ms` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az vm virtual-machine reimage](#VirtualMachinesReimage)|Reimage|[Parameters](#ParametersVirtualMachinesReimage)|[Example](#ExamplesVirtualMachinesReimage)|
+|[az vmss v-ms redeploy](#VirtualMachineScaleSetVMsRedeploy)|Redeploy|[Parameters](#ParametersVirtualMachineScaleSetVMsRedeploy)|Not Found|
+|[az vmss v-ms reimage-all](#VirtualMachineScaleSetVMsReimageAll)|ReimageAll|[Parameters](#ParametersVirtualMachineScaleSetVMsReimageAll)|Not Found|
+|[az vmss v-ms retrieve-boot-diagnostic-data](#VirtualMachineScaleSetVMsRetrieveBootDiagnosticsData)|RetrieveBootDiagnosticsData|[Parameters](#ParametersVirtualMachineScaleSetVMsRetrieveBootDiagnosticsData)|[Example](#ExamplesVirtualMachineScaleSetVMsRetrieveBootDiagnosticsData)|
 
-### <a name="CommandsInVirtualMachineScaleSets">Commands in `az vm virtual-machine-scale-set` group</a>
+### <a name="CommandsInVirtualMachineScaleSetVMExtensions">Commands in `az vmss vm-extension` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk](#VirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk)|ForceRecoveryServiceFabricPlatformUpdateDomainWalk|[Parameters](#ParametersVirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk)|Not Found|
-|[az vm virtual-machine-scale-set redeploy](#VirtualMachineScaleSetsRedeploy)|Redeploy|[Parameters](#ParametersVirtualMachineScaleSetsRedeploy)|Not Found|
-|[az vm virtual-machine-scale-set reimage-all](#VirtualMachineScaleSetsReimageAll)|ReimageAll|[Parameters](#ParametersVirtualMachineScaleSetsReimageAll)|Not Found|
+|[az vmss vm-extension list](#VirtualMachineScaleSetVMExtensionsList)|List|[Parameters](#ParametersVirtualMachineScaleSetVMExtensionsList)|[Example](#ExamplesVirtualMachineScaleSetVMExtensionsList)|
+|[az vmss vm-extension show](#VirtualMachineScaleSetVMExtensionsGet)|Get|[Parameters](#ParametersVirtualMachineScaleSetVMExtensionsGet)|[Example](#ExamplesVirtualMachineScaleSetVMExtensionsGet)|
+|[az vmss vm-extension create](#VirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create)|CreateOrUpdate#Create|[Parameters](#ParametersVirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create)|[Example](#ExamplesVirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create)|
 
-### <a name="CommandsInVirtualMachineScaleSetVMs">Commands in `az vm virtual-machine-scale-set-v-ms` group</a>
+### <a name="CommandsInVirtualMachineScaleSetVMRunCommands">Commands in `az vmss vm-run` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az vm virtual-machine-scale-set-v-ms redeploy](#VirtualMachineScaleSetVMsRedeploy)|Redeploy|[Parameters](#ParametersVirtualMachineScaleSetVMsRedeploy)|Not Found|
-|[az vm virtual-machine-scale-set-v-ms reimage-all](#VirtualMachineScaleSetVMsReimageAll)|ReimageAll|[Parameters](#ParametersVirtualMachineScaleSetVMsReimageAll)|Not Found|
-|[az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data](#VirtualMachineScaleSetVMsRetrieveBootDiagnosticsData)|RetrieveBootDiagnosticsData|[Parameters](#ParametersVirtualMachineScaleSetVMsRetrieveBootDiagnosticsData)|[Example](#ExamplesVirtualMachineScaleSetVMsRetrieveBootDiagnosticsData)|
-
-### <a name="CommandsInVirtualMachineScaleSetVMExtensions">Commands in `az vm virtual-machine-scale-set-vm-extension` group</a>
-|CLI Command|Operation Swagger name|Parameters|Examples|
-|---------|------------|--------|-----------|
-|[az vm virtual-machine-scale-set-vm-extension list](#VirtualMachineScaleSetVMExtensionsList)|List|[Parameters](#ParametersVirtualMachineScaleSetVMExtensionsList)|[Example](#ExamplesVirtualMachineScaleSetVMExtensionsList)|
-|[az vm virtual-machine-scale-set-vm-extension show](#VirtualMachineScaleSetVMExtensionsGet)|Get|[Parameters](#ParametersVirtualMachineScaleSetVMExtensionsGet)|[Example](#ExamplesVirtualMachineScaleSetVMExtensionsGet)|
-|[az vm virtual-machine-scale-set-vm-extension create](#VirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create)|CreateOrUpdate#Create|[Parameters](#ParametersVirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create)|[Example](#ExamplesVirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create)|
-
-### <a name="CommandsInVirtualMachineScaleSetVMRunCommands">Commands in `az vm virtual-machine-scale-set-vm-run-command` group</a>
-|CLI Command|Operation Swagger name|Parameters|Examples|
-|---------|------------|--------|-----------|
-|[az vm virtual-machine-scale-set-vm-run-command list](#VirtualMachineScaleSetVMRunCommandsList)|List|[Parameters](#ParametersVirtualMachineScaleSetVMRunCommandsList)|[Example](#ExamplesVirtualMachineScaleSetVMRunCommandsList)|
+|[az vmss vm-run list](#VirtualMachineScaleSetVMRunCommandsList)|List|[Parameters](#ParametersVirtualMachineScaleSetVMRunCommandsList)|[Example](#ExamplesVirtualMachineScaleSetVMRunCommandsList)|
 
 
 ## COMMAND DETAILS
+
+### group `az sshkey`
+#### <a name="SshPublicKeysListByResourceGroup">Command `az sshkey list`</a>
+
+##### <a name="ParametersSshPublicKeysListByResourceGroup">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+
+#### <a name="SshPublicKeysListBySubscription">Command `az sshkey list`</a>
+
+##### <a name="ParametersSshPublicKeysListBySubscription">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="SshPublicKeysGet">Command `az sshkey show`</a>
+
+##### <a name="ExamplesSshPublicKeysGet">Example</a>
+```
+az sshkey show --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+```
+##### <a name="ParametersSshPublicKeysGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
+
+#### <a name="SshPublicKeysCreate">Command `az sshkey create`</a>
+
+##### <a name="ExamplesSshPublicKeysCreate">Example</a>
+```
+az sshkey create --location "westus" --public-key "{ssh-rsa public key}" --resource-group "myResourceGroup" --name \
+"mySshPublicKeyName"
+```
+##### <a name="ParametersSshPublicKeysCreate">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
+|**--location**|string|Resource location|location|location|
+|**--tags**|dictionary|Resource tags|tags|tags|
+|**--public-key**|string|SSH public key used to authenticate to a virtual machine through ssh. If this property is not initially provided when the resource is created, the publicKey property will be populated when generateKeyPair is called. If the public key is provided upon resource creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.|public_key|publicKey|
+
+#### <a name="SshPublicKeysUpdate">Command `az sshkey update`</a>
+
+##### <a name="ParametersSshPublicKeysUpdate">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
+|**--tags**|dictionary|Resource tags|tags|tags|
+|**--public-key**|string|SSH public key used to authenticate to a virtual machine through ssh. If this property is not initially provided when the resource is created, the publicKey property will be populated when generateKeyPair is called. If the public key is provided upon resource creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.|public_key|publicKey|
+
+#### <a name="SshPublicKeysDelete">Command `az sshkey delete`</a>
+
+##### <a name="ParametersSshPublicKeysDelete">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
+
+#### <a name="SshPublicKeysGenerateKeyPair">Command `az sshkey generate-key-pair`</a>
+
+##### <a name="ExamplesSshPublicKeysGenerateKeyPair">Example</a>
+```
+az sshkey generate-key-pair --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+```
+##### <a name="ParametersSshPublicKeysGenerateKeyPair">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
+
+### group `az vm`
+#### <a name="VirtualMachinesReimage">Command `az vm reimage`</a>
+
+##### <a name="ExamplesVirtualMachinesReimage">Example</a>
+```
+az vm reimage --temp-disk true --resource-group "myResourceGroup" --name "myVMName"
+```
+##### <a name="ParametersVirtualMachinesReimage">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
+|**--vm-name**|string|The name of the virtual machine.|vm_name|vmName|
+|**--temp-disk**|boolean|Specifies whether to reimage temp disk. Default value: false. Note: This temp disk reimage parameter is only supported for VM/VMSS with Ephemeral OS disk.|temp_disk|tempDisk|
 
 ### group `az vm disk-access`
 #### <a name="DiskAccessesDeleteAPrivateEndpointConnection">Command `az vm disk-access delete-a-private-endpoint-connection`</a>
@@ -191,93 +276,8 @@ az vm gallery-application-version list --gallery-application-name "myGalleryAppl
 |**--gallery-name**|string|The name of the Shared Application Gallery in which the Application Definition resides.|gallery_name|galleryName|
 |**--gallery-application-name**|string|The name of the Shared Application Gallery Application Definition from which the Application Versions are to be listed.|gallery_application_name|galleryApplicationName|
 
-### group `az vm ssh-public-key`
-#### <a name="SshPublicKeysListByResourceGroup">Command `az vm ssh-public-key list`</a>
-
-##### <a name="ParametersSshPublicKeysListByResourceGroup">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-
-#### <a name="SshPublicKeysListBySubscription">Command `az vm ssh-public-key list`</a>
-
-##### <a name="ParametersSshPublicKeysListBySubscription">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-#### <a name="SshPublicKeysGet">Command `az vm ssh-public-key show`</a>
-
-##### <a name="ExamplesSshPublicKeysGet">Example</a>
-```
-az vm ssh-public-key show --resource-group "myResourceGroup" --name "mySshPublicKeyName"
-```
-##### <a name="ParametersSshPublicKeysGet">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
-
-#### <a name="SshPublicKeysCreate">Command `az vm ssh-public-key create`</a>
-
-##### <a name="ExamplesSshPublicKeysCreate">Example</a>
-```
-az vm ssh-public-key create --location "westus" --public-key "{ssh-rsa public key}" --resource-group "myResourceGroup" \
---name "mySshPublicKeyName"
-```
-##### <a name="ParametersSshPublicKeysCreate">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
-|**--location**|string|Resource location|location|location|
-|**--tags**|dictionary|Resource tags|tags|tags|
-|**--public-key**|string|SSH public key used to authenticate to a virtual machine through ssh. If this property is not initially provided when the resource is created, the publicKey property will be populated when generateKeyPair is called. If the public key is provided upon resource creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.|public_key|publicKey|
-
-#### <a name="SshPublicKeysUpdate">Command `az vm ssh-public-key update`</a>
-
-##### <a name="ParametersSshPublicKeysUpdate">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
-|**--tags**|dictionary|Resource tags|tags|tags|
-|**--public-key**|string|SSH public key used to authenticate to a virtual machine through ssh. If this property is not initially provided when the resource is created, the publicKey property will be populated when generateKeyPair is called. If the public key is provided upon resource creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.|public_key|publicKey|
-
-#### <a name="SshPublicKeysDelete">Command `az vm ssh-public-key delete`</a>
-
-##### <a name="ParametersSshPublicKeysDelete">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
-
-#### <a name="SshPublicKeysGenerateKeyPair">Command `az vm ssh-public-key generate-key-pair`</a>
-
-##### <a name="ExamplesSshPublicKeysGenerateKeyPair">Example</a>
-```
-az vm ssh-public-key generate-key-pair --resource-group "myResourceGroup" --name "mySshPublicKeyName"
-```
-##### <a name="ParametersSshPublicKeysGenerateKeyPair">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
-
-### group `az vm virtual-machine`
-#### <a name="VirtualMachinesReimage">Command `az vm virtual-machine reimage`</a>
-
-##### <a name="ExamplesVirtualMachinesReimage">Example</a>
-```
-az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --name "myVMName"
-```
-##### <a name="ParametersVirtualMachinesReimage">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--vm-name**|string|The name of the virtual machine.|vm_name|vmName|
-|**--temp-disk**|boolean|Specifies whether to reimage temp disk. Default value: false. Note: This temp disk reimage parameter is only supported for VM/VMSS with Ephemeral OS disk.|temp_disk|tempDisk|
-
-### group `az vm virtual-machine-scale-set`
-#### <a name="VirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk">Command `az vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk`</a>
+### group `az vmss`
+#### <a name="VirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk">Command `az vmss force-recovery-service-fabric-platform-update-domain-walk`</a>
 
 ##### <a name="ParametersVirtualMachineScaleSetsForceRecoveryServiceFabricPlatformUpdateDomainWalk">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -286,7 +286,7 @@ az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup
 |**--vm-scale-set-name**|string|The name of the VM scale set.|vm_scale_set_name|vmScaleSetName|
 |**--platform-update-domain**|integer|The platform update domain for which a manual recovery walk is requested|platform_update_domain|platformUpdateDomain|
 
-#### <a name="VirtualMachineScaleSetsRedeploy">Command `az vm virtual-machine-scale-set redeploy`</a>
+#### <a name="VirtualMachineScaleSetsRedeploy">Command `az vmss redeploy`</a>
 
 ##### <a name="ParametersVirtualMachineScaleSetsRedeploy">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -295,7 +295,7 @@ az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup
 |**--vm-scale-set-name**|string|The name of the VM scale set.|vm_scale_set_name|vmScaleSetName|
 |**--instance-ids**|array|The virtual machine scale set instance ids. Omitting the virtual machine scale set instance ids will result in the operation being performed on all virtual machines in the virtual machine scale set.|instance_ids|instanceIds|
 
-#### <a name="VirtualMachineScaleSetsReimageAll">Command `az vm virtual-machine-scale-set reimage-all`</a>
+#### <a name="VirtualMachineScaleSetsReimageAll">Command `az vmss reimage-all`</a>
 
 ##### <a name="ParametersVirtualMachineScaleSetsReimageAll">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -304,8 +304,8 @@ az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup
 |**--vm-scale-set-name**|string|The name of the VM scale set.|vm_scale_set_name|vmScaleSetName|
 |**--instance-ids**|array|The virtual machine scale set instance ids. Omitting the virtual machine scale set instance ids will result in the operation being performed on all virtual machines in the virtual machine scale set.|instance_ids|instanceIds|
 
-### group `az vm virtual-machine-scale-set-v-ms`
-#### <a name="VirtualMachineScaleSetVMsRedeploy">Command `az vm virtual-machine-scale-set-v-ms redeploy`</a>
+### group `az vmss v-ms`
+#### <a name="VirtualMachineScaleSetVMsRedeploy">Command `az vmss v-ms redeploy`</a>
 
 ##### <a name="ParametersVirtualMachineScaleSetVMsRedeploy">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -314,7 +314,7 @@ az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup
 |**--vm-scale-set-name**|string|The name of the VM scale set.|vm_scale_set_name|vmScaleSetName|
 |**--instance-id**|string|The instance ID of the virtual machine.|instance_id|instanceId|
 
-#### <a name="VirtualMachineScaleSetVMsReimageAll">Command `az vm virtual-machine-scale-set-v-ms reimage-all`</a>
+#### <a name="VirtualMachineScaleSetVMsReimageAll">Command `az vmss v-ms reimage-all`</a>
 
 ##### <a name="ParametersVirtualMachineScaleSetVMsReimageAll">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -323,11 +323,11 @@ az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup
 |**--vm-scale-set-name**|string|The name of the VM scale set.|vm_scale_set_name|vmScaleSetName|
 |**--instance-id**|string|The instance ID of the virtual machine.|instance_id|instanceId|
 
-#### <a name="VirtualMachineScaleSetVMsRetrieveBootDiagnosticsData">Command `az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data`</a>
+#### <a name="VirtualMachineScaleSetVMsRetrieveBootDiagnosticsData">Command `az vmss v-ms retrieve-boot-diagnostic-data`</a>
 
 ##### <a name="ExamplesVirtualMachineScaleSetVMsRetrieveBootDiagnosticsData">Example</a>
 ```
-az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data --instance-id "0" --resource-group "ResourceGroup" \
+az vmss v-ms retrieve-boot-diagnostic-data --instance-id "0" --resource-group "ResourceGroup" \
 --sas-uri-expiration-time-in-minutes 60 --vm-scale-set-name "myvmScaleSet"
 ```
 ##### <a name="ParametersVirtualMachineScaleSetVMsRetrieveBootDiagnosticsData">Parameters</a> 
@@ -338,13 +338,12 @@ az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data --instance-id
 |**--instance-id**|string|The instance ID of the virtual machine.|instance_id|instanceId|
 |**--sas-uri-expiration-time-in-minutes**|integer|Expiration duration in minutes for the SAS URIs with a value between 1 to 1440 minutes. <br><br>NOTE: If not specified, SAS URIs will be generated with a default expiration duration of 120 minutes.|sas_uri_expiration_time_in_minutes|sasUriExpirationTimeInMinutes|
 
-### group `az vm virtual-machine-scale-set-vm-extension`
-#### <a name="VirtualMachineScaleSetVMExtensionsList">Command `az vm virtual-machine-scale-set-vm-extension list`</a>
+### group `az vmss vm-extension`
+#### <a name="VirtualMachineScaleSetVMExtensionsList">Command `az vmss vm-extension list`</a>
 
 ##### <a name="ExamplesVirtualMachineScaleSetVMExtensionsList">Example</a>
 ```
-az vm virtual-machine-scale-set-vm-extension list --instance-id "0" --resource-group "myResourceGroup" \
---vm-scale-set-name "myvmScaleSet"
+az vmss vm-extension list --instance-id "0" --resource-group "myResourceGroup" --vm-scale-set-name "myvmScaleSet"
 ```
 ##### <a name="ParametersVirtualMachineScaleSetVMExtensionsList">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -354,12 +353,12 @@ az vm virtual-machine-scale-set-vm-extension list --instance-id "0" --resource-g
 |**--instance-id**|string|The instance ID of the virtual machine.|instance_id|instanceId|
 |**--expand**|string|The expand expression to apply on the operation.|expand|$expand|
 
-#### <a name="VirtualMachineScaleSetVMExtensionsGet">Command `az vm virtual-machine-scale-set-vm-extension show`</a>
+#### <a name="VirtualMachineScaleSetVMExtensionsGet">Command `az vmss vm-extension show`</a>
 
 ##### <a name="ExamplesVirtualMachineScaleSetVMExtensionsGet">Example</a>
 ```
-az vm virtual-machine-scale-set-vm-extension show --instance-id "0" --resource-group "myResourceGroup" \
---vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet"
+az vmss vm-extension show --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name "myVMExtension" \
+--vm-scale-set-name "myvmScaleSet"
 ```
 ##### <a name="ParametersVirtualMachineScaleSetVMExtensionsGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -370,14 +369,13 @@ az vm virtual-machine-scale-set-vm-extension show --instance-id "0" --resource-g
 |**--vm-extension-name**|string|The name of the virtual machine extension.|vm_extension_name|vmExtensionName|
 |**--expand**|string|The expand expression to apply on the operation.|expand|$expand|
 
-#### <a name="VirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create">Command `az vm virtual-machine-scale-set-vm-extension create`</a>
+#### <a name="VirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create">Command `az vmss vm-extension create`</a>
 
 ##### <a name="ExamplesVirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create">Example</a>
 ```
-az vm virtual-machine-scale-set-vm-extension create --type-properties-type "extType" --auto-upgrade-minor-version true \
---publisher "extPublisher" --settings "{\\"UserName\\":\\"xyz@microsoft.com\\"}" --type-handler-version "1.2" \
---instance-id "0" --resource-group "myResourceGroup" --vm-extension-name "myVMExtension" --vm-scale-set-name \
-"myvmScaleSet"
+az vmss vm-extension create --type-properties-type "extType" --auto-upgrade-minor-version true --publisher \
+"extPublisher" --settings "{\\"UserName\\":\\"xyz@microsoft.com\\"}" --type-handler-version "1.2" --instance-id "0" \
+--resource-group "myResourceGroup" --vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet"
 ```
 ##### <a name="ParametersVirtualMachineScaleSetVMExtensionsCreateOrUpdate#Create">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -400,13 +398,12 @@ az vm virtual-machine-scale-set-vm-extension create --type-properties-type "extT
 |**--substatuses**|array|The resource status information.|substatuses|substatuses|
 |**--statuses**|array|The resource status information.|statuses|statuses|
 
-### group `az vm virtual-machine-scale-set-vm-run-command`
-#### <a name="VirtualMachineScaleSetVMRunCommandsList">Command `az vm virtual-machine-scale-set-vm-run-command list`</a>
+### group `az vmss vm-run`
+#### <a name="VirtualMachineScaleSetVMRunCommandsList">Command `az vmss vm-run list`</a>
 
 ##### <a name="ExamplesVirtualMachineScaleSetVMRunCommandsList">Example</a>
 ```
-az vm virtual-machine-scale-set-vm-run-command list --instance-id "0" --resource-group "myResourceGroup" \
---vm-scale-set-name "myvmScaleSet"
+az vmss vm-run list --instance-id "0" --resource-group "myResourceGroup" --vm-scale-set-name "myvmScaleSet"
 ```
 ##### <a name="ParametersVirtualMachineScaleSetVMRunCommandsList">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
