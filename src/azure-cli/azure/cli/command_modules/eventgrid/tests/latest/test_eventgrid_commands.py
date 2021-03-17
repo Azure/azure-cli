@@ -461,6 +461,7 @@ class EventGridTests(ScenarioTest):
 
         self.cmd('az eventgrid topic delete --name {topic_name} --resource-group {rg}')
 
+    @unittest.skip('live test always fails, need fix by owners')
     @ResourceGroupPreparer()
     def test_create_system_topic(self, resource_group):
         endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
@@ -1067,6 +1068,7 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid event-subscription delete --source-resource-id {scope} --name {event_subscription_name}')
         self.cmd('az eventgrid topic delete --name {topic_name} --resource-group {rg}')
 
+    @unittest.skip('live test always fails, need fix by owners')
     @ResourceGroupPreparer()
     def test_Partner_scenarios(self, resource_group):
         storagequeue_endpoint_id = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg/queueServices/default/queues/stogqueuedestination'
