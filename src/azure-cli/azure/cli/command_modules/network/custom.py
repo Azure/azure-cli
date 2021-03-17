@@ -3539,6 +3539,8 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                                                  ip_address=addr['ip_address'])
                         else:
                             raise KeyError
+                    else:
+                        raise KeyError
 
                     new_addresses.append(address)
             else:
@@ -3829,10 +3831,18 @@ def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_
                                       'Subnet',
                                       'VirtualNetwork')
     if cmd.supported_api_version(min_api='2020-11-01'):
-        new_address = LoadBalancerBackendAddress(name=address_name,
-                                                 subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
-                                                 virtual_network=VirtualNetwork(id=vnet) if vnet else None,
-                                                 ip_address=ip_address if ip_address else None)
+        if vnet:
+            new_address = LoadBalancerBackendAddress(name=address_name,
+                                                     subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
+                                                     virtual_network=VirtualNetwork(id=vnet),
+                                                     ip_address=ip_address if ip_address else None)
+        elif is_valid_resource_id(subnet):
+            new_address = LoadBalancerBackendAddress(name=address_name,
+                                                     subnet=Subnet(id=subnet),
+                                                     ip_address=ip_address if ip_address else None)
+        else:
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet name | subnet id) information.')
+
     else:
         new_address = LoadBalancerBackendAddress(name=address_name,
                                                  virtual_network=VirtualNetwork(id=vnet) if vnet else None,
