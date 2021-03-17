@@ -3930,7 +3930,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
         stg = self.cmd('az sql stg create -g {rg} -l {loc} --trust-scope {trust_scope} -n {stg_name} -m {mi1} {mi2}').get_output_in_json()
         assert stg['name'] == 'stg-test'
 
-        self.cmd('az sql stg get -g {rg} -l {loc} -n {stg_name}').get_output_in_json()
+        self.cmd('az sql stg show -g {rg} -l {loc} -n {stg_name}').get_output_in_json()
 
         stg_list = self.cmd('az sql stg list -g {rg} --instance-name {managed_instance_name_1}').get_output_in_json()
         assert len(stg_list) == 1

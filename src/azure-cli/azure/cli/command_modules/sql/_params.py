@@ -1628,7 +1628,7 @@ def load_arguments(self, _):
                    help='The trust scope of the Server Trust Group.',
                    nargs='+')
 
-    with self.argument_context('sql stg get') as c:
+    with self.argument_context('sql stg show') as c:
         c.argument('location',
                    help='The location of the Server Trust Group.')
 

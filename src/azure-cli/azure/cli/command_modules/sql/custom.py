@@ -3655,10 +3655,11 @@ def server_trust_group_create(
         name,
         location,
         group_member,
-        trust_scope):
+        trust_scope,
+        no_wait=False):
 
     members = [ServerInfo(server_id=member) for member in group_member]
-    return client.create_or_update(resource_group_name=resource_group_name,
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name=resource_group_name,
                                    location_name=location,
                                    server_trust_group_name=name,
                                    group_members=members,
@@ -3669,9 +3670,10 @@ def server_trust_group_delete(
         client,
         resource_group_name,
         name,
-        location):
+        location,
+        no_wait=False):
 
-    return client.delete(resource_group_name=resource_group_name,
+    return sdk_no_wait(no_wait, client.delete, resource_group_name=resource_group_name,
                          location_name=location,
                          server_trust_group_name=name)
 
