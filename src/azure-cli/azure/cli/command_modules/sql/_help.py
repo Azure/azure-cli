@@ -659,7 +659,7 @@ type: command
 short-summary: Retrieve a Server Trust Group.
 examples:
   - name: Retrieve a Server Trust Group.
-    text: az sql stg get -g resourcegroup -l location -n stg-name
+    text: az sql stg show -g resourcegroup -l location -n stg-name
 """
 
 helps['sql stg delete'] = """
