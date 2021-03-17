@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError, UnrecognizedArgumentError
 
 logger = get_logger(__name__)
 
@@ -3466,17 +3466,25 @@ def set_lb_frontend_ip_configuration(
     return parent
 
 
+def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
+    if vnet and not is_valid_resource_id(vnet):
+        vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet)
+    return vnet
+
+
+def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
+    if subnet and not is_valid_resource_id(subnet):
+        subnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name) + f'/subnets/{subnet}'
+    return subnet
+
+
 def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                    vnet=None, backend_addresses=None, backend_addresses_config_file=None):
-    def _process_vnet_name_and_id(vnet):
-        if vnet and not is_valid_resource_id(vnet):
-            vnet = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='virtualNetworks',
-                name=vnet)
-        return vnet
     if backend_addresses and backend_addresses_config_file:
         raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
     if backend_addresses_config_file:
@@ -3515,18 +3523,18 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     if cmd.supported_api_version(min_api='2020-11-01'):
         try:
             new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])) if 'virtual_network' in addr else None,
-                                                        subnet=Subnet(id=addr['subnet']) if 'subnet' in addr else None,
+                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)) if 'virtual_network' in addr else None,
+                                                        subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
                                                         ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
         except KeyError:
-            raise CLIError('Each backend address must have name, ip-address, (vnet | subnet) information.')
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet | subnet) information.')
     else:
         try:
             new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
+                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
                                                         ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
         except KeyError:
-            raise CLIError('Each backend address must have name, vnet and ip-address information.')
+            raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
 
     new_pool = BackendAddressPool(name=backend_address_pool_name,
                                   load_balancer_backend_addresses=new_addresses)
@@ -3803,7 +3811,7 @@ def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_
                                       'VirtualNetwork')
     if cmd.supported_api_version(min_api='2020-11-01'):
         new_address = LoadBalancerBackendAddress(name=address_name,
-                                                 subnet=Subnet(id=subnet) if subnet else None,
+                                                 subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
                                                  virtual_network=VirtualNetwork(id=vnet) if vnet else None,
                                                  ip_address=ip_address if ip_address else None)
     else:

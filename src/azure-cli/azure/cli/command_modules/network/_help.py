@@ -3340,11 +3340,12 @@ parameters:
     short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
     long-summary: |
         Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
-        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet==/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
+        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
+        Usage3: --backend-address name=addr1 ip-address=10.0.0.1 subnet=subnet1 --vnet MyVnet
 
         name: Required. The name of the backend address.
         ip-address: Required. Ip Address within the Virtual Network.
-        subnet: Id of the subnet.(Required if --vnet lacks)
+        subnet: Name or Id of the subnet.
 
         Multiple backend addresses can be specified by using more than one `--backend-address` argument.
   - name: --backend-addresses-config-file
@@ -3366,8 +3367,13 @@ parameters:
           },
           {
             "name": "address3",
-            "subnet": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2",
+            "subnet": "subnet3",
             "ipAddress": "10.0.0.6"
+          },
+          {
+            "name": "address4",
+            "subnet": "/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet4",
+            "ipAddress": "10.0.0.7"
           }
         ]
 examples:

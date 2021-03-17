@@ -8,7 +8,6 @@ from collections import defaultdict
 import argparse
 from knack.util import CLIError
 from azure.cli.core.azclierror import UnrecognizedArgumentError
-from msrestazure.tools import is_valid_resource_id
 from ._validators import read_base_64_file
 
 
@@ -35,10 +34,7 @@ class AddBackendAddressCreate(argparse._AppendAction):
             elif kl == 'ip-address':
                 d['ip_address'] = v[0]
             elif kl == 'subnet':
-                if is_valid_resource_id(v[0]):
-                    d['subnet'] = v[0]
-                else:
-                    raise UnrecognizedArgumentError(f'{v[0]} is not valid subnet id')
+                d['subnet'] = v[0]
             else:
                 raise CLIError('key error: key must be one of name and ip-address.')
         return d

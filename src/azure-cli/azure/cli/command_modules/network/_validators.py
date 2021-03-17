@@ -1963,12 +1963,6 @@ def process_vnet_name_or_id(cmd, namespace):
             name=namespace.vnet)
 
 
-def validator_subnet_id(namespace):
-    from azure.mgmt.core.tools import is_valid_resource_id
-    if namespace.subnet and not is_valid_resource_id(namespace.subnet):
-        raise UnrecognizedArgumentError(f'{namespace.subnet} in not valid')
-
-
 def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused-argument
     rule_group_name = namespace.rule_group_name
     rules = namespace.rules

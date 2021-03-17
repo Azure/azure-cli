@@ -2679,9 +2679,11 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
             'rg': resource_group,
-            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-address-pool-config.json')
+            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-address-pool-config.json'),
+            'subnet_name': 'subnetx'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet_name} --vnet-name {vnet} --address-prefixes 10.0.1.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
 
@@ -2695,9 +2697,9 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('name', 'bap1'))
 
         # create with subnet
-        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 '
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} '
                  '--backend-address name=addr1 ip-address=10.0.0.1 subnet={subnet} '
-                 '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet} '
+                 '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet}',
                  checks=self.check('name', 'bap2'))
         self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap2 ')
@@ -2731,7 +2733,9 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr7 --subnet {subnet} --ip-address 10.0.0.7', checks=self.check('name', 'bap1'))
 
-        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '2'))
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr8 --vnet {vnet} --subnet {subnet_name} --ip-address 10.0.0.8', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '3'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_probes', location='eastus2')
     def test_network_lb_probes(self, resource_group):
