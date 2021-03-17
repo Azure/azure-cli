@@ -364,6 +364,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -700,6 +703,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.

@@ -204,7 +204,7 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
                  checks=[JMESPathCheck('sku.tier', tier),
                          JMESPathCheck('sku.name', sku_name)])
 
-    def _test_flexible_server_upadte_mmw(self, database_engine, resource_group, server):
+    def _test_flexible_server_update_mmw(self, database_engine, resource_group, server):
 
         self.cmd('{} flexible-server update -g {} -n {} --maintenance-window Mon:1:30'
                  .format(database_engine, resource_group, server),
@@ -587,7 +587,10 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             tier = 'GeneralPurpose'
             version = 5.7
-            sku_name = 'Standard_D2s_v3'
+            if location == 'eastus2euap':
+                sku_name = 'Standard_D2s_v3'
+            else:
+                sku_name = 'Standard_D2ds_v4'
             storage_size = 20
         storage_size_mb = storage_size * 1024
         backup_retention = 10
@@ -648,7 +651,7 @@ class FlexibleServerReplicationMgmtScenarioTest(RdbmsScenarioTest):  # pylint: d
 
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
+                          checks=[JMESPathCheck('replicationRole', 'Source')]).get_output_in_json()
 
         self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),

@@ -13,11 +13,6 @@
 # pylint: disable=no-self-use,too-many-lines
 from __future__ import print_function
 
-# from .generated.custom import *  # noqa: F403
-try:
-    from .manual.custom import *   # noqa: F403, pylint: disable=unused-import,unused-wildcard-import,wildcard-import
-except ImportError:
-    pass
 
 import json
 import os
@@ -50,6 +45,12 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
+
+from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+try:
+    from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+except ImportError:
+    pass
 
 logger = get_logger(__name__)
 
