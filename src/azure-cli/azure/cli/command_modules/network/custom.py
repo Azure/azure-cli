@@ -3483,6 +3483,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
     return subnet
 
 
+# pylint: disable=too-many-branches
 def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                    vnet=None, backend_addresses=None, backend_addresses_config_file=None):
     if backend_addresses and backend_addresses_config_file:
@@ -3519,15 +3520,32 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     for addr in addresses_pool:
         if 'virtual_network' not in addr and vnet:
             addr['virtual_network'] = vnet
+
     # pylint: disable=line-too-long
-    if cmd.supported_api_version(min_api='2020-11-01'):
+    if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
         try:
-            new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)) if 'virtual_network' in addr else None,
-                                                        subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                        ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+            if addresses_pool:
+                new_addresses = []
+                for addr in addresses_pool:
+                    if 'virtual_network' in addr:
+                        address = LoadBalancerBackendAddress(name=addr['name'],
+                                                             virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                             subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                             ip_address=addr['ip_address'])
+                    elif 'subnet' in addr:
+                        if is_valid_resource_id(addr['subnet']):
+                            address = LoadBalancerBackendAddress(name=addr['name'],
+                                                                 subnet=Subnet(id=addr['subnet']),
+                                                                 ip_address=addr['ip_address'])
+                        else:
+                            raise KeyError
+
+                    new_addresses.append(address)
+            else:
+                new_addresses = None
         except KeyError:
-            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet name | subnet id) information.')
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet '
+                                            'name | subnet id) information.')
     else:
         try:
             new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
