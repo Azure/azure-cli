@@ -2364,6 +2364,8 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     if no_wait:
         return retval
 
+    wait_second = 5
+    time.sleep(wait_second)
     new_retval = _wait_security_domain_operation(client, hsm_name, 'upload', vault_base_url=vault_base_url)
     if new_retval:
         return new_retval
@@ -2431,6 +2433,8 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
     )
 
     if not no_wait:
+        wait_second = 5
+        time.sleep(wait_second)
         polling_ret = _wait_security_domain_operation(client, hsm_name, 'download', vault_base_url=vault_base_url)
         # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
         if polling_ret and getattr(polling_ret, 'status', None) != 'Failed':
