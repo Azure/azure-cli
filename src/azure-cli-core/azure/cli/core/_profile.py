@@ -631,6 +631,18 @@ class Profile:
         authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
         app = ClientApplication(_CLIENT_ID, authority=authority)
         result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
+
+        if 'error' in result:
+            logger.warning(result['error_description'])
+
+            # Retry login with VM SSH as resource
+            token_entry = self._login_with_authorization_code_flow(
+                tenant, 'https://pas.windows.net/CheckMyAccess/Linux')
+            result = app.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
+
+            if 'error' in result:
+                from azure.cli.core.adal_authentication import aad_error_handler
+                aad_error_handler(result)
         return username, result["access_token"]
 
     def get_refresh_token(self, resource=None,
@@ -674,17 +686,22 @@ class Profile:
             creds = self._get_token_from_cloud_shell(resource)
         else:
             tenant_dest = tenant if tenant else account[_TENANT_ID]
-            if user_type == _USER:
-                # User
-                creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                  tenant_dest, resource)
-            else:
-                # Service Principal
-                use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
-                creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                               resource,
-                                                                               tenant_dest,
-                                                                               use_cert_sn_issuer)
+            import adal
+            try:
+                if user_type == _USER:
+                    # User
+                    creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                      tenant_dest, resource)
+                else:
+                    # Service Principal
+                    use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
+                    creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                                   resource,
+                                                                                   tenant_dest,
+                                                                                   use_cert_sn_issuer)
+            except adal.AdalError as ex:
+                from azure.cli.core.adal_authentication import adal_error_handler
+                adal_error_handler(ex)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
@@ -791,6 +808,18 @@ class Profile:
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
+
+    def _login_with_authorization_code_flow(self, tenant, resource):
+        authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
+        results = _get_authorization_code(resource, authority_url)
+
+        if not results.get('code'):
+            raise CLIError('Login failed')
+
+        context = _authentication_context_factory(self.cli_ctx, tenant, self._creds_cache.adal_token_cache)
+        token_entry = context.acquire_token_with_authorization_code(
+            results['code'], results['reply_url'], resource, _CLIENT_ID)
+        return token_entry
 
 
 class MsiAccountTypes:

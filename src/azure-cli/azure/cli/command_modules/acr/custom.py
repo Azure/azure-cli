@@ -107,6 +107,7 @@ def acr_update_custom(cmd,
                       data_endpoint_enabled=None,
                       public_network_enabled=None,
                       allow_trusted_services=None,
+                      anonymous_pull_enabled=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -127,6 +128,9 @@ def acr_update_custom(cmd,
 
     if public_network_enabled is not None:
         _configure_public_network_access(cmd, instance, public_network_enabled)
+
+    if anonymous_pull_enabled is not None:
+        instance.anonymous_pull_enabled = anonymous_pull_enabled
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
 
@@ -258,6 +262,8 @@ def acr_login(cmd,
                        'docker commands, to avoid authentication errors, use all lowercase.')
 
     from subprocess import PIPE, Popen
+    logger.debug("Invoking '%s --username %s --password <redacted> %s'",
+                 docker_command, username, login_server)
     p = Popen([docker_command, "login",
                "--username", username,
                "--password", password,

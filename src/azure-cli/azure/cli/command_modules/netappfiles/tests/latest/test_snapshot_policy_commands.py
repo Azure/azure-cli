@@ -7,6 +7,8 @@ import unittest
 
 LOCATION = "centralus"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
+vnet_name = "cli-vnet-lefr-02"
+subnet_name = "default"
 
 
 class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
@@ -20,14 +22,12 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         subs = self.cmd("az account show").get_output_in_json()
         return subs['id']
 
-    def create_volume(self, account_name, pool_name, volume_name, snapshot_policy_id=None):
-        vnet_name = "cli-vnet-lefr-02"
-        subnet_name = "default"
-
-        # create vnet and pool
-        self.setup_vnet(vnet_name, subnet_name)
-        self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4" %
-                 (account_name, pool_name, LOCATION)).get_output_in_json()
+    def create_volume(self, account_name, pool_name, volume_name, snapshot_policy_id=None, volume_only=False):
+        if not volume_only:
+            # create vnet and pool
+            self.setup_vnet(vnet_name, subnet_name)
+            self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4" %
+                     (account_name, pool_name, LOCATION))
 
         # create volume
         return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s --vnet %s --subnet %s "
@@ -263,10 +263,8 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['enabled'] == enabled
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
 
-    @unittest.skip("Waiting for a fix on swagger and sdk")
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
     def test_snapshot_policy_list_volumes(self):
-        raise unittest.SkipTest("Skipping - need to fix NFSAAS-12189")
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
@@ -291,13 +289,14 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         list_volumes = self.cmd("az netappfiles snapshot policy volumes -g {rg} -a %s --snapshot-policy-name %s" %
                                 (account_name, snapshot_policy_name)).get_output_in_json()
 
-        assert len(list_volumes) == 1
+        assert len(list_volumes['value']) == 1
 
         # create second volume
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
-        self.create_volume(account_name, pool_name, volume_name, snapshot_policy_id=snapshot_policy['id'])
+        self.create_volume(account_name, pool_name, volume_name, snapshot_policy_id=snapshot_policy['id'],
+                           volume_only=True)
 
         list_volumes = self.cmd("az netappfiles snapshot policy volumes -g {rg} -a %s --snapshot-policy-name %s" %
                                 (account_name, snapshot_policy_name)).get_output_in_json()
 
-        assert len(list_volumes) == 2
+        assert len(list_volumes['value']) == 2

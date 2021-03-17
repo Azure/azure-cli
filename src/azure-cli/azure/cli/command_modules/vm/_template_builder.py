@@ -8,6 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -255,7 +256,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
-        enable_hotpatching=None):
+        enable_hotpatching=None, platform_fault_domain=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -304,10 +305,24 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
             os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
 
+        # Windows patch settings
         if patch_mode is not None and custom_image_os_type.lower() == 'windows':
+            if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Windows VM. Valid values are AutomaticByOS, '
+                    'AutomaticByPlatform, Manual.')
             os_profile['windowsConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode,
                 'enableHotpatching': enable_hotpatching
+            }
+
+        # Linux patch settings
+        if patch_mode is not None and custom_image_os_type.lower() == 'linux':
+            if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Linux VM. Valid values are AutomaticByPlatform, ImageDefault.')
+            os_profile['linuxConfiguration']['patchSettings'] = {
+                'patchMode': patch_mode
             }
 
         return os_profile
@@ -460,6 +475,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     if encryption_at_host is not None:
         vm_properties['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+
+    if platform_fault_domain is not None:
+        vm_properties['platformFaultDomain'] = platform_fault_domain
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),

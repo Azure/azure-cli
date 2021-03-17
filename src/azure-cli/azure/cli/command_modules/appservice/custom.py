@@ -602,6 +602,7 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(name))
+    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
     return webapp
@@ -2089,10 +2090,10 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     if application_logging:
         fs_log = None
         blob_log = None
-        level = application_logging != 'off'
+        level = level if application_logging != 'off' else False
+        level = True if level is None else level
         if application_logging in ['filesystem', 'off']:
             fs_log = FileSystemApplicationLogsConfig(level=level)
-        level = application_logging != 'off'
         if application_logging in ['azureblobstorage', 'off']:
             blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
                                                              sas_url=None)

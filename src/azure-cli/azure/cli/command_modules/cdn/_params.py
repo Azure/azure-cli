@@ -432,7 +432,7 @@ def load_arguments(self, _):
                    help='TLS protocol version that will be used for Https.')
         c.argument('host_name', help='The host name of the domain. Must be a domain name.')
         c.argument('azure_dns_zone', help='ID of the Azure DNS zone.')
-        c.argument('secret', help='ID of the Azure key vault certificate.')
+        c.argument('secret', help='Name of the azure front door secret.')
 
     with self.argument_context('afd custom-domain list') as c:
         c.argument('profile_name', id_part=None)
@@ -513,7 +513,8 @@ def configure_rule_parameters(c):
                nargs='+', help='Transform to apply before matching.')
     c.argument('negate_condition', arg_group="Match Condition", arg_type=get_three_state_flag(),
                help='If true, negates the condition')
-    actions = ["RequestHeader", "ResponseHeader"].extend(DeliveryRuleAction._subtype_map["name"].keys())
+    actions = ["RequestHeader", "ResponseHeader"]
+    actions.extend(DeliveryRuleAction._subtype_map["name"].keys())
     c.argument('action_name', arg_group="Action", help='Name of the action.', arg_type=get_enum_type(actions))
     c.argument('cache_behavior', arg_group="Action",
                arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']),
