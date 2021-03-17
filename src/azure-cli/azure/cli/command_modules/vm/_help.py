@@ -1384,11 +1384,11 @@ examples:
 
 
         latest=$(az vm extension image list-versions \\
-          --publisher {publisher} -l {location} -n {extension} \\
+          --publisher ${publisher} -l ${location} -n ${extension} \\
           --query "[].name" -o tsv | sort | tail -n 1)
 
-        az vm extension image show -l {location} \\
-          --publisher {publisher} -n {extension} --version {latest}
+        az vm extension image show -l ${location} \\
+          --publisher ${publisher} -n ${extension} --version ${latest}
 """
 
 helps['vm extension list'] = """
@@ -1461,9 +1461,9 @@ examples:
   - name: Deallocate, generalize, and capture multiple stopped virtual machines.
     text: |
         vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-        az vm deallocate --ids {vms_ids}
-        az vm generalize --ids {vms_ids}
-        az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
+        az vm deallocate --ids ${vms_ids}
+        az vm generalize --ids ${vms_ids}
+        az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
 
 """
 
