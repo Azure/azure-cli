@@ -1368,6 +1368,7 @@ def validate_client_auth_parameter(cmd, ns):
                        "when creating container.")
     else:
         validate_client_parameters(cmd, ns)
+    validate_metadata(ns)
 
 
 def validate_encryption_scope_client_params(ns):
