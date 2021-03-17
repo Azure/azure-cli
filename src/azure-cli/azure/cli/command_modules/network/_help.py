@@ -3368,7 +3368,7 @@ parameters:
             "name": "address3",
             "subnet": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2",
             "ipAddress": "10.0.0.6"
-          },
+          }
         ]
 examples:
   - name: Create an address pool.
