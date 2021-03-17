@@ -98,6 +98,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip['name'] = "[concat('{}', copyIndex())]".format(name)
         public_ip['copy'] = {
             'name': 'publicipcopy',
+            'mode': 'parallel',
             'count': count
         }
 
@@ -167,6 +168,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         nic['name'] = "[concat('{}', copyIndex())]".format(name)
         nic['copy'] = {
             'name': 'niccopy',
+            'mode': 'parallel',
             'count': count
         }
 
@@ -519,6 +521,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if count:
         vm['copy'] = {
             'name': 'vmcopy',
+            'mode': 'parallel',
             'count': count
         }
         vm['name'] = "[concat('{}', copyIndex())]".format(name)
