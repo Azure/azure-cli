@@ -1880,6 +1880,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                tags=None,
                zones=None,
                enable_node_public_ip=False,
+               node_public_ip_prefix_id=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
@@ -1923,6 +1924,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         proximity_placement_group_id=ppg,
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
+        node_public_ip_prefix_id=node_public_ip_prefix_id,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -3357,6 +3359,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       kubernetes_version=None,
                       zones=None,
                       enable_node_public_ip=False,
+                      node_public_ip_prefix_id=None,
                       node_vm_size=None,
                       node_osdisk_type=None,
                       node_osdisk_size=0,
@@ -3418,6 +3421,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         availability_zones=zones,
         scale_set_priority=priority,
         enable_node_public_ip=enable_node_public_ip,
+        node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         mode=mode
