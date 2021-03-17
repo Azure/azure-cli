@@ -654,7 +654,7 @@ examples:
     text: az sql stg create -g resourcegroup -l location -n stg-name --trust-scope GlobalTransactions -m $mi1-id $mi2-id
 """
 
-helps['sql stg get'] = """
+helps['sql stg show'] = """
 type: command
 short-summary: Retrieve a Server Trust Group.
 examples:
