@@ -493,7 +493,7 @@ examples:
             -g rg1 --system-topic-name systemtopic1 \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
-            --storage-queue-msg-ttl 300
+            --queue-msg-ttl 300
 """
 
 helps['eventgrid system-topic event-subscription delete'] = """
@@ -583,7 +583,7 @@ examples:
             -g rg1 --system-topic-name systemtopic1 \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
-            --storage-queue-msg-ttl 300
+            --queue-msg-ttl 300
 """
 
 helps['eventgrid partner topic event-subscription'] = """
@@ -662,7 +662,7 @@ examples:
             -g rg1 --partner-topic-name partnertopic1 \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
-            --storage-queue-msg-ttl 300
+            --queue-msg-ttl 300
 """
 
 helps['eventgrid partner topic event-subscription delete'] = """
@@ -752,7 +752,7 @@ examples:
             -g rg1 --partner-topic-name partnertopic1 \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
-            --storage-queue-msg-ttl 300
+            --queue-msg-ttl 300
 
 """
 
@@ -859,7 +859,7 @@ examples:
             --source-resource-id /subscriptions/{SubID} \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
-            --storage-queue-msg-ttl 300
+            --queue-msg-ttl 300
   - name: Create a new event subscription for an Azure subscription, using default filters, and an Azure ServiceBusQueue as a destination.
     text: |
         az eventgrid event-subscription create --name es2 \\
@@ -1127,7 +1127,7 @@ examples:
     text: |
         az eventgrid event-subscription update --name es2 \\
             --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/kalsegblob" \\
-            --storage-queue-msg-ttl 300
+            --queue-msg-ttl 300
 """
 
 helps['eventgrid extension-topic'] = """
