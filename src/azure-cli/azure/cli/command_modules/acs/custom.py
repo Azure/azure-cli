@@ -63,21 +63,21 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentity
-from azure.mgmt.containerservice.v2020_09_01.models import AgentPool
-from azure.mgmt.containerservice.v2020_09_01.models import AgentPoolUpgradeSettings
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterSKU
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterWindowsProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2021_02_01.models import AgentPool
+from azure.mgmt.containerservice.v2021_02_01.models import AgentPoolUpgradeSettings
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterSKU
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterWindowsProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -96,7 +96,7 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
-from ._client_factory import cf_managed_clusters
+from ._client_factory import cf_agent_pools
 from ._client_factory import get_msi_client
 
 from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
@@ -772,13 +772,14 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
 
 
 def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    msi_client = get_msi_client(cli_ctx)
-    pattern = '/subscriptions/.*?/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'
+    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
     resource_id = resource_id.lower()
     match = re.search(pattern, resource_id)
     if match:
-        resource_group_name = match.group(1)
-        identity_name = match.group(2)
+        subscription_id = match.group(1)
+        resource_group_name = match.group(2)
+        identity_name = match.group(3)
+        msi_client = get_msi_client(cli_ctx, subscription_id)
         try:
             identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                                resource_name=identity_name)
@@ -2546,7 +2547,7 @@ def aks_update(cmd, client, resource_group_name, name,
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     client_id = ""
-    if instance.identity is not None and instance.identity.type == "SystemAssigned":
+    if _is_msi_cluster(instance):
         if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
             raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
                            'Please do not set --attach-acr or --detach-acr. '
@@ -2663,7 +2664,9 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets cluster.')
-            _upgrade_single_nodepool_image_version(True, client, resource_group_name, name, agent_pool_profile.name)
+            agent_pool_client = cf_agent_pools(cmd.cli_ctx)
+            _upgrade_single_nodepool_image_version(True, agent_pool_client,
+                                                   resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
 
@@ -3462,9 +3465,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                        'If you only want to upgrade the node version please use the "--node-image-only" option only.')
 
     if node_image_only:
-        managed_cluster_client = cf_managed_clusters(cmd.cli_ctx)
         return _upgrade_single_nodepool_image_version(no_wait,
-                                                      managed_cluster_client,
+                                                      client,
                                                       resource_group_name,
                                                       cluster_name,
                                                       nodepool_name)
@@ -4068,3 +4070,9 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def _is_msi_cluster(managed_cluster):
+    return (managed_cluster and managed_cluster.identity and
+            (managed_cluster.identity.type.casefold() == "systemassigned" or
+             managed_cluster.identity.type.casefold() == "userassigned"))
