@@ -6,14 +6,17 @@
 
 import argparse
 import platform
+from enum import Enum
+
 
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_PARAM_KWARGS
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
-from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
-
+from azure.cli.core.translator import (action_class, action_class_by_factory,
+                                       completer_func, completer_by_factory, type_converter_func,
+                                       type_converter_by_factory, register_arg_type, arg_type_by_factory)
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
@@ -28,28 +31,16 @@ def get_subscription_locations(cli_ctx):
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 
-@Completer
+@completer_func
 def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_subscription_locations(cmd.cli_ctx)
     return [item.name for item in result]
 
 
-# pylint: disable=redefined-builtin
-def get_datetime_type(help=None, date=True, time=True, timezone=True):
-
-    help_string = help + ' ' if help else ''
-    accepted_formats = []
-    if date:
-        accepted_formats.append('date (yyyy-mm-dd)')
-    if time:
-        accepted_formats.append('time (hh:mm:ss.xxxxx)')
-    if timezone:
-        accepted_formats.append('timezone (+/-hh:mm)')
-    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
-
+@action_class_by_factory
+def get_datetime_action(date=True, time=True, timezone=True):
     # pylint: disable=too-few-public-methods
     class DatetimeAction(argparse.Action):
-
         def __call__(self, parser, namespace, values, option_string=None):
             """ Parse a date value and return the ISO8601 string. """
             import dateutil.parser
@@ -62,6 +53,15 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
                 dt_val = dateutil.parser.parse(value_string)
             except ValueError:
                 pass
+
+            accepted_formats = []
+            if date:
+                accepted_formats.append('date (yyyy-mm-dd)')
+            if time:
+                accepted_formats.append('time (hh:mm:ss.xxxxx)')
+            if timezone:
+                accepted_formats.append('timezone (+/-hh:mm)')
+            help_string = ' '.join(accepted_formats)
 
             # TODO: custom parsing attempts here
             if not dt_val:
@@ -82,15 +82,38 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
 
             iso_string = dt_val.isoformat()
             setattr(namespace, self.dest, iso_string)
+    return DatetimeAction
 
-    return CLIArgumentType(action=DatetimeAction, nargs='+', help=help_string)
+
+# pylint: disable=redefined-builtin
+@arg_type_by_factory
+def get_datetime_type(help=None, date=True, time=True, timezone=True):
+    help_string = help + ' ' if help else ''
+    accepted_formats = []
+    if date:
+        accepted_formats.append('date (yyyy-mm-dd)')
+    if time:
+        accepted_formats.append('time (hh:mm:ss.xxxxx)')
+    if timezone:
+        accepted_formats.append('timezone (+/-hh:mm)')
+    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
+    action = get_datetime_action(date=date, time=time, timezone=timezone)
+    return CLIArgumentType(action=action, nargs='+', help=help_string)
 
 
+@type_converter_func
 def file_type(path):
     import os
     return os.path.expanduser(path)
 
 
+@type_converter_func
+def json_object_type(json_string):
+    from azure.cli.core.util import get_json_object
+    return get_json_object(json_string)
+
+
+@type_converter_by_factory
 def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
@@ -114,7 +137,7 @@ def get_resource_groups(cli_ctx):
     return list(rcf.resource_groups.list())
 
 
-@Completer
+@completer_func
 def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_resource_groups(cmd.cli_ctx)
     return [item.name for item in result]
@@ -138,9 +161,9 @@ def get_resources_in_subscription(cli_ctx, resource_type=None):
     return list(rcf.resources.list(filter=filter_str))
 
 
+@completer_by_factory
 def get_resource_name_completion_list(resource_type=None):
 
-    @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         rg = getattr(namespace, 'resource_group_name', None)
         if rg:
@@ -150,14 +173,32 @@ def get_resource_name_completion_list(resource_type=None):
     return completer
 
 
+@completer_by_factory
 def get_generic_completion_list(generic_list):
 
-    @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         return generic_list
     return completer
 
 
+@action_class_by_factory
+def get_three_state_action(positive_label='true', negative_label='false', invert=False, return_label=False):
+    # pylint: disable=too-few-public-methods
+    class ThreeStateAction(argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            values = values or positive_label
+            is_positive = values.lower() == positive_label.lower()
+            is_positive = not is_positive if invert else is_positive
+            set_val = None
+            if return_label:
+                set_val = positive_label if is_positive else negative_label
+            else:
+                set_val = is_positive
+            setattr(namespace, self.dest, set_val)
+    return ThreeStateAction
+
+
+@arg_type_by_factory
 def get_three_state_flag(positive_label='true', negative_label='false', invert=False, return_label=False):
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
@@ -169,33 +210,43 @@ def get_three_state_flag(positive_label='true', negative_label='false', invert=F
     - return_label: if true, return the corresponding label. Otherwise, return a boolean value
     """
     choices = [positive_label, negative_label]
-
-    # pylint: disable=too-few-public-methods
-    class ThreeStateAction(argparse.Action):
-
-        def __call__(self, parser, namespace, values, option_string=None):
-            values = values or positive_label
-            is_positive = values.lower() == positive_label.lower()
-            is_positive = not is_positive if invert else is_positive
-            set_val = None
-            if return_label:
-                set_val = positive_label if is_positive else negative_label
-            else:
-                set_val = is_positive
-            setattr(namespace, self.dest, set_val)
-
+    action = get_three_state_action(positive_label=positive_label, negative_label=negative_label, invert=invert,
+                                    return_label=return_label)
     params = {
         'choices': CaseInsensitiveList(choices),
         'nargs': '?',
-        'action': ThreeStateAction
+        'action': action
     }
     return CLIArgumentType(**params)
 
+    # pylint: disable=too-few-public-methods
 
+
+@action_class
+class EnumAction(argparse.Action):
+
+    def __call__(self, parser, args, values, option_string=None):
+
+        def _get_value(val):
+            return next((x for x in self.choices if x.lower() == val.lower()), val)
+
+        if isinstance(values, list):
+            values = [_get_value(v) for v in values]
+        else:
+            values = _get_value(values)
+        setattr(args, self.dest, values)
+
+
+@arg_type_by_factory
 def get_enum_type(data, default=None):
     """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
     if not data:
         return None
+
+    if isinstance(data, type) and issubclass(data, Enum):
+        enum_model = data
+    else:
+        enum_model = None
 
     # transform enum types, otherwise assume list of string choices
     try:
@@ -203,38 +254,23 @@ def get_enum_type(data, default=None):
     except AttributeError:
         choices = data
 
-    # pylint: disable=too-few-public-methods
-    class DefaultAction(argparse.Action):
-
-        def __call__(self, parser, args, values, option_string=None):
-
-            def _get_value(val):
-                return next((x for x in self.choices if x.lower() == val.lower()), val)
-
-            if isinstance(values, list):
-                values = [_get_value(v) for v in values]
-            else:
-                values = _get_value(values)
-            setattr(args, self.dest, values)
-
-    def _type(value):
-        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
-
     default_value = None
     if default:
         default_value = next((x for x in choices if x.lower() == default.lower()), None)
         if not default_value:
             raise CLIError("Command authoring exception: unrecognized default '{}' from choices '{}'"
                            .format(default, choices))
-        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction, default=default_value)
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=EnumAction, enum_model=enum_model,
+                                   default=default_value)
     else:
-        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction)
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=EnumAction, enum_model=enum_model)
     return arg_type
 
 
 # GLOBAL ARGUMENT DEFINITIONS
 
-resource_group_name_type = CLIArgumentType(
+resource_group_name_type = register_arg_type(
+    'resource_group_name_type',
     options_list=['--resource-group', '-g'],
     completer=get_resource_group_completion_list,
     id_part='resource_group',
@@ -246,9 +282,10 @@ resource_group_name_type = CLIArgumentType(
         scopes=[ALL]
     ))
 
-name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
+name_type = register_arg_type('name_type', options_list=['--name', '-n'], help='the primary resource name')
 
 
+@arg_type_by_factory
 def get_location_type(cli_ctx):
     location_type = CLIArgumentType(
         options_list=['--location', '-l'],
@@ -266,7 +303,8 @@ def get_location_type(cli_ctx):
     return location_type
 
 
-deployment_name_type = CLIArgumentType(
+deployment_name_type = register_arg_type(
+    'deployment_name_type',
     help=argparse.SUPPRESS,
     required=False,
     validator=generate_deployment_name
@@ -275,45 +313,53 @@ deployment_name_type = CLIArgumentType(
 quotes = '""' if platform.system() == 'Windows' else "''"
 quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
-tags_type = CLIArgumentType(
+tags_type = register_arg_type(
+    'tags_type',
     validator=validate_tags,
     help="space-separated tags: key[=value] [key[=value] ...]. {}".format(quote_text),
     nargs='*'
 )
 
-tag_type = CLIArgumentType(
+tag_type = register_arg_type(
+    'tag_type',
     type=validate_tag,
     help="a single tag in 'key[=value]' format. {}".format(quote_text),
     nargs='?',
     const=''
 )
 
-no_wait_type = CLIArgumentType(
+no_wait_type = register_arg_type(
+    'no_wait_type',
     options_list=['--no-wait', ],
     help='do not wait for the long-running operation to finish',
     action='store_true'
 )
 
-zones_type = CLIArgumentType(
+zones_type = register_arg_type(
+    'zones_type',
     options_list=['--zones', '-z'],
     nargs='+',
     help='Space-separated list of availability zones into which to provision the resource.',
     choices=['1', '2', '3']
 )
 
-zone_type = CLIArgumentType(
+zone_type = register_arg_type(
+    'zone_type',
     options_list=['--zone', '-z'],
     help='Availability zone into which to provision the resource.',
     choices=['1', '2', '3'],
     nargs=1
 )
 
-vnet_name_type = CLIArgumentType(
+vnet_name_type = register_arg_type(
+    'vnet_name_type',
     local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET])
 )
 
-subnet_name_type = CLIArgumentType(
-    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+subnet_name_type = register_arg_type(
+    'subnet_name_type',
+    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET])
+)
 
 
 def patch_arg_make_required(argument):
@@ -350,6 +396,10 @@ class AzArgumentContext(ArgumentsContext):
         if arg_type:
             arg_type_copy = arg_type.settings.copy()
             arg_type_copy.update(merged_kwargs)
+            if '_arg_type' in arg_type_copy:
+                raise KeyError('"_arg_type" is a reserved key')
+            # The key name `arg_type` will exist for nested arg_type, so use `_arg_type`.
+            arg_type_copy['_arg_type'] = arg_type
             return arg_type_copy
         return merged_kwargs
 
