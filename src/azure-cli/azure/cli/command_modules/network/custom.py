@@ -3527,7 +3527,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                                         subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
                                                         ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
         except KeyError:
-            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet | subnet) information.')
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet name | subnet id) information.')
     else:
         try:
             new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
@@ -3800,6 +3800,7 @@ def set_cross_region_lb_rule(
 # endregion
 
 
+# pylint: disable=line-too-long
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                         address_name, ip_address, vnet=None, subnet=None):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
