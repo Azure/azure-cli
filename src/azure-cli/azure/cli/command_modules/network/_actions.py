@@ -35,10 +35,10 @@ class AddBackendAddressCreate(argparse._AppendAction):
             elif kl == 'ip-address':
                 d['ip_address'] = v[0]
             elif kl == 'subnet':
-                 if is_valid_resource_id(v[0]):
-                     d['subnet'] = v[0]
-                 else:
-                     raise UnrecognizedArgumentError(f'{v[0]} is not valid subnet id')
+                if is_valid_resource_id(v[0]):
+                    d['subnet'] = v[0]
+                else:
+                    raise UnrecognizedArgumentError(f'{v[0]} is not valid subnet id')
             else:
                 raise CLIError('key error: key must be one of name and ip-address.')
         return d

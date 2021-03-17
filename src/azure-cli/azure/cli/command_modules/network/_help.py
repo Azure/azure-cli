@@ -3415,7 +3415,7 @@ examples:
   - name: Add one backend address into the load balance backend address pool.
     text: az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --vnet MyVnet --ip-address 10.0.0.1
   - name: Add one backend address into the load balance backend address pool with subnet.
-    text: az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2 --ip-address 10.0.0.1    
+    text: az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2 --ip-address 10.0.0.1
 """
 
 helps['network lb address-pool address remove'] = """

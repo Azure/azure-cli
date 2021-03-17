@@ -976,7 +976,6 @@ def load_arguments(self, _):
         c.argument('ip_address', help='Ip Address within the Virtual Network.')
         c.argument('subnet', help='Id of the existing subnet.', validator=validator_subnet_id, min_api='2020-11-01')
 
-
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
