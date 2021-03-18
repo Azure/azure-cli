@@ -77,11 +77,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_sa)
 
-    cloud_data_plane_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.common#CloudStorageAccount.{}',
-        client_factory=cloud_storage_account_service_factory
-    )
-
     block_blob_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
         client_factory=blob_data_service_factory,
@@ -139,8 +134,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
-    with self.command_group('storage account', cloud_data_plane_sdk) as g:
-        g.storage_command('generate-sas', 'generate_shared_access_signature')
+    with self.command_group('storage account',
+                            command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
+        g.storage_command('generate-sas', 'generate_sas')
 
     encryption_scope_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#EncryptionScopesOperations.{}',
@@ -302,6 +298,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        table_transformer=transform_blob_output)
         g.storage_custom_command_oauth('query', 'query_blob',
                                        is_preview=True, min_api='2019-12-12')
+        g.storage_custom_command_oauth('rewrite', 'rewrite_blob', is_preview=True, min_api='2020-04-08')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',

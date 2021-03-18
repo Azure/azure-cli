@@ -150,6 +150,11 @@ examples:
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/default" \\
         --resource-provider-connection Outbound --enable-private-link
+  - name: Create a cluster with Compute Isolation feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --enable-compute-isolation --workernode-size "Standard_E8S_V3" --headnode-size "Standard_E8S_V3"
 """
 
 helps['hdinsight list'] = """

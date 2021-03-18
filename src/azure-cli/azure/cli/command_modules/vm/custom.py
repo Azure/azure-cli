@@ -13,11 +13,6 @@
 # pylint: disable=no-self-use,too-many-lines
 from __future__ import print_function
 
-# from .generated.custom import *  # noqa: F403
-try:
-    from .manual.custom import *   # noqa: F403, pylint: disable=unused-import,unused-wildcard-import,wildcard-import
-except ImportError:
-    pass
 
 import json
 import os
@@ -50,6 +45,12 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
+
+from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+try:
+    from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+except ImportError:
+    pass
 
 logger = get_logger(__name__)
 
@@ -294,7 +295,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=False):
+                        tier=None, enable_bursting=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -396,7 +397,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_access_id = disk_access
     if tier is not None:
         disk.tier = tier
-    disk.bursting_enabled = enable_bursting
+    if enable_bursting is not None:
+        disk.bursting_enabled = enable_bursting
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -453,7 +455,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
-    instance.bursting_enabled = enable_bursting
+    if enable_bursting is not None:
+        instance.bursting_enabled = enable_bursting
     return instance
 # endregion
 
@@ -718,7 +721,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-              encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None):
+              encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
+              enable_hotpatching=None, platform_fault_domain=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -890,7 +894,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
-        enable_auto_update=enable_auto_update, patch_mode=patch_mode)
+        enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
+        platform_fault_domain=platform_fault_domain)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1195,9 +1200,21 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # update the NSG with the new rule to allow inbound traffic
     SecurityRule = cmd.get_models('SecurityRule', resource_type=ResourceType.MGMT_NETWORK)
-    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
+
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
+
+    # use portranges if multiple ports are entered
+    if "," not in port:
+        port_arg = {
+            'destination_port_range': port
+        }
+    else:
+        port_arg = {
+            'destination_port_ranges': port.split(',')
+        }
+
     rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
-                        source_port_range='*', destination_port_range=port, priority=priority,
+                        source_port_range='*', **port_arg, priority=priority,
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
@@ -2216,7 +2233,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
 
     ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
+                                  type_properties_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
                                   type_handler_version=version,
                                   settings={'UserName': username},
@@ -2225,9 +2242,8 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
     if no_wait:
         return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
                            resource_group_name, vm_instance.name, instance_name, ext)
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                vm_instance.name,
-                                                                instance_name, ext)
+    poller = client.virtual_machine_extensions.begin_create_or_update(
+        resource_group_name, vm_instance.name, instance_name, ext)
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
@@ -2342,7 +2358,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
+                max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None):
@@ -2358,9 +2374,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
-    scale_set_vm_str = 'ScaleSetVM'
-    vm_str = 'VM'
-    if orchestration_mode.lower() == scale_set_vm_str.lower():
+    uniform_str = 'Uniform'
+    flexible_str = 'Flexible'
+    if orchestration_mode.lower() == uniform_str.lower():
         from msrestazure.tools import resource_id, is_valid_resource_id
 
         storage_sku = disk_info['os'].get('storageAccountType')
@@ -2601,9 +2617,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
 
-    elif orchestration_mode.lower() == vm_str.lower():
+    elif orchestration_mode.lower() == flexible_str.lower():
         if platform_fault_domain_count is None:
-            raise CLIError("usage error: --platform-fault-domain-count is required in VM mode")
+            raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
         vmss_resource = {
             'type': 'Microsoft.Compute/virtualMachineScaleSets',
             'name': vmss_name,
@@ -2623,13 +2639,13 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 'id': proximity_placement_group
             }
     else:
-        raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
+        raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
 
-    if orchestration_mode.lower() == scale_set_vm_str.lower() and admin_password:
+    if orchestration_mode.lower() == uniform_str.lower() and admin_password:
         master_template.add_secure_parameter('adminPassword', admin_password)
 
     template = master_template.build()
@@ -2667,7 +2683,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
             sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
 
-    if orchestration_mode.lower() == scale_set_vm_str.lower() and assign_identity is not None:
+    if orchestration_mode.lower() == uniform_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
@@ -2699,8 +2715,10 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
+    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
+    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):

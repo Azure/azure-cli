@@ -20,15 +20,15 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 
 def load_arguments(self, _):
 
-    with self.argument_context('vm ssh-public-key list') as c:
+    with self.argument_context('sshkey list') as c:
         c.argument('resource_group_name', resource_group_name_type)
 
-    with self.argument_context('vm ssh-public-key show') as c:
+    with self.argument_context('sshkey show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
 
-    with self.argument_context('vm ssh-public-key create') as c:
+    with self.argument_context('sshkey create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.')
@@ -40,7 +40,7 @@ def load_arguments(self, _):
                    'will be populated when generateKeyPair is called. If the public key is provided upon resource '
                    'creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.')
 
-    with self.argument_context('vm ssh-public-key update') as c:
+    with self.argument_context('sshkey update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
@@ -50,12 +50,7 @@ def load_arguments(self, _):
                    'will be populated when generateKeyPair is called. If the public key is provided upon resource '
                    'creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.')
 
-    with self.argument_context('vm ssh-public-key delete') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
-                   'name of the SSH public key.', id_part='name')
-
-    with self.argument_context('vm ssh-public-key generate-key-pair') as c:
+    with self.argument_context('sshkey delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')

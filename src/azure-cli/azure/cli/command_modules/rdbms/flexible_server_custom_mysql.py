@@ -4,13 +4,17 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
+from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
@@ -32,16 +36,13 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            administrator_login_password=None, version=None,
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
-                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
+                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None):
     # validator
     if location is None:
         location = DEFAULT_LOCATION_MySQL
-    sku_info = get_mysql_list_skus_info(cmd, location)
+    sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
-    storage_mb *= 1024
 
-    from azure.mgmt.rdbms import mysql_flexibleservers
-    # try:
     db_context = DbContext(
         azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         logging_name='MySQL', command_group='mysql', server_client=client)
@@ -82,6 +83,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     else:
         delegated_subnet_arguments = None
 
+    # calculate IOPS
+    iops = _determine_iops(storage_mb, iops_info, iops, tier, sku_name)
+
+    storage_mb *= 1024  # storage input comes in GiB value
     administrator_login_password = generate_password(administrator_login_password)
     if server_result is None:
         # Create mysql server
@@ -91,7 +96,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                                        sku_name, tier, storage_mb, administrator_login,
                                        administrator_login_password,
                                        version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                       high_availability, zone)
+                                       high_availability, zone, iops)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -139,7 +144,12 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    from azure.mgmt.rdbms import mysql_flexibleservers
+    try:
+        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
+    except ValueError:
+        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
+    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
+
     parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,
         restore_point_in_time=restore_point_in_time,
@@ -154,9 +164,10 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, instance,
                                        sku_name=None,
                                        tier=None,
@@ -170,10 +181,11 @@ def flexible_server_update_custom_func(cmd, instance,
                                        assign_identity=False,
                                        ha_enabled=None,
                                        replication_role=None,
-                                       maintenance_window=None):
+                                       maintenance_window=None,
+                                       iops=None):
     # validator
     location = ''.join(instance.location.lower().split())
-    sku_info = get_mysql_list_skus_info(cmd, location)
+    sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, instance=instance)
 
     from importlib import import_module
@@ -182,14 +194,98 @@ def flexible_server_update_custom_func(cmd, instance,
     module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
-    if sku_name:
-        instance.sku.name = sku_name
-
-    if tier:
-        instance.sku.tier = tier
-
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb * 1024
+
+    sku_rank = {'Standard_B1s': 1, 'Standard_B1ms': 2, 'Standard_B2s': 3, 'Standard_D2ds_v4': 4,
+                'Standard_D4ds_v4': 5, 'Standard_D8ds_v4': 6,
+                'Standard_D16ds_v4': 7, 'Standard_D32ds_v4': 8, 'Standard_D48ds_v4': 9, 'Standard_D64ds_v4': 10,
+                'Standard_E2ds_v4': 11,
+                'Standard_E4ds_v4': 12, 'Standard_E8ds_v4': 13, 'Standard_E16ds_v4': 14, 'Standard_E32ds_v4': 15,
+                'Standard_E48ds_v4': 16,
+                'Standard_E64ds_v4': 17}
+    if location == 'eastus2euap':
+        sku_rank.update({
+            'Standard_D2s_v3': 4,
+            'Standard_D4s_v3': 5, 'Standard_D8s_v3': 6,
+            'Standard_D16s_v3': 7, 'Standard_D32s_v3': 8, 'Standard_D48s_v3': 9, 'Standard_D64s_v3': 10,
+            'Standard_E2s_v3': 11,
+            'Standard_E4s_v3': 12, 'Standard_E8s_v3': 13, 'Standard_E16s_v3': 14, 'Standard_E32s_v3': 15,
+            'Standard_E48s_v3': 16,
+            'Standard_E64s_v3': 17
+        })
+
+    if iops:
+        if (tier is not None and sku_name is None) or (tier is None and sku_name is not None):
+            raise CLIError('Argument Error. If you pass --tier, --sku_name is a mandatory parameter and vice-versa.')
+
+        if tier is None and sku_name is None:
+            iops = _determine_iops(instance.storage_profile.storage_mb // 1024, iops_info, iops, instance.sku.tier, instance.sku.name)
+
+        else:
+            new_sku_rank = sku_rank[sku_name]
+            old_sku_rank = sku_rank[instance.sku.name]
+            supplied_iops = iops
+            max_allowed_iops_new_sku = iops_info[tier][sku_name]
+            default_iops = 100
+            free_iops = (instance.storage_profile.storage_mb // 1024) * 3
+
+            # Downgrading SKU
+            if new_sku_rank < old_sku_rank:
+                if supplied_iops > max_allowed_iops_new_sku:
+                    iops = max_allowed_iops_new_sku
+                    logger.warning('The max IOPS for your sku is %s. Provisioning the server with %s...', iops, iops)
+                elif supplied_iops < default_iops:
+                    if free_iops < default_iops:
+                        iops = default_iops
+                        logger.warning('The min IOPS is %s. Provisioning the server with %s...', default_iops,
+                                       default_iops)
+                    else:
+                        iops = min(max_allowed_iops_new_sku, free_iops)
+                        logger.warning('Updating the server with %s free IOPS...', iops)
+            else:  # Upgrading SKU
+                if supplied_iops > max_allowed_iops_new_sku:
+                    iops = max_allowed_iops_new_sku
+                    logger.warning(
+                        'The max IOPS for your sku is %s. Provisioning the server with %s...', iops, iops)
+                elif supplied_iops <= max_allowed_iops_new_sku:
+                    iops = max(supplied_iops, min(free_iops, max_allowed_iops_new_sku))
+                    if iops != supplied_iops:
+                        logger.warning('Updating the server with %s free IOPS...', iops)
+                elif supplied_iops < default_iops:
+                    if free_iops < default_iops:
+                        iops = default_iops
+                        logger.warning(
+                            'The min IOPS is %s. Updating the server with %s...', default_iops, default_iops)
+                    else:
+                        iops = min(max_allowed_iops_new_sku, free_iops)
+                        logger.warning('Updating the server with %s free IOPS...', iops)
+            instance.sku.name = sku_name
+            instance.sku.tier = tier
+        instance.storage_profile.storage_iops = iops
+
+    # pylint: disable=too-many-boolean-expressions
+    if (iops is None and tier is None and sku_name) or (iops is None and sku_name is None and tier):
+        raise CLIError('Argument Error. If you pass --tier, --sku_name is a mandatory parameter and vice-versa.')
+
+    if iops is None and sku_name and tier:
+        new_sku_rank = sku_rank[sku_name]
+        old_sku_rank = sku_rank[instance.sku.name]
+        instance.sku.name = sku_name
+        instance.sku.tier = tier
+        max_allowed_iops_new_sku = iops_info[tier][sku_name]
+        iops = instance.storage_profile.storage_iops
+
+        if new_sku_rank < old_sku_rank:  # Downgrading
+            if instance.storage_profile.storage_iops > max_allowed_iops_new_sku:
+                iops = max_allowed_iops_new_sku
+                logger.warning('Updating the server with max %s IOPS...', iops)
+        else:  # Upgrading
+            if instance.storage_profile.storage_iops < (instance.storage_profile.storage_mb // 1024) * 3:
+                iops = min(max_allowed_iops_new_sku, (instance.storage_profile.storage_mb // 1024) * 3)
+                logger.warning('Updating the server with free %s IOPS...', iops)
+
+        instance.storage_profile.storage_iops = iops
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
@@ -201,6 +297,7 @@ def flexible_server_update_custom_func(cmd, instance,
         instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
     if maintenance_window:
+        logger.warning('If you are updating maintenancw window with other parameter, maintenance window will be updated first. Please update the other parameters later.')
         # if disabled is pass in reset to default values
         if maintenance_window.lower() == "disabled":
             day_of_week = start_hour = start_minute = 0
@@ -211,7 +308,6 @@ def flexible_server_update_custom_func(cmd, instance,
 
         # set values - if maintenance_window when is None when created then create a new object
         if instance.maintenance_window is None:
-            from azure.mgmt.rdbms import mysql_flexibleservers
             instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
                 day_of_week=day_of_week,
                 start_hour=start_hour,
@@ -224,6 +320,8 @@ def flexible_server_update_custom_func(cmd, instance,
             instance.maintenance_window.start_minute = start_minute
             instance.maintenance_window.custom_window = custom_window
 
+        return ServerForUpdate(maintenance_window=instance.maintenance_window)
+
     params = ServerForUpdate(sku=instance.sku,
                              storage_profile=instance.storage_profile,
                              administrator_login_password=administrator_login_password,
@@ -231,15 +329,12 @@ def flexible_server_update_custom_func(cmd, instance,
                              delegated_subnet_arguments=instance.delegated_subnet_arguments,
                              tags=tags,
                              ha_enabled=ha_enabled,
-                             replication_role=replication_role,
-                             maintenance_window=instance.maintenance_window)
+                             replication_role=replication_role)
 
     if assign_identity:
         if server_module_path.find('mysql'):
-            from azure.mgmt.rdbms import mysql_flexibleservers
             if instance.identity is None:
-                instance.identity = mysql_flexibleservers.models.Identity(
-                    type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+                instance.identity = mysql_flexibleservers.models.Identity()
             params.identity = instance.identity
 
     return params
@@ -256,7 +351,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
             yes=yes)
     if confirm:
         try:
-            result = client.delete(resource_group_name, server_name)
+            result = client.begin_delete(resource_group_name, server_name)
             if cmd.cli_ctx.local_context.is_on:
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('mysql flexible-server', 'server_name')
@@ -282,7 +377,13 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     elif source is None:
         source = "user-override"
 
-    return client.update(resource_group_name, server_name, configuration_name, value, source)
+    parameters = mysql_flexibleservers.models.Configuration(
+        name=configuration_name,
+        value=value,
+        source=source
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 
 
 # Replica commands
@@ -311,14 +412,12 @@ def flexible_replica_create(cmd, client, resource_group_name, replica_name, serv
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
 
-    from azure.mgmt.rdbms import mysql_flexibleservers
-
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_id=server_name,
         location=location,
         create_mode="Replica")
-    return sdk_no_wait(no_wait, client.create, resource_group_name, replica_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
 
 def flexible_replica_stop(client, resource_group_name, server_name):
@@ -337,7 +436,7 @@ def flexible_replica_stop(client, resource_group_name, server_name):
 
     params = ServerForUpdate(replication_role='None')
 
-    return client.update(resource_group_name, server_name, params)
+    return client.begin_update(resource_group_name, server_name, params)
 
 
 def flexible_server_mysql_get(cmd, resource_group_name, server_name):
@@ -354,14 +453,12 @@ def flexible_list_skus(cmd, client, location):
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags,
                    delegated_subnet_arguments,
-                   assign_identity, public_network_access, ha_enabled, availability_zone):
+                   assign_identity, public_network_access, ha_enabled, availability_zone, iops):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/mysql-pricing for pricing details', server_name, sku_name)
-
-    from azure.mgmt.rdbms import mysql_flexibleservers
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
@@ -373,7 +470,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         public_network_access=public_network_access,
         storage_profile=mysql_flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            storage_mb=storage_mb),
+            storage_mb=storage_mb,
+            storage_iops=iops),
         location=location,
         create_mode="Default",
         delegated_subnet_arguments=delegated_subnet_arguments,
@@ -382,11 +480,10 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = mysql_flexibleservers.models.Identity(
-            type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+        parameters.identity = mysql_flexibleservers.models.Identity()
 
     return resolve_poller(
-        server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(logging_name))
 
 
@@ -468,11 +565,38 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
     database_client = cf_db(cmd.cli_ctx, None)
     try:
         database_client.get(resource_group_name, server_name, database_name)
-    except CloudError:
+    except ResourceNotFoundError:
         logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+        parameters = {
+            'name': database_name,
+            'charset': 'utf8',
+            'collation': 'utf8_general_ci'
+        }
         resolve_poller(
-            database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8'), cmd.cli_ctx,
+            database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
             '{} Database Create/Update'.format(logging_name))
+
+
+def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+
+    if charset is None and collation is None:
+        charset = 'utf8'
+        collation = 'utf8_general_ci'
+        logger.warning("Creating database with utf8 charset and utf8_general_ci collation")
+    elif charset or collation:
+        raise RequiredArgumentMissingError("charset and collation have to be input together.")
+
+    parameters = {
+        'name': database_name,
+        'charset': charset,
+        'collation': collation
+    }
+
+    return client.begin_create_or_update(
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters)
 
 
 def _create_mysql_connection_string(host, database_name, user_name, password):
@@ -483,6 +607,30 @@ def _create_mysql_connection_string(host, database_name, user_name, password):
         'password': password if password is not None else '{password}'
     }
     return 'mysql {dbname} --host {host} --user {username} --password={password}'.format(**connection_kwargs)
+
+
+def _determine_iops(storage_gb, iops_info, iops, tier, sku_name):
+    default_iops = 100
+    max_supported_iops = iops_info[tier][sku_name]
+    free_storage_iops = storage_gb * 3
+
+    if iops is None:
+        return default_iops
+    if iops < default_iops:
+        if iops <= free_storage_iops:
+            iops = max(default_iops, min(max_supported_iops, free_storage_iops))
+            logger.warning('Your IOPS input is below the free IOPS provided. Provisioning the server with free %s IOPS...', iops)
+        elif iops > free_storage_iops:
+            iops = default_iops
+            logger.warning('The min IOPS is %s. Provisioning the server with %s...', iops, iops)
+    elif iops > max_supported_iops:
+        iops = max_supported_iops
+        logger.warning('The max IOPS for your sku is %s. Provisioning the server with %s IOPS...', iops, iops)
+    elif default_iops <= iops <= free_storage_iops:
+        iops = min(free_storage_iops, max_supported_iops)
+        logger.warning('Your IOPS input is below the free IOPS provided. Provisioning the server with %s free IOPS...', iops)
+
+    return iops
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

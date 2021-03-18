@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.18.0"
+VERSION = "2.20.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -43,27 +43,27 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2.3',
+    'adal~=1.2.6',
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
+    'azure-common~=1.1',
+    'azure-mgmt-core>=1.2.0,<2.0.0',
     'colorama~=0.4.1',
+    'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack==0.8.0rc2',
-    'msal~=1.0.0',
-    'msal-extensions~=0.1.3',
+    'msal>=1.10.0,<2.0.0',
+    # Dependencies of the vendored subscription SDK
+    # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
+    'msrest>=0.5.0',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
+    'pkginfo>=1.5.0.1',
     'PyJWT==1.7.1',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.22',
     'six~=1.12',
-    'pkginfo>=1.5.0.1',
-    'azure-mgmt-core>=1.2.0,<2.0.0',
-    # Dependencies of the vendored subscription SDK
-    # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
-    'msrest>=0.5.0',
-    'azure-common~=1.1',
 ]
 
 # dependencies for specific OSes

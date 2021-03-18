@@ -18,7 +18,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
     from azure.mgmt.monitor.models import (MetricAlertResource,
                                            MetricAlertSingleResourceMultipleMetricCriteria,
                                            MetricAlertMultipleResourceMultipleMetricCriteria,
-                                           MetricCriteria)
+                                           DynamicMetricCriteria)
     from azure.cli.core import CLIError
     # generate names for the conditions
     for i, cond in enumerate(condition):
@@ -30,8 +30,15 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
             raise CLIError('--target-resource-type and --target-resource-region must be provided.')
         criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
     else:
-        if len(scopes) == 1 and isinstance(condition, MetricCriteria):
-            criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+        if len(scopes) == 1:
+            is_dynamic_threshold_criterion = False
+            for v in condition:
+                if isinstance(v, DynamicMetricCriteria):
+                    is_dynamic_threshold_criterion = True
+            if not is_dynamic_threshold_criterion:
+                criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+            else:
+                criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
         else:
             criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
             target_resource_type = resource_type
@@ -81,14 +88,9 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
 
     # process action additions
     if add_actions is not None:
-        for action in add_actions:
-            match = next(
-                (x for x in instance.actions if action.action_group_id.lower() == x.action_group_id.lower()), None
-            )
-            if match:
-                match.webhook_properties = action.webhook_properties
-            else:
-                instance.actions.append(action)
+        add_action_ids = {x.action_group_id.lower() for x in add_actions}
+        instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in add_action_ids]
+        instance.actions.extend(add_actions)
 
     # process condition removals
     if remove_conditions is not None:
@@ -256,10 +258,10 @@ def _parse_action_removals(actions):
 
 def _parse_resource_and_scope_type(scopes):
     from azure.mgmt.core.tools import parse_resource_id
-    from knack.util import CLIError
+    from azure.cli.core.azclierror import InvalidArgumentValueError
 
     if not scopes:
-        raise CLIError('scopes cannot be null.')
+        raise InvalidArgumentValueError('scopes cannot be null.')
 
     namespace = ''
     resource_type = ''
@@ -267,7 +269,7 @@ def _parse_resource_and_scope_type(scopes):
 
     def validate_scope(item_namespace, item_resource_type, item_scope_type):
         if namespace != item_namespace or resource_type != item_resource_type or scope_type != item_scope_type:
-            raise CLIError('Multiple scopes should be the same resource type.')
+            raise InvalidArgumentValueError('Multiple scopes should be the same resource type.')
 
     def store_scope(item_namespace, item_resource_type, item_scope_type):
         nonlocal namespace
@@ -280,13 +282,18 @@ def _parse_resource_and_scope_type(scopes):
     def parse_one_scope_with_action(scope, operation_on_scope):
         result = parse_resource_id(scope)
         if 'namespace' in result and 'resource_type' in result:
-            operation_on_scope(result['namespace'], result['resource_type'], 'resource')
+            resource_types = [result['type']]
+            child_idx = 1
+            while 'child_type_{}'.format(child_idx) in result:
+                resource_types.append(result['child_type_{}'.format(child_idx)])
+                child_idx += 1
+            operation_on_scope(result['namespace'], '/'.join(resource_types), 'resource')
         elif 'resource_group' in result:  # It's a resource group.
             operation_on_scope('', '', 'resource_group')
         elif 'subscription' in result:  # It's a subscription.
             operation_on_scope('', '', 'subscription')
         else:
-            raise CLIError('Scope must be a valid resource id.')
+            raise InvalidArgumentValueError('Scope must be a valid resource id.')
 
     # Store the resource type and scope type from first scope
     parse_one_scope_with_action(scopes[0], operation_on_scope=store_scope)

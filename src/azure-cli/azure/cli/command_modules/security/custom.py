@@ -11,6 +11,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AssessmentStatus,
                                         IoTSecuritySolutionModel,
                                         UpdateIotSecuritySolutionData)
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
 
@@ -342,6 +343,97 @@ def _construct_resource_id(client, resource_group_name, storage_account_name):
         namespace='Microsoft.Storage',
         type='storageAccounts',
         name=storage_account_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Sql Vulnerability Assessment
+# --------------------------------------------------------------------------------------------
+
+
+# pylint: disable=line-too-long
+def get_va_sql_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def list_va_sql_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def get_va_sql_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(scan_id, rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def list_va_sql_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def get_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def list_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def delete_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.delete(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def update_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    if baseline_latest is True and baseline is None:
+        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan=True)
+    if baseline_latest is False and baseline is not None:
+        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results=baseline)
+    raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
+
+
+# pylint: disable=line-too-long
+def set_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    if baseline_latest is True and baseline is None:
+        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan=True)
+    if baseline_latest is False and baseline is not None:
+        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results=baseline)
+    raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
+
+
+def _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
+
+    if vm_name is None and agent_id is None and vm_uuid is None:
+        return f'{vm_resource_id}/sqlServers/{server_name}/databases/{database_name}'
+    if vm_name is not None and agent_id is not None and vm_uuid is not None:
+        vm_identifier = f'{vm_name}_{agent_id}_{vm_uuid}'
+        return f'{vm_resource_id}/onPremiseMachines/{vm_identifier}/sqlServers/{server_name}/databases/{database_name}'
+    raise MutuallyExclusiveArgumentError('Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types')
+
+
+def _get_va_sql_api_version():
+
+    return "2020-07-01-preview"
 
 
 # --------------------------------------------------------------------------------------------
