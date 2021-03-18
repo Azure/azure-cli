@@ -3479,7 +3479,11 @@ def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
 
 def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
     if subnet and not is_valid_resource_id(subnet):
-        subnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name) + f'/subnets/{subnet}'
+        vnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name)
+        if vnet is None:
+            raise UnrecognizedArgumentError('vnet should be provided when input subnet name instead of subnet id')
+
+        subnet = vnet + f'/subnets/{subnet}'
     return subnet
 
 
