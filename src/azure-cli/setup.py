@@ -99,7 +99,7 @@ DEPENDENCIES = [
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
-    'azure-mgmt-marketplaceordering~=0.1',
+    'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
