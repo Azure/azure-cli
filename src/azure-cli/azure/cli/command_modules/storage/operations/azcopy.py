@@ -72,7 +72,7 @@ def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs
         azcopy = _azcopy_login_client(cmd)
 
     flags = []
-    if recursive is not None:
+    if recursive:
         flags.append('--recursive')
     azcopy.copy(source, destination, flags=flags)
 
