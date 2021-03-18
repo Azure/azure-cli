@@ -3527,18 +3527,18 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
             if addresses_pool:
                 new_addresses = []
                 for addr in addresses_pool:
+                    # vnet      | subnet        |  status
+                    # name/id   | name/id/null  |    ok
+                    # null      | id            |    ok
                     if 'virtual_network' in addr:
                         address = LoadBalancerBackendAddress(name=addr['name'],
                                                              virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
                                                              subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
                                                              ip_address=addr['ip_address'])
-                    elif 'subnet' in addr:
-                        if is_valid_resource_id(addr['subnet']):
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 subnet=Subnet(id=addr['subnet']),
-                                                                 ip_address=addr['ip_address'])
-                        else:
-                            raise KeyError
+                    elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
+                        address = LoadBalancerBackendAddress(name=addr['name'],
+                                                             subnet=Subnet(id=addr['subnet']),
+                                                             ip_address=addr['ip_address'])
                     else:
                         raise KeyError
 
