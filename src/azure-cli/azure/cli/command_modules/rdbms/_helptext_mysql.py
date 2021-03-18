@@ -25,14 +25,33 @@ examples:
   - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
     text: |
         az mysql flexible-server create --public-access none
+  - name: Create a MySQL flexible server with public access and add client IP address to have access to the server
+    text: |
+        az mysql flexible-server create --public-access <my_client_ip>
+  - name: Create a MySQL flexible server with public access and add the range of IP address to have access to this server
+    text: |
+      az mysql flexible-server create --public-access <start_ip_address-end_ip_address>
+  - name: Create a MySQL flexible server with public access and allow applications from Azure IP addresses to connect to your flexible server
+    text: |
+      az mysql flexible-server create --public-access 0.0.0.0
   - name: Create a MySQL flexible server with specified SKU and storage, using defaults from local context.
     text: |
         az mysql flexible-server create --name testServer --admin-password password
+  - name: Create a MySQL flexible server using already existing virtual network and subnet. If provided virtual network and subnet does not exists then virtual network and subnet with default address prefix will be created.
+    text: |
+      az mysql flexible-server create --vnet myVnet --subnet mySubnet
+  - name: Create a MySQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+    text: |
+      az mysql flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
+  - name: Create a MySQL flexible server using new virtual network, subnet with non-default address prefix.
+    text: |
+      az mysql flexible-server create --vnet myVnet --address-prefixes 10.0.0.0/24 --subnet mySubnet --subnet-prefixes 10.0.0.0/24
   - name: Create a MySQL flexible server with  parameters set.
     text: |
-        az mysql flexible-server create --location northeurope --resource-group testGroup --name testServer --admin-user username \\
-            --admin-password password --sku-name Standard_B1ms --tier GeneralPurpose --public-access 0.0.0.0 \\
-            --storage-size 32 --tags "key=value" --version 5.7
+        az mysql flexible-server create --location northeurope --resource-group testGroup \\
+          --name testServer --admin-user username --admin-password password \\
+          --sku-name Standard-B1ms --tier Burstable --public-access 0.0.0.0 --storage-size 32 \\
+          --tags "key=value" --version 5.7
 """
 
 helps['mysql flexible-server db'] = """
@@ -47,7 +66,7 @@ examples:
   - name: Create database 'testDatabase' in the flexible server 'testServer' with the default parameters.
     text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase
   - name: Create database 'testDatabase' in the flexible server 'testServer' with a given character set and collation rules.
-    text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase//
+    text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase \\
             --charset validCharset --collation validCollation
 """
 
@@ -132,10 +151,10 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer
+    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer \\
             --rule-name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer
+    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer \\
             --rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
@@ -233,8 +252,8 @@ examples:
   - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
     text: |
         az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
-            --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testServer2" \\
-            --restore-time "2017-06-15T13:10:00Z"
+          --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testServer2" \\
+          --restore-time "2017-06-15T13:10:00Z"
 """
 
 helps['mysql flexible-server show'] = """
