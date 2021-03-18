@@ -521,7 +521,8 @@ def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
         queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=False,
+        delivery_attribute_mapping=None):
 
     event_subscription_info = _get_event_subscription_info(
         endpoint=endpoint,
@@ -547,7 +548,8 @@ def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         queue_msg_ttl=queue_msg_ttl,
-        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays)
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
 
     return client.create_or_update(
         resource_group_name,
@@ -662,7 +664,8 @@ def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=t
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
         queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=False,
+        delivery_attribute_mapping=None):
 
     event_subscription_info = _get_event_subscription_info(
         endpoint=endpoint,
@@ -688,7 +691,8 @@ def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=t
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         queue_msg_ttl=queue_msg_ttl,
-        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays)
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
 
     return client.create_or_update(
         resource_group_name,
@@ -760,7 +764,8 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=False,
+        delivery_attribute_mapping=None):
 
     event_subscription_info = _get_event_subscription_info(
         endpoint=endpoint,
@@ -786,7 +791,8 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         deadletter_identity=deadletter_identity,
         deadletter_identity_endpoint=deadletter_identity_endpoint,
         queue_msg_ttl=queue_msg_ttl,
-        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays)
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
+        delivery_attribute_mapping=delivery_attribute_mapping)
 
     return client.create_or_update(
         source_resource_id,
@@ -918,7 +924,8 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=False,
+        delivery_attribute_mapping=None):
 
     if endpoint is None and delivery_identity_endpoint is None or \
        endpoint is not None and delivery_identity_endpoint is not None:
@@ -1008,6 +1015,9 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         tennant_id = azure_active_directory_tenant_id
         application_id = azure_active_directory_application_id_or_uri
 
+    if delivery_attribute_mapping is not None and endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower():
+        raise CLIError('usage error: --delivery-attribute-mapping is not applicable for '
+                           'endpoint type StorageQueue.')
     destination = None
     if endpoint is not None:
         destination = _get_endpoint_destination(
@@ -1017,7 +1027,8 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
             preferred_batch_size_in_kilobytes,
             tennant_id,
             application_id,
-            queue_msg_ttl)
+            queue_msg_ttl,
+            delivery_attribute_mapping)
 
     delivery_with_resource_identity = None
 
@@ -1031,7 +1042,8 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
             preferred_batch_size_in_kilobytes,
             tennant_id,
             application_id,
-            queue_msg_ttl)
+            queue_msg_ttl,
+            delivery_attribute_mapping)
         delivery_with_resource_identity = DeliveryWithResourceIdentity(
             identity=delivery_identity_info,
             destination=destination_with_identity)
@@ -1273,7 +1285,8 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=False,
+        delivery_attribute_mapping=None):
 
     condition1 = delivery_identity is not None and \
         (delivery_identity_endpoint is None or delivery_identity_endpoint_type is None)
@@ -1305,6 +1318,10 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
 
     if endpoint_type.lower() != WEBHOOK_DESTINATION.lower() and endpoint is None:
         raise CLIError('Invalid usage: Since --endpoint-type is specified, a valid endpoint must also be specified.')
+
+    if endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower() and delivery_attribute_mapping is not None:
+        raise CLIError('usage error: --delivery-attribute-mapping is not applicable for '
+                           'endpoint type StorageQueue.')
 
     tennant_id = None
     application_id = None
@@ -1349,7 +1366,8 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
             preferred_batch_size_in_kilobytes,
             tennant_id,
             application_id,
-            queue_msg_ttl)
+            queue_msg_ttl,
+            delivery_attribute_mapping)
 
     delivery_with_resource_identity = None
 
@@ -1363,7 +1381,8 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
             0,
             tennant_id,
             application_id,
-            queue_msg_ttl)
+            queue_msg_ttl,
+            delivery_attribute_mapping)
         delivery_with_resource_identity = DeliveryWithResourceIdentity(
             identity=delivery_identity_info,
             destination=destination_with_identity)
@@ -1416,7 +1435,8 @@ def _get_endpoint_destination(
         preferred_batch_size_in_kilobytes,
         azure_active_directory_tenant_id,
         azure_active_directory_application_id_or_uri,
-        queue_msg_ttl=None):
+        queue_msg_ttl=None,
+        delivery_attribute_mapping=None):
 
     if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
         destination = WebHookEventSubscriptionDestination(
@@ -1424,22 +1444,24 @@ def _get_endpoint_destination(
             max_events_per_batch=max_events_per_batch,
             preferred_batch_size_in_kilobytes=preferred_batch_size_in_kilobytes,
             azure_active_directory_tenant_id=azure_active_directory_tenant_id,
-            azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri)
+            azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri,
+            delivery_attribute_mappings=delivery_attribute_mapping)
     elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
-        destination = EventHubEventSubscriptionDestination(resource_id=endpoint)
+        destination = EventHubEventSubscriptionDestination(resource_id=endpoint,delivery_attribute_mappings=delivery_attribute_mapping)
     elif endpoint_type.lower() == HYBRIDCONNECTION_DESTINATION.lower():
-        destination = HybridConnectionEventSubscriptionDestination(resource_id=endpoint)
+        destination = HybridConnectionEventSubscriptionDestination(resource_id=endpoint,delivery_attribute_mappings=delivery_attribute_mapping)
     elif endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower():
         destination = _get_storage_queue_destination(endpoint, queue_msg_ttl)
     elif endpoint_type.lower() == SERVICEBUSQUEUE_DESTINATION.lower():
-        destination = ServiceBusQueueEventSubscriptionDestination(resource_id=endpoint)
+        destination = ServiceBusQueueEventSubscriptionDestination(resource_id=endpoint,delivery_attribute_mappings=delivery_attribute_mapping)
     elif endpoint_type.lower() == SERVICEBUSTOPIC_DESTINATION.lower():
-        destination = ServiceBusTopicEventSubscriptionDestination(resource_id=endpoint)
+        destination = ServiceBusTopicEventSubscriptionDestination(resource_id=endpoint,delivery_attribute_mappings=delivery_attribute_mapping)
     elif endpoint_type.lower() == AZUREFUNCTION_DESTINATION.lower():
         destination = AzureFunctionEventSubscriptionDestination(
             resource_id=endpoint,
             max_events_per_batch=max_events_per_batch,
-            preferred_batch_size_in_kilobytes=preferred_batch_size_in_kilobytes)
+            preferred_batch_size_in_kilobytes=preferred_batch_size_in_kilobytes,
+            delivery_attribute_mappings=delivery_attribute_mapping)
     return destination
 
 

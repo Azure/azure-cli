@@ -20,6 +20,7 @@ from azure.cli.core.commands.parameters import (
 from .advanced_filter import EventSubscriptionAddFilter
 from .event_channel_filter import EventChannelAddFilter
 from .inbound_ip_rules import AddInboundIpRule
+from .delivery_attribute_mapping import AddDeliveryAttributeMapping
 
 included_event_types_type = CLIArgumentType(
     help="A space-separated list of event types (e.g., Microsoft.Storage.BlobCreated and Microsoft.Storage.BlobDeleted). In order to subscribe to all default event types, do not specify any value for this argument. For event grid topics, event types are customer defined. For Azure events, e.g., Storage Accounts, IoT Hub, etc., you can query their event types using this CLI command 'az eventgrid topic-type list-event-types'.",
@@ -185,7 +186,7 @@ enable_advanced_filtering_on_arrays = CLIArgumentType(
     help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.",
     arg_type=get_enum_type(['true', 'false']),
     arg_group="Filtering", 
-    options_list=['--enable-advanced-filtering-on-arrays'],
+    options_list=['--enable-advanced-filtering-on-arrays', '-e'],
     is_preview=True
 )
 
@@ -238,14 +239,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
-        c.argument('kind', arg_type=kind_type)
-        c.argument('extended_location_name', arg_type=extended_location_name)
-        c.argument('extended_location_type', arg_type=extended_location_type)
-        c.argument('queue_msg_ttl', arg_type=queue_msg_ttl)
-        c.argument('enable_advanced_filtering_on_arrays', arg_group="Filtering", arg_type=enable_advanced_filtering_on_arrays)
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('kind', arg_type=kind_type)
+        c.argument('extended_location_name', arg_type=extended_location_name)
+        c.argument('extended_location_type', arg_type=extended_location_type)
 
     with self.argument_context('eventgrid topic key') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
@@ -344,6 +343,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('delivery_identity_endpoint', help="Endpoint with identity where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.", is_preview=True)
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
         c.argument('queue_msg_ttl', arg_type=queue_msg_ttl)
+        c.argument('enable_advanced_filtering_on_arrays', arg_group="Filtering", arg_type=enable_advanced_filtering_on_arrays)
+        c.argument('delivery_attribute_mapping', arg_group="Delivery Attribute Mapping", action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -367,6 +368,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('queue_msg_ttl', arg_type=queue_msg_ttl)
+        c.argument('enable_advanced_filtering_on_arrays', arg_group="Filtering", arg_type=enable_advanced_filtering_on_arrays)
+        c.argument('delivery_attribute_mapping', arg_group="Delivery Attribute Mapping", action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -391,6 +394,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('queue_msg_ttl', arg_type=queue_msg_ttl)
+        c.argument('enable_advanced_filtering_on_arrays', arg_group="Filtering", arg_type=enable_advanced_filtering_on_arrays)
+        c.argument('delivery_attribute_mapping', arg_group="Delivery Attribute Mapping", action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)

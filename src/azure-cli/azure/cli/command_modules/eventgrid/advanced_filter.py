@@ -39,12 +39,12 @@ NUMBERGREATERTHANOREQUALS = "NumberGreaterThanOrEquals"
 NUMBERLESSTHAN = "NumberLessThan"
 NUMBERLESSTHANOREQUALS = "NumberLessThanOrEquals"
 BOOLEQUALS = "BoolEquals"
-NUMBERINRANGE = "NumberInRange",
-NUMBERNOTINRANGE = "NumberNotInRange",
-STRINGNOTBEGINSWITH = "StringNotBeginsWith",
-STRINGNOTENDSWITH = "StringNotEndsWith",
-STRINGNOTCONTAINS = "StringNotContains",
-ISNULLORUNDEFINED = "IsNullOrUndefined",
+NUMBERINRANGE = "NumberInRange"
+NUMBERNOTINRANGE = "NumberNotInRange"
+STRINGNOTBEGINSWITH = "StringNotBeginsWith"
+STRINGNOTENDSWITH = "StringNotEndsWith"
+STRINGNOTCONTAINS = "StringNotContains"
+ISNULLORUNDEFINED = "IsNullOrUndefined"
 ISNOTNULL = "IsNotNull"
         
 # pylint: disable=protected-access
@@ -61,10 +61,10 @@ class EventSubscriptionAddFilter(argparse._AppendAction):
 # operators that support no value
         if operator.lower() == ISNULLORUNDEFINED.lower():
             _validate_no_value_is_specified(ISNULLORUNDEFINED, values)
-            advanced_filter = IsNullOrUndefined(key=key)
+            advanced_filter = IsNullOrUndefinedAdvancedFilter(key=key)
         elif operator.lower() == ISNOTNULL.lower():
             _validate_no_value_is_specified(ISNOTNULL, values)
-            advanced_filter = IsNotNull(key=key)
+            advanced_filter = IsNotNullAdvancedFilter(key=key)
         
 # operators that support single value
         elif operator.lower() == NUMBERLESSTHAN.lower():
@@ -109,11 +109,17 @@ class EventSubscriptionAddFilter(argparse._AppendAction):
 
 # operators that support range of values
         elif operator.lower() == NUMBERINRANGE.lower():
-            float_values = [float(i) for i in values[2:]]
-            advanced_filter = NumberInRangeAdvancedFilter(key=key, values=float_values)
+            result = []
+            for value in values[2:]:
+              float_value = [float(i) for i in value.split(',')]
+              result.append(float_value)
+            advanced_filter = NumberInRangeAdvancedFilter(key=key, values=result)
         elif operator.lower() == NUMBERNOTINRANGE.lower():
-            float_values = [float(i) for i in values[2:]]
-            advanced_filter = NumberNotInRangeAdvancedFilter(key=key, values=float_values)
+            result = []
+            for value in values[2:]:
+              float_value = [float(i) for i in value.split(',')]
+              result.append(float_value)
+            advanced_filter = NumberNotInRangeAdvancedFilter(key=key, values=result)
         else:
             raise CLIError("--advanced-filter: The specified filter operator '{}' is not"
                            " a valid operator. Supported values are ".format(operator) +

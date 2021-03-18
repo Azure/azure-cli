@@ -255,20 +255,27 @@ parameters:
   - name: --publisher-filter
     short-summary: A publisher filter that is used to enable filtering of events based on a specific event property. This set of filters that are specified by the publisher in order to determine which events to be received by the subscriber.
     long-summary: |
-        Usage:                     --publisher-filter KEY[.INNERKEY] FILTEROPERATOR VALUE [VALUE ...]
-        StringIn:                  --publisher-filter data.Color StringIn Blue Red Orange Yellow
-        StringNotIn:               --publisher-filter data.Color StringNotIn Blue Red Orange Yellow
-        StringContains:            --publisher-filter subject StringContains Blue Red
-        StringBeginsWith:          --publisher-filter subject StringBeginsWith Blue Red
-        StringEndsWith:            --publisher-filter subject StringEndsWith img png jpg
-        NumberIn:                  --publisher-filter data.property1 NumberIn 5 10 20
-        NumberNotIn:               --publisher-filter data.property2 NumberNotIn 100 200 300
-        NumberLessThan:            --publisher-filter data.property3 NumberLessThan 100
-        NumberLessThanOrEquals:    --publisher-filter data.property2 NumberLessThanOrEquals 100
-        NumberGreaterThan:         --publisher-filter data.property3 NumberGreaterThan 100
-        NumberGreaterThanOrEquals: --publisher-filter data.property2 NumberGreaterThanOrEquals 100
-        BoolEquals:                --publisher-filter data.property3 BoolEquals true
-        Multiple publisher filters can be specified by using more than one `--publisher-filter` argument.
+        Usage:                     --advanced-filter KEY[.INNERKEY] FILTEROPERATOR VALUE [VALUE ...]
+        StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
+        StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
+        StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
+        StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
+        StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
+        NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
+        NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
+        NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
+        NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
+        NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
+        NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
+        BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
+        Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
 examples:
   - name: Create a specific event channel.
     text: az eventgrid partner namespace event-channel create -g rg1 --partner-namespace-name partnernamespace1 -n eventChannelName1 --source SourceExample1 --destination-subscription-id 61f7c265-374d-499e-866d-5f4cc302b888 --destination-resource-group-name rg2 --desination-topic-name topicName1
@@ -434,15 +441,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --deadletter-endpoint
     short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.
@@ -450,6 +464,16 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue 
+
 examples:
   - name: Create a new event subscription for an Event Grid system topic, using default filters.
     text: |
@@ -494,6 +518,16 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --queue-msg-ttl 300
+  - name: Create a new event subscription for an Event Grid system topic, using Azure Function as destination with delivery attribute mapping.
+    text: >
+        az eventgrid system-topic event-subscription create -n es1 \\
+            -g rg1 --system-topic-name systemtopic1 \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} \\
+            --endpoint-type azurefunction \\
+            --delivery-attribute-mapping somename static somevalue \\
+            --delivery-attribute-mapping somename static somevalue false \\
+            --delivery-attribute-mapping somename static somevalue true \\
+            --delivery-attribute-mapping somename dynamic somefield  
 """
 
 helps['eventgrid system-topic event-subscription delete'] = """
@@ -538,16 +572,32 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename static somevalue 
 examples:
   - name: Update an event subscription for an Event Grid system topic to specify a new endpoint.
     text: |
@@ -584,6 +634,14 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --queue-msg-ttl 300
+  - name: Update an event subscription for an Event Grid system topic, using Azure Function as destination with delivery attribute mapping.
+    text: |
+        az eventgrid system-topic event-subscription update -n es1 \\
+            -g rg1 --system-topic-name systemtopic1 \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} \\
+            --endpoint-type azurefunction \\
+            --delivery-attribute-mapping somename static somevalue false --delivery-attribute-mapping somename static somevalue true \\
+            --delivery-attribute-mapping somename dynamic somefield  
 """
 
 helps['eventgrid partner topic event-subscription'] = """
@@ -602,22 +660,40 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --deadletter-endpoint
     short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.
     long-summary: |
-        Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
+        :       --deadletter-endpoint  STORAGEID
+                     --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename static somevalue 
+
 examples:
   - name: Create a new event subscription for an Event Grid partner topic, using default filters.
     text: |
@@ -707,16 +783,32 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename static somevalue 
 examples:
   - name: Update an event subscription for an Event Grid partner topic to specify a new endpoint.
     text: |
@@ -753,7 +845,14 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --queue-msg-ttl 300
-
+  - name: Update an event subscription for a Event Grid partner topic, using Azure Function as destination with delivery attribute mapping.
+    text: |
+        az eventgrid partner topic event-subscription update -n es1 \\
+            -g rg1 --partner-topic-name partnertopic1 \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} \\
+            --endpoint-type azurefunction \\
+            --delivery-attribute-mapping somename static somevalue false --delivery-attribute-mapping somename static somevalue true \\
+            --delivery-attribute-mapping somename dynamic somefield  
 """
 
 helps['eventgrid event-subscription'] = """
@@ -773,15 +872,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --source-resource-id
     short-summary: Fully qualified identifier of the Azure resource to which the event subscription needs to be created.
@@ -794,13 +900,19 @@ parameters:
         For EventGrid domain:       --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1
         For EventGrid domain topic: --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1/topics/t1
   - name: --deadletter-endpoint
-    short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.
-    long-summary: |
-        Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
+    short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.    
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
-  - name: --delivery-identity-endpoint-type
-    short-summary: The type of the destination endpoint with resource identity.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename static somevalue 
+
 examples:
   - name: Create a new event subscription for an Event Grid topic, using default filters.
     text: |
@@ -905,10 +1017,17 @@ examples:
 
   - name: Create a new event subscription for an Event Grid topic, using Eventhub with systemassigned MSI identity as destination and with deadletter with MSI identity
     text: |
-        az eventgrid event-subscription create --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
+        az eventgrid event-subscription create -n es1 \\
+            --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
             --delivery-identity-endpoint-type eventhub --delivery-identity systemassigned --delivery-identity-endpoint /subscriptions/{SubId2|}/resourceGroups/{RG2}/providers/Microsoft.eventhub/namespaces/{EventHubNamespace}/eventhubs/{EventhubName} \\
             --deadletter-identity-endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/s2/blobServices/default/containers/blobcontainer1 --deadletter-identity systemassigned -n {EventSubscriptionName}
 
+  - name: Create a new event subscription for an Event Grid topic with delivery attribute mapping.
+    text: |
+        az eventgrid event-subscription create -n es1 \\
+            --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
+            --delivery-attribute-mapping somename static somevalue false --delivery-attribute-mapping somename static somevalue true \\
+            --delivery-attribute-mapping somename dynamic somefield  
 """
 
 helps['eventgrid event-subscription delete'] = """
@@ -1079,16 +1198,32 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange:             --advanced-filter data.property1 NumberInRange 5,6,7 10,11 20
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange  5,6,7 10,11 20
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename static somevalue 
 examples:
   - name: Update an event subscription for an Event Grid topic to specify a new endpoint.
     text: |
@@ -1128,6 +1263,12 @@ examples:
         az eventgrid event-subscription update --name es2 \\
             --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/kalsegblob" \\
             --queue-msg-ttl 300
+  - name: Update an event subscription with delivery attribute mapping.
+    text: |
+        az eventgrid event-subscription update -n es1 \\
+            --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
+            --delivery-attribute-mapping somename static somevalue false --delivery-attribute-mapping somename static somevalue true \\
+            --delivery-attribute-mapping somename dynamic somefield  
 """
 
 helps['eventgrid extension-topic'] = """
