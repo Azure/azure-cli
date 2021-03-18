@@ -40,7 +40,8 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess
+    ServerPublicNetworkAccess,
+    ServerInfo
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -3642,6 +3643,62 @@ def server_aad_only_enable(
         server_name=server_name,
         azure_ad_only_authentication=True
     )
+
+###############################################
+#           sql server trust groups           #
+###############################################
+
+
+def server_trust_group_create(
+        client,
+        resource_group_name,
+        name,
+        location,
+        group_member,
+        trust_scope,
+        no_wait=False):
+
+    members = [ServerInfo(server_id=member) for member in group_member]
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name,
+                       group_members=members,
+                       trust_scopes=trust_scope)
+
+
+def server_trust_group_delete(
+        client,
+        resource_group_name,
+        name,
+        location,
+        no_wait=False):
+
+    return sdk_no_wait(no_wait, client.delete,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name)
+
+
+def server_trust_group_get(
+        client,
+        resource_group_name,
+        name,
+        location):
+
+    return client.get(resource_group_name=resource_group_name,
+                      location_name=location,
+                      server_trust_group_name=name)
+
+
+def server_trust_group_list(
+        client,
+        resource_group_name,
+        instance_name=None,
+        location=None):
+    if instance_name:
+        return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=instance_name)
+    return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
 
 
 ###############################################
