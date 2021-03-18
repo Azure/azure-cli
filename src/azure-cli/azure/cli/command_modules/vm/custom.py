@@ -1285,7 +1285,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, proximity_placement_group=None, workspace=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
+              enable_vtpm=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1328,6 +1329,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vm.security_profile = {'uefiSettings': {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }}
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)

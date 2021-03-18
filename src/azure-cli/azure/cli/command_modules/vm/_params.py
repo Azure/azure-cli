@@ -318,6 +318,10 @@ def load_arguments(self, _):
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
+        c.argument('enable_secure_boot', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                   help='Enable secure boot.')
+        c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                   help='Enable vTPM.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
