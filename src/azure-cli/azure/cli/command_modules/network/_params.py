@@ -974,6 +974,7 @@ def load_arguments(self, _):
         c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
         c.argument('vnet', help='Name or Id of the virtual network.', validator=process_vnet_name_or_id)
         c.argument('ip_address', help='Ip Address within the Virtual Network.')
+        c.argument('subnet', help='Name or Id of the existing subnet.(If name is provided, vnet is also required;If id, vnet is not required)', min_api='2020-11-01')
 
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
