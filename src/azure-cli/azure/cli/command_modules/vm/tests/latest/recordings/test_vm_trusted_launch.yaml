@@ -1,0 +1,95 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --security-type --enable-secure-boot --enable-vtpm --admin-username
+        --admin-password --nsg-rule
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.20.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_trusted_launch_000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_trusted_launch_000001","name":"cli_test_vm_trusted_launch_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-03-18T09:37:13Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 18 Mar 2021 09:37:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --security-type --enable-secure-boot --enable-vtpm --admin-username
+        --admin-password --nsg-rule
+      User-Agent:
+      - AZURECLI/2.20.0 azsdk-python-azure-mgmt-compute/19.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/windowsserver-gen2preview-preview/skus/windows10-tvm/versions/18363.592.2001092016?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"NotFound\",\r\n    \"message\":
+        \"Artifact: VMImage was not found.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '99'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 18 Mar 2021 09:37:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73998
+    status:
+      code: 404
+      message: Not Found
+version: 1

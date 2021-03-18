@@ -5072,5 +5072,16 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('sshkey show -g {rg} -n k3')
 
 
+class VMTrustedLaunchScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_')
+    def test_vm_trusted_launch(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image MicrosoftWindowsServer:windowsserver-gen2preview-preview:windows10-tvm:18363.592.2001092016 --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username AzureUser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
