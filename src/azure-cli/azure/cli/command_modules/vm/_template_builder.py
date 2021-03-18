@@ -78,7 +78,7 @@ def build_storage_account_resource(_, name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -94,6 +94,14 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'properties': public_ip_properties
     }
 
+    if count:
+        public_ip['name'] = "[concat('{}', copyIndex())]".format(name)
+        public_ip['copy'] = {
+            'name': 'publicipcopy',
+            'mode': 'parallel',
+            'count': count
+        }
+
     # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
     # support x-zone; rather we will rely on the Standard LB to work with such scale sets
     if zone and len(zone) == 1:
@@ -105,8 +113,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None):
-
+                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None,
+                       count=None):
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
         'privateIPAllocationMethod': private_ip_allocation,
@@ -118,15 +126,20 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     if public_ip_id:
         ip_config_properties['publicIPAddress'] = {'id': public_ip_id}
+        if count:
+            ip_config_properties['publicIPAddress']['id'] = "[concat('{}', copyIndex())]".format(public_ip_id)
 
+    ipconfig_name = 'ipconfig{}'.format(vm_name)
     nic_properties = {
         'ipConfigurations': [
             {
-                'name': 'ipconfig{}'.format(vm_name),
+                'name': ipconfig_name,
                 'properties': ip_config_properties
             }
         ]
     }
+    if count:
+        nic_properties['ipConfigurations'][0]['name'] = "[concat('{}', copyIndex())]".format(ipconfig_name)
 
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
@@ -150,6 +163,15 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         'dependsOn': [],
         'properties': nic_properties
     }
+
+    if count:
+        nic['name'] = "[concat('{}', copyIndex())]".format(name)
+        nic['copy'] = {
+            'name': 'niccopy',
+            'mode': 'parallel',
+            'count': count
+        }
+
     return nic
 
 
@@ -256,7 +278,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
-        enable_hotpatching=None, platform_fault_domain=None):
+        enable_hotpatching=None, platform_fault_domain=None, count=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -264,11 +286,17 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         special_chars = '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
 
+        # _computer_name is used to avoid shadow names
+        _computer_name = computer_name or ''.join(filter(lambda x: x not in special_chars, name))
+
         os_profile = {
             # Use name as computer_name if it's not provided. Remove special characters from name.
-            'computerName': computer_name or ''.join(filter(lambda x: x not in special_chars, name)),
+            'computerName': _computer_name,
             'adminUsername': admin_username
         }
+
+        if count:
+            os_profile['computerName'] = "[concat('{}', copyIndex())]".format(_computer_name)
 
         if admin_password:
             os_profile['adminPassword'] = "[parameters('adminPassword')]"
@@ -490,6 +518,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     }
     if zone:
         vm['zones'] = zone
+    if count:
+        vm['copy'] = {
+            'name': 'vmcopy',
+            'mode': 'parallel',
+            'count': count
+        }
+        vm['name'] = "[concat('{}', copyIndex())]".format(name)
     return vm
 
 
