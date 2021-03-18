@@ -438,6 +438,12 @@ def _server_mysql_get(cmd, resource_group_name, server_name):
     return client.servers.get(resource_group_name, server_name)
 
 
+def _server_stop(cmd, client, resource_group_name, server_name):
+    logger.warning("Server will be automatically started after 7 days "
+                   "if you do not perform a manual start operation")
+    return client.begin_stop(resource_group_name, server_name)
+
+
 def _server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)

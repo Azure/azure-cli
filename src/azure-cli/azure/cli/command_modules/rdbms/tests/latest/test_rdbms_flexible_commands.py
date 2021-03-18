@@ -530,7 +530,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(RdbmsScenarioTest):
 
         database_name = 'flexibleserverdbtest'
 
-        self.cmd('{} flexible-server db create -g {} -s {} -d {} --collation utf8'.format(database_engine, resource_group, server, database_name),
+        self.cmd('{} flexible-server db create -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
                  checks=[JMESPathCheck('name', database_name)])
 
         self.cmd('{} flexible-server db show -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
