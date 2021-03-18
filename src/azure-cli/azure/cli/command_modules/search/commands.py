@@ -74,5 +74,5 @@ def load_command_table(self, _):
         g.command('create', 'create')
         g.command('delete', 'delete')
 
-    with self.command_group('search', is_preview=True):
+    with self.command_group('search'):
         pass
