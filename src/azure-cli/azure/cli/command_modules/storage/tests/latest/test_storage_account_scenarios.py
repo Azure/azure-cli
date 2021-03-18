@@ -7,7 +7,8 @@ import time
 import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
+                               StorageAccountPreparer, VirtualNetworkPreparer, NsgPreparer, NsgRulePreparer,
+                               api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -733,23 +734,43 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer()
-    def test_update_storage_account_with_files_aadds(self, resource_group):
+    @NsgPreparer(location='eastus')
+    @NsgRulePreparer(parameter_name='rule1', priority='301', protocol='Tcp', access='Allow', direction='Inbound',
+                     destination_port_ranges='5986', source_address_prefixes='AzureActiveDirectoryDomainServices')
+    @NsgRulePreparer(parameter_name='rule2', priority='201', protocol='Tcp', access='Allow', direction='Inbound',
+                     destination_port_ranges='3389', source_address_prefixes='CorpNetSaw')
+    @VirtualNetworkPreparer(location='eastus')
+    def test_storage_account_with_files_aadds(self, resource_group, network_security_groups, rule1, rule2, subnet_id):
+        # Prepare Domain Service
+        ds_name = self.create_random_name(prefix='clitest', length=24)
+        self.cmd('az ad ds create --domain "TestDomainService.com" -n {} -g {} --replica-sets '
+                 'location=eastus subnet-id={} '.format(ds_name, resource_group, subnet_id))
+
+        time.sleep(1800)
+
+        # Create with aadds
         name = self.create_random_name(prefix='cli', length=24)
         create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
 
+        create_cmd = 'az storage account create -n {} -g {} --enable-files-aadds'.format(name, resource_group)
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
+
+        create_cmd = 'az storage account create -n {} -g {} --enable-files-aadds false'.format(name, resource_group)
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
+
+        # Update with aadds
         update_cmd = 'az storage account update -n {} -g {} --enable-files-aadds'.format(name, resource_group)
         result = self.cmd(update_cmd).get_output_in_json()
 
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
-
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer()
-    def test_update_storage_account_with_files_aadds_false(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
-        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
 
         update_cmd = 'az storage account update -n {} -g {} --enable-files-aadds false'.format(name, resource_group)
         result = self.cmd(update_cmd).get_output_in_json()
@@ -757,45 +778,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer()
-    def test_update_storage_account_with_files_aadds_true(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
-        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
-
         update_cmd = 'az storage account update -n {} -g {} --enable-files-aadds true'.format(name, resource_group)
         result = self.cmd(update_cmd).get_output_in_json()
-
-        self.assertIn('azureFilesIdentityBasedAuthentication', result)
-        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
-
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer()
-    def test_create_storage_account_with_files_aadds(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {} --enable-files-aadds'.format(name, resource_group)
-        result = self.cmd(create_cmd).get_output_in_json()
-
-        self.assertIn('azureFilesIdentityBasedAuthentication', result)
-        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
-
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer()
-    def test_create_storage_account_with_files_aadds_false(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {} --enable-files-aadds false'.format(name, resource_group)
-        result = self.cmd(create_cmd).get_output_in_json()
-
-        self.assertIn('azureFilesIdentityBasedAuthentication', result)
-        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
-
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer()
-    def test_create_storage_account_with_files_aadds_true(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {} --enable-files-aadds true'.format(name, resource_group)
-        result = self.cmd(create_cmd).get_output_in_json()
 
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')

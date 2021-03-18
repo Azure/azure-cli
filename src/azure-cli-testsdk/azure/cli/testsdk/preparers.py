@@ -16,6 +16,8 @@ from .utilities import StorageAccountKeyReplacer, GraphClientPasswordReplacer
 KEY_RESOURCE_GROUP = 'rg'
 KEY_VIRTUAL_NETWORK = 'vnet'
 KEY_VNET_NIC = 'nic'
+KEY_NSG = 'nsg'
+KEY_NSG_RULE = 'nsg_rule'
 
 
 # This preparer's traffic is not recorded.
@@ -267,7 +269,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
 # pylint: disable=too-many-instance-attributes
 class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest.vn', location='westus',
-                 parameter_name='virtual_network',
+                 parameter_name='virtual_network', subnet_parameter_name='subnet_id',
                  resource_group_parameter_name='resource_group',
                  resource_group_key=KEY_RESOURCE_GROUP,
                  dev_setting_name='AZURE_CLI_TEST_DEV_VIRTUAL_NETWORK_NAME',
@@ -280,6 +282,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
+        self.subnet_parameter_name = subnet_parameter_name
         self.key = key
         self.resource_group_parameter_name = resource_group_parameter_name
         self.resource_group_key = resource_group_key
@@ -297,10 +300,11 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         tags = ' '.join(['{}={}'.format(key, value)
                          for key, value in tags.items()])
         template = 'az network vnet create --resource-group {} --location {} --name {} --subnet-name default --tag ' + tags
-        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), self.location, name))
+        raw_result = self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), self.location, name))
 
+        output = raw_result.get_output_in_json()
         self.test_class_instance.kwargs[self.key] = name
-        return {self.parameter_name: name}
+        return {self.parameter_name: name, self.subnet_parameter_name: output['newVNet']['subnets'][0]['id']}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
@@ -374,6 +378,135 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             template = 'To create a VirtualNetworkNic a virtual network is required. Please add ' \
                        'decorator @{} in front of this VirtualNetworkNic preparer.'
             raise CliTestError(template.format(VnetNicPreparer.__name__))
+
+
+# pylint: disable=too-many-instance-attributes
+class NsgPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='nsg', location='westus',
+                 parameter_name='network_security_groups',
+                 resource_group_parameter_name='resource_group',
+                 resource_group_key=KEY_RESOURCE_GROUP,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_NSG_NAME',
+                 random_name_length=24, key=KEY_NSG):
+        if ' ' in name_prefix:
+            raise CliTestError(
+                'Error: Space character in name prefix \'%s\'' % name_prefix)
+        super(NsgPreparer, self).__init__(
+            name_prefix, random_name_length)
+        self.cli_ctx = get_dummy_cli()
+        self.location = location
+        self.parameter_name = parameter_name
+        self.key = key
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.resource_group_key = resource_group_key
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+
+    def create_resource(self, name, **kwargs):
+        if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = name
+            return {self.parameter_name: self.dev_setting_name, }
+
+        tags = {'product': 'azurecli', 'cause': 'automation',
+                'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+        if 'ENV_JOB_NAME' in os.environ:
+            tags['job'] = os.environ['ENV_JOB_NAME']
+        tags = ' '.join(['{}={}'.format(key, value)
+                         for key, value in tags.items()])
+        template = 'az network nsg create --resource-group {} --location {} --name {} --tags ' + tags
+        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), self.location, name))
+
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.dev_setting_name:
+            from msrestazure.azure_exceptions import CloudError
+            try:
+                self.live_only_execute(
+                    self.cli_ctx,
+                    'az network nsg delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+            except CloudError:
+                # deletion of nsg may fail as service could create subresources like IPConfig. We could rely on the deletion of resource group to delete the vnet.
+                pass
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a NSG, a resource group is required. Please add ' \
+                       'decorator @{} in front of this Nsg preparer.'
+            raise CliTestError(template.format(VirtualNetworkPreparer.__name__))
+
+
+# pylint: disable=too-many-instance-attributes
+class NsgRulePreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='rule', priority='100', protocol='*', access='Allow', direction='Inbound',
+                 destination_address_prefixes='*', destination_port_ranges=80,
+                 source_address_prefixes='*', source_port_ranges=80,
+                 parameter_name='nsg_rule',
+                 resource_group_parameter_name='resource_group',
+                 nsg_parameter_name='network_security_groups',
+                 dev_setting_name='AZURE_CLI_TEST_DEV_NSG_RULE_NAME',
+                 random_name_length=24, key=KEY_NSG_RULE):
+        if ' ' in name_prefix:
+            raise CliTestError(
+                'Error: Space character in name prefix \'%s\'' % name_prefix)
+        super(NsgRulePreparer, self).__init__(name_prefix, random_name_length)
+        self.cli_ctx = get_dummy_cli()
+        self.access = access
+        self.priority = priority
+        self.protocol = protocol
+        self.direction = direction
+        self.destination_address_prefixes = destination_address_prefixes
+        self.destination_port_ranges = destination_port_ranges
+        self.source_address_prefixes = source_address_prefixes
+        self.source_port_ranges = source_port_ranges
+        self.parameter_name = parameter_name
+        self.key = key
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.nsg_parameter_name = nsg_parameter_name
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+
+    def create_resource(self, name, **kwargs):
+        if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = name
+            return {self.parameter_name: self.dev_setting_name, }
+
+        template = """network nsg rule create --resource-group {} --name {} --nsg-name {} --priority {} --access {} 
+                   --protocol {} --direction {} --destination-address-prefixes {} --destination-port-ranges {}
+                   --source-address-prefixes {} --source-port-ranges {}"""
+
+        self.live_only_execute(self.cli_ctx, template.format(
+            self._get_resource_group(**kwargs), name, self._get_network_security_group(**kwargs), self.priority,
+            self.access, self.protocol, self.direction, self.destination_address_prefixes, self.destination_port_ranges,
+            self.source_address_prefixes, self.source_port_ranges))
+
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.dev_setting_name:
+            self.live_only_execute(
+                self.cli_ctx,
+                'az network nsg rule delete --name {} --resource-group {} --nsg-name {}'.format(
+                    name, self._get_resource_group(**kwargs), self._get_network_security_group(**kwargs)))
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a nsg rule, a resource group is required. Please add ' \
+                       'decorator @{} in front of this NsgRulePreparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__))
+
+    def _get_network_security_group(self, **kwargs):
+        try:
+            return kwargs.get(self.nsg_parameter_name)
+        except KeyError:
+            template = 'To create a nsg rule, a network security group is required. Please add ' \
+                       'decorator @{} in front of this NsgRulePreparer.'
+            raise CliTestError(template.format(VirtualNetworkPreparer.__name__))
+
 
 # Utility
 
