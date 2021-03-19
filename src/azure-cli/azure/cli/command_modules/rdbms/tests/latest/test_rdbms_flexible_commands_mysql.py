@@ -172,7 +172,7 @@ class MySqlFlexibleServerIopsMgmtScenarioTest(FlexibleServerIopsMgmtScenarioTest
 
     @AllowLargeResponse()
     @pytest.mark.order(2)
-    @pytest.mark.depends(on=['MySqlFlexibleServerIopsMgmtScenarioTest::test_mysql_flexible_server_mgmt_prepare'])
+    @pytest.mark.depends(on=['MySqlFlexibleServerIopsMgmtScenarioTest::test_mysql_flexible_server_iops_prepare'])
     def test_mysql_flexible_server_iops_create(self):
         self._test_flexible_server_iops_create('mysql', self.resource_group, self.server_1, self.server_2, self.server_3)
 
