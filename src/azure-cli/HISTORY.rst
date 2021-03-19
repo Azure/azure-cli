@@ -27,8 +27,8 @@ Release History
 **App Service**
 
 * [BREAKING CHANGE] Fixes #16087:az webapp config ssl create  setting --name parameter as required. (#17079)
-* : fix #17053- `az webapp show` returning null values for SiteConfig properties (#17054)
-* : fix #17207 - for az webapp log config 'level' always defaults to verbose (#17259)
+* Fix #17053: `az webapp show` returning null values for SiteConfig properties (#17054)
+* Fix #17207: for az webapp log config 'level' always defaults to verbose (#17259)
 
 **ARM**
 
