@@ -596,7 +596,7 @@ def cli_system_topic_update(
     system_topic_update_parameters = SystemTopicUpdateParameters(
         tags=tags,
         identity=identity_info)
-    
+
     return client.update(
         resource_group_name=resource_group_name,
         system_topic_name=system_topic_name,
@@ -1601,6 +1601,7 @@ def _validate_subscription_id_matches_default_subscription_id(
                        ' does not match the default subscription ID. To set the default subscription ID,'
                        ' use az account set ID_OR_NAME, or use the global argument --subscription ')
 
+
 def _get_identity_info(identity=None):
     if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
         identity_type_name = _get_identity_type(identity)
@@ -1608,6 +1609,7 @@ def _get_identity_info(identity=None):
     else:
         identity_info = IdentityInfo(type=IDENTITY_NONE)
     return identity_info
+
 
 def _get_identity_info_only_if_not_none(identity=None):
     identity_info = None
