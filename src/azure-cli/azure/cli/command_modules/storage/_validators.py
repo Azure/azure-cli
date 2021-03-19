@@ -1529,9 +1529,6 @@ def _is_valid_uri(uri):
 def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions):
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
-    if '&sig=' in url:
-        return url
-
     if sas_token:
         sas_token = sas_token.lstrip('?')
     else:
@@ -1608,9 +1605,12 @@ def validate_fs_directory_upload_destination_url(cmd, namespace):
             pass
         url = file_client.url
 
-    namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
-                                             account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                             service='blob', resource_types='co', permissions='rwdlac')
+    if _is_valid_uri(url):
+        namespace.destination = url
+    else:
+        namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                 service='blob', resource_types='co', permissions='rwdlac')
     del namespace.destination_fs
     del namespace.destination_path
 
