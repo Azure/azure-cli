@@ -596,7 +596,7 @@ def cli_system_topic_update(
     system_topic_update_parameters = SystemTopicUpdateParameters(
         tags=tags,
         identity=identity_info)
-    
+
     return client.update(
         resource_group_name=resource_group_name,
         system_topic_name=system_topic_name,
