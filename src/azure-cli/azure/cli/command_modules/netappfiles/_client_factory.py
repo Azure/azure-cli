@@ -8,8 +8,8 @@
 
 def cf_netappfiles(cli_ctx, *kwargs):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.netapp import AzureNetAppFilesManagementClient
-    return get_mgmt_service_client(cli_ctx, AzureNetAppFilesManagementClient)
+    from azure.mgmt.netapp import NetAppManagementClient
+    return get_mgmt_service_client(cli_ctx, NetAppManagementClient)
 
 
 def accounts_mgmt_client_factory(cli_ctx, _):
@@ -46,3 +46,7 @@ def backup_policies_mgmt_client_factory(cli_ctx, _):
 
 def vaults_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).vaults
+
+
+def volume_backup_status_mgmt_client_factory(cli_ctx, _):
+    return cf_netappfiles(cli_ctx).volume_backup_status
