@@ -7,6 +7,7 @@ Release History
 ++++++
 * Unify ADAL and MSAL error handler (#17072)
 * Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+* Allow configuring theme (#17073)
 
 2.20.0
 ++++++
