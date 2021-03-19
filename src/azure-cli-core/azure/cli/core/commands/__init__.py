@@ -17,7 +17,6 @@ import sys
 import time
 import copy
 from importlib import import_module
-import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
@@ -713,7 +712,7 @@ class AzCliCommandInvoker(CommandInvoker):
         except Exception as ex:  # pylint: disable=broad-except
             if cmd_copy.exception_handler:
                 return cmd_copy.exception_handler(ex)
-            six.reraise(*sys.exc_info())
+            raise
 
     def _run_jobs_serially(self, jobs, ids):
         results, exceptions = [], []

@@ -10,7 +10,6 @@ from collections import OrderedDict
 import copy
 import json
 import re
-from six import string_types
 
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
@@ -413,11 +412,11 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
                                 child_arg_name='item_name', custom_function_op=None, **kwargs):
     if not isinstance(context, AzCommandsLoader):
         raise TypeError("'context' expected type '{}'. Got: '{}'".format(AzCommandsLoader.__name__, type(context)))
-    if not isinstance(getter_op, string_types):
+    if not isinstance(getter_op, str):
         raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op))
-    if not isinstance(setter_op, string_types):
+    if not isinstance(setter_op, str):
         raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op))
-    if custom_function_op and not isinstance(custom_function_op, string_types):
+    if custom_function_op and not isinstance(custom_function_op, str):
         raise TypeError("Custom function operation must be a string. Got '{}'".format(
             custom_function_op))
 

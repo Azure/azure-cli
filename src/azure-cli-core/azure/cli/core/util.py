@@ -15,8 +15,7 @@ import ssl
 import re
 import logging
 
-import six
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.request import urlopen
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -344,8 +343,8 @@ def _get_local_versions():
 
 def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
-
-    output = six.StringIO()
+    import io
+    output = io.StringIO()
     versions = _get_local_versions()
 
     # get the versions from pypi
@@ -528,7 +527,7 @@ def b64encode(s):
     :return: base64 encoded string
     :rtype: str
     """
-    encoded = base64.b64encode(six.b(s))
+    encoded = base64.b64encode(s.encode("latin-1"))
     return encoded if encoded is str else encoded.decode('latin-1')
 
 
@@ -887,7 +886,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         value = getattr(endpoints, p)
                     except CloudEndpointNotSetException:
                         continue
-                    if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
+                    if isinstance(value, str) and url.lower().startswith(value.lower()):
                         resource = value
                         break
         if resource:
