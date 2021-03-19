@@ -356,7 +356,7 @@ class ErrorMinifier:
 
     def __init__(self, errors_list):
         self._errors_list = errors_list
-        self._capacity = None
+        self._capacity = None  # to how many symbols should minify
         self._minified_error = "\n".join(self._errors_list)
 
     def set_capacity(self, capacity):
@@ -399,11 +399,13 @@ class ErrorMinifier:
         if len(errors_string) <= self._capacity:
             return errors_string
 
-        # last resort keep removing middle lines
-        while len(errors_string) > self._capacity:
-            errors_string = self._minify_by_removing_lines(errors_string)
+        # remove some lines
+        errors_string = self._minify_by_removing_lines(errors_string, desired_length=self._capacity)
+        if len(errors_string) <= self._capacity:
+            return errors_string
 
-        return errors_string
+        # last resort: strip off the suffix
+        return self._minify_by_removing_suffix(errors_string, desired_length=self._capacity)
 
     @staticmethod
     def _minify_by_shortening_file_names(error_string, levels=5):
@@ -459,23 +461,41 @@ class ErrorMinifier:
         return "\n".join(lines)
 
     @staticmethod
-    def _minify_by_removing_lines(error_string):
-        error_string = error_string.replace(ErrorMinifier._CONTINUATION_STR, "")
-        lines = error_string.splitlines()
+    def _minify_by_removing_lines(error_string, desired_length):
+        """
+        Repeatedly remove the lines from the middle, as a last resort remove even the
+        first line but keep the last one, in the effort to strip down the error string
+        to the desired length.
+        """
+        if len(error_string) <= desired_length:
+            return error_string
 
-        mid = int(len(lines) / 2) + 1
-        if not (".py" in lines[mid] and ", ln" in lines[mid]):
-            mid -= 1
+        symbols_to_remove = len(error_string) - desired_length + len(ErrorMinifier._CONTINUATION_STR)
+        lines = error_string.splitlines(keepends=True)
 
-        new_lines = []
-        for i, line in enumerate(lines):
-            if i == mid:
-                new_lines.append(ErrorMinifier._CONTINUATION_STR.strip())
-            if i in range(mid, mid + 4):
-                continue
-            new_lines.append(line)
+        if len(lines) <= 1 or symbols_to_remove <= 0:
+            # nothing to remove
+            return error_string
 
-        return "\n".join(new_lines)
+        mid = 0
+        while len(lines) > 1 and symbols_to_remove > 0:
+            # remove the middle line, when even prefer to remove the one closer to the start
+            mid = (len(lines) - 1) // 2
+            symbols_to_remove -= len(lines.pop(mid))
+
+        lines.insert(mid, ErrorMinifier._CONTINUATION_STR)
+        return "".join(lines)
+
+    @staticmethod
+    def _minify_by_removing_suffix(error_string, desired_length):
+        """
+        Strip off the suffix of the error string, force it to be <= desired length.
+        """
+        if len(error_string) <= desired_length:
+            return error_string
+
+        continuation = ErrorMinifier._CONTINUATION_STR.strip()[:desired_length]
+        return error_string[:desired_length - len(continuation)] + continuation
 
     def __str__(self):
         if self._minified_error:
