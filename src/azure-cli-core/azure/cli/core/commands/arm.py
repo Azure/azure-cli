@@ -587,7 +587,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
 def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
 
-    if not isinstance(getter_op, string_types):
+    if not isinstance(getter_op, str):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
     factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
@@ -718,7 +718,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
 
 def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
 
-    if not isinstance(getter_op, string_types):
+    if not isinstance(getter_op, str):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
     factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
