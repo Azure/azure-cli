@@ -27,7 +27,7 @@ Release History
 **App Service**
 
 * [BREAKING CHANGE] Fixes #16087: `az webapp config ssl create`: set `--name` parameter as required. (#17079)
-* Fix #17053: `az webapp show` returning null values for SiteConfig properties (#17054)
+* Fix #17053: `az webapp show` return null values for SiteConfig properties (#17054)
 * Fix #17207: `az webapp log config`: 'level' always defaults to verbose (#17259)
 
 **ARM**
@@ -81,10 +81,10 @@ Release History
 
 **Network**
 
-* `az network public-ip prefix  create`: Support `--zone 1 2 3` (#17279)
-* `az network lb  frontend-ip create`: Support `--zone 1 2 3` (#17279)
+* `az network public-ip prefix create`: Support `--zone 1 2 3` (#17279)
+* `az network lb frontend-ip create`: Support `--zone 1 2 3` (#17279)
 * Bump version from '2020-08-01' to '2020-11-01' (#17290)
-* `az network lb address-pool` : Support subnet when creating or updating an IP-based backend pool of a load balancer. (#17336)
+* `az network lb address-pool`: Support subnet when creating or updating an IP-based backend pool of a load balancer. (#17336)
 
 **Packaging**
 
@@ -122,6 +122,11 @@ Release History
 
 * Fix #16952: Fix ImportError after upgrade (#17314)
 
+**Misc.**
+
+* Allow configuring theme (#17073)
+
+
 2.20.0
 ++++++
 
@@ -134,7 +139,7 @@ Release History
 * Update module to use 2020 Azure Media Services api. (#16492)
 * `az ams account encryption`: New subgroup to show or set the encryption for the media service account (#16492)
 * `az ams account storage set-authentication`: New command to set the authentication for the storage account associated with the media service account (#16492)
-* `az ams account create (mi-system-assigned)`: New --mi-system-assigned parameter for account create to set the managed identity of the media account (#16492)
+* `az ams account create (mi-system-assigned)`: New `--mi-system-assigned` parameter for account create to set the managed identity of the media account (#16492)
 * `az ams account mru set`: This command will no longer work for Media Services accounts that are created with the 2020-05-01 version of the API or later. (#16492)
 * `az ams live-event create (stretch-mode, key-frame-interval, transcrip-lang, use-static-hostname, custom hostname)`: Add new parameter options to live-event create command (#16492)
 * `az ams live-event standby`: New command to put the live event in standby mode (#16492)
@@ -197,14 +202,14 @@ Release History
 **Network**
 
 * Bump version from '2020-07-01' to '2020-08-01' (#16889)
-* `az network public-ip create`: Support '--zone 1 2 3' after '2020-08-01' (#17043)
+* `az network public-ip create`: Support `--zone 1 2 3` after '2020-08-01' (#17043)
 * `az network routeserver peering`: Rename `--vrouter-name` by `--routeserver` (#17049)
 * `az network express-route peering create`: Support ipv6 address (#17048)
 * `az network public-ip create`: Expose a new argument `--tier` (#17069)
 
 **OpenShift**
 
-* Update of az openshift deprecation warning (#16604)
+* Update of `az openshift` deprecation warning (#16604)
 
 **Search**
 
@@ -212,9 +217,9 @@ Release History
 
 **SQL**
 
-* Update az sql mi examples (#16852)
-* `az sql db/elastic-pool create/update`: Add maintenance-configuration argument (#16915)
-* `az sql db replica create`: Add --secondary-type argument (#16960)
+* Update `az sql mi` examples (#16852)
+* `az sql db/elastic-pool create/update`: Add `maintenance-configuration` argument (#16915)
+* `az sql db replica create`: Add `--secondary-type` argument (#16960)
 
 **Storage**
 
