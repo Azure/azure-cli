@@ -278,7 +278,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
-        enable_hotpatching=None, platform_fault_domain=None, count=None):
+        enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
+        enable_vtpm=None, count=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -501,8 +502,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if max_price is not None:
         vm_properties['billingProfile'] = {'maxPrice': max_price}
 
+    vm_properties['securityProfile'] = {}
+
     if encryption_at_host is not None:
-        vm_properties['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+        vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
+
+    if security_type is not None:
+        vm_properties['securityProfile']['securityType'] = security_type
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vm_properties['securityProfile']['uefiSettings'] = {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }
 
     if platform_fault_domain is not None:
         vm_properties['platformFaultDomain'] = platform_fault_domain

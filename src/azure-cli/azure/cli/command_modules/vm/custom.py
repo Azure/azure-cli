@@ -722,7 +722,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
-              enable_hotpatching=None, platform_fault_domain=None, count=None):
+              enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
+              enable_vtpm=None, count=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -915,7 +916,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
-        platform_fault_domain=platform_fault_domain, count=count)
+        platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
+        enable_vtpm=enable_vtpm, count=count)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1313,7 +1315,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, proximity_placement_group=None, workspace=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
+              enable_vtpm=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1356,6 +1359,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vm.security_profile = {'uefiSettings': {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }}
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
