@@ -117,10 +117,6 @@ Release History
 * Fix #16917: az storage account generate-sas fails if a connection string is provided (#17200)
 * Fix #16979: `az storage container create` fails when providing storage container metadata (#17202)
 
-**Style**
-
-* Allow configuring theme (#17073)
-
 **Upgrade**
 
 * Fix 16952: Fix ImportError after upgrade (#17314)
