@@ -73,7 +73,7 @@ Release History
 
 * `az netappfiles account backup show`: Operation added. (#17173)
 * `az netappfiles account backup delete`: Operation added. (#17173)
-* `az netappfiles account ad add`: Parameter ldap-over-tls added. (#17173)
+* `az netappfiles account ad add`: Parameter `--ldap-over-tls` added. (#17173)
 * `az netappfiles account create`: Parameter encryption added. (#17173)
 * `az netappfiles account update`: Parameter encryption added. (#17173)
 * `az netappfiles volume create`: Parameter encryption-key-source added. (#17173)
