@@ -11,7 +11,7 @@ Release History
 * Output a trace in `az acr login` for self-diagnosing potential docker command latency (#17115)
 * Fix a bug when run check-health behind corporate proxy (#17177)
 * Support anonymous pull (#17006)
-* Fix#16700: Use "exists" api to check storage blob existence (#17299)
+* Fix #16700: Use "exists" api to check storage blob existence (#17299)
 
 **AKS**
 
