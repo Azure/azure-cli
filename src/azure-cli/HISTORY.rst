@@ -86,10 +86,6 @@ Release History
 * Bump version from '2020-08-01' to '2020-11-01' (#17290)
 * `az network lb address-pool`: Support subnet when creating or updating an IP-based backend pool of a load balancer. (#17336)
 
-**Packaging**
-
-* Add azure-identity dependency (#17277)
-
 **RDBMS**
 
 * Added tests for flexible server team pipeline (#16947)
