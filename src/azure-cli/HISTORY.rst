@@ -3,6 +3,125 @@
 Release History
 ===============
 
+2.21.0
+++++++
+
+**ACR**
+
+* Output a trace in `az acr login` for self-diagnosing potential docker command latency (#17115)
+* Fix #17172: When run check-health behind corporate proxy (#17177)
+* `acr update`: Support anonymous pull (#17006)
+* Fix #16700: Use "exists" api to check storage blob existence (#17299)
+
+**AKS**
+
+* `aks update`: Add `--no-uptime-sla` (#17192)
+* Fix cross-sub assigning identity error and attach acr error (#17281)
+* Add support for node public IP prefix ID (#17138)
+
+**APIM**
+
+* [BREAKING CHANGE] `apim backup`: `--storage-account-container` not support multi-value. (#17315)
+* [BREAKING CHANGE] `apim restore`: `--storage-account-container` not support multi-value. (#17315)
+
+**App Service**
+
+* [BREAKING CHANGE] Fix #16087: `az webapp config ssl create`: set `--name` parameter as required. (#17079)
+* Fix #17053: `az webapp show` return null values for SiteConfig properties (#17054)
+* Fix #17207: `az webapp log config`: 'level' always defaults to verbose (#17259)
+
+**ARM**
+
+* `az bicep build`: fix an issue where build warnings are not shown (#17180)
+
+**Backup**
+
+* Add `id_part` for sub-resource names to fix `--ids` (#17165)
+* Fix #17094: Created separate test suite for CRR tests (#17183)
+* `az backup protection check-vm`: Add `--vm` and `--resource-group` as optional params (#16974)
+
+**Cache**
+
+* GA `az cache` (#17264)
+
+**CDN**
+
+* `az afd rule create`: Fix `--help` message (#17282)
+
+**Compute**
+
+* Fix a Windows vm user update bug (#17257)
+* Fix #16585: `az vmss deallocate`: `--instance-ids` failed (#17274)
+* `az vm create`: New parameter `--platform-fault-domain` in FLEX VMSS mode (#16409)
+* `az vm create`: `--patch-mode` for Linux VM (#16409)
+* `az ssh vm`: Automatically launch browser when getting certificate fails (#17093)
+* `az vm create`: New parameter `--count` (#17217)
+* `az vm create`: Trusted Launch (#17354)
+* Fix #16037: az vm open-port accepts list of ports (#17255)
+
+**Extension**
+
+* Add actionable message when an extension is not compatible with the CLI core (#16751)
+
+**Key Vault**
+
+* `az keyvault role definition list`: Support `--custom-role-only` to list only custom role definitions (#17119)
+* Support keyvault custom role definition (#17109)
+* Add `--no-wait` for command `az keyvault security-domain download` and `--target-operation` for command `az keyvault security-domain wait` (#17263)
+
+**NetAppFiles**
+
+* `az netappfiles account backup show`: Operation added. (#17173)
+* `az netappfiles account backup delete`: Operation added. (#17173)
+* `az netappfiles account ad add`: Parameter `--ldap-over-tls` added. (#17173)
+* `az netappfiles account create`: Parameter `--encryption` added. (#17173)
+* `az netappfiles account update`: Parameter `--encryption` added. (#17173)
+* `az netappfiles volume create`: Parameter `--encryption-key-source` added. (#17173)
+* `az netappfiles volume create`: Default export policy removed for nfsv4.1 and optional parameters added for setting up an export policy for nfsv4.1: rule_index, unix_read_only, unix_read_write, cifs, allowed_clients (#17173)
+
+**Network**
+
+* `az network public-ip prefix create`: Support `--zone 1 2 3` (#17279)
+* `az network lb frontend-ip create`: Support `--zone 1 2 3` (#17279)
+* Bump version from '2020-08-01' to '2020-11-01' (#17290)
+* `az network lb address-pool`: Support subnet when creating or updating an IP-based backend pool of a load balancer. (#17336)
+
+**RDBMS**
+
+* Added tests for flexible server team pipeline (#16947)
+* Python SDK migration (#17191)
+* Added PostgreSQL database create, show, and delete feature (#17271)
+* Updating Python SDK to 8.1.0b2 (#17359)
+
+**Role**
+
+* `az ad app permission list/grant`: Refine error message when no associated Service Principal exists for the App (#17051)
+
+**Search**
+
+* `az search`: GA (#17258)
+
+**Service Fabric**
+
+* `az sf certificate`: deprecate cluster cert commands. (#17190)
+
+**SQL**
+
+* Add Server Trust Group commands (#17275)
+
+**Storage**
+
+* Fix #16917: `az storage account generate-sas` fails if a connection string is provided (#17200)
+* Fix #16979: `az storage container create` fails when providing storage container metadata (#17202)
+
+**Upgrade**
+
+* Fix #16952: Fix ImportError after upgrade (#17314)
+
+**Misc.**
+
+* Allow configuring theme (#17073)
+
 2.20.0
 ++++++
 
@@ -15,7 +134,7 @@ Release History
 * Update module to use 2020 Azure Media Services api. (#16492)
 * `az ams account encryption`: New subgroup to show or set the encryption for the media service account (#16492)
 * `az ams account storage set-authentication`: New command to set the authentication for the storage account associated with the media service account (#16492)
-* `az ams account create (mi-system-assigned)`: New --mi-system-assigned parameter for account create to set the managed identity of the media account (#16492)
+* `az ams account create (mi-system-assigned)`: New `--mi-system-assigned` parameter for account create to set the managed identity of the media account (#16492)
 * `az ams account mru set`: This command will no longer work for Media Services accounts that are created with the 2020-05-01 version of the API or later. (#16492)
 * `az ams live-event create (stretch-mode, key-frame-interval, transcrip-lang, use-static-hostname, custom hostname)`: Add new parameter options to live-event create command (#16492)
 * `az ams live-event standby`: New command to put the live event in standby mode (#16492)
@@ -78,14 +197,14 @@ Release History
 **Network**
 
 * Bump version from '2020-07-01' to '2020-08-01' (#16889)
-* `az network public-ip create`: Support '--zone 1 2 3' after '2020-08-01' (#17043)
+* `az network public-ip create`: Support `--zone 1 2 3` after '2020-08-01' (#17043)
 * `az network routeserver peering`: Rename `--vrouter-name` by `--routeserver` (#17049)
 * `az network express-route peering create`: Support ipv6 address (#17048)
 * `az network public-ip create`: Expose a new argument `--tier` (#17069)
 
 **OpenShift**
 
-* Update of az openshift deprecation warning (#16604)
+* Update of `az openshift` deprecation warning (#16604)
 
 **Search**
 
@@ -93,9 +212,9 @@ Release History
 
 **SQL**
 
-* Update az sql mi examples (#16852)
-* `az sql db/elastic-pool create/update`: Add maintenance-configuration argument (#16915)
-* `az sql db replica create`: Add --secondary-type argument (#16960)
+* Update `az sql mi` examples (#16852)
+* `az sql db/elastic-pool create/update`: Add `maintenance-configuration` argument (#16915)
+* `az sql db replica create`: Add `--secondary-type` argument (#16960)
 
 **Storage**
 
