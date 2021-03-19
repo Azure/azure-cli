@@ -36,7 +36,7 @@ Release History
 
 **Backup**
 
-* Added id_part for sub-resource names (#17165)
+* Add `id_part` for sub-resource names to fix `--ids` (#17165)
 * Fix #17094: Created separate test suite for CRR tests (#17183)
 * `az backup protection check-vm`: Add vm and resource-group as optional params (#16974)
 
