@@ -74,9 +74,9 @@ Release History
 * `az netappfiles account backup show`: Operation added. (#17173)
 * `az netappfiles account backup delete`: Operation added. (#17173)
 * `az netappfiles account ad add`: Parameter `--ldap-over-tls` added. (#17173)
-* `az netappfiles account create`: Parameter encryption added. (#17173)
-* `az netappfiles account update`: Parameter encryption added. (#17173)
-* `az netappfiles volume create`: Parameter encryption-key-source added. (#17173)
+* `az netappfiles account create`: Parameter `--encryption` added. (#17173)
+* `az netappfiles account update`: Parameter `--encryption` added. (#17173)
+* `az netappfiles volume create`: Parameter `--encryption-key-source` added. (#17173)
 * `az netappfiles volume create`: Default export policy removed for nfsv4.1 and optional parameters added for setting up an export policy for nfsv4.1: rule_index, unix_read_only, unix_read_write, cifs, allowed_clients (#17173)
 
 **Network**
