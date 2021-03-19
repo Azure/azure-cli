@@ -920,6 +920,12 @@ examples:
         az netappfiles volume backup update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
 """
 
+
+helps['netappfiles volume backup status'] = """
+type: group
+short-summary: See Azure NetApp Files (ANF) Volume Backup Status.
+"""
+
 helps['netappfiles volume backup status show'] = """
 type: command
 short-summary: Update the specified ANF backup with the values provided.
