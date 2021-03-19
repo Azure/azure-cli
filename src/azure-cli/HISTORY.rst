@@ -122,7 +122,6 @@ Release History
 
 * Allow configuring theme (#17073)
 
-
 2.20.0
 ++++++
 
