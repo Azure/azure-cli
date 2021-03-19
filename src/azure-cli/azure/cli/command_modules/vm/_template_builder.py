@@ -474,7 +474,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if max_price is not None:
         vm_properties['billingProfile'] = {'maxPrice': max_price}
 
-    vm_properties['securityProfile'] = {'uefiSettings': {}}
+    vm_properties['securityProfile'] = {}
 
     if encryption_at_host is not None:
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
@@ -482,11 +482,11 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if security_type is not None:
         vm_properties['securityProfile']['securityType'] = security_type
 
-    if enable_secure_boot is not None:
-        vm_properties['securityProfile']['uefiSettings']['secureBootEnabled'] = enable_secure_boot
-
-    if enable_vtpm is not None:
-        vm_properties['securityProfile']['uefiSettings']['vTpmEnabled'] = enable_vtpm
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vm_properties['securityProfile']['uefiSettings'] = {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }
 
     if platform_fault_domain is not None:
         vm_properties['platformFaultDomain'] = platform_fault_domain
