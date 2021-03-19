@@ -1146,6 +1146,8 @@ def process_vnet_gateway_update_namespace(cmd, namespace):
     get_virtual_network_validator()(cmd, ns)
     get_public_ip_validator()(cmd, ns)
     validate_tags(ns)
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        _validate_cert(namespace, 'root_cert_data')
     public_ip_count = len(ns.public_ip_address or [])
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '

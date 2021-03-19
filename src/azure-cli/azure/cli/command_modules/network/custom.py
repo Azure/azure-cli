@@ -6381,7 +6381,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
             vnet_gateway.vpn_client_configuration.aad_issuer = aad_issuer
             vnet_gateway.vpn_client_configuration.aad_audience = aad_audience
             vnet_gateway.vpn_client_configuration.vpn_client_root_certificates = [
-                VpnClientRootCertificate(name=root_cert_name, public_cert_data=root_cert_data)]
+                VpnClientRootCertificate(name=root_cert_name,
+                                         public_cert_data=root_cert_data)] if root_cert_data else None
 
     if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
         vnet_gateway.custom_routes = AddressSpace()
@@ -6395,9 +6396,11 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None, custom_routes=None):
-    AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration = cmd.get_models(
-        'AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration', 'VpnClientConfiguration')
+                        gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
+                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None):
+    (AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration,
+     VpnClientRootCertificate) = cmd.get_models('AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
+                                                'VpnClientConfiguration', 'VpnClientRootCertificate')
 
     if any((address_prefixes, radius_server, radius_secret, client_protocol)) and not instance.vpn_client_configuration:
         instance.vpn_client_configuration = VpnClientConfiguration()
@@ -6413,6 +6416,15 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
         c.set_param('vpn_client_protocols', client_protocol)
         c.set_param('radius_server_address', radius_server)
         c.set_param('radius_server_secret', radius_secret)
+        if cmd.supported_api_version(min_api='2020-11-01'):
+            c.set_param('aad_tenant', aad_tenant)
+            c.set_param('aad_audience', aad_audience)
+            c.set_param('aad_issuer', aad_issuer)
+            c.set_param('vpn_authentication_types', vpn_auth_type)
+
+    if root_cert_data and cmd.supported_api_version(min_api='2020-11-01'):
+        upsert_to_collection(instance.vpn_client_configuration, 'vpn_client_root_certificates',
+                             VpnClientRootCertificate(name=root_cert_name, public_cert_data=root_cert_data), 'name')
 
     with cmd.update_context(instance.sku) as c:
         c.set_param('name', sku)

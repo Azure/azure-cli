@@ -3585,6 +3585,58 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
 
 
+class NetworkVnetGatewayMultiAuth(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_multi_auth')
+    def test_network_vnet_gateway_multi_auth(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+            'aad_tenant': 'https://login.microsoftonline.com/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4',
+            'aad_issuer': 'https://sts.windows.net/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4/',
+            'aad_audience': 'a21fce82-76af-45e6-8583-a08cb3b956f9',
+            'root_cert_name': 'root-cert',
+            'root_cert_data': os.path.join(TEST_DIR, 'test-root-cert.cer'),
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN '
+                 '--aad-audience {aad_audience} --aad-issuer {aad_issuer} --aad-tenant {aad_tenant} '
+                 '--root-cert-name {root_cert_name} --root-cert-data "{root_cert_data}" '
+                 '--radius-secret 111_aaa --radius-server 30.1.1.15 --vpn-auth-type AAD Certificate Radius',
+                 checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_multi_auth1')
+    def test_network_vnet_gateway_multi_auth1(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+            'aad_tenant': 'https://login.microsoftonline.com/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4',
+            'aad_issuer': 'https://sts.windows.net/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4/',
+            'aad_audience': 'a21fce82-76af-45e6-8583-a08cb3b956f9',
+            'root_cert_name': 'root-cert',
+            'root_cert_data': os.path.join(TEST_DIR, 'test-root-cert.cer'),
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN')
+        self.cmd('network vnet-gateway update -g {rg} -n {gw} --vpn-auth-type AAD Certificate Radius '
+                 '--aad-audience {aad_audience} --aad-issuer {aad_issuer} --aad-tenant {aad_tenant} '
+                 '--root-cert-name {root_cert_name} --root-cert-data "{root_cert_data}" '
+                 '--radius-secret 111_aaa --radius-server 30.1.1.15 ',
+                 checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
+
+
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
