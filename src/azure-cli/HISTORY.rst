@@ -125,10 +125,6 @@ Release History
 
 * Fix 16952: Fix ImportError after upgrade (#17314)
 
-**VM**
-
-* Add #16037: az vm open-port accepts list of ports (#17255)
-
 2.20.0
 ++++++
 
