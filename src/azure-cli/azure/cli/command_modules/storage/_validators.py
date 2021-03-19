@@ -14,7 +14,8 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
                                                                file_data_service_factory,
-                                                               storage_client_factory)
+                                                               storage_client_factory,
+                                                               cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -1528,6 +1529,9 @@ def _is_valid_uri(uri):
 def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions):
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
+    if '&sig=' in url:
+        return url
+
     if sas_token:
         sas_token = sas_token.lstrip('?')
     else:
@@ -1582,29 +1586,28 @@ def is_directory(props):
 
 
 def validate_fs_directory_upload_destination_url(cmd, namespace):
-    destination = namespace.destination_path
-    container = namespace.destination_fs
     kwargs = {'account_name': namespace.account_name,
               'account_key': namespace.account_key,
               'connection_string': namespace.connection_string,
-              'sas_token': namespace.sas_token}
-    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
-    destination = destination[1:] if destination.startswith('/') else destination
-    from azure.common import AzureException
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-    try:
-        props = client.get_blob_properties(container, destination)
-        if not is_directory(props):
-            raise InvalidArgumentValueError('usage error: You are specifying --destination-path with a file name, '
-                                            'not directory name. Please change to a valid directory name. '
-                                            'If you want to upload to a file, please use '
-                                            '`az storage fs file upload` command.')
-    except AzureException:
-        pass
+              'sas_token': namespace.sas_token,
+              'file_system_name': namespace.destination_fs}
+    client = cf_adls_file_system(cmd.cli_ctx, kwargs)
+    url = client.url
+    if namespace.destination_path:
+        from azure.core.exceptions import AzureError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        file_client = client.get_file_client(file_path=namespace.destination_path)
+        try:
+            props = file_client.get_file_properties()
+            if not is_directory(props):
+                raise InvalidArgumentValueError('usage error: You are specifying --destination-path with a file name, '
+                                                'not directory name. Please change to a valid directory name. '
+                                                'If you want to upload to a file, please use '
+                                                '`az storage fs file upload` command.')
+        except AzureError:
+            pass
+        url = file_client.url
 
-    if not destination.endswith('/'):
-        destination += '/'
-    url = client.make_blob_url(container, destination)
     namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
                                              account_key=namespace.account_key, sas_token=namespace.sas_token,
                                              service='blob', resource_types='co', permissions='rwdlac')
@@ -1616,9 +1619,13 @@ def validate_fs_directory_download_source_url(cmd, namespace):
     kwargs = {'account_name': namespace.account_name,
               'account_key': namespace.account_key,
               'connection_string': namespace.connection_string,
-              'sas_token': namespace.sas_token}
-    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
-    url = client.make_blob_url(namespace.source_fs, namespace.source_path)
+              'sas_token': namespace.sas_token,
+              'file_system_name': namespace.source_fs}
+    client = cf_adls_file_system(cmd.cli_ctx, kwargs)
+    url = client.url
+    if namespace.source_path:
+        file_client = client.get_file_client(file_path=namespace.source_path)
+        url = file_client.url
     namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
                                         account_key=namespace.account_key, sas_token=namespace.sas_token,
                                         service='blob', resource_types='co', permissions='rl')

@@ -1565,11 +1565,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from ._validators import validate_fs_directory_upload_destination_url
         c.extra('destination_fs', options_list=['--file-system', '-f'], required=True,
                 help='The upload destination file system.')
-        c.extra('destination_path', options_list=['--destination-path', '-d'], required=True,
+        c.extra('destination_path', options_list=['--destination-path', '-d'],
                 validator=validate_fs_directory_upload_destination_url,
                 help='The upload destination directory path. It should be an absolute path to file system. '
-                     'Use / to upload to root directory. If the specified destination path does not exist, '
-                     'a new directory path will be created.')
+                     'If the specified destination path does not exist, a new directory path will be created.')
         c.argument('source', options_list=['--source', '-s'],
                    help='The source file path to upload from.')
         c.argument('recursive', recursive_type, help='Recursively upload files. If enabled, all the files '
@@ -1580,10 +1579,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from ._validators import validate_fs_directory_download_source_url
         c.extra('source_fs', options_list=['--file-system', '-f'], required=True,
                 help='The download source file system.')
-        c.extra('source_path', options_list=['--source-path', '-s'], required=True,
+        c.extra('source_path', options_list=['--source-path', '-s'],
                 validator=validate_fs_directory_download_source_url,
-                help='The download source directory path. It should be an absolute path to file system. '
-                     'Use / to download from root directory.')
+                help='The download source directory path. It should be an absolute path to file system.')
         c.argument('destination', options_list=['--destination-path', '-d'],
                    help='The destination local directory path to download.')
         c.argument('recursive', recursive_type, help='Recursively download files. If enabled, all the files '

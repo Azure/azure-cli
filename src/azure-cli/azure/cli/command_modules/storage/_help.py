@@ -1934,6 +1934,8 @@ helps['storage fs directory upload'] = """
     examples:
         - name: Upload a single file to a storage blob directory.
           text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d directory
+        - name: Upload a local directory to root directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" --recursive
         - name: Upload a local directory to a directory in ADLS Gen2 file system.
           text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" -d directory --recursive
         - name: Upload a set of files in a local directory to a directory in ADLS Gen2 file system.
@@ -1946,9 +1948,11 @@ helps['storage fs directory download'] = """
     examples:
         - name: Download a single file in a directory in ADLS Gen2 file system.
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d "<local-path>"
-        - name: Download the entire directory in a directory in ADLS Gen2 file system.
+        - name: Download whole ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount  -d "<local-path>" --recursive
+        - name: Download the entire directory in ADLS Gen2 file system.
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s SourceDirectoryPath -d "<local-path>" --recursive
-        - name: Download an entire subdirectory of a directory in ADLS Gen2 file system.
+        - name: Download an entire subdirectory in ADLS Gen2 file system.
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
 """
 

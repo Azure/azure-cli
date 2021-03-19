@@ -497,6 +497,18 @@ class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(filesystem, '/'.join([directory, 'subdir']), storage_account, sas),
                  checks=[JMESPathCheck('length(@)', 10)])
 
+        # Upload single file to the fs root directory
+        self.storage_cmd('storage fs directory upload -f {} -s "{}"', account_info, filesystem,
+                         os.path.join(test_dir, 'readme'))
+        self.storage_cmd('storage fs file exists -f {} --path {}', account_info, filesystem, 'readme') \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        # Upload files to the fs root directory
+        self.storage_cmd('storage fs directory upload -f {} -s "{}" -r', account_info, filesystem,
+                         os.path.join(test_dir, 'duff'))
+        self.storage_cmd('storage fs file exists -f {} --path {}', account_info, filesystem, 'duff/edward') \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
         # Argument validation: Fail when destination path is file name
         self.cmd('storage fs directory upload -f {} -d {} -s {} --account-name {}'.format(
             filesystem, '/'.join([directory, 'readme']), test_dir, storage_account), expect_failure=True)
@@ -511,6 +523,7 @@ class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
         filesystem = 'testfilesystem'
         directory = 'testdir'
         self.storage_cmd('storage fs create -n {}', account_info, filesystem)
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
         self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
                          directory, os.path.join(test_dir, 'readme'))
         self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
@@ -539,7 +552,7 @@ class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(filesystem, '/'.join([directory, 'apple']), local_folder, connection_string))
         self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
 
-        # Download file in a directory
-        self.cmd('storage fs directory download -f {} -s "{}" -d "{}" --recursive --account-name {} --sas-token {}'
-                 .format(filesystem, '/'.join([directory, 'apple/file_0']), local_folder, storage_account, sas))
-        self.assertEqual(23, sum(len(f) for r, d, f in os.walk(local_folder)))
+        # Download from root directory
+        self.cmd('storage fs directory download -f {} -d "{}" --recursive --account-name {} --sas-token {}'
+                 .format(filesystem, local_folder, storage_account, sas))
+        self.assertEqual(6, sum(len(d) for r, d, f in os.walk(local_folder)))
