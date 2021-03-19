@@ -1109,6 +1109,12 @@ def process_vnet_create_namespace(cmd, namespace):
         namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
+def _validate_cert(namespace, param_name):
+    attr = getattr(namespace, param_name)
+    if attr and os.path.isfile(attr):
+        setattr(namespace, param_name, read_base_64_file(attr))
+
+
 def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
@@ -1130,6 +1136,9 @@ def process_vnet_gateway_create_namespace(cmd, namespace):
     if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
+
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        _validate_cert(namespace, 'root_cert_data')
 
 
 def process_vnet_gateway_update_namespace(cmd, namespace):

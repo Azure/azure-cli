@@ -6338,11 +6338,12 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None, custom_routes=None):
+                        gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
+                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
-     VpnClientConfiguration, AddressSpace) = cmd.get_models(
+     VpnClientConfiguration, AddressSpace, VpnClientRootCertificate) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
-         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace')
+         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace', 'VpnClientRootCertificate')
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
@@ -6372,6 +6373,15 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         if any((radius_secret, radius_server)) and cmd.supported_api_version(min_api='2017-06-01'):
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
+
+        # multi authentication
+        if cmd.supported_api_version(min_api='2020-11-01'):
+            vnet_gateway.vpn_client_configuration.vpn_authentication_types = vpn_auth_type
+            vnet_gateway.vpn_client_configuration.aad_tenant = aad_tenant
+            vnet_gateway.vpn_client_configuration.aad_issuer = aad_issuer
+            vnet_gateway.vpn_client_configuration.aad_audience = aad_audience
+            vnet_gateway.vpn_client_configuration.vpn_client_root_certificates = [
+                VpnClientRootCertificate(name=root_cert_name, public_cert_data=root_cert_data)]
 
     if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
         vnet_gateway.custom_routes = AddressSpace()
