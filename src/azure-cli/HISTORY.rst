@@ -120,7 +120,7 @@ Release History
 
 **Upgrade**
 
-* Fix 16952: Fix ImportError after upgrade (#17314)
+* Fix #16952: Fix ImportError after upgrade (#17314)
 
 2.20.0
 ++++++
