@@ -52,7 +52,7 @@ Release History
 
 * Fix a Windows vm user update bug (#17257)
 * Fix #16585: `az vmss deallocate`: `--instance-ids` failed (#17274)
-* `az vm create`: New parameter --platform-fault-domain in FLEX VMSS mode (#16409)
+* `az vm create`: New parameter `--platform-fault-domain` in FLEX VMSS mode (#16409)
 * `az vm create`: `--patch-mode` for Linux VM (#16409)
 * `az ssh vm`: Automatically launch browser when getting certificate fails (#17093)
 * `az vm create`: New parameter `--count` (#17217)
