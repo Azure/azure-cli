@@ -46,7 +46,7 @@ Release History
 
 **CDN**
 
-* `az afd rule create`: Fix '--help' message (#17282)
+* `az afd rule create`: Fix `--help` message (#17282)
 
 **Compute**
 
