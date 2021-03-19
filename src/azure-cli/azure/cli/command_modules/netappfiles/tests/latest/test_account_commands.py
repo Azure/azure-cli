@@ -13,9 +13,6 @@ LOCATION = "westus2"
 
 
 class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
-    def test_start(self):
-        self.cmd("az account set -s 6e85a00d-1230-45c1-b656-febf9b3d123c")
-
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_create_delete_account(self):
         account_name = self.create_random_name(prefix='cli', length=24)
