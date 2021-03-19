@@ -173,9 +173,14 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
     subnet_id_parts = parse_resource_id(subnet_id)
+    subnet_subscription_id = subnet_id_parts['subscription'] 
     subnet_resource_group = subnet_id_parts['resource_group']
     subnet_vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
+
+    if get_subscription_id(cli_ctx).lower() != subnet_subscription_id.lower():
+        raise ArgumentUsageError('Cannot validate subnet in different subscription for missing service endpoint.'
+                                 ' Use --ignore-missing-endpoint or -i to skip validation and manually verify service endpoint.')
 
     vnet_client = network_client_factory(cli_ctx, api_version=NETWORK_API_VERSION)
     subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)

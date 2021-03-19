@@ -174,6 +174,8 @@ def _validate_ip_address_format(namespace):
         if ' ' in input_value:
             raise InvalidArgumentValueError("Spaces not allowed: '{}' ".format(input_value))
         input_ips = input_value.split(',')
+        if len(input_ips) > 8:
+            raise InvalidArgumentValueError('Maximum 8 IP addresses are allowed per rule.')
         validated_ips = ''
         for ip in input_ips:
             # Use ipaddress library to validate ip network format
@@ -209,6 +211,8 @@ def _validate_service_tag_format(cmd, namespace):
         if ' ' in input_value:
             raise InvalidArgumentValueError("Spaces not allowed: '{}' ".format(input_value))
         input_tags = input_value.split(',')
+        if len(input_tags) > 8:
+            raise InvalidArgumentValueError('Maximum 8 service tags are allowed per rule.')
         network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
         resource_group_name = namespace.resource_group_name
         name = namespace.name
