@@ -15,7 +15,7 @@ Release History
 
 **AKS**
 
-* Add --no-uptime-sla (#17192)
+* `aks update`: Add `--no-uptime-sla` (#17192)
 * Fix cross-sub assigning identity error and attach acr error (#17281)
 * Add support for node public IP prefix ID (#17138)
 
