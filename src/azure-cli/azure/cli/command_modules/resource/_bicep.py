@@ -79,7 +79,7 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
             f.write(request.read())
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        
+
         if stdout:
             print(f'Successfully installed Bicep CLI to "{installation_path}".')
         else:
