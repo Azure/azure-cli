@@ -587,7 +587,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
-        c.argument('destination_path', help='The destination path that will be appended to the blob name.')
+        c.argument('destination_path', help='The destination path that will be prepended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
         from ._validators import get_include_help_string
