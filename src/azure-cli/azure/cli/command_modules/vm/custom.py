@@ -1937,9 +1937,10 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     :param plan:Image billing plan
     :return:
     """
+    from azure.mgmt.marketplaceordering.models import OfferType
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
     op = cf_vm_image_term(cmd.cli_ctx, '')
-    terms = op.get(offer_type='virtualmachine',
+    terms = op.get(offer_type=OfferType.VIRTUALMACHINE,
                    publisher_id=publisher,
                    offer_id=offer,
                    plan_id=plan)
