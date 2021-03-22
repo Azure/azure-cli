@@ -1828,6 +1828,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    from azure.mgmt.marketplaceordering.models import OfferType
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
                                            InvalidArgumentValueError,
                                            RequiredArgumentMissingError)
@@ -1852,9 +1853,16 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
 
     market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
 
-    term = market_place_client.marketplace_agreements.get(publisher, offer, plan)
+    term = market_place_client.marketplace_agreements.get(offer_type=OfferType.VIRTUALMACHINE,
+                                                          publisher_id=publisher,
+                                                          offer_id=offer,
+                                                          plan_id=plan)
     term.accepted = True
-    return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
+    return market_place_client.marketplace_agreements.create(offer_type=OfferType.VIRTUALMACHINE,
+                                                             publisher_id=publisher,
+                                                             offer_id=offer,
+                                                             plan_id=plan,
+                                                             parameters=term)
 # endregion
 
 
@@ -1878,11 +1886,19 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
 
 
 def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
+    from azure.mgmt.marketplaceordering.models import OfferType
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
     op = cf_vm_image_term(cmd.cli_ctx, '')
-    terms = op.get(publisher, offer, plan)
+    terms = op.get(offer_type=OfferType.VIRTUALMACHINE,
+                   publisher_id=publisher,
+                   offer_id=offer,
+                   plan_id=plan)
     terms.accepted = accept
-    return op.create(publisher, offer, plan, terms)
+    return op.create(offer_type=OfferType.VIRTUALMACHINE,
+                     publisher_id=publisher,
+                     offer_id=offer,
+                     plan_id=plan,
+                     parameters=terms)
 
 
 def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -1921,9 +1937,13 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     :param plan:Image billing plan
     :return:
     """
+    from azure.mgmt.marketplaceordering.models import OfferType
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
     op = cf_vm_image_term(cmd.cli_ctx, '')
-    terms = op.get(publisher, offer, plan)
+    terms = op.get(offer_type=OfferType.VIRTUALMACHINE,
+                   publisher_id=publisher,
+                   offer_id=offer,
+                   plan_id=plan)
     return terms
 
 
