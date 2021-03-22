@@ -15,8 +15,7 @@ from ._client_factory import (
     account_backups_mgmt_client_factory,
     backups_mgmt_client_factory,
     backup_policies_mgmt_client_factory,
-    vaults_mgmt_client_factory,
-    volume_backup_status_mgmt_client_factory)
+    vaults_mgmt_client_factory)
 from ._exception_handler import netappfiles_exception_handler
 
 
@@ -83,13 +82,6 @@ def load_command_table(self, _):
         exception_handler=netappfiles_exception_handler
     )
     load_vaults_command_groups(self, netappfiles_vaults_sdk)
-
-    netappfiles_volume_backup_status_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._volume_backup_status_operations#VolumeBackupStatusOperations.{}',
-        client_factory=volume_backup_status_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_volume_backup_status_command_groups(self, netappfiles_volume_backup_status_sdk)
 
     with self.command_group('netappfiles', is_preview=False):
         pass
@@ -269,8 +261,3 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
 def load_vaults_command_groups(self, netappfiles_vaults_sdk):
     with self.command_group('netappfiles vault', netappfiles_vaults_sdk) as g:
         g.command('list', 'list')
-
-
-def load_volume_backup_status_command_groups(self, netappfiles_volume_backup_status_sdk):
-    with self.command_group('netappfiles volume backup status', netappfiles_volume_backup_status_sdk, is_preview=True) as g:
-        g.show_command('show', 'get')

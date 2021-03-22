@@ -46,7 +46,3 @@ def backup_policies_mgmt_client_factory(cli_ctx, _):
 
 def vaults_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).vaults
-
-
-def volume_backup_status_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).volume_backup_status

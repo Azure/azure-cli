@@ -921,28 +921,6 @@ examples:
 """
 
 
-helps['netappfiles volume backup status'] = """
-type: group
-short-summary: See Azure NetApp Files (ANF) Volume Backup Status.
-"""
-
-helps['netappfiles volume backup status show'] = """
-type: command
-short-summary: Update the specified ANF backup with the values provided.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF volume
-examples:
-  - name: Get volume's ANF backup status
-    text: >
-        az netappfiles volume backup status show -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
-"""
-
-
 helps['netappfiles snapshot policy'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Snapshot Policy Resources.
