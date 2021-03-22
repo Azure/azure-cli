@@ -609,6 +609,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'server_trust_group_delete', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'server_trust_group_get')
         g.custom_command('list', 'server_trust_group_list')
+        g.wait_command('wait')
 
     ###############################################
     #                sql managed instance         #

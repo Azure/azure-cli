@@ -3844,10 +3844,10 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'loc': 'westeurope',
-            'vnet_name': 'stgCliTestVname',
-            'subnet_name': 'stgCliTestSubnet',
-            'nsg': 'stgCliTestNsg',
-            'route_table_name': 'stgCliTestRouteTable',
+            'vnet_name': self.create_random_name('stgCliTestVnet', 20),
+            'subnet_name': self.create_random_name('stgCliTestSubnet', 20),
+            'nsg': self.create_random_name('stgCliTestNsg', 20),
+            'route_table_name': self.create_random_name('stgCliTestRouteTable', 30),
             'route_name_default': 'default',
             'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
             'managed_instance_name_1': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
