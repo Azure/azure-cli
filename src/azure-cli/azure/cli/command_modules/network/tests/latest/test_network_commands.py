@@ -3609,7 +3609,7 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
                  '--aad-audience {aad_audience} --aad-issuer {aad_issuer} --aad-tenant {aad_tenant} '
                  '--root-cert-name {root_cert_name} --root-cert-data "{root_cert_data}" '
                  '--radius-secret 111_aaa --radius-server 30.1.1.15 --vpn-auth-type AAD Certificate Radius',
-                 checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
+                 checks=[self.check('length(vnetGateway.vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
     @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_multi_auth1')
     def test_network_vnet_gateway_multi_auth1(self, resource_group):
