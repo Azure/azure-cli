@@ -301,10 +301,10 @@ def create_snapshot(client, resource_group_name, account_name, pool_name, volume
 
 # ---- SNAPSHOT POLICIES ----
 def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
-                           hourly_snapshots=0, hourly_minute=0,
-                           daily_snapshots=0, daily_minute=0, daily_hour=0,
-                           weekly_snapshots=0, weekly_minute=0, weekly_hour=0, weekly_day=None,
-                           monthly_snapshots=0, monthly_minute=0, monthly_hour=0, monthly_days=None,
+                           hourly_snapshots=None, hourly_minute=None,
+                           daily_snapshots=None, daily_minute=None, daily_hour=None,
+                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
+                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                            enabled=False, tags=None):
     body = SnapshotPolicy(
         location=location,
@@ -320,10 +320,10 @@ def create_snapshot_policy(client, resource_group_name, account_name, snapshot_p
 
 
 def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
-                          hourly_snapshots=0, hourly_minute=0,
-                          daily_snapshots=0, daily_minute=0, daily_hour=0,
-                          weekly_snapshots=0, weekly_minute=0, weekly_hour=0, weekly_day=None,
-                          monthly_snapshots=0, monthly_minute=0, monthly_hour=0, monthly_days=None,
+                          hourly_snapshots=None, hourly_minute=None,
+                          daily_snapshots=None, daily_minute=None, daily_hour=None,
+                          weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
+                          monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
                           enabled=False):
     body = SnapshotPolicyPatch(
         location=location,
@@ -350,8 +350,8 @@ def update_backup(client, resource_group_name, account_name, pool_name, volume_n
 
 # ---- BACKUP POLICIES ----
 def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
-                         daily_backups=0, weekly_backups=0, monthly_backups=0,
-                         yearly_backups=0, enabled=False, tags=None):
+                         daily_backups=None, weekly_backups=None, monthly_backups=None,
+                         yearly_backups=None, enabled=False, tags=None):
     body = BackupPolicy(
         location=location,
         daily_backups_to_keep=daily_backups,
@@ -364,8 +364,8 @@ def create_backup_policy(client, resource_group_name, account_name, backup_polic
 
 
 def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
-                        daily_backups=0, weekly_backups=0, monthly_backups=0,
-                        yearly_backups=0, enabled=False, tags=None):
+                        daily_backups=None, weekly_backups=None, monthly_backups=None,
+                        yearly_backups=None, enabled=False, tags=None):
     body = BackupPolicyPatch(
         location=location,
         daily_backups_to_keep=daily_backups,
