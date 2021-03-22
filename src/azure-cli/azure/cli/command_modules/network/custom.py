@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError, UnrecognizedArgumentError
 
 logger = get_logger(__name__)
 
@@ -2760,7 +2760,8 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
 
     propagated_route_tables = PropagatedRouteTable(
         labels=labels,
-        ids=[SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]
+        ids=[SubResource(id=propagated_route_table) for propagated_route_table in
+             propagated_route_tables] if propagated_route_tables else None
     )
     routing_configuration = RoutingConfiguration(
         associated_route_table=SubResource(id=associated_route_table),
@@ -3328,7 +3329,7 @@ def lb_get(client, resource_group_name, load_balancer_name):
 # workaround for : https://github.com/Azure/azure-cli/issues/17071
 def lb_get_operation(lb):
     for item in lb.frontend_ip_configurations:
-        if item.zones is not None and len(item.zones) >= 3:
+        if item.zones is not None and len(item.zones) >= 3 and item.subnet is None:
             item.zones = None
 
     return lb
@@ -3465,17 +3466,30 @@ def set_lb_frontend_ip_configuration(
     return parent
 
 
+def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
+    if vnet and not is_valid_resource_id(vnet):
+        vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet)
+    return vnet
+
+
+def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
+    if subnet and not is_valid_resource_id(subnet):
+        vnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name)
+        if vnet is None:
+            raise UnrecognizedArgumentError('vnet should be provided when input subnet name instead of subnet id')
+
+        subnet = vnet + f'/subnets/{subnet}'
+    return subnet
+
+
+# pylint: disable=too-many-branches
 def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                    vnet=None, backend_addresses=None, backend_addresses_config_file=None):
-    def _process_vnet_name_and_id(vnet):
-        if vnet and not is_valid_resource_id(vnet):
-            vnet = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='virtualNetworks',
-                name=vnet)
-        return vnet
     if backend_addresses and backend_addresses_config_file:
         raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
     if backend_addresses_config_file:
@@ -3488,8 +3502,10 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     (BackendAddressPool,
      LoadBalancerBackendAddress,
+     Subnet,
      VirtualNetwork) = cmd.get_models('BackendAddressPool',
                                       'LoadBalancerBackendAddress',
+                                      'Subnet',
                                       'VirtualNetwork')
     # Before 2020-03-01, service doesn't support the other rest method.
     # We have to use old one to keep backward compatibility.
@@ -3508,13 +3524,42 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     for addr in addresses_pool:
         if 'virtual_network' not in addr and vnet:
             addr['virtual_network'] = vnet
+
     # pylint: disable=line-too-long
-    try:
-        new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                    virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
-                                                    ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
-    except KeyError:
-        raise CLIError('Each backend address must have name, vnet and ip-address information.')
+    if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
+        try:
+            if addresses_pool:
+                new_addresses = []
+                for addr in addresses_pool:
+                    # vnet      | subnet        |  status
+                    # name/id   | name/id/null  |    ok
+                    # null      | id            |    ok
+                    if 'virtual_network' in addr:
+                        address = LoadBalancerBackendAddress(name=addr['name'],
+                                                             virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                             subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                             ip_address=addr['ip_address'])
+                    elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
+                        address = LoadBalancerBackendAddress(name=addr['name'],
+                                                             subnet=Subnet(id=addr['subnet']),
+                                                             ip_address=addr['ip_address'])
+                    else:
+                        raise KeyError
+
+                    new_addresses.append(address)
+            else:
+                new_addresses = None
+        except KeyError:
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet '
+                                            'name | subnet id) information.')
+    else:
+        try:
+            new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
+                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                        ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+        except KeyError:
+            raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
+
     new_pool = BackendAddressPool(name=backend_address_pool_name,
                                   load_balancer_backend_addresses=new_addresses)
     return ncf.load_balancer_backend_address_pools.begin_create_or_update(resource_group_name,
@@ -3779,16 +3824,33 @@ def set_cross_region_lb_rule(
 # endregion
 
 
+# pylint: disable=line-too-long
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                        address_name, vnet, ip_address):
+                                        address_name, ip_address, vnet=None, subnet=None):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     (LoadBalancerBackendAddress,
+     Subnet,
      VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
+                                      'Subnet',
                                       'VirtualNetwork')
-    new_address = LoadBalancerBackendAddress(name=address_name,
-                                             virtual_network=VirtualNetwork(id=vnet) if vnet else None,
-                                             ip_address=ip_address if ip_address else None)
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        if vnet:
+            new_address = LoadBalancerBackendAddress(name=address_name,
+                                                     subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
+                                                     virtual_network=VirtualNetwork(id=vnet),
+                                                     ip_address=ip_address if ip_address else None)
+        elif is_valid_resource_id(subnet):
+            new_address = LoadBalancerBackendAddress(name=address_name,
+                                                     subnet=Subnet(id=subnet),
+                                                     ip_address=ip_address if ip_address else None)
+        else:
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet name | subnet id) information.')
+
+    else:
+        new_address = LoadBalancerBackendAddress(name=address_name,
+                                                 virtual_network=VirtualNetwork(id=vnet) if vnet else None,
+                                                 ip_address=ip_address if ip_address else None)
     if address_pool.load_balancer_backend_addresses is None:
         address_pool.load_balancer_backend_addresses = []
     address_pool.load_balancer_backend_addresses.append(new_address)
@@ -6623,6 +6685,8 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
     gateway.vpn_client_configuration.aad_tenant = None
     gateway.vpn_client_configuration.aad_audience = None
     gateway.vpn_client_configuration.aad_issuer = None
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        gateway.vpn_client_configuration.vpn_authentication_types = None
 
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 # endregion

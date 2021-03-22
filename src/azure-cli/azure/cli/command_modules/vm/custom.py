@@ -13,11 +13,6 @@
 # pylint: disable=no-self-use,too-many-lines
 from __future__ import print_function
 
-# from .generated.custom import *  # noqa: F403
-try:
-    from .manual.custom import *   # noqa: F403, pylint: disable=unused-import,unused-wildcard-import,wildcard-import
-except ImportError:
-    pass
 
 import json
 import os
@@ -50,6 +45,12 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
+
+from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+try:
+    from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+except ImportError:
+    pass
 
 logger = get_logger(__name__)
 
@@ -721,7 +722,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
-              enable_hotpatching=None):
+              enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
+              enable_vtpm=None, count=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -732,6 +734,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_msi_role_assignment,
                                                                 build_vm_linux_log_analytics_workspace_agent,
                                                                 build_vm_windows_log_analytics_workspace_agent)
+    from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -765,7 +768,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     storage_container_name = storage_container_name or 'vhds'
 
     # Build up the ARM template
-    master_template = ArmTemplateBuilder()
+    if count is None:
+        master_template = ArmTemplateBuilder()
+    else:
+        master_template = ArmTemplateBuilder20190401()
 
     vm_dependencies = []
     if storage_account_type == 'new':
@@ -778,7 +784,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     nic_name = None
     if nic_type == 'new':
         nic_name = '{}VMNic'.format(vm_name)
-        vm_dependencies.append('Microsoft.Network/networkInterfaces/{}'.format(nic_name))
+        nic_full_name = 'Microsoft.Network/networkInterfaces/{}'.format(nic_name)
+        if count:
+            vm_dependencies.extend([nic_full_name + str(i) for i in range(count)])
+        else:
+            vm_dependencies.append(nic_full_name)
 
         nic_dependencies = []
         if vnet_type == 'new':
@@ -823,12 +833,15 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
-            nic_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(
-                public_ip_address))
+            public_ip_address_full_name = 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address)
+            if count:
+                nic_dependencies.extend([public_ip_address_full_name + str(i) for i in range(count)])
+            else:
+                nic_dependencies.append(public_ip_address_full_name)
             master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location, tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name,
-                                                                  public_ip_sku, zone))
+                                                                  public_ip_sku, zone, count))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
@@ -843,12 +856,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
                 else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
 
-        nics = [
-            {'id': '{}/networkInterfaces/{}'.format(network_id_template, nic_name)}
-        ]
+        nics_id = '{}/networkInterfaces/{}'.format(network_id_template, nic_name)
+
+        if count:
+            nics = [
+                {'id': "[concat('{}', copyIndex())]".format(nics_id)}
+            ]
+        else:
+            nics = [
+                {'id': nics_id}
+            ]
+
         nic_resource = build_nic_resource(
             cmd, nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
-            public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking)
+            public_ip_address_id, application_security_groups, accelerated_networking=accelerated_networking,
+            count=count)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
     else:
@@ -893,7 +915,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
-        enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching)
+        enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
+        platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
+        enable_vtpm=enable_vtpm, count=count)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -967,18 +991,28 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
         LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
 
-    vm = get_vm_details(cmd, resource_group_name, vm_name)
-    if assign_identity is not None:
-        if enable_local_identity and not identity_scope:
-            _show_missing_access_warning(resource_group_name, vm_name, 'vm')
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
-                                                         vm.identity.user_assigned_identities))
+    if count:
+        vm_names = [vm_name + str(i) for i in range(count)]
+    else:
+        vm_names = [vm_name]
+    vms = []
+    # Use vm_name2 to avoid R1704: Redefining argument with the local name 'vm_name' (redefined-argument-from-local)
+    for vm_name2 in vm_names:
+        vm = get_vm_details(cmd, resource_group_name, vm_name2)
+        if assign_identity is not None:
+            if enable_local_identity and not identity_scope:
+                _show_missing_access_warning(resource_group_name, vm_name2, 'vm')
+            setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
+                                                             vm.identity.user_assigned_identities))
+        vms.append(vm)
 
     if workspace is not None:
         workspace_name = parse_resource_id(workspace_id)['name']
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    return vm
+    if len(vms) == 1:
+        return vms[0]
+    return vms
 
 
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
@@ -1198,9 +1232,21 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # update the NSG with the new rule to allow inbound traffic
     SecurityRule = cmd.get_models('SecurityRule', resource_type=ResourceType.MGMT_NETWORK)
-    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
+
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
+
+    # use portranges if multiple ports are entered
+    if "," not in port:
+        port_arg = {
+            'destination_port_range': port
+        }
+    else:
+        port_arg = {
+            'destination_port_ranges': port.split(',')
+        }
+
     rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
-                        source_port_range='*', destination_port_range=port, priority=priority,
+                        source_port_range='*', **port_arg, priority=priority,
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
@@ -1269,7 +1315,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, proximity_placement_group=None, workspace=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
+              enable_vtpm=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1312,6 +1359,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vm.security_profile = {'uefiSettings': {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }}
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -1775,6 +1828,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    from azure.mgmt.marketplaceordering.models import OfferType
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
                                            InvalidArgumentValueError,
                                            RequiredArgumentMissingError)
@@ -1799,9 +1853,16 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
 
     market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
 
-    term = market_place_client.marketplace_agreements.get(publisher, offer, plan)
+    term = market_place_client.marketplace_agreements.get(offer_type=OfferType.VIRTUALMACHINE,
+                                                          publisher_id=publisher,
+                                                          offer_id=offer,
+                                                          plan_id=plan)
     term.accepted = True
-    return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
+    return market_place_client.marketplace_agreements.create(offer_type=OfferType.VIRTUALMACHINE,
+                                                             publisher_id=publisher,
+                                                             offer_id=offer,
+                                                             plan_id=plan,
+                                                             parameters=term)
 # endregion
 
 
@@ -1825,11 +1886,19 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
 
 
 def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
+    from azure.mgmt.marketplaceordering.models import OfferType
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
     op = cf_vm_image_term(cmd.cli_ctx, '')
-    terms = op.get(publisher, offer, plan)
+    terms = op.get(offer_type=OfferType.VIRTUALMACHINE,
+                   publisher_id=publisher,
+                   offer_id=offer,
+                   plan_id=plan)
     terms.accepted = accept
-    return op.create(publisher, offer, plan, terms)
+    return op.create(offer_type=OfferType.VIRTUALMACHINE,
+                     publisher_id=publisher,
+                     offer_id=offer,
+                     plan_id=plan,
+                     parameters=terms)
 
 
 def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -1868,9 +1937,13 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     :param plan:Image billing plan
     :return:
     """
+    from azure.mgmt.marketplaceordering.models import OfferType
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
     op = cf_vm_image_term(cmd.cli_ctx, '')
-    terms = op.get(publisher, offer, plan)
+    terms = op.get(offer_type=OfferType.VIRTUALMACHINE,
+                   publisher_id=publisher,
+                   offer_id=offer,
+                   plan_id=plan)
     return terms
 
 
@@ -2701,8 +2774,10 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
+    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
+    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):

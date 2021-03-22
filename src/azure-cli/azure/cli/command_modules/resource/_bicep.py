@@ -115,6 +115,8 @@ def _get_bicep_download_url(system, release_tag):
     if system == "Windows":
         return download_url.format("bicep-win-x64.exe")
     if system == "Linux":
+        if os.path.exists("/lib/ld-musl-x86_64.so.1"):
+            return download_url.format("bicep-linux-musl-x64")
         return download_url.format("bicep-linux-x64")
     if system == "Darwin":
         return download_url.format("bicep-osx-x64")
@@ -143,6 +145,9 @@ def _run_command(bicep_installation_path, args):
 
     try:
         process.check_returncode()
+        command_warnings = process.stderr.decode("utf-8")
+        if command_warnings:
+            _logger.warning(command_warnings)
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
         raise UnclassifiedUserFault(process.stderr.decode("utf-8"))

@@ -489,15 +489,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
 
     with self.argument_context('storage account generate-sas') as c:
-        from ._validators import get_not_none_validator
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
         c.register_sas_arguments()
         c.argument('services', type=services_type(self))
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=['--account-name'],
-                   validator=get_not_none_validator('account_name'))
+        c.argument('account_name', acct_name_type, options_list=['--account-name'])
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
@@ -1173,6 +1171,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.argument('expand', default=None)
         c.ignore('filter', 'maxpagesize')
+        c.ignore('x_ms_snapshot')  # Ignore first before it is ready
 
     for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:

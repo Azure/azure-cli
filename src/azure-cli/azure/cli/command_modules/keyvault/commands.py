@@ -139,7 +139,7 @@ def load_command_table(self, _):
                                 is_preview=True) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
-            g.keyvault_custom('download', 'security_domain_download')
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_entity.command_type) as g:
