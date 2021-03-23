@@ -7,11 +7,11 @@
 
 from knack.util import CLIError
 from msrest.exceptions import ValidationError  # pylint: disable=import-error
-from azure.core.exceptions import ClientAuthenticationError, HttpResponseError, ResourceExistsError, ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError
 
 
 def netappfiles_exception_handler(ex):
-    if isinstance(ex, (ClientAuthenticationError, HttpResponseError, ResourceExistsError, ResourceNotFoundError,
+    if isinstance(ex, (HttpResponseError,
                        ValidationError, ValueError)):
         message = ex
         raise CLIError(message)
