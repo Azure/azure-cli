@@ -11,7 +11,6 @@ import argparse
 import argcomplete
 
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands import AzCliCommandInvoker
@@ -392,7 +391,93 @@ class AzCliCommandParser(CLICommandParser):
                                                                   default_value) if cli_ctx else default_value
         return run_after_extension_installed
 
-    def _check_value(self, action, value):  # pylint: disable=too-many-statements, too-many-locals, too-many-branches
+    def _check_value_in_extensions(self, cli_ctx, args, no_prompt):  # pylint: disable=too-many-statements
+        """Check if the command args can be found in extension commands.
+        """
+        # Check if the command is from an extension
+        from azure.cli.core.util import roughly_parse_command
+        from azure.cli.core.azclierror import NoTTYError
+        exit_code = 2
+        command_str = roughly_parse_command(args[1:])
+        ext_name = self._search_in_extension_commands(command_str)
+        # ext_name is a list if the input command matches the prefix of one or more extension commands,
+        # for instance: `az blueprint` when running `az blueprint -h`
+        # ext_name is a str if the input command matches a complete command of an extension,
+        # for instance: `az blueprint create`
+        if isinstance(ext_name, list):
+            if len(ext_name) > 1:
+                from knack.prompting import prompt_choice_list, NoTTYException
+                prompt_msg = "The command requires the latest version of one of the following " \
+                    "extensions. You need to pick one to install:"
+                try:
+                    choice_idx = prompt_choice_list(prompt_msg, ext_name)
+                    ext_name = ext_name[choice_idx]
+                except NoTTYException:
+                    tty_err_msg = "{}{}\nUnable to prompt for selection as no tty available. Please update or " \
+                        "install the extension with 'az extension add --upgrade -n <extension-name>'." \
+                        .format(prompt_msg, ext_name)
+                    az_error = NoTTYError(tty_err_msg)
+                    az_error.print_error()
+                    az_error.send_telemetry()
+                    self.exit(exit_code)
+            else:
+                ext_name = ext_name[0]
+        if not ext_name:
+            return
+
+        telemetry.set_command_details(command_str,
+                                      parameters=AzCliCommandInvoker._extract_parameter_names(args),  # pylint: disable=protected-access
+                                      extension_name=ext_name)
+        run_after_extension_installed = self._get_extension_run_after_dynamic_install_config()
+        prompt_info = ""
+        if no_prompt:
+            logger.warning('The command requires the extension %s. It will be installed first.', ext_name)
+            install_ext = True
+        else:  # yes_prompt
+            from knack.prompting import prompt_y_n, NoTTYException
+            prompt_msg = 'The command requires the extension {}. Do you want to install it now?'.format(ext_name)
+            if run_after_extension_installed:
+                prompt_msg = '{} The command will continue to run after the extension is installed.' \
+                    .format(prompt_msg)
+            NO_PROMPT_CONFIG_MSG = "Run 'az config set extension.use_dynamic_install=" \
+                "yes_without_prompt' to allow installing extensions without prompt."
+            try:
+                install_ext = prompt_y_n(prompt_msg, default='y')
+                if install_ext:
+                    prompt_info = " with prompt"
+                    logger.warning(NO_PROMPT_CONFIG_MSG)
+            except NoTTYException:
+                tty_err_msg = "The command requires the extension {}. " \
+                              "Unable to prompt for extension install confirmation as no tty " \
+                              "available. {}".format(ext_name, NO_PROMPT_CONFIG_MSG)
+                az_error = NoTTYError(tty_err_msg)
+                az_error.print_error()
+                az_error.send_telemetry()
+                self.exit(exit_code)
+
+        if install_ext:
+            from azure.cli.core.extension.operations import add_extension
+            add_extension(cli_ctx=cli_ctx, extension_name=ext_name, upgrade=True)
+            if run_after_extension_installed:
+                import subprocess
+                import platform
+                exit_code = subprocess.call(args, shell=platform.system() == 'Windows')
+                error_msg = ("Extension {} dynamically installed{} and commands will be "
+                             "rerun automatically.").format(ext_name, prompt_info)
+            else:
+                error_msg = 'Extension {} installed{}. Please rerun your command.' \
+                    .format(ext_name, prompt_info)
+        else:
+            error_msg = "The command requires the latest version of extension {ext_name}. " \
+                "To install, run 'az extension add --upgrade -n {ext_name}'.".format(
+                    ext_name=ext_name)
+        az_error = CommandNotFoundError(error_msg)
+        if exit_code != 0:
+            az_error.print_error()
+        az_error.send_telemetry()
+        self.exit(exit_code)
+
+    def _check_value(self, action, value):  # pylint: too-many-locals, too-many-branches
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
@@ -400,127 +485,46 @@ class AzCliCommandParser(CLICommandParser):
             # use cli_ctx from cli_help which is not lost.
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
-            caused_by_extension_not_installed = False
             command_name_inferred = self.prog
-            error_msg = None
-            use_dynamic_install = 'no'
             if not self.command_source:
                 candidates = []
                 args = self.prog.split() + self._raw_arguments
                 use_dynamic_install = self._get_extension_use_dynamic_install_config()
                 if use_dynamic_install != 'no':
-                    # Check if the command is from an extension
-                    from azure.cli.core.util import roughly_parse_command
-                    command_str = roughly_parse_command(args[1:])
-                    ext_name = self._search_in_extension_commands(command_str)
-                    # The input command matches the prefix of one or more extension commands
-                    if isinstance(ext_name, list):
-                        if len(ext_name) > 1:
-                            from knack.prompting import prompt_choice_list, NoTTYException
-                            prompt_msg = "The command requires the latest version of one of the following " \
-                                "extensions. You need to pick one to install:"
-                            try:
-                                choice_idx = prompt_choice_list(prompt_msg, ext_name)
-                                ext_name = ext_name[choice_idx]
-                                use_dynamic_install = 'yes_without_prompt'
-                            except NoTTYException:
-                                error_msg = "{}{}\nUnable to prompt for selection as no tty available. Please " \
-                                    "update or install the extension with 'az extension add --upgrade -n " \
-                                    "<extension-name>'.".format(prompt_msg, ext_name)
-                                logger.error(error_msg)
-                                telemetry.set_user_fault(error_msg)
-                                self.exit(2)
-                        else:
-                            ext_name = ext_name[0]
-
-                    if ext_name:
-                        caused_by_extension_not_installed = True
-                        telemetry.set_command_details(command_str,
-                                                      parameters=AzCliCommandInvoker._extract_parameter_names(args),  # pylint: disable=protected-access
-                                                      extension_name=ext_name)
-                        run_after_extension_installed = self._get_extension_run_after_dynamic_install_config()
-                        prompt_info = ""
-                        if use_dynamic_install == 'yes_without_prompt':
-                            logger.warning('The command requires the extension %s. '
-                                           'It will be installed first.', ext_name)
-                            go_on = True
-                        else:
-                            from knack.prompting import prompt_y_n, NoTTYException
-                            prompt_msg = 'The command requires the extension {}. ' \
-                                'Do you want to install it now?'.format(ext_name)
-                            if run_after_extension_installed:
-                                prompt_msg = '{} The command will continue to run after the extension is installed.' \
-                                    .format(prompt_msg)
-                            NO_PROMPT_CONFIG_MSG = "Run 'az config set extension.use_dynamic_install=" \
-                                "yes_without_prompt' to allow installing extensions without prompt."
-                            try:
-                                go_on = prompt_y_n(prompt_msg, default='y')
-                                if go_on:
-                                    prompt_info = " with prompt"
-                                    logger.warning(NO_PROMPT_CONFIG_MSG)
-                            except NoTTYException:
-                                error_msg = "The command requires the extension {}. " \
-                                            "Unable to prompt for extension install confirmation as no tty " \
-                                            "available. {}".format(ext_name, NO_PROMPT_CONFIG_MSG)
-                                go_on = False
-                        if go_on:
-                            from azure.cli.core.extension.operations import add_extension
-                            add_extension(cli_ctx=cli_ctx, extension_name=ext_name, upgrade=True)
-                            if run_after_extension_installed:
-                                import subprocess
-                                import platform
-                                exit_code = subprocess.call(args, shell=platform.system() == 'Windows')
-                                error_msg = ("Extension {} dynamically installed{} and commands will be "
-                                             "rerun automatically.").format(ext_name, prompt_info)
-                                telemetry.set_user_fault(error_msg)
-                                self.exit(exit_code)
-                            else:
-                                with CommandLoggerContext(logger):
-                                    error_msg = 'Extension {} installed{}. Please rerun your command.' \
-                                        .format(ext_name, prompt_info)
-                                    logger.error(error_msg)
-                                    telemetry.set_user_fault(error_msg)
-                                self.exit(2)
-                        else:
-                            error_msg = "The command requires the latest version of extension {ext_name}. " \
-                                "To install, run 'az extension add --upgrade -n {ext_name}'.".format(
-                                    ext_name=ext_name) if not error_msg else error_msg
-                if not error_msg:
-                    # parser has no `command_source`, value is part of command itself
-                    error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
+                    # The function will exit if the parse error is caused by the extension for the command not installed
+                    self._check_value_in_extensions(cli_ctx, args, use_dynamic_install == 'yes_without_prompt')
+                # parser has no `command_source`, value is part of command itself
+                error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
                 az_error = CommandNotFoundError(error_msg)
-                if not caused_by_extension_not_installed:
-                    candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
-                    if candidates:
-                        # use the most likely candidate to replace the misspelled command
-                        args_inferred = [item if item != value else candidates[0] for item in args]
-                        command_name_inferred = ' '.join(args_inferred).split('-')[0]
-
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                if candidates:
+                    # use the most likely candidate to replace the misspelled command
+                    args_inferred = [item if item != value else candidates[0] for item in args]
+                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'.".format(
                     prog=self.prog, value=value, param=parameter)
-                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 az_error = InvalidArgumentValueError(error_msg)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
 
             command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
             # recommend a command for user
-            if not caused_by_extension_not_installed:
-                recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
-                recommender.set_help_examples(self.get_examples(command_name_inferred))
-                recommendations = recommender.provide_recommendations()
-                if recommendations:
-                    az_error.set_aladdin_recommendation(recommendations)
+            recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
+            recommender.set_help_examples(self.get_examples(command_name_inferred))
+            recommendations = recommender.provide_recommendations()
+            if recommendations:
+                az_error.set_aladdin_recommendation(recommendations)
 
-                # remind user to check extensions if we can not find a command to recommend
-                if isinstance(az_error, CommandNotFoundError) \
-                        and not az_error.recommendations and self.prog == 'az' \
-                        and use_dynamic_install == 'no':
-                    az_error.set_recommendation(EXTENSION_REFERENCE)
+            # remind user to check extensions if we can not find a command to recommend
+            if isinstance(az_error, CommandNotFoundError) \
+                    and not az_error.recommendations and self.prog == 'az' \
+                    and use_dynamic_install == 'no':
+                az_error.set_recommendation(EXTENSION_REFERENCE)
 
             az_error.print_error()
             az_error.send_telemetry()

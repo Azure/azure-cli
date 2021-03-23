@@ -220,6 +220,11 @@ class ManualInterrupt(UserFault):
     pass
 
 
+class NoTTYError(UserFault):
+    """ No tty available for prompt. """
+    pass
+
+
 # ARM template related error types
 class InvalidTemplateError(UserFault):
     """ ARM template validation fails. It could be caused by incorrect template files or parameters """
