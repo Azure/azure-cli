@@ -10,50 +10,10 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
-from azure.cli.core.commands.parameters import (
-    tags_type,
-    resource_group_name_type,
-    get_location_type
-)
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.parameters import resource_group_name_type
 
 
 def load_arguments(self, _):
-
-    with self.argument_context('sshkey list') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-
-    with self.argument_context('sshkey show') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
-                   'name of the SSH public key.', id_part='name')
-
-    with self.argument_context('sshkey create') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
-                   'name of the SSH public key.')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('public_key', type=str, help='SSH public key used to authenticate to a virtual machine through ssh. '
-                   'If this property is not initially provided when the resource is created, the publicKey property '
-                   'will be populated when generateKeyPair is called. If the public key is provided upon resource '
-                   'creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.')
-
-    with self.argument_context('sshkey update') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
-                   'name of the SSH public key.', id_part='name')
-        c.argument('tags', tags_type)
-        c.argument('public_key', type=str, help='SSH public key used to authenticate to a virtual machine through ssh. '
-                   'If this property is not initially provided when the resource is created, the publicKey property '
-                   'will be populated when generateKeyPair is called. If the public key is provided upon resource '
-                   'creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.')
-
-    with self.argument_context('sshkey delete') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
-                   'name of the SSH public key.', id_part='name')
 
     with self.argument_context('sshkey generate') as c:
         c.argument('resource_group_name', resource_group_name_type)

@@ -853,13 +853,17 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
 
 def _get_grant_permissions(graph_client, client_sp_object_id=None, query_filter=None):
     query_filter = query_filter or ("clientId eq '{}'".format(client_sp_object_id) if client_sp_object_id else None)
+    grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
     try:
-        grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
-    except CloudError as ex:  # Graph doesn't follow the ARM error; otherwise would be caught by msrest-azure
+        # Make the REST request immediately so that errors can be raised and handled.
+        return list(grant_info)
+    except CloudError as ex:
         if ex.status_code == 404:
-            return []
+            raise CLIError("Service principal with appId or objectId '{id}' doesn't exist. "
+                           "If '{id}' is an appId, make sure an associated service principal is created "
+                           "for the app. To create one, run `az ad sp create --id {id}`."
+                           .format(id=client_sp_object_id))
         raise
-    return grant_info
 
 
 def list_permissions(cmd, identifier):
@@ -870,13 +874,14 @@ def list_permissions(cmd, identifier):
 
     # first get the permission grant history
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
 
     # get original permissions required by the application, we will cross check the history
     # and mark out granted ones
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     permissions = application.required_resource_access
+    if permissions:
+        grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
     for p in permissions:
         result = list(graph_client.service_principals.list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
