@@ -133,186 +133,6 @@ class CommandOperation(BaseCommandOperation):
         return self.load_op_handler_description(op)
 
 
-class WaitCommandOperation(BaseCommandOperation):
-
-    def __init__(self, command_loader, op_path, **kwargs):
-        if not isinstance(op_path, str):
-            raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(WaitCommandOperation, self).__init__(command_loader, **kwargs)
-        self.op_path = op_path
-
-    def handler(self, command_args):    # pylint: disable=too-many-statements
-        """ Callback function of CLICommand handler """
-        from msrest.exceptions import ClientException
-        from azure.core.exceptions import HttpResponseError
-        from knack.util import CLIError
-        from azure.cli.core.commands.arm import EXCLUDED_NON_CLIENT_PARAMS, verify_property
-
-        import time
-
-        op = self.get_op_handler(self.op_path)
-        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
-        self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
-
-        client_arg_name = self.resolve_client_arg_name(self.op_path)
-        try:
-            client = self.client_factory(self.cli_ctx) if self.client_factory else None
-        except TypeError:
-            client = self.client_factory(self.cli_ctx, command_args) if self.client_factory else None
-        if client and (client_arg_name in getter_args):
-            command_args[client_arg_name] = client
-
-        getter = self.get_op_handler(self.op_path)      # Fetch op handler again after cmd property is set
-
-        timeout = command_args.pop('timeout')
-        interval = command_args.pop('interval')
-        wait_for_created = command_args.pop('created')
-        wait_for_deleted = command_args.pop('deleted')
-        wait_for_updated = command_args.pop('updated')
-        wait_for_exists = command_args.pop('exists')
-        custom_condition = command_args.pop('custom')
-        if not any([wait_for_created, wait_for_updated, wait_for_deleted,
-                    wait_for_exists, custom_condition]):
-            raise CLIError(
-                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
-
-        progress_indicator = self.cli_ctx.get_progress_controller()
-        progress_indicator.begin()
-        for _ in range(0, timeout, interval):
-            try:
-                progress_indicator.add(message='Waiting')
-                instance = getter(**command_args)
-                if wait_for_exists:
-                    progress_indicator.end()
-                    return None
-                provisioning_state = self._get_provisioning_state(instance)
-                # until we have any needs to wait for 'Failed', let us bail out on this
-                if provisioning_state:
-                    provisioning_state = provisioning_state.lower()
-                if provisioning_state == 'failed':
-                    progress_indicator.stop()
-                    raise CLIError('The operation failed')
-                if ((wait_for_created or wait_for_updated) and provisioning_state == 'succeeded') or \
-                        custom_condition and bool(verify_property(instance, custom_condition)):
-                    progress_indicator.end()
-                    return None
-            except (ClientException, HttpResponseError) as ex:
-                progress_indicator.stop()
-                if getattr(ex, 'status_code', None) == 404:
-                    if wait_for_deleted:
-                        return None
-                    if not any([wait_for_created, wait_for_exists, custom_condition]):
-                        raise
-                else:
-                    raise
-            except Exception:  # pylint: disable=broad-except
-                progress_indicator.stop()
-                raise
-
-            time.sleep(interval)
-
-        progress_indicator.end()
-        return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
-
-    @staticmethod
-    def _get_provisioning_state(instance):
-        provisioning_state = getattr(instance, 'provisioning_state', None)
-        if not provisioning_state:
-            # some SDK, like resource-group, has 'provisioning_state' under 'properties'
-            properties = getattr(instance, 'properties', None)
-            if properties:
-                provisioning_state = getattr(properties, 'provisioning_state', None)
-                # some SDK, like keyvault, has 'provisioningState' under 'properties.additional_properties'
-                if not provisioning_state:
-                    additional_properties = getattr(properties, 'additional_properties', {})
-                    provisioning_state = additional_properties.get('provisioningState')
-        return provisioning_state
-
-    def arguments_loader(self):
-        """ Callback function of CLICommand arguments_loader """
-        cmd_args = self.load_getter_op_arguments(self.op_path)
-
-        group_name = 'Wait Condition'
-        cmd_args['timeout'] = CLICommandArgument(
-            'timeout', options_list=['--timeout'], default=3600, arg_group=group_name, type=int,
-            help='maximum wait in seconds'
-        )
-        cmd_args['interval'] = CLICommandArgument(
-            'interval', options_list=['--interval'], default=30, arg_group=group_name, type=int,
-            help='polling interval in seconds'
-        )
-        cmd_args['deleted'] = CLICommandArgument(
-            'deleted', options_list=['--deleted'], action='store_true', arg_group=group_name,
-            help='wait until deleted'
-        )
-        cmd_args['created'] = CLICommandArgument(
-            'created', options_list=['--created'], action='store_true', arg_group=group_name,
-            help="wait until created with 'provisioningState' at 'Succeeded'"
-        )
-        cmd_args['updated'] = CLICommandArgument(
-            'updated', options_list=['--updated'], action='store_true', arg_group=group_name,
-            help="wait until updated with provisioningState at 'Succeeded'"
-        )
-        cmd_args['exists'] = CLICommandArgument(
-            'exists', options_list=['--exists'], action='store_true', arg_group=group_name,
-            help="wait until the resource exists"
-        )
-        cmd_args['custom'] = CLICommandArgument(
-            'custom', options_list=['--custom'], arg_group=group_name,
-            help="Wait until the condition satisfies a custom JMESPath query. E.g. "
-                 "provisioningState!='InProgress', "
-                 "instanceView.statuses[?code=='PowerState/running']"
-        )
-        return [(k, v) for k, v in cmd_args.items()]
-
-    def description_loader(self):
-        """ Callback function of CLICommand description_loader """
-        return self.load_op_handler_description()
-
-
-class ShowCommandOperation(BaseCommandOperation):
-
-    def __init__(self, command_loader, op_path, **kwargs):
-        if not isinstance(op_path, str):
-            raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(ShowCommandOperation, self).__init__(command_loader, **kwargs)
-        self.op_path = op_path
-
-    def handler(self, command_args):
-        """ Callback function of CLICommand handler """
-        from azure.cli.core.commands.arm import show_exception_handler, EXCLUDED_NON_CLIENT_PARAMS
-
-        op = self.get_op_handler(self.op_path)
-        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
-
-        self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
-
-        client_arg_name = self.resolve_client_arg_name(self.op_path)
-        try:
-            client = self.client_factory(self.cli_ctx) if self.client_factory else None
-        except TypeError:
-            client = self.client_factory(self.cli_ctx, command_args) if self.client_factory else None
-
-        if client and (client_arg_name in getter_args):
-            command_args[client_arg_name] = client
-
-        op = self.get_op_handler(self.op_path)  # Fetch op handler again after cmd property is set
-        try:
-            return op(**command_args)
-        except Exception as ex:  # pylint: disable=broad-except
-            show_exception_handler(ex)
-
-    def arguments_loader(self):
-        """ Callback function of CLICommand arguments_loader """
-        cmd_args = self.load_getter_op_arguments(self.op_path)
-        return [(k, v) for k, v in cmd_args.items()]
-
-    def description_loader(self):
-        """ Callback function of CLICommand description_loader """
-        op = self.get_op_handler(self.op_path)
-        return self.load_op_handler_description(op)
-
-
 class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable=too-many-instance-attributes
 
     class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
@@ -503,6 +323,186 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         op = self.get_op_handler(self.custom_function_op_path)
         self.apply_doc_string(op)  # pylint: disable=protected-access
         return dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
+
+    def description_loader(self):
+        """ Callback function of CLICommand description_loader """
+        return self.load_op_handler_description()
+
+
+class ShowCommandOperation(BaseCommandOperation):
+
+    def __init__(self, command_loader, op_path, **kwargs):
+        if not isinstance(op_path, str):
+            raise TypeError("operation must be a string. Got '{}'".format(op_path))
+        super(ShowCommandOperation, self).__init__(command_loader, **kwargs)
+        self.op_path = op_path
+
+    def handler(self, command_args):
+        """ Callback function of CLICommand handler """
+        from azure.cli.core.commands.arm import show_exception_handler, EXCLUDED_NON_CLIENT_PARAMS
+
+        op = self.get_op_handler(self.op_path)
+        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+
+        self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
+
+        client_arg_name = self.resolve_client_arg_name(self.op_path)
+        try:
+            client = self.client_factory(self.cli_ctx) if self.client_factory else None
+        except TypeError:
+            client = self.client_factory(self.cli_ctx, command_args) if self.client_factory else None
+
+        if client and (client_arg_name in getter_args):
+            command_args[client_arg_name] = client
+
+        op = self.get_op_handler(self.op_path)  # Fetch op handler again after cmd property is set
+        try:
+            return op(**command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            show_exception_handler(ex)
+
+    def arguments_loader(self):
+        """ Callback function of CLICommand arguments_loader """
+        cmd_args = self.load_getter_op_arguments(self.op_path)
+        return [(k, v) for k, v in cmd_args.items()]
+
+    def description_loader(self):
+        """ Callback function of CLICommand description_loader """
+        op = self.get_op_handler(self.op_path)
+        return self.load_op_handler_description(op)
+
+
+class WaitCommandOperation(BaseCommandOperation):
+
+    def __init__(self, command_loader, op_path, **kwargs):
+        if not isinstance(op_path, str):
+            raise TypeError("operation must be a string. Got '{}'".format(op_path))
+        super(WaitCommandOperation, self).__init__(command_loader, **kwargs)
+        self.op_path = op_path
+
+    def handler(self, command_args):    # pylint: disable=too-many-statements
+        """ Callback function of CLICommand handler """
+        from msrest.exceptions import ClientException
+        from azure.core.exceptions import HttpResponseError
+        from knack.util import CLIError
+        from azure.cli.core.commands.arm import EXCLUDED_NON_CLIENT_PARAMS, verify_property
+
+        import time
+
+        op = self.get_op_handler(self.op_path)
+        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
+
+        client_arg_name = self.resolve_client_arg_name(self.op_path)
+        try:
+            client = self.client_factory(self.cli_ctx) if self.client_factory else None
+        except TypeError:
+            client = self.client_factory(self.cli_ctx, command_args) if self.client_factory else None
+        if client and (client_arg_name in getter_args):
+            command_args[client_arg_name] = client
+
+        getter = self.get_op_handler(self.op_path)      # Fetch op handler again after cmd property is set
+
+        timeout = command_args.pop('timeout')
+        interval = command_args.pop('interval')
+        wait_for_created = command_args.pop('created')
+        wait_for_deleted = command_args.pop('deleted')
+        wait_for_updated = command_args.pop('updated')
+        wait_for_exists = command_args.pop('exists')
+        custom_condition = command_args.pop('custom')
+        if not any([wait_for_created, wait_for_updated, wait_for_deleted,
+                    wait_for_exists, custom_condition]):
+            raise CLIError(
+                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
+
+        progress_indicator = self.cli_ctx.get_progress_controller()
+        progress_indicator.begin()
+        for _ in range(0, timeout, interval):
+            try:
+                progress_indicator.add(message='Waiting')
+                instance = getter(**command_args)
+                if wait_for_exists:
+                    progress_indicator.end()
+                    return None
+                provisioning_state = self._get_provisioning_state(instance)
+                # until we have any needs to wait for 'Failed', let us bail out on this
+                if provisioning_state:
+                    provisioning_state = provisioning_state.lower()
+                if provisioning_state == 'failed':
+                    progress_indicator.stop()
+                    raise CLIError('The operation failed')
+                if ((wait_for_created or wait_for_updated) and provisioning_state == 'succeeded') or \
+                        custom_condition and bool(verify_property(instance, custom_condition)):
+                    progress_indicator.end()
+                    return None
+            except (ClientException, HttpResponseError) as ex:
+                progress_indicator.stop()
+                if getattr(ex, 'status_code', None) == 404:
+                    if wait_for_deleted:
+                        return None
+                    if not any([wait_for_created, wait_for_exists, custom_condition]):
+                        raise
+                else:
+                    raise
+            except Exception:  # pylint: disable=broad-except
+                progress_indicator.stop()
+                raise
+
+            time.sleep(interval)
+
+        progress_indicator.end()
+        return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
+
+    @staticmethod
+    def _get_provisioning_state(instance):
+        provisioning_state = getattr(instance, 'provisioning_state', None)
+        if not provisioning_state:
+            # some SDK, like resource-group, has 'provisioning_state' under 'properties'
+            properties = getattr(instance, 'properties', None)
+            if properties:
+                provisioning_state = getattr(properties, 'provisioning_state', None)
+                # some SDK, like keyvault, has 'provisioningState' under 'properties.additional_properties'
+                if not provisioning_state:
+                    additional_properties = getattr(properties, 'additional_properties', {})
+                    provisioning_state = additional_properties.get('provisioningState')
+        return provisioning_state
+
+    def arguments_loader(self):
+        """ Callback function of CLICommand arguments_loader """
+        cmd_args = self.load_getter_op_arguments(self.op_path)
+
+        group_name = 'Wait Condition'
+        cmd_args['timeout'] = CLICommandArgument(
+            'timeout', options_list=['--timeout'], default=3600, arg_group=group_name, type=int,
+            help='maximum wait in seconds'
+        )
+        cmd_args['interval'] = CLICommandArgument(
+            'interval', options_list=['--interval'], default=30, arg_group=group_name, type=int,
+            help='polling interval in seconds'
+        )
+        cmd_args['deleted'] = CLICommandArgument(
+            'deleted', options_list=['--deleted'], action='store_true', arg_group=group_name,
+            help='wait until deleted'
+        )
+        cmd_args['created'] = CLICommandArgument(
+            'created', options_list=['--created'], action='store_true', arg_group=group_name,
+            help="wait until created with 'provisioningState' at 'Succeeded'"
+        )
+        cmd_args['updated'] = CLICommandArgument(
+            'updated', options_list=['--updated'], action='store_true', arg_group=group_name,
+            help="wait until updated with provisioningState at 'Succeeded'"
+        )
+        cmd_args['exists'] = CLICommandArgument(
+            'exists', options_list=['--exists'], action='store_true', arg_group=group_name,
+            help="wait until the resource exists"
+        )
+        cmd_args['custom'] = CLICommandArgument(
+            'custom', options_list=['--custom'], arg_group=group_name,
+            help="Wait until the condition satisfies a custom JMESPath query. E.g. "
+                 "provisioningState!='InProgress', "
+                 "instanceView.statuses[?code=='PowerState/running']"
+        )
+        return [(k, v) for k, v in cmd_args.items()]
 
     def description_loader(self):
         """ Callback function of CLICommand description_loader """
