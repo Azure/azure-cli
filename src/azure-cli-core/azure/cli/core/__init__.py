@@ -770,7 +770,8 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
-    # keyvault and batch are using this function
+    # Please use add_cli_command instead of _cli_command.
+    # Currently "keyvault" and "batch" modules are still rely on this function, so it cannot be removed now.
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
         from knack.deprecation import Deprecated
@@ -831,6 +832,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                         **kwargs)
 
     def add_cli_command(self, name, command_operation, **kwargs):
+        """Register a command in command_table with command operation provided"""
         from knack.deprecation import Deprecated
         from .commands.command_operation import BaseCommandOperation
         if not issubclass(type(command_operation), BaseCommandOperation):

@@ -10,11 +10,12 @@ from knack.arguments import CLICommandArgument, ignore_type
 
 
 class BaseCommandOperation:
+    """ Base class of command operation classes """
 
     def __init__(self, ctx, **kwargs):
         if not isinstance(ctx, AzCommandsLoader):
             raise TypeError("'ctx' expected type '{}'. Got: '{}'".format(AzCommandsLoader.__name__, type(ctx)))
-        self.ctx = ctx
+        self.ctx = ctx  # AzCommandsLoader
         self.cmd = None
         self.kwargs = kwargs
         self.client_factory = kwargs.get('client_factory')
@@ -22,19 +23,23 @@ class BaseCommandOperation:
 
     @property
     def cli_ctx(self):
+        """ Return the cli_ctx of command or commands loader """
         return self.cmd.cli_ctx if self.cmd else self.ctx.cli_ctx
 
     def handler(self, command_args):
+        """ Callback function of CLICommand handler """
         raise NotImplementedError()
 
     def arguments_loader(self):
+        """ Callback function of CLICommand arguments_loader """
         raise NotImplementedError()
 
     def description_loader(self):
+        """ Callback function of CLICommand description_loader """
         raise NotImplementedError()
 
-    def get_op_handler(self, operation):
-        """ Import and load the operation handler """
+    def get_op_handler(self, op_path):
+        """ Import and load the operation handler by path """
         # Patch the unversioned sdk path to include the appropriate API version for the
         # resource type in question.
         from importlib import import_module
@@ -44,13 +49,13 @@ class BaseCommandOperation:
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation.startswith(rt.import_prefix + '.'):
-                operation = operation.replace(rt.import_prefix,
-                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
-                                                                     operation_group=self.operation_group))
+            if op_path.startswith(rt.import_prefix + '.'):
+                op_path = op_path.replace(rt.import_prefix,
+                                          get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
+                                                                 operation_group=self.operation_group))
 
         try:
-            mod_to_import, attr_path = operation.split('#')
+            mod_to_import, attr_path = op_path.split('#')
             handler = import_module(mod_to_import)
             for part in attr_path.split('.'):
                 handler = getattr(handler, part)
@@ -58,79 +63,86 @@ class BaseCommandOperation:
                 return handler
             return get_method_function(handler)
         except (ValueError, AttributeError):
-            raise ValueError("The operation '{}' is invalid.".format(operation))
+            raise ValueError("The operation '{}' is invalid.".format(op_path))
 
-    def load_getter_op_arguments(self, getter_op, cmd_args=None):
-        op = self.get_op_handler(getter_op)
+    def load_getter_op_arguments(self, getter_op_path, cmd_args=None):
+        """ Load arguments from function signature of getter command op """
+        op = self.get_op_handler(getter_op_path)
         getter_args = dict(
             extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
         cmd_args = cmd_args or {}
         cmd_args.update(getter_args)
+        # The cmd argument is required when calling self.handler function.
         cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
         return cmd_args
 
     def apply_doc_string(self, handler):
         return self.ctx._apply_doc_string(handler, self.kwargs)  # pylint: disable=protected-access
 
-    def load_op_description(self, handler=None):
+    def load_op_handler_description(self, handler=None):
+        """ Load the description from function signature of command op """
         if handler is None:
             def default_handler():
-                """"""  # default_handler should have __doc__ property
+                """"""  # Use empty __doc__ property here, which is required in extract_full_summary_from_signature
             handler = default_handler
         self.apply_doc_string(handler)
         return extract_full_summary_from_signature(handler)
 
-    def resolve_client_arg_name(self, operation):
+    def resolve_client_arg_name(self, op_path):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
-        return resolve_client_arg_name(operation, self.kwargs)
+        return resolve_client_arg_name(op_path, self.kwargs)
 
 
 class CommandOperation(BaseCommandOperation):
 
-    def __init__(self, ctx, operation, **kwargs):
-        if not isinstance(operation, string_types):
-            raise TypeError("Operation must be a string. Got '{}'".format(operation))
+    def __init__(self, ctx, op_path, **kwargs):
+        if not isinstance(op_path, string_types):
+            raise TypeError("Operation must be a string. Got '{}'".format(op_path))
         super(CommandOperation, self).__init__(ctx, **kwargs)
-        self.operation = operation
+        self.op_path = op_path
 
     def handler(self, command_args):
+        """ Callback function of CLICommand handler """
         from azure.cli.core.util import get_arg_list, augment_no_wait_handler_args
 
-        op = self.get_op_handler(self.operation)
+        op = self.get_op_handler(self.op_path)
         op_args = get_arg_list(op)
-        cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
+        self.cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
-        client = self.client_factory(cmd.cli_ctx, command_args) if self.client_factory else None
+        client = self.client_factory(self.cli_ctx, command_args) if self.client_factory else None
         supports_no_wait = self.kwargs.get('supports_no_wait', None)
         if supports_no_wait:
             no_wait_enabled = command_args.pop('no_wait', False)
             augment_no_wait_handler_args(no_wait_enabled, op, command_args)
         if client:
-            client_arg_name = self.resolve_client_arg_name(self.operation)
+            client_arg_name = self.resolve_client_arg_name(self.op_path)
             if client_arg_name in op_args:
                 command_args[client_arg_name] = client
         return op(**command_args)
 
     def arguments_loader(self):
-        op = self.get_op_handler(self.operation)
+        """ Callback function of CLICommand arguments_loader """
+        op = self.get_op_handler(self.op_path)
         self.apply_doc_string(op)
         cmd_args = list(extract_args_from_signature(op, excluded_params=self.ctx.excluded_command_handler_args))
         return cmd_args
 
     def description_loader(self):
-        op = self.get_op_handler(self.operation)
-        return self.load_op_description(op)
+        """ Callback function of CLICommand description_loader """
+        op = self.get_op_handler(self.op_path)
+        return self.load_op_handler_description(op)
 
 
 class WaitCommandOperation(BaseCommandOperation):
 
-    def __init__(self, ctx, operation, **kwargs):
-        if not isinstance(operation, string_types):
-            raise TypeError("operation must be a string. Got '{}'".format(operation))
+    def __init__(self, ctx, op_path, **kwargs):
+        if not isinstance(op_path, string_types):
+            raise TypeError("operation must be a string. Got '{}'".format(op_path))
         super(WaitCommandOperation, self).__init__(ctx, **kwargs)
-        self.operation = operation
+        self.op_path = op_path
 
     def handler(self, command_args):    # pylint: disable=too-many-statements
+        """ Callback function of CLICommand handler """
         from msrest.exceptions import ClientException
         from azure.core.exceptions import HttpResponseError
         from knack.util import CLIError
@@ -138,12 +150,11 @@ class WaitCommandOperation(BaseCommandOperation):
 
         import time
 
-        op = self.get_op_handler(self.operation)
-
+        op = self.get_op_handler(self.op_path)
         getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
 
-        client_arg_name = self.resolve_client_arg_name(self.operation)
+        client_arg_name = self.resolve_client_arg_name(self.op_path)
         try:
             client = self.client_factory(self.cli_ctx) if self.client_factory else None
         except TypeError:
@@ -151,7 +162,7 @@ class WaitCommandOperation(BaseCommandOperation):
         if client and (client_arg_name in getter_args):
             command_args[client_arg_name] = client
 
-        getter = self.get_op_handler(self.operation)
+        getter = self.get_op_handler(self.op_path)      # Fetch op handler again after cmd property is set
 
         timeout = command_args.pop('timeout')
         interval = command_args.pop('interval')
@@ -218,7 +229,8 @@ class WaitCommandOperation(BaseCommandOperation):
         return provisioning_state
 
     def arguments_loader(self):
-        cmd_args = self.load_getter_op_arguments(self.operation)
+        """ Callback function of CLICommand arguments_loader """
+        cmd_args = self.load_getter_op_arguments(self.op_path)
 
         group_name = 'Wait Condition'
         cmd_args['timeout'] = CLICommandArgument(
@@ -254,26 +266,28 @@ class WaitCommandOperation(BaseCommandOperation):
         return [(k, v) for k, v in cmd_args.items()]
 
     def description_loader(self):
-        return self.load_op_description()
+        """ Callback function of CLICommand description_loader """
+        return self.load_op_handler_description()
 
 
 class ShowCommandOperation(BaseCommandOperation):
 
-    def __init__(self, ctx, operation, **kwargs):
-        if not isinstance(operation, string_types):
-            raise TypeError("operation must be a string. Got '{}'".format(operation))
+    def __init__(self, ctx, op_path, **kwargs):
+        if not isinstance(op_path, string_types):
+            raise TypeError("operation must be a string. Got '{}'".format(op_path))
         super(ShowCommandOperation, self).__init__(ctx, **kwargs)
-        self.operation = operation
+        self.op_path = op_path
 
     def handler(self, command_args):
+        """ Callback function of CLICommand handler """
         from azure.cli.core.commands.arm import show_exception_handler, EXCLUDED_NON_CLIENT_PARAMS
 
-        op = self.get_op_handler(self.operation)
+        op = self.get_op_handler(self.op_path)
         getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
 
         self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
 
-        client_arg_name = self.resolve_client_arg_name(self.operation)
+        client_arg_name = self.resolve_client_arg_name(self.op_path)
         try:
             client = self.client_factory(self.cli_ctx) if self.client_factory else None
         except TypeError:
@@ -282,48 +296,52 @@ class ShowCommandOperation(BaseCommandOperation):
         if client and (client_arg_name in getter_args):
             command_args[client_arg_name] = client
 
-        op = self.get_op_handler(self.operation)
+        op = self.get_op_handler(self.op_path)  # Fetch op handler again after cmd property is set
         try:
             return op(**command_args)
         except Exception as ex:  # pylint: disable=broad-except
             show_exception_handler(ex)
 
     def arguments_loader(self):
-        cmd_args = self.load_getter_op_arguments(self.operation)
+        """ Callback function of CLICommand arguments_loader """
+        cmd_args = self.load_getter_op_arguments(self.op_path)
         return [(k, v) for k, v in cmd_args.items()]
 
     def description_loader(self):
-        op = self.get_op_handler(self.operation)
-        return self.load_op_description(op)
+        """ Callback function of CLICommand description_loader """
+        op = self.get_op_handler(self.op_path)
+        return self.load_op_handler_description(op)
 
 
 class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable=too-many-instance-attributes
 
     class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
+        """Action for 'properties_to_set', 'properties_to_add' and 'properties_to_remove' arguments"""
         def __call__(self, parser, namespace, values, option_string=None):
             if not getattr(namespace, 'ordered_arguments', None):
                 setattr(namespace, 'ordered_arguments', [])
             namespace.ordered_arguments.append((option_string, values))
 
-    def __init__(self, ctx, getter_op, setter_op, setter_arg_name, custom_function_op, child_collection_prop_name,
-                 child_collection_key, child_arg_name, **kwargs):
-        if not isinstance(getter_op, string_types):
-            raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op))
-        if not isinstance(setter_op, string_types):
-            raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op))
-        if custom_function_op and not isinstance(custom_function_op, string_types):
-            raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op))
+    def __init__(self, ctx, getter_op_path, setter_op_path, setter_arg_name, custom_function_op_path,
+                 child_collection_prop_name, child_collection_key, child_arg_name, **kwargs):
+        if not isinstance(getter_op_path, string_types):
+            raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op_path))
+        if not isinstance(setter_op_path, string_types):
+            raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op_path))
+        if custom_function_op_path and not isinstance(custom_function_op_path, string_types):
+            raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op_path))
         super(GenericUpdateCommandOperation, self).__init__(ctx, **kwargs)
 
-        self.getter_operation = getter_op
-        self.setter_operation = setter_op
-        self.custom_function_operation = custom_function_op
+        self.getter_op_path = getter_op_path
+        self.setter_op_path = setter_op_path
+        self.custom_function_op_path = custom_function_op_path
         self.setter_arg_name = setter_arg_name
         self.child_collection_prop_name = child_collection_prop_name
         self.child_collection_key = child_collection_key
         self.child_arg_name = child_arg_name
 
     def handler(self, command_args):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+        """ Callback function of CLICommand handler """
         from knack.util import CLIError
         from azure.cli.core.commands import cached_get, cached_put, _is_poller
         from azure.cli.core.util import find_child_item, augment_no_wait_handler_args
@@ -341,7 +359,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
             del command_args[item]
 
-        getter, getterargs = self._extract_handler_and_args(command_args, self.getter_operation)
+        getter, getterargs = self._extract_op_handler_and_args(command_args, self.getter_op_path)
 
         if self.child_collection_prop_name:
             parent = cached_get(self.cmd, getter, **getterargs)
@@ -352,16 +370,16 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             instance = cached_get(self.cmd, getter, **getterargs)
 
         # pass instance to the custom_function, if provided
-        if self.custom_function_operation:
-            custom_function, custom_func_args = self._extract_handler_and_args(
-                command_args, self.custom_function_operation)
+        if self.custom_function_op_path:
+            custom_function, custom_func_args = self._extract_op_handler_and_args(
+                command_args, self.custom_function_op_path)
             if self.child_collection_prop_name:
                 parent = custom_function(instance=instance, parent=parent, **custom_func_args)
             else:
                 instance = custom_function(instance=instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setter, setterargs = self._extract_handler_and_args(command_args, self.setter_operation)
+        setter, setterargs = self._extract_op_handler_and_args(command_args, self.setter_op_path)
 
         for arg in ordered_arguments:
             arg_type, arg_values = arg
@@ -418,7 +436,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
                 result, *child_names, path=self.child_collection_prop_name, key_path=self.child_collection_key)
         return result
 
-    def _extract_handler_and_args(self, args, operation):
+    def _extract_op_handler_and_args(self, args, op_path):
         from azure.cli.core.commands.arm import EXCLUDED_NON_CLIENT_PARAMS
 
         client = None
@@ -428,8 +446,8 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             except TypeError:
                 client = self.client_factory(self.cli_ctx, args)
 
-        client_arg_name = self.resolve_client_arg_name(operation)
-        op = self.get_op_handler(operation)
+        client_arg_name = self.resolve_client_arg_name(op_path)
+        op = self.get_op_handler(op_path)
         raw_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         op_args = {key: val for key, val in args.items() if key in raw_args}
         if client_arg_name in raw_args:
@@ -437,11 +455,12 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         return op, op_args
 
     def arguments_loader(self):
+        """ Callback function of CLICommand arguments_loader """
         from azure.cli.core.commands.arm import set_usage, add_usage, remove_usage
 
-        arguments = self.load_getter_op_arguments(self.getter_operation)
-        arguments.update(self._set_arguments_loader())
-        arguments.update(self._function_arguments_loader())
+        arguments = self.load_getter_op_arguments(self.getter_op_path)
+        arguments.update(self.load_setter_op_arguments())
+        arguments.update(self.load_custom_function_op_arguments())
         arguments.pop('instance', None)  # inherited from custom_function(instance, ...)
         arguments.pop('parent', None)
         arguments.pop('expand', None)  # possibly inherited from the getter
@@ -474,16 +493,17 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         )
         return [(k, v) for k, v in arguments.items()]
 
-    def _set_arguments_loader(self):
-        op = self.get_op_handler(self.setter_operation)
+    def load_setter_op_arguments(self):
+        op = self.get_op_handler(self.setter_op_path)
         return dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
 
-    def _function_arguments_loader(self):
-        if not self.custom_function_operation:
+    def load_custom_function_op_arguments(self):
+        if not self.custom_function_op_path:
             return {}
-        op = self.get_op_handler(self.custom_function_operation)
+        op = self.get_op_handler(self.custom_function_op_path)
         self.apply_doc_string(op)  # pylint: disable=protected-access
         return dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
 
     def description_loader(self):
-        return self.load_op_description()
+        """ Callback function of CLICommand description_loader """
+        return self.load_op_handler_description()

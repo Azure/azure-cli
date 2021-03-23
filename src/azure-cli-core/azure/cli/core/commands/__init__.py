@@ -1257,12 +1257,12 @@ class AzCommandGroup(CommandGroup):
         self._apply_tags(merged_kwargs, kwargs, name)
 
         operations_tmpl = merged_kwargs['operations_tmpl']
-        operation = operations_tmpl.format(method_name)
+        op_path = operations_tmpl.format(method_name)
 
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = CommandOperation(
             ctx=self.command_loader,
-            operation=operation,
+            op_path=op_path,
             **merged_kwargs
         )
         self.command_loader.add_cli_command(command_name,
@@ -1303,17 +1303,17 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
         self._apply_tags(merged_kwargs, kwargs, name)
 
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
-        setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
-        custom_func_op = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
-                                                 custom_command=True) if custom_func_name else None
+        getter_op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type)
+        setter_op_path = self._resolve_operation(merged_kwargs, setter_name, setter_type)
+        custom_function_op_path = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
+                                                          custom_command=True) if custom_func_name else None
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = GenericUpdateCommandOperation(
             ctx=self.command_loader,
-            getter_op=getter_op,
-            setter_op=setter_op,
+            getter_op_path=getter_op_path,
+            setter_op_path=setter_op_path,
             setter_arg_name=setter_arg_name,
-            custom_function_op=custom_func_op,
+            custom_function_op_path=custom_function_op_path,
             child_collection_prop_name=child_collection_prop_name,
             child_collection_key=child_collection_key,
             child_arg_name=child_arg_name,
@@ -1340,12 +1340,12 @@ class AzCommandGroup(CommandGroup):
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+        getter_op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
 
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = WaitCommandOperation(
             ctx=self.command_loader,
-            operation=getter_op,
+            op_path=getter_op_path,
             **merged_kwargs
         )
         self.command_loader.add_cli_command(command_name,
@@ -1366,12 +1366,12 @@ class AzCommandGroup(CommandGroup):
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        operation = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+        op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
 
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = ShowCommandOperation(
             ctx=self.command_loader,
-            operation=operation,
+            op_path=op_path,
             **merged_kwargs
         )
         self.command_loader.add_cli_command(command_name,
