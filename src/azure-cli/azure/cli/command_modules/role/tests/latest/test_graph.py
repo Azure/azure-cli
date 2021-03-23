@@ -338,8 +338,7 @@ class CreateForRbacScenarioTest(ScenarioTest):
             # Success
             mock.MagicMock()
         ]
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('ad sp create-for-rbac --skip-assignment')
+        self.cmd('ad sp create-for-rbac --skip-assignment')
 
 
 class GraphGroupScenarioTest(ScenarioTest):
