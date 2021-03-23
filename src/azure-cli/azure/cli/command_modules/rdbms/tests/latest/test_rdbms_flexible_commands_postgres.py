@@ -333,8 +333,14 @@ class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyRes
     def test_postgres_flexible_server_parameter_mgmt(self):
         self._test_parameter_mgmt('postgres', self.resource_group, self.server)
 
+    @AllowLargeResponse()
     @pytest.mark.order(4)
     @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_parameter_mgmt'])
+    def test_postgres_flexible_server_database_mgmt(self):
+        self._test_database_mgmt('postgres', self.resource_group, self.server)
+
+    @pytest.mark.order(5)
+    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_database_mgmt'])
     def test_postgres_flexible_server_proxy_resource_mgmt_delete(self):
         self._test_flexible_server_proxy_resource_mgmt_delete(self.resource_group)
 

@@ -15,6 +15,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
+    cf_postgres_flexible_db,
     cf_postgres_flexible_location_capabilities)
 
 from ._transformers import (
@@ -74,6 +75,11 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_config
     )
 
+    postgres_flexible_db_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#DatabasesOperations.{}',
+        client_factory=cf_postgres_flexible_db
+    )
+
     postgres_flexible_location_capabilities_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms..postgresql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_postgres_flexible_location_capabilities
@@ -95,7 +101,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.command('start', 'begin_start')
-        g.command('stop', 'begin_stop')
+        g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'server_delete_func')
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
@@ -137,6 +143,15 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
+    with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_postgres_flexible_db,
+                            is_preview=True) as g:
+        g.custom_command('create', 'database_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('delete', 'database_delete_func')
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_server')
+
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
@@ -145,7 +160,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.command('start', 'begin_start')
-        g.command('stop', 'begin_stop')
+        g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'server_delete_func')
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)

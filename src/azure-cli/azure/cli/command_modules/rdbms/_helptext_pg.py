@@ -29,15 +29,33 @@ examples:
   - name: Create a PostgreSQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
     text: |
         az postgres flexible-server create --public-access none
-
+  - name: Create a PostgreSQL flexible server with public access and add client IP address to have access to the server
+    text: |
+      az postgres flexible-server create --public-access <my_client_ip>
+  - name: Create a PostgreSQL flexible server with public access and add the range of IP address to have access to this server
+    text: |
+      az postgres flexible-server create --public-access <start_ip_address-end_ip_address>
+  - name: Create a PostgreSQL flexible server with public access and allow applications from Azure IP addresses to connect to your flexible server
+    text: |
+      az postgres flexible-server create --public-access 0.0.0.0
   - name: Create a PostgreSQL flexible server with specified SKU and storage, using defaults from local context.
     text: |
         az postgres flexible-server create --name testServer --admin-password password
+  - name: Create a PostgreSQL flexible server using already existing virtual network and subnet. If provided virtual network and subnet does not exists then virtual network and subnet with default address prefix will be created.
+    text: |
+      az postgres flexible-server create --vnet myVnet --subnet mySubnet
+  - name: Create a PostgreSQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+    text: |
+      az postgres flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
+  - name: Create a PostgreSQL flexible server using new virtual network, subnet with non-default address prefix.
+    text: |
+      az postgres flexible-server create --vnet myVnet --address-prefixes 10.0.0.0/24 --subnet mySubnet --subnet-prefixes 10.0.0.0/24
   - name: Create a PostgreSQL flexible server with  parameters set.
     text: |
-        az postgres flexible-server create --location northeurope --resource-group testGroup --name testServer --admin-user username \\
-            --admin-password password --sku-name Standard_D4s_v3 --tier GeneralPurpose --public-access 0.0.0.0 \\
-            --storage-size 512 --tags "key=value" --version 12
+        az postgres flexible-server create --location northeurope --resource-group testGroup \\
+          --name testServer --admin-user username --admin-password password \\
+          --sku-name Standard_D4s_v3 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 512 --tags "key=value" --version 12
 """
 
 helps['postgres flexible-server delete'] = """
@@ -48,6 +66,46 @@ examples:
     text: az postgres flexible-server delete --resource-group testGroup --name testServer
   - name: Delete a flexible server without prompt or confirmation.
     text: az postgres flexible-server delete --resource-group testGroup --name testServer --yes
+"""
+
+helps['postgres flexible-server db'] = """
+type: group
+short-summary: Manage PostgreSQL databases on a flexible server.
+"""
+
+helps['postgres flexible-server db create'] = """
+type: command
+short-summary: Create a PostgreSQL database on a flexible server.
+examples:
+  - name: Create database 'testDatabase' in the flexible server 'testServer' with the default parameters.
+    text: az postgres flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase
+  - name: Create database 'testDatabase' in the flexible server 'testServer' with a given character set and collation rules.
+    text: az postgres flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase \\
+            --charset validCharset --collation validCollation
+"""
+
+helps['postgres flexible-server db delete'] = """
+type: command
+short-summary: Delete a database on a flexible server.
+examples:
+  - name: Delete database 'testDatabase' in the flexible server 'testServer'.
+    text: az postgres flexible-server db delete --resource-group testGroup --server-name testServer --database-name testDatabase
+"""
+
+helps['postgres flexible-server db list'] = """
+type: command
+short-summary: List the databases for a flexible server.
+examples:
+  - name: List databases in the flexible server 'testServer'.
+    text: az postgres flexible-server db list --resource-group testGroup --server-name testServer
+"""
+
+helps['postgres flexible-server db show'] = """
+type: command
+short-summary: Show the details of a database.
+examples:
+  - name: Show database 'testDatabase' in the server 'testServer'.
+    text: az postgres flexible-server db show --resource-group testGroup --server-name testServer --database-name testDatabase
 """
 
 helps['postgres flexible-server firewall-rule'] = """
@@ -167,8 +225,8 @@ examples:
   - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
     text: |
         az postgres flexible-server restore --resource-group testGroup --name testServerNew \\
-            --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testServer2" \\
-            --restore-time "2017-06-15T13:10:00Z"
+          --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testServer2" \\
+          --restore-time "2017-06-15T13:10:00Z"
 """
 
 helps['postgres flexible-server show'] = """
