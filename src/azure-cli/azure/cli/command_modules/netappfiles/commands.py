@@ -222,6 +222,7 @@ def load_backups_command_groups(self, netappfiles_backups_sdk):
         g.command('list', 'list')
         g.command('delete', 'begin_delete')
         g.custom_command('update', 'update_backup',
+                         client_factory=backups_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#BackupPatch',
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('create', 'create_backup',
