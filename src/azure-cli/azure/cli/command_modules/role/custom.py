@@ -1457,10 +1457,14 @@ def create_service_principal_for_rbac(
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
+                err_msg = str(ex)
                 if retry_time < _RETRY_TIMES and (
-                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                        ' does not reference ' in err_msg or
+                        ' does not exist ' in err_msg or
+                        'service principal being created must in the local tenant' in err_msg):
+                    logger.warning("Creating service principal failed with error '%s'. Retrying: %s/%s",
+                                   err_msg, retry_time + 1, _RETRY_TIMES)
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",
