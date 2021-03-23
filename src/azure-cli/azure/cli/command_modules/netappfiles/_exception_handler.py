@@ -11,8 +11,7 @@ from azure.core.exceptions import HttpResponseError
 
 
 def netappfiles_exception_handler(ex):
-    if isinstance(ex, (HttpResponseError,
-                       ValidationError, ValueError)):
+    if isinstance(ex, (HttpResponseError, ValidationError, ValueError)):
         message = ex
         raise CLIError(message)
 
