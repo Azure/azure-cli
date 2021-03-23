@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from uuid import uuid4
+from datetime import datetime, timedelta, timezone
 
 # pylint: disable=import-error
 # pylint: disable=broad-except
@@ -377,9 +378,16 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
     if backup_type is None:
         raise RequiredArgumentMissingError("Backup type missing. Please provide a valid backup type using "
                                            "--backup-type argument.")
+
     message = "For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy"
-    if retain_until is not None:
+
+    if (retain_until is not None and backup_type != 'CopyOnlyFull'):
         logger.warning(message)
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
@@ -390,10 +398,10 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
             Enable compression is not applicable for SAPHanaDatabase item type.
             """)
 
-    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull']:
+    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull', 'Incremental']:
         raise CLIError(
             """
-            Backup type cannot be Log or CopyOnlyFull for SAPHanaDatabase item type.
+            Backup type cannot be Log, CopyOnlyFull, Incremental for SAPHanaDatabase Adhoc backup.
             """)
 
     properties = AzureWorkloadBackupRequest(backup_type=backup_type, enable_compression=enable_compression,
