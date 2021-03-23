@@ -325,9 +325,13 @@ class CreateForRbacScenarioTest(ScenarioTest):
             finally:
                 self.cmd('ad sp delete --id {name}')
 
+    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory')
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory')
     @mock.patch('azure.cli.command_modules.role.custom._create_service_principal')
     @mock.patch('azure.cli.command_modules.role.custom.create_application')
-    def test_create_for_rbac_retry(self, create_application_mock, create_service_principal_mock):
+    def test_create_for_rbac_retry(self, create_application_mock, create_service_principal_mock,
+                                   graph_client_factory_mock, auth_client_factory_mock):
+        graph_client_factory_mock.return_value.config.tenant_id = '00000001-0000-0000-0000-000000000000'
         create_application_mock.return_value.app_id = '00000000-0000-0000-0000-000000000000'
         create_service_principal_mock.side_effect = [
             # Mock replication exceptions
