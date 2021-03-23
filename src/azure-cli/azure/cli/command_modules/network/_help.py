@@ -4623,8 +4623,6 @@ long-summary: >
 helps['network public-ip create'] = """
 type: command
 short-summary: Create a public IP address.
-long-summary: >
-    [Coming breaking change] In the coming release, the default behavior will be changed as follows when sku is Standard and zone is not provided: zones = [], which means the Standard Public IP has no zones. If you want to create a zone-redundant Public IP address, please specify all the zones in the region. For example, --zone 1 2 3.
 examples:
   - name: Create a basic public IP resource.
     text: az network public-ip create -g MyResourceGroup -n MyIp
