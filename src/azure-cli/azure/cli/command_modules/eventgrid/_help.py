@@ -434,15 +434,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange              --advanced-filter data.property1 NumberInRange 5,10 20,30 40,50
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange 100,110 200,210 300,310
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --deadletter-endpoint
     short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.
@@ -494,6 +501,12 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --storage-queue-msg-ttl 300
+  - name: Create a new event subscription for an Event Grid system topic and enable advanced filtering on arrays
+    text: |
+        az eventgrid system-topic event-subscription create -n es1 \\
+            -g rg1 --system-topic-name systemtopic1 \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} --endpoint-type azurefunction \\
+            --enable-advanced-filtering-on-arrays true
 
 """
 
@@ -539,15 +552,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange              --advanced-filter data.property1 NumberInRange 5,10 20,30 40,50
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange 100,110 200,210 300,310
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
 examples:
   - name: Update an event subscription for an Event Grid system topic to specify a new endpoint.
@@ -583,6 +603,11 @@ examples:
         az eventgrid system-topic event-subscription update -n es1 \\
             -g rg1 --system-topic-name systemtopic1 \\
             --storage-queue-msg-ttl 300
+  - name: Update an event subscription for an Event Grid system topic with advanced filtering on arrays enabled
+    text: |
+        az eventgrid system-topic event-subscription update -n es1 \\
+            -g rg1 --system-topic-name systemtopic1 \\
+            --enable-advanced-filtering-on-arrays true
 """
 
 helps['eventgrid partner topic event-subscription'] = """
@@ -601,15 +626,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange              --advanced-filter data.property1 NumberInRange 5,10 20,30 40,50
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange 100,110 200,210 300,310
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --deadletter-endpoint
     short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.
@@ -661,6 +693,13 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --storage-queue-msg-ttl 300
+  - name: Create a new event subscription for an Event Grid partner topic with advanced filtering on arrays enabled
+    text: |
+        az eventgrid partner topic event-subscription create -n es1 \\
+            -g rg1 --partner-topic-name partnertopic1 \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --enable-advanced-filtering-on-arrays true
 """
 
 helps['eventgrid partner topic event-subscription delete'] = """
@@ -705,15 +744,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange              --advanced-filter data.property1 NumberInRange 5,10 20,30 40,50
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange 100,110 200,210 300,310
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
 examples:
   - name: Update an event subscription for an Event Grid partner topic to specify a new endpoint.
@@ -744,7 +790,6 @@ examples:
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --advanced-filter data.blobType StringIn BlockBlob
             --advanced-filter data.url StringBeginsWith https://myaccount.blob.core.windows.net
-
   - name: Update an event subscription for an Event Grid partner topic using Storage Queue as destination with message ttl at 5 mins
     text: |
         az eventgrid partner topic event-subscription update -n es1 \\
@@ -752,6 +797,13 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --storage-queue-msg-ttl 300
+  - name: Update an event subscription for an Event Grid partner topic with advanced filtering on arrays enabled
+    text: |
+        az eventgrid partner topic event-subscription update -n es1 \\
+            -g rg1 --partner-topic-name partnertopic1 \\
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --enable-advanced-filtering-on-arrays true
 
 """
 
@@ -772,15 +824,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange              --advanced-filter data.property1 NumberInRange 5,10 20,30 40,50
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange 100,110 200,210 300,310
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --source-resource-id
     short-summary: Fully qualified identifier of the Azure resource to which the event subscription needs to be created.
@@ -908,6 +967,14 @@ examples:
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --storage-queue-msg-ttl 300
+
+  - name: Create a new event subscription for an Event Grid topic with advanced filtering enabled on arrays
+    text: |
+        az eventgrid event-subscription create -n es1 \\
+            --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1
+            --endpoint-type storagequeue \\
+            --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --enable-advanced-filtering-on-arrays true
 """
 
 helps['eventgrid event-subscription delete'] = """
@@ -1078,15 +1145,22 @@ parameters:
         StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
         StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
         StringContains:            --advanced-filter subject StringContains Blue Red
+        StringNotContains:         --advanced-filter subject StringNotContains Blue Red
         StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+        StringNotBeginsWith:       --advanced-filter subject StringNotBeginsWith Blue Red
         StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+        StringNotEndsWith:         --advanced-filter subject StringNotEndsWith img png jpg
         NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+        NumberInRange              --advanced-filter data.property1 NumberInRange 5,10 20,30 40,50
         NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+        NumberNotInRange:          --advanced-filter data.property2 NumberNotInRange 100,110 200,210 300,310
         NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
         NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
         NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
         NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
         BoolEquals:                --advanced-filter data.property3 BoolEquals true
+        IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
+        IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
 examples:
   - name: Update an event subscription for an Event Grid topic to specify a new endpoint.
@@ -1127,6 +1201,11 @@ examples:
         az eventgrid event-subscription update --name es2 \\
             --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/kalsegblob" \\
             --storage-queue-msg-ttl 300
+  - name: Update an event subscription with advanced filtering enabled on arrays
+    text: |
+        az eventgrid event-subscription update --name es2 \\
+            --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/kalsegblob" \\
+            --enable-advanced-filtering-on-arrays true
 """
 
 helps['eventgrid extension-topic'] = """
