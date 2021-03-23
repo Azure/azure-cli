@@ -1261,7 +1261,7 @@ class AzCommandGroup(CommandGroup):
 
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = CommandOperation(
-            ctx=self.command_loader,
+            command_loader=self.command_loader,
             op_path=op_path,
             **merged_kwargs
         )
@@ -1309,7 +1309,7 @@ class AzCommandGroup(CommandGroup):
                                                           custom_command=True) if custom_func_name else None
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = GenericUpdateCommandOperation(
-            ctx=self.command_loader,
+            command_loader=self.command_loader,
             getter_op_path=getter_op_path,
             setter_op_path=setter_op_path,
             setter_arg_name=setter_arg_name,
@@ -1344,7 +1344,7 @@ class AzCommandGroup(CommandGroup):
 
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = WaitCommandOperation(
-            ctx=self.command_loader,
+            command_loader=self.command_loader,
             op_path=getter_op_path,
             **merged_kwargs
         )
@@ -1370,7 +1370,7 @@ class AzCommandGroup(CommandGroup):
 
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         command_operation = ShowCommandOperation(
-            ctx=self.command_loader,
+            command_loader=self.command_loader,
             op_path=op_path,
             **merged_kwargs
         )

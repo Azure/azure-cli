@@ -12,10 +12,11 @@ from knack.arguments import CLICommandArgument, ignore_type
 class BaseCommandOperation:
     """ Base class of command operation classes """
 
-    def __init__(self, ctx, **kwargs):
-        if not isinstance(ctx, AzCommandsLoader):
-            raise TypeError("'ctx' expected type '{}'. Got: '{}'".format(AzCommandsLoader.__name__, type(ctx)))
-        self.ctx = ctx  # AzCommandsLoader
+    def __init__(self, command_loader, **kwargs):
+        if not isinstance(command_loader, AzCommandsLoader):
+            raise TypeError("'command_loader' expected type '{}'. Got: '{}'".format(
+                AzCommandsLoader.__name__, type(command_loader)))
+        self.command_loader = command_loader
         self.cmd = None
         self.kwargs = kwargs
         self.client_factory = kwargs.get('client_factory')
@@ -23,8 +24,8 @@ class BaseCommandOperation:
 
     @property
     def cli_ctx(self):
-        """ Return the cli_ctx of command or commands loader """
-        return self.cmd.cli_ctx if self.cmd else self.ctx.cli_ctx
+        """ Return the cli_ctx of command or command_loader """
+        return self.cmd.cli_ctx if self.cmd else self.command_loader.cli_ctx
 
     def handler(self, command_args):
         """ Callback function of CLICommand handler """
@@ -77,7 +78,7 @@ class BaseCommandOperation:
         return cmd_args
 
     def apply_doc_string(self, handler):
-        return self.ctx._apply_doc_string(handler, self.kwargs)  # pylint: disable=protected-access
+        return self.command_loader._apply_doc_string(handler, self.kwargs)  # pylint: disable=protected-access
 
     def load_op_handler_description(self, handler=None):
         """ Load the description from function signature of command op """
@@ -95,10 +96,10 @@ class BaseCommandOperation:
 
 class CommandOperation(BaseCommandOperation):
 
-    def __init__(self, ctx, op_path, **kwargs):
+    def __init__(self, command_loader, op_path, **kwargs):
         if not isinstance(op_path, string_types):
             raise TypeError("Operation must be a string. Got '{}'".format(op_path))
-        super(CommandOperation, self).__init__(ctx, **kwargs)
+        super(CommandOperation, self).__init__(command_loader, **kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -124,7 +125,7 @@ class CommandOperation(BaseCommandOperation):
         """ Callback function of CLICommand arguments_loader """
         op = self.get_op_handler(self.op_path)
         self.apply_doc_string(op)
-        cmd_args = list(extract_args_from_signature(op, excluded_params=self.ctx.excluded_command_handler_args))
+        cmd_args = list(extract_args_from_signature(op, excluded_params=self.command_loader.excluded_command_handler_args))
         return cmd_args
 
     def description_loader(self):
@@ -135,10 +136,10 @@ class CommandOperation(BaseCommandOperation):
 
 class WaitCommandOperation(BaseCommandOperation):
 
-    def __init__(self, ctx, op_path, **kwargs):
+    def __init__(self, command_loader, op_path, **kwargs):
         if not isinstance(op_path, string_types):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(WaitCommandOperation, self).__init__(ctx, **kwargs)
+        super(WaitCommandOperation, self).__init__(command_loader, **kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):    # pylint: disable=too-many-statements
@@ -272,10 +273,10 @@ class WaitCommandOperation(BaseCommandOperation):
 
 class ShowCommandOperation(BaseCommandOperation):
 
-    def __init__(self, ctx, op_path, **kwargs):
+    def __init__(self, command_loader, op_path, **kwargs):
         if not isinstance(op_path, string_types):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(ShowCommandOperation, self).__init__(ctx, **kwargs)
+        super(ShowCommandOperation, self).__init__(command_loader, **kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -322,7 +323,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
                 setattr(namespace, 'ordered_arguments', [])
             namespace.ordered_arguments.append((option_string, values))
 
-    def __init__(self, ctx, getter_op_path, setter_op_path, setter_arg_name, custom_function_op_path,
+    def __init__(self, command_loader, getter_op_path, setter_op_path, setter_arg_name, custom_function_op_path,
                  child_collection_prop_name, child_collection_key, child_arg_name, **kwargs):
         if not isinstance(getter_op_path, string_types):
             raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op_path))
@@ -330,7 +331,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op_path))
         if custom_function_op_path and not isinstance(custom_function_op_path, string_types):
             raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op_path))
-        super(GenericUpdateCommandOperation, self).__init__(ctx, **kwargs)
+        super(GenericUpdateCommandOperation, self).__init__(command_loader, **kwargs)
 
         self.getter_op_path = getter_op_path
         self.setter_op_path = setter_op_path
