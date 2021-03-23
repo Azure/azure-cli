@@ -397,6 +397,15 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs file list --path {} -f {} --exclude-dir', account_info, directory, filesystem) \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
+        # List files with marker
+        result = self.storage_cmd('storage fs file list -f {} --num-results 1 --show-next-marker',
+                                  account_info, filesystem).get_output_in_json()
+        self.assertIsNotNone(result[1]['nextMarker'])
+        next_marker = result[1]['nextMarker']
+
+        self.storage_cmd('storage fs file list -f {} --num-results 1 --marker {}',
+                         account_info, filesystem, next_marker).assert_with_checks(JMESPathCheck('length(@)', 1))
+
         # Download file
         local_dir = self.create_temp_dir()
         self.storage_cmd('storage fs file download -p {} -f {} -d "{}"', account_info, file_path, filesystem, local_dir)
