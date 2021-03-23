@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import argparse
-from six import string_types, get_method_function
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.arguments import CLICommandArgument, ignore_type
@@ -62,7 +61,7 @@ class BaseCommandOperation:
                 handler = getattr(handler, part)
             if isinstance(handler, types.FunctionType):
                 return handler
-            return get_method_function(handler)
+            return handler.__func__
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(op_path))
 
@@ -97,7 +96,7 @@ class BaseCommandOperation:
 class CommandOperation(BaseCommandOperation):
 
     def __init__(self, command_loader, op_path, **kwargs):
-        if not isinstance(op_path, string_types):
+        if not isinstance(op_path, str):
             raise TypeError("Operation must be a string. Got '{}'".format(op_path))
         super(CommandOperation, self).__init__(command_loader, **kwargs)
         self.op_path = op_path
@@ -137,7 +136,7 @@ class CommandOperation(BaseCommandOperation):
 class WaitCommandOperation(BaseCommandOperation):
 
     def __init__(self, command_loader, op_path, **kwargs):
-        if not isinstance(op_path, string_types):
+        if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
         super(WaitCommandOperation, self).__init__(command_loader, **kwargs)
         self.op_path = op_path
@@ -274,7 +273,7 @@ class WaitCommandOperation(BaseCommandOperation):
 class ShowCommandOperation(BaseCommandOperation):
 
     def __init__(self, command_loader, op_path, **kwargs):
-        if not isinstance(op_path, string_types):
+        if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
         super(ShowCommandOperation, self).__init__(command_loader, **kwargs)
         self.op_path = op_path
@@ -325,11 +324,11 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
 
     def __init__(self, command_loader, getter_op_path, setter_op_path, setter_arg_name, custom_function_op_path,
                  child_collection_prop_name, child_collection_key, child_arg_name, **kwargs):
-        if not isinstance(getter_op_path, string_types):
+        if not isinstance(getter_op_path, str):
             raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op_path))
-        if not isinstance(setter_op_path, string_types):
+        if not isinstance(setter_op_path, str):
             raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op_path))
-        if custom_function_op_path and not isinstance(custom_function_op_path, string_types):
+        if custom_function_op_path and not isinstance(custom_function_op_path, str):
             raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op_path))
         super(GenericUpdateCommandOperation, self).__init__(command_loader, **kwargs)
 
