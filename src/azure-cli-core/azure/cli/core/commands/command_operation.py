@@ -11,15 +11,15 @@ from knack.arguments import CLICommandArgument, ignore_type
 class BaseCommandOperation:
     """ Base class of command operation classes """
 
-    def __init__(self, command_loader, **kwargs):
+    def __init__(self, command_loader, **merged_kwargs):
         if not isinstance(command_loader, AzCommandsLoader):
             raise TypeError("'command_loader' expected type '{}'. Got: '{}'".format(
                 AzCommandsLoader.__name__, type(command_loader)))
         self.command_loader = command_loader
         self.cmd = None
-        self.kwargs = kwargs
-        self.client_factory = kwargs.get('client_factory')
-        self.operation_group = kwargs.get('operation_group')
+        self.merged_kwargs = merged_kwargs
+        self.client_factory = merged_kwargs.get('client_factory')
+        self.operation_group = merged_kwargs.get('operation_group')
 
     @property
     def cli_ctx(self):
@@ -77,7 +77,7 @@ class BaseCommandOperation:
         return cmd_args
 
     def apply_doc_string(self, handler):
-        return self.command_loader._apply_doc_string(handler, self.kwargs)  # pylint: disable=protected-access
+        return self.command_loader._apply_doc_string(handler, self.merged_kwargs)  # pylint: disable=protected-access
 
     def load_op_handler_description(self, handler=None):
         """ Load the description from function signature of command op """
@@ -90,15 +90,15 @@ class BaseCommandOperation:
 
     def resolve_client_arg_name(self, op_path):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
-        return resolve_client_arg_name(op_path, self.kwargs)
+        return resolve_client_arg_name(op_path, self.merged_kwargs)
 
 
 class CommandOperation(BaseCommandOperation):
 
-    def __init__(self, command_loader, op_path, **kwargs):
+    def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("Operation must be a string. Got '{}'".format(op_path))
-        super(CommandOperation, self).__init__(command_loader, **kwargs)
+        super(CommandOperation, self).__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -110,7 +110,7 @@ class CommandOperation(BaseCommandOperation):
         self.cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
         client = self.client_factory(self.cli_ctx, command_args) if self.client_factory else None
-        supports_no_wait = self.kwargs.get('supports_no_wait', None)
+        supports_no_wait = self.merged_kwargs.get('supports_no_wait', None)
         if supports_no_wait:
             no_wait_enabled = command_args.pop('no_wait', False)
             augment_no_wait_handler_args(no_wait_enabled, op, command_args)
@@ -143,14 +143,14 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             namespace.ordered_arguments.append((option_string, values))
 
     def __init__(self, command_loader, getter_op_path, setter_op_path, setter_arg_name, custom_function_op_path,
-                 child_collection_prop_name, child_collection_key, child_arg_name, **kwargs):
+                 child_collection_prop_name, child_collection_key, child_arg_name, **merged_kwargs):
         if not isinstance(getter_op_path, str):
             raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op_path))
         if not isinstance(setter_op_path, str):
             raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op_path))
         if custom_function_op_path and not isinstance(custom_function_op_path, str):
             raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op_path))
-        super(GenericUpdateCommandOperation, self).__init__(command_loader, **kwargs)
+        super(GenericUpdateCommandOperation, self).__init__(command_loader, **merged_kwargs)
 
         self.getter_op_path = getter_op_path
         self.setter_op_path = setter_op_path
@@ -331,10 +331,10 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
 
 class ShowCommandOperation(BaseCommandOperation):
 
-    def __init__(self, command_loader, op_path, **kwargs):
+    def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(ShowCommandOperation, self).__init__(command_loader, **kwargs)
+        super(ShowCommandOperation, self).__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -374,10 +374,10 @@ class ShowCommandOperation(BaseCommandOperation):
 
 class WaitCommandOperation(BaseCommandOperation):
 
-    def __init__(self, command_loader, op_path, **kwargs):
+    def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(WaitCommandOperation, self).__init__(command_loader, **kwargs)
+        super(WaitCommandOperation, self).__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):    # pylint: disable=too-many-statements
