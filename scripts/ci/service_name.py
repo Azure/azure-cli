@@ -4,6 +4,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+"""
+Check format of service_name.json. Command and AzureServiceName are required. Others are optional.
+Each highest level command group should have reference in service_name.json.
+"""
 import json
 
 from azure.cli.core import MainCommandsLoader, AzCli
@@ -28,7 +32,8 @@ def main():
         if help_file.command:
             high_command_set.add(help_file.command.split()[0])
     print(high_command_set)
-    # Check existence in service_name.json
+
+    # Load and check service_name.json
     with open('src/azure-cli/service_name.json') as f:
         service_names = json.load(f)
     # print(service_names)
@@ -42,6 +47,8 @@ def main():
             raise Exception('AzureServiceName of {} is empty!'.format(command))
         service_name_map[command[3:]] = service
     print(service_name_map)
+
+    # Check existence in service_name.json
     for high_command in high_command_set:
         if high_command not in service_name_map:
             raise Exception('No entry of {} in service_name.json'.format(high_command))
