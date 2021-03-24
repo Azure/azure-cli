@@ -5,7 +5,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
