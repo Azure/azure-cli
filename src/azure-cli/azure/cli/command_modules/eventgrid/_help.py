@@ -457,6 +457,8 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
+  - name: --delivery-attribute-mapping
+    short-summary: Delivery attribute mapping
 examples:
   - name: Create a new event subscription for an Event Grid system topic, using default filters.
     text: |
@@ -569,6 +571,8 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Delivery attribute mapping
 examples:
   - name: Update an event subscription for an Event Grid system topic to specify a new endpoint.
     text: |
@@ -649,6 +653,8 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
+  - name: --delivery-attribute-mapping
+    short-summary: Delivery attribute mapping
 examples:
   - name: Create a new event subscription for an Event Grid partner topic, using default filters.
     text: |
@@ -761,6 +767,8 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Delivery attribute mapping
 examples:
   - name: Update an event subscription for an Event Grid partner topic to specify a new endpoint.
     text: |
@@ -859,6 +867,8 @@ parameters:
     short-summary: The type of the destination endpoint.
   - name: --delivery-identity-endpoint-type
     short-summary: The type of the destination endpoint with resource identity.
+  - name: --delivery-attribute-mapping
+    short-summary: Delivery attribute mapping
 examples:
   - name: Create a new event subscription for an Event Grid topic, using default filters.
     text: |
@@ -1162,6 +1172,8 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Delivery attribute mapping
 examples:
   - name: Update an event subscription for an Event Grid topic to specify a new endpoint.
     text: |

@@ -20,6 +20,7 @@ from azure.cli.core.commands.parameters import (
 from .advanced_filter import EventSubscriptionAddFilter
 from .event_channel_filter import EventChannelAddFilter
 from .inbound_ip_rules import AddInboundIpRule
+from .delivery_attribute_mapping import AddDeliveryAttributeMapping
 
 included_event_types_type = CLIArgumentType(
     help="A space-separated list of event types (e.g., Microsoft.Storage.BlobCreated and Microsoft.Storage.BlobDeleted). In order to subscribe to all default event types, do not specify any value for this argument. For event grid topics, event types are customer defined. For Azure events, e.g., Storage Accounts, IoT Hub, etc., you can query their event types using this CLI command 'az eventgrid topic-type list-event-types'.",
@@ -137,7 +138,6 @@ partner_topic_name_type = CLIArgumentType(
     arg_type=name_type,
     options_list=['--partner-topic-name'],
     completer=get_resource_name_completion_list('Microsoft.EventGrid/partnertopics'))
-
 
 partner_topic_source_type = CLIArgumentType(
     help='The identifier of the resource that forms the partner source of the events. This represents a unique resource in the partner\'s resource model.',
@@ -314,6 +314,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
         c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
         c.argument('enable_advanced_filtering_on_arrays', arg_type=enable_advanced_filtering_on_arrays)
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -338,6 +339,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
         c.argument('enable_advanced_filtering_on_arrays', arg_type=enable_advanced_filtering_on_arrays)
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -363,6 +365,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('storage_queue_msg_ttl', arg_type=storage_queue_msg_ttl)
         c.argument('enable_advanced_filtering_on_arrays', arg_type=enable_advanced_filtering_on_arrays)
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
