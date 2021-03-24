@@ -493,7 +493,7 @@ def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=None):
 
     event_subscription_info = _get_event_subscription_info(
         endpoint=endpoint,
@@ -631,7 +631,7 @@ def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=t
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=None):
 
     event_subscription_info = _get_event_subscription_info(
         endpoint=endpoint,
@@ -731,7 +731,7 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=None):
 
     event_subscription_info = _get_event_subscription_info(
         endpoint=endpoint,
@@ -889,7 +889,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False):
+        enable_advanced_filtering_on_arrays=None):
 
     if endpoint is None and delivery_identity_endpoint is None or \
        endpoint is not None and delivery_identity_endpoint is not None:
