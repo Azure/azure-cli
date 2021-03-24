@@ -36,11 +36,11 @@ for ext in $output; do
     fi
 done
 
-az self-test --debug
-if [ $? != 0 ]
-then
-    exit_code=1
-    echo "Failed to verify:" $ext
-fi
+#az self-test --debug
+#if [ $? != 0 ]
+#then
+#    exit_code=1
+#    echo "Failed to verify:" $ext
+#fi
 
 exit $exit_code
