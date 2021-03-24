@@ -225,7 +225,7 @@ def _parse_list_skus(result, database_engine):
             for vcores in version.supported_vcores:
                 skus.add(vcores.name)
                 if database_engine == 'mysql':
-                    sku_iops_dict[vcores.name] = vcores.additional_properties['supportedIOPS']
+                    sku_iops_dict[vcores.name] = vcores.supported_iops
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 

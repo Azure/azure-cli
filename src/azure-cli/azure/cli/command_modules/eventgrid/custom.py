@@ -40,6 +40,7 @@ from azure.mgmt.eventgrid.models import (
     EventChannelSource,
     EventChannelDestination,
     SystemTopic,
+    SystemTopicUpdateParameters,
     EventSubscriptionIdentity,
     DeliveryWithResourceIdentity,
     DeadLetterWithResourceIdentity,
@@ -131,12 +132,7 @@ def cli_topic_create_or_update(
     sku_info = ResourceSku(name=sku_name)
     identity_info = None
 
-    if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
-        identity_type_name = _get_identity_type(identity)
-        identity_info = IdentityInfo(type=identity_type_name)
-    else:
-        identity_info = IdentityInfo(type=IDENTITY_NONE)
-
+    identity_info = _get_identity_info(identity)
     topic_info = Topic(
         location=location,
         tags=tags,
@@ -167,12 +163,7 @@ def cli_topic_update(
         sku_name = _get_sku(sku)
         sku_info = ResourceSku(name=sku_name)
 
-    identity_info = None
-
-    if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
-        identity_type_name = _get_identity_type(identity)
-        identity_info = IdentityInfo(type=identity_type_name)
-
+    identity_info = _get_identity_info_only_if_not_none(identity)
     topic_update_parameters = TopicUpdateParameters(
         tags=tags,
         public_network_access=public_network_access,
@@ -200,11 +191,7 @@ def cli_domain_update(
         sku_name = _get_sku(sku)
         sku_info = ResourceSku(name=sku_name)
 
-    identity_info = None
-    if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
-        identity_type_name = _get_identity_type(identity)
-        identity_info = IdentityInfo(type=identity_type_name)
-
+    identity_info = _get_identity_info_only_if_not_none(identity)
     domain_update_parameters = DomainUpdateParameters(
         tags=tags,
         public_network_access=public_network_access,
@@ -251,12 +238,7 @@ def cli_domain_create_or_update(
 
     identity_info = None
 
-    if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
-        identity_type_name = _get_identity_type(identity)
-        identity_info = IdentityInfo(type=identity_type_name)
-    else:
-        identity_info = IdentityInfo(type=IDENTITY_NONE)
-
+    identity_info = _get_identity_info(identity)
     domain_info = Domain(
         location=location,
         tags=tags,
@@ -584,13 +566,17 @@ def cli_system_topic_create_or_update(
         location,
         topic_type,
         source,
-        tags=None):
+        tags=None,
+        identity=None):
+
+    identity_info = _get_identity_info(identity)
 
     system_topic_info = SystemTopic(
         location=location,
         tags=tags,
         topic_type=topic_type,
-        source=source)
+        source=source,
+        identity=identity_info)
 
     return client.create_or_update(
         resource_group_name,
@@ -602,12 +588,19 @@ def cli_system_topic_update(
         client,
         resource_group_name,
         system_topic_name,
-        tags=None):
+        tags=None,
+        identity=None):
+
+    identity_info = _get_identity_info_only_if_not_none(identity)
+
+    system_topic_update_parameters = SystemTopicUpdateParameters(
+        tags=tags,
+        identity=identity_info)
 
     return client.update(
         resource_group_name=resource_group_name,
         system_topic_name=system_topic_name,
-        tags=tags)
+        system_topic_update_parameters=system_topic_update_parameters)
 
 
 def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=too-many-locals
@@ -1607,3 +1600,20 @@ def _validate_subscription_id_matches_default_subscription_id(
         raise CLIError('The subscription ID in the specified resource-id'
                        ' does not match the default subscription ID. To set the default subscription ID,'
                        ' use az account set ID_OR_NAME, or use the global argument --subscription ')
+
+
+def _get_identity_info(identity=None):
+    if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
+        identity_type_name = _get_identity_type(identity)
+        identity_info = IdentityInfo(type=identity_type_name)
+    else:
+        identity_info = IdentityInfo(type=IDENTITY_NONE)
+    return identity_info
+
+
+def _get_identity_info_only_if_not_none(identity=None):
+    identity_info = None
+    if (identity is not None and identity.lower() != IDENTITY_NONE.lower()):
+        identity_type_name = _get_identity_type(identity)
+        identity_info = IdentityInfo(type=identity_type_name)
+    return identity_info

@@ -323,6 +323,8 @@ short-summary: Create a system topic.
 examples:
   - name: Create a new system topic for storage account source.
     text: az eventgrid system-topic create -g rg1 --name systemtopic1 --location westus2 --topic-type microsoft.storage.storageaccounts --source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname
+  - name: Create a new system topic with systemassigned identity
+    text: az eventgrid system-topic create -g rg1 --name systemtopic1 --location westus2 --topic-type microsoft.storage.storageaccounts --source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname --identity systemassigned
 
 """
 
@@ -364,6 +366,8 @@ short-summary: Update a system topic.
 examples:
   - name: Update the properties of an existing system topic.
     text: az eventgrid system-topic update -g rg1 --name systemtopic1 --tags Dept=IT
+  - name: Update the identity of an existing system topic.
+    text: az eventgrid system-topic update -g rg1 --name systemtopic1 --identity systemassigned
 """
 
 helps['eventgrid partner topic list'] = """

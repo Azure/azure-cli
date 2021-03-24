@@ -38,16 +38,16 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | ACR   | Yes |Not Started | 04/30/2021 |Catherine||Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
 | CosmosDB   | Yes |Not Started | 04/30/2021 |Yong||GA (6.0.0) | Preview (2.0.0rc1) |  Medium (Once two months) |Module|
 | ServiceBus   | Yes |Not Started | 04/30/2021 |Catherine||GA (6.0.0) | GA (1.0.0) | Medium (Once four months) | Module |
-| CDN   | Yes |Not Started | 04/30/2021 |Yong||GA (10.0.0) | GA (6.0.0) | Low (Once half year) | Module |
-| NetAppFiles |  Yes |Not Started | 04/30/2021 |Yong||GA (1.0.0) | Preview (0.15.0) | Medium (Once two months) | Module|
+| CDN   | Yes |**Doing** | 04/30/2021 |Yong||GA (10.0.0) | GA (6.0.0) | Low (Once half year) | Module |
+| NetAppFiles |  Yes |**Doing** | 04/30/2021 |Yong||GA (1.0.0) | Preview (0.15.0) | Medium (Once two months) | Module|
 | PrivateDNS | Yes | Not Started | 04/30/2021 |Yong||Preview (1.0.0b1) | Preview (0.1.0) |N/A | Module |
 | ApplicationInsights   |Yes | Not Started | 04/30/2021 |Yong||GA (1.0.0) | Vendored_Preview (0.2.0) | N/A | Extension |
-| Firewall   |Yes| Not Started | 04/30/2021 |Yong|| Network: GA (17.0.0) | Network: Vendored_GA (13.0.0) | N/A | Extension |
+| Firewall   |Yes| **Completed** | 04/30/2021 |Yong|| Network: GA (17.0.0) | Network: Vendored_GA (13.0.0) | N/A | Extension |
 | Frontdoor   | Yes | Not Started | 04/30/2021 |Yong||Preview (1.0.0b1) | Vendored_Preview (0.3.1) | N/A | Extension |
 |**Phase 2: Management&Governance&others** |  |  | |  | |  |||||
 | CostManagement   | Yes | **Completed** | 06/30/2021 |||Vendored_GA (1.2.0) | N/A | N/A | Extension |
 | DataFactory   | Yes | **Completed** | 06/30/2021 |||Vendored_SDK | N/A | N/A | Extension |
-| RDBMS |  Yes|Not Started | 06/30/2021 |Yong||GA (8.0.0) | Preview (3.1.0rc1) | Medium (Once two months) | Module |
+| RDBMS |  Yes|**Completed** | 06/30/2021 |Yong||GA (8.0.0) | Preview (3.1.0rc1) | Medium (Once two months) | Module |
 | EventGrid | Yes |Not Started | 06/30/2021 |Catherine|| GA (8.0.0) | Preview (3.0.0rc8) | Medium (Once three months) | Module |
 | HDInsight | Yes |Not Started | 06/30/2021 |Catherine|| GA (7.0.0) | GA (2.1.0) | Medium (Once two months) | Module |
 | Kusto |  Yes |Not Started | 06/30/2021 |Catherine||Preview (1.0.0b1) | Preview (0.10.0) | Medium (Once two months | Module |
