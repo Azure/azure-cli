@@ -65,7 +65,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 0
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netapp_test_snap_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snap_')
     def test_create_volume_from_snapshot(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)

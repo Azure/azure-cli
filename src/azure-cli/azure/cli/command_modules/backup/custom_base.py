@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
@@ -105,9 +104,6 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
-
-    if retain_until is None:
-        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
@@ -261,8 +257,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                               container_name, backup_management_type)
 
 
-def check_protection_enabled_for_vm(cmd, vm_id):
-    return custom.check_protection_enabled_for_vm(cmd, vm_id)
+def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    return custom.check_protection_enabled_for_vm(cmd, vm_id, vm, resource_group_name)
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
@@ -402,9 +398,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     target_item = None
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
-        target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
-                                                target_server_name, target_server_type,
-                                                workload_type, container_name)
+        target_item = show_protectable_instance(
+            cmd, protectable_items_client, resource_group_name, vault_name,
+            target_server_name, target_server_type, workload_type,
+            container_name if target_container_name is None else target_container_name)
+
     target_container = None
     if target_container_name is not None:
         container_client = backup_protection_containers_cf(cmd.cli_ctx)

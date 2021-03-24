@@ -40,7 +40,8 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess
+    ServerPublicNetworkAccess,
+    ServerInfo
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -794,6 +795,7 @@ def _db_dw_create(
         dest_db,
         no_wait,
         sku=None,
+        secondary_type=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -816,6 +818,9 @@ def _db_dw_create(
     # Set create mode properties
     if source_db:
         kwargs['source_database_id'] = source_db.id()
+
+    if secondary_type:
+        kwargs['secondary_type'] = secondary_type
 
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
@@ -984,6 +989,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        secondary_type=None,
         no_wait=False,
         **kwargs):
     '''
@@ -1019,13 +1025,13 @@ def db_create_replica(
         if kwargs['storage_account_type'] == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
 
-    # Replica must have the same database name as the source db
     return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
+        secondary_type=secondary_type,
         **kwargs)
 
 
@@ -3638,6 +3644,62 @@ def server_aad_only_enable(
         azure_ad_only_authentication=True
     )
 
+###############################################
+#           sql server trust groups           #
+###############################################
+
+
+def server_trust_group_create(
+        client,
+        resource_group_name,
+        name,
+        location,
+        group_member,
+        trust_scope,
+        no_wait=False):
+
+    members = [ServerInfo(server_id=member) for member in group_member]
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name,
+                       group_members=members,
+                       trust_scopes=trust_scope)
+
+
+def server_trust_group_delete(
+        client,
+        resource_group_name,
+        name,
+        location,
+        no_wait=False):
+
+    return sdk_no_wait(no_wait, client.delete,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name)
+
+
+def server_trust_group_get(
+        client,
+        resource_group_name,
+        name,
+        location):
+
+    return client.get(resource_group_name=resource_group_name,
+                      location_name=location,
+                      server_trust_group_name=name)
+
+
+def server_trust_group_list(
+        client,
+        resource_group_name,
+        instance_name=None,
+        location=None):
+    if instance_name:
+        return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=instance_name)
+    return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
+
 
 ###############################################
 #                sql managed instance         #
@@ -4427,7 +4489,7 @@ def managed_db_log_replay_start(
     if auto_complete and not last_backup_name:
         raise CLIError('Please specify a last backup name when using auto complete flag.')
 
-    kwargs['auto_complete'] = auto_complete
+    kwargs['auto_complete_restore'] = auto_complete
     kwargs['last_backup_name'] = last_backup_name
 
     kwargs['storageContainerUri'] = storage_container_uri

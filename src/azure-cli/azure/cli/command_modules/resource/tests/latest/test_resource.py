@@ -5,10 +5,12 @@
 
 import json
 import os
+import platform
 import shutil
 import time
 import mock
 import unittest
+from pathlib import Path
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
@@ -2724,6 +2726,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
+            'new_ad_desc': 'new_test_appdef_123',
             'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
             'auth': principal_id + ':' + role_definition_id,
             'lock': 'None'
@@ -2742,13 +2745,26 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('artifacts[1].type', 'Custom')
         ]).get_output_in_json()['id']
 
+        # update a managedapp definition
+        self.cmd('managedapp definition update -n {adn} --package-file-uri {uri} --display-name {addn} --description {new_ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{new_ad_desc}'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
+        ])
+
         self.cmd('managedapp definition list -g {rg}',
                  checks=self.check('[0].name', '{adn}'))
 
         self.cmd('managedapp definition show --ids {ad_id}', checks=[
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
-            self.check('description', '{ad_desc}'),
+            self.check('description', '{new_ad_desc}'),
             self.check('authorizations[0].principalId', principal_id),
             self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
@@ -3243,6 +3259,111 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
             self.check('location', self.kwargs['location'])
         ])
         self.cmd('group delete -n {group2} -y')
+
+
+class BicepScenarioTest(ScenarioTest):
+    def test_bicep_list_versions(self):
+        self.cmd('az bicep list-versions', checks=[
+            self.greater_than('length(@)', 0)
+        ])
+
+
+class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+    def setup(self):
+        super.setup()
+        self._remove_bicep_cli()
+
+    def tearDown(self):
+        super().tearDown()
+        self._remove_bicep_cli()
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicep')
+    def test_resource_group_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_subscription_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy.bicep').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment sub validate --location westus --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment sub create --location westus --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_management_group_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy.bicep').replace('\\', '\\\\'),
+            'mg': self.create_random_name('azure-cli-management', 30)
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} --location WestUS --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_tenent_level_deployment_with_bicep(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'role_definition_deploy.bicep').replace('\\', '\\\\')
+        })
+
+        self.cmd('deployment tenant validate --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant create --location WestUS --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def _remove_bicep_cli(self):
+        bicep_cli_path = self._get_bicep_cli_path()
+        if os.path.isfile(bicep_cli_path):
+            os.remove(bicep_cli_path)
+
+    def _get_bicep_cli_path(self):
+        installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
+
+        if platform.system() == "Windows":
+            return os.path.join(installation_folder, "bicep.exe")
+        return os.path.join(installation_folder, "bicep")
 
 
 if __name__ == '__main__':

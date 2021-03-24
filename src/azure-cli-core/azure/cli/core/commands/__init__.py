@@ -5,8 +5,6 @@
 
 # pylint: disable=too-many-lines
 
-from __future__ import print_function
-
 import argparse
 import datetime
 import json
@@ -17,7 +15,6 @@ import sys
 import time
 import copy
 from importlib import import_module
-import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
@@ -27,7 +24,7 @@ from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import (
-    get_command_type_kwarg, read_file_content, get_arg_list, poller_classes, log_cmd_history, clean_exception_history)
+    get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
 
@@ -519,10 +516,6 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.invocation.data['command_string'] = command
         telemetry.set_raw_command_name(command)
 
-        # record execution log when "az next" is installed
-        log_cmd_history(command, args)
-        clean_exception_history(command)
-
         try:
             self.commands_loader.command_table = {command: self.commands_loader.command_table[command]}
         except KeyError:
@@ -717,7 +710,7 @@ class AzCliCommandInvoker(CommandInvoker):
         except Exception as ex:  # pylint: disable=broad-except
             if cmd_copy.exception_handler:
                 return cmd_copy.exception_handler(ex)
-            six.reraise(*sys.exc_info())
+            raise
 
     def _run_jobs_serially(self, jobs, ids):
         results, exceptions = [], []

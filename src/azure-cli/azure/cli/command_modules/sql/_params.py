@@ -827,6 +827,11 @@ def load_arguments(self, _):
                    help='Name of the new replica.'
                    ' If unspecified, defaults to the source database name.')
 
+        c.argument('secondary_type',
+                   options_list=['--secondary-type'],
+                   help='Type of secondary to create.'
+                   ' Allowed values include: Geo, Named.')
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
@@ -1596,6 +1601,57 @@ def load_arguments(self, _):
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
                 help='The virtual network name')
+
+    ###############################################
+    #           sql server trust groups           #
+    ###############################################
+
+    with self.argument_context('sql stg') as c:
+        c.argument('resource_group_name',
+                   help='The resource group name')
+
+    with self.argument_context('sql stg create') as c:
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+        c.argument('location',
+                   help='The location name of the Server Trust Group.')
+
+        c.argument('group_member',
+                   options_list=['--group-member', '-m'],
+                   help="""Managed Instance that is to be a member of the group.
+                   Specify resource group, subscription id and the name of the instance.""",
+                   nargs='+')
+
+        c.argument('trust_scope',
+                   help='The trust scope of the Server Trust Group.',
+                   nargs='+')
+
+    with self.argument_context('sql stg show') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg delete') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg list') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.',
+                   arg_group='List By Location')
+
+        c.argument('instance_name',
+                   help='Managed Instance name.',
+                   arg_group='List By Instance')
 
     ###############################################
     #                sql managed instance         #

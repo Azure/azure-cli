@@ -1176,6 +1176,8 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+    if namespace.count is not None:
+        _validate_count(namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
@@ -1196,8 +1198,6 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
-    if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM')
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1356,9 +1356,9 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
-    # scale_set_vm_str = 'ScaleSetVM'
-    vm_str = 'VM'
-    if namespace.orchestration_mode.lower() == vm_str.lower():
+    # uniform_str = 'Uniform'
+    flexible_str = 'Flexible'
+    if namespace.orchestration_mode.lower() == flexible_str.lower():
         validate_tags(namespace)
         if not namespace.location:
             get_default_location_from_resource_group(cmd, namespace)
@@ -1428,7 +1428,10 @@ def process_vmss_create_namespace(cmd, namespace):
         if any(param is not None for param in banned_params):
             raise CLIError('usage error: In VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+        _validate_proximity_placement_group(cmd, namespace)
         return
+
+    # Uniform mode
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
@@ -1759,3 +1762,46 @@ def _validate_vmss_create_host_group(cmd, namespace):
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
             )
+
+
+def _validate_count(namespace):
+    if namespace.count < 2 or namespace.count > 250:
+        raise ValidationError('--count should be in [2, 250]')
+    banned_params = [
+        namespace.attach_data_disks,
+        namespace.attach_os_disk,
+        namespace.boot_diagnostics_storage,
+        namespace.computer_name,
+        namespace.dedicated_host,
+        namespace.dedicated_host_group,
+        namespace.nics,
+        namespace.os_disk_name,
+        namespace.private_ip_address,
+        namespace.public_ip_address,
+        namespace.public_ip_address_dns_name,
+        namespace.storage_account,
+        namespace.storage_container_name,
+        namespace.subnet,
+        namespace.use_unmanaged_disk,
+        namespace.vnet_name
+    ]
+    params_str = [
+        '--attach-data-disks',
+        '--attach-os-disk',
+        '--boot-diagnostics-storage',
+        '--computer-name',
+        '--host',
+        '--host-group',
+        '--nics',
+        '--os-disk-name',
+        '--private-ip-address',
+        '--public-ip-address',
+        '--public-ip-address-dns-name',
+        '--storage-account',
+        '--storage-container-name',
+        '--subnet',
+        '--use-unmanaged-disk',
+        '--vnet-name'
+    ]
+    if any(param for param in banned_params):
+        raise ValidationError('When --count is specified, {} are not allowed'.format(', '.join(params_str)))

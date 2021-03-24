@@ -2236,7 +2236,10 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         database_name = "cliautomationdb01"
         target_database_name = "cliautomationdb02"
+        hs_database_name = "cliautomationhs03"
+        hs_target_database_name = "cliautomationnr04"
         service_objective = 'GP_Gen5_8'
+        hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
         class ServerInfo(object):  # pylint: disable=too-few-public-methods
@@ -2264,8 +2267,15 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s1.group)])
 
+        # create hs db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
+                 checks=[
+                     JMESPathCheck('name', hs_database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
         # create replica in second server with min params
-        # partner resouce group unspecified because s1.group == s2.group
+        # partner resource group unspecified because s1.group == s2.group
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
                  .format(s1.group, s1.name, database_name,
                          s2.name),
@@ -2294,14 +2304,28 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db delete -g {} -s {} -n {} --yes'
                  .format(s2.group, s2.name, database_name))
 
+        secondary_type = "Geo"
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {} --partner-database {}'
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
                  .format(s1.group, s1.name, database_name,
-                         s2.name, service_objective, target_database_name),
+                         s2.name, service_objective, target_database_name, secondary_type),
                  checks=[
                      JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
+
+        # Create a named replica
+        secondary_type = "Named"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, hs_database_name,
+                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', hs_target_database_name),
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'pool1'
@@ -3806,6 +3830,115 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', 'Premium'),
                      JMESPathCheck('zoneRedundant', True),
                      JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MDB1))])
+
+
+class SqlServerTrustGroupsScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westeurope', name_prefix='clitest')
+    def test_sql_server_trust_groups(self):
+
+        resource_prefix = 'sqlstg'
+
+        account = self.cmd('account show').get_output_in_json()
+
+        self.kwargs.update({
+            'loc': 'westeurope',
+            'vnet_name': 'stgCliTestVname',
+            'subnet_name': 'stgCliTestSubnet',
+            'nsg': 'stgCliTestNsg',
+            'route_table_name': 'stgCliTestRouteTable',
+            'route_name_default': 'default',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name_1': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'managed_instance_name_2': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'vault_name': self.create_random_name(resource_prefix, 24),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': 32,
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
+            'delegations': 'Microsoft.Sql/managedInstances',
+            'subscription_id': account['id']
+        })
+
+        self.cmd('az network nsg create --name {nsg} --resource-group {rg} --location {loc}')
+
+        self.cmd('az network nsg rule create --name "allow_management_inbound" --nsg-name {nsg} --priority 100 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges 9000 9003 1438 1440 1452 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"')
+        self.cmd('az network nsg rule create --name "allow_misubnet_inbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
+        self.cmd('az network nsg rule create --name "allow_health_probe_inbound" --nsg-name {nsg} --priority 300 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Inbound --protocol "*" --source-address-prefixes AzureLoadBalancer --source-port-ranges "*"')
+        self.cmd('az network nsg rule create --name "allow_management_outbound" --nsg-name {nsg} --priority 1100 --resource-group {rg} --access Allow --destination-address-prefixes AzureCloud --destination-port-ranges 443 12000 --direction Outbound --protocol Tcp --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
+        self.cmd('az network nsg rule create --name "allow_misubnet_outbound" --nsg-name {nsg} --priority 200 --resource-group {rg} --access Allow --destination-address-prefixes 10.0.0.0/24 --destination-port-ranges "*" --direction Outbound --protocol "*" --source-address-prefixes 10.0.0.0/24 --source-port-ranges "*"')
+
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --delegations {delegations}')
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+
+        self.cmd('az network vnet subnet update --name {subnet_name} --network-security-group {nsg} --route-table {route_table_name} --vnet-name {vnet_name} --resource-group {rg}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # Create sql managed_instance
+        managed_instance_1 = self.cmd('sql mi create -g {rg} -n {managed_instance_name_1} -l {loc} '
+                                      '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                                      '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                                      '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                                      checks=[
+                                          self.check('name', '{managed_instance_name_1}'),
+                                          self.check('resourceGroup', '{rg}'),
+                                          self.check('administratorLogin', '{admin_login}'),
+                                          self.check('vCores', '{v_cores}'),
+                                          self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                          self.check('licenseType', '{license_type}'),
+                                          self.check('sku.tier', '{edition}'),
+                                          self.check('sku.family', '{family}'),
+                                          self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
+
+        managed_instance_2 = self.cmd('sql mi create -g {rg} -n {managed_instance_name_2} -l {loc} '
+                                      '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                                      '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                                      '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                                      checks=[
+                                          self.check('name', '{managed_instance_name_2}'),
+                                          self.check('resourceGroup', '{rg}'),
+                                          self.check('administratorLogin', '{admin_login}'),
+                                          self.check('vCores', '{v_cores}'),
+                                          self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                          self.check('licenseType', '{license_type}'),
+                                          self.check('sku.tier', '{edition}'),
+                                          self.check('sku.family', '{family}'),
+                                          self.check('sku.capacity', '{v_cores}')]).get_output_in_json()
+
+        self.kwargs.update({
+            'stg_name': 'stg-test',
+            'trust_scope': 'GlobalTransactions',
+            'mi1': managed_instance_1['id'],
+            'mi2': managed_instance_2['id'],
+        })
+
+        stg = self.cmd('az sql stg create -g {rg} -l {loc} --trust-scope {trust_scope} -n {stg_name} -m {mi1} {mi2}').get_output_in_json()
+        assert stg['name'] == 'stg-test'
+
+        self.cmd('az sql stg show -g {rg} -l {loc} -n {stg_name}').get_output_in_json()
+
+        stg_list = self.cmd('az sql stg list -g {rg} --instance-name {managed_instance_name_1}').get_output_in_json()
+        assert len(stg_list) == 1
+
+        stg_list = self.cmd('az sql stg list -g {rg} -l {loc}').get_output_in_json()
+        assert len(stg_list) == 1
+
+        self.cmd('az sql stg delete -g {rg} -l {loc} -n {stg_name} --yes')
 
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):

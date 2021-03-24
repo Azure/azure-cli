@@ -233,6 +233,8 @@ def load_arguments(self, _):
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
+            c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
+            c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
         with self.argument_context(scope + ' config ssl show') as c:
             c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
@@ -640,7 +642,7 @@ def load_arguments(self, _):
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
         c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help="The name of the subnet",
+        c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp deploy') as c:
@@ -674,7 +676,7 @@ def load_arguments(self, _):
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
         c.argument('vnet', help="The name or resource ID of the Vnet", validator=validate_add_vnet,
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help="The name of the subnet",
+        c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('functionapp') as c:

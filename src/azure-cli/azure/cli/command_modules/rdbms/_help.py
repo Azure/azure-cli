@@ -906,7 +906,7 @@ examples:
         az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\
             --sku-name B_Gen5_1 --ssl-enforcement Enabled --minimal-tls-version TLS1_0 --public-network-access Disabled \\
             --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 \\
-            --tags "key=value" --version 11.0
+            --tags "key=value" --version 11
 """
 
 helps['postgres server delete'] = """

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from uuid import uuid4
+from datetime import datetime, timedelta, timezone
 
 # pylint: disable=import-error
 # pylint: disable=broad-except
@@ -180,11 +181,16 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
-    item_properties = item.properties
-    item_properties.policy_id = policy.id
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise InvalidArgumentValueError("Item must be either of type SQLDataBase or SAPHanaDatabase.")
+
+    item_properties = _get_protected_item_instance(backup_item_type)
+    item_properties.policy_id = policy.id
 
     param = ProtectedItemResource(properties=item_properties)
 
@@ -369,9 +375,19 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until, backup_type,
                enable_compression=False):
+    if backup_type is None:
+        raise RequiredArgumentMissingError("Backup type missing. Please provide a valid backup type using "
+                                           "--backup-type argument.")
+
     message = "For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy"
-    if retain_until is not None:
+
+    if (retain_until is not None and backup_type != 'CopyOnlyFull'):
         logger.warning(message)
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
@@ -382,10 +398,10 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
             Enable compression is not applicable for SAPHanaDatabase item type.
             """)
 
-    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull']:
+    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull', 'Incremental']:
         raise CLIError(
             """
-            Backup type cannot be Log or CopyOnlyFull for SAPHanaDatabase item type.
+            Backup type cannot be Log, CopyOnlyFull, Incremental for SAPHanaDatabase Adhoc backup.
             """)
 
     properties = AzureWorkloadBackupRequest(backup_type=backup_type, enable_compression=enable_compression,
