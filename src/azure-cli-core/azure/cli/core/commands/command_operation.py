@@ -124,7 +124,8 @@ class CommandOperation(BaseCommandOperation):
         """ Callback function of CLICommand arguments_loader """
         op = self.get_op_handler(self.op_path)
         self.apply_doc_string(op)
-        cmd_args = list(extract_args_from_signature(op, excluded_params=self.command_loader.excluded_command_handler_args))
+        cmd_args = list(extract_args_from_signature(
+            op, excluded_params=self.command_loader.excluded_command_handler_args))
         return cmd_args
 
     def description_loader(self):
