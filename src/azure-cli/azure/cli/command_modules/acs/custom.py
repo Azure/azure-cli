@@ -2190,7 +2190,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         from msrestazure.tools import is_valid_resource_id
         if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
             if is_valid_resource_id(private_dns_zone):
-                print("use custom private dns zone")
                 use_custom_private_dns_zone = True
             else:
                 raise CLIError(private_dns_zone + " is not a valid Azure resource ID.")
