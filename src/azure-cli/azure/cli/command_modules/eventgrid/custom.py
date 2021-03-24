@@ -893,11 +893,10 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False,
+        enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
     if endpoint is None and delivery_identity_endpoint is None or \
-       endpoint is not None and delivery_identity_endpoint is not None:
         raise CLIError('usage error: either --endpoint or --delivery-identity-endpoint should '
                        'be specified at one time, not both.')
 

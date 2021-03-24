@@ -123,6 +123,7 @@ class EventSubscriptionAddFilter(argparse._AppendAction):
 
 
 def _get_in_advanced_filter(key, operator, values):
+    _validate_at_least_single_value_is_specified(operator, values)
     float_values = [float(i) for i in values[2:]]
 
     if operator.lower() == NUMBERIN.lower():
@@ -145,7 +146,6 @@ def _get_in_range_advanced_filter(key, operator, values):
         advanced_filter = NumberNotInRangeAdvancedFilter(key=key, values=result)
     return advanced_filter
 
-
 def _validate_only_single_value_is_specified(operator_type, values):
     if len(values) != 3:
         raise CLIError("--advanced-filter: For '{}' operator, only one filter value "
@@ -158,7 +158,13 @@ def _validate_no_value_is_specified(operator_type, values):
                        "must be specified.".format(operator_type))
 
 
+def _validate_at_least_single_value_is_specified(operator_type, values):
+    if len(values) < 3:
+        raise CLIError("--advanced-filter: For '{}' operator at least one filter value "
+                       "must be specified.".format(operator_type))
+
+
 def _validate_values_len(values):
     valuesLen = len(values)
     if valuesLen < 2:
-        raise CLIError('usage error: --advanced-filter KEY[.INNERKEY] FILTEROPERATOR [VALUE ...]')
+        raise CLIError('usage error: --advanced-filter KEY[.INNERKEY] FILTEROPERATOR VALUE [VALUE...]')
