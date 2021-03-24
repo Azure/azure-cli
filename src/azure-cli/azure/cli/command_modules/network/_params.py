@@ -1740,7 +1740,7 @@ def load_arguments(self, _):
         c.argument('route_table_name', options_list='--route-table-name', help='Route table name')
         c.argument('next_hop_type', help='The type of Azure hop the packet should be sent to.', arg_type=get_enum_type(RouteNextHopType))
         c.argument('next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
-        c.argument('address_prefix', help='The destination CIDR to which the route applies.')
+        c.argument('address_prefix', help='The destination CIDR to which the route applies. You can also use a Service Tag here instead (this feature is in Public Preview)')
 
     # endregion
 
