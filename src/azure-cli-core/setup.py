@@ -5,11 +5,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.20.0"
+VERSION = "2.21.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
