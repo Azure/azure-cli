@@ -833,8 +833,6 @@ def load_arguments(self, _):
             license_msg = "Specifies that the Windows image or disk was licensed on-premises. " \
                           "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
                           "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
-                          "Remember that after setting the license type on VMSs, execute the following command to apply the changes to the existing VM." \
-                          "`az vmss update-instances -g 'Your resource group name' -n 'Your VMSS name' --instance-ids '*' `" \
                           "For more information see the Azure Windows VM online docs."
             c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'None']))
             c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
