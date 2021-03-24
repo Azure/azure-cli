@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy, _generate_sas_token
 
 
