@@ -1035,7 +1035,9 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         raise CLIError('usage error: --time is a required parameter')
     daily_recurrence = {'time': time}
     notification_settings = None
-    if webhook:
+    if email:
+        if not webhook:
+            raise CLIError('usage error: --webhook is a required parameter when --email exists')
         notification_settings = {
             'emailRecipient': email,
             'webhookUrl': webhook,
