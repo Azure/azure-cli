@@ -6,7 +6,7 @@
 import mock
 import unittest
 import difflib
-from six import StringIO
+from io import StringIO
 from collections import namedtuple
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
