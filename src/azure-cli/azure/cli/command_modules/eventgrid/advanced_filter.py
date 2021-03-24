@@ -146,6 +146,7 @@ def _get_in_range_advanced_filter(key, operator, values):
         advanced_filter = NumberNotInRangeAdvancedFilter(key=key, values=result)
     return advanced_filter
 
+
 def _validate_only_single_value_is_specified(operator_type, values):
     if len(values) != 3:
         raise CLIError("--advanced-filter: For '{}' operator, only one filter value "
