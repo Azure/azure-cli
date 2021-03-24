@@ -848,7 +848,7 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def setUp(self):
         super(NetworkPrivateLinkEventGridScenarioTest, self).setUp()
-        self.cmd('extension add -n eventgrid')
+        # self.cmd('extension add -n eventgrid')
 
     def tearDown(self):
         # self.cmd('extension remove -n eventgrid')

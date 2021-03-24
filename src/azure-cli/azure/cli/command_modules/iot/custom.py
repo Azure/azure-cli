@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods,too-many-lines,too-many-arguments,too-many-locals
 
-from __future__ import print_function
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
