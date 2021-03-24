@@ -20,6 +20,12 @@ from azure.cli.core.commands.arm import resource_exists
 
 from ._client_factory import _compute_client_factory
 
+from .generated.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+try:
+    from .manual.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+except ImportError:
+    pass
+
 logger = get_logger(__name__)
 
 

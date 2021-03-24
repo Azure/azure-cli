@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.20.0"
+VERSION = "2.21.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -77,8 +77,8 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc17',
-    'azure-mgmt-containerservice~=9.4.0',
     'azure-mgmt-cosmosdb~=3.0.0',
+    'azure-mgmt-containerservice~=11.1.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -86,7 +86,7 @@ DEPENDENCIES = [
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
-    'azure-mgmt-eventgrid==3.0.0rc7',
+    'azure-mgmt-eventgrid==3.0.0rc9',
     'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-hdinsight~=2.2.0',
     'azure-mgmt-imagebuilder~=0.4.0',
@@ -99,15 +99,15 @@ DEPENDENCIES = [
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
-    'azure-mgmt-marketplaceordering~=0.1',
+    'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.16.0',
-    'azure-mgmt-network~=17.1.0',
+    'azure-mgmt-network~=18.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=8.0.0',
+    'azure-mgmt-rdbms~=8.1.0b2',
     'azure-mgmt-recoveryservicesbackup~=0.11.0',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-redhatopenshift==0.1.0',
