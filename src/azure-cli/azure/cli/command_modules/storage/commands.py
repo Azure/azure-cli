@@ -501,16 +501,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                cf_mgmt_file_shares,
                                                                resource_type=ResourceType.MGMT_STORAGE),
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01') as g:
+        from ._transformers import transform_share_rm_output
         g.custom_command('create', 'create_share_rm')
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
         g.custom_command('list', 'list_share_rm')
-        g.show_command('show', 'get')
+        g.show_command('show', 'get', transform=transform_share_rm_output)
         g.generic_update_command('update', setter_name='update', setter_arg_name='file_share',
                                  custom_func_name='update_share_rm')
         g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
         g.custom_command('restore', 'restore_share_rm')
-        g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview')
+        g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview',
+                         transform=transform_share_rm_output)
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:

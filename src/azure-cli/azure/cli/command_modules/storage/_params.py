@@ -1171,9 +1171,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.argument('expand', default=None)
         c.argument('x_ms_snapshot', options_list='--snapshot',
-                   help='The snapshot parameter is an opaque DateTime value that, when present, '
-                        'specifies the share snapshot to retrieve.')
+                   help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
+
+    with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.ignore('x_ms_snapshot')
 
     for item in ['create', 'update', 'snapshot']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
