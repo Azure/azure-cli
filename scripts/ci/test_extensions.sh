@@ -18,8 +18,8 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
-# TODO: Remove when ML extension is compatible with CLI 2.0.69 core
-# https://github.com/Azure/azure-cli-extensions/issues/826
+# azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+# azure-iot: https://github.com/Azure/azure-cli/pull/17456
 block_list='azure-cli-ml azure-iot'
 
 for ext in $output; do
