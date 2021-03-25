@@ -2006,6 +2006,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         self.cmd('network express-route auth list --resource-group {rg} --circuit-name {er}', checks=self.is_empty())
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route(self, resource_group):
 
@@ -2157,6 +2158,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
     def test_network_express_route_ipv6_peering(self, resource_group):
 
@@ -2178,6 +2180,7 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
         ])
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering2', location='eastus')
     def test_network_express_route_ipv6_peering2(self, resource_group):
         self.kwargs['er'] = 'test_circuit'
