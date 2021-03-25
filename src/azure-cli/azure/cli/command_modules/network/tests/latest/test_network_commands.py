@@ -2056,6 +2056,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         # so we will just verify that the command makes it through the SDK without error.
         self.cmd('network express-route list-arp-tables --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
         self.cmd('network express-route list-route-tables --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
+        self.cmd('network express-route list-route-tables-summary --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
 
         self.cmd('network express-route delete --resource-group {rg} --name {er}')
         # Expecting no results as we just deleted the only express route in the resource group
@@ -2173,6 +2174,9 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
             self.check('ipv6PeeringConfig.microsoftPeeringConfig.customerAsn', 100001),
             self.check('ipv6PeeringConfig.state', 'Enabled')
         ])
+        self.cmd('network express-route peering get-stats -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
+            self.check('type(@)', 'object'),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering2', location='eastus')
     def test_network_express_route_ipv6_peering2(self, resource_group):
@@ -2209,6 +2213,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+        self.cmd('network express-route peering connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
     @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
