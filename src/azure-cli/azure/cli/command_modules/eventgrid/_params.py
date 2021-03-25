@@ -155,6 +155,7 @@ phone_extension_type = CLIArgumentType(
 
 storage_queue_msg_ttl = CLIArgumentType(
     help="Storage queue message time to live in seconds.",
+    type=int,
     options_list=['--storage-queue-msg-ttl', '--qttl'],
     is_preview=True
 )

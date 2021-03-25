@@ -114,7 +114,7 @@ def cli_topic_create_or_update(
         client,
         resource_group_name,
         topic_name,
-        location,
+        location=None,
         tags=None,
         input_schema=EVENTGRID_SCHEMA,
         input_mapping_fields=None,
@@ -379,8 +379,8 @@ def cli_partner_namespace_create_or_update(
         client,
         resource_group_name,
         partner_namespace_name,
-        location=None,
         partner_registration_id,
+        location=None,
         tags=None):
 
     partner_namespace_info = PartnerNamespace(
@@ -567,9 +567,9 @@ def cli_system_topic_create_or_update(
         client,
         resource_group_name,
         system_topic_name,
-        location=None,
         topic_type,
         source,
+        location=None,
         tags=None,
         identity=None):
 
@@ -974,7 +974,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         raise CLIError('usage error: --storage-queue-msg-ttl is only applicable for endpoint type StorageQueue.')
 
     if storage_queue_msg_ttl is not None:
-        storage_queue_msg_ttl = int(storage_queue_msg_ttl)
+        storage_queue_msg_ttl = storage_queue_msg_ttl
 
     destination = None
     if endpoint is not None:
@@ -1274,7 +1274,7 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
         raise CLIError('Invalid usage: Since --endpoint-type is specified, a valid endpoint must also be specified.')
 
     if storage_queue_msg_ttl is not None:
-        storage_queue_msg_ttl = int(storage_queue_msg_ttl)
+        storage_queue_msg_ttl = storage_queue_msg_ttl
 
     tennant_id = None
     application_id = None
