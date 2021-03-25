@@ -982,6 +982,10 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
     if storage_queue_msg_ttl is not None:
         storage_queue_msg_ttl = int(storage_queue_msg_ttl)
 
+    if endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower() and \
+       delivery_attribute_mapping is not None:
+       raise CLIError('usage error: --delivery-attribute-mapping is not applicable for endpoint type StorageQueue.')
+
     destination = None
     if endpoint is not None:
         destination = _get_endpoint_destination(
