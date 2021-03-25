@@ -1351,19 +1351,13 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
             identity=deadletter_delivery_identity_info,
             dead_letter_destination=deadletter_destination_with_identity)
 
-    if subject_begins_with is not None:
-        event_subscription_filter.subject_begins_with = subject_begins_with
-
-    if subject_ends_with is not None:
-        event_subscription_filter.subject_ends_with = subject_ends_with
-
-    if included_event_types is not None:
-        event_subscription_filter.included_event_types = included_event_types
-
-    event_subscription_filter.enable_advanced_filtering_on_arrays = enable_advanced_filtering_on_arrays
-
-    if advanced_filter is not None:
-        event_subscription_filter.advanced_filters = advanced_filter
+    _set_event_subscription_filter(
+        event_subscription_filter,
+        subject_begins_with,
+        subject_ends_with,
+        included_event_types,
+        enable_advanced_filtering_on_arrays,
+        advanced_filter)
 
     if labels is not None:
         event_subscription_labels = labels
@@ -1665,3 +1659,27 @@ def _get_identity_info_only_if_not_none(identity=None):
         identity_type_name = _get_identity_type(identity)
         identity_info = IdentityInfo(type=identity_type_name)
     return identity_info
+
+
+def _set_event_subscription_filter(
+        event_subscription_filter,
+        subject_begins_with=None,
+        subject_ends_with=None,
+        included_event_types=None,
+        enable_advanced_filtering_on_arrays=None,
+        advanced_filter=None):
+
+    if subject_begins_with is not None:
+        event_subscription_filter.subject_begins_with = subject_begins_with
+
+    if subject_ends_with is not None:
+        event_subscription_filter.subject_ends_with = subject_ends_with
+
+    if included_event_types is not None:
+        event_subscription_filter.included_event_types = included_event_types
+
+    if enable_advanced_filtering_on_arrays is not None:
+        event_subscription_filter.enable_advanced_filtering_on_arrays = enable_advanced_filtering_on_arrays
+
+    if advanced_filter is not None:
+        event_subscription_filter.advanced_filters = advanced_filter
