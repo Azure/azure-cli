@@ -795,7 +795,6 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         # so we will just verify that the command makes it through the SDK without error.
         self.cmd('network express-route list-arp-tables --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
         self.cmd('network express-route list-route-tables --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
-        self.cmd('network express-route list-route-tables-summery --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
 
         self.cmd('network express-route delete --resource-group {rg} --name {er}')
         # Expecting no results as we just deleted the only express route in the resource group
