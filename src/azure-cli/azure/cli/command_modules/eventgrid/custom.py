@@ -6,7 +6,6 @@
 # pylint: disable=too-many-lines
 
 import re
-import sys
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
@@ -221,7 +220,7 @@ def cli_domain_create_or_update(
         client,
         resource_group_name,
         domain_name,
-        location,
+        location=None,
         tags=None,
         input_schema=EVENTGRID_SCHEMA,
         input_mapping_fields=None,
@@ -380,7 +379,7 @@ def cli_partner_namespace_create_or_update(
         client,
         resource_group_name,
         partner_namespace_name,
-        location,
+        location=None,
         partner_registration_id,
         tags=None):
 
@@ -412,7 +411,7 @@ def cli_event_channel_create_or_update(
         partner_topic_source,
         destination_subscription_id,
         destination_resource_group_name,
-        desination_topic_name,
+        destination_topic_name,
         activation_expiration_date=None,
         partner_topic_description=None,
         publisher_filter=None):
@@ -422,7 +421,7 @@ def cli_event_channel_create_or_update(
     destination_info = EventChannelDestination(
         azure_subscription_id=destination_subscription_id,
         resource_group=destination_resource_group_name,
-        partner_topic_name=desination_topic_name)
+        partner_topic_name=destination_topic_name)
 
     event_channel_filter = None
     if publisher_filter is not None:
@@ -457,7 +456,7 @@ def cli_partner_topic_create_or_update(
         client,
         resource_group_name,
         partner_topic_name,
-        location,
+        location=None,
         tags=None):
 
     partner_topic_info = PartnerTopic(
@@ -570,7 +569,7 @@ def cli_system_topic_create_or_update(
         client,
         resource_group_name,
         system_topic_name,
-        location,
+        location=None,
         topic_type,
         source,
         tags=None,
@@ -1146,10 +1145,7 @@ def cli_system_topic_event_subscription_update(
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         storage_queue_msg_ttl=storage_queue_msg_ttl,
-        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays)
-
-    print('print systemtopic update params', file=sys.stderr)
-    print(params.filter.enable_advanced_filtering_on_arrays, file=sys.stderr)
+        enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
     return client.update(
@@ -1382,9 +1378,6 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
         event_subscription_filter.included_event_types = included_event_types
 
     event_subscription_filter.enable_advanced_filtering_on_arrays = enable_advanced_filtering_on_arrays
-
-    print('printing enable_advanced_filtering_on_arrays value', file=sys.stderr)
-    print(event_subscription_filter.enable_advanced_filtering_on_arrays, file=sys.stderr)
 
     if advanced_filter is not None:
         event_subscription_filter.advanced_filters = advanced_filter
