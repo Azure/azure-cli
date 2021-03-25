@@ -845,15 +845,6 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
-    @AllowLargeResponse()
-    def setUp(self):
-        super(NetworkPrivateLinkEventGridScenarioTest, self).setUp()
-        self.cmd('extension add -n eventgrid')
-
-    def tearDown(self):
-        # self.cmd('extension remove -n eventgrid')
-        super(NetworkPrivateLinkEventGridScenarioTest, self).tearDown()
-
     @ResourceGroupPreparer(name_prefix='cli_test_event_grid_plr')
     def test_private_link_resource_event_grid(self, resource_group):
         self.kwargs.update({
