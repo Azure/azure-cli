@@ -18,11 +18,14 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
-for ext in $output; do
+# TODO: Remove when ML extension is compatible with CLI 2.0.69 core
+# https://github.com/Azure/azure-cli-extensions/issues/826
+block_list='azure-cli-ml azure-iot'
 
-    # TODO: Remove when ML extension is compatible with CLI 2.0.69 core
-    # https://github.com/Azure/azure-cli-extensions/issues/826
-    if [ $ext == 'azure-cli-ml' ]; then
+for ext in $output; do
+    # Use regex to detect if $ext is in $block_list
+    if [[ $block_list =~ $ext ]]; then
+        echo "$ext is skipped"
         continue
     fi
 
@@ -36,11 +39,11 @@ for ext in $output; do
     fi
 done
 
-#az self-test --debug
-#if [ $? != 0 ]
-#then
-#    exit_code=1
-#    echo "Failed to verify:" $ext
-#fi
+az self-test --debug
+if [ $? != 0 ]
+then
+    exit_code=1
+    echo "Failed to verify:" $ext
+fi
 
 exit $exit_code
