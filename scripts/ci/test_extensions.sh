@@ -23,13 +23,13 @@ exit_code=0
 block_list='azure-cli-ml azure-iot'
 
 for ext in $output; do
+    echo
     # Use regex to detect if $ext is in $block_list
     if [[ $block_list =~ $ext ]]; then
-        echo "$ext is skipped"
+        echo "Skip extension: $ext"
         continue
     fi
 
-    echo
     echo "Verifying extension:" $ext
     az extension add -n $ext
     if [ $? != 0 ]
