@@ -53,58 +53,53 @@ ISNOTNULL = "IsNotNull"
 class EventSubscriptionAddFilter(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
 
-        _validate_values_len(values)
+        _validate_min_values_len(values)
         key = values[0]
         operator = values[1]
 
 # operators that support no value
         if operator.lower() == ISNULLORUNDEFINED.lower():
-            _validate_no_value_is_specified(ISNULLORUNDEFINED, values)
-            advanced_filter = IsNullOrUndefinedAdvancedFilter(key=key)
+            advanced_filter = _get_zero_value_advanced_filter(key, operator, values)
         elif operator.lower() == ISNOTNULL.lower():
-            _validate_no_value_is_specified(ISNOTNULL, values)
-            advanced_filter = IsNotNullAdvancedFilter(key=key)
+            advanced_filter = _get_zero_value_advanced_filter(key, operator, values)
 
 # operators that support single value
         elif operator.lower() == NUMBERLESSTHAN.lower():
-            _validate_only_single_value_is_specified(NUMBERLESSTHAN, values)
-            advanced_filter = NumberLessThanAdvancedFilter(key=key, value=float(values[2]))
+            advanced_filter = _get_single_value_advanced_filter(key, operator, values)
         elif operator.lower() == NUMBERLESSTHANOREQUALS.lower():
-            _validate_only_single_value_is_specified(NUMBERLESSTHANOREQUALS, values)
-            advanced_filter = NumberLessThanOrEqualsAdvancedFilter(key=key, value=float(values[2]))
+            advanced_filter = _get_single_value_advanced_filter(key, operator, values)
         elif operator.lower() == NUMBERGREATERTHAN.lower():
-            _validate_only_single_value_is_specified(NUMBERGREATERTHAN, values)
-            advanced_filter = NumberGreaterThanAdvancedFilter(key=key, value=float(values[2]))
+            advanced_filter = _get_single_value_advanced_filter(key, operator, values)
         elif operator.lower() == NUMBERGREATERTHANOREQUALS.lower():
-            _validate_only_single_value_is_specified(NUMBERGREATERTHANOREQUALS, values)
-            advanced_filter = NumberGreaterThanOrEqualsAdvancedFilter(key=key, value=float(values[2]))
+            advanced_filter = _get_single_value_advanced_filter(key, operator, values)
         elif operator.lower() == BOOLEQUALS.lower():
-            _validate_only_single_value_is_specified(BOOLEQUALS, values)
-            advanced_filter = BoolEqualsAdvancedFilter(key=key, value=bool(values[2]))
+            advanced_filter = _get_single_value_advanced_filter(key, operator, values)
 
 # operators that support multiple values
         elif operator.lower() == NUMBERIN.lower() or operator.lower() == NUMBERNOTIN.lower():
-            advanced_filter = _get_in_advanced_filter(key, operator, values)
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGIN.lower():
-            advanced_filter = StringInAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGNOTIN.lower():
-            advanced_filter = StringNotInAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGBEGINSWITH.lower():
-            advanced_filter = StringBeginsWithAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGNOTBEGINSWITH.lower():
-            advanced_filter = StringNotBeginsWithAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGENDSWITH.lower():
-            advanced_filter = StringEndsWithAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGNOTENDSWITH.lower():
-            advanced_filter = StringNotEndsWithAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGCONTAINS.lower():
-            advanced_filter = StringContainsAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
         elif operator.lower() == STRINGNOTCONTAINS.lower():
-            advanced_filter = StringNotContainsAdvancedFilter(key=key, values=values[2:])
+            advanced_filter = _get_multi_value_advanced_filter(key, operator, values)
 
 # operators that support range of values
-        elif operator.lower() == NUMBERINRANGE.lower() or operator.lower() == NUMBERNOTINRANGE.lower():
-            advanced_filter = _get_in_range_advanced_filter(key, operator, values)
+        elif operator.lower() == NUMBERINRANGE.lower():
+            advanced_filter = _get_range_advanced_filter(key, operator, values)
+        elif operator.lower() == NUMBERNOTINRANGE.lower():
+            advanced_filter = _get_range_advanced_filter(key, operator, values)
         else:
             raise CLIError("--advanced-filter: The specified filter operator '{}' is not"
                            " a valid operator. Supported values are ".format(operator) +
@@ -122,19 +117,90 @@ class EventSubscriptionAddFilter(argparse._AppendAction):
         namespace.advanced_filter.append(advanced_filter)
 
 
-def _get_in_advanced_filter(key, operator, values):
-    _validate_at_least_single_value_is_specified(operator, values)
-    float_values = [float(i) for i in values[2:]]
+def _get_zero_value_advanced_filter(key, operator, values):
+    if len(values) != 2:
+        raise CLIError("--advanced-filter: For '{}' operator no filter value "
+                       "must be specified.".format(operator))
+
+    if operator.lower() == ISNULLORUNDEFINED.lower():
+        advanced_filter = IsNullOrUndefinedAdvancedFilter(key=key)
+    elif operator.lower() == ISNOTNULL.lower():
+        advanced_filter = IsNotNullAdvancedFilter(key=key)
+    else:
+        raise CLIError("--advanced-filter: The specified filter operator '{}' is not"
+                       " a zero value operator. Supported operators are ".format(operator) +
+                       ISNULLORUNDEFINED + "," + ISNOTNULL + ".")
+    return advanced_filter
+
+
+def _get_single_value_advanced_filter(key, operator, values):
+    if len(values) != 3:
+        raise CLIError("--advanced-filter: For '{}' operator only one filter value "
+                       "must be specified.".format(operator))
+
+    if operator.lower() == NUMBERLESSTHAN.lower():
+        advanced_filter = NumberLessThanAdvancedFilter(key=key, value=float(values[2]))
+    elif operator.lower() == NUMBERLESSTHANOREQUALS.lower():
+        advanced_filter = NumberLessThanOrEqualsAdvancedFilter(key=key, value=float(values[2]))
+    elif operator.lower() == NUMBERGREATERTHAN.lower():
+        advanced_filter = NumberGreaterThanAdvancedFilter(key=key, value=float(values[2]))
+    elif operator.lower() == NUMBERGREATERTHANOREQUALS.lower():
+        advanced_filter = NumberGreaterThanOrEqualsAdvancedFilter(key=key, value=float(values[2]))
+    elif operator.lower() == BOOLEQUALS.lower():
+        advanced_filter = BoolEqualsAdvancedFilter(key=key, value=bool(values[2]))
+    else:
+        raise CLIError("--advanced-filter: The specified filter operator '{}' is not"
+                       " a single value operator. Supported operators are ".format(operator) +
+                       NUMBERLESSTHAN + "," + NUMBERLESSTHANOREQUALS + "," +
+                       NUMBERGREATERTHAN + "," + NUMBERGREATERTHANOREQUALS + "," +
+                       BOOLEQUALS + ".")
+    return advanced_filter
+
+
+def _get_multi_value_advanced_filter(key, operator, values):
+    if len(values) < 3:
+        raise CLIError("--advanced-filter: For '{}' operator at least one filter value "
+                       "must be specified.".format(operator))
 
     if operator.lower() == NUMBERIN.lower():
+        float_values = [float(i) for i in values[2:]]
         advanced_filter = NumberInAdvancedFilter(key=key, values=float_values)
     elif operator.lower() == NUMBERNOTIN.lower():
+        float_values = [float(i) for i in values[2:]]
         advanced_filter = NumberNotInAdvancedFilter(key=key, values=float_values)
+    elif operator.lower() == STRINGIN.lower():
+        advanced_filter = StringInAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGNOTIN.lower():
+        advanced_filter = StringNotInAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGBEGINSWITH.lower():
+        advanced_filter = StringBeginsWithAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGNOTBEGINSWITH.lower():
+        advanced_filter = StringNotBeginsWithAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGENDSWITH.lower():
+        advanced_filter = StringEndsWithAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGNOTENDSWITH.lower():
+        advanced_filter = StringNotEndsWithAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGCONTAINS.lower():
+        advanced_filter = StringContainsAdvancedFilter(key=key, values=values[2:])
+    elif operator.lower() == STRINGNOTCONTAINS.lower():
+        advanced_filter = StringNotContainsAdvancedFilter(key=key, values=values[2:])
+    else:
+        raise CLIError("--advanced-filter: The specified filter operator '{}' is not "
+                       " a multi-value operator. Supported operators are ".format(operator) +
+                       NUMBERIN + "," + NUMBERNOTIN + "," +
+                       STRINGIN + "," + STRINGNOTIN + "," +
+                       STRINGBEGINSWITH + "," + STRINGNOTBEGINSWITH + "," +
+                       STRINGENDSWITH + "," + STRINGNOTENDSWITH + "," +
+                       STRINGCONTAINS + "," + STRINGNOTCONTAINS + ".")
 
     return advanced_filter
 
 
-def _get_in_range_advanced_filter(key, operator, values):
+def _get_range_advanced_filter(key, operator, values):
+    if len(values) < 3:
+        raise CLIError("--advanced-filter: For '{}' operator at least one range filter value "
+                       "like 'value1,value2' must be specified.".format(operator))
+
     result = []
     for value in values[2:]:
         float_value = [float(i) for i in value.split(',')]
@@ -144,28 +210,15 @@ def _get_in_range_advanced_filter(key, operator, values):
         advanced_filter = NumberInRangeAdvancedFilter(key=key, values=result)
     elif operator.lower() == NUMBERNOTINRANGE.lower():
         advanced_filter = NumberNotInRangeAdvancedFilter(key=key, values=result)
+    else:
+        raise CLIError("--advanced-filter: The specified filter operator '{}' is not "
+                       " a range value operator. Supported operators are ".format(operator) +
+                       NUMBERINRANGE + "," + NUMBERNOTINRANGE + ".")
+
     return advanced_filter
 
 
-def _validate_only_single_value_is_specified(operator_type, values):
-    if len(values) != 3:
-        raise CLIError("--advanced-filter: For '{}' operator, only one filter value "
-                       "must be specified.".format(operator_type))
-
-
-def _validate_no_value_is_specified(operator_type, values):
-    if len(values) != 2:
-        raise CLIError("--advanced-filter: For '{}' operator, no filter value "
-                       "must be specified.".format(operator_type))
-
-
-def _validate_at_least_single_value_is_specified(operator_type, values):
-    if len(values) < 3:
-        raise CLIError("--advanced-filter: For '{}' operator at least one filter value "
-                       "must be specified.".format(operator_type))
-
-
-def _validate_values_len(values):
+def _validate_min_values_len(values):
     valuesLen = len(values)
     if valuesLen < 2:
-        raise CLIError('usage error: --advanced-filter KEY[.INNERKEY] FILTEROPERATOR VALUE [VALUE...]')
+        raise CLIError("usage error: --advanced-filter KEY[.INNERKEY] FILTEROPERATOR VALUE [VALUE...]")
