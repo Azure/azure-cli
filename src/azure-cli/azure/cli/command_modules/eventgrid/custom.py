@@ -379,8 +379,8 @@ def cli_partner_namespace_create_or_update(
         client,
         resource_group_name,
         partner_namespace_name,
-        location=None,
         partner_registration_id,
+        location=None,
         tags=None):
 
     partner_namespace_info = PartnerNamespace(
@@ -569,9 +569,9 @@ def cli_system_topic_create_or_update(
         client,
         resource_group_name,
         system_topic_name,
-        location=None,
         topic_type,
         source,
+        location=None,
         tags=None,
         identity=None):
 
@@ -896,6 +896,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         delivery_attribute_mapping=None):
 
     if endpoint is None and delivery_identity_endpoint is None or \
+       endpoint is not None and delivery_identity_endpoint is not None:
         raise CLIError('usage error: either --endpoint or --delivery-identity-endpoint should '
                        'be specified at one time, not both.')
 
@@ -984,7 +985,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
 
     if endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower() and \
        delivery_attribute_mapping is not None:
-       raise CLIError('usage error: --delivery-attribute-mapping is not applicable for endpoint type StorageQueue.')
+        raise CLIError('usage error: --delivery-attribute-mapping is not applicable for endpoint type StorageQueue.')
 
     destination = None
     if endpoint is not None:
