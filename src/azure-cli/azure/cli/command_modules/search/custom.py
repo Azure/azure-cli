@@ -29,7 +29,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     :param public_network_access: Public accessibility to the search service;
                                   allowed values are "enabled" or "disabled".
     :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma or semicolon;
-                     These IP rules are applicable only when public_network_access is "enabled".
+                     these IP rules are applicable only when --public-network-access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
     """
     from azure.mgmt.search.models import SearchService, Sku, NetworkRuleSet, IpRule, Identity
@@ -76,7 +76,7 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
     :param public_network_access: Public accessibility to the search service;
                                   allowed values are "enabled" or "disabled".
     :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma(',') or
-                     semicolon(';'); If spaces (ex - ' '), ',' or ';' is provided, any existing IP rule will be
+                     semicolon(';'); If spaces (' '), ',' or ';' is provided, any existing IP rule will be
                      nullified and no public IP rule is applied. These IP rules are applicable only when
                      public_network_access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
@@ -117,8 +117,8 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
 
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.
-    :param private_endpoint_connection_name: Name of the private endpoint connection resource.
-        Ex - {the name of the private endpoint resource}.{guid}.
+    :param private_endpoint_connection_name: Name of the private endpoint connection resource;
+        for example: {the name of the private endpoint resource}.{guid}.
     :param private_link_service_connection_status: The updated status of the private endpoint connection resource.
         Possible values include: "Pending", "Approved", "Rejected", "Disconnected".
     :param private_link_service_connection_description: Custom description when updating
@@ -158,9 +158,9 @@ def create_shared_private_link_resource(cmd, resource_group_name, search_service
     :param search_service_name: Name of the search service.
     :param shared_private_link_resource_name: Name of the shared private link resource.
     :param shared_private_link_resource_id: Fully qualified resource ID for the resource.
-        Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
+        for example: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
         {resourceProviderNamespace}/{resourceType}/{resourceName}.
-    :param shared_private_link_resource_group_id: The group id of the resource. Ex, blob, sql or vault.
+    :param shared_private_link_resource_group_id: The group id of the resource; for example: blob, sql or vault.
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
@@ -190,10 +190,10 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.
     :param shared_private_link_resource_name: Name of the shared private link resource.
-    :param shared_private_link_resource_id: Fully qualified resource ID for the resource.
-        Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
+    :param shared_private_link_resource_id: Fully qualified resource ID for the resource;
+        for example: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
         {resourceProviderNamespace}/{resourceType}/{resourceName}.
-    :param shared_private_link_resource_group_id: The group id of the resource. Ex, blob, sql or vault.
+    :param shared_private_link_resource_group_id: The group id of the resource; for example: blob, sql or vault.
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
