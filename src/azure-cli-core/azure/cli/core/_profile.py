@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import collections
 import errno
 import json
@@ -633,8 +631,16 @@ class Profile:
         result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
 
         if 'error' in result:
-            from azure.cli.core.adal_authentication import aad_error_handler
-            aad_error_handler(result)
+            logger.warning(result['error_description'])
+
+            # Retry login with VM SSH as resource
+            token_entry = self._login_with_authorization_code_flow(
+                tenant, 'https://pas.windows.net/CheckMyAccess/Linux')
+            result = app.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
+
+            if 'error' in result:
+                from azure.cli.core.adal_authentication import aad_error_handler
+                aad_error_handler(result)
         return username, result["access_token"]
 
     def get_refresh_token(self, resource=None,
@@ -800,6 +806,18 @@ class Profile:
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
+
+    def _login_with_authorization_code_flow(self, tenant, resource):
+        authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
+        results = _get_authorization_code(resource, authority_url)
+
+        if not results.get('code'):
+            raise CLIError('Login failed')
+
+        context = _authentication_context_factory(self.cli_ctx, tenant, self._creds_cache.adal_token_cache)
+        token_entry = context.acquire_token_with_authorization_code(
+            results['code'], results['reply_url'], resource, _CLIENT_ID)
+        return token_entry
 
 
 class MsiAccountTypes:

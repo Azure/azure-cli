@@ -34,8 +34,8 @@ class ComputeCommandsLoader(AzCommandsLoader):
         load_command_table(self, args)
         try:
             # When generated commands are required uncomment the following two lines.
-            # from .generated.commands import load_command_table as load_command_table_generated
-            # load_command_table_generated(self, args)
+            from .generated.commands import load_command_table as load_command_table_generated
+            load_command_table_generated(self, args)
             from .manual.commands import load_command_table as load_command_table_manual
             load_command_table_manual(self, args)
         except ImportError:

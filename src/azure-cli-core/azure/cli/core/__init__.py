@@ -4,15 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from __future__ import print_function
-
-__version__ = "2.20.0"
+__version__ = "2.21.0"
 
 import os
 import sys
 import timeit
-
-import six
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -780,7 +776,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
         kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
-        if operation and not isinstance(operation, six.string_types):
+        if operation and not isinstance(operation, str):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
         if handler and not callable(handler):
             raise TypeError("Handler must be a callable. Got '{}'".format(operation))
@@ -856,7 +852,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 op = getattr(op, part)
             if isinstance(op, types.FunctionType):
                 return op
-            return six.get_method_function(op)
+            return op.__func__
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(operation))
 

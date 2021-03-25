@@ -36,11 +36,11 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
         local_context_info = self.cmd('config param-persist show').get_output_in_json()
 
-        self.cmd('{} flexible-server show'.format(database_engine),
-                 checks=[JMESPathCheck('resourceGroup', local_context_info['all']['resource_group_name']),
-                         JMESPathCheck('location', 'East US 2 EUAP'),
-                         JMESPathCheck('name', local_context_info[database_engine + ' flexible-server']['server_name']),
-                         JMESPathCheck('administratorLogin', local_context_info[database_engine + ' flexible-server']['administrator_login'])])
+        show_result = self.cmd('{} flexible-server show'.format(database_engine),
+                               checks=[JMESPathCheck('resourceGroup', local_context_info['all']['resource_group_name']),
+                                       JMESPathCheck('name', local_context_info[database_engine + ' flexible-server']['server_name']),
+                                       JMESPathCheck('administratorLogin', local_context_info[database_engine + ' flexible-server']['administrator_login'])]).get_output_in_json()
+        self.assertEqual(''.join(show_result['location'].lower().split()), location)
 
         self.cmd('{} flexible-server show-connection-string'.format(database_engine),
                  checks=[StringContainCheck(local_context_info[database_engine + ' flexible-server']['administrator_login'])]).get_output_in_json()

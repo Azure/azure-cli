@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import threading
 import time
 import ast
@@ -2090,10 +2089,10 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     if application_logging:
         fs_log = None
         blob_log = None
-        level = application_logging != 'off'
+        level = level if application_logging != 'off' else False
+        level = True if level is None else level
         if application_logging in ['filesystem', 'off']:
             fs_log = FileSystemApplicationLogsConfig(level=level)
-        level = application_logging != 'off'
         if application_logging in ['azureblobstorage', 'off']:
             blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
                                                              sas_url=None)
