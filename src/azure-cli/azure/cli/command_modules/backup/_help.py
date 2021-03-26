@@ -215,7 +215,7 @@ type: command
 short-summary: Retrieve all protectable items within a certain container or across all registered containers.
 examples:
   - name: Retrieve all protectable items within a certain container or across all registered containers. It consists of all the elements in the hierarchy of the application. Returns DBs and their upper tier entities like Instance, AvailabilityGroup etc.
-    text: az backup protectable-item list --resource-group MyResourceGroup --vault-name MyVault --workload-type MSSQL --container-name MyContainer
+    text: az backup protectable-item list --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureWorkload --workload-type MSSQL --container-name MyContainer
 """
 
 helps['backup protectable-item show'] = """
