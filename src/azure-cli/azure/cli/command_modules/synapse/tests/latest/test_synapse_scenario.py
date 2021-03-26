@@ -733,7 +733,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
-    # @record_only()
+    @record_only()
     def test_access_control(self):
         self.kwargs.update({
             'workspace': 'clitestsynapseworkspace',
