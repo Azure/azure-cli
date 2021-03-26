@@ -2031,13 +2031,103 @@ def _reconstruct_role_definition(role_definition):
     return ret
 
 
-def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, hsm_name=None, custom_role_only=False):  # pylint: disable=unused-argument
     """ List role definitions. """
     query_scope = scope
     if query_scope is None:
         query_scope = ''
     role_definitions = client.list_role_definitions(role_scope=query_scope)
+    if custom_role_only:
+        role_definitions = [role for role in role_definitions if role.role_type == 'CustomRole']
     return [_reconstruct_role_definition(role) for role in role_definitions]
+
+
+def create_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=False)
+
+
+def update_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=True)
+
+
+def _create_update_role_definition(client, role_definition, for_update):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from azure.keyvault.administration import KeyVaultPermission
+
+    if os.path.exists(role_definition):
+        role_definition = get_file_json(role_definition)
+    else:
+        role_definition = shell_safe_json_parse(role_definition)
+
+    if not isinstance(role_definition, dict):
+        raise InvalidArgumentValueError('Invalid role definition. A valid dictionary JSON representation is expected.')
+    # to workaround service defects, ensure property names are camel case
+    # e.g. NotActions -> notActions
+    names = [p for p in role_definition if p[:1].isupper()]
+    for n in names:
+        new_name = n[:1].lower() + n[1:]
+        role_definition[new_name] = role_definition.pop(n)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    role_definition_name = None
+    role_name = role_definition.get('roleName', None)
+    description = role_definition.get('description', None)
+    permissions = [KeyVaultPermission(
+        allowed_actions=role_definition.get('actions', None),
+        denied_actions=role_definition.get('notActions', None),
+        allowed_data_actions=role_definition.get('dataActions', None),
+        denied_data_actions=role_definition.get('notDataActions', None)
+    )]
+
+    if for_update:
+        role_definition_name = role_definition.get('name', None)
+        role_id = role_definition.get('id', None)
+
+        if role_definition_name is None and role_id is None:
+            raise InvalidArgumentValueError('Please provide "name" or "id" property in'
+                                            ' your role definition JSON content.')
+
+        role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    result_role_definition = client.set_role_definition(
+        role_scope=role_scope,
+        permissions=permissions,
+        role_definition_name=role_definition_name,
+        role_name=role_name,
+        description=description
+    )
+
+    return _reconstruct_role_definition(result_role_definition)
+
+
+def _get_role_definition_name(role_definition_name, role_id):
+    if role_definition_name is None and role_id is None:
+        raise InvalidArgumentValueError('Please specify either --role-definition-name or --role-id.')
+
+    if role_definition_name is None:
+        if '/' not in role_id:
+            raise InvalidArgumentValueError('The role resource id is invalid: {}'.format(role_id))
+        role_definition_name = role_id.split('/')[-1]
+
+    return role_definition_name
+
+
+def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    client.delete_role_definition(role_scope, role_definition_name)
+
+
+def show_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    result_role_definition = client.get_role_definition(role_scope, role_definition_name)
+
+    return _reconstruct_role_definition(result_role_definition)
 # endregion
 
 
@@ -2083,11 +2173,11 @@ def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=Non
 
 # region security domain
 def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
-                                  identifier=None):  # pylint: disable=unused-argument
+                                  identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
     if os.path.exists(sd_exchange_key):
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
-    ret = client.transfer_key(vault_base_url=hsm_name)
+    ret = client.transfer_key(vault_base_url=hsm_name or vault_base_url)
     exchange_key = json.loads(json.loads(ret)['transfer_key'])
 
     def get_x5c_as_pem():
@@ -2114,14 +2204,22 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
         raise ex
 
 
-def _wait_security_domain_operation(client, hsm_name, identifier=None):  # pylint: disable=unused-argument
+def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
+                                    identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
     retries = 0
     max_retries = 30
     wait_second = 5
     while retries < max_retries:
         try:
-            ret = client.upload_pending(vault_base_url=hsm_name)
-            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Failed']:
+            ret = None
+            if target_operation == 'upload':
+                ret = client.upload_pending(vault_base_url=hsm_name or vault_base_url)
+            elif target_operation == 'download':
+                ret = client.download_pending(vault_base_url=hsm_name or vault_base_url)
+
+            # v7.2-preview and v7.2 will change the upload operation from Sync to Async
+            # due to service defects, it returns 'Succeeded' before the change and 'Success' after the change
+            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Success', 'Failed']:
                 return ret
         except:  # pylint: disable=bare-except
             pass
@@ -2222,7 +2320,7 @@ def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
 
 
 def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None, no_wait=False):  # pylint: disable=unused-argument
+                           identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2261,19 +2359,21 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     )
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
-    retval = client.upload(vault_base_url=hsm_name, security_domain=security_domain)
+    retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
 
     if no_wait:
         return retval
 
-    new_retval = _wait_security_domain_operation(client, hsm_name)
+    wait_second = 5
+    time.sleep(wait_second)
+    new_retval = _wait_security_domain_operation(client, hsm_name, 'upload', vault_base_url=vault_base_url)
     if new_retval:
         return new_retval
     return retval
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
-                             identifier=None):  # pylint: disable=unused-argument
+                             identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
@@ -2316,15 +2416,30 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
         certificates.append(sd_jwk)
 
+    # save security-domain backup value to local file
+    def _save_to_local_file(file_path, security_domain):
+        try:
+            with open(file_path, 'w') as f:
+                f.write(security_domain.value)
+        except Exception as ex:  # pylint: disable=bare-except
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            from azure.cli.core.azclierror import FileOperationError
+            raise FileOperationError(str(ex))
+
     ret = client.download(
-        vault_base_url=hsm_name,
+        vault_base_url=hsm_name or vault_base_url,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
 
-    try:
-        with open(security_domain_file, 'w') as f:
-            f.write(ret.value)
-    except:  # pylint: disable=bare-except
-        if os.path.isfile(security_domain_file):
-            os.remove(security_domain_file)
+    if not no_wait:
+        wait_second = 5
+        time.sleep(wait_second)
+        polling_ret = _wait_security_domain_operation(client, hsm_name, 'download', vault_base_url=vault_base_url)
+        # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
+        if polling_ret and getattr(polling_ret, 'status', None) != 'Failed':
+            _save_to_local_file(security_domain_file, ret)
+        return polling_ret
+
+    _save_to_local_file(security_domain_file, ret)
 # endregion

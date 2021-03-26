@@ -16,13 +16,10 @@ from azure.cli.core.commands import CliCommandType
 def load_command_table(self, _):
 
     from ..generated._client_factory import cf_ssh_public_key
+
     vm_ssh_public_key = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
-        client_factory=cf_ssh_public_key)
+        client_factory=cf_ssh_public_key,
+    )
     with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
-        g.custom_command('list', 'vm_ssh_public_key_list')
-        g.custom_show_command('show', 'vm_ssh_public_key_show')
-        g.custom_command('create', 'vm_ssh_public_key_create')
-        g.custom_command('update', 'vm_ssh_public_key_update')
-        g.custom_command('delete', 'vm_ssh_public_key_delete', confirmation=True)
-        # g.custom_command('generate', 'vm_ssh_public_key_generate_key_pair')
+        g.custom_command('create', 'sshkey_create')

@@ -6,6 +6,9 @@
 import json
 import os
 import re
+
+from azure.cli.core.commands.arm import ArmTemplateBuilder
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -352,3 +355,10 @@ def update_disk_sku_info(info_dict, skus):
             except ValueError:
                 raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
             _update(info_dict, lun, value)
+
+
+class ArmTemplateBuilder20190401(ArmTemplateBuilder):
+
+    def __init__(self):
+        super().__init__()
+        self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
