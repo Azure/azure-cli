@@ -55,7 +55,7 @@ sku_type = CLIArgumentType(
 )
 
 identity_type = CLIArgumentType(
-    help="The identity type of the resource (e.g., topic or domain).",
+    help="The identity type of the resource.",
     arg_type=get_enum_type(['noidentity', 'systemassigned']),
     options_list=['--identity'],
     is_preview=True
@@ -159,7 +159,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)
-        c.argument('included_event_types', arg_type=included_event_types_type)
+        c.argument('included_event_types', arg_group="Filtering", arg_type=included_event_types_type)
         c.argument('labels', arg_type=labels_type)
         c.argument('endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default='webhook'))
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
@@ -167,10 +167,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('endpoint', help="Endpoint where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint. It is expected that the destination endpoint to be already created and available for use before executing any Event Grid command.")
         c.argument('delivery_identity_endpoint', help="Endpoint with identity where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.", is_preview=True)
         c.argument('event_subscription_name', help="Name of the event subscription.")
-        c.argument('subject_begins_with', help="An optional string to filter events for an event subscription based on a prefix. Wildcard characters are not supported.")
-        c.argument('subject_ends_with', help="An optional string to filter events for an event subscription based on a suffix. Wildcard characters are not supported.")
+        c.argument('subject_begins_with', arg_group="Filtering", help="An optional string to filter events for an event subscription based on a prefix. Wildcard characters are not supported.")
+        c.argument('subject_ends_with', arg_group="Filtering", help="An optional string to filter events for an event subscription based on a suffix. Wildcard characters are not supported.")
         c.argument('topic_type_name', help="Name of the topic type.")
-        c.argument('is_subject_case_sensitive', arg_type=get_three_state_flag(), options_list=['--subject-case-sensitive'], help="Specify to indicate whether the subject fields should be compared in a case sensitive manner. True if flag present.", )
+        c.argument('is_subject_case_sensitive', arg_group="Filtering", arg_type=get_three_state_flag(), options_list=['--subject-case-sensitive'], help="Specify to indicate whether the subject fields should be compared in a case sensitive manner. True if flag present.", )
         c.argument('input_mapping_fields', arg_type=input_mapping_fields_type)
         c.argument('input_mapping_default_values', arg_type=input_mapping_default_values_type)
         c.argument('input_schema', arg_type=input_schema_type)
@@ -198,10 +198,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('setup_uri', help="URI of the partner website that can be used by Azure customers to setup Event Grid integration on an event source.")
         c.argument('partner_registration_id', help="The fully qualified ARM Id of the partner registration that should be associated with this partner namespace. This takes the following format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/partnerRegistrations/{partnerRegistrationName}.")
         c.argument('partner_topic_source', arg_type=partner_topic_source_type)
-        c.argument('desination_topic_name', help="Name of the partner topic associated with the event channel.")
+        c.argument('destination_topic_name', help="Name of the partner topic associated with the event channel.")
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
+        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+                   options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
+                   help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
@@ -290,7 +293,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('event_ttl', help="Event time to live (in minutes). Must be a number between 1 and 1440.")
         c.argument('deadletter_endpoint', help="The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.")
         c.argument('deadletter_identity_endpoint', help="The Azure resource ID of an Azure Storage blob container destination with identity where EventGrid should deadletter undeliverable events for this event subscription.")
-        c.argument('advanced_filter', action=EventSubscriptionAddFilter, nargs='+')
+        c.argument('advanced_filter', arg_group="Filtering", action=EventSubscriptionAddFilter, nargs='+')
         c.argument('expiration_date', help="Date or datetime (in UTC, e.g. '2018-11-30T11:59:59+00:00' or '2018-11-30') after which the event subscription would expire. By default, there is no expiration for the event subscription.")
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
@@ -298,6 +301,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('delivery_identity_endpoint', help="Endpoint with identity where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.", is_preview=True)
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
+        c.argument('storage_queue_msg_ttl',
+                   help="Storage queue message time to live in seconds.",
+                   type=int,
+                   options_list=['--storage-queue-msg-ttl', '--qttl'],
+                   is_preview=True)
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -315,11 +323,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('preferred_batch_size_in_kilobytes', help="Preferred batch size in kilobytes. Must be a number between 1 and 1024.")
         c.argument('event_ttl', help="Event time to live (in minutes). Must be a number between 1 and 1440.")
         c.argument('deadletter_endpoint', help="The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.")
-        c.argument('advanced_filter', action=EventSubscriptionAddFilter, nargs='+')
+        c.argument('advanced_filter', arg_group="Filtering", action=EventSubscriptionAddFilter, nargs='+')
         c.argument('expiration_date', help="Date or datetime (in UTC, e.g. '2018-11-30T11:59:59+00:00' or '2018-11-30') after which the event subscription would expire. By default, there is no expiration for the event subscription.")
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('storage_queue_msg_ttl',
+                   help="Storage queue message time to live in seconds.",
+                   type=int,
+                   options_list=['--storage-queue-msg-ttl', '--qttl'],
+                   is_preview=True)
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -338,11 +351,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('preferred_batch_size_in_kilobytes', help="Preferred batch size in kilobytes. Must be a number between 1 and 1024.")
         c.argument('event_ttl', help="Event time to live (in minutes). Must be a number between 1 and 1440.")
         c.argument('deadletter_endpoint', help="The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.")
-        c.argument('advanced_filter', action=EventSubscriptionAddFilter, nargs='+')
+        c.argument('advanced_filter', arg_group="Filtering", action=EventSubscriptionAddFilter, nargs='+')
         c.argument('expiration_date', help="Date or datetime (in UTC, e.g. '2018-11-30T11:59:59+00:00' or '2018-11-30') after which the event subscription would expire. By default, there is no expiration for the event subscription.")
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('storage_queue_msg_ttl',
+                   help="Storage queue message time to live in seconds.",
+                   type=int,
+                   options_list=['--storage-queue-msg-ttl', '--qttl'],
+                   is_preview=True)
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
