@@ -254,6 +254,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup protectable-item list') as c:
         c.argument('protectable_item_type', protectable_item_type)
+        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
 
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
