@@ -539,6 +539,10 @@ examples:
     text: |
         az eventgrid system-topic event-subscription show --name es1 \\
              -g rg1 --system-topic-name systemtopic1
+  - name: Show the details of an event subscription for an Event Grid system topic include any static delivery attribute secrets.
+    text: |
+        az eventgrid system-topic event-subscription show --name es1 \\
+             -g rg1 --system-topic-name systemtopic1 -include-static-attrib-secret
 """
 
 helps['eventgrid system-topic event-subscription update'] = """
@@ -735,6 +739,10 @@ examples:
     text: |
         az eventgrid partner topic event-subscription show --name es1 \\
              -g rg1 --partner-topic-name partnertopic1
+  - name: Show the details of an event subscription for an Event Grid partner topic and include static delivery attribute secrets
+    text: |
+        az eventgrid partner topic event-subscription show --name es1 \\
+             -g rg1 --partner-topic-name partnertopic1 --include-static-delivery-attribute-secret
 """
 
 helps['eventgrid partner topic event-subscription update'] = """
@@ -1128,6 +1136,11 @@ examples:
     text: |
         az eventgrid event-subscription show --name es3 \\
             --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/microsoft.storage/storageaccounts/kalsegblob
+  - name: Show the details of an event subscription for a resource group including any static delivery attribute secrets.
+    text: |
+        az eventgrid event-subscription show --name es3 \\
+            --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1 \\
+            --include-static-delivery-attribute-secret
 """
 
 helps['eventgrid event-subscription update'] = """
