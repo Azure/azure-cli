@@ -1128,6 +1128,12 @@ examples:
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --input-schema cloudeventschemav1_0
   - name: Create a new topic which allows specific inbound ip rules with Basic Sku and system assigned identity
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --public-network-access enabled --inbound-ip-rules 10.0.0.0/8 Allow --inbound-ip-rules 10.2.0.0/8 Allow --sku Basic --identity systemassigned
+  - name: Create a new topic in Azure.
+    text: az eventgrid topic create -g rg1 --name topic1 -l westus2
+  - name: Create a new topic in Azure.
+    text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --kind azure
+  - name: Create a new topic in AzureArc targeting a custom location.
+    text: az eventgrid topic create -g rg1 --name topic1 -l eastus2euap --kind azurearc --extended-location-name /subscriptions/<subid>/resourcegroups/<rgname>/providers/microsoft.extendedlocation/customlocations/<cust-loc-name> --extended-location-type customlocation
 """
 
 helps['eventgrid topic delete'] = """

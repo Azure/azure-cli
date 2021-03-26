@@ -44,7 +44,8 @@ from azure.mgmt.eventgrid.models import (
     EventSubscriptionIdentity,
     DeliveryWithResourceIdentity,
     DeadLetterWithResourceIdentity,
-    EventChannelFilter)
+    EventChannelFilter,
+    ExtendedLocation)
 
 logger = get_logger(__name__)
 
@@ -79,6 +80,9 @@ CLOUDEVENTV1_0_SCHEMA = "CloudEventSchemaV1_0"
 CUSTOM_EVENT_SCHEMA = "CustomEventSchema"
 CUSTOM_INPUT_SCHEMA = "CustomInputSchema"
 GLOBAL = "global"
+KIND_AZURE = "Azure"
+KIND_AZUREARC = "AzureArc"
+CUSTOMLOCATION = "CustomLocation"
 
 # Deprecated event delivery schema values
 INPUT_EVENT_SCHEMA = "InputEventSchema"
@@ -122,7 +126,10 @@ def cli_topic_create_or_update(
         public_network_access=None,
         inbound_ip_rules=None,
         sku=SKU_BASIC,
-        identity=None):
+        identity=None,
+        kind=KIND_AZURE,
+        extended_location_name=None,
+        extended_location_type=None):
 
     final_input_schema, input_schema_mapping = _get_input_schema_and_mapping(
         input_schema,
@@ -133,6 +140,9 @@ def cli_topic_create_or_update(
     identity_info = None
 
     identity_info = _get_identity_info(identity)
+    kind_name = _get_kind(kind)
+    extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
+
     topic_info = Topic(
         location=location,
         tags=tags,
@@ -141,7 +151,9 @@ def cli_topic_create_or_update(
         public_network_access=public_network_access,
         inbound_ip_rules=inbound_ip_rules,
         sku=sku_info,
-        identity=identity_info)
+        identity=identity_info,
+        kind=kind_name,
+        extendedLocation=extended_location)
 
     return client.create_or_update(
         resource_group_name,
@@ -1617,3 +1629,42 @@ def _get_identity_info_only_if_not_none(identity=None):
         identity_type_name = _get_identity_type(identity)
         identity_info = IdentityInfo(type=identity_type_name)
     return identity_info
+
+
+def _get_kind(kind_name):
+    if kind_name.lower() == KIND_AZURE.lower():
+        result = KIND_AZURE
+    elif kind_name.lower() == KIND_AZUREARC.lower():
+        result = KIND_AZUREARC
+
+    return result
+
+
+def _get_extended_location(kind_name=None, extended_location_name=None, extended_location_type=None):
+    result = None
+
+    if kind_name is None:
+        _ensure_extended_location_is_none(extended_location_name, extended_location_type)
+    elif kind_name.lower() == KIND_AZURE.lower():
+        _ensure_extended_location_is_none(extended_location_name, extended_location_type)
+    elif kind_name.lower() == KIND_AZUREARC.lower():
+        _ensure_extended_location_is_valid(extended_location_name, extended_location_type)
+        result = ExtendedLocation(name=extended_location_name, type=extended_location_type)
+    else:
+        raise CLIError("--kind: The specified kind '{}' is not valid."
+                       " Supported values are ".format(kind_name) +
+                       KIND_AZURE + "," + KIND_AZUREARC + ".")
+    return result
+
+
+def _ensure_extended_location_is_none(extended_location_name=None, extended_location_type=None):
+
+    if extended_location_name is not None or extended_location_type is not None:
+        raise CLIError('Cannot specify extended-location-name or extended-location-type when targetting Azure.')
+
+
+def _ensure_extended_location_is_valid(extended_location_name=None, extended_location_type=None):
+    if extended_location_name is None or extended_location_type is None or \
+       extended_location_type.lower() != CUSTOMLOCATION.lower():
+        raise CLIError("Must specify extended-location-name and extended-location-type"
+                       " and extended-location-type value must be 'customLocation'.")

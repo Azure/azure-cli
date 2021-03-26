@@ -153,6 +153,28 @@ phone_number_type = CLIArgumentType(
 phone_extension_type = CLIArgumentType(
     help='The extension of the customer service number of the publisher. Only digits are allowed and number of digits should not exceed 10.')
 
+kind_type = CLIArgumentType(
+    help="The kind of topic resource.",
+    arg_type=get_enum_type(['azure', 'azurearc']),
+    options_list=['--kind'],
+    is_preview=True
+)
+
+extended_location_name = CLIArgumentType(
+    help="The extended location name if kind==azurearc.",
+    options_list=['--extended-location-name'],
+    arg_group="Azure Arc",
+    is_preview=True
+)
+
+extended_location_type = CLIArgumentType(
+    help="The extended location type if kind==azurearc.",
+    arg_type=get_enum_type(['customlocation']),
+    arg_group="Azure Arc",
+    options_list=['--extended-location-type'],
+    is_preview=True
+)
+
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid') as c:
@@ -205,6 +227,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('kind', arg_type=kind_type)
+        c.argument('extended_location_name', arg_type=extended_location_name)
+        c.argument('extended_location_type', arg_type=extended_location_type)
 
     with self.argument_context('eventgrid topic key') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
