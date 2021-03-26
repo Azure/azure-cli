@@ -56,7 +56,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
-    from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
@@ -67,89 +66,88 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     # Print the traceback and exception message
     logger.debug(traceback.format_exc())
 
-    with CommandLoggerContext(logger):
-        error_msg = getattr(ex, 'message', str(ex))
-        exit_code = 1
+    error_msg = getattr(ex, 'message', str(ex))
+    exit_code = 1
 
-        if isinstance(ex, azclierror.AzCLIError):
-            az_error = ex
+    if isinstance(ex, azclierror.AzCLIError):
+        az_error = ex
 
-        elif isinstance(ex, JMESPathError):
-            error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
-            az_error = azclierror.InvalidArgumentValueError(error_msg)
-            az_error.set_recommendation(QUERY_REFERENCE)
+    elif isinstance(ex, JMESPathError):
+        error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
+        az_error = azclierror.InvalidArgumentValueError(error_msg)
+        az_error.set_recommendation(QUERY_REFERENCE)
 
-        elif isinstance(ex, SSLError):
+    elif isinstance(ex, SSLError):
+        az_error = azclierror.AzureConnectionError(error_msg)
+        az_error.set_recommendation(SSLERROR_TEMPLATE)
+
+    elif isinstance(ex, CloudError):
+        if extract_common_error_message(ex):
+            error_msg = extract_common_error_message(ex)
+        status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg)
+
+    elif isinstance(ex, ValidationError):
+        az_error = azclierror.ValidationError(error_msg)
+
+    elif isinstance(ex, CLIError):
+        # TODO: Fine-grained analysis here
+        az_error = azclierror.UnclassifiedUserFault(error_msg)
+
+    elif isinstance(ex, AzureError):
+        if extract_common_error_message(ex):
+            error_msg = extract_common_error_message(ex)
+        AzCLIErrorType = get_error_type_by_azure_error(ex)
+        az_error = AzCLIErrorType(error_msg)
+
+    elif isinstance(ex, AzureException):
+        if is_azure_connection_error(error_msg):
+            az_error = azclierror.AzureConnectionError(error_msg)
+        else:
+            # TODO: Fine-grained analysis here for Unknown error
+            az_error = azclierror.UnknownError(error_msg)
+
+    elif isinstance(ex, ClientRequestError):
+        if is_azure_connection_error(error_msg):
+            az_error = azclierror.AzureConnectionError(error_msg)
+        elif isinstance(ex.inner_exception, SSLError):
+            # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
             az_error = azclierror.AzureConnectionError(error_msg)
             az_error.set_recommendation(SSLERROR_TEMPLATE)
-
-        elif isinstance(ex, CloudError):
-            if extract_common_error_message(ex):
-                error_msg = extract_common_error_message(ex)
-            status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
-            AzCLIErrorType = get_error_type_by_status_code(status_code)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, ValidationError):
-            az_error = azclierror.ValidationError(error_msg)
-
-        elif isinstance(ex, CLIError):
-            # TODO: Fine-grained analysis here
-            az_error = azclierror.UnclassifiedUserFault(error_msg)
-
-        elif isinstance(ex, AzureError):
-            if extract_common_error_message(ex):
-                error_msg = extract_common_error_message(ex)
-            AzCLIErrorType = get_error_type_by_azure_error(ex)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, AzureException):
-            if is_azure_connection_error(error_msg):
-                az_error = azclierror.AzureConnectionError(error_msg)
-            else:
-                # TODO: Fine-grained analysis here for Unknown error
-                az_error = azclierror.UnknownError(error_msg)
-
-        elif isinstance(ex, ClientRequestError):
-            if is_azure_connection_error(error_msg):
-                az_error = azclierror.AzureConnectionError(error_msg)
-            elif isinstance(ex.inner_exception, SSLError):
-                # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
-                az_error = azclierror.AzureConnectionError(error_msg)
-                az_error.set_recommendation(SSLERROR_TEMPLATE)
-            else:
-                az_error = azclierror.ClientRequestError(error_msg)
-
-        elif isinstance(ex, HttpOperationError):
-            message, _ = extract_http_operation_error(ex)
-            if message:
-                error_msg = message
-            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
-            AzCLIErrorType = get_error_type_by_status_code(status_code)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, HTTPError):
-            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
-            AzCLIErrorType = get_error_type_by_status_code(status_code)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, KeyboardInterrupt):
-            error_msg = 'Keyboard interrupt is captured.'
-            az_error = azclierror.ManualInterrupt(error_msg)
-
         else:
-            error_msg = "The command failed with an unexpected error. Here is the traceback:"
-            az_error = azclierror.CLIInternalError(error_msg)
-            az_error.set_exception_trace(ex)
-            az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+            az_error = azclierror.ClientRequestError(error_msg)
 
-        if isinstance(az_error, azclierror.ResourceNotFoundError):
-            exit_code = 3
+    elif isinstance(ex, HttpOperationError):
+        message, _ = extract_http_operation_error(ex)
+        if message:
+            error_msg = message
+        status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg)
 
-        az_error.print_error()
-        az_error.send_telemetry()
+    elif isinstance(ex, HTTPError):
+        status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg)
 
-        return exit_code
+    elif isinstance(ex, KeyboardInterrupt):
+        error_msg = 'Keyboard interrupt is captured.'
+        az_error = azclierror.ManualInterrupt(error_msg)
+
+    else:
+        error_msg = "The command failed with an unexpected error. Here is the traceback:"
+        az_error = azclierror.CLIInternalError(error_msg)
+        az_error.set_exception_trace(ex)
+        az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+
+    if isinstance(az_error, azclierror.ResourceNotFoundError):
+        exit_code = 3
+
+    az_error.print_error()
+    az_error.send_telemetry()
+
+    return exit_code
 
 
 def extract_common_error_message(ex):
