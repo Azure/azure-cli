@@ -114,7 +114,7 @@ def cli_topic_create_or_update(
         client,
         resource_group_name,
         topic_name,
-        location,
+        location=None,
         tags=None,
         input_schema=EVENTGRID_SCHEMA,
         input_mapping_fields=None,
@@ -492,7 +492,7 @@ def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False,
+        enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
     event_subscription_info = _get_event_subscription_info(
@@ -632,7 +632,7 @@ def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=t
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False,
+        enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
     event_subscription_info = _get_event_subscription_info(
@@ -732,7 +732,7 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         deadletter_identity=None,
         deadletter_identity_endpoint=None,
         storage_queue_msg_ttl=None,
-        enable_advanced_filtering_on_arrays=False,
+        enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
     event_subscription_info = _get_event_subscription_info(
@@ -979,9 +979,6 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
     if endpoint_type.lower() != STORAGEQUEUE_DESTINATION.lower() and \
        storage_queue_msg_ttl is not None:
         raise CLIError('usage error: --storage-queue-msg-ttl is only applicable for endpoint type StorageQueue.')
-
-    if storage_queue_msg_ttl is not None:
-        storage_queue_msg_ttl = int(storage_queue_msg_ttl)
 
     if endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower() and \
        delivery_attribute_mapping is not None:
@@ -1455,11 +1452,15 @@ def _get_storage_queue_destination(endpoint, storage_queue_msg_ttl):
                        '/subscriptions/id/resourceGroups/rg/providers/Microsoft.Storage/' +
                        'storageAccounts/sa1/queueServices/default/queues/queueName')
 
-    destination = StorageQueueEventSubscriptionDestination(
-        resource_id=queue_items[0],
-        queue_name=queue_items[1],
-        queue_message_time_to_live_in_seconds=storage_queue_msg_ttl)
-
+    if storage_queue_msg_ttl is not None:
+        destination = StorageQueueEventSubscriptionDestination(
+            resource_id=queue_items[0],
+            queue_name=queue_items[1],
+            queue_message_time_to_live_in_seconds=storage_queue_msg_ttl)
+    else:
+        destination = StorageQueueEventSubscriptionDestination(
+            resource_id=queue_items[0],
+            queue_name=queue_items[1])
     return destination
 
 

@@ -56,7 +56,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
             vaults = self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
 
             # create backup policy
-            backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
+            backup_policy_name = self.create_random_name(prefix='cli-backup-pol-', length=16)
             backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s "
                                      "--backup-policy-name %s -l %s --daily-backups 1  --enabled true" %
                                      (account_name, backup_policy_name, LOCATION)).get_output_in_json()
