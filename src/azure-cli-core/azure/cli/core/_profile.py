@@ -113,6 +113,7 @@ def _load_tokens_from_file(file_path):
             raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                            "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                            "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+    logger.debug("'%s' is not a file or doesn't exist.", file_path)
     return []
 
 
