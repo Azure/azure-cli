@@ -153,9 +153,25 @@ phone_number_type = CLIArgumentType(
 phone_extension_type = CLIArgumentType(
     help='The extension of the customer service number of the publisher. Only digits are allowed and number of digits should not exceed 10.')
 
-storage_queue_msg_ttl = CLIArgumentType(
-    help="Storage queue message time to live in seconds.",
-    options_list=['--storage-queue-msg-ttl', '--qttl'],
+kind_type = CLIArgumentType(
+    help="The kind of topic resource.",
+    arg_type=get_enum_type(['azure', 'azurearc']),
+    options_list=['--kind'],
+    is_preview=True
+)
+
+extended_location_name = CLIArgumentType(
+    help="The extended location name if kind==azurearc.",
+    options_list=['--extended-location-name'],
+    arg_group="Azure Arc",
+    is_preview=True
+)
+
+extended_location_type = CLIArgumentType(
+    help="The extended location type if kind==azurearc.",
+    arg_type=get_enum_type(['customlocation']),
+    arg_group="Azure Arc",
+    options_list=['--extended-location-type'],
     is_preview=True
 )
 
@@ -214,6 +230,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('kind', arg_type=kind_type)
+        c.argument('extended_location_name', arg_type=extended_location_name)
+        c.argument('extended_location_type', arg_type=extended_location_type)
 
     with self.argument_context('eventgrid topic key') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
@@ -307,18 +326,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('delivery_identity_endpoint', help="Endpoint with identity where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.", is_preview=True)
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
-<<<<<<< HEAD
         c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
-=======
->>>>>>> 3bff786b9e337aa35bb4cc64a09e5600a35663f8
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '--qttl'],
                    is_preview=True)
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -341,18 +357,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-<<<<<<< HEAD
         c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
-=======
->>>>>>> 3bff786b9e337aa35bb4cc64a09e5600a35663f8
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '--qttl'],
                    is_preview=True)
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
+
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -376,18 +390,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-<<<<<<< HEAD
         c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
-=======
->>>>>>> 3bff786b9e337aa35bb4cc64a09e5600a35663f8
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '--qttl'],
                    is_preview=True)
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
