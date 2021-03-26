@@ -5,7 +5,6 @@ parameters:
   - name: CLIExtensionRepoPath
     type: string
     default: ''
-
 steps:
   - bash: |
       set -ev
@@ -13,7 +12,7 @@ steps:
       python -m venv env
       chmod +x env/bin/activate
       . env/bin/activate
-
+      python -m pip install -U pip
       pip install azdev==0.1.29
       azdev --version
 
