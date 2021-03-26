@@ -58,7 +58,6 @@ DEPENDENCIES = [
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
-    'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
