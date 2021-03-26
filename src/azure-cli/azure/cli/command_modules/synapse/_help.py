@@ -858,6 +858,20 @@ type: group
 short-summary: Manage Synapse's role assignments and definitions.
 """
 
+helps['synapse role scope'] = """
+type: group
+short-summary: Manage Synapse's role scopes.
+"""
+
+helps['synapse role scope list'] = """
+type: command
+short-summary: List role scopes.
+examples:
+  - name: List role scopes.
+    text: |-
+        az synapse role scope list --workspace-name testsynapseworkspace
+"""
+
 helps['synapse role assignment'] = """
 type: group
 short-summary: Manage Synapse's role assignments.
@@ -883,7 +897,7 @@ examples:
   - name: List role assignments by role id/name.
     text: |-
         az synapse role assignment list --workspace-name testsynapseworkspace \\
-        --role "Sql Admin"
+        --role "Synapse Apache Spark Administrator"
   - name: List role assignments by assignee.
     text: |-
         az synapse role assignment list --workspace-name testsynapseworkspace \\
@@ -891,7 +905,15 @@ examples:
   - name: List role assignments by objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment list --workspace-name testsynapseworkspace \\
-        --assignee 00000000-0000-0000-0000-000000000000
+        --assignee-object-id 00000000-0000-0000-0000-000000000000
+  - name: List role assignments by scope.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --scope "workspaces/{workspaceName}"
+  - name: List role assignments by item type and item name.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --item-type "bigDataPools" --item "bigDataPoolName"
 """
 
 helps['synapse role assignment create'] = """
@@ -901,15 +923,24 @@ examples:
   - name: Create a role assignment using service principal name.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee sp_name
+        --role "Synapse Administrator" --assignee sp_name
   - name: Create a role assignment using user principal name.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee username@contoso.com
+        --role "Synapse Administrator" --assignee username@contoso.com
   - name: Create a role assignment using objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee 00000000-0000-0000-0000-000000000000
+        --role "Synapse Administrator" --assignee 00000000-0000-0000-0000-000000000000
+  - name: Create a role assignment at scope.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --scope "workspaces/{workspaceName}" --role "Synapse Administrator" --assignee username@contoso.com
+  - name: Create a role assignment at scope that combination of item type and item name.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --item-type "bigDataPools" --item "bigDataPoolName" --role "Synapse Administrator" \\
+        --assignee username@contoso.com
 """
 
 helps['synapse role assignment delete'] = """
@@ -919,11 +950,11 @@ examples:
   - name: Delete role assignments by role and assignee.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee sp_name
+        --role "Synapse Administrator" --assignee sp_name
   - name: Delete role assignments by role id/name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
-        --role "Sql Admin"
+        --role "Synapse Administrator"
   - name: Delete role assignments by service principal name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
@@ -954,6 +985,15 @@ examples:
   - name: List role definitions.
     text: |-
         az synapse role definition list --workspace-name testsynapseworkspace
+  - name: List role definitions by scope.
+    text: |-
+        az synapse role definition list --workspace-name testsynapseworkspace --scope "workspaces/{workspaceName}"
+  - name: List role definitions by item type.
+    text: |-
+        az synapse role definition list --workspace-name testsynapseworkspace --item-type "bigDataPools"
+  - name: List role definitions built-in by Synapse.
+    text: |-
+        az synapse role definition list --workspace-name testsynapseworkspace --is-built-in True
 """
 
 helps['synapse role definition show'] = """
@@ -964,6 +1004,10 @@ examples:
     text: |-
         az synapse role definition show --workspace-name testsynapseworkspace \\
         --role 00000000-0000-0000-0000-000000000000
+  - name: Get role definition by role name.
+    text: |-
+        az synapse role definition show --workspace-name testsynapseworkspace \\
+        --role "Synapse SQL Administrator"
 """
 
 helps['synapse linked-service'] = """

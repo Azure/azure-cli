@@ -12,6 +12,9 @@ SPARK_DOTNET_ASSEMBLY_SEARCH_PATHS_KEY = 'spark.yarn.appMasterEnv.DOTNET_ASSEMBL
 SPARK_DOTNET_UDFS_FOLDER_NAME = 'udfs'
 SPARK_SERVICE_ENDPOINT_API_VERSION = '2019-11-01-priview'
 AdministratorType = "activeDirectory"
+ITEM_NAME_MAPPING = {'bigDataPools': '{bigDataPoolName}', 'integrationRuntimes': '{integrationRuntimeName}',
+                     'linkedServices': '{linkedServiceName}', 'credentials': '{credentialName}',
+                     'scopePools': '{scopePoolName}'}
 
 
 class SynapseSqlCreateMode(str, Enum):
@@ -62,3 +65,17 @@ class SqlPoolConnectionClientAuthenticationType(str, Enum):
     SqlPassword = 'SqlPassword'
     ActiveDirectoryPassword = 'ADPassword'
     ActiveDirectoryIntegrated = 'ADIntegrated'
+
+
+class PrincipalType(str, Enum):
+    user = "User"
+    group = "Group"
+    service_principal = "ServicePrincipal"
+
+
+class ItemType(str, Enum):
+    bigDataPools = "bigDataPools"
+    scopePools = "scopePools"
+    integrationRuntimes = "integrationRuntimes"
+    credentials = "credentials"
+    linkedServices = "linkedServices"
