@@ -337,8 +337,57 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
             _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
+def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
+    import socket
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    if registry_name is None:
+        logger.warning("Registry name must be provided to check connectivity.")
+        return
+
+    registry = None
+
+    # retrieve registry
+    try:
+        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
+    except CLIError:
+        logger.warning("Registry resource must be accessible to verify private endpoint setting")
+
+    if not registry.private_endpoint_connections:
+        logger.warning("Registry doesn't have private endpoints")
+
+    res = parse_resource_id(registry.id)
+    if not is_valid_resource_id(vnet_of_private_endpoint):
+        vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
+                                               namespace='Microsoft.Network', type='virtualNetworks',
+                                               subscription=res['subscription'])
+    # get FQDNs for registry and its data endpoint
+    pe_ids = [e.private_endpoint and e.private_endpoint.id for e in registry.private_endpoint_connections]
+    dns_mappings = {}
+    for pe_id in pe_ids:
+        res = parse_resource_id(pe_id)
+        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK,
+                                                 subscription_id=res['subscription'])
+        pe = network_client.private_endpoints.get(res['resource_group'], res['name'])
+        if bool(re.match(vnet_of_private_endpoint, pe.subnet.id, re.I)):
+            for dns_config in pe.custom_dns_configs:
+                if dns_config.fqdn in dns_mappings:
+                    logger.warning("More than one private endpoint exist in %s. DNS routing might be unreliable",
+                                   vnet_of_private_endpoint)
+                dns_mappings[dns_config.fqdn] = dns_config.ip_addresses
+
+    for fqdn in dns_mappings:
+        result = socket.gethostbyname('ygpe123.azurecr.io')
+        #  TODO handle potential unreachable hosts
+        if result not in dns_mappings[fqdn]:
+            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result[-1])
+
+
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
+                     vnet=None,
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
@@ -351,6 +400,9 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_cli_version()
 
     _check_registry_health(cmd, registry_name, ignore_errors)
+
+    if vnet:
+        _check_private_endpoint(cmd, registry_name, vnet)
 
     if not in_cloud_console:
         _get_helm_version(ignore_errors)

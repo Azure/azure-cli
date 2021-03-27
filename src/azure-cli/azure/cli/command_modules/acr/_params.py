@@ -312,6 +312,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr check-health') as c:
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
+        c.argument('vnet', options_list=['--vnet'],
+                   help="name/id of virtual network to verify dns configurations of registry's private endpoints", required=False)
 
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
