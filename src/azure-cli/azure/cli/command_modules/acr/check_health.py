@@ -363,7 +363,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
         vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
                                                namespace='Microsoft.Network', type='virtualNetworks',
                                                subscription=res['subscription'])
-    # get FQDNs for registry and its data endpoint
+    # retrieve FQDNs for registry and its data endpoint
     pe_ids = [e.private_endpoint and e.private_endpoint.id for e in registry.private_endpoint_connections]
     dns_mappings = {}
     for pe_id in pe_ids:
@@ -379,10 +379,10 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
                 dns_mappings[dns_config.fqdn] = dns_config.ip_addresses
 
     for fqdn in dns_mappings:
-        result = socket.gethostbyname('ygpe123.azurecr.io')
+        result = socket.gethostbyname(fqdn)
         #  TODO handle potential unreachable hosts
         if result not in dns_mappings[fqdn]:
-            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result[-1])
+            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result)
 
 
 # General command
