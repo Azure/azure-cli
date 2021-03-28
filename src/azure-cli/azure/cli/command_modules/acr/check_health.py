@@ -359,12 +359,12 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
     if not registry.private_endpoint_connections:
         logger.warning("Registry doesn't have private endpoints")
 
-    res = parse_resource_id(registry.id)
     if not is_valid_resource_id(vnet_of_private_endpoint):
+        res = parse_resource_id(registry.id)
         vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
                                                namespace='Microsoft.Network', type='virtualNetworks',
                                                subscription=res['subscription'])
-        return
+
     # retrieve FQDNs for registry and its data endpoint
     pe_ids = [e.private_endpoint and e.private_endpoint.id for e in registry.private_endpoint_connections]
     dns_mappings = {}
@@ -374,22 +374,25 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
                                                  subscription_id=res['subscription'])
         pe = network_client.private_endpoints.get(res['resource_group'], res['name'])
         if bool(re.match(vnet_of_private_endpoint, pe.subnet.id, re.I)):
-            for dns_config in pe.custom_dns_configs:
-                if dns_config.fqdn in dns_mappings:
-                    logger.warning("More than one private endpoint exist in %s. DNS routing might be unreliable",
+            nic_id = pe.network_interfaces[0].id
+            nic_res = parse_resource_id(nic_id)
+            nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
+            for dns_config in nic.ip_configurations:
+                if dns_config.private_link_connection_properties.fqdns[0] in dns_mappings:
+                    logger.warning("More than one private endpoint exist in %s. DNS routing will be unreliable",
                                    vnet_of_private_endpoint)
-                dns_mappings[dns_config.fqdn] = dns_config.ip_addresses
+                dns_mappings[dns_config.private_link_connection_properties.fqdns[0]] = dns_config.private_ip_address
 
     dns_ok = True
     for fqdn in dns_mappings:
         result = socket.gethostbyname(fqdn)
-        #  TODO handle potential unreachable hosts
         if result not in dns_mappings[fqdn]:
-            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn][0], result)
+            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result)
             dns_ok = False
-    
+
     if dns_ok:
         print_pass("DNS routing of private endpoint")
+
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
