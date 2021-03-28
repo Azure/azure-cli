@@ -354,6 +354,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
         registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
     except CLIError:
         logger.warning("Registry resource must be accessible to verify private endpoint setting")
+        return
 
     if not registry.private_endpoint_connections:
         logger.warning("Registry doesn't have private endpoints")
@@ -363,6 +364,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
         vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
                                                namespace='Microsoft.Network', type='virtualNetworks',
                                                subscription=res['subscription'])
+        return
     # retrieve FQDNs for registry and its data endpoint
     pe_ids = [e.private_endpoint and e.private_endpoint.id for e in registry.private_endpoint_connections]
     dns_mappings = {}
@@ -383,7 +385,8 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
         #  TODO handle potential unreachable hosts
         if result not in dns_mappings[fqdn]:
             logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result)
-
+            return
+    print_pass("DNS routing of private endpoint")
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
