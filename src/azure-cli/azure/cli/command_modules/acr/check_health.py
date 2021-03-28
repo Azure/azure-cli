@@ -380,13 +380,16 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
                                    vnet_of_private_endpoint)
                 dns_mappings[dns_config.fqdn] = dns_config.ip_addresses
 
+    dns_ok = True
     for fqdn in dns_mappings:
         result = socket.gethostbyname(fqdn)
         #  TODO handle potential unreachable hosts
         if result not in dns_mappings[fqdn]:
-            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result)
-            return
-    print_pass("DNS routing of private endpoint")
+            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn][0], result)
+            dns_ok = False
+    
+    if dns_ok:
+        print_pass("DNS routing of private endpoint")
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
