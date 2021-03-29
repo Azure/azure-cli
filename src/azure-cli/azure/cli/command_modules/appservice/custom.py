@@ -1053,8 +1053,11 @@ def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
 
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-    setattr(webapp, 'ftpPublishingUrl', url)
+    try:
+        url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
+        setattr(webapp, 'ftpPublishingUrl', url)
+    except StopIteration as e:
+        pass
     return webapp
 
 
@@ -1997,6 +2000,14 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     return content.result()
 
 
+def _convert_publish_profile_from_xml(profile):
+    new = {}
+    for key in profile:
+        # strip the leading '@' xmltodict put in for attributes
+        new[key.lstrip('@')] = profile[key]
+    return new
+
+
 def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
 
@@ -2009,13 +2020,16 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     if not xml:
         profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
         converted = []
-        for profile in profiles:
-            new = {}
-            for key in profile:
-                # strip the leading '@' xmltodict put in for attributes
-                new[key.lstrip('@')] = profile[key]
+
+        if isinstance(profiles, list):
+            for profile in profiles:
+                new = _convert_publish_profile_from_xml(profile)
+                converted.append(new)
+        else:
+            new = _convert_publish_profile_from_xml(profiles)
             converted.append(new)
         return converted
+
     cmd.cli_ctx.invocation.data['output'] = 'tsv'
     return full_xml
 
