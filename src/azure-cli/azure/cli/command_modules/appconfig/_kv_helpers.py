@@ -541,7 +541,7 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues):
         kv_json = {'key': kv.key,
                    'value': kv.value,
                    'label': kv.label,
-                   'locked': kv.read_only,
+                   'locked': kv.locked,
                    'last modified': kv.last_modified,
                    'content type': kv.content_type}
         # tags
