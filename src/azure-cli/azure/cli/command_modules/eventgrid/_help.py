@@ -549,7 +549,7 @@ examples:
   - name: Show the details of an event subscription for an Event Grid system topic include any static delivery attribute secrets.
     text: |
         az eventgrid system-topic event-subscription show --name es1 \\
-             -g rg1 --system-topic-name systemtopic1 -include-static-attrib-secret
+             -g rg1 --system-topic-name systemtopic1 --include-dam-secret
 """
 
 helps['eventgrid system-topic event-subscription update'] = """
