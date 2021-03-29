@@ -981,7 +981,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
-                self.cli_ctx.get_progress_controller().stop()
+                self.progress_bar.stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -989,7 +989,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.cli_ctx.get_progress_controller().stop()
+            self.progress_bar.stop()
             handle_long_running_operation_exception(client_exception)
 
         self.progress_bar.end()

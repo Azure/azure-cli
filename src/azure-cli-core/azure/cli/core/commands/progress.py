@@ -185,6 +185,12 @@ class IndeterminateProgressBar:
                 stream=sys.stderr,
                 hide_cursor=False))
 
+    def begin(self):
+        self.hook.begin()
+        
+    def stop(self):
+        self.hook.stop()
+
     def update_progress(self):
         self.hook.add(message=self.message)
 
