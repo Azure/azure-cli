@@ -170,7 +170,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         # update backup
         tags = "Tag1=Value1 Tag2=Value2"
-        label = "label"
+        # label = "label"
         self.cmd("netappfiles volume backup update -g {rg} -a %s -p %s -v %s --backup-name %s --tags %s" %
                  (account_name, pool_name, volume_name, backup_name, tags))
 
@@ -181,7 +181,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         assert backup['name'] == account_name + "/" + pool_name + "/" + volume_name + "/" + backup_name
         assert backup['id'] is not None
         # there is a bug in update where the label is not updated - will be fixed later
-        #assert backup['label'] == label
+        # assert backup['label'] == label
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
