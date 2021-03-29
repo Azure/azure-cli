@@ -47,6 +47,7 @@ from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
                                        InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError,
                                        ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -1904,7 +1905,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if dns_name_prefix and fqdn_subdomain:
-        raise CLIError('--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
+        raise MutuallyExclusiveArgumentError('--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
     if not dns_name_prefix and not fqdn_subdomain:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
@@ -2185,17 +2186,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     use_custom_private_dns_zone = False
     if private_dns_zone:
         if not enable_private_cluster:
-            raise CLIError("Invalid private dns zone for public cluster. It should always be empty for public cluster")
+            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. It should always be empty for public cluster")
         mc.api_server_access_profile.private_dns_zone = private_dns_zone
         from msrestazure.tools import is_valid_resource_id
         if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
             if is_valid_resource_id(private_dns_zone):
                 use_custom_private_dns_zone = True
             else:
-                raise CLIError(private_dns_zone + " is not a valid Azure resource ID.")
+                raise InvalidArgumentValueError(private_dns_zone + " is not a valid Azure resource ID.")
     if fqdn_subdomain:
         if not use_custom_private_dns_zone:
-            raise CLIError("--fqdn-subdomain should only be used for private cluster with custom private dns zone")
+            raise ArgumentUsageError("--fqdn-subdomain should only be used for private cluster with custom private dns zone")
         mc.fqdn_subdomain = fqdn_subdomain
 
     if uptime_sla:
