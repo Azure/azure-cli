@@ -2000,14 +2000,6 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     return content.result()
 
 
-def _convert_publish_profile_from_xml(profile):
-    new = {}
-    for key in profile:
-        # strip the leading '@' xmltodict put in for attributes
-        new[key.lstrip('@')] = profile[key]
-    return new
-
-
 def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
 
@@ -2021,12 +2013,14 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
         profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
         converted = []
 
-        if isinstance(profiles, list):
-            for profile in profiles:
-                new = _convert_publish_profile_from_xml(profile)
-                converted.append(new)
-        else:
-            new = _convert_publish_profile_from_xml(profiles)
+        if not isinstance(profiles, list):
+            profiles = [profiles]
+
+        for profile in profiles:
+            new = {}
+            for key in profile:
+                # strip the leading '@' xmltodict put in for attributes
+                new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
 
