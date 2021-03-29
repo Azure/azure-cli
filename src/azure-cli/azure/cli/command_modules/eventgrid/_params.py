@@ -56,7 +56,7 @@ sku_type = CLIArgumentType(
 )
 
 identity_type = CLIArgumentType(
-    help="The identity type of the resource.",
+    help="The managed identity type for the resource.",
     arg_type=get_enum_type(['noidentity', 'systemassigned']),
     options_list=['--identity'],
     is_preview=True
@@ -334,14 +334,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '-qttl'],
                    is_preview=True)
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+', is_preview=True)
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid event-subscription show') as c:
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '-include-static-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '-include-static-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
 
     with self.argument_context('eventgrid system-topic event-subscription') as c:
         c.argument('system_topic_name', arg_type=system_topic_name_type, id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/systemtopics'))
@@ -366,7 +366,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '-qttl'],
                    is_preview=True)
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+', is_preview=True)
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -374,7 +374,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid system-topic event-subscription show') as c:
         c.argument('system_topic_name', arg_type=system_topic_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/systemtopics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '-include-static-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '-include-static-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
 
     with self.argument_context('eventgrid partner topic event-subscription') as c:
         c.argument('partner_topic_name', arg_type=partner_topic_name_type, id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnertopics'))
@@ -399,7 +399,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '-qttl'],
                    is_preview=True)
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+')
+        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+', is_preview=True)
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -407,7 +407,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid partner topic event-subscription show') as c:
         c.argument('partner_topic_name', arg_type=partner_topic_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnertopics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '-include-static-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '-include-static-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
 
     with self.argument_context('eventgrid topic-type') as c:
         c.argument('topic_type_name', arg_type=name_type, help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))

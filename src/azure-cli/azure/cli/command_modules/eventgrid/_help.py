@@ -458,7 +458,14 @@ parameters:
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
   - name: --delivery-attribute-mapping
-    short-summary: Delivery attribute mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Create a new event subscription for an Event Grid system topic, using default filters.
     text: |
@@ -576,7 +583,14 @@ parameters:
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --delivery-attribute-mapping
-    short-summary: Delivery attribute mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Update an event subscription for an Event Grid system topic to specify a new endpoint.
     text: |
@@ -658,7 +672,14 @@ parameters:
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
   - name: --delivery-attribute-mapping
-    short-summary: Delivery attribute mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Create a new event subscription for an Event Grid partner topic, using default filters.
     text: |
@@ -776,7 +797,14 @@ parameters:
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --delivery-attribute-mapping
-    short-summary: Delivery attribute mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Update an event subscription for an Event Grid partner topic to specify a new endpoint.
     text: |
@@ -876,7 +904,14 @@ parameters:
   - name: --delivery-identity-endpoint-type
     short-summary: The type of the destination endpoint with resource identity.
   - name: --delivery-attribute-mapping
-    short-summary: Delivery attribute mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Create a new event subscription for an Event Grid topic, using default filters.
     text: |
@@ -1186,7 +1221,14 @@ parameters:
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
   - name: --delivery-attribute-mapping
-    short-summary: Delivery attribute mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Update an event subscription for an Event Grid topic to specify a new endpoint.
     text: |
