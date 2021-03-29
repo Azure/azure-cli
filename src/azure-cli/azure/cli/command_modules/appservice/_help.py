@@ -1090,9 +1090,9 @@ examples:
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
 parameters:
   - name: --settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. To enable or disable specific App Setting as deployment slot setting through @{file} it should be specified as "slotSetting":false
   - name: --slot-settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
+    short-summary: App settings that should be enabled as deployment slot settings. The app settings can be represented as space-separated KEY=VALUE pair or Use @{file} to load from a file.
 """
 
 helps['webapp config backup'] = """
