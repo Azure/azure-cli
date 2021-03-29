@@ -2186,7 +2186,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     use_custom_private_dns_zone = False
     if private_dns_zone:
         if not enable_private_cluster:
-            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. It should always be empty for public cluster")
+            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. "
+                                            "It should always be empty for public cluster")
         mc.api_server_access_profile.private_dns_zone = private_dns_zone
         from msrestazure.tools import is_valid_resource_id
         if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
@@ -2196,7 +2197,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 raise InvalidArgumentValueError(private_dns_zone + " is not a valid Azure resource ID.")
     if fqdn_subdomain:
         if not use_custom_private_dns_zone:
-            raise ArgumentUsageError("--fqdn-subdomain should only be used for private cluster with custom private dns zone")
+            raise ArgumentUsageError("--fqdn-subdomain should only be used for "
+                                     "private cluster with custom private dns zone")
         mc.fqdn_subdomain = fqdn_subdomain
 
     if uptime_sla:
