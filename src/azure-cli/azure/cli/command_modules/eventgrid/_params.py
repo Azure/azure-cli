@@ -338,6 +338,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
                    is_preview=True,
+                   help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping', '-dam'])
 
     with self.argument_context('eventgrid event-subscription list') as c:
@@ -374,6 +375,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
                    is_preview=True,
+                   help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping', '-dam'])
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
@@ -411,6 +413,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
                    is_preview=True,
+                   help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping', '-dam'])
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
