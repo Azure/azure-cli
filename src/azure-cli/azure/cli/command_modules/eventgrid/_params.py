@@ -334,7 +334,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '-qttl'],
                    is_preview=True)
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+', is_preview=True)
+        c.argument('delivery_attribute_mapping',
+                   action=AddDeliveryAttributeMapping,
+                   nargs='+',
+                   is_preview=True,
+                   options_list=['--delivery-attribute-mapping', '-dam'])
 
     with self.argument_context('eventgrid event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -366,7 +370,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '-qttl'],
                    is_preview=True)
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+', is_preview=True)
+        c.argument('delivery_attribute_mapping',
+                   action=AddDeliveryAttributeMapping,
+                   nargs='+',
+                   is_preview=True,
+                   options_list=['--delivery-attribute-mapping', '-dam'])
 
     with self.argument_context('eventgrid system-topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -399,7 +407,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    type=int,
                    options_list=['--storage-queue-msg-ttl', '-qttl'],
                    is_preview=True)
-        c.argument('delivery_attribute_mapping', action=AddDeliveryAttributeMapping, nargs='+', is_preview=True)
+        c.argument('delivery_attribute_mapping',
+                   action=AddDeliveryAttributeMapping,
+                   nargs='+',
+                   is_preview=True,
+                   options_list=['--delivery-attribute-mapping', '-dam'])
 
     with self.argument_context('eventgrid partner topic event-subscription list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)

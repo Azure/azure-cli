@@ -153,7 +153,7 @@ def cli_topic_create_or_update(
         sku=sku_info,
         identity=identity_info,
         kind=kind_name,
-        extendedLocation=extended_location)
+        extended_Location=extended_location)
 
     return client.create_or_update(
         resource_group_name,
