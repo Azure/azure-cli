@@ -3,10 +3,19 @@
 Release History
 ===============
 
-2.19.1.1
+2.21.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.21.0
+++++++
+* Unify ADAL and MSAL error handler (#17072)
+* Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+
+2.20.0
+++++++
+* Minor fixes
 
 2.19.1
 ++++++

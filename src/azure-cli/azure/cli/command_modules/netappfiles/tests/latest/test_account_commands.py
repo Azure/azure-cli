@@ -116,3 +116,24 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account = self.cmd("netappfiles account show -g {rg} -n %s" % account_name).get_output_in_json()
         assert account['name'] == account_name
         assert account['activeDirectories'] is None
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    def test_account_encryption(self):
+        # create account with encryption value
+        account_name = self.create_random_name(prefix='cli', length=24)
+        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s --encryption %s" %
+                           (account_name, LOCATION, "Microsoft.NetApp")).get_output_in_json()
+        assert account['name'] == account_name
+        assert account['encryption']['keySource'] == "Microsoft.NetApp"
+
+        # create account without encryption value
+        account_name = self.create_random_name(prefix='cli', length=24)
+        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" %
+                           (account_name, LOCATION)).get_output_in_json()
+        assert account['name'] == account_name
+
+        # update account with encryption value
+        account = self.cmd("az netappfiles account update --resource-group {rg} -a %s --encryption %s"
+                           % (account_name, "Microsoft.NetApp")).get_output_in_json()
+        assert account['name'] == account_name
+        assert account['encryption']['keySource'] == "Microsoft.NetApp"

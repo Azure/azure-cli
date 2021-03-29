@@ -635,18 +635,6 @@ class Profile:
         """get access token for current user account, used by vsts and iot module"""
         return self.get_access_token_for_scopes(username, tenant, *resource_to_scopes(resource))
 
-    def get_msal_token(self, scopes, data):
-        """
-        This is added for vmssh feature with backward compatible interface.
-        data contains token_type (ssh-cert), key_id and JWK.
-        """
-        account = self.get_subscription()
-        username = account[_USER_ENTITY][_USER_NAME]
-        subscription_id = account[_SUBSCRIPTION_ID]
-        credential, _, _ = self.get_login_credentials(subscription_id=subscription_id)
-        certificate = credential.get_token(*scopes, data=data)
-        return username, certificate.token
-
     @staticmethod
     def _try_parse_msi_account_name(account):
         user_name = account[_USER_ENTITY].get(_USER_NAME)
@@ -759,6 +747,18 @@ class Profile:
         return (cred,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
+
+    def get_msal_token(self, scopes, data):
+        """
+        This is added for vmssh feature with backward compatible interface.
+        data contains token_type (ssh-cert), key_id and JWK.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        subscription_id = account[_SUBSCRIPTION_ID]
+        credential, _, _ = self.get_login_credentials(subscription_id=subscription_id)
+        certificate = credential.get_token(*scopes, data=data)
+        return username, certificate.token
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()

@@ -8,7 +8,6 @@ import sys
 import azure.cli.core.telemetry as telemetry
 from knack.util import CLIError
 from knack.log import get_logger
-from .util import log_latest_error_info
 
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
@@ -87,7 +86,6 @@ class AzCLIError(CLIError):
 
     def send_telemetry(self):
         telemetry.set_error_type(self.__class__.__name__)
-        log_latest_error_info(self.error_msg, self.__class__.__name__)
 # endregion
 
 

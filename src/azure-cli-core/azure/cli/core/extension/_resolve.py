@@ -29,12 +29,14 @@ def _is_not_platform_specific(item):
 
 
 def _is_compatible_with_cli_version(item):
-    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(item['metadata'])
+    is_compatible, cli_core_version, min_required, max_required, min_ext_required = ext_compat_with_cli(
+        item['metadata'])
     if is_compatible:
         return True
     logger.debug("Skipping '%s' as not compatible with this version of the CLI. "
-                 "Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", item['filename'], is_compatible, cli_core_version, min_required, max_required)
+                 "Extension compatibility result: is_compatible=%s cli_core_version=%s ext_version=%s "
+                 "min_core_required=%s max_core_required=%s min_ext_required=%s", item['filename'], is_compatible,
+                 cli_core_version, item['metadata'].get('version'), min_required, max_required, min_ext_required)
     return False
 
 
@@ -53,13 +55,13 @@ def _is_greater_than_cur_version(cur_version):
     return filter_func
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None):
+def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None):
     """
     Gets the download Url and digest for the matching extension
 
     :param cur_version: threshold verssion to filter out extensions.
     """
-    candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
+    candidates = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx).get(extension_name, [])
 
     if not candidates:
         raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
@@ -90,6 +92,16 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     download_url, digest = chosen.get('downloadUrl'), chosen.get('sha256Digest')
     if not download_url:
         raise NoExtensionCandidatesError("No download url found.")
+    azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
+        cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
+    config_index_url = cli_ctx.config.get('extension', 'index_url', None) if cli_ctx else None
+    if azmirror_endpoint and not config_index_url:
+        # when extension index and wheels are mirrored in airgapped clouds from public cloud
+        # the content of the index.json is not updated, so we need to modify the wheel url got
+        # from the index.json here.
+        import posixpath
+        whl_name = download_url.split('/')[-1]
+        download_url = posixpath.join(azmirror_endpoint, 'extensions', whl_name)
     return download_url, digest
 
 

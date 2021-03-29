@@ -86,7 +86,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
                                            use_secondary_region)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
-        return custom_afs.list_recovery_points(client, resource_group_name, vault_name, item, start_date,
+        return custom_afs.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date,
                                                end_date, use_secondary_region)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
@@ -261,8 +261,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                               container_name, backup_management_type)
 
 
-def check_protection_enabled_for_vm(cmd, vm_id):
-    return custom.check_protection_enabled_for_vm(cmd, vm_id)
+def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    return custom.check_protection_enabled_for_vm(cmd, vm_id, vm, resource_group_name)
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
@@ -402,9 +402,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     target_item = None
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
-        target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
-                                                target_server_name, target_server_type,
-                                                workload_type, container_name)
+        target_item = show_protectable_instance(
+            cmd, protectable_items_client, resource_group_name, vault_name,
+            target_server_name, target_server_type, workload_type,
+            container_name if target_container_name is None else target_container_name)
+
     target_container = None
     if target_container_name is not None:
         container_client = backup_protection_containers_cf(cmd.cli_ctx)

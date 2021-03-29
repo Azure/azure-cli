@@ -141,20 +141,23 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         telemetry.set_failure(err_msg)
         sys.exit(exit_code)
 
-    import azure.cli.core
+    # Avoid using python modules directly as they may have been changed due to upgrade.
+    # If you do need to use them, you may need to reload them and their dependent modules.
+    # Otherwise you may have such issue https://github.com/Azure/azure-cli/issues/16952
     import importlib
-    importlib.reload(azure.cli.core)
-    new_version = azure.cli.core.__version__
+    import json
+    importlib.reload(subprocess)
+    importlib.reload(json)
+
+    version_result = subprocess.check_output(['az', 'version', '-o', 'json'], shell=platform.system() == 'Windows')
+    version_json = json.loads(version_result)
+    new_version = version_json['azure-cli-core']
 
     if update_cli and new_version == local_version:
         err_msg = "CLI upgrade failed or aborted."
         logger.warning(err_msg)
         telemetry.set_failure(err_msg)
         sys.exit(1)
-
-    # Python is reinstalled in another versioned directory with Homebrew, subprocess needs to be reloaded
-    if installer == 'HOMEBREW' and exts:
-        importlib.reload(subprocess)
 
     if exts:
         logger.warning("Upgrading extensions")
@@ -174,7 +177,8 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text, format_styled_text
-    format_styled_text.theme = theme
+    if theme:
+        format_styled_text.theme = theme
     print_styled_text("[How to call print_styled_text]")
     # Print an empty line
     print_styled_text()
