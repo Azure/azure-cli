@@ -711,11 +711,9 @@ def get_command_type_kwarg(custom_command=False):
 
 def reload_module(module):
     # reloading the imported module to update
-    try:
+    if module in sys.modules:
         from importlib import reload
-    except ImportError:
-        pass  # for python 2
-    reload(sys.modules[module])
+        reload(sys.modules[module])
 
 
 def get_default_admin_username():
