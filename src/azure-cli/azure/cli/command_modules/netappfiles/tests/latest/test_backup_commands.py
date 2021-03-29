@@ -220,13 +220,13 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
                           (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
 
         # disable backup for volume
-        vaults = self.get_vaults(account_name)
-        #self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
-                 #(account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
+        # vaults = self.get_vaults(account_name)
+        # self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
+                 # (account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
 
         # create new volume and restore backup
         volume2_name = self.create_random_name(prefix='cli-vol-', length=24)
-        volume2 = self.create_volume(account_name, pool_name, volume2_name, volume_only=True,
+        self.create_volume(account_name, pool_name, volume2_name, volume_only=True,
                                      backup_id=backup['backupId'], vnet_name=vnet_name)
 
         volume2 = self.cmd("netappfiles volume show -g {rg} -a %s -p %s -v %s" %
