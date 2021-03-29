@@ -379,9 +379,9 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
-    _print("Python location '{}'".format(sys.executable))
-    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     import os
+    _print("Python location '{}'".format(os.path.abspath(sys.executable)))
+    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
         _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
