@@ -187,7 +187,7 @@ class IndeterminateProgressBar:
 
     def begin(self):
         self.hook.begin()
-        
+
     def stop(self):
         self.hook.stop()
 
