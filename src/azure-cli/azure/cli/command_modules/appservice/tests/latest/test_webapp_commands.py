@@ -607,7 +607,7 @@ class WebappConfigureTest(ScenarioTest):
         output.append({
             'name': 's3',
             'value': 'value3',
-            'slotSetting': False
+            'slotSetting': True
         })
         with open(settings_file, 'w') as file:
             file.write(json.dumps(output))
@@ -630,7 +630,7 @@ class WebappConfigureTest(ScenarioTest):
         self.assertEqual(output[2], {
             'name': 's3',
             'value': 'value3',
-            'slotSetting': False
+            'slotSetting': True
         })
         # update site config
         site_configs = {

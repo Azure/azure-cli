@@ -250,27 +250,27 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
-    i = 0
+
     # pylint: disable=too-many-nested-blocks
-    for src, dest in [(settings, result), (slot_settings, slot_result)]:
-        i += 1
+    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
                     for t in temp:
-                        if i != 1:
-                            slot_result[t['name']] = t['value']
+                        if 'slotSetting' in t.keys():
+                            slot_result[t['name']] = t['slotSetting']
+                        if setting_type == "SlotSettings":
+                            slot_result[t['name']] = True
                             # Mark each setting as the slot setting
-                        else:
-                            result[t['name']] = t['value']
+                        result[t['name']] = t['value']
                 else:
                     dest.update(temp)
             except CLIError:
                 setting_name, value = s.split('=', 1)
                 dest[setting_name] = value
+                result.update(dest)
 
-    result.update(slot_result)
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
@@ -281,10 +281,14 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     app_settings_slot_cfg_names = []
     if slot_result:
-        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
-        slot_cfg_names.app_setting_names = new_slot_setting_names
+        # Slot settings logic to add a new setting(s) or remove an existing setting(s)
+        for slot_setting_name, value in slot_result.items():
+            if value and slot_setting_name not in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.append(slot_setting_name)
+            elif not value and slot_setting_name in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
@@ -4209,7 +4213,7 @@ def _make_onedeploy_request(params):
     poll_async_deployment_for_debugging = True
 
     # check the status of async deployment
-    if response.status_code == 202:
+    if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
             logger.info('Polloing the status of async deployment')
@@ -4217,9 +4221,6 @@ def _make_onedeploy_request(params):
                                                          deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         return response_body
-
-    if response.status_code == 200:
-        return response
 
     # API not available yet!
     if response.status_code == 404:
