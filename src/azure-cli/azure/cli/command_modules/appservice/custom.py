@@ -4216,10 +4216,10 @@ def _make_onedeploy_request(params):
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            logger.info('Polloing the status of async deployment')
+            logger.info('Polloing the status of deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                          deployment_status_url, headers, params.timeout)
-            logger.info('Async deployment complete. Server response: %s', response_body)
+            logger.info('Deployment complete. Server response: %s', response_body)
         return response_body
 
     # API not available yet!
