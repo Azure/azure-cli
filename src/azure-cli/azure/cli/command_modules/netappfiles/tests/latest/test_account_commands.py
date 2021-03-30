@@ -93,16 +93,20 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         # add an active directory
         ad_name = 'cli-ad-name'
         kdc_ip = '172.16.254.1'
+        ldap_signing = True
+        allow_local_ldap_users = True
         acc_with_active_directory = self.cmd("netappfiles account ad add -g {rg} -n %s --username aduser "
                                              "--password aduser --smb-server-name SMBSERVER --dns '1.2.3.4' "
-                                             "--domain westcentralus --ad-name %s --kdc-ip %s" %
-                                             (account_name, ad_name, kdc_ip)).get_output_in_json()
+                                             "--domain westcentralus --ad-name %s --kdc-ip %s --ldap-signing %s "
+                                             "--allow-local-ldap-users %s" %
+                                             (account_name, ad_name, kdc_ip, ldap_signing, allow_local_ldap_users)).get_output_in_json()
         assert acc_with_active_directory['name'] == account_name
         assert acc_with_active_directory['activeDirectories'][0]['username'] == 'aduser'
         assert acc_with_active_directory['activeDirectories'][0]['status'] == 'Created'
         assert acc_with_active_directory['activeDirectories'][0]['adName'] == ad_name
         assert acc_with_active_directory['activeDirectories'][0]['aesEncryption'] is False
-        assert acc_with_active_directory['activeDirectories'][0]['ldapSigning'] is False
+        assert acc_with_active_directory['activeDirectories'][0]['ldapSigning'] is ldap_signing
+        assert acc_with_active_directory['activeDirectories'][0]['allowLocalNFSUsersWithLdap'] is allow_local_ldap_users
 
         # list active directory
         active_directory = self.cmd("netappfiles account ad list -g {rg} -n %s" % account_name).get_output_in_json()

@@ -34,6 +34,7 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account ad') as c:
         c.argument('backup_operators', arg_type=tags_type)
         c.argument('security_operators', arg_type=tags_type)
+        c.argument('allow_local_ldap_users', arg_type=tags_type)
 
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
@@ -49,14 +50,6 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account backup-policy list') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('backup_policy_name', options_list=['--backup-policy-name', '-b'], help='The name of the backup policy')
-
-    with self.argument_context('netappfiles account backup') as c:
-        c.argument('account_name', account_name_type, id_part=None)
-
-    load_poolArguments(self, account_name_type, pool_name_type)
-    load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_vaultArguments(self, account_name_type)
 
     with self.argument_context('netappfiles account backup') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -89,6 +82,7 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('unix_read_only', arg_type=get_three_state_flag())
         c.argument('unix_read_write', arg_type=get_three_state_flag())
         c.argument('cifs', arg_type=get_three_state_flag())
+        c.argument('ldap_enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)

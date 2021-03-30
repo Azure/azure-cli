@@ -253,3 +253,6 @@ def _get_add_headers_callback(cli_ctx):
             pass
 
     return _add_headers
+
+
+prepare_client_kwargs_track2 = _prepare_client_kwargs_track2

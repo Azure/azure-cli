@@ -1603,6 +1603,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='An opaque continuation token. This value can be retrieved from the next_marker field of a '
                    'previous generator object. If specified, this generator will begin returning results from this '
                    'point.')
+        c.argument('show_next_marker', action='store_true', is_preview=True,
+                   help='Show nextMarker in result when specified.')
 
     for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show', 'metadata update',
                  'metadata show']:

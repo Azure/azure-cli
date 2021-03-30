@@ -262,7 +262,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            validator=retention_validator)
                 c.argument('version', default='12', options_list=['--version'],
                            help='Server major version.')
-                c.argument('zone', options_list=['--zone, -z'],
+                c.argument('zone', options_list=['--zone', '-z'],
                            help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable',
@@ -275,7 +275,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
                 c.argument('version', default='5.7', options_list=['--version'],
                            help='Server major version.')
-                c.argument('zone', options_list=['--zone, -z'],
+                c.argument('zone', options_list=['--zone', '-z'],
                            help='Availability zone into which to provision the resource.')
                 c.argument('iops', type=int, options_list=['--iops'],
                            help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
@@ -289,7 +289,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Resource ID of an existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers/Microsoft.DBforMySQL/flexibleServers.After delegation, this subnet cannot be used for any other type of Azure resources.')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
-            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'], arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
+            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
                        help='Administrator username for the server. Once set, it cannot be changed. ')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
