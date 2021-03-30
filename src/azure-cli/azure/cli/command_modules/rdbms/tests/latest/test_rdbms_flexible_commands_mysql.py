@@ -57,7 +57,7 @@ class MySqlFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
     @pytest.mark.dependency(name="test_mysql_flexible_server_mgmt_prepare")
     def test_mysql_flexible_server_mgmt_prepare(self):
         self.cmd('az group create --location {} --name {}'.format('mysql_location', self.resource_group))
-        self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('mysql', 'francecentral', self.resource_group, self.server))
+        self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('mysql', mysql_location, self.resource_group, self.server))
 
     @AllowLargeResponse()
     @pytest.mark.order(2)

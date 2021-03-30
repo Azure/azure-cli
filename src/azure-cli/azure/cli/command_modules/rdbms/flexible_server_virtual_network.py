@@ -17,7 +17,7 @@ DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
 DEFAULT_SUBNET_PREFIX = '10.0.0.0/24'
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, delegation_service_name, vnet_address_pref, subnet_address_pref):
     Delegation, Subnet, VirtualNetwork, AddressSpace, ServiceEndpoint = cmd.get_models('Delegation', 'Subnet', 'VirtualNetwork',
                                                                                        'AddressSpace', 'ServiceEndpointPropertiesFormat',
@@ -171,7 +171,7 @@ def _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, subnet_
         vnet_exist = _get_resource(nw_client.virtual_networks, resource_group, vnet_name)
         if not vnet_exist:
             logger.warning('The Vnet does not exist. Creating new vnet "%s" in resource group "%s"',
-                        vnet_name, resource_group)
+                           vnet_name, resource_group)
             nw_client.virtual_networks.begin_create_or_update(resource_group,
                                                               vnet_name,
                                                               VirtualNetwork(name=vnet_name,
