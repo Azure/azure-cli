@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import threading
 import time
 import ast
@@ -2090,10 +2089,10 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     if application_logging:
         fs_log = None
         blob_log = None
-        level = application_logging != 'off'
+        level = level if application_logging != 'off' else False
+        level = True if level is None else level
         if application_logging in ['filesystem', 'off']:
             fs_log = FileSystemApplicationLogsConfig(level=level)
-        level = application_logging != 'off'
         if application_logging in ['azureblobstorage', 'off']:
             blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
                                                              sas_url=None)
@@ -2585,14 +2584,14 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
     if found_cert:
-        if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
+        if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
             return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                               webapp_cert.host_names[0], ssl_type,
+                                               found_cert.host_names[0], ssl_type,
                                                certificate_thumbprint, slot)
 
         query_result = list_hostnames(cmd, resource_group_name, name, slot)
         hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-        to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+        to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
         for h in to_update:
             _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                         h, ssl_type, certificate_thumbprint, slot)

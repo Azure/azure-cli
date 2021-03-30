@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-LOCATION = "eastus2euap"
+LOCATION = "southcentralusstage"
 
 
 class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
-                 (vnet_name, LOCATION))
+                 (vnet_name, "southcentralus"))
         self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.5.0.0/24' "
                  "--delegations 'Microsoft.Netapp/volumes' -g {rg}" % (subnet_name, vnet_name))
 

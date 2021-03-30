@@ -20,13 +20,13 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySql/flexibleServers/azuredbclitest-000002/restart?api-version=2020-07-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySql/flexibleServers/azuredbclitest-000002/restart?api-version=2020-07-01-preview
   response:
     body:
       string: '{"operation":"RestartServerManagementOperation","startTime":"2021-02-14T18:19:00.467Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -38,7 +38,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/operationResults/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-privatepreview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/operationResults/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
       pragma:
       - no-cache
       server:
@@ -63,13 +63,67 @@ interactions:
       - mysql flexible-server restart
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-07-01-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/operationResults/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
+  response:
+    body:
+      string: '{"operation":"RestartServerManagementOperation","startTime":"2021-02-14T18:19:00.467Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '87'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 14 Feb 2021 18:18:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/operationResults/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql flexible-server restart
+      Connection:
+      - keep-alive
       ParameterSetName:
       - -g -n
       User-Agent:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-07-01-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
   response:
     body:
       string: '{"name":"64ed9ac5-4a13-4d44-b8ae-212c14418e30","status":"InProgress","startTime":"2021-02-14T18:19:00.467Z"}'
@@ -116,7 +170,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-07-01-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
   response:
     body:
       string: '{"name":"64ed9ac5-4a13-4d44-b8ae-212c14418e30","status":"InProgress","startTime":"2021-02-14T18:19:00.467Z"}'
@@ -163,7 +217,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-07-01-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
   response:
     body:
       string: '{"name":"64ed9ac5-4a13-4d44-b8ae-212c14418e30","status":"InProgress","startTime":"2021-02-14T18:19:00.467Z"}'
@@ -210,7 +264,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-07-01-privatepreview Azure-SDK-For-Python AZURECLI/2.19.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus2euap/azureAsyncOperation/64ed9ac5-4a13-4d44-b8ae-212c14418e30?api-version=2020-07-01-preview
   response:
     body:
       string: '{"name":"64ed9ac5-4a13-4d44-b8ae-212c14418e30","status":"Succeeded","startTime":"2021-02-14T18:19:00.467Z"}'
