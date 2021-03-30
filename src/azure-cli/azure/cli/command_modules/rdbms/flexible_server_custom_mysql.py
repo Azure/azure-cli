@@ -583,7 +583,7 @@ def database_create_func(client, resource_group_name=None, server_name=None, dat
         charset = 'utf8'
         collation = 'utf8_general_ci'
         logger.warning("Creating database with utf8 charset and utf8_general_ci collation")
-    elif charset or collation:
+    elif (not charset and collation) or (charset and not collation):
         raise RequiredArgumentMissingError("charset and collation have to be input together.")
 
     parameters = {
