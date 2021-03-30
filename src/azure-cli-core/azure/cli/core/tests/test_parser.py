@@ -6,7 +6,7 @@
 import mock
 import unittest
 import difflib
-from six import StringIO
+from io import StringIO
 from collections import namedtuple
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
@@ -209,8 +209,10 @@ class TestParser(unittest.TestCase):
         choice_lists = []
         original_get_close_matches = difflib.get_close_matches
 
-        def mock_log_error(_, msg):
-            logger_msgs.append(msg)
+        def mock_log_error(logger_self, msg):
+            # Only intercept 'cli.azure.cli.core.azclierror' logger and ignore 'az_command_data_logger'
+            if logger_self.name.startswith('cli'):
+                logger_msgs.append(msg)
 
         def mock_get_close_matches(*args, **kwargs):
             choice_lists.append(original_get_close_matches(*args, **kwargs))

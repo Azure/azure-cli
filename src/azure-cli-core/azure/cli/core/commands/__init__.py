@@ -5,8 +5,6 @@
 
 # pylint: disable=too-many-lines
 
-from __future__ import print_function
-
 import argparse
 import datetime
 import json
@@ -17,7 +15,6 @@ import sys
 import time
 import copy
 from importlib import import_module
-import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
@@ -30,7 +27,7 @@ from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
-
+from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -713,7 +710,7 @@ class AzCliCommandInvoker(CommandInvoker):
         except Exception as ex:  # pylint: disable=broad-except
             if cmd_copy.exception_handler:
                 return cmd_copy.exception_handler(ex)
-            six.reraise(*sys.exc_info())
+            raise
 
     def _run_jobs_serially(self, jobs, ids):
         results, exceptions = [], []
@@ -869,7 +866,8 @@ class AzCliCommandInvoker(CommandInvoker):
 
 
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
-    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=500.0,
+                 progress_bar=None):
 
         self.cli_ctx = cli_ctx
         self.start_msg = start_msg
@@ -877,6 +875,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
+        self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -948,16 +947,17 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.cli_ctx.get_progress_controller().begin()
+        self.progress_bar.begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
+
         telemetry.poll_start()
         poll_flag = False
         while not poller.done():
             poll_flag = True
-            self.cli_ctx.get_progress_controller().add(message='Running')
+
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -975,9 +975,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
+                self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
-                self.cli_ctx.get_progress_controller().stop()
+                self.progress_bar.stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -985,12 +986,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.cli_ctx.get_progress_controller().stop()
+            self.progress_bar.stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.cli_ctx.get_progress_controller().end()
+        self.progress_bar.end()
         if poll_flag:
             telemetry.poll_end()
+
         return result
 
 

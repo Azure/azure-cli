@@ -5072,6 +5072,29 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('sshkey show -g {rg} -n k3')
 
 
+class VMTrustedLaunchScenarioTest(ScenarioTest):
+    @unittest.skip('Not supported')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
+    def test_vm_trusted_launch(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+        ])
+
+    @unittest.skip('Not supported')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
+    def test_vm_trusted_launch_update(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
+        self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+        ])
+
+
 class VMCreateCountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_')
     def test_vm_create_count(self, resource_group):
