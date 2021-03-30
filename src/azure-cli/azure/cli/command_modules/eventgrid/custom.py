@@ -142,7 +142,6 @@ def cli_topic_create_or_update(
     identity_info = _get_identity_info(identity)
     kind_name = _get_kind(kind)
     extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
-
     topic_info = Topic(
         location=location,
         tags=tags,
@@ -153,7 +152,7 @@ def cli_topic_create_or_update(
         sku=sku_info,
         identity=identity_info,
         kind=kind_name,
-        extended_Location=extended_location)
+        extended_location=extended_location)
 
     return client.create_or_update(
         resource_group_name,

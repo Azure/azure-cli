@@ -224,10 +224,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
         c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
-                   options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
-                   help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
-
+        
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
         c.argument('kind', arg_type=kind_type)
