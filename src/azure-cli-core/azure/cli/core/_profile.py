@@ -271,7 +271,7 @@ class Profile:
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
                 if hasattr(s, 'home_tenant_id'):
                     subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
-                if getattr(s, 'managed_by_tenants', None):
+                if getattr(s, 'managed_by_tenants', None) is not None:
                     subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
             consolidated.append(subscription_dict)
