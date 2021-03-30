@@ -15,7 +15,7 @@ from azure.cli.core._help import AzCliHelp
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
 from azure.cli.core.parser import AzCliCommandParser
-from mock import patch
+from unittest.mock import patch
 
 
 def main():
@@ -31,21 +31,23 @@ def main():
     for help_file in help_files:
         if help_file.command:
             high_command_set.add(help_file.command.split()[0])
+    print('high_command_set:')
     print(high_command_set)
 
     # Load and check service_name.json
     with open('src/azure-cli/service_name.json') as f:
         service_names = json.load(f)
-    # print(service_names)
+    print('Verifying src/azure-cli/service_name.json')
     service_name_map = {}
     for service_name in service_names:
         command = service_name['Command']
         service = service_name['AzureServiceName']
         if not command.startswith('az '):
-            raise Exception('{} not starts with az'.format(command))
+            raise Exception('{} does not start with az!'.format(command))
         if not service:
             raise Exception('AzureServiceName of {} is empty!'.format(command))
         service_name_map[command[3:]] = service
+    print('service_name_map:')
     print(service_name_map)
 
     # Check existence in service_name.json
