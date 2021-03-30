@@ -53,7 +53,7 @@ def main():
     # Check existence in service_name.json
     for high_command in high_command_set:
         if high_command not in service_name_map:
-            raise Exception('No entry of {} in service_name.json'.format(high_command))
+            raise Exception('No entry of {} in service_name.json. Please add one to the file.'.format(high_command))
 
 
 if __name__ == "__main__":
