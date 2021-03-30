@@ -412,7 +412,7 @@ def _get_install_info(cmd,
         cred_client = cf_acr_token_credentials(cmd.cli_ctx)
         poller = acr_token_credential_generate(
             cmd, cred_client, registry_name, sync_token_name,
-            password1=True, password2=True, resource_group_name=resource_group_name)
+            password1=True, password2=False, resource_group_name=resource_group_name)
         credentials = LongRunningOperation(cmd.cli_ctx)(poller)
         sync_username = credentials.username
         sync_password = credentials.passwords[0].value
