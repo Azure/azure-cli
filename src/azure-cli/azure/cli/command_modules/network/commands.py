@@ -1364,6 +1364,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get', transform=transform_vpn_connection)
         g.command('list', 'list', transform=transform_vpn_connection_list)
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
+        g.command('list-ike-sas', 'begin_get_ike_sas')
 
     with self.command_group('network vpn-connection shared-key', network_vpn_sdk) as g:
         g.show_command('show', 'get_shared_key')
@@ -1377,6 +1378,11 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_vpn_conn_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
         g.custom_command('list', 'list_vpn_conn_ipsec_policies')
         g.custom_command('clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
+
+    with self.command_group('network vpn-connection packet-capture', network_vpn_sdk, min_api='2019-07-01') as g:
+        g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
+        g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
+
     # endregion
 
     # region VirtualRouter

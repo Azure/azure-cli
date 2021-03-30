@@ -6661,6 +6661,21 @@ def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     return ncf.get(resource_group_name, connection_name).ipsec_policies
 
 
+def start_vpn_conn_package_capture(cmd, resource_group_name, virtual_network_gateway_connection_name,
+                                   filter_data=None, no_wait=False):
+    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
+    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    return sdk_no_wait(no_wait, ncf.begin_start_packet_capture, resource_group_name,
+                       virtual_network_gateway_connection_name, parameters=parameters)
+
+def stop_vpn_conn_package_capture(cmd, resource_group_name, virtual_network_gateway_connection_name, sas_url, no_wait=False):
+    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
+    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    return sdk_no_wait(no_wait, ncf.begin_stop_packet_capture, resource_group_name,
+                       virtual_network_gateway_connection_name, parameters=parameters)
+
 def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
                             aad_tenant, aad_audience, aad_issuer, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways

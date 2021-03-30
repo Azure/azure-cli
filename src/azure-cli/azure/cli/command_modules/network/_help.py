@@ -5819,6 +5819,14 @@ examples:
     text: az network vpn-connection list -g MyResourceGroup
 """
 
+helps['network vpn-connection list-ike-sas'] = """
+type: command
+short-summary: List IKE Security Associations for a VPN connection.
+examples:
+  - name: List IKE Security Associations for a VPN connection.
+    text: az network vpn-connection list-ike-sas -g MyResourceGroup -n MyConnection
+"""
+
 helps['network vpn-connection shared-key'] = """
 type: group
 short-summary: Manage VPN shared keys.
@@ -5878,6 +5886,27 @@ examples:
     text: |
         az network vpn-connection update --name MyConnection --resource-group MyResourceGroup --use-policy-based-traffic-selectors true
     crafted: true
+"""
+
+helps['network vpn-connection packet-capture'] = """
+type: group
+short-summary: Manage packet capture on a VPN connection.
+"""
+
+helps['network vpn-connection packet-capture start'] = """
+type: command
+short-summary: Start packet capture on a VPN connection.
+examples:
+  - name: Start packet capture on a VPN connection.
+    text: az network vpn-connection packet-capture start -g MyResourceGroup -n MyConnection
+"""
+
+helps['network vpn-connection packet-capture stop'] = """
+type: command
+short-summary: Stop packet capture on a VPN connection.
+examples:
+  - name: Stop packet capture on a VPN connection.
+    text: az network vpn-connection packet-capture stop -g MyResourceGroup -n MyConnection --sas-url https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
 """
 
 helps['network vrouter'] = """
