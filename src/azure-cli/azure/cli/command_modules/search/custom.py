@@ -69,7 +69,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
 
 
 def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
-                          ip_rules=None, identity_type=None, no_wait=False):
+                          ip_rules=None, identity_type=None):
     """
     Update partition and replica of the given search service.
 
