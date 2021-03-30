@@ -898,7 +898,7 @@ class EventGridTests(ScenarioTest):
 
         # Make sure to replace these with proper values for re-recording the tests.
         azure_active_directory_tenant_id = '72f988bf-86f1-41af-91ab-2d7cd011db47'
-        azure_active_directory_application_id_or_uri = '03d47d4a-7c50-43e0-ba90-89d090cc4582'
+        azure_active_directory_application_id_or_uri = '761faacd-cdac-45af-9530-9e6f03e7722b'
 
         self.kwargs.update({
             'event_subscription_name1': event_subscription_name1,

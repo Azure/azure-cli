@@ -457,6 +457,15 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Create a new event subscription for an Event Grid system topic, using default filters.
     text: |
@@ -537,6 +546,10 @@ examples:
     text: |
         az eventgrid system-topic event-subscription show --name es1 \\
              -g rg1 --system-topic-name systemtopic1
+  - name: Show the details of an event subscription for an Event Grid system topic include any static delivery attribute secrets.
+    text: |
+        az eventgrid system-topic event-subscription show --name es1 \\
+             -g rg1 --system-topic-name systemtopic1 --include-attrib-secret
 """
 
 helps['eventgrid system-topic event-subscription update'] = """
@@ -569,6 +582,15 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Update an event subscription for an Event Grid system topic to specify a new endpoint.
     text: |
@@ -649,6 +671,15 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Create a new event subscription for an Event Grid partner topic, using default filters.
     text: |
@@ -729,6 +760,10 @@ examples:
     text: |
         az eventgrid partner topic event-subscription show --name es1 \\
              -g rg1 --partner-topic-name partnertopic1
+  - name: Show the details of an event subscription for an Event Grid partner topic and include static delivery attribute secrets
+    text: |
+        az eventgrid partner topic event-subscription show --name es1 \\
+             -g rg1 --partner-topic-name partnertopic1 --include-static-delivery-attribute-secret
 """
 
 helps['eventgrid partner topic event-subscription update'] = """
@@ -761,6 +796,15 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Update an event subscription for an Event Grid partner topic to specify a new endpoint.
     text: |
@@ -859,6 +903,15 @@ parameters:
     short-summary: The type of the destination endpoint.
   - name: --delivery-identity-endpoint-type
     short-summary: The type of the destination endpoint with resource identity.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Create a new event subscription for an Event Grid topic, using default filters.
     text: |
@@ -1118,6 +1171,11 @@ examples:
     text: |
         az eventgrid event-subscription show --name es3 \\
             --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/microsoft.storage/storageaccounts/kalsegblob
+  - name: Show the details of an event subscription for a resource group including any static delivery attribute secrets.
+    text: |
+        az eventgrid event-subscription show --name es3 \\
+            --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1 \\
+            --include-static-delivery-attribute-secret
 """
 
 helps['eventgrid event-subscription update'] = """
@@ -1162,6 +1220,15 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
+  - name: --delivery-attribute-mapping
+    short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
+    long-summary: |
+        Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue false
+        Static Attribute Mapping:     --delivery-attribute-mapping somename static somevalue true
+        Dynamic Attribute Mapping:    --delivery-attribute-mapping somename dynamic somevalue
+        Both Static and Dynamic:      --delivery-attribute-mapping somename dynamic somevalue --delivery-attribute-mapping somename2 static somevalue
 examples:
   - name: Update an event subscription for an Event Grid topic to specify a new endpoint.
     text: |
@@ -1243,6 +1310,12 @@ examples:
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --input-schema cloudeventschemav1_0
   - name: Create a new topic which allows specific inbound ip rules with Basic Sku and system assigned identity
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --public-network-access enabled --inbound-ip-rules 10.0.0.0/8 Allow --inbound-ip-rules 10.2.0.0/8 Allow --sku Basic --identity systemassigned
+  - name: Create a new topic in Azure.
+    text: az eventgrid topic create -g rg1 --name topic1 -l westus2
+  - name: Create a new topic in Azure.
+    text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --kind azure
+  - name: Create a new topic in AzureArc targeting a custom location.
+    text: az eventgrid topic create -g rg1 --name topic1 -l eastus2euap --kind azurearc --extended-location-name /subscriptions/<subid>/resourcegroups/<rgname>/providers/microsoft.extendedlocation/customlocations/<cust-loc-name> --extended-location-type customlocation
 """
 
 helps['eventgrid topic delete'] = """
