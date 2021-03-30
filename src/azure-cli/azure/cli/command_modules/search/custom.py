@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
+from azure.cli.core.util import sdk_no_wait
 
 logger = get_logger(__name__)
 
@@ -16,7 +17,8 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 
 
 def create_search_service(cmd, resource_group_name, search_service_name, sku, location=None, partition_count=0,
-                          replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None):
+                          replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None,
+                          no_wait=False):
     """
     Creates a Search service in the given resource group.
 
@@ -63,11 +65,11 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
         _identity = Identity(type=identity_type)
         _search.identity = _identity
 
-    return _client.begin_create_or_update(resource_group_name, search_service_name, _search)
+    return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name, search_service_name, _search)
 
 
 def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
-                          ip_rules=None, identity_type=None):
+                          ip_rules=None, identity_type=None, no_wait=False):
     """
     Update partition and replica of the given search service.
 
@@ -150,7 +152,8 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
 def create_shared_private_link_resource(cmd, resource_group_name, search_service_name,
                                         shared_private_link_resource_name, shared_private_link_resource_id,
                                         shared_private_link_resource_group_id,
-                                        shared_private_link_resource_request_message="Please approve"):
+                                        shared_private_link_resource_request_message="Please approve",
+                                        no_wait=False):
     """
     Create shared privatelink resources in a Search service in the given resource group.
 
@@ -176,14 +179,15 @@ def create_shared_private_link_resource(cmd, resource_group_name, search_service
         request_message=shared_private_link_resource_request_message
     )
 
-    return _client.begin_create_or_update(resource_group_name, search_service_name, shared_private_link_resource_name,
-                                          _shared_private_link_resource)
+    return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name,
+                       search_service_name, shared_private_link_resource_name, _shared_private_link_resource)
 
 
 def update_shared_private_link_resource(cmd, resource_group_name, search_service_name,
                                         shared_private_link_resource_name, shared_private_link_resource_id,
                                         shared_private_link_resource_group_id,
-                                        shared_private_link_resource_request_message):
+                                        shared_private_link_resource_request_message,
+                                        no_wait=False):
     """
     Update shared privatelink resources in a Search service in the given resource group.
 
@@ -209,5 +213,5 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
         request_message=shared_private_link_resource_request_message
     )
 
-    return _client.begin_create_or_update(resource_group_name, search_service_name, shared_private_link_resource_name,
-                                          _shared_private_link_resource)
+    return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name,
+                       search_service_name, shared_private_link_resource_name, _shared_private_link_resource)
