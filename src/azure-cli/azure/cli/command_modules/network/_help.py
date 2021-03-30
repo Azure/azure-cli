@@ -5888,6 +5888,14 @@ examples:
     crafted: true
 """
 
+helps['network vpn-connection show-device-config-script'] = """
+type: command
+short-summary: Get a XML format representation for VPN connection device configuration script.
+examples:
+  - name: Get a XML format representation for VPN connection device configuration script.
+    text: az network vpn-connection show-device-config-script -g MyResourceGroup -n MyConnection --vendor "Cisco" --device-family "ISR" --firmware-version "IOS 15.1 (Preview)"
+"""
+
 helps['network vpn-connection packet-capture'] = """
 type: group
 short-summary: Manage packet capture on a VPN connection.
