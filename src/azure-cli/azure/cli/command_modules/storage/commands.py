@@ -511,7 +511,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  custom_func_name='update_share_rm')
         g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
         g.custom_command('restore', 'restore_share_rm')
-        g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview',
+        g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview', is_preview=True,
                          transform=transform_share_rm_output)
 
     with self.command_group('storage share', command_type=file_sdk,

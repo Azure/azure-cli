@@ -2335,7 +2335,7 @@ examples:
 
 helps['storage share-rm snapshot'] = """
 type: command
-short-summary: Creates a snapshot of an existing share under the specified account.
+short-summary: Create a snapshot of an existing share under the specified account.
 examples:
   - name: Create a snapshot of an existing share under the specified account.
     text: az storage share-rm snapshot -g MyResourceGroup --storage-account mystorageaccount --name myfileshare

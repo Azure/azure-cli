@@ -1170,7 +1170,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.argument('expand', default=None)
-        c.argument('x_ms_snapshot', options_list='--snapshot',
+        c.argument('x_ms_snapshot', options_list='--snapshot', is_preview=True,
                    help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
 
