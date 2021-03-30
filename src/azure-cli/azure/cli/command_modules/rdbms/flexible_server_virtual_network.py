@@ -35,16 +35,18 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
             vnet_name = parsed_subnet_id['name']
             resource_group = parsed_subnet_id['resource_group']
             subscription = parsed_subnet_id['subscription']
-            resource_client = resource_client_factory(cmd.cli_ctx)
+            resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription)
             rg = resource_client.resource_groups.get(resource_group)
             location = rg.location
-            validate_rg_loc_sub(subscription, location, get_subscription_id(cmd.cli_ctx), loc)
-            subnet_result = check_resource_existence(cmd, subnet_name, vnet_name, resource_group)
+            if subscription != get_subscription_id(cmd.cli_ctx):
+                logger.warning('The subnet is in different subscription from the server')
+                nw_client = network_client_factory(cmd.cli_ctx, subscription_id=subscription)
+            subnet_result = check_resource_existence(cmd, subnet_name, vnet_name, resource_group, subscription)
             if subnet_result:
-                logger.info('Using existing subnet "%s" in resource group "%s"', subnet_result.name, resource_group)
+                logger.warning('Using existing subnet "%s" in resource group "%s"', subnet_result.name, resource_group)
 
                 if not subnet_result.delegations:
-                    logger.info('Adding "%s" delegation to the existing subnet.', )
+                    logger.warning('Adding "%s" delegation to the existing subnet.', delegation_service_name)
                     subnet_result.delegations = [delegation]
                     subnet_result.service_endpoints = [service_endpoint]
                     subnet_result = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
@@ -55,7 +57,7 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
                             raise CLIError("Can not use subnet with existing delegations other than {}".format(
                                 delegation_service_name))
             else:
-                logger.warning("The supplied subnet id does not exist.")
+                logger.warning("The supplied subnet id does not exist. Creating the subnet first..")
                 subnet_result = _create_vnet_subnet_delegation(nw_client, resource_group_name, vnet_name,
                                                                'Subnet' + server_name[6:], location, server_name,
                                                                delegation, service_endpoint,
@@ -125,10 +127,10 @@ def _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegati
         # pylint: disable=no-else-return
         # disabling no-else-return as both if and else return or raise a CLI error, which is needed
         if subnet_result:
-            logger.info('Using existing subnet "%s" in resource group "%s"', subnet_result.name, resource_group_name)
+            logger.warning('Using existing subnet "%s" in resource group "%s"', subnet_result.name, resource_group_name)
 
             if not subnet_result.delegations:
-                logger.info('Adding "%s" delegation to the existing subnet.', )
+                logger.warning('Adding "%s" delegation to the existing subnet.', )
                 subnet_result.delegations = [delegation]
                 subnet_result.service_endpoints = [service_endpoint]
                 subnet_result = nw_client.subnets.begin_create_or_update(resource_group_name, vnet, subnet,
@@ -156,8 +158,8 @@ def validate_rg_loc_sub(s_subscription, s_location, subscription, location):
             "Incorrect Usage : The location and subscription of the server,Vnet and Subnet should be same.")
 
 
-def check_resource_existence(cmd, subnet_name, vnet_name, resource_group_name, ):
-    nw_client = network_client_factory(cmd.cli_ctx)
+def check_resource_existence(cmd, subnet_name, vnet_name, resource_group_name, subscription=None):
+    nw_client = network_client_factory(cmd.cli_ctx, subscription_id=subscription)
     subnet = _get_resource(nw_client.subnets, resource_group_name, vnet_name, subnet_name)
     return subnet
 
@@ -168,7 +170,7 @@ def _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, subnet_
     try:
         vnet_exist = _get_resource(nw_client.virtual_networks, resource_group, vnet_name)
         if not vnet_exist:
-            logger.info('The Vnet does not exist. Creating new vnet "%s" in resource group "%s"',
+            logger.warning('The Vnet does not exist. Creating new vnet "%s" in resource group "%s"',
                         vnet_name, resource_group)
             nw_client.virtual_networks.begin_create_or_update(resource_group,
                                                               vnet_name,
@@ -184,7 +186,7 @@ def _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, subnet_
             delegations=[delegation],
             service_endpoints=[service_endpoint])
 
-        logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group)
+        logger.warning('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group)
         return nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
                                                         subnet_result).result()
     except HttpResponseError as err:
