@@ -1362,7 +1362,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get', transform=transform_vpn_connection)
-        g.command('list', 'list', transform=transform_vpn_connection_list)
+        g.custom_command('list', 'list_vpn_connections', transform=transform_vpn_connection_list)
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
 
     with self.command_group('network vpn-connection shared-key', network_vpn_sdk) as g:

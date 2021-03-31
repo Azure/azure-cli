@@ -6567,6 +6567,14 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
             gateway2_id['resource_group'], gateway2_id['name'])
 
     return instance
+
+def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
+    if virtual_network_gateway_name:
+        client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+        return client.list_connections(resource_group_name, virtual_network_gateway_name)
+    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    return client.list(resource_group_name)
+
 # endregion
 
 

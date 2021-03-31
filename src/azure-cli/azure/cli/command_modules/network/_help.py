@@ -5813,10 +5813,12 @@ examples:
 
 helps['network vpn-connection list'] = """
 type: command
-short-summary: List all VPN connections in a resource group.
+short-summary: List all VPN connections.
 examples:
   - name: List all VPN connections in a resource group.
     text: az network vpn-connection list -g MyResourceGroup
+  - name: List all VPN connections in a virtual network gateway.
+    text: az network vpn-connection list -g MyResourceGroup --vnet-gateway-name MyVnetGateway
 """
 
 helps['network vpn-connection shared-key'] = """
