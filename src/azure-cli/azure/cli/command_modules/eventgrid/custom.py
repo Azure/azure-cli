@@ -141,7 +141,7 @@ def cli_topic_create_or_update(
 
     kind_name = _get_kind(kind)
     extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
-    
+
     identity_info = _get_identity_info(identity, kind)
     topic_info = Topic(
         location=location,
@@ -930,10 +930,11 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
-    if endpoint is None and delivery_identity_endpoint is None or \
-       endpoint is not None and delivery_identity_endpoint is not None:
-        raise CLIError('usage error: either --endpoint or --delivery-identity-endpoint should '
-                       'be specified at one time, not both.')
+    _validate_delivery_identity_args(
+        endpoint,
+        delivery_identity,
+        delivery_identity_endpoint,
+        delivery_identity_endpoint_type)
 
     if deadletter_endpoint is not None and deadletter_identity_endpoint is not None:
         raise CLIError('usage error: either --deadletter_endpoint or --deadletter_identity_endpoint '
@@ -982,15 +983,6 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
             raise CLIError('usage error: azure-active-directory-tenant-id is missing. '
                            'It should include an Azure Active Directory Tenant Id.')
 
-    condition1 = delivery_identity is not None and \
-        (delivery_identity_endpoint is None or delivery_identity_endpoint_type is None)
-    condition2 = delivery_identity is None and \
-        (delivery_identity_endpoint is not None or delivery_identity_endpoint_type is not None)
-    if endpoint is None and (condition1 or condition2):
-        raise CLIError('usage error: one or more delivery identity information is missing. '
-                       'If delivery_identity is specified, both delivery_identity_endpoint and '
-                       'delivery_identity_endpoint_type should be specified.')
-
     condition1 = deadletter_identity is not None and deadletter_identity_endpoint is None
     condition2 = deadletter_identity is None and deadletter_identity_endpoint is not None
     if condition1 or condition2:
@@ -1023,7 +1015,10 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
     elif delivery_identity_endpoint is not None:
         identity_type_name = _get_event_subscription_identity_type(delivery_identity)
         delivery_identity_info = EventSubscriptionIdentity(type=identity_type_name)
-        _validate_destination_attribute(delivery_identity_endpoint_type, storage_queue_msg_ttl, delivery_attribute_mapping)
+        _validate_destination_attribute(
+            delivery_identity_endpoint_type,
+            storage_queue_msg_ttl,
+            delivery_attribute_mapping)
         destination_with_identity = _get_endpoint_destination(
             delivery_identity_endpoint_type,
             delivery_identity_endpoint,
@@ -1346,19 +1341,19 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
 
     # if endpoint and delivery_identity_endpoint is not specified then use the instance value
     if endpoint is None and delivery_identity_endpoint is None:
-          if event_subscription_destination is not None:
-              _validate_and_update_destination(
-                  event_subscription_destination.endpoint_type,
-                  event_subscription_destination,
-                  storage_queue_msg_ttl,
-                  delivery_attribute_mapping)
-          elif event_subscription_destination_with_resource_identity is not None:
-              _validate_and_update_destination(
-                  event_subscription_destination_with_resource_identity.endpoint_type,
-                  instance_delivery_with_resource_identity.destination,
-                  storage_queue_msg_ttl,
-                  delivery_attribute_mapping)
-              delivery_with_resource_identity = instance_delivery_with_resource_identity
+        if event_subscription_destination is not None:
+            _validate_and_update_destination(
+                event_subscription_destination.endpoint_type,
+                event_subscription_destination,
+                storage_queue_msg_ttl,
+                delivery_attribute_mapping)
+        elif event_subscription_destination_with_resource_identity is not None:
+            _validate_and_update_destination(
+                event_subscription_destination_with_resource_identity.endpoint_type,
+                instance_delivery_with_resource_identity.destination,
+                storage_queue_msg_ttl,
+                delivery_attribute_mapping)
+            delivery_with_resource_identity = instance_delivery_with_resource_identity
     elif endpoint is not None:
         _validate_destination_attribute(
             endpoint_type,
@@ -1756,9 +1751,9 @@ def _get_identity_info(identity=None, kind=None):
         identity_info = IdentityInfo(type=identity_type_name)
     else:
         if kind is None or kind.lower() == KIND_AZURE.lower():
-          identity_info = IdentityInfo(type=IDENTITY_NONE)
+            identity_info = IdentityInfo(type=IDENTITY_NONE)
         else:
-          identity_info = None
+            identity_info = None
     return identity_info
 
 
@@ -1838,14 +1833,21 @@ def _validate_delivery_identity_args(
         delivery_identity,
         delivery_identity_endpoint,
         delivery_identity_endpoint_type):
+
     condition1 = delivery_identity is not None and \
         (delivery_identity_endpoint is None or delivery_identity_endpoint_type is None)
+
     condition2 = delivery_identity is None and \
         (delivery_identity_endpoint is not None or delivery_identity_endpoint_type is not None)
+
     if endpoint is None and (condition1 or condition2):
         raise CLIError('usage error: one or more delivery identity information is missing. '
-                       'If delivery_identity is specified, both delivery_identity_endpoint and '
-                       'delivery_identity_endpoint_type should be specified.')
+                       'If --delivery-identity is specified, both --delivery-identity-endpoint and '
+                       '--delivery-identity-endpoint-type should be specified.')
+
+    if endpoint is not None and (condition1 or condition2):
+        raise CLIError('usage error: Cannot specify both --delivery-identity and --endpoint.'
+                       ' If --endpoint is specified then none of the --delivery-identity properties can be specified.')
 
 
 def _validate_deadletter_identity_args(deadletter_identity, deadletter_identity_endpoint):
@@ -1854,6 +1856,7 @@ def _validate_deadletter_identity_args(deadletter_identity, deadletter_identity_
     if condition1 or condition2:
         raise CLIError('usage error: one or more deadletter identity information is missing. If '
                        'deadletter_identity is specified, deadletter_identity_endpoint should be specified.')
+
 
 def _validate_and_update_destination(endpoint_type, destination, storage_queue_msg_ttl, delivery_attribute_mapping):
     _validate_destination_attribute(
