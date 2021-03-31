@@ -15,7 +15,6 @@ from azure.cli.core._help import AzCliHelp
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
 from azure.cli.core.parser import AzCliCommandParser
-from unittest.mock import patch
 
 
 def main():
