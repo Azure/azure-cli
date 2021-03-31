@@ -119,3 +119,11 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
             forbidden_string = ', '.join(_dest_to_option(x) for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
+
+
+def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
+    if not namespace.edge_zone:
+        namespace.edge_zone = {
+            'name': namespace.edge_zone,
+            'type': 'EdgeZone'
+        }
