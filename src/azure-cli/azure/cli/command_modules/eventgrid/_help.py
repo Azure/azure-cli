@@ -1025,7 +1025,7 @@ examples:
     text: |
         az eventgrid event-subscription create -n {EventSubscriptionName} --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
             --delivery-identity-endpoint-type StorageQueue --delivery-identity systemassigned --delivery-identity-endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
-            --storage-queue-msg-ttl 300  
+            --storage-queue-msg-ttl 300
 
   - name: Create a new event subscription for an Event Grid topic with advanced filtering enabled on arrays
     text: |

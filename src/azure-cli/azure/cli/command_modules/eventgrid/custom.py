@@ -141,7 +141,7 @@ def cli_topic_create_or_update(
 
     kind_name = _get_kind(kind)
     extended_location = _get_extended_location(kind, extended_location_name, extended_location_type)
-    
+
     identity_info = _get_identity_info(identity, kind)
     topic_info = Topic(
         location=location,
@@ -1023,7 +1023,10 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
     elif delivery_identity_endpoint is not None:
         identity_type_name = _get_event_subscription_identity_type(delivery_identity)
         delivery_identity_info = EventSubscriptionIdentity(type=identity_type_name)
-        _validate_destination_attribute(delivery_identity_endpoint_type, storage_queue_msg_ttl, delivery_attribute_mapping)
+        _validate_destination_attribute(
+            delivery_identity_endpoint_type,
+            storage_queue_msg_ttl,
+            delivery_attribute_mapping)
         destination_with_identity = _get_endpoint_destination(
             delivery_identity_endpoint_type,
             delivery_identity_endpoint,
@@ -1346,19 +1349,19 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
 
     # if endpoint and delivery_identity_endpoint is not specified then use the instance value
     if endpoint is None and delivery_identity_endpoint is None:
-          if event_subscription_destination is not None:
-              _validate_and_update_destination(
-                  event_subscription_destination.endpoint_type,
-                  event_subscription_destination,
-                  storage_queue_msg_ttl,
-                  delivery_attribute_mapping)
-          elif event_subscription_destination_with_resource_identity is not None:
-              _validate_and_update_destination(
-                  event_subscription_destination_with_resource_identity.endpoint_type,
-                  instance_delivery_with_resource_identity.destination,
-                  storage_queue_msg_ttl,
-                  delivery_attribute_mapping)
-              delivery_with_resource_identity = instance_delivery_with_resource_identity
+        if event_subscription_destination is not None:
+            _validate_and_update_destination(
+                event_subscription_destination.endpoint_type,
+                event_subscription_destination,
+                storage_queue_msg_ttl,
+                delivery_attribute_mapping)
+        elif event_subscription_destination_with_resource_identity is not None:
+            _validate_and_update_destination(
+                event_subscription_destination_with_resource_identity.endpoint_type,
+                instance_delivery_with_resource_identity.destination,
+                storage_queue_msg_ttl,
+                delivery_attribute_mapping)
+            delivery_with_resource_identity = instance_delivery_with_resource_identity
     elif endpoint is not None:
         _validate_destination_attribute(
             endpoint_type,
@@ -1756,9 +1759,9 @@ def _get_identity_info(identity=None, kind=None):
         identity_info = IdentityInfo(type=identity_type_name)
     else:
         if kind is None or kind.lower() == KIND_AZURE.lower():
-          identity_info = IdentityInfo(type=IDENTITY_NONE)
+            identity_info = IdentityInfo(type=IDENTITY_NONE)
         else:
-          identity_info = None
+            identity_info = None
     return identity_info
 
 
@@ -1854,6 +1857,7 @@ def _validate_deadletter_identity_args(deadletter_identity, deadletter_identity_
     if condition1 or condition2:
         raise CLIError('usage error: one or more deadletter identity information is missing. If '
                        'deadletter_identity is specified, deadletter_identity_endpoint should be specified.')
+
 
 def _validate_and_update_destination(endpoint_type, destination, storage_queue_msg_ttl, delivery_attribute_mapping):
     _validate_destination_attribute(
