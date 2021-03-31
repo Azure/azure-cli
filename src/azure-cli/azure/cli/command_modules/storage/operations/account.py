@@ -57,7 +57,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
-                           identity_type=None, user_identity_id=None):
+                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -89,11 +89,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                                                                         key_vault_uri=encryption_key_vault,
                                                                         key_version=encryption_key_version)
 
-    if 'UserAssigned' in identity_type and user_identity_id is not None:
+    if identity_type and 'UserAssigned' in identity_type and user_identity_id:
         params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
+    elif identity_type:
+        params.identity = Identity(type=identity_type)
+    if key_vault_user_identity_id is not None:
         EncryptionIdentity = cmd.get_models('EncryptionIdentity')
         params.encryption.encryption_identity = EncryptionIdentity(
-            encryption_user_assigned_identity=user_identity_id)
+            encryption_user_assigned_identity=key_vault_user_identity_id)
 
     if access_tier:
         params.access_tier = AccessTier(access_tier)
@@ -266,7 +269,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None):
+                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
+                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -314,6 +318,19 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+
+    if identity_type and 'UserAssigned' in identity_type and user_identity_id:
+        params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
+    elif identity_type:
+        params.identity = Identity(type=identity_type)
+        # if identity_type == 'None':
+        #     params.encryption.key_vault_properties = None
+        #     params.encryption.key_source = KeySource.microsoft_storage
+    if key_vault_user_identity_id is not None:
+        EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        params.encryption.encryption_identity = EncryptionIdentity(
+            encryption_user_assigned_identity=key_vault_user_identity_id)
+
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         if enable_files_aadds:  # enable AADDS

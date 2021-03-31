@@ -296,6 +296,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
+        t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('sku', arg_type=get_enum_type(t_sku_name),
                    help='Note that the SKU name cannot be updated to Standard_ZRS, Premium_LRS or Premium_ZRS, '
@@ -329,18 +330,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
+        c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
+                   help='The identity type.')
+        c.argument('user_identity_id', arg_group='Identity',
+                   help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
+                   'permitted here.')
 
-    with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
-        t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
-        c.argument('encryption_key_name', help='The name of the KeyVault key.', )
-        c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
-        c.argument('encryption_key_version',
-                   help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
-                   'Please use "" to opt in key auto-rotation again.')
-        c.argument('encryption_key_source',
-                   arg_type=get_enum_type(t_key_source),
-                   help='The default encryption key source',
-                   validator=validate_encryption_source)
+    for scope in ['storage account create', 'storage account update']:
+        with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
+                                   resource_type=ResourceType.MGMT_STORAGE) as c:
+            t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('encryption_key_name', help='The name of the KeyVault key.', )
+            c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
+            c.argument('encryption_key_version',
+                       help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
+                       'Please use "" to opt in key auto-rotation again.')
+            c.argument('encryption_key_source',
+                       arg_type=get_enum_type(t_key_source),
+                       help='The default encryption key source',
+                       validator=validate_encryption_source)
+            c.argument('key_vault_user_identity_id', min_api='2021-01-01',
+                       help='Resource identifier of the UserAssigned identity to be associated with server-side '
+                            'encryption on the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
