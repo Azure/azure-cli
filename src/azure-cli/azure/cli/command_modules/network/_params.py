@@ -1694,8 +1694,7 @@ def load_arguments(self, _):
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
 
     with self.argument_context('network public-ip update') as c:
-        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName),
-                   deprecate_info=c.deprecate(hide=True),)
+        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
