@@ -15,10 +15,10 @@ Bug report is one of the most common issues reported in open-source community. B
 3. Fix the bug.
 
 ### Confirm the Bug
-Confirm whether it is a bug. If you can definitely identify it is a bug according description of the issue, then go to next step. Otherwise, try to reproduce the bug by yourself. You can ask the issue reporter for details such as version, concrete command and logs so that you can understand the issue better and it is more likely to reproduce the bug. It is not rare that it is not a bug, but a usage error instead. Refer to "Usage Error" section.
+Confirm whether it is a bug. If you can definitely identify it is a bug according description of the issue, then go to next step. Otherwise, try to reproduce the bug by yourself. You can ask the issue reporter for details such as version, concrete steps and logs so that you can understand the issue better and it is more likely to be able reproduce the bug. It is not rare that it is not a bug, but it is a usage error instead. Refer to "Usage Error" section.
 
 ### Locate the Fault
-Fault localization is critical to fix a bug. Some tips:
+Fault localization is critical to bug fix. Some tips:
 1. Analyzing logs. It helps you understand the bug.
 2. Step-by-step debugging. Most modern IDEs provide integrated debugging experience.
 
