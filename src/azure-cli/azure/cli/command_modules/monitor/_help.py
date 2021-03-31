@@ -1713,8 +1713,7 @@ short-summary: List the metric namespaces for the resource.
 examples:
   - name: List the metric namespaces for the resource.
     text: |
-        az monitor metrics list-namespaces --resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Network/networkSecurityGroups/ADDS-NSG
-    crafted: true
+        az monitor metrics list-namespaces --resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Network/networkSecurityGroups/ADDS-NSG --start-time 2021-03-01T00:00:00Z
 """
 
 helps['monitor clone'] = """
