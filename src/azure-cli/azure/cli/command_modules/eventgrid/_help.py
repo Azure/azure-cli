@@ -1021,6 +1021,12 @@ examples:
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --storage-queue-msg-ttl 300
 
+  - name: Create a new event subscription for an Event Grid topic using StorageQueue with systemassigned MSI identity as destination
+    text: |
+        az eventgrid event-subscription create -n {EventSubscriptionName} --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
+            --delivery-identity-endpoint-type StorageQueue --delivery-identity systemassigned --delivery-identity-endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
+            --storage-queue-msg-ttl 300  
+
   - name: Create a new event subscription for an Event Grid topic with advanced filtering enabled on arrays
     text: |
         az eventgrid event-subscription create -n es1 \\
@@ -1315,7 +1321,7 @@ examples:
   - name: Create a new topic in Azure.
     text: az eventgrid topic create -g rg1 --name topic1 -l westus2 --kind azure
   - name: Create a new topic in AzureArc targeting a custom location.
-    text: az eventgrid topic create -g rg1 --name topic1 -l eastus2euap --kind azurearc --extended-location-name /subscriptions/<subid>/resourcegroups/<rgname>/providers/microsoft.extendedlocation/customlocations/<cust-loc-name> --extended-location-type customlocation
+    text: az eventgrid topic create -g rg1 --name topic1 -l eastus2euap --kind azurearc --extended-location-name /subscriptions/<subid>/resourcegroups/<rgname>/providers/microsoft.extendedlocation/customlocations/<cust-loc-name> --extended-location-type customlocation --input-schema CloudEventSchemaV1_0
 """
 
 helps['eventgrid topic delete'] = """
