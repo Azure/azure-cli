@@ -862,32 +862,32 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
         self.assertEqual(result['encryption']['keyVaultProperties'], None)
 
-        # # CMK with UAI1 -> CMK with UAI2
-        # self.kwargs['new_id'] = self.create_random_name(prefix='newid', length=24)
-        # identity = self.cmd('az identity create -n {new_id} -g {rg}').get_output_in_json()
-        # self.kwargs['new_iid'] = identity['id']
-        # self.kwargs['new_oid'] = identity['principalId']
-        #
-        # self.cmd('az keyvault set-policy -n {vt} --object-id {new_oid} -g {rg} '
-        #          '--key-permissions get wrapKey unwrapKey recover')
-        #
-        # result = self.cmd('az storage account update -n {sa1} -g {rg} '
-        #                   '--encryption-key-source Microsoft.Keyvault '
-        #                   '--encryption-key-vault {vtn} '
-        #                   '--encryption-key-name testkey '
-        #                   '--key-vault-user-identity-id {new_iid} '
-        #                   '--identity-type UserAssigned '
-        #                   '--user-identity-id {new_iid}').get_output_in_json()
-        #
-        # self.assertEqual(result['name'], self.kwargs['sa1'])
-        # self.assertEqual(result['identity']['type'], 'UserAssigned')
-        # self.assertIn(self.kwargs['new_iid'], result['identity']['userAssignedIdentities'])
-        # self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['new_iid'])
-        # self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
-        # self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
-        # self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
-        # self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
-        # self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+        # CMK with UAI1 -> CMK with UAI2
+        self.kwargs['new_id'] = self.create_random_name(prefix='newid', length=24)
+        identity = self.cmd('az identity create -n {new_id} -g {rg}').get_output_in_json()
+        self.kwargs['new_iid'] = identity['id']
+        self.kwargs['new_oid'] = identity['principalId']
+
+        self.cmd('az keyvault set-policy -n {vt} --object-id {new_oid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+
+        result = self.cmd('az storage account update -n {sa1} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--key-vault-user-identity-id {new_iid} '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {new_iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['new_iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['new_iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
         #
         # # Remove identity for storage account
         # result = self.cmd('az storage account create -n {sa} -g {rg} --identity-type None').get_output_in_json()
