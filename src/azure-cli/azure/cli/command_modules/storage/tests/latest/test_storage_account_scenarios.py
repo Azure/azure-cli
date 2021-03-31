@@ -582,6 +582,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         assert renewed_keys[0] == original_keys[0]
         assert renewed_keys[1] != original_keys[1]
 
+    @record_only()   # Need to configure domain service first
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer()
     def test_renew_account_kerb_key(self, resource_group):
