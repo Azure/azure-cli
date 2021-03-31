@@ -5072,6 +5072,21 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('sshkey show -g {rg} -n k3')
 
 
+class VMInstallPatchesScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
+    def test_vm_install_patches(self, resource_group):
+        # Create new one
+        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('vm create -g {rg} -n vm2 --image UbuntuLTS --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-linux Critical Security', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
