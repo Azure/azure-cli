@@ -27,6 +27,7 @@ Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
 BuildArch:      x86_64
 Requires:       %{python_cmd}
 Prefix:         /usr
+Prefix:         /etc
 
 BuildRequires:  gcc, libffi-devel, openssl-devel, perl
 BuildRequires:  %{python_cmd}-devel
