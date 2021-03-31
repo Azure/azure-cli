@@ -24,8 +24,7 @@ def main():
                    invocation_cls=AzCliCommandInvoker,
                    parser_cls=AzCliCommandParser,
                    help_cls=AzCliHelp)
-    with patch('getpass.getuser', return_value='your_system_user_login_name'):
-        create_invoker_and_load_cmds_and_args(az_cli)
+    create_invoker_and_load_cmds_and_args(az_cli)
     help_files = get_all_help(az_cli)
     high_command_set = set()
     for help_file in help_files:
