@@ -397,6 +397,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
                          'https://managedhsm.azure.com')
 
+        # VM SSH
+        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/.default"]),
+                         'https://pas.windows.net/CheckMyAccess/Linux')
+        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]),
+                         'https://pas.windows.net/CheckMyAccess/Linux')
+
     def test_resource_to_scopes(self):
         from azure.cli.core.util import resource_to_scopes
         # resource converted to a scopes list
