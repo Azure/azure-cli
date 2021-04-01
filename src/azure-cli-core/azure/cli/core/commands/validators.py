@@ -122,7 +122,7 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
 
 
 def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
-    if not namespace.edge_zone:
+    if namespace.edge_zone:
         namespace.edge_zone = {
             'name': namespace.edge_zone,
             'type': 'EdgeZone'

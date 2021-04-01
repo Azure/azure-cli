@@ -5104,5 +5104,39 @@ class VMCreateCountScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n vm2')
 
 
+class ExtendedLocation(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extended_location_')
+    def test_vm_extended_location(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image ubuntults --nsg-rule None --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extended_location_')
+    def test_vmss_extended_location(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vmss --image ubuntults --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vmss show -g {rg} -n vmss', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_other_extended_location_')
+    def test_other_extended_location(self, resource_group):
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --edge-zone microsoftlosangeles1', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+        # Python SDK not ready
+        # self.cmd('snapshot create -g {rg} -n s1 --size-gb 10 --edge-zone microsoftlosangeles1', checks=[
+        #     self.check('extendedLocation.name', 'microsoftlosangeles1'),
+        #     self.check('extendedLocation.type', 'EdgeZone')
+        # ])
+        self.cmd('image create -g {rg} -n image --os-type linux --source d1 --edge-zone microsoftlosangeles1', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
