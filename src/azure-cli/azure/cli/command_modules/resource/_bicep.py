@@ -17,11 +17,29 @@ import semver
 
 from six.moves.urllib.request import urlopen
 from knack.log import get_logger
-from azure.cli.core.azclierror import FileOperationError, ValidationError, UnclassifiedUserFault, ClientRequestError
+from azure.cli.core.azclierror import (
+    FileOperationError,
+    ValidationError,
+    UnclassifiedUserFault,
+    ClientRequestError,
+    InvalidTemplateError,
+)
 
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
+
+# See: https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-syntax#template-format
+_template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
+
 _logger = get_logger(__name__)
+
+
+def validate_bicep_target_scope(template_schema, deployment_scope):
+    target_scope = _template_schema_to_target_scope(template_schema)
+    if target_scope != deployment_scope:
+        raise InvalidTemplateError(
+            f'The target scope "{target_scope}" does not match the deployment scope "{deployment_scope}".'
+        )
 
 
 def run_bicep_command(args, auto_install=True, check_upgrade=True):
@@ -84,7 +102,7 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
             print(f'Successfully installed Bicep CLI to "{installation_path}".')
         else:
             _logger.info(
-                'Successfully installed Bicep CLI to %s',
+                "Successfully installed Bicep CLI to %s",
                 installation_path,
             )
     except IOError as err:
@@ -158,3 +176,20 @@ def _run_command(bicep_installation_path, args):
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
         raise UnclassifiedUserFault(process.stderr.decode("utf-8"))
+
+
+def _template_schema_to_target_scope(template_schema):
+    template_schema_match = re.search(_template_schema_pattern, template_schema)
+    template_type = template_schema_match.group('templateType') if template_schema_match else None
+    template_type_lower = template_type.lower() if template_type else None
+    print(template_type)
+
+    if template_type_lower == "deployment":
+        return "resourceGroup"
+    if template_type_lower == "subscriptiondeployment":
+        return "subscription"
+    if template_type_lower == "managementgroupdeployment":
+        return "managementGroup"
+    if template_type_lower == "tenantdeployment":
+        return "tenant"
+    return None
