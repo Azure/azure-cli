@@ -30,7 +30,7 @@ from azure.cli.command_modules.monitor.validators import validate_metric_dimensi
 from azure.cli.command_modules.monitor.actions import get_period_type
 
 
-# pylint: disable=too-many-statements, too-many-branches, too-many-locals
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
 def load_arguments(self, _):
     # Model imports
     StorageAccountTypes = self.get_models('StorageAccountTypes')
