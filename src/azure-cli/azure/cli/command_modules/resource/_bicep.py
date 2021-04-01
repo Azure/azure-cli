@@ -30,7 +30,7 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
 
     if not installed:
         if auto_install:
-            ensure_bicep_installation()
+            ensure_bicep_installation(stdout=False)
         else:
             raise FileOperationError('Bicep CLI not found. Install it now by running "az bicep install".')
     elif check_upgrade:
@@ -49,7 +49,7 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
     return _run_command(installation_path, args)
 
 
-def ensure_bicep_installation(release_tag=None):
+def ensure_bicep_installation(release_tag=None, stdout=True):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
 
@@ -68,10 +68,11 @@ def ensure_bicep_installation(release_tag=None):
 
     try:
         release_tag = release_tag if release_tag else get_bicep_latest_release_tag()
-        if release_tag:
-            print(f"Installing Bicep CLI {release_tag}...")
-        else:
-            print("Installing Bicep CLI...")
+        if stdout:
+            if release_tag:
+                print(f"Installing Bicep CLI {release_tag}...")
+            else:
+                print("Installing Bicep CLI...")
 
         request = urlopen(_get_bicep_download_url(system, release_tag))
         with open(installation_path, "wb") as f:
@@ -79,7 +80,13 @@ def ensure_bicep_installation(release_tag=None):
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-        print(f'Successfully installed Bicep CLI to "{installation_path}".')
+        if stdout:
+            print(f'Successfully installed Bicep CLI to "{installation_path}".')
+        else:
+            _logger.info(
+                'Successfully installed Bicep CLI to %s',
+                installation_path,
+            )
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 

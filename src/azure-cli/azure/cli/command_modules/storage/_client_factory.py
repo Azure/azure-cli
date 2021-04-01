@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client, \
-    _prepare_client_kwargs_track2
+    prepare_client_kwargs_track2
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
@@ -203,7 +203,7 @@ def _config_location_mode(kwargs, client_kwargs):
 
 
 def cf_blob_service(cli_ctx, kwargs):
-    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
@@ -247,7 +247,7 @@ def cf_container_client(cli_ctx, kwargs):
 
 
 def cf_adls_service(cli_ctx, kwargs):
-    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
@@ -288,7 +288,7 @@ def cf_or_policy(cli_ctx, _):
 
 
 def cf_queue_service(cli_ctx, kwargs):
-    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_QUEUE, '_queue_service_client#QueueServiceClient')
     connection_string = kwargs.pop('connection_string', None)
