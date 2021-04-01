@@ -5688,6 +5688,14 @@ examples:
     text: az network vnet-gateway vpn-client show-url -g MyResourceGroup -n MyVnetGateway
 """
 
+helps['network vnet-gateway vpn-client show-health'] = """
+type: command
+short-summary: Get the VPN client connection health detail per P2S client connection of the virtual network gateway.
+examples:
+  - name: Get the VPN client connection health detail per P2S client connection of the virtual network gateway.
+    text: az network vnet-gateway vpn-client show-health -g MyResourceGroup -n MyVnetGateway
+"""
+
 helps['network vnet-gateway wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.

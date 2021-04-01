@@ -1338,6 +1338,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
         g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
+        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
 
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
