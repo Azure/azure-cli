@@ -20,11 +20,11 @@ def list_role_assignments(cmd, workspace_name, role=None, assignee=None, assigne
     if bool(item) != bool(item_type):
         raise CLIError('usage error: --item-type STRING --item STRING')
 
-    return _list_role_assignment(cmd, workspace_name, role, assignee or assignee_object_id,
+    return _list_role_assignments(cmd, workspace_name, role, assignee or assignee_object_id,
                                  scope, resolve_assignee=(not assignee_object_id), item=item, item_type=item_type)
 
 
-def _list_role_assignment(cmd, workspace_name, role=None, assignee=None, scope=None,
+def _list_role_assignments(cmd, workspace_name, role=None, assignee=None, scope=None,
                           resolve_assignee=True, item=None, item_type=None):
     """Prepare scope, role ID and resolve object ID from Graph API."""
     if any([scope, item, item_type]):

@@ -13,8 +13,7 @@ SPARK_DOTNET_UDFS_FOLDER_NAME = 'udfs'
 SPARK_SERVICE_ENDPOINT_API_VERSION = '2019-11-01-priview'
 AdministratorType = "activeDirectory"
 ITEM_NAME_MAPPING = {'bigDataPools': '{bigDataPoolName}', 'integrationRuntimes': '{integrationRuntimeName}',
-                     'linkedServices': '{linkedServiceName}', 'credentials': '{credentialName}',
-                     'scopePools': '{scopePoolName}'}
+                     'linkedServices': '{linkedServiceName}', 'credentials': '{credentialName}'}
 
 
 class SynapseSqlCreateMode(str, Enum):
