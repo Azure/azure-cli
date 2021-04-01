@@ -3194,15 +3194,19 @@ def upgrade_bicep_cli(cmd):
     ensure_bicep_installation(release_tag=latest_release_tag)
 
 
-def build_bicep_file(cmd, files, stdout=None):
+def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
+    args = ["build", file]
+    if outdir:
+        args += ["--outdir", outdir]
+    if outfile:
+        args += ["--outfile", outfile]
     if stdout:
-        print(run_bicep_command(["build"] + files + ["--stdout"]))
-    else:
-        run_bicep_command(["build"] + files)
+        args += ["--stdout"]
+    run_bicep_command(args)
 
 
-def decompile_bicep_file(cmd, files):
-    run_bicep_command(["decompile"] + files)
+def decompile_bicep_file(cmd, file):
+    run_bicep_command(["decompile", file])
 
 
 def show_bicep_cli_version(cmd):
