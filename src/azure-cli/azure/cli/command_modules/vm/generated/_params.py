@@ -7,7 +7,6 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
@@ -67,7 +66,7 @@ def load_arguments(self, _):
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
 
-    with self.argument_context('vm virtual-machine install-patch') as c:
+    with self.argument_context('vm install-patch') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_name', options_list=['--name'], type=str, help='The name of the virtual machine.',
                    id_part='name')
@@ -80,7 +79,7 @@ def load_arguments(self, _):
         c.argument('linux_parameters', action=AddLinuxParameters, nargs='+', help='Input for InstallPatches on a Linux '
                    'VM, as directly received by the API')
 
-    with self.argument_context('vm virtual-machine reimage') as c:
+    with self.argument_context('vm reimage') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_name', options_list=['--name'], type=str, help='The name of the virtual machine.',
                    id_part='name')
@@ -88,33 +87,33 @@ def load_arguments(self, _):
                    'value: false. Note: This temp disk reimage parameter is only supported for VM/VMSS with Ephemeral '
                    'OS disk.')
 
-    with self.argument_context('vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk') as c:
+    with self.argument_context('vmss force-recovery-service-fabric-platform-update-domain-walk') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('platform_update_domain', type=int, help='The platform update domain for which a manual recovery '
                    'walk is requested')
 
-    with self.argument_context('vm virtual-machine-scale-set redeploy') as c:
+    with self.argument_context('vmss redeploy') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_ids', nargs='+', help='The virtual machine scale set instance ids. Omitting the virtual '
                    'machine scale set instance ids will result in the operation being performed on all virtual '
                    'machines in the virtual machine scale set.')
 
-    with self.argument_context('vm virtual-machine-scale-set reimage-all') as c:
+    with self.argument_context('vmss reimage-all') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_ids', nargs='+', help='The virtual machine scale set instance ids. Omitting the virtual '
                    'machine scale set instance ids will result in the operation being performed on all virtual '
                    'machines in the virtual machine scale set.')
 
-    with self.argument_context('vm virtual-machine-scale-set-vm-extension list') as c:
+    with self.argument_context('vmss vm-extension list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
         c.argument('expand', type=str, help='The expand expression to apply on the operation.')
 
-    with self.argument_context('vm virtual-machine-scale-set-vm-extension show') as c:
+    with self.argument_context('vmss vm-extension show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
@@ -122,7 +121,7 @@ def load_arguments(self, _):
                    id_part='child_name_2')
         c.argument('expand', type=str, help='The expand expression to apply on the operation.')
 
-    with self.argument_context('vm virtual-machine-scale-set-vm-extension create') as c:
+    with self.argument_context('vmss vm-extension create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
@@ -155,7 +154,7 @@ def load_arguments(self, _):
         c.argument('statuses', action=AddStatuses, nargs='+', help='The resource status information.',
                    arg_group='Instance View')
 
-    with self.argument_context('vm virtual-machine-scale-set-vm-extension wait') as c:
+    with self.argument_context('vmss vm-extension wait') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
@@ -163,17 +162,17 @@ def load_arguments(self, _):
                    id_part='child_name_2')
         c.argument('expand', type=str, help='The expand expression to apply on the operation.')
 
-    with self.argument_context('vm virtual-machine-scale-set-v-ms redeploy') as c:
+    with self.argument_context('vmss v-ms redeploy') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
 
-    with self.argument_context('vm virtual-machine-scale-set-v-ms reimage-all') as c:
+    with self.argument_context('vmss v-ms reimage-all') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
 
-    with self.argument_context('vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data') as c:
+    with self.argument_context('vmss v-ms retrieve-boot-diagnostic-data') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
@@ -181,7 +180,7 @@ def load_arguments(self, _):
                    'URIs with a value between 1 to 1440 minutes. <br><br>NOTE: If not specified, SAS URIs will be '
                    'generated with a default expiration duration of 120 minutes.')
 
-    with self.argument_context('vm virtual-machine-scale-set-vm-run-command list') as c:
+    with self.argument_context('vmss vm-run list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
         c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')

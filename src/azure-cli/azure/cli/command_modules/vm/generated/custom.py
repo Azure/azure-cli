@@ -62,14 +62,14 @@ def sshkey_delete(client,
                          ssh_public_key_name=ssh_public_key_name)
 
 
-def vm_virtual_machine_install_patch(client,
-                                     resource_group_name,
-                                     vm_name,
-                                     maximum_duration,
-                                     reboot_setting,
-                                     windows_parameters=None,
-                                     linux_parameters=None,
-                                     no_wait=False):
+def vm_install_patch(client,
+                     resource_group_name,
+                     vm_name,
+                     maximum_duration,
+                     reboot_setting,
+                     windows_parameters=None,
+                     linux_parameters=None,
+                     no_wait=False):
     install_patches_input = {}
     install_patches_input['maximum_duration'] = maximum_duration
     install_patches_input['reboot_setting'] = reboot_setting
@@ -82,11 +82,11 @@ def vm_virtual_machine_install_patch(client,
                        install_patches_input=install_patches_input)
 
 
-def vm_virtual_machine_reimage(client,
-                               resource_group_name,
-                               vm_name,
-                               temp_disk=None,
-                               no_wait=False):
+def vm_reimage(client,
+               resource_group_name,
+               vm_name,
+               temp_disk=None,
+               no_wait=False):
     parameters = {}
     parameters['temp_disk'] = temp_disk
     return sdk_no_wait(no_wait,
@@ -96,20 +96,20 @@ def vm_virtual_machine_reimage(client,
                        parameters=parameters)
 
 
-def vm_virtual_machine_scale_set_force_recovery_service_fabric_platform_update_domain_walk(client,
-                                                                                           resource_group_name,
-                                                                                           vm_scale_set_name,
-                                                                                           platform_update_domain):
+def vmss_force_recovery_service_fabric_platform_update_domain_walk(client,
+                                                                   resource_group_name,
+                                                                   vm_scale_set_name,
+                                                                   platform_update_domain):
     return client.force_recovery_service_fabric_platform_update_domain_walk(resource_group_name=resource_group_name,
                                                                             vm_scale_set_name=vm_scale_set_name,
                                                                             platform_update_domain=platform_update_domain)
 
 
-def vm_virtual_machine_scale_set_redeploy(client,
-                                          resource_group_name,
-                                          vm_scale_set_name,
-                                          instance_ids=None,
-                                          no_wait=False):
+def vmss_redeploy(client,
+                  resource_group_name,
+                  vm_scale_set_name,
+                  instance_ids=None,
+                  no_wait=False):
     vm_instance_i__ds = {}
     vm_instance_i__ds['instance_ids'] = instance_ids
     return sdk_no_wait(no_wait,
@@ -119,11 +119,11 @@ def vm_virtual_machine_scale_set_redeploy(client,
                        vm_instance_i_ds=vm_instance_i__ds)
 
 
-def vm_virtual_machine_scale_set_reimage_all(client,
-                                             resource_group_name,
-                                             vm_scale_set_name,
-                                             instance_ids=None,
-                                             no_wait=False):
+def vmss_reimage_all(client,
+                     resource_group_name,
+                     vm_scale_set_name,
+                     instance_ids=None,
+                     no_wait=False):
     vm_instance_i__ds = {}
     vm_instance_i__ds['instance_ids'] = instance_ids
     return sdk_no_wait(no_wait,
@@ -133,23 +133,23 @@ def vm_virtual_machine_scale_set_reimage_all(client,
                        vm_instance_i_ds=vm_instance_i__ds)
 
 
-def vm_virtual_machine_scale_set_vm_extension_list(client,
-                                                   resource_group_name,
-                                                   vm_scale_set_name,
-                                                   instance_id,
-                                                   expand=None):
+def vmss_vm_extension_list(client,
+                           resource_group_name,
+                           vm_scale_set_name,
+                           instance_id,
+                           expand=None):
     return client.list(resource_group_name=resource_group_name,
                        vm_scale_set_name=vm_scale_set_name,
                        instance_id=instance_id,
                        expand=expand)
 
 
-def vm_virtual_machine_scale_set_vm_extension_show(client,
-                                                   resource_group_name,
-                                                   vm_scale_set_name,
-                                                   instance_id,
-                                                   vm_extension_name,
-                                                   expand=None):
+def vmss_vm_extension_show(client,
+                           resource_group_name,
+                           vm_scale_set_name,
+                           instance_id,
+                           vm_extension_name,
+                           expand=None):
     return client.get(resource_group_name=resource_group_name,
                       vm_scale_set_name=vm_scale_set_name,
                       instance_id=instance_id,
@@ -157,25 +157,25 @@ def vm_virtual_machine_scale_set_vm_extension_show(client,
                       expand=expand)
 
 
-def vm_virtual_machine_scale_set_vm_extension_create(client,
-                                                     resource_group_name,
-                                                     vm_scale_set_name,
-                                                     instance_id,
-                                                     vm_extension_name,
-                                                     force_update_tag=None,
-                                                     publisher=None,
-                                                     type_properties_type=None,
-                                                     type_handler_version=None,
-                                                     auto_upgrade_minor_version=None,
-                                                     enable_automatic_upgrade=None,
-                                                     settings=None,
-                                                     protected_settings=None,
-                                                     name=None,
-                                                     type_=None,
-                                                     virtual_machine_extension_instance_view_type_handler_version_type_handler_version=None,
-                                                     substatuses=None,
-                                                     statuses=None,
-                                                     no_wait=False):
+def vmss_vm_extension_create(client,
+                             resource_group_name,
+                             vm_scale_set_name,
+                             instance_id,
+                             vm_extension_name,
+                             force_update_tag=None,
+                             publisher=None,
+                             type_properties_type=None,
+                             type_handler_version=None,
+                             auto_upgrade_minor_version=None,
+                             enable_automatic_upgrade=None,
+                             settings=None,
+                             protected_settings=None,
+                             name=None,
+                             type_=None,
+                             virtual_machine_extension_instance_view_type_handler_version_type_handler_version=None,
+                             substatuses=None,
+                             statuses=None,
+                             no_wait=False):
     extension_parameters = {}
     extension_parameters['force_update_tag'] = force_update_tag
     extension_parameters['publisher'] = publisher
@@ -200,11 +200,11 @@ def vm_virtual_machine_scale_set_vm_extension_create(client,
                        extension_parameters=extension_parameters)
 
 
-def vm_virtual_machine_scale_set_v_ms_redeploy(client,
-                                               resource_group_name,
-                                               vm_scale_set_name,
-                                               instance_id,
-                                               no_wait=False):
+def vmss_v_ms_redeploy(client,
+                       resource_group_name,
+                       vm_scale_set_name,
+                       instance_id,
+                       no_wait=False):
     return sdk_no_wait(no_wait,
                        client.begin_redeploy,
                        resource_group_name=resource_group_name,
@@ -212,11 +212,11 @@ def vm_virtual_machine_scale_set_v_ms_redeploy(client,
                        instance_id=instance_id)
 
 
-def vm_virtual_machine_scale_set_v_ms_reimage_all(client,
-                                                  resource_group_name,
-                                                  vm_scale_set_name,
-                                                  instance_id,
-                                                  no_wait=False):
+def vmss_v_ms_reimage_all(client,
+                          resource_group_name,
+                          vm_scale_set_name,
+                          instance_id,
+                          no_wait=False):
     return sdk_no_wait(no_wait,
                        client.begin_reimage_all,
                        resource_group_name=resource_group_name,
@@ -224,22 +224,22 @@ def vm_virtual_machine_scale_set_v_ms_reimage_all(client,
                        instance_id=instance_id)
 
 
-def vm_virtual_machine_scale_set_v_ms_retrieve_boot_diagnostic_data(client,
-                                                                    resource_group_name,
-                                                                    vm_scale_set_name,
-                                                                    instance_id,
-                                                                    sas_uri_expiration_time_in_minutes=None):
+def vmss_v_ms_retrieve_boot_diagnostic_data(client,
+                                            resource_group_name,
+                                            vm_scale_set_name,
+                                            instance_id,
+                                            sas_uri_expiration_time_in_minutes=None):
     return client.retrieve_boot_diagnostics_data(resource_group_name=resource_group_name,
                                                  vm_scale_set_name=vm_scale_set_name,
                                                  instance_id=instance_id,
                                                  sas_uri_expiration_time_in_minutes=sas_uri_expiration_time_in_minutes)
 
 
-def vm_virtual_machine_scale_set_vm_run_command_list(client,
-                                                     resource_group_name,
-                                                     vm_scale_set_name,
-                                                     instance_id,
-                                                     expand=None):
+def vmss_vm_run_list(client,
+                     resource_group_name,
+                     vm_scale_set_name,
+                     instance_id,
+                     expand=None):
     return client.list(resource_group_name=resource_group_name,
                        vm_scale_set_name=vm_scale_set_name,
                        instance_id=instance_id,

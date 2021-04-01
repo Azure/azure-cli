@@ -45,13 +45,13 @@ from .example_steps import step_gallery_application_version_list
 from .example_steps import step_gallery_application_delete
 from .example_steps import step_create
 from .example_steps import step_show
-from .example_steps import step_virtual_machine_install_patch
-from .example_steps import step_virtual_machine_reimage
-from .example_steps import step_virtual_machine_scale_set_vm_extension_create
-from .example_steps import step_virtual_machine_scale_set_vm_extension_show
-from .example_steps import step_virtual_machine_scale_set_vm_extension_list
-from .example_steps import step_virtual_machine_scale_set_vm_run_command_list
-from .example_steps import step_virtual_machine_scale
+from .example_steps import step_install_patch
+from .example_steps import step_reimage
+from .example_steps import step_vm_extension_create
+from .example_steps import step_vm_extension_show
+from .example_steps import step_vm_extension_list
+from .example_steps import step_vm_run_list
+from .example_steps import step_v_ms_retrieve_boot_diagnostic_data
 from .. import (
     try_manual,
     raise_if,
@@ -214,13 +214,13 @@ def call_scenario(test):
         test.check("publicKey", "{{ssh-rsa public key}}", case_sensitive=False),
         test.check("name", "{mySshPublicKey}", case_sensitive=False),
     ])
-    step_virtual_machine_install_patch(test, checks=[])
-    step_virtual_machine_reimage(test, checks=[])
-    step_virtual_machine_scale_set_vm_extension_create(test, checks=[])
-    step_virtual_machine_scale_set_vm_extension_show(test, checks=[])
-    step_virtual_machine_scale_set_vm_extension_list(test, checks=[])
-    step_virtual_machine_scale_set_vm_run_command_list(test, checks=[])
-    step_virtual_machine_scale(test, checks=[])
+    step_install_patch(test, checks=[])
+    step_reimage(test, checks=[])
+    step_vm_extension_create(test, checks=[])
+    step_vm_extension_show(test, checks=[])
+    step_vm_extension_list(test, checks=[])
+    step_vm_run_list(test, checks=[])
+    step_v_ms_retrieve_boot_diagnostic_data(test, checks=[])
     cleanup_scenario(test)
 
 
