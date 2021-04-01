@@ -67,7 +67,7 @@ DEPENDENCIES = [
 
 # dependencies for specific OSes
 if not sys.platform.startswith('cygwin'):
-    DEPENDENCIES.append('psutil~=5.7')
+    DEPENDENCIES.append('psutil~=5.8')
 
 TESTS_REQUIRE = [
     'mock'
