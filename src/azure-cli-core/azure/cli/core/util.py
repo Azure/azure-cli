@@ -510,11 +510,25 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
         try:
             import ast
             return ast.literal_eval(json_or_dict_string)
-        except SyntaxError:
-            raise CLIError(json_ex)
-        except ValueError as ex:
+        except Exception as ex:
             logger.debug(ex)  # log the exception which could be a python dict parsing error.
-            raise CLIError(json_ex)  # raise json_ex error which is more readable and likely.
+
+            # Echo the JSON received by CLI
+            msg = "Failed to parse JSON: {}\nError detail: {}".format(json_or_dict_string, json_ex)
+
+            # Recommendation for all shells
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            recommendation = "The JSON may have been parsed by the shell. See " \
+                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
+
+            # Recommendation especially for PowerShell
+            parent_proc = get_parent_proc_name().lower()
+            if parent_proc in ("powershell.exe", "pwsh.exe"):
+                recommendation += "\nPowerShell requires additional quoting rules. See " \
+                                  "https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md"
+
+            # Raise from json_ex error which is more likely to be the original error
+            raise InvalidArgumentValueError(msg, recommendation=recommendation) from json_ex
 
 
 def b64encode(s):
@@ -1218,7 +1232,8 @@ def _get_parent_proc_name():
     # Un-cached function to get parent process name.
     try:
         import psutil
-    except ImportError:
+    except ImportError as ex:
+        logger.debug(ex)
         return None
 
     import os
