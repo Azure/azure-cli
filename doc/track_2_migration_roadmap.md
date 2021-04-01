@@ -33,7 +33,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | KeyVault    | Yes|**Completed** | 04/30/2021 |Catherine||GA (8.0.0) | GA (2.2.0) | Medium (Once three months) | Module |
 | Monitor     |Yes |**Completed** | 04/30/2021 |Yong||Monitor: GA (2.0.0)<br> LogAnalytics: GA (8.0.0) | Monitor: Preview (0.12.0)<br> LogAnalytics: GA (2.0.0) | Medium (Once two months) | Module |
 | Resource   | Yes |Not Started | 04/30/2021 |Yong ||GA (15.0.0) | GA (12.0.0) | Medium (Once two months) | Module |
-| AppService   |  Yes|Not Started | 04/30/2021 |Catherine||GA (1.0.0) | Preview (0.48.0) | Medium (Once three months) | Module |
+| AppService   |  Yes| **In progress** | 04/30/2021 |Catherine||GA (1.0.0) | Preview (0.48.0) | Medium (Once three months) | Module |
 | ACS   |  Yes |Not Started | 04/30/2021 |Catherine||ContainerService: GA (14.0.0)<br> ContainerInstance: GA (7.0.0) | ContainerService: GA (11.0.0)<br> ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
 | ACR   | Yes |Not Started | 04/30/2021 |Catherine||Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
 | CosmosDB   | Yes |Not Started | 04/30/2021 |Yong||GA (6.0.0) | Preview (2.0.0rc1) |  Medium (Once two months) |Module|
@@ -58,7 +58,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | Synapse |  |Not Started | N/A |||Preview (1.0.0b1) | Preview (0.6.0) | Medium (Once two months) | Module |
 | EventHub   |  |Not Started | N/A |||GA (8.0.0) | GA (4.2.0) | Low (Once a year) | Module |
 | Search |  |**Completed** | N/A |||GA (8.0.0) | GA (3.0.0) | Low (Once a year) | Module |
-| AppConfiguration  |  |Not Started | N/A |||GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
+| AppConfiguration  |  |**Completed** | N/A |||GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Security |  |Not Started | N/A |||GA (1.0.0) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Batch   |  |Not Started | N/A |||GA (14.0.0) | GA (9.0.0) | Low (Once half year) | Module |
 | CognitiveServices | |Not Started | N/A ||| GA (11.0.0) | GA (6.3.0) | Low (Once half year) | Module |
