@@ -3591,6 +3591,7 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
         self.cmd('network vnet-gateway ipsec-policy clear -g {rg} --gateway-name {gw}')
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway show-supported-devices -g {rg} -n {gw} -o tsv')
 
 
 class NetworkVnetGatewayMultiAuth(ScenarioTest):

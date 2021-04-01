@@ -5566,6 +5566,14 @@ examples:
     text: az network vnet-gateway list-learned-routes -g MyResourceGroup -n MyVnetGateway
 """
 
+helps['network vnet-gateway show-supported-devices'] = """
+type: command
+short-summary: Get a xml format representation for supported vpn devices.
+examples:
+  - name: Get a xml format representation for supported vpn devices.
+    text: az network vnet-gateway show-supported-devices -g MyResourceGroup -n MyVnetGateway
+"""
+
 helps['network vnet-gateway reset'] = """
 type: command
 short-summary: Reset a virtual network gateway.
@@ -5893,7 +5901,7 @@ type: command
 short-summary: Get a XML format representation for VPN connection device configuration script.
 examples:
   - name: Get a XML format representation for VPN connection device configuration script.
-    text: az network vpn-connection show-device-config-script -g MyResourceGroup -n MyConnection --vendor "Cisco" --device-family "ISR" --firmware-version "IOS 15.1 (Preview)"
+    text: az network vpn-connection show-device-config-script -g MyResourceGroup -n MyConnection --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"
 """
 
 helps['network vpn-connection packet-capture'] = """
