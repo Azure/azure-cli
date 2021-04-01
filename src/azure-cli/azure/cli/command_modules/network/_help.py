@@ -5501,6 +5501,14 @@ examples:
     text: az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
 """
 
+helps['network vnet-gateway disconnect-vpn-connections'] = """
+type: command
+short-summary: Disconnect vpn connections of virtual network gateway.
+examples:
+  - name: Disconnect vpn connections of virtual network gateway.
+    text: az network vnet-gateway disconnect-vpn-connections -g MyResourceGroup -n MyVnetGateway --vpn-connections MyConnetion1ByName MyConnection2ByID
+"""
+
 helps['network vnet-gateway ipsec-policy'] = """
 type: group
 short-summary: Manage virtual network gateway IPSec policies.
@@ -5818,7 +5826,7 @@ examples:
   - name: List all VPN connections in a resource group.
     text: az network vpn-connection list -g MyResourceGroup
   - name: List all VPN connections in a virtual network gateway.
-    text: az network vpn-connection list -g MyResourceGroup --vnet-gateway-name MyVnetGateway
+    text: az network vpn-connection list -g MyResourceGroup --vnet-gateway MyVnetGateway
 """
 
 helps['network vpn-connection shared-key'] = """

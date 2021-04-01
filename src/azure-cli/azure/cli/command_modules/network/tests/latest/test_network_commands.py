@@ -3568,7 +3568,7 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection list -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
-        self.cmd('network vpn-connection list -g {rg} --vnet-gateway-name {gw1}', checks=[
+        self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
             self.check('length(@)', 1)
         ])
 
@@ -4130,6 +4130,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway list-learned-routes -g {rg} -n {gw1}')
         self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
         self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
+        self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
+            self.check('length(@)', 2)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
     def test_network_vpn_gateway_aad(self, resource_group):
@@ -4177,6 +4180,40 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('aadAudience', None)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_disconnect_connects_')
+    def test_network_vpn_gateway_disconnect_connects(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'vnet2': 'myvnet2',
+            'gw1': 'gateway1',
+            'gw2': 'gateway2',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network public-ip create -n {ip2} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16')
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --public-ip-address {ip1} '
+                 '--vpn-gateway-generation Generation1 --address-prefixes 201.169.0.0/16 --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --public-ip-address {ip2} '
+                 '--vpn-gateway-generation Generation1 --no-wait')
+
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
+
+        self.kwargs.update({
+            'conn12': 'conn1to2',
+            'conn21': 'conn2to1',
+        })
+
+        self.cmd('network vpn-connection create -n {conn12} -g {rg} --shared-key 123 '
+                 '--vnet-gateway1 {gw1} --vnet-gateway2 {gw2}')
+        self.cmd('network vpn-connection create -n {conn21} -g {rg} --shared-key 123 '
+                 '--vnet-gateway2 {gw1} --vnet-gateway1 {gw2}')
+        self.cmd('network vnet-gateway disconnect-vpn-connections -g {rg} -n {gw1} --vpn-connections {conn12}')
 
 class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 

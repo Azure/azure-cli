@@ -37,6 +37,7 @@ from azure.cli.command_modules.network._validators import (
     validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
+    validate_vpn_connection_name_or_id,
     process_vnet_name_or_id, validate_trusted_client_cert)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -1954,6 +1955,11 @@ def load_arguments(self, _):
         c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
         c.argument('client_root_certificates', nargs='+', help='Space-separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
         c.argument('use_legacy', min_api='2017-06-01', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
+
+    with self.argument_context('network vnet-gateway disconnect-vpn-connections') as c:
+        c.argument('vpn_connection_ids', options_list=['--vpn-connections'], nargs='+',
+                   help='List of Name or ID of VPN connections.',
+                   validator=validate_vpn_connection_name_or_id)
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -1966,7 +1972,7 @@ def load_arguments(self, _):
         c.argument('express_route_gateway_bypass', min_api='2018-07-01', arg_type=get_three_state_flag(), help='Bypass ExpressRoute gateway for data forwarding.')
 
     with self.argument_context('network vpn-connection list') as c:
-        c.argument('virtual_network_gateway_name', options_list=['--vnet-gateway-name'], help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'))
+        c.argument('virtual_network_gateway_name', options_list=['--vnet-gateway'], help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'))
 
     with self.argument_context('network vpn-connection create') as c:
         c.argument('connection_name', options_list=['--name', '-n'], metavar='NAME', help='Connection name.')
