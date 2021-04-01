@@ -207,6 +207,8 @@ def load_arguments(self, _):
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
         c.argument('attach_acr', acr_arg_type)
         c.argument('enable_private_cluster', action='store_true')
+        c.argument('private_dns_zone')
+        c.argument('fqdn_subdomain')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', type=str, validator=validate_assign_identity)
