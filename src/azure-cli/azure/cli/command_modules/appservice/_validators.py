@@ -25,9 +25,11 @@ def validate_site_create(cmd, namespace):
             and isinstance(namespace.plan, str):
         resource_group_name = namespace.resource_group_name
         plan = namespace.plan
+        print(plan)
         if is_valid_resource_id(plan):
             parsed_result = parse_resource_id(plan)
             plan_info = client.app_service_plans.get(parsed_result['resource_group'], parsed_result['name'])
+            print(plan_info)
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
@@ -141,29 +143,6 @@ def validate_front_end_scale_factor(namespace):
         scale_factor = namespace.front_end_scale_factor
         if scale_factor < min_scale_factor or scale_factor > max_scale_factor:
             raise CLIError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
-
-
-def validate_asp_sku(cmd, namespace):
-    import json
-    client = web_client_factory(cmd.cli_ctx)
-    serverfarm = namespace.name
-    resource_group_name = namespace.resource_group_name
-    asp = client.app_service_plans.get(resource_group_name, serverfarm, None, raw=True)
-    if asp.response.status_code != 200:
-        raise CLIError(asp.response.text)
-    # convert byte array to json
-    output_str = asp.response.content.decode('utf8')
-    res = json.loads(output_str)
-
-    # Isolated SKU is supported only for ASE
-    if namespace.sku in ['I1', 'I2', 'I3']:
-        if res.get('properties').get('hostingEnvironment') is None:
-            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
-    else:
-        if res.get('properties').get('hostingEnvironment') is not None:
-            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
 
 
 def validate_ip_address(cmd, namespace):

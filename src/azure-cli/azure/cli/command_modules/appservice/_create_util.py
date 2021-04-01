@@ -337,6 +337,7 @@ def get_site_availability(cmd, name):
 def get_app_details(cmd, name):
     client = web_client_factory(cmd.cli_ctx)
     data = (list(filter(lambda x: name.lower() == x.name.lower(), client.web_apps.list())))
+    print(data)
     _num_items = len(data)
     if _num_items > 0:
         return data[0]
