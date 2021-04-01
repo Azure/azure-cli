@@ -130,7 +130,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         enabled = True
         tags = "Tag1=Value1"
         self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s "
-                 "-l %s -d %s -w %s -m %s -e %s --tags %s --enabled true" %
+                 "-l %s -d %s -w %s -m %s -e %s --tags %s" %
                  (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
                   weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
 

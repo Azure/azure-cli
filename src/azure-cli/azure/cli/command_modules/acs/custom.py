@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import binascii
 import datetime
 import errno
@@ -47,6 +46,7 @@ from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
                                        InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError,
                                        ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -120,6 +120,7 @@ from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
+from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM
 
 logger = get_logger(__name__)
 
@@ -1884,6 +1885,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
+               private_dns_zone=None,
+               fqdn_subdomain=None,
                enable_managed_identity=True,
                assign_identity=None,
                attach_acr=None,
@@ -1900,7 +1903,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    if not dns_name_prefix:
+    if dns_name_prefix and fqdn_subdomain:
+        raise MutuallyExclusiveArgumentError('--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
+    if not dns_name_prefix and not fqdn_subdomain:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -1984,7 +1989,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                       service_principal=service_principal, client_secret=client_secret,
                                                       subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                      location=location, name=name)
+                                                      fqdn_subdomain=fqdn_subdomain, location=location, name=name)
         service_principal_profile = ManagedClusterServicePrincipalProfile(
             client_id=principal_obj.get("service_principal"),
             secret=principal_obj.get("client_secret"),
@@ -2176,6 +2181,24 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id
     )
+
+    use_custom_private_dns_zone = False
+    if private_dns_zone:
+        if not enable_private_cluster:
+            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. "
+                                            "It should always be empty for public cluster")
+        mc.api_server_access_profile.private_dns_zone = private_dns_zone
+        from msrestazure.tools import is_valid_resource_id
+        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+            if is_valid_resource_id(private_dns_zone):
+                use_custom_private_dns_zone = True
+            else:
+                raise InvalidArgumentValueError(private_dns_zone + " is not a valid Azure resource ID.")
+    if fqdn_subdomain:
+        if not use_custom_private_dns_zone:
+            raise ArgumentUsageError("--fqdn-subdomain should only be used for "
+                                     "private cluster with custom private dns zone")
+        mc.fqdn_subdomain = fqdn_subdomain
 
     if uptime_sla:
         mc.sku = ManagedClusterSKU(
@@ -3603,6 +3626,7 @@ def _ensure_aks_service_principal(cli_ctx,
                                   client_secret=None,
                                   subscription_id=None,
                                   dns_name_prefix=None,
+                                  fqdn_subdomain=None,
                                   location=None,
                                   name=None):
     aad_session_key = None
@@ -3613,7 +3637,10 @@ def _ensure_aks_service_principal(cli_ctx,
         if not client_secret:
             client_secret = _create_client_secret()
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        if dns_name_prefix:
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        else:
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, fqdn_subdomain, location)
 
         service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
