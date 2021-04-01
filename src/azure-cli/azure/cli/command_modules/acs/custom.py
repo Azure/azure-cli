@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import binascii
 import datetime
 import errno
@@ -47,6 +46,7 @@ from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
                                        InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError,
                                        ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -63,21 +63,21 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentity
-from azure.mgmt.containerservice.v2020_09_01.models import AgentPool
-from azure.mgmt.containerservice.v2020_09_01.models import AgentPoolUpgradeSettings
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterSKU
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterWindowsProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2021_02_01.models import AgentPool
+from azure.mgmt.containerservice.v2021_02_01.models import AgentPoolUpgradeSettings
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterSKU
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterWindowsProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -96,7 +96,7 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
-from ._client_factory import cf_managed_clusters
+from ._client_factory import cf_agent_pools
 from ._client_factory import get_msi_client
 
 from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
@@ -120,6 +120,7 @@ from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
 from ._consts import ADDONS
 from ._consts import CONST_CANIPULL_IMAGE
+from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM
 
 logger = get_logger(__name__)
 
@@ -772,13 +773,14 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
 
 
 def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    msi_client = get_msi_client(cli_ctx)
-    pattern = '/subscriptions/.*?/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'
+    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
     resource_id = resource_id.lower()
     match = re.search(pattern, resource_id)
     if match:
-        resource_group_name = match.group(1)
-        identity_name = match.group(2)
+        subscription_id = match.group(1)
+        resource_group_name = match.group(2)
+        identity_name = match.group(3)
+        msi_client = get_msi_client(cli_ctx, subscription_id)
         try:
             identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                                resource_name=identity_name)
@@ -1879,9 +1881,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                tags=None,
                zones=None,
                enable_node_public_ip=False,
+               node_public_ip_prefix_id=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
+               private_dns_zone=None,
+               fqdn_subdomain=None,
                enable_managed_identity=True,
                assign_identity=None,
                attach_acr=None,
@@ -1898,7 +1903,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    if not dns_name_prefix:
+    if dns_name_prefix and fqdn_subdomain:
+        raise MutuallyExclusiveArgumentError('--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
+    if not dns_name_prefix and not fqdn_subdomain:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -1922,6 +1929,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         proximity_placement_group_id=ppg,
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
+        node_public_ip_prefix_id=node_public_ip_prefix_id,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -1981,7 +1989,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                       service_principal=service_principal, client_secret=client_secret,
                                                       subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                      location=location, name=name)
+                                                      fqdn_subdomain=fqdn_subdomain, location=location, name=name)
         service_principal_profile = ManagedClusterServicePrincipalProfile(
             client_id=principal_obj.get("service_principal"),
             secret=principal_obj.get("client_secret"),
@@ -2173,6 +2181,24 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id
     )
+
+    use_custom_private_dns_zone = False
+    if private_dns_zone:
+        if not enable_private_cluster:
+            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. "
+                                            "It should always be empty for public cluster")
+        mc.api_server_access_profile.private_dns_zone = private_dns_zone
+        from msrestazure.tools import is_valid_resource_id
+        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+            if is_valid_resource_id(private_dns_zone):
+                use_custom_private_dns_zone = True
+            else:
+                raise InvalidArgumentValueError(private_dns_zone + " is not a valid Azure resource ID.")
+    if fqdn_subdomain:
+        if not use_custom_private_dns_zone:
+            raise ArgumentUsageError("--fqdn-subdomain should only be used for "
+                                     "private cluster with custom private dns zone")
+        mc.fqdn_subdomain = fqdn_subdomain
 
     if uptime_sla:
         mc.sku = ManagedClusterSKU(
@@ -2546,7 +2572,7 @@ def aks_update(cmd, client, resource_group_name, name,
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     client_id = ""
-    if instance.identity is not None and instance.identity.type == "SystemAssigned":
+    if _is_msi_cluster(instance):
         if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
             raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
                            'Please do not set --attach-acr or --detach-acr. '
@@ -2663,7 +2689,9 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets cluster.')
-            _upgrade_single_nodepool_image_version(True, client, resource_group_name, name, agent_pool_profile.name)
+            agent_pool_client = cf_agent_pools(cmd.cli_ctx)
+            _upgrade_single_nodepool_image_version(True, agent_pool_client,
+                                                   resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
 
@@ -3354,6 +3382,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       kubernetes_version=None,
                       zones=None,
                       enable_node_public_ip=False,
+                      node_public_ip_prefix_id=None,
                       node_vm_size=None,
                       node_osdisk_type=None,
                       node_osdisk_size=0,
@@ -3415,6 +3444,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         availability_zones=zones,
         scale_set_priority=priority,
         enable_node_public_ip=enable_node_public_ip,
+        node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         mode=mode
@@ -3462,9 +3492,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                        'If you only want to upgrade the node version please use the "--node-image-only" option only.')
 
     if node_image_only:
-        managed_cluster_client = cf_managed_clusters(cmd.cli_ctx)
         return _upgrade_single_nodepool_image_version(no_wait,
-                                                      managed_cluster_client,
+                                                      client,
                                                       resource_group_name,
                                                       cluster_name,
                                                       nodepool_name)
@@ -3597,6 +3626,7 @@ def _ensure_aks_service_principal(cli_ctx,
                                   client_secret=None,
                                   subscription_id=None,
                                   dns_name_prefix=None,
+                                  fqdn_subdomain=None,
                                   location=None,
                                   name=None):
     aad_session_key = None
@@ -3607,7 +3637,10 @@ def _ensure_aks_service_principal(cli_ctx,
         if not client_secret:
             client_secret = _create_client_secret()
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        if dns_name_prefix:
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        else:
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, fqdn_subdomain, location)
 
         service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
@@ -4068,3 +4101,9 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def _is_msi_cluster(managed_cluster):
+    return (managed_cluster and managed_cluster.identity and
+            (managed_cluster.identity.type.casefold() == "systemassigned" or
+             managed_cluster.identity.type.casefold() == "userassigned"))

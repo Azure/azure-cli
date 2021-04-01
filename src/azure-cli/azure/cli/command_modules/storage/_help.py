@@ -170,6 +170,7 @@ examples:
 
 helps['storage account generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the storage account.
 parameters:
   - name: --services
     short-summary: 'The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.'
@@ -1925,6 +1926,34 @@ examples:
       text: |
           az storage fs directory show --account-name myadlsaccount --auth-mode login --file-system myfilesystem --name dir
       crafted: true
+"""
+
+helps['storage fs directory upload'] = """
+    type: command
+    short-summary: Upload files or subdirectories to a directory in ADLS Gen2 file system.
+    examples:
+        - name: Upload a single file to a storage blob directory.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d directory
+        - name: Upload a local directory to root directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" --recursive
+        - name: Upload a local directory to a directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" -d directory --recursive
+        - name: Upload a set of files in a local directory to a directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file*" -d directory --recursive
+"""
+
+helps['storage fs directory download'] = """
+    type: command
+    short-summary: Download files from the directory in ADLS Gen2 file system to a local file path.
+    examples:
+        - name: Download a single file in a directory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d "<local-path>"
+        - name: Download whole ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount  -d "<local-path>" --recursive
+        - name: Download the entire directory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s SourceDirectoryPath -d "<local-path>" --recursive
+        - name: Download an entire subdirectory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
 """
 
 helps['storage fs file'] = """

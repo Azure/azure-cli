@@ -334,6 +334,18 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
             self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddressVersion', 'IPv6')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_lb_frontend_ip_zone', location='eastus2')
+    def test_network_lb_frontend_ip_zone(self, resource_group):
+        self.kwargs.update({
+            'location': 'eastus2',
+        })
+
+        # LB with subnet : internal LB
+        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+            self.check("length(zones)", 3)
+        ])
+
 
 class NetworkPublicIpWithSku(ScenarioTest):
 
@@ -425,6 +437,18 @@ class NetworkPublicIpPrefix(ScenarioTest):
         # Check with unsupported IP address version: IPv5
         with self.assertRaisesRegexp(SystemExit, '2'):
             self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
+    def test_network_public_ip_prefix_zone(self, resource_group):
+        self.kwargs.update({
+            'prefix': 'prefix1',
+        })
+
+        # Test prefix with multi zones
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --zone 1 2 3', checks=[
+            self.check('prefixLength', 30),
+            self.check('length(zones)', 3)
+        ])
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
@@ -2655,24 +2679,30 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
             'rg': resource_group,
-            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-address-pool-config.json')
+            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-address-pool-config.json'),
+            'subnet_name': 'subnetx'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet_name} --vnet-name {vnet} --address-prefixes 10.0.1.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
 
-        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
-            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address name=addr2')
-        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
-            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --backend-address name=addr2 ip-address=10.0.0.3')
-        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
-            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address ip-address=10.0.0.3')
+        self.kwargs['subnet'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['subnets'][0]['id']
 
+        # create with vnet
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} '
                  '--backend-address name=addr1 ip-address=10.0.0.1 '
                  '--backend-address name=addr2 ip-address=10.0.0.2 '
                  '--backend-address name=addr3 ip-address=10.0.0.3',
                  checks=self.check('name', 'bap1'))
+
+        # create with subnet
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} '
+                 '--backend-address name=addr1 ip-address=10.0.0.1 subnet={subnet} '
+                 '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
+                 '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet}',
+                 checks=self.check('name', 'bap2'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap2 ')
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
 
@@ -2700,6 +2730,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
 
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '1'))
+
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr7 --subnet {subnet} --ip-address 10.0.0.7', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr8 --vnet {vnet} --subnet {subnet_name} --ip-address 10.0.0.8', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '3'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_probes', location='eastus2')
     def test_network_lb_probes(self, resource_group):
@@ -3547,6 +3583,58 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
         self.cmd('network vnet-gateway ipsec-policy clear -g {rg} --gateway-name {gw}')
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
+
+
+class NetworkVnetGatewayMultiAuth(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_multi_auth')
+    def test_network_vnet_gateway_multi_auth(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+            'aad_tenant': 'https://login.microsoftonline.com/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4',
+            'aad_issuer': 'https://sts.windows.net/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4/',
+            'aad_audience': 'a21fce82-76af-45e6-8583-a08cb3b956f9',
+            'root_cert_name': 'root-cert',
+            'root_cert_data': os.path.join(TEST_DIR, 'test-root-cert.cer'),
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN '
+                 '--aad-audience {aad_audience} --aad-issuer {aad_issuer} --aad-tenant {aad_tenant} '
+                 '--root-cert-name {root_cert_name} --root-cert-data "{root_cert_data}" '
+                 '--radius-secret 111_aaa --radius-server 30.1.1.15 --vpn-auth-type AAD Certificate Radius',
+                 checks=[self.check('length(vnetGateway.vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_multi_auth1')
+    def test_network_vnet_gateway_multi_auth1(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+            'aad_tenant': 'https://login.microsoftonline.com/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4',
+            'aad_issuer': 'https://sts.windows.net/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4/',
+            'aad_audience': 'a21fce82-76af-45e6-8583-a08cb3b956f9',
+            'root_cert_name': 'root-cert',
+            'root_cert_data': os.path.join(TEST_DIR, 'test-root-cert.cer'),
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN')
+        self.cmd('network vnet-gateway update -g {rg} -n {gw} --vpn-auth-type AAD Certificate Radius '
+                 '--aad-audience {aad_audience} --aad-issuer {aad_issuer} --aad-tenant {aad_tenant} '
+                 '--root-cert-name {root_cert_name} --root-cert-data "{root_cert_data}" '
+                 '--radius-secret 111_aaa --radius-server 30.1.1.15 ',
+                 checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
 
 class NetworkVirtualRouter(ScenarioTest):

@@ -364,6 +364,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -376,6 +379,13 @@ parameters:
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: Private dns zone mode for private cluster.
+    long-summary: Allowed values are "system" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
+  - name: --fqdn-subdomain
+    type: string
+    short-summary: Prefix for FQDN that is created for private cluster with custom private dns zone scenario.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
@@ -700,6 +710,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.

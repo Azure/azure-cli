@@ -4,23 +4,27 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.mgmt.rdbms import postgresql_flexibleservers
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG
+    DEFAULT_LOCATION_PG, change_str_to_datetime
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
 from .validators import pg_arguments_validator
 
 
 logger = get_logger(__name__)
+DEFAULT_DB_NAME = 'flexibleserverdb'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 
 
@@ -33,7 +37,7 @@ def flexible_server_create(cmd, client,
                            sku_name=None, tier=None,
                            storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
-                           tags=None, public_access=None,
+                           tags=None, public_access=None, database_name=None,
                            assign_identity=False, subnet_arm_resource_id=None,
                            high_availability=None, zone=None, vnet_resource_id=None,
                            vnet_address_prefix=None, subnet_address_prefix=None):
@@ -44,11 +48,8 @@ def flexible_server_create(cmd, client,
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
     storage_mb *= 1024
 
-    from azure.mgmt.rdbms import postgresql_flexibleservers
-
-    # try:
     db_context = DbContext(
-        azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
     # Raise error when user passes values for both parameters
@@ -105,6 +106,11 @@ def flexible_server_create(cmd, client,
                 start_ip, end_ip = parse_public_access_input(public_access)
             firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
+        # Create mysql database if it does not exist
+        if database_name is None:
+            database_name = DEFAULT_DB_NAME
+        _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+
     user = server_result.administrator_login
     server_id = server_result.id
     loc = server_result.location
@@ -112,8 +118,8 @@ def flexible_server_create(cmd, client,
     sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
 
-    logger.warning('Make a note of your password. If you forget, you would have to \
-                   reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
+    logger.warning('Make a note of your password. If you forget, you would have to'
+                   'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
                    server_name, resource_group_name)
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
@@ -126,8 +132,7 @@ def flexible_server_create(cmd, client,
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, restore_point_in_time=None,
-                            location=None, zone=None, no_wait=False):
+                            source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
 
     if not is_valid_resource_id(source_server):
@@ -143,14 +148,17 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    from azure.mgmt.rdbms import postgresql_flexibleservers
+    restore_point_in_time = change_str_to_datetime(restore_point_in_time)
+    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
+
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
         availability_zone=zone,
-        location=location,
-        server_name=server_name)
+        source_resource_group_name=resource_group_name,
+        source_subscription_id=get_subscription_id(cmd.cli_ctx),
+        location=location)
 
     # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server_id)
@@ -158,13 +166,9 @@ def flexible_server_restore(cmd, client,
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
     except Exception as e:
-        raise ValueError('Unable to get source server: {}.'.format(str(e)))
+        raise ResourceNotFoundError(e)
 
-    if source_server_object.id.split('/')[4] != resource_group_name:
-        raise CLIError("Check if the source server exists in the same resource group you entered. \
-                        The source server and the restored server should be in the same resource group. ")
-
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 # Update Flexible server command
@@ -213,7 +217,6 @@ def flexible_server_update_custom_func(cmd, instance,
 
         # set values - if maintenance_window when is None when created then create a new object
         if instance.maintenance_window is None:
-            from azure.mgmt.rdbms import postgresql_flexibleservers
             instance.maintenance_window = postgresql_flexibleservers.models.MaintenanceWindow(
                 day_of_week=day_of_week,
                 start_hour=start_hour,
@@ -235,10 +238,8 @@ def flexible_server_update_custom_func(cmd, instance,
 
     if assign_identity:
         if server_module_path.find('postgres'):
-            from azure.mgmt.rdbms import postgresql_flexibleservers
             if instance.identity is None:
-                instance.identity = postgresql_flexibleservers.models.Identity(
-                    type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+                instance.identity = postgresql_flexibleservers.models.Identity()
             params.identity = instance.identity
     return params
 
@@ -253,7 +254,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
             yes=yes)
     if confirm:
         try:
-            result = client.delete(resource_group_name, server_name)
+            result = client.begin_delete(resource_group_name, server_name)
             if cmd.cli_ctx.local_context.is_on:
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('postgres flexible-server', 'server_name')
@@ -286,7 +287,13 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     elif source is None:
         source = "user-override"
 
-    return client.update(resource_group_name, server_name, configuration_name, value, source)
+    parameters = postgresql_flexibleservers.models.Configuration(
+        configuration_name=configuration_name,
+        value=value,
+        source=source
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 
 
 def flexible_list_skus(cmd, client, location):
@@ -303,8 +310,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku_name)
-
-    from azure.mgmt.rdbms import postgresql_flexibleservers
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
@@ -325,12 +330,51 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = postgresql_flexibleservers.models.Identity(
-            type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
+        parameters.identity = postgresql_flexibleservers.models.Identity()
 
     return resolve_poller(
-        server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(logging_name))
+
+
+def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
+    # check for existing database, create if not
+    cf_db, logging_name = db_context.cf_db, db_context.logging_name
+    database_client = cf_db(cmd.cli_ctx, None)
+    try:
+        database_client.get(resource_group_name, server_name, database_name)
+    except ResourceNotFoundError:
+        logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+        parameters = {
+            'name': database_name,
+            'charset': 'utf8',
+            'collation': 'en_US.utf8'
+        }
+        resolve_poller(
+            database_client.begin_create(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
+            '{} Database Create/Update'.format(logging_name))
+
+
+def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+
+    if charset is None and collation is None:
+        charset = 'utf8'
+        collation = 'en_US.utf8'
+        logger.warning("Creating database with utf8 charset and en_US.utf8 collation")
+    elif (not charset and collation) or (charset and not collation):
+        raise RequiredArgumentMissingError("charset and collation have to be input together.")
+
+    parameters = {
+        'name': database_name,
+        'charset': charset,
+        'collation': collation
+    }
+
+    return client.begin_create(
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters)
 
 
 def flexible_server_connection_string(
@@ -428,10 +472,11 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location, user
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
-    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None,
+    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
                  command_group=None, server_client=None):
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
         self.logging_name = logging_name
+        self.cf_db = cf_db
         self.command_group = command_group
         self.server_client = server_client
