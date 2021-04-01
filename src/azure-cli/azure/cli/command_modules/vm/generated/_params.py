@@ -7,15 +7,27 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
 from azure.cli.core.commands.parameters import (
     tags_type,
+    get_three_state_flag,
+    get_enum_type,
     resource_group_name_type,
     get_location_type
 )
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group,
+    validate_file_or_dict
+)
+from .._actions import (
+    AddWindowsParameters,
+    AddLinuxParameters,
+    AddSubstatuses,
+    AddStatuses
+)
 
 
 def load_arguments(self, _):
@@ -54,3 +66,365 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
+
+    with self.argument_context('vm virtual-machine install-patch') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_name', options_list=['--name'], type=str, help='The name of the virtual machine.',
+                   id_part='name')
+        c.argument('maximum_duration', type=str, help='Specifies the maximum amount of time that the operation will '
+                   'run. It must be an ISO 8601-compliant duration string such as PT4H (4 hours)')
+        c.argument('reboot_setting', arg_type=get_enum_type(['IfRequired', 'Never', 'Always']), help='Defines when it '
+                   'is acceptable to reboot a VM during a software update operation.')
+        c.argument('windows_parameters', action=AddWindowsParameters, nargs='+', help='Input for InstallPatches on a '
+                   'Windows VM, as directly received by the API')
+        c.argument('linux_parameters', action=AddLinuxParameters, nargs='+', help='Input for InstallPatches on a Linux '
+                   'VM, as directly received by the API')
+
+    with self.argument_context('vm virtual-machine reimage') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_name', options_list=['--name'], type=str, help='The name of the virtual machine.',
+                   id_part='name')
+        c.argument('temp_disk', arg_type=get_three_state_flag(), help='Specifies whether to reimage temp disk. Default '
+                   'value: false. Note: This temp disk reimage parameter is only supported for VM/VMSS with Ephemeral '
+                   'OS disk.')
+
+    with self.argument_context('vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('platform_update_domain', type=int, help='The platform update domain for which a manual recovery '
+                   'walk is requested')
+
+    with self.argument_context('vm virtual-machine-scale-set redeploy') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_ids', nargs='+', help='The virtual machine scale set instance ids. Omitting the virtual '
+                   'machine scale set instance ids will result in the operation being performed on all virtual '
+                   'machines in the virtual machine scale set.')
+
+    with self.argument_context('vm virtual-machine-scale-set reimage-all') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_ids', nargs='+', help='The virtual machine scale set instance ids. Omitting the virtual '
+                   'machine scale set instance ids will result in the operation being performed on all virtual '
+                   'machines in the virtual machine scale set.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+        c.argument('vm_extension_name', type=str, help='The name of the virtual machine extension.',
+                   id_part='child_name_2')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension create') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+        c.argument('vm_extension_name', type=str, help='The name of the virtual machine extension.')
+        c.argument('force_update_tag', type=str, help='How the extension handler should be forced to update even if '
+                   'the extension configuration has not changed.')
+        c.argument('publisher', type=str, help='The name of the extension handler publisher.')
+        c.argument('type_properties_type', type=str, help='Specifies the type of the extension; an example is '
+                   '"CustomScriptExtension".')
+        c.argument('type_handler_version', type=str, help='Specifies the version of the script handler.')
+        c.argument('auto_upgrade_minor_version', arg_type=get_three_state_flag(), help='Indicates whether the '
+                   'extension should use a newer minor version if one is available at deployment time. Once deployed, '
+                   'however, the extension will not upgrade minor versions unless redeployed, even with this property '
+                   'set to true.')
+        c.argument('enable_automatic_upgrade', arg_type=get_three_state_flag(), help='Indicates whether the extension '
+                   'should be automatically upgraded by the platform if there is a newer version of the extension '
+                   'available.')
+        c.argument('settings', type=validate_file_or_dict, help='Json formatted public settings for the extension. '
+                   'Expected value: json-string/@json-file.')
+        c.argument('protected_settings', type=validate_file_or_dict, help='The extension can contain either '
+                   'protectedSettings or protectedSettingsFromKeyVault or no protected settings at all. Expected '
+                   'value: json-string/@json-file.')
+        c.argument('name', type=str, help='The virtual machine extension name.', arg_group='Instance View')
+        c.argument('type_', options_list=['--type'], type=str, help='Specifies the type of the extension; an example '
+                   'is "CustomScriptExtension".', arg_group='Instance View')
+        c.argument('virtual_machine_extension_instance_view_type_handler_version_type_handler_version', type=str,
+                   help='Specifies the version of the script handler.', arg_group='Instance View')
+        c.argument('substatuses', action=AddSubstatuses, nargs='+', help='The resource status information.',
+                   arg_group='Instance View')
+        c.argument('statuses', action=AddStatuses, nargs='+', help='The resource status information.',
+                   arg_group='Instance View')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-extension wait') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+        c.argument('vm_extension_name', type=str, help='The name of the virtual machine extension.',
+                   id_part='child_name_2')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm virtual-machine-scale-set-v-ms redeploy') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+
+    with self.argument_context('vm virtual-machine-scale-set-v-ms reimage-all') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+
+    with self.argument_context('vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.', id_part='name')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.', id_part='child_name_1')
+        c.argument('sas_uri_expiration_time_in_minutes', type=int, help='Expiration duration in minutes for the SAS '
+                   'URIs with a value between 1 to 1440 minutes. <br><br>NOTE: If not specified, SAS URIs will be '
+                   'generated with a default expiration duration of 120 minutes.')
+
+    with self.argument_context('vm virtual-machine-scale-set-vm-run-command list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('vm_scale_set_name', type=str, help='The name of the VM scale set.')
+        c.argument('instance_id', type=str, help='The instance ID of the virtual machine.')
+        c.argument('expand', type=str, help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vm disk-access delete-a-private-endpoint-connection') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('disk_access_name', options_list=['--name', '-n', '--disk-access-name'], type=str, help='The name '
+                   'of the disk access resource that is being created. The name can\'t be changed after the disk '
+                   'encryption set is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum '
+                   'name length is 80 characters.', id_part='name')
+        c.argument('private_endpoint_connection_name', type=str, help='The name of the private endpoint connection',
+                   id_part='child_name_1')
+
+    with self.argument_context('vm disk-access list-private-endpoint-connection') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('disk_access_name', options_list=['--name', '-n', '--disk-access-name'], type=str, help='The name '
+                   'of the disk access resource that is being created. The name can\'t be changed after the disk '
+                   'encryption set is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum '
+                   'name length is 80 characters.')
+
+    with self.argument_context('vm disk-access show-private-link-resource') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('disk_access_name', options_list=['--name', '-n', '--disk-access-name'], type=str, help='The name '
+                   'of the disk access resource that is being created. The name can\'t be changed after the disk '
+                   'encryption set is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum '
+                   'name length is 80 characters.', id_part='name')
+
+    with self.argument_context('vm disk-restore-point show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('restore_point_collection_name', type=str, help='The name of the restore point collection that the '
+                   'disk restore point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum '
+                   'name length is 80 characters.', id_part='name')
+        c.argument('vm_restore_point_name', type=str, help='The name of the vm restore point that the disk disk '
+                   'restore point belongs. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name '
+                   'length is 80 characters.', id_part='child_name_1')
+        c.argument('disk_restore_point_name', options_list=['--name', '-n', '--disk-restore-point-name'], type=str,
+                   help='The name of the disk restore point created. Supported characters for the name are a-z, A-Z, '
+                   '0-9 and _. The maximum name length is 80 characters.', id_part='child_name_2')
+
+    with self.argument_context('vm gallery-application list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery from which Application '
+                   'Definitions are to be listed.')
+
+    with self.argument_context('vm gallery-application show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery from which the '
+                   'Application Definitions are to be retrieved.', id_part='name')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be retrieved.', id_part='child_name_1')
+
+    with self.argument_context('vm gallery-application create') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery in which the Application '
+                   'Definition is to be created.')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be created or updated. The allowed '
+                   'characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The '
+                   'maximum length is 80 characters.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('description', type=str, help='The description of this gallery Application Definition resource. '
+                   'This property is updatable.')
+        c.argument('eula', type=str, help='The Eula agreement for the gallery Application Definition.')
+        c.argument('privacy_statement_uri', type=str, help='The privacy statement uri.')
+        c.argument('release_note_uri', type=str, help='The release note uri.')
+        c.argument('end_of_life_date', help='The end of life date of the gallery Application Definition. This property '
+                   'can be used for decommissioning purposes. This property is updatable.')
+        c.argument('supported_os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='This property allows you '
+                   'to specify the supported type of the OS that application is built for. <br><br> Possible values '
+                   'are: <br><br> **Windows** <br><br> **Linux**')
+
+    with self.argument_context('vm gallery-application delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery in which the Application '
+                   'Definition is to be deleted.', id_part='name')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be deleted.', id_part='child_name_1')
+
+    with self.argument_context('vm gallery-application wait') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery from which the '
+                   'Application Definitions are to be retrieved.', id_part='name')
+        c.argument('gallery_application_name', options_list=['--name', '-n', '--gallery-application-name'], type=str,
+                   help='The name of the gallery Application Definition to be retrieved.', id_part='child_name_1')
+
+    with self.argument_context('vm gallery-application-version list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('gallery_name', type=str, help='The name of the Shared Application Gallery in which the Application '
+                   'Definition resides.')
+        c.argument('gallery_application_name', type=str, help='The name of the Shared Application Gallery Application '
+                   'Definition from which the Application Versions are to be listed.')
+
+    with self.argument_context('vm cloud-service-role-instance list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='')
+
+    with self.argument_context('vm cloud-service-role-instance show') as c:
+        c.argument('role_instance_name', type=str, help='Name of the role instance.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service-role-instance reimage') as c:
+        c.argument('role_instance_name', type=str, help='Name of the role instance.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service-role-instance restart') as c:
+        c.argument('role_instance_name', type=str, help='Name of the role instance.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service-role-instance show-instance-view') as c:
+        c.argument('role_instance_name', type=str, help='Name of the role instance.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service-role-instance show-remote-desktop-file') as c:
+        c.argument('role_instance_name', type=str, help='Name of the role instance.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service-role-instance wait') as c:
+        c.argument('role_instance_name', type=str, help='Name of the role instance.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service-role list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='')
+
+    with self.argument_context('vm cloud-service-role show') as c:
+        c.argument('role_name', type=str, help='Name of the role.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='', id_part='name')
+
+    with self.argument_context('vm cloud-service list') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+
+    with self.argument_context('vm cloud-service show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+
+    with self.argument_context('vm cloud-service create') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('package_url', type=str, help='Specifies a URL that refers to the location of the service package '
+                   'in the Blob service. The service package URL can be Shared Access Signature (SAS) URI from any '
+                   'storage account. This is a write-only property and is not returned in GET calls.')
+        c.argument('configuration', type=str, help='Specifies the XML service configuration (.cscfg) for the cloud '
+                   'service.')
+        c.argument('configuration_url', type=str, help='Specifies a URL that refers to the location of the service '
+                   'configuration in the Blob service. The service package URL  can be Shared Access Signature (SAS) '
+                   'URI from any storage account. This is a write-only property and is not returned in GET calls.')
+        c.argument('start_cloud_service', arg_type=get_three_state_flag(), help='(Optional) Indicates whether to start '
+                   'the cloud service immediately after it is created. The default value is `true`. If false, the '
+                   'service model is still deployed, but the code is not run immediately. Instead, the service is '
+                   'PoweredOff until you call Start, at which time the service will be started. A deployed service '
+                   'still incurs charges, even if it is poweredoff.')
+        c.argument('allow_model_override', arg_type=get_three_state_flag(), help='(Optional) Indicates whether the '
+                   'role sku properties (roleProfile.roles.sku) specified in the model/template should override the '
+                   'role instance count and vm size specified in the .cscfg and .csdef respectively. The default value '
+                   'is `false`.')
+        c.argument('upgrade_mode', arg_type=get_enum_type(['Auto', 'Manual', 'Simultaneous']), help='Update mode for '
+                   'the cloud service. Role instances are allocated to update domains when the service is deployed. '
+                   'Updates can be initiated manually in each update domain or initiated automatically in all update '
+                   'domains. Possible Values are <br /><br />**Auto**<br /><br />**Manual** <br /><br '
+                   '/>**Simultaneous**<br /><br /> If not specified, the default value is Auto. If set to Manual, PUT '
+                   'UpdateDomain must be called to apply the update. If set to Auto, the update is automatically '
+                   'applied to each update domain in sequence.')
+        c.argument('extensions', type=validate_file_or_dict, help='List of extensions for the cloud service. Expected '
+                   'value: json-string/@json-file.', arg_group='Extension Profile')
+        c.argument('load_balancer_configurations', type=validate_file_or_dict, help='List of Load balancer '
+                   'configurations. Cloud service can have up to two load balancer configurations, corresponding to a '
+                   'Public Load Balancer and an Internal Load Balancer. Expected value: json-string/@json-file.',
+                   arg_group='Network Profile')
+        c.argument('id_', options_list=['--id'], type=str, help='Resource Id', arg_group='Network Profile Swappable '
+                   'Cloud Service')
+        c.argument('secrets', type=validate_file_or_dict, help='Specifies set of certificates that should be installed '
+                   'onto the role instances. Expected value: json-string/@json-file.', arg_group='Os Profile')
+        c.argument('roles', type=validate_file_or_dict, help='List of roles for the cloud service. Expected value: '
+                   'json-string/@json-file.', arg_group='Role Profile')
+
+    with self.argument_context('vm cloud-service delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+
+    with self.argument_context('vm cloud-service delete-instance') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+        c.argument('role_instances', nargs='+', help='List of cloud service role instance names. Value of \'*\' will '
+                   'signify all role instances of the cloud service.')
+
+    with self.argument_context('vm cloud-service power-off') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+
+    with self.argument_context('vm cloud-service restart') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+        c.argument('role_instances', nargs='+', help='List of cloud service role instance names. Value of \'*\' will '
+                   'signify all role instances of the cloud service.')
+
+    with self.argument_context('vm cloud-service show-instance-view') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+
+    with self.argument_context('vm cloud-service start') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+
+    with self.argument_context('vm cloud-service wait') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', options_list=['--name', '-n', '--cloud-service-name'], type=str, help='Name '
+                   'of the cloud service.', id_part='name')
+
+    with self.argument_context('vm cloud-service-update-domain list-update-domain') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='Name of the cloud service.')
+
+    with self.argument_context('vm cloud-service-update-domain show-update-domain') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='Name of the cloud service.', id_part='name')
+        c.argument('update_domain', type=int, help='Specifies an integer value that identifies the update domain. '
+                   'Update domains are identified with a zero-based index: the first update domain has an ID of 0, the '
+                   'second has an ID of 1, and so on.', id_part='child_name_1')
+
+    with self.argument_context('vm cloud-service-update-domain walk-update-domain') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('cloud_service_name', type=str, help='Name of the cloud service.', id_part='name')
+        c.argument('update_domain', type=int, help='Specifies an integer value that identifies the update domain. '
+                   'Update domains are identified with a zero-based index: the first update domain has an ID of 0, the '
+                   'second has an ID of 1, and so on.', id_part='child_name_1')

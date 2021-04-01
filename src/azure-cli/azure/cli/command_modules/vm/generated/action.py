@@ -8,3 +8,139 @@
 # regenerated.
 # --------------------------------------------------------------------------
 # pylint: disable=protected-access
+
+import argparse
+from collections import defaultdict
+from knack.util import CLIError
+
+
+class AddWindowsParameters(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.windows_parameters = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'classifications-to-include':
+                d['classifications_to_include'] = v
+            elif kl == 'kb-numbers-to-include':
+                d['kb_numbers_to_include'] = v
+            elif kl == 'kb-numbers-to-exclude':
+                d['kb_numbers_to_exclude'] = v
+            elif kl == 'exclude-kbs-requiring-reboot':
+                d['exclude_kbs_requiring_reboot'] = v[0]
+            elif kl == 'max-patch-publish-date':
+                d['max_patch_publish_date'] = v[0]
+            else:
+                raise CLIError('Unsupported Key {} is provided for parameter windows_parameters. All possible keys '
+                               'are: classifications-to-include, kb-numbers-to-include, kb-numbers-to-exclude, '
+                               'exclude-kbs-requiring-reboot, max-patch-publish-date'.format(k))
+        return d
+
+
+class AddLinuxParameters(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.linux_parameters = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'classifications-to-include':
+                d['classifications_to_include'] = v
+            elif kl == 'package-name-masks-to-include':
+                d['package_name_masks_to_include'] = v
+            elif kl == 'package-name-masks-to-exclude':
+                d['package_name_masks_to_exclude'] = v
+            elif kl == 'maintenance-run-id':
+                d['maintenance_run_id'] = v[0]
+            else:
+                raise CLIError('Unsupported Key {} is provided for parameter linux_parameters. All possible keys are: '
+                               'classifications-to-include, package-name-masks-to-include, '
+                               'package-name-masks-to-exclude, maintenance-run-id'.format(k))
+        return d
+
+
+class AddSubstatuses(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AddSubstatuses, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'code':
+                d['code'] = v[0]
+            elif kl == 'level':
+                d['level'] = v[0]
+            elif kl == 'display-status':
+                d['display_status'] = v[0]
+            elif kl == 'message':
+                d['message'] = v[0]
+            elif kl == 'time':
+                d['time'] = v[0]
+            else:
+                raise CLIError('Unsupported Key {} is provided for parameter substatuses. All possible keys are: code, '
+                               'level, display-status, message, time'.format(k))
+        return d
+
+
+class AddStatuses(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AddStatuses, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'code':
+                d['code'] = v[0]
+            elif kl == 'level':
+                d['level'] = v[0]
+            elif kl == 'display-status':
+                d['display_status'] = v[0]
+            elif kl == 'message':
+                d['message'] = v[0]
+            elif kl == 'time':
+                d['time'] = v[0]
+            else:
+                raise CLIError('Unsupported Key {} is provided for parameter statuses. All possible keys are: code, '
+                               'level, display-status, message, time'.format(k))
+        return d

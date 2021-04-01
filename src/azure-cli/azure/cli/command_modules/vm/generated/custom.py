@@ -7,7 +7,10 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
+
+from azure.cli.core.util import sdk_no_wait
 
 
 def sshkey_list(client,
@@ -57,3 +60,517 @@ def sshkey_delete(client,
                   ssh_public_key_name):
     return client.delete(resource_group_name=resource_group_name,
                          ssh_public_key_name=ssh_public_key_name)
+
+
+def vm_virtual_machine_install_patch(client,
+                                     resource_group_name,
+                                     vm_name,
+                                     maximum_duration,
+                                     reboot_setting,
+                                     windows_parameters=None,
+                                     linux_parameters=None,
+                                     no_wait=False):
+    install_patches_input = {}
+    install_patches_input['maximum_duration'] = maximum_duration
+    install_patches_input['reboot_setting'] = reboot_setting
+    install_patches_input['windows_parameters'] = windows_parameters
+    install_patches_input['linux_parameters'] = linux_parameters
+    return sdk_no_wait(no_wait,
+                       client.begin_install_patches,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       install_patches_input=install_patches_input)
+
+
+def vm_virtual_machine_reimage(client,
+                               resource_group_name,
+                               vm_name,
+                               temp_disk=None,
+                               no_wait=False):
+    parameters = {}
+    parameters['temp_disk'] = temp_disk
+    return sdk_no_wait(no_wait,
+                       client.begin_reimage,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       parameters=parameters)
+
+
+def vm_virtual_machine_scale_set_force_recovery_service_fabric_platform_update_domain_walk(client,
+                                                                                           resource_group_name,
+                                                                                           vm_scale_set_name,
+                                                                                           platform_update_domain):
+    return client.force_recovery_service_fabric_platform_update_domain_walk(resource_group_name=resource_group_name,
+                                                                            vm_scale_set_name=vm_scale_set_name,
+                                                                            platform_update_domain=platform_update_domain)
+
+
+def vm_virtual_machine_scale_set_redeploy(client,
+                                          resource_group_name,
+                                          vm_scale_set_name,
+                                          instance_ids=None,
+                                          no_wait=False):
+    vm_instance_i__ds = {}
+    vm_instance_i__ds['instance_ids'] = instance_ids
+    return sdk_no_wait(no_wait,
+                       client.begin_redeploy,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=vm_instance_i__ds)
+
+
+def vm_virtual_machine_scale_set_reimage_all(client,
+                                             resource_group_name,
+                                             vm_scale_set_name,
+                                             instance_ids=None,
+                                             no_wait=False):
+    vm_instance_i__ds = {}
+    vm_instance_i__ds['instance_ids'] = instance_ids
+    return sdk_no_wait(no_wait,
+                       client.begin_reimage_all,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=vm_instance_i__ds)
+
+
+def vm_virtual_machine_scale_set_vm_extension_list(client,
+                                                   resource_group_name,
+                                                   vm_scale_set_name,
+                                                   instance_id,
+                                                   expand=None):
+    return client.list(resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       instance_id=instance_id,
+                       expand=expand)
+
+
+def vm_virtual_machine_scale_set_vm_extension_show(client,
+                                                   resource_group_name,
+                                                   vm_scale_set_name,
+                                                   instance_id,
+                                                   vm_extension_name,
+                                                   expand=None):
+    return client.get(resource_group_name=resource_group_name,
+                      vm_scale_set_name=vm_scale_set_name,
+                      instance_id=instance_id,
+                      vm_extension_name=vm_extension_name,
+                      expand=expand)
+
+
+def vm_virtual_machine_scale_set_vm_extension_create(client,
+                                                     resource_group_name,
+                                                     vm_scale_set_name,
+                                                     instance_id,
+                                                     vm_extension_name,
+                                                     force_update_tag=None,
+                                                     publisher=None,
+                                                     type_properties_type=None,
+                                                     type_handler_version=None,
+                                                     auto_upgrade_minor_version=None,
+                                                     enable_automatic_upgrade=None,
+                                                     settings=None,
+                                                     protected_settings=None,
+                                                     name=None,
+                                                     type_=None,
+                                                     virtual_machine_extension_instance_view_type_handler_version_type_handler_version=None,
+                                                     substatuses=None,
+                                                     statuses=None,
+                                                     no_wait=False):
+    extension_parameters = {}
+    extension_parameters['force_update_tag'] = force_update_tag
+    extension_parameters['publisher'] = publisher
+    extension_parameters['type_properties_type'] = type_properties_type
+    extension_parameters['type_handler_version'] = type_handler_version
+    extension_parameters['auto_upgrade_minor_version'] = auto_upgrade_minor_version
+    extension_parameters['enable_automatic_upgrade'] = enable_automatic_upgrade
+    extension_parameters['settings'] = settings
+    extension_parameters['protected_settings'] = protected_settings
+    extension_parameters['instance_view'] = {}
+    extension_parameters['instance_view']['name'] = name
+    extension_parameters['instance_view']['type'] = type_
+    extension_parameters['instance_view']['type_handler_version'] = virtual_machine_extension_instance_view_type_handler_version_type_handler_version
+    extension_parameters['instance_view']['substatuses'] = substatuses
+    extension_parameters['instance_view']['statuses'] = statuses
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       instance_id=instance_id,
+                       vm_extension_name=vm_extension_name,
+                       extension_parameters=extension_parameters)
+
+
+def vm_virtual_machine_scale_set_v_ms_redeploy(client,
+                                               resource_group_name,
+                                               vm_scale_set_name,
+                                               instance_id,
+                                               no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_redeploy,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       instance_id=instance_id)
+
+
+def vm_virtual_machine_scale_set_v_ms_reimage_all(client,
+                                                  resource_group_name,
+                                                  vm_scale_set_name,
+                                                  instance_id,
+                                                  no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_reimage_all,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       instance_id=instance_id)
+
+
+def vm_virtual_machine_scale_set_v_ms_retrieve_boot_diagnostic_data(client,
+                                                                    resource_group_name,
+                                                                    vm_scale_set_name,
+                                                                    instance_id,
+                                                                    sas_uri_expiration_time_in_minutes=None):
+    return client.retrieve_boot_diagnostics_data(resource_group_name=resource_group_name,
+                                                 vm_scale_set_name=vm_scale_set_name,
+                                                 instance_id=instance_id,
+                                                 sas_uri_expiration_time_in_minutes=sas_uri_expiration_time_in_minutes)
+
+
+def vm_virtual_machine_scale_set_vm_run_command_list(client,
+                                                     resource_group_name,
+                                                     vm_scale_set_name,
+                                                     instance_id,
+                                                     expand=None):
+    return client.list(resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
+                       instance_id=instance_id,
+                       expand=expand)
+
+
+def vm_disk_access_delete_a_private_endpoint_connection(client,
+                                                        resource_group_name,
+                                                        disk_access_name,
+                                                        private_endpoint_connection_name,
+                                                        no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete_a_private_endpoint_connection,
+                       resource_group_name=resource_group_name,
+                       disk_access_name=disk_access_name,
+                       private_endpoint_connection_name=private_endpoint_connection_name)
+
+
+def vm_disk_access_list_private_endpoint_connection(client,
+                                                    resource_group_name,
+                                                    disk_access_name):
+    return client.list_private_endpoint_connections(resource_group_name=resource_group_name,
+                                                    disk_access_name=disk_access_name)
+
+
+def vm_disk_access_show_private_link_resource(client,
+                                              resource_group_name,
+                                              disk_access_name):
+    return client.get_private_link_resources(resource_group_name=resource_group_name,
+                                             disk_access_name=disk_access_name)
+
+
+def vm_disk_restore_point_show(client,
+                               resource_group_name,
+                               restore_point_collection_name,
+                               vm_restore_point_name,
+                               disk_restore_point_name):
+    return client.get(resource_group_name=resource_group_name,
+                      restore_point_collection_name=restore_point_collection_name,
+                      vm_restore_point_name=vm_restore_point_name,
+                      disk_restore_point_name=disk_restore_point_name)
+
+
+def vm_gallery_application_list(client,
+                                resource_group_name,
+                                gallery_name):
+    return client.list_by_gallery(resource_group_name=resource_group_name,
+                                  gallery_name=gallery_name)
+
+
+def vm_gallery_application_show(client,
+                                resource_group_name,
+                                gallery_name,
+                                gallery_application_name):
+    return client.get(resource_group_name=resource_group_name,
+                      gallery_name=gallery_name,
+                      gallery_application_name=gallery_application_name)
+
+
+def vm_gallery_application_create(client,
+                                  resource_group_name,
+                                  gallery_name,
+                                  gallery_application_name,
+                                  location,
+                                  tags=None,
+                                  description=None,
+                                  eula=None,
+                                  privacy_statement_uri=None,
+                                  release_note_uri=None,
+                                  end_of_life_date=None,
+                                  supported_os_type=None,
+                                  no_wait=False):
+    gallery_application = {}
+    gallery_application['location'] = location
+    gallery_application['tags'] = tags
+    gallery_application['description'] = description
+    gallery_application['eula'] = eula
+    gallery_application['privacy_statement_uri'] = privacy_statement_uri
+    gallery_application['release_note_uri'] = release_note_uri
+    gallery_application['end_of_life_date'] = end_of_life_date
+    gallery_application['supported_os_type'] = supported_os_type
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application=gallery_application)
+
+
+def vm_gallery_application_delete(client,
+                                  resource_group_name,
+                                  gallery_name,
+                                  gallery_application_name,
+                                  no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name)
+
+
+def vm_gallery_application_version_list(client,
+                                        resource_group_name,
+                                        gallery_name,
+                                        gallery_application_name):
+    return client.list_by_gallery_application(resource_group_name=resource_group_name,
+                                              gallery_name=gallery_name,
+                                              gallery_application_name=gallery_application_name)
+
+
+def vm_cloud_service_role_instance_list(client,
+                                        resource_group_name,
+                                        cloud_service_name):
+    return client.list(resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_instance_show(client,
+                                        role_instance_name,
+                                        resource_group_name,
+                                        cloud_service_name):
+    return client.get(role_instance_name=role_instance_name,
+                      resource_group_name=resource_group_name,
+                      cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_instance_reimage(client,
+                                           role_instance_name,
+                                           resource_group_name,
+                                           cloud_service_name,
+                                           no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_reimage,
+                       role_instance_name=role_instance_name,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_instance_restart(client,
+                                           role_instance_name,
+                                           resource_group_name,
+                                           cloud_service_name,
+                                           no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_restart,
+                       role_instance_name=role_instance_name,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_instance_show_instance_view(client,
+                                                      role_instance_name,
+                                                      resource_group_name,
+                                                      cloud_service_name):
+    return client.get_instance_view(role_instance_name=role_instance_name,
+                                    resource_group_name=resource_group_name,
+                                    cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_instance_show_remote_desktop_file(client,
+                                                            role_instance_name,
+                                                            resource_group_name,
+                                                            cloud_service_name):
+    return client.get_remote_desktop_file(role_instance_name=role_instance_name,
+                                          resource_group_name=resource_group_name,
+                                          cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_list(client,
+                               resource_group_name,
+                               cloud_service_name):
+    return client.list(resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_role_show(client,
+                               role_name,
+                               resource_group_name,
+                               cloud_service_name):
+    return client.get(role_name=role_name,
+                      resource_group_name=resource_group_name,
+                      cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_list(client,
+                          resource_group_name):
+    return client.list(resource_group_name=resource_group_name)
+
+
+def vm_cloud_service_show(client,
+                          resource_group_name,
+                          cloud_service_name):
+    return client.get(resource_group_name=resource_group_name,
+                      cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_create(client,
+                            resource_group_name,
+                            cloud_service_name,
+                            location=None,
+                            tags=None,
+                            package_url=None,
+                            configuration=None,
+                            configuration_url=None,
+                            start_cloud_service=None,
+                            allow_model_override=None,
+                            upgrade_mode=None,
+                            extensions=None,
+                            load_balancer_configurations=None,
+                            id_=None,
+                            secrets=None,
+                            roles=None,
+                            no_wait=False):
+    parameters = {}
+    parameters['location'] = location
+    parameters['tags'] = tags
+    parameters['properties'] = {}
+    parameters['properties']['package_url'] = package_url
+    parameters['properties']['configuration'] = configuration
+    parameters['properties']['configuration_url'] = configuration_url
+    parameters['properties']['start_cloud_service'] = start_cloud_service
+    parameters['properties']['allow_model_override'] = allow_model_override
+    parameters['properties']['upgrade_mode'] = upgrade_mode
+    parameters['properties']['extension_profile'] = {}
+    parameters['properties']['extension_profile']['extensions'] = extensions
+    parameters['properties']['network_profile'] = {}
+    parameters['properties']['network_profile']['load_balancer_configurations'] = load_balancer_configurations
+    parameters['properties']['network_profile']['swappable_cloud_service'] = {}
+    parameters['properties']['network_profile']['swappable_cloud_service']['id'] = id_
+    parameters['properties']['os_profile'] = {}
+    parameters['properties']['os_profile']['secrets'] = secrets
+    parameters['properties']['role_profile'] = {}
+    parameters['properties']['role_profile']['roles'] = roles
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name,
+                       parameters=parameters)
+
+
+def vm_cloud_service_delete(client,
+                            resource_group_name,
+                            cloud_service_name,
+                            no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_delete_instance(client,
+                                     resource_group_name,
+                                     cloud_service_name,
+                                     role_instances=None,
+                                     no_wait=False):
+    parameters = {}
+    parameters['role_instances'] = role_instances
+    return sdk_no_wait(no_wait,
+                       client.begin_delete_instances,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name,
+                       parameters=parameters)
+
+
+def vm_cloud_service_list_all(client):
+    return client.list_all()
+
+
+def vm_cloud_service_power_off(client,
+                               resource_group_name,
+                               cloud_service_name,
+                               no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_power_off,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_restart(client,
+                             resource_group_name,
+                             cloud_service_name,
+                             role_instances=None,
+                             no_wait=False):
+    parameters = {}
+    parameters['role_instances'] = role_instances
+    return sdk_no_wait(no_wait,
+                       client.begin_restart,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name,
+                       parameters=parameters)
+
+
+def vm_cloud_service_show_instance_view(client,
+                                        resource_group_name,
+                                        cloud_service_name):
+    return client.get_instance_view(resource_group_name=resource_group_name,
+                                    cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_start(client,
+                           resource_group_name,
+                           cloud_service_name,
+                           no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_start,
+                       resource_group_name=resource_group_name,
+                       cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_update_domain_list_update_domain(client,
+                                                      resource_group_name,
+                                                      cloud_service_name):
+    return client.list_update_domains(resource_group_name=resource_group_name,
+                                      cloud_service_name=cloud_service_name)
+
+
+def vm_cloud_service_update_domain_show_update_domain(client,
+                                                      resource_group_name,
+                                                      cloud_service_name,
+                                                      update_domain):
+    return client.get_update_domain(resource_group_name=resource_group_name,
+                                    cloud_service_name=cloud_service_name,
+                                    update_domain=update_domain)
+
+
+def vm_cloud_service_update_domain_walk_update_domain(client,
+                                                      resource_group_name,
+                                                      cloud_service_name,
+                                                      update_domain):
+    parameters = {}
+    return client.begin_walk_update_domain(resource_group_name=resource_group_name,
+                                           cloud_service_name=cloud_service_name,
+                                           update_domain=update_domain,
+                                           parameters=parameters)

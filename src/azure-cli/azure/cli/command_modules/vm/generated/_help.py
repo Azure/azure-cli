@@ -52,3 +52,642 @@ helps['sshkey delete'] = """
     type: command
     short-summary: "Delete an SSH public key."
 """
+
+helps['vm virtual-machine'] = """
+    type: group
+    short-summary: Manage virtual machine with vm
+"""
+
+helps['vm virtual-machine install-patch'] = """
+    type: command
+    short-summary: "Installs patches on the VM."
+    parameters:
+      - name: --windows-parameters
+        short-summary: "Input for InstallPatches on a Windows VM, as directly received by the API"
+        long-summary: |
+            Usage: --windows-parameters classifications-to-include=XX kb-numbers-to-include=XX \
+kb-numbers-to-exclude=XX exclude-kbs-requiring-reboot=XX max-patch-publish-date=XX
+
+            classifications-to-include: The update classifications to select when installing patches for Windows.
+            kb-numbers-to-include: Kbs to include in the patch operation
+            kb-numbers-to-exclude: Kbs to exclude in the patch operation
+            exclude-kbs-requiring-reboot: Filters out Kbs that don't have an InstallationRebootBehavior of \
+'NeverReboots' when this is set to true.
+            max-patch-publish-date: This is used to install patches that were published on or before this given max \
+published date.
+      - name: --linux-parameters
+        short-summary: "Input for InstallPatches on a Linux VM, as directly received by the API"
+        long-summary: |
+            Usage: --linux-parameters classifications-to-include=XX package-name-masks-to-include=XX \
+package-name-masks-to-exclude=XX maintenance-run-id=XX
+
+            classifications-to-include: The update classifications to select when installing patches for Linux.
+            package-name-masks-to-include: packages to include in the patch operation. Format: \
+packageName_packageVersion
+            package-name-masks-to-exclude: packages to exclude in the patch operation. Format: \
+packageName_packageVersion
+            maintenance-run-id: This is used as a maintenance run identifier for Auto VM Guest Patching in Linux.
+    examples:
+      - name: Install patch state of a virtual machine.
+        text: |-
+               az vm virtual-machine install-patch --maximum-duration "PT4H" --reboot-setting "IfRequired" \
+--windows-parameters classifications-to-include="Critical" classifications-to-include="Security" \
+max-patch-publish-date="2020-11-19T02:36:43.0539904+00:00" --resource-group "myResourceGroupName" --name "myVMName"
+"""
+
+helps['vm virtual-machine reimage'] = """
+    type: command
+    short-summary: "Reimages the virtual machine which has an ephemeral OS disk back to its initial state."
+    examples:
+      - name: Reimage a Virtual Machine.
+        text: |-
+               az vm virtual-machine reimage --temp-disk true --resource-group "myResourceGroup" --name "myVMName"
+"""
+
+helps['vm virtual-machine wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm virtual-machine is successfully created.
+        text: |-
+               az sshkey wait --resource-group "myResourceGroup" --name "mySshPublicKeyName" --created
+"""
+
+helps['vm virtual-machine-scale-set'] = """
+    type: group
+    short-summary: Manage virtual machine scale set with vm
+"""
+
+helps['vm virtual-machine-scale-set force-recovery-service-fabric-platform-update-domain-walk'] = """
+    type: command
+    short-summary: "Manual platform update domain walk to update virtual machines in a service fabric virtual machine \
+scale set."
+"""
+
+helps['vm virtual-machine-scale-set redeploy'] = """
+    type: command
+    short-summary: "Shuts down all the virtual machines in the virtual machine scale set, moves them to a new node, \
+and powers them back on."
+"""
+
+helps['vm virtual-machine-scale-set reimage-all'] = """
+    type: command
+    short-summary: "Reimages all the disks ( including data disks ) in the virtual machines in a VM scale set. This \
+operation is only supported for managed disks."
+"""
+
+helps['vm virtual-machine-scale-set wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine-scale-set is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm virtual-machine-scale-set is successfully created.
+        text: |-
+               az sshkey wait --resource-group "myResourceGroup" --name "mySshPublicKeyName" --created
+"""
+
+helps['vm virtual-machine-scale-set-vm-extension'] = """
+    type: group
+    short-summary: Manage virtual machine scale set vm extension with vm
+"""
+
+helps['vm virtual-machine-scale-set-vm-extension list'] = """
+    type: command
+    short-summary: "The operation to get all extensions of an instance in Virtual Machine Scaleset."
+    examples:
+      - name: List extensions in Vmss instance.
+        text: |-
+               az vm virtual-machine-scale-set-vm-extension list --instance-id "0" --resource-group "myResourceGroup" \
+--vm-scale-set-name "myvmScaleSet"
+"""
+
+helps['vm virtual-machine-scale-set-vm-extension show'] = """
+    type: command
+    short-summary: "The operation to get the VMSS VM extension."
+    examples:
+      - name: Get VirtualMachineScaleSet VM extension.
+        text: |-
+               az vm virtual-machine-scale-set-vm-extension show --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet"
+"""
+
+helps['vm virtual-machine-scale-set-vm-extension create'] = """
+    type: command
+    short-summary: "The operation to Create the VMSS VM extension."
+    parameters:
+      - name: --substatuses
+        short-summary: "The resource status information."
+        long-summary: |
+            Usage: --substatuses code=XX level=XX display-status=XX message=XX time=XX
+
+            code: The status code.
+            level: The level code.
+            display-status: The short localizable label for the status.
+            message: The detailed status message, including for alerts and error messages.
+            time: The time of the status.
+
+            Multiple actions can be specified by using more than one --substatuses argument.
+      - name: --statuses
+        short-summary: "The resource status information."
+        long-summary: |
+            Usage: --statuses code=XX level=XX display-status=XX message=XX time=XX
+
+            code: The status code.
+            level: The level code.
+            display-status: The short localizable label for the status.
+            message: The detailed status message, including for alerts and error messages.
+            time: The time of the status.
+
+            Multiple actions can be specified by using more than one --statuses argument.
+    examples:
+      - name: Create VirtualMachineScaleSet VM extension.
+        text: |-
+               az vm virtual-machine-scale-set-vm-extension create --type-properties-type "extType" \
+--auto-upgrade-minor-version true --publisher "extPublisher" --settings "{\\"UserName\\":\\"xyz@microsoft.com\\"}" \
+--type-handler-version "1.2" --instance-id "0" --resource-group "myResourceGroup" --vm-extension-name "myVMExtension" \
+--vm-scale-set-name "myvmScaleSet"
+"""
+
+helps['vm virtual-machine-scale-set-vm-extension wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine-scale-set-vm-extension \
+is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm virtual-machine-scale-set-vm-extension is \
+successfully created.
+        text: |-
+               az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
+"""
+
+helps['vm virtual-machine-scale-set-v-ms'] = """
+    type: group
+    short-summary: Manage virtual machine scale set v ms with vm
+"""
+
+helps['vm virtual-machine-scale-set-v-ms redeploy'] = """
+    type: command
+    short-summary: "Shuts down the virtual machine in the virtual machine scale set, moves it to a new node, and \
+powers it back on."
+"""
+
+helps['vm virtual-machine-scale-set-v-ms reimage-all'] = """
+    type: command
+    short-summary: "Allows you to re-image all the disks ( including data disks ) in the a VM scale set instance. This \
+operation is only supported for managed disks."
+"""
+
+helps['vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data'] = """
+    type: command
+    short-summary: "The operation to retrieve SAS URIs of boot diagnostic logs for a virtual machine in a VM scale \
+set."
+    examples:
+      - name: RetrieveBootDiagnosticsData of a virtual machine.
+        text: |-
+               az vm virtual-machine-scale-set-v-ms retrieve-boot-diagnostic-data --instance-id "0" --resource-group \
+"ResourceGroup" --sas-uri-expiration-time-in-minutes 60 --vm-scale-set-name "myvmScaleSet"
+"""
+
+helps['vm virtual-machine-scale-set-v-ms wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm virtual-machine-scale-set-v-ms is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm virtual-machine-scale-set-v-ms is successfully \
+created.
+        text: |-
+               az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
+"""
+
+helps['vm virtual-machine-scale-set-vm-run-command'] = """
+    type: group
+    short-summary: Manage virtual machine scale set vm run command with vm
+"""
+
+helps['vm virtual-machine-scale-set-vm-run-command list'] = """
+    type: command
+    short-summary: "The operation to get all run commands of an instance in Virtual Machine Scaleset."
+    examples:
+      - name: List run commands in Vmss instance.
+        text: |-
+               az vm virtual-machine-scale-set-vm-run-command list --instance-id "0" --resource-group \
+"myResourceGroup" --vm-scale-set-name "myvmScaleSet"
+"""
+
+helps['vm disk-access'] = """
+    type: group
+    short-summary: Manage disk access with vm
+"""
+
+helps['vm disk-access delete-a-private-endpoint-connection'] = """
+    type: command
+    short-summary: "Deletes a private endpoint connection under a disk access resource."
+    examples:
+      - name: Delete a private endpoint connection under a disk access resource.
+        text: |-
+               az vm disk-access delete-a-private-endpoint-connection --name "myDiskAccess" \
+--private-endpoint-connection-name "myPrivateEndpointConnection" --resource-group "myResourceGroup"
+"""
+
+helps['vm disk-access list-private-endpoint-connection'] = """
+    type: command
+    short-summary: "List information about private endpoint connections under a disk access resource."
+    examples:
+      - name: Get information about a private endpoint connection under a disk access resource.
+        text: |-
+               az vm disk-access list-private-endpoint-connection --name "myDiskAccess" --resource-group \
+"myResourceGroup"
+"""
+
+helps['vm disk-access show-private-link-resource'] = """
+    type: command
+    short-summary: "Gets the private link resources possible under disk access resource."
+    examples:
+      - name: List all possible private link resources under disk access resource.
+        text: |-
+               az vm disk-access show-private-link-resource --name "myDiskAccess" --resource-group "myResourceGroup"
+"""
+
+helps['vm disk-access wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm disk-access is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm disk-access is successfully created.
+        text: |-
+               az vm virtual-machine-scale-set-vm-extension wait --instance-id "0" --resource-group "myResourceGroup" \
+--vm-extension-name "myVMExtension" --vm-scale-set-name "myvmScaleSet" --created
+"""
+
+helps['vm disk-restore-point'] = """
+    type: group
+    short-summary: Manage disk restore point with vm
+"""
+
+helps['vm disk-restore-point show'] = """
+    type: command
+    short-summary: "Get disk restorePoint resource."
+    examples:
+      - name: Get an incremental disk restorePoint resource.
+        text: |-
+               az vm disk-restore-point show --name "TestDisk45ceb03433006d1baee0_b70cd924-3362-4a80-93c2-9415eaa12745"\
+ --resource-group "myResourceGroup" --restore-point-collection-name "rpc" --vm-restore-point-name "vmrp"
+"""
+
+helps['vm gallery-application'] = """
+    type: group
+    short-summary: Manage gallery application with vm
+"""
+
+helps['vm gallery-application list'] = """
+    type: command
+    short-summary: "List gallery Application Definitions in a gallery."
+    examples:
+      - name: List gallery Applications in a gallery.
+        text: |-
+               az vm gallery-application list --gallery-name "myGalleryName" --resource-group "myResourceGroup"
+"""
+
+helps['vm gallery-application show'] = """
+    type: command
+    short-summary: "Retrieves information about a gallery Application Definition."
+    examples:
+      - name: Get a gallery Application.
+        text: |-
+               az vm gallery-application show --name "myGalleryApplicationName" --gallery-name "myGalleryName" \
+--resource-group "myResourceGroup"
+"""
+
+helps['vm gallery-application create'] = """
+    type: command
+    short-summary: "Create a gallery Application Definition."
+    examples:
+      - name: Create or update a simple gallery Application.
+        text: |-
+               az vm gallery-application create --location "West US" --description "This is the gallery application \
+description." --eula "This is the gallery application EULA." --privacy-statement-uri "myPrivacyStatementUri}" \
+--release-note-uri "myReleaseNoteUri" --supported-os-type "Windows" --name "myGalleryApplicationName" --gallery-name \
+"myGalleryName" --resource-group "myResourceGroup"
+"""
+
+helps['vm gallery-application delete'] = """
+    type: command
+    short-summary: "Delete a gallery Application."
+    examples:
+      - name: Delete a gallery Application.
+        text: |-
+               az vm gallery-application delete --name "myGalleryApplicationName" --gallery-name "myGalleryName" \
+--resource-group "myResourceGroup"
+"""
+
+helps['vm gallery-application wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm gallery-application is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm gallery-application is successfully created.
+        text: |-
+               az vm gallery-application wait --name "myGalleryApplicationName" --gallery-name "myGalleryName" \
+--resource-group "myResourceGroup" --created
+      - name: Pause executing next line of CLI script until the vm gallery-application is successfully deleted.
+        text: |-
+               az vm gallery-application wait --name "myGalleryApplicationName" --gallery-name "myGalleryName" \
+--resource-group "myResourceGroup" --deleted
+"""
+
+helps['vm gallery-application-version'] = """
+    type: group
+    short-summary: Manage gallery application version with vm
+"""
+
+helps['vm gallery-application-version list'] = """
+    type: command
+    short-summary: "List gallery Application Versions in a gallery Application Definition."
+    examples:
+      - name: List gallery Application Versions in a gallery Application Definition.
+        text: |-
+               az vm gallery-application-version list --gallery-application-name "myGalleryApplicationName" \
+--gallery-name "myGalleryName" --resource-group "myResourceGroup"
+"""
+
+helps['vm cloud-service-role-instance'] = """
+    type: group
+    short-summary: Manage cloud service role instance with vm
+"""
+
+helps['vm cloud-service-role-instance list'] = """
+    type: command
+    short-summary: "Gets the list of all role instances in a cloud service. Use nextLink property in the response to \
+get the next page of role instances. Do this till nextLink is null to fetch all the role instances."
+    examples:
+      - name: List Role Instances in a Cloud Service
+        text: |-
+               az vm cloud-service-role-instance list --cloud-service-name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service-role-instance show'] = """
+    type: command
+    short-summary: "Gets a role instance from a cloud service."
+    examples:
+      - name: Get Cloud Service Role Instance
+        text: |-
+               az vm cloud-service-role-instance show --cloud-service-name "{cs-name}" --resource-group "ConstosoRG" \
+--role-instance-name "{roleInstance-name}"
+"""
+
+helps['vm cloud-service-role-instance reimage'] = """
+    type: command
+    short-summary: "The Reimage Role Instance asynchronous operation reinstalls the operating system on instances of \
+web roles or worker roles."
+    examples:
+      - name: Reimage Cloud Service Role Instance
+        text: |-
+               az vm cloud-service-role-instance reimage --cloud-service-name "{cs-name}" --resource-group \
+"ConstosoRG" --role-instance-name "{roleInstance-name}"
+"""
+
+helps['vm cloud-service-role-instance restart'] = """
+    type: command
+    short-summary: "The Reboot Role Instance asynchronous operation requests a reboot of a role instance in the cloud \
+service."
+    examples:
+      - name: Restart Cloud Service Role Instance
+        text: |-
+               az vm cloud-service-role-instance restart --cloud-service-name "{cs-name}" --resource-group \
+"ConstosoRG" --role-instance-name "{roleInstance-name}"
+"""
+
+helps['vm cloud-service-role-instance show-instance-view'] = """
+    type: command
+    short-summary: "Retrieves information about the run-time state of a role instance in a cloud service."
+    examples:
+      - name: Get Instance View of Cloud Service Role Instance
+        text: |-
+               az vm cloud-service-role-instance show-instance-view --cloud-service-name "{cs-name}" --resource-group \
+"ConstosoRG" --role-instance-name "{roleInstance-name}"
+"""
+
+helps['vm cloud-service-role-instance show-remote-desktop-file'] = """
+    type: command
+    short-summary: "Gets a remote desktop file for a role instance in a cloud service."
+"""
+
+helps['vm cloud-service-role-instance wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm cloud-service-role-instance is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm cloud-service-role-instance is successfully \
+created.
+        text: |-
+               az vm cloud-service-role-instance wait --cloud-service-name "{cs-name}" --resource-group "ConstosoRG" \
+--role-instance-name "{roleInstance-name}" --created
+"""
+
+helps['vm cloud-service-role'] = """
+    type: group
+    short-summary: Manage cloud service role with vm
+"""
+
+helps['vm cloud-service-role list'] = """
+    type: command
+    short-summary: "Gets a list of all roles in a cloud service. Use nextLink property in the response to get the next \
+page of roles. Do this till nextLink is null to fetch all the roles."
+    examples:
+      - name: List Roles in a Cloud Service
+        text: |-
+               az vm cloud-service-role list --cloud-service-name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service-role show'] = """
+    type: command
+    short-summary: "Gets a role from a cloud service."
+    examples:
+      - name: Get Cloud Service Role
+        text: |-
+               az vm cloud-service-role show --cloud-service-name "{cs-name}" --resource-group "ConstosoRG" \
+--role-name "{role-name}"
+"""
+
+helps['vm cloud-service'] = """
+    type: group
+    short-summary: Manage cloud service with vm
+"""
+
+helps['vm cloud-service list'] = """
+    type: command
+    short-summary: "Gets a list of all cloud services under a resource group. Use nextLink property in the response to \
+get the next page of Cloud Services. Do this till nextLink is null to fetch all the Cloud Services."
+    examples:
+      - name: List Cloud Services in a Resource Group
+        text: |-
+               az vm cloud-service list --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service show'] = """
+    type: command
+    short-summary: "Display information about a cloud service."
+    examples:
+      - name: Get Cloud Service with Multiple Roles and RDP Extension
+        text: |-
+               az vm cloud-service show --name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service create'] = """
+    type: command
+    short-summary: "Create a cloud service. Please note some properties can be set only during cloud service \
+creation."
+    examples:
+      - name: Create New Cloud Service with Multiple Roles
+        text: |-
+               az vm cloud-service create --name "{cs-name}" --location "westus" --configuration \
+"{ServiceConfiguration}" --load-balancer-configurations "[{\\"name\\":\\"contosolb\\",\\"properties\\":{\\"frontendIPCo\
+nfigurations\\":[{\\"name\\":\\"contosofe\\",\\"properties\\":{\\"publicIPAddress\\":{\\"id\\":\\"/subscriptions/{subsc\
+ription-id}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/contosopublicip\\"}}}]}}]" \
+--package-url "{PackageUrl}" --roles "[{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{\\"name\\":\\"Standard_D1_v2\\",\\"\
+capacity\\":1,\\"tier\\":\\"Standard\\"}},{\\"name\\":\\"ContosoBackend\\",\\"sku\\":{\\"name\\":\\"Standard_D1_v2\\",\
+\\"capacity\\":1,\\"tier\\":\\"Standard\\"}}]" --upgrade-mode "Auto" --resource-group "ConstosoRG"
+      - name: Create New Cloud Service with Single Role
+        text: |-
+               az vm cloud-service create --name "{cs-name}" --location "westus" --configuration \
+"{ServiceConfiguration}" --load-balancer-configurations "[{\\"name\\":\\"myLoadBalancer\\",\\"properties\\":{\\"fronten\
+dIPConfigurations\\":[{\\"name\\":\\"myfe\\",\\"properties\\":{\\"publicIPAddress\\":{\\"id\\":\\"/subscriptions/{subsc\
+ription-id}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/myPublicIP\\"}}}]}}]" \
+--package-url "{PackageUrl}" --roles "[{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{\\"name\\":\\"Standard_D1_v2\\",\\"\
+capacity\\":1,\\"tier\\":\\"Standard\\"}}]" --upgrade-mode "Auto" --resource-group "ConstosoRG"
+      - name: Create New Cloud Service with Single Role and Certificate from Key Vault
+        text: |-
+               az vm cloud-service create --name "{cs-name}" --location "westus" --configuration \
+"{ServiceConfiguration}" --load-balancer-configurations "[{\\"name\\":\\"contosolb\\",\\"properties\\":{\\"frontendIPCo\
+nfigurations\\":[{\\"name\\":\\"contosofe\\",\\"properties\\":{\\"publicIPAddress\\":{\\"id\\":\\"/subscriptions/{subsc\
+ription-id}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/contosopublicip\\"}}}]}}]" \
+--secrets "[{\\"sourceVault\\":{\\"id\\":\\"/subscriptions/{subscription-id}/resourceGroups/ConstosoRG/providers/Micros\
+oft.KeyVault/vaults/{keyvault-name}\\"},\\"vaultCertificates\\":[{\\"certificateUrl\\":\\"https://{keyvault-name}.vault\
+.azure.net:443/secrets/ContosoCertificate/{secret-id}\\"}]}]" --package-url "{PackageUrl}" --roles \
+"[{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"Standard\
+\\"}}]" --upgrade-mode "Auto" --resource-group "ConstosoRG"
+      - name: Create New Cloud Service with Single Role and RDP Extension
+        text: |-
+               az vm cloud-service create --name "{cs-name}" --location "westus" --configuration \
+"{ServiceConfiguration}" --extensions "[{\\"name\\":\\"RDPExtension\\",\\"properties\\":{\\"type\\":\\"RDP\\",\\"autoUp\
+gradeMinorVersion\\":false,\\"protectedSettings\\":\\"<PrivateConfig><Password>{password}</Password></PrivateConfig>\\"\
+,\\"publisher\\":\\"Microsoft.Windows.Azure.Extensions\\",\\"settings\\":\\"<PublicConfig><UserName>UserAzure</UserName\
+><Expiration>10/22/2021 15:05:45</Expiration></PublicConfig>\\",\\"typeHandlerVersion\\":\\"1.2.1\\"}}]" \
+--load-balancer-configurations "[{\\"name\\":\\"contosolb\\",\\"properties\\":{\\"frontendIPConfigurations\\":[{\\"name\
+\\":\\"contosofe\\",\\"properties\\":{\\"publicIPAddress\\":{\\"id\\":\\"/subscriptions/{subscription-id}/resourceGroup\
+s/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/contosopublicip\\"}}}]}}]" --package-url "{PackageUrl}" \
+--roles "[{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"S\
+tandard\\"}}]" --upgrade-mode "Auto" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service delete'] = """
+    type: command
+    short-summary: "Deletes a cloud service."
+    examples:
+      - name: Delete Cloud Service
+        text: |-
+               az vm cloud-service delete --name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service delete-instance'] = """
+    type: command
+    short-summary: "Deletes role instances in a cloud service."
+    examples:
+      - name: Delete Cloud Service Role Instances
+        text: |-
+               az vm cloud-service delete-instance --name "{cs-name}" --role-instances "ContosoFrontend_IN_0" \
+"ContosoBackend_IN_1" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service list-all'] = """
+    type: command
+    short-summary: "Gets a list of all cloud services in the subscription, regardless of the associated resource \
+group. Use nextLink property in the response to get the next page of Cloud Services. Do this till nextLink is null to \
+fetch all the Cloud Services."
+    examples:
+      - name: List Cloud Services in a Subscription
+        text: |-
+               az vm cloud-service list-all
+"""
+
+helps['vm cloud-service power-off'] = """
+    type: command
+    short-summary: "Power off the cloud service. Note that resources are still attached and you are getting charged \
+for the resources."
+    examples:
+      - name: Stop or PowerOff Cloud Service
+        text: |-
+               az vm cloud-service power-off --name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service restart'] = """
+    type: command
+    short-summary: "Restarts one or more role instances in a cloud service."
+    examples:
+      - name: Restart Cloud Service Role Instances
+        text: |-
+               az vm cloud-service restart --name "{cs-name}" --role-instances "ContosoFrontend_IN_0" \
+"ContosoBackend_IN_1" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service show-instance-view'] = """
+    type: command
+    short-summary: "Gets the status of a cloud service."
+    examples:
+      - name: Get Cloud Service Instance View with Multiple Roles
+        text: |-
+               az vm cloud-service show-instance-view --name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service start'] = """
+    type: command
+    short-summary: "Starts the cloud service."
+    examples:
+      - name: Start Cloud Service
+        text: |-
+               az vm cloud-service start --name "{cs-name}" --resource-group "ConstosoRG"
+"""
+
+helps['vm cloud-service wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the vm cloud-service is met.
+    examples:
+      - name: Pause executing next line of CLI script until the vm cloud-service is successfully created.
+        text: |-
+               az vm cloud-service wait --name "{cs-name}" --resource-group "ConstosoRG" --created
+      - name: Pause executing next line of CLI script until the vm cloud-service is successfully deleted.
+        text: |-
+               az vm cloud-service wait --name "{cs-name}" --resource-group "ConstosoRG" --deleted
+"""
+
+helps['vm cloud-service-update-domain'] = """
+    type: group
+    short-summary: Manage cloud service update domain with vm
+"""
+
+helps['vm cloud-service-update-domain list-update-domain'] = """
+    type: command
+    short-summary: "Gets a list of all update domains in a cloud service."
+    examples:
+      - name: List Update Domains in Cloud Service
+        text: |-
+               az vm cloud-service-update-domain list-update-domain --cloud-service-name "{cs-name}" --resource-group \
+"ConstosoRG"
+"""
+
+helps['vm cloud-service-update-domain show-update-domain'] = """
+    type: command
+    short-summary: "Gets the specified update domain of a cloud service. Use nextLink property in the response to get \
+the next page of update domains. Do this till nextLink is null to fetch all the update domains."
+    examples:
+      - name: Get Cloud Service Update Domain
+        text: |-
+               az vm cloud-service-update-domain show-update-domain --cloud-service-name "{cs-name}" --resource-group \
+"ConstosoRG" --update-domain 1
+"""
+
+helps['vm cloud-service-update-domain walk-update-domain'] = """
+    type: command
+    short-summary: "Updates the role instances in the specified update domain."
+    examples:
+      - name: Update Cloud Service to specified Domain
+        text: |-
+               az vm cloud-service-update-domain walk-update-domain --cloud-service-name "{cs-name}" --resource-group \
+"ConstosoRG" --update-domain 1
+"""
