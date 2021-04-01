@@ -783,7 +783,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.command('get-stats', 'get_peering_stats', command_type=network_er_sdk)
+        g.command('get-stats', 'get_peering_stats', command_type=network_er_sdk, is_preview=True)
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
 
     with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
