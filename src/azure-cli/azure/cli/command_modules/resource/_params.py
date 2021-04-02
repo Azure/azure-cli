@@ -574,7 +574,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                     type=file_type, help="The path to the Bicep file to build in the file system."))
+                                                    type=file_type, help="The path to the Bicep file to build in the file system."))
         c.argument('outdir', arg_type=CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(),
                                                       help="When set, saves the output at the specified directory."))
         c.argument('outfile', arg_type=CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(),
@@ -584,7 +584,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                     type=file_type, help="The path to the ARM template to decompile in the file system."))
+                                                    type=file_type, help="The path to the ARM template to decompile in the file system."))
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')
