@@ -2757,8 +2757,7 @@ examples:
 
 helps['vmss update'] = """
 type: command
-short-summary: Update a VMSS.
-long-summary: To update a global scale set property, you must update the property in the scale set model.Remember to execute the `az vmss update-instances -g 'Your resource group name' -n 'Your VMSS name' --instance-ids '*' ` command after using this command to make the change take effect. If you don't set the automatic modes for the upgrade policy.
+short-summary: Update a VMSS.After that,remember to execute the 'az vmss update-instances' command to make the changes take effect, assuming that you have not set the automatic modes for the upgrade policy
 examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
