@@ -18,7 +18,7 @@ except ImportError:
     import mock
 import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only
 from azure.cli.testsdk.decorators import serial_test
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
@@ -165,6 +165,7 @@ class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     @serial_test()
+    @live_only()
     def test_botservice_create_v4_csharp_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -210,6 +211,7 @@ class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     @serial_test()
+    @live_only()
     def test_botservice_create_v4_js_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -259,6 +261,7 @@ class BotTests(ScenarioTest):
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript')
 
     @ResourceGroupPreparer(random_name_length=20)
+    @live_only() # if the path to download already exist the tests fail as by design which makes this not idempotent
     def test_botservice_download_should_create_appsettings_for_v4_csharp_webapp_echo_bots_no_bot_file(self,
                                                                                                       resource_group):
         self.kwargs.update({
@@ -300,6 +303,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
+    @live_only()
     def test_botservice_download_should_create_env_file_for_v4_node_webapp_echo_bots_no_bot_file(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -339,6 +343,7 @@ class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     @serial_test()
+    @live_only()
     def test_botservice_keep_node_modules_should_not_empty_node_modules_or_install_dependencies(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),

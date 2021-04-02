@@ -3919,8 +3919,6 @@ def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_c
         time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
 
 
-# TODO: Check with Calvin what is the purpose of this - seems like this is updating a metadata value used by portal?
-# what is scenarios that will fail if this is not done - will save 2 expensive calls on CLI end, if removed
 def _update_webapp_current_stack_property_if_needed(cmd, resource_group, name, current_stack):
     if not current_stack:
         return
@@ -4194,17 +4192,14 @@ def _make_onedeploy_request(params):
     poll_async_deployment_for_debugging = True
 
     # check the status of async deployment
-    if response.status_code == 202:
+    if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            logger.info('Polloing the status of async deployment')
+            logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                          deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         return response_body
-
-    if response.status_code == 200:
-        return response
 
     # API not available yet!
     if response.status_code == 404:
