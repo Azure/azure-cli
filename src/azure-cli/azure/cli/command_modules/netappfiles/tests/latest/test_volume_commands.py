@@ -139,7 +139,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.cmd("az group delete --yes -n %s" % (subnet_rg))
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    @ResourceGroupPreparer(name_prefix='cli_netappf_test_volume2_', parameter_name='replication_resourcegroup')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume2_', parameter_name='replication_resourcegroup')
     def test_perform_replication(self, resource_group, replication_resourcegroup):
         # create source volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -407,10 +407,20 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
 
+        smb_encryption = False
+        smb_continuously_avl = False
+        encryption_key_source = "Microsoft.NetApp"
+        ldap_enabled = False
+
         self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
         volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
-                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s "
-                          "--smb-encryption %s --smb-continuously-avl %s --encryption-key-source %s" %
+                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --smb-encryption %s "
+                          "--smb-continuously-avl %s --encryption-key-source %s --ldap-enabled %s" %
                           (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
-                           subnet_name, False, False, "Microsoft.NetApp")).get_output_in_json()
+                           subnet_name, smb_encryption, smb_continuously_avl, encryption_key_source, ldap_enabled)
+                          ).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        assert volume['smbEncryption'] == smb_encryption
+        assert volume['smbContinuouslyAvailable'] == smb_continuously_avl
+        assert volume['encryptionKeySource'] == encryption_key_source
+        assert volume['ldapEnabled'] == ldap_enabled
