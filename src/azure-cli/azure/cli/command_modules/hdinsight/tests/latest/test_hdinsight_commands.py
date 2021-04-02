@@ -12,7 +12,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class HDInsightClusterTests(ScenarioTest):
-    location = 'eastus2'
+    location = 'southcentralus'
 
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
@@ -556,7 +556,7 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _component_version_arguments():
-        return '-t {} --component-version {}'.format('spark', 'spark=2.2')
+        return '-t {} --component-version {} --version {}'.format('spark', 'spark=2.4', '4.0')
 
     @staticmethod
     def _with_cluster_config():
