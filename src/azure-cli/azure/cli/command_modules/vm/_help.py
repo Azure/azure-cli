@@ -2757,7 +2757,7 @@ examples:
 
 helps['vmss update'] = """
 type: command
-short-summary: Update a VMSS.After that,remember to execute the 'az vmss update-instances' command to make the changes take effect, assuming that you have not set the automatic modes for the upgrade policy
+short-summary: Update a VMSS. After that, remember to execute the 'az vmss update-instances' command to make the changes take effect, assuming that you have not set the automatic modes for the upgrade policy.
 examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
