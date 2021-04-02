@@ -11,15 +11,18 @@ from azure.mgmt.cdn.models import (AFDEndpoint, HealthProbeRequestType, EnabledS
                                    LoadBalancingSettingsParameters, SecurityPolicyWebApplicationFirewallParameters,
                                    SecurityPolicyWebApplicationFirewallAssociation, CustomerCertificateParameters,
                                    AFDDomain, AFDDomainHttpsParameters, AfdCertificateType, AfdMinimumTlsVersion,
-                                   AFDEndpointUpdateParameters, SkuName, ErrorResponseException)
+                                   AFDEndpointUpdateParameters, SkuName, AfdPurgeParameters, Secret,
+                                   SecurityPolicy, ProfileUpdateParameters)
 
 from azure.mgmt.cdn.operations import (AFDOriginGroupsOperations, AFDOriginsOperations, AFDProfilesOperations,
                                        SecretsOperations, AFDEndpointsOperations, RoutesOperations, RuleSetsOperations,
                                        RulesOperations, SecurityPoliciesOperations, AFDCustomDomainsOperations,
                                        ProfilesOperations)
 
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import (sdk_no_wait)
-from azure.cli.core.azclierror import (ResourceNotFoundError, InvalidArgumentValueError)
+from azure.cli.core.azclierror import (InvalidArgumentValueError)
+from azure.core.exceptions import (ResourceNotFoundError)
 
 from knack.log import get_logger
 from msrest.polling import LROPoller, NoPolling
@@ -80,20 +83,15 @@ def create_afd_profile(client: ProfilesOperations, resource_group_name, profile_
 
     # Force location to global
     profile = Profile(location="global", sku=Sku(name=sku), tags=tags)
-    return client.create(resource_group_name, profile_name, profile)
+    return client.begin_create(resource_group_name, profile_name, profile)
 
 
 def delete_afd_profile(client: ProfilesOperations, resource_group_name, profile_name):
     profile = None
     try:
         profile = client.get(resource_group_name, profile_name)
-    except ErrorResponseException as e:
-        props = getattr(e.inner_exception, 'additional_properties', {})
-        if not isinstance(props, dict) or not isinstance(props.get('error'), dict):
-            raise e
-        props = props['error']
-        if props.get('code') != 'ResourceNotFound':
-            raise e
+    except ResourceNotFoundError:
+        pass
 
     if profile is None or profile.sku.name not in (SkuName.premium_azure_front_door,
                                                    SkuName.standard_azure_front_door):
@@ -103,7 +101,7 @@ def delete_afd_profile(client: ProfilesOperations, resource_group_name, profile_
         logger.warning("Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported.")
         return LROPoller(client, None, get_long_running_output, NoPolling())
 
-    return client.delete(resource_group_name, profile_name)
+    return client.begin_delete(resource_group_name, profile_name)
 
 
 def update_afd_profile(client: ProfilesOperations, resource_group_name, profile_name, tags):
@@ -112,7 +110,7 @@ def update_afd_profile(client: ProfilesOperations, resource_group_name, profile_
         logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
         raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
 
-    return client.update(resource_group_name, profile_name, tags)
+    return client.begin_update(resource_group_name, profile_name, ProfileUpdateParameters(tags=tags))
 
 
 def list_afd_profiles(client: ProfilesOperations, resource_group_name=None):
@@ -149,7 +147,15 @@ def create_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, pro
                            enabled_state=enabled_state,
                            tags=tags)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, profile_name, endpoint_name, endpoint)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, profile_name, endpoint_name, endpoint)
+
+
+def purge_afd_endpoint_content(client: AFDEndpointsOperations, resource_group_name, profile_name, endpoint_name,
+                               content_paths, domains=None, no_wait=None):
+    endpoint = AfdPurgeParameters(content_paths=content_paths,
+                                  domains=domains)
+
+    return sdk_no_wait(no_wait, client.begin_purge_content, resource_group_name, profile_name, endpoint_name, endpoint)
 
 
 def update_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, profile_name, endpoint_name,
@@ -160,7 +166,7 @@ def update_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, pro
         tags=tags
     )
 
-    return client.update(resource_group_name, profile_name, endpoint_name, update_properties)
+    return client.begin_update(resource_group_name, profile_name, endpoint_name, update_properties)
 
 
 def create_afd_origin_group(client: AFDOriginGroupsOperations,
@@ -189,10 +195,10 @@ def create_afd_origin_group(client: AFDOriginGroupsOperations,
     afd_origin_group = AFDOriginGroup(load_balancing_settings=load_balancing_settings_parameters,
                                       health_probe_settings=health_probe_parameters)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         origin_group_name,
-                         afd_origin_group).result()
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               origin_group_name,
+                               afd_origin_group).result()
 
 
 def update_afd_origin_group(client: AFDOriginGroupsOperations,
@@ -230,10 +236,10 @@ def update_afd_origin_group(client: AFDOriginGroupsOperations,
     afd_origin_group = AFDOriginGroup(load_balancing_settings=load_balancing_settings_parameters,
                                       health_probe_settings=health_probe_parameters)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         origin_group_name,
-                         afd_origin_group).result()
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               origin_group_name,
+                               afd_origin_group).result()
 
 
 def create_afd_origin(client: AFDOriginsOperations,
@@ -262,19 +268,19 @@ def create_afd_origin(client: AFDOriginsOperations,
             group_id=private_link_sub_resource_type,
             request_message=private_link_request_message)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         origin_group_name,
-                         origin_name,
-                         AFDOrigin(
-                             host_name=host_name,
-                             http_port=http_port,
-                             https_port=https_port,
-                             origin_host_header=origin_host_header,
-                             priority=priority,
-                             weight=weight,
-                             shared_private_link_resource=shared_private_link_resource,
-                             enabled_state=enabled_state))
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               origin_group_name,
+                               origin_name,
+                               AFDOrigin(
+                                   host_name=host_name,
+                                   http_port=http_port,
+                                   https_port=https_port,
+                                   origin_host_header=origin_host_header,
+                                   priority=priority,
+                                   weight=weight,
+                                   shared_private_link_resource=shared_private_link_resource,
+                                   enabled_state=enabled_state))
 
 
 def update_afd_origin(client: AFDOriginsOperations,
@@ -339,14 +345,15 @@ def update_afd_origin(client: AFDOriginsOperations,
         origin.shared_private_link_resource = existing.shared_private_link_resource
 
     # client.update does not allow unset field
-    return client.create(resource_group_name,
-                         profile_name,
-                         origin_group_name,
-                         origin_name,
-                         origin)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               origin_group_name,
+                               origin_name,
+                               origin)
 
 
-def create_afd_route(client: RoutesOperations,
+def create_afd_route(cmd,
+                     client: RoutesOperations,
                      resource_group_name: str,
                      profile_name: str,
                      endpoint_name: str,
@@ -364,18 +371,19 @@ def create_afd_route(client: RoutesOperations,
                      patterns_to_match: List[str] = None,
                      rule_sets: List[str] = None):
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     formatted_custom_domains = []
     if custom_domains is not None:
         for custom_domain in custom_domains:
             if '/customdomains/' not in custom_domain.lower():
-                custom_domain = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+                custom_domain = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                                 f'/providers/Microsoft.Cdn/profiles/{profile_name}/customDomains/{custom_domain}'
 
             # If the origin is not an ID, assume it's a name and format it as an ID.
             formatted_custom_domains.append(ResourceReference(id=custom_domain))
 
     if '/origingroups/' not in origin_group.lower():
-        origin_group = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+        origin_group = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                        f'/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group}'
 
     compression_settings = CompressionSettings(
@@ -386,35 +394,39 @@ def create_afd_route(client: RoutesOperations,
     if is_compression_enabled and content_types_to_compress is None:
         compression_settings.content_types_to_compress = default_content_types()
 
+    if not compression_settings.is_compression_enabled:
+        compression_settings.content_types_to_compress = []
+
     formatted_rule_sets = []
     if rule_sets is not None:
         for rule_set in rule_sets:
             if '/rulesets/' not in rule_set.lower():
-                rule_set = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+                rule_set = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                            f'/providers/Microsoft.Cdn/profiles/{profile_name}/ruleSets/{rule_set}'
 
             formatted_rule_sets.append(ResourceReference(id=rule_set))
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         endpoint_name,
-                         route_name,
-                         Route(
-                             custom_domains=formatted_custom_domains,
-                             origin_path=origin_path,
-                             patterns_to_match=patterns_to_match if patterns_to_match is not None else ['/*'],
-                             supported_protocols=supported_protocols,
-                             https_redirect=https_redirect,
-                             origin_group=ResourceReference(id=origin_group),
-                             forwarding_protocol=forwarding_protocol,
-                             rule_sets=formatted_rule_sets,
-                             query_string_caching_behavior=query_string_caching_behavior,
-                             compression_settings=compression_settings,
-                             link_to_default_domain=LinkToDefaultDomain.enabled if link_to_default_domain else
-                             LinkToDefaultDomain.disabled))
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               endpoint_name,
+                               route_name,
+                               Route(
+                                   custom_domains=formatted_custom_domains,
+                                   origin_path=origin_path,
+                                   patterns_to_match=patterns_to_match if patterns_to_match is not None else ['/*'],
+                                   supported_protocols=supported_protocols,
+                                   https_redirect=https_redirect,
+                                   origin_group=ResourceReference(id=origin_group),
+                                   forwarding_protocol=forwarding_protocol,
+                                   rule_sets=formatted_rule_sets,
+                                   query_string_caching_behavior=query_string_caching_behavior,
+                                   compression_settings=compression_settings,
+                                   link_to_default_domain=LinkToDefaultDomain.enabled if link_to_default_domain else
+                                   LinkToDefaultDomain.disabled))
 
 
-def update_afd_route(client: RoutesOperations,
+def update_afd_route(cmd,
+                     client: RoutesOperations,
                      resource_group_name: str,
                      profile_name: str,
                      endpoint_name: str,
@@ -443,11 +455,12 @@ def update_afd_route(client: RoutesOperations,
         query_string_caching_behavior=query_string_caching_behavior,
         link_to_default_domain=link_to_default_domain)
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if custom_domains is not None:
         formatted_custom_domains = []
         for custom_domain in custom_domains:
             if '/customdomains/' not in custom_domain.lower():
-                custom_domain = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+                custom_domain = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                                 f'/providers/Microsoft.Cdn/profiles/{profile_name}/customDomains/{custom_domain}'
 
             # If the origin is not an ID, assume it's a name and format it as an ID.
@@ -457,7 +470,7 @@ def update_afd_route(client: RoutesOperations,
 
     if origin_group is not None:
         if '/origingroups/' not in origin_group.lower():
-            origin_group = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+            origin_group = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                            f'/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{origin_group}'
 
         route.origin_group = origin_group
@@ -466,7 +479,7 @@ def update_afd_route(client: RoutesOperations,
         formatted_rule_sets = []
         for rule_set in rule_sets:
             if '/rulesets/' not in rule_set.lower():
-                rule_set = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+                rule_set = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                            f'/providers/Microsoft.Cdn/profiles/{profile_name}/ruleSets/{rule_set}'
 
             # If the origin is not an ID, assume it's a name and format it as an ID.
@@ -500,13 +513,16 @@ def update_afd_route(client: RoutesOperations,
                 is_compression_enabled=existing.compression_settings["isCompressionEnabled"]
             )
     else:
-        route.compression_settings = None
+        route.compression_settings = CompressionSettings(
+            content_types_to_compress=[],
+            is_compression_enabled=False
+        )
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         endpoint_name,
-                         route_name,
-                         route)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               endpoint_name,
+                               route_name,
+                               route)
 
 
 def create_afd_rule_set(client: RuleSetsOperations,
@@ -514,7 +530,7 @@ def create_afd_rule_set(client: RuleSetsOperations,
                         profile_name: str,
                         rule_set_name: str):
 
-    return client.create(resource_group_name, profile_name, rule_set_name)
+    return client.begin_create(resource_group_name, profile_name, rule_set_name)
 
 
 # pylint: disable=too-many-locals
@@ -552,11 +568,11 @@ def create_afd_rule(client: RulesOperations, resource_group_name, profile_name, 
         match_processing_behavior=match_processing_behavior
     )
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         rule_set_name,
-                         rule_name,
-                         rule=rule)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               rule_set_name,
+                               rule_name,
+                               rule=rule)
 
 
 def add_afd_rule_condition(client: RulesOperations, resource_group_name, profile_name, rule_set_name,
@@ -568,11 +584,11 @@ def add_afd_rule_condition(client: RulesOperations, resource_group_name, profile
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
     existing_rule.conditions.append(condition)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         rule_set_name,
-                         rule_name,
-                         rule=existing_rule)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               rule_set_name,
+                               rule_name,
+                               rule=existing_rule)
 
 
 def add_afd_rule_action(client: RulesOperations, resource_group_name, profile_name, rule_set_name,
@@ -590,11 +606,11 @@ def add_afd_rule_action(client: RulesOperations, resource_group_name, profile_na
                            custom_fragment, source_pattern, destination, preserve_unmatched_path)
 
     existing_rule.actions.append(action)
-    return client.create(resource_group_name,
-                         profile_name,
-                         rule_set_name,
-                         rule_name,
-                         rule=existing_rule)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               rule_set_name,
+                               rule_name,
+                               rule=existing_rule)
 
 
 def remove_afd_rule_condition(client: RulesOperations, resource_group_name, profile_name,
@@ -605,11 +621,11 @@ def remove_afd_rule_condition(client: RulesOperations, resource_group_name, prof
     else:
         logger.warning("Invalid condition index found. This command will be skipped. Please check the rule.")
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         rule_set_name,
-                         rule_name,
-                         rule=existing_rule)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               rule_set_name,
+                               rule_name,
+                               rule=existing_rule)
 
 
 def remove_afd_rule_action(client: RulesOperations, resource_group_name, profile_name, rule_set_name, rule_name, index):
@@ -619,11 +635,11 @@ def remove_afd_rule_action(client: RulesOperations, resource_group_name, profile
     else:
         logger.warning("Invalid condition index found. This command will be skipped. Please check the rule.")
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         rule_set_name,
-                         rule_name,
-                         rule=existing_rule)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               rule_set_name,
+                               rule_name,
+                               rule=existing_rule)
 
 
 def list_afd_rule_condition(client: RulesOperations, resource_group_name,
@@ -661,10 +677,10 @@ def create_afd_security_policy(client: SecurityPoliciesOperations,
             domains=[ResourceReference(id=domain) for domain in domains],
             patterns_to_match=["/*"])])
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         security_policy_name,
-                         parameters=parameters)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               security_policy_name,
+                               SecurityPolicy(parameters=parameters))
 
 
 def update_afd_security_policy(client: SecurityPoliciesOperations,
@@ -690,10 +706,10 @@ def update_afd_security_policy(client: SecurityPoliciesOperations,
             domains=[ResourceReference(id=domain) for domain in domains],
             patterns_to_match=["/*"])] if domains is not None else existing.parameters.associations)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         security_policy_name,
-                         parameters=parameters)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               security_policy_name,
+                               SecurityPolicy(parameters=parameters))
 
 
 def create_afd_secret(client: SecretsOperations,
@@ -725,10 +741,10 @@ def create_afd_secret(client: SecretsOperations,
             use_latest_version=False
         )
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         secret_name,
-                         parameters=parameters)
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               secret_name,
+                               Secret(parameters=parameters))
 
 
 def update_afd_secret(client: SecretsOperations,
@@ -760,7 +776,8 @@ def update_afd_secret(client: SecretsOperations,
                              use_latest_version)
 
 
-def create_afd_custom_domain(client: AFDCustomDomainsOperations,
+def create_afd_custom_domain(cmd,
+                             client: AFDCustomDomainsOperations,
                              resource_group_name: str,
                              profile_name: str,
                              custom_domain_name: str,
@@ -774,8 +791,9 @@ def create_afd_custom_domain(client: AFDCustomDomainsOperations,
     if azure_dns_zone is not None and "/dnszones/" not in azure_dns_zone.lower():
         raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if secret is not None and "/secrets/" not in secret.lower():
-        secret = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+        secret = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                  f'/providers/Microsoft.Cdn/profiles/{profile_name}/secrets/{secret}'
 
     tls_settings = AFDDomainHttpsParameters(certificate_type=certificate_type,
@@ -786,10 +804,11 @@ def create_afd_custom_domain(client: AFDCustomDomainsOperations,
                            tls_settings=tls_settings,
                            azure_dns_zone=ResourceReference(id=azure_dns_zone) if azure_dns_zone is not None else None)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, profile_name, custom_domain_name, afd_domain)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, profile_name, custom_domain_name, afd_domain)
 
 
-def update_afd_custom_domain(client: AFDCustomDomainsOperations,
+def update_afd_custom_domain(cmd,
+                             client: AFDCustomDomainsOperations,
                              resource_group_name: str,
                              profile_name: str,
                              custom_domain_name: str,
@@ -801,8 +820,9 @@ def update_afd_custom_domain(client: AFDCustomDomainsOperations,
     if azure_dns_zone is not None and "/dnszones/" not in azure_dns_zone.lower():
         raise InvalidArgumentValueError('azure_dns_zone should be valid Azure dns zone ID.')
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if secret is not None and "/secrets/" not in secret.lower():
-        secret = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+        secret = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                  f'/providers/Microsoft.Cdn/profiles/{profile_name}/secrets/{secret}'
 
     existing = client.get(resource_group_name, profile_name, custom_domain_name)
@@ -821,9 +841,9 @@ def update_afd_custom_domain(client: AFDCustomDomainsOperations,
         tls_settings=tls_settings,
         azure_dns_zone=ResourceReference(id=azure_dns_zone) if azure_dns_zone is not None else existing.azure_dns_zone)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         custom_domain_name,
-                         afd_domain).result()
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               custom_domain_name,
+                               afd_domain).result()
 
 # endregion
