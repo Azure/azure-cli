@@ -8,15 +8,18 @@ import re
 import stat
 import platform
 import subprocess
+import json
 
-from pathlib import Path
+from json.decoder import JSONDecodeError
 from contextlib import suppress
+from datetime import datetime, timedelta
 
 import requests
 import semver
 
 from six.moves.urllib.request import urlopen
 from knack.log import get_logger
+from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (
     FileOperationError,
     ValidationError,
@@ -31,6 +34,11 @@ _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1
 # See: https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
 
+_config_dir = get_config_dir()
+_bicep_installation_dir = os.path.join(_config_dir, "bin")
+_bicep_version_check_file_path = os.path.join(_config_dir, "bicepVersionCheck.json")
+_bicep_version_check_cache_ttl = timedelta(minutes=10)
+
 _logger = get_logger(__name__)
 
 
@@ -42,7 +50,7 @@ def validate_bicep_target_scope(template_schema, deployment_scope):
         )
 
 
-def run_bicep_command(args, auto_install=True, check_upgrade=True):
+def run_bicep_command(args, auto_install=True, check_version=True):
     installation_path = _get_bicep_installation_path(platform.system())
     installed = os.path.isfile(installation_path)
 
@@ -51,18 +59,24 @@ def run_bicep_command(args, auto_install=True, check_upgrade=True):
             ensure_bicep_installation(stdout=False)
         else:
             raise FileOperationError('Bicep CLI not found. Install it now by running "az bicep install".')
-    elif check_upgrade:
+    elif check_version:
+        latest_release_tag, cache_expired = _load_bicep_version_check_result_from_cache()
+
         with suppress(ClientRequestError):
             # Checking upgrade should ignore connection issues.
             # Users may continue using the current installed version.
             installed_version = _get_bicep_installed_version(installation_path)
-            latest_release_tag = get_bicep_latest_release_tag()
+            latest_release_tag = get_bicep_latest_release_tag() if cache_expired else latest_release_tag
             latest_version = _extract_semver(latest_release_tag)
+
             if installed_version and latest_version and semver.compare(installed_version, latest_version) < 0:
                 _logger.warning(
                     'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
                     latest_release_tag,
                 )
+
+            if cache_expired:
+                _refresh_bicep_version_check_cache(latest_release_tag)
 
     return _run_command(installation_path, args)
 
@@ -124,9 +138,32 @@ def get_bicep_available_release_tags():
 def get_bicep_latest_release_tag():
     try:
         response = requests.get("https://api.github.com/repos/Azure/bicep/releases/latest")
+        response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+
+
+def _load_bicep_version_check_result_from_cache():
+    try:
+        with open(_bicep_version_check_file_path, "r") as version_check_file:
+            version_check_data = json.load(version_check_file)
+            latest_release_tag = version_check_data["latestReleaseTag"]
+            last_check_time = datetime.fromisoformat(version_check_data["lastCheckTime"])
+            cache_expired = datetime.now() - last_check_time > _bicep_version_check_cache_ttl
+
+            return latest_release_tag, cache_expired
+    except (IOError, JSONDecodeError):
+        return None, True
+
+
+def _refresh_bicep_version_check_cache(lastest_release_tag):
+    with open(_bicep_version_check_file_path, "w+") as version_check_file:
+        version_check_data = {
+            "lastCheckTime": datetime.now().isoformat(timespec="microseconds"),
+            "latestReleaseTag": lastest_release_tag,
+        }
+        json.dump(version_check_data, version_check_file)
 
 
 def _get_bicep_installed_version(bicep_executable_path):
@@ -150,12 +187,10 @@ def _get_bicep_download_url(system, release_tag):
 
 
 def _get_bicep_installation_path(system):
-    installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
-
     if system == "Windows":
-        return os.path.join(installation_folder, "bicep.exe")
+        return os.path.join(_bicep_installation_dir, "bicep.exe")
     if system in ("Linux", "Darwin"):
-        return os.path.join(installation_folder, "bicep")
+        return os.path.join(_bicep_installation_dir, "bicep")
 
     raise ValidationError(f'The platform "{format(system)}" is not supported.')
 
@@ -180,9 +215,8 @@ def _run_command(bicep_installation_path, args):
 
 def _template_schema_to_target_scope(template_schema):
     template_schema_match = re.search(_template_schema_pattern, template_schema)
-    template_type = template_schema_match.group('templateType') if template_schema_match else None
+    template_type = template_schema_match.group("templateType") if template_schema_match else None
     template_type_lower = template_type.lower() if template_type else None
-    print(template_type)
 
     if template_type_lower == "deployment":
         return "resourceGroup"

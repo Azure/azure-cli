@@ -29,7 +29,7 @@ class TestBicep(unittest.TestCase):
     @mock.patch("azure.cli.command_modules.resource._bicep.get_bicep_latest_release_tag")
     @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installed_version")
     @mock.patch("os.path.isfile")
-    def test_run_bicep_command_check_upgrade(
+    def test_run_bicep_command_check_version(
         self,
         isfile_stub,
         _get_bicep_installed_version_stub,
@@ -42,7 +42,7 @@ class TestBicep(unittest.TestCase):
         _get_bicep_installed_version_stub.return_value = "1.0.0"
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
-        run_bicep_command(["--version"], check_upgrade=True)
+        run_bicep_command(["--version"], check_version=True)
 
         warning_mock.assert_called_once_with(
             'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',

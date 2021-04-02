@@ -573,17 +573,17 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('bicep build') as c:
-        c.argument('files', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                      type=file_type, help="The path to the Bicep file to build in the file system."))
         c.argument('outdir', arg_type=CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(),
                                                       help="When set, saves the output at the specified directory."))
         c.argument('outfile', arg_type=CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(),
-                                                      help="When set, saves the output as the specified file path."))
+                                                       help="When set, saves the output as the specified file path."))
         c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
                                                       help="When set, prints all output to stdout instead of corresponding files."))
 
     with self.argument_context('bicep decompile') as c:
-        c.argument('files', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                      type=file_type, help="The path to the ARM template to decompile in the file system."))
 
     with self.argument_context('bicep install') as c:
