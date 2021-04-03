@@ -1837,9 +1837,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None, tags=None, no_prompt=False):
-    artifacts = None
-    input_template = None
+                         description=None, version=None, version_description=None, tags=None, no_prompt=False, ui_form_definition_file=None):
     if location is None:
         rcf = _resource_client_factory(cmd.cli_ctx)
         location = rcf.resource_groups.get(resource_group_name).location
@@ -1849,7 +1847,8 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         raise IncorrectUsageError('please provide --version if --template-file is specified')
 
     if version:
-        Exists = False
+        input_template, artifacts, input_ui_form_definition = None, None, None
+        exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
                 existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
@@ -1857,7 +1856,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
                 if not confirmation:
                     return None
-                Exists = True
+                exists = True
             except Exception:  # pylint: disable=broad-except
                 pass
 
@@ -1867,7 +1866,11 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
             input_template = getattr(packed_template, 'RootTemplate')
             artifacts = getattr(packed_template, 'Artifacts')
 
-        if not Exists:
+        if ui_form_definition_file:
+            ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+            input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
+
+        if not exists:
             try:  # Check if parent template spec already exists.
                 exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
                 if tags is None:  # New version should inherit tags from parent if none are provided.
@@ -1879,8 +1882,8 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
-        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
+        template_spec_version = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1889,7 +1892,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
 
 def update_template_spec(cmd, resource_group_name=None, name=None, template_spec=None, template_file=None, display_name=None,
-                         description=None, version=None, version_description=None, tags=None):
+                         description=None, version=None, version_description=None, tags=None, ui_form_definition_file=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_spec:
@@ -1899,38 +1902,42 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    existing_template = None
-    artifacts = None
 
+    existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
         packed_template = pack(cmd, template_file)
         input_template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
+    if ui_form_definition_file:
+        ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+        input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
+
     if version:
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
 
-        version_tags = tags
-        if tags is None:  # Do not remove tags if not explicitely empty.
-            version_tags = getattr(existing_template, 'tags')
+        # Do not remove tags if not explicitly empty.
+        if tags is None:
+            tags = getattr(existing_template, 'tags')
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:
             input_template = getattr(existing_template, 'template')
-
+        if ui_form_definition_file is None:
+            input_ui_form_definition = getattr(existing_template, 'formUiDefinition')
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=version_tags)
+        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
-    version_tags = tags
-    if version_tags is None:  # Do not remove tags if not explicitely empty.
+    # Do not remove tags if not explicitly empty.
+    if tags is None:
         tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')
