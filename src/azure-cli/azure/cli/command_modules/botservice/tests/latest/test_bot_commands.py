@@ -261,7 +261,7 @@ class BotTests(ScenarioTest):
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript')
 
     @ResourceGroupPreparer(random_name_length=20)
-    @live_only() # if the path to download already exist the tests fail as by design which makes this not idempotent
+    @live_only()  # if the path to download already exist the tests fail as by design which makes this not idempotent
     def test_botservice_download_should_create_appsettings_for_v4_csharp_webapp_echo_bots_no_bot_file(self,
                                                                                                       resource_group):
         self.kwargs.update({
