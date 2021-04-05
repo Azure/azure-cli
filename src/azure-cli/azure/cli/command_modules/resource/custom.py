@@ -6,7 +6,6 @@
 # pylint: disable=too-many-lines
 # pylint: disable=line-too-long
 
-from __future__ import print_function
 from collections import OrderedDict
 import codecs
 import json

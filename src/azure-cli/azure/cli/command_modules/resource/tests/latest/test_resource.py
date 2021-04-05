@@ -1034,7 +1034,8 @@ class TemplateSpecsExportTest(LiveScenarioTest):
             'template_spec_name': 'CLITestTemplateSpecExport',
             'output_folder': os.path.dirname(os.path.realpath(__file__)).replace('\\', '\\\\')
         })
-        with self.assertRaises(IncorrectUsageError) as err:
+        # Because exit_code is 1, so the exception caught should be an AssertionError
+        with self.assertRaises(AssertionError) as err:
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
             self.assertTrue('Please specify the template spec version for export' in str(err.exception))
 
@@ -1186,6 +1187,8 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment sub cancel -n {dn2}')
+
+        self.cmd('deployment sub wait -n {dn2} --custom "provisioningState==Canceled"')
 
         self.cmd('deployment sub show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')

@@ -1081,6 +1081,9 @@ examples:
     supported-profiles: latest
     text: >
         az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
+  - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image centos --count 3
 """
 
 helps['vm deallocate'] = """
@@ -2754,7 +2757,7 @@ examples:
 
 helps['vmss update'] = """
 type: command
-short-summary: Update a VMSS.
+short-summary: Update a VMSS. Run 'az vmss update-instances' command to roll out the changes to VMs if you have not configured upgrade policy.
 examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
