@@ -223,8 +223,23 @@ def acr_connected_registry_delete(cmd,
             token_client = cf_acr_tokens(cmd.cli_ctx)
             scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
 
+            # Delete target sync scope map and token.
             acr_token_delete(cmd, token_client, registry_name, sync_token_name, yes, resource_group_name)
             acr_scope_map_delete(cmd, scope_map_client, registry_name, sync_scope_map_name, yes, resource_group_name)
+            # Cleanup gateway permissions from ancestors
+            connected_registry_list = list(client.list(resource_group_name, registry_name))
+            family_tree, _ = _get_family_tree(connected_registry_list, None)
+            gateway_actions_list = [[connected_registry_name.lower()] + DEFAULT_GATEWAY_SCOPE]
+            gateway_actions_set = set(parse_scope_map_actions(gateway_actions_list=gateway_actions_list))
+
+            parent_id = connected_registry.parent.id
+            while parent_id and not parent_id.isspace():
+                ancestor = family_tree[parent_id]["connectedRegistry"]
+                msg = "Removing '{}' gateway permissions from {}".format(connected_registry_name, ancestor.name)
+                logger.warning(msg)
+                _update_repo_permissions(cmd, resource_group_name, registry_name,
+                                         ancestor, set(), gateway_actions_set)
+                parent_id = ancestor.parent.id
         else:
             msg = "Connected registry successfully deleted. Please cleanup your sync tokens and scope maps. " + \
                 "Run the following commands for cleanup: \n\t" + \

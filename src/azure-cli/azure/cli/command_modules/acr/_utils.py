@@ -472,7 +472,7 @@ def parse_repositories_from_actions(actions):
     return list(set(repositories))
 
 
-def parse_scope_map_actions(repository_actions_list, gateway_actions_list=None):
+def parse_scope_map_actions(repository_actions_list=None, gateway_actions_list=None):
     from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
     valid_actions = {action.value for action in RepoScopeMapActions}
     actions = _parse_scope_map_actions(repository_actions_list, valid_actions, 'repositories')
