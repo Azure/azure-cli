@@ -27,6 +27,11 @@ class ConnectedRegistryModes(Enum):
     REGISTRY = 'Registry'
 
 
+class ConnectedRegistryActivationStatus(Enum):
+    ACTIVE = 'Active'
+    INACTIVE = 'Inactive'
+
+
 DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message/write']
 REPO_SCOPES_BY_MODE = {
     ConnectedRegistryModes.MIRROR.value: ['content/read', 'metadata/read'],
@@ -74,6 +79,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     if parent_name:
         try:
             parent = acr_connected_registry_show(cmd, client, parent_name, registry_name, resource_group_name)
+            connected_registry_list = list(client.list(resource_group_name, registry_name))
+            family_tree, _ = _get_family_tree(connected_registry_list, None)
         except ErrorResponseException as ex:
             if ex.response.status_code == 404:
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
@@ -83,6 +90,13 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
                            "please visit https://aka.ms/acr/connected-registry.")
+        msg = "Can't create the registry '{}'. The ancestor connected ".format(connected_registry_name) +\
+              "registry activation status is not '{}'. ".format(ConnectedRegistryActivationStatus.ACTIVE.value) +\
+              "Please install the parent connected registry and try again. For more information on connected " +\
+              "registries, please visit https://aka.ms/acr/connected-registry."
+        _check_ancestors_are_active(family_tree, parent.id, msg)
+        _update_ancestor_permissions(cmd, family_tree, resource_group_name, registry_name, parent.id,
+                                     connected_registry_name, repositories, mode, False)
 
     if sync_token_name:
         sync_token_id = build_token_id(subscription_id, resource_group_name, registry_name, sync_token_name)
@@ -205,7 +219,6 @@ def acr_connected_registry_delete(cmd,
                                   cleanup=False,
                                   yes=False,
                                   resource_group_name=None):
-
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
@@ -229,17 +242,8 @@ def acr_connected_registry_delete(cmd,
             # Cleanup gateway permissions from ancestors
             connected_registry_list = list(client.list(resource_group_name, registry_name))
             family_tree, _ = _get_family_tree(connected_registry_list, None)
-            gateway_actions_list = [[connected_registry_name.lower()] + DEFAULT_GATEWAY_SCOPE]
-            gateway_actions_set = set(parse_scope_map_actions(gateway_actions_list=gateway_actions_list))
-
-            parent_id = connected_registry.parent.id
-            while parent_id and not parent_id.isspace():
-                ancestor = family_tree[parent_id]["connectedRegistry"]
-                msg = "Removing '{}' gateway permissions from {}".format(connected_registry_name, ancestor.name)
-                logger.warning(msg)
-                _update_repo_permissions(cmd, resource_group_name, registry_name,
-                                         ancestor, set(), gateway_actions_set)
-                parent_id = ancestor.parent.id
+            _update_ancestor_permissions(cmd, family_tree, resource_group_name, registry_name,
+                                         connected_registry.parent.id, connected_registry_name, remove_access=True)
         else:
             msg = "Connected registry successfully deleted. Please cleanup your sync tokens and scope maps. " + \
                 "Run the following commands for cleanup: \n\t" + \
@@ -470,6 +474,45 @@ def _get_install_info(cmd,
     }
 # endregion
 
+def _check_ancestors_are_active(family_tree, parent_id, msg):
+    while parent_id and not parent_id.isspace():
+        ancestor = family_tree[parent_id]["connectedRegistry"]
+        if ancestor.activation.status != ConnectedRegistryActivationStatus.ACTIVE.value:
+            raise CLIError(msg)
+        parent_id = ancestor.parent.id
+
+
+def _update_ancestor_permissions(cmd,
+                                 family_tree,
+                                 resource_group_name,
+                                 registry_name,
+                                 parent_id,
+                                 gateway,
+                                 repositories=None,
+                                 mode=None,
+                                 remove_access=False):
+    gateway_actions_list = [[gateway.lower()] + DEFAULT_GATEWAY_SCOPE]
+    if repositories is not None:
+        repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
+        repo_msg = ", ".join(repositories)
+        repo_msg = " and repo(s) '{}' {} permissions".format(repo_msg, mode)
+    if remove_access:
+        action_txt = "Removing"
+        add_actions_set = set()
+        remove_actions_set = set(parse_scope_map_actions(gateway_actions_list=gateway_actions_list))
+    else:
+        action_txt = "Adding"
+        add_actions_set = set(parse_scope_map_actions(repository_actions_list, gateway_actions_list))
+        remove_actions_set = set()
+
+    while parent_id and not parent_id.isspace():
+        ancestor = family_tree[parent_id]["connectedRegistry"]
+        msg = "{} '{}' gateway permissions{} to connected registry '{}' sync scope map.".format(
+            action_txt, gateway, repo_msg, ancestor.name)
+        _update_repo_permissions(cmd, resource_group_name, registry_name,
+                                 ancestor, add_actions_set, remove_actions_set, msg=msg)
+        parent_id = ancestor.parent.id
+
 # region connected-registry repo update
 def _update_repo_permissions(cmd,
                              resource_group_name,
@@ -477,13 +520,18 @@ def _update_repo_permissions(cmd,
                              connected_registry,
                              add_actions_set,
                              remove_actions_set,
+                             msg=None,
                              description=None):
     scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
     sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
     sync_scope_map = get_scope_map_from_id(cmd, sync_token.scope_map_id)
     sync_scope_map_name = sync_scope_map.name
-    final_actions_set = set(sync_scope_map.actions).union(add_actions_set).difference(remove_actions_set)
+    current_actions_set = set(sync_scope_map.actions)
+    final_actions_set = current_actions_set.union(add_actions_set).difference(remove_actions_set)
+    if final_actions_set == current_actions_set:
+        return None
     current_actions = list(final_actions_set)
+    logger.warning(msg)
     return scope_map_client.update(
         resource_group_name,
         registry_name,
@@ -532,9 +580,8 @@ def acr_connected_registry_repo(cmd,
         lineage = _get_lineage(family_tree, target_connected_registry.id)
         for connected_registry in lineage:
             msg = "Removing '{}' permissions from {}".format(remove_repos_txt, connected_registry.name)
-            logger.warning(msg)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
-                                     connected_registry, set(), remove_repos_set)
+                                     connected_registry, set(), remove_repos_set, msg=msg)
     else:
         remove_repos_set = set()
 
@@ -546,24 +593,21 @@ def acr_connected_registry_repo(cmd,
         parent_id = target_connected_registry.parent.id
         while parent_id and not parent_id.isspace():
             connected_registry = family_tree[parent_id]["connectedRegistry"]
-            msg = "Adding '{}' permissions from {}".format(add_repos_txt, connected_registry.name)
-            logger.warning(msg)
+            msg = "Adding '{}' permissions to {}".format(add_repos_txt, connected_registry.name)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
-                                     connected_registry, add_repos_set, set())
+                                     connected_registry, add_repos_set, set(), msg=msg)
             parent_id = connected_registry.parent.id
     else:
         add_repos_set = set()
 
     # update target connected registry repo permissions.
     if add_repos and remove_repos:
-        msg = "Adding '{}' and removing '{}' permissions from {}".format(
+        msg = "Adding '{}' and removing '{}' permissions in {}".format(
             add_repos_txt, remove_repos_txt, target_connected_registry.name)
     elif add_repos:
-        msg = "Adding '{}' permissions from {}".format(add_repos_txt, target_connected_registry.name)
+        msg = "Adding '{}' permissions to {}".format(add_repos_txt, target_connected_registry.name)
     else:
         msg = "Removing '{}' permissions from {}".format(remove_repos_txt, target_connected_registry.name)
-    logger.warning(msg)
     _update_repo_permissions(cmd, resource_group_name, registry_name,
-                             target_connected_registry, add_repos_set, remove_repos_set)
-    return
+                             target_connected_registry, add_repos_set, remove_repos_set, msg=msg)
 # endregion
