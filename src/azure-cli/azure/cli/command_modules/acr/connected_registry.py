@@ -401,7 +401,8 @@ def _get_install_info(cmd,
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
         parent_gateway_endpoint = "<parent gateway endpoint>"
-    if parent_gateway_endpoint.endswith(".data.azurecr.io") or parent_gateway_endpoint.endswith(".data.azurecr-test.io"):
+    if parent_gateway_endpoint.endswith(".data.azurecr.io") \
+       or parent_gateway_endpoint.endswith(".data.azurecr-test.io"):
         parent_endpoint_protocol = "https"
     else:
         parent_endpoint_protocol = "<http or https>"
