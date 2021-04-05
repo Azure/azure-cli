@@ -474,6 +474,7 @@ def _get_install_info(cmd,
     }
 # endregion
 
+
 def _check_ancestors_are_active(family_tree, parent_id, msg):
     while parent_id and not parent_id.isspace():
         ancestor = family_tree[parent_id]["connectedRegistry"]
@@ -513,6 +514,7 @@ def _update_ancestor_permissions(cmd,
                                  ancestor, add_actions_set, remove_actions_set, msg=msg)
         parent_id = ancestor.parent.id
 
+
 # region connected-registry repo update
 def _update_repo_permissions(cmd,
                              resource_group_name,
@@ -539,6 +541,7 @@ def _update_repo_permissions(cmd,
         description,
         current_actions
     )
+
 
 def _get_scope_map_actions_set(repos, actions):
     for i, repo_name in enumerate(repos):

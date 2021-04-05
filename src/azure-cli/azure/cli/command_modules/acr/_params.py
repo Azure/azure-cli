@@ -429,6 +429,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('remove_repos', options_list=['--remove'], nargs='*', required=False,
                    help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
+
 def _get_helm_default_install_location():
     exe_name = 'helm'
     system = platform.system()

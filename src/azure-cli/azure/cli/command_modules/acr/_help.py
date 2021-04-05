@@ -1337,7 +1337,7 @@ examples:
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
   - name: removes all 'repo1' and 'repo2' permissions from 'myconnectedregistry' and its sucesors sync scope maps actions.
     text: >
-        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
 """
 # endregion
 
