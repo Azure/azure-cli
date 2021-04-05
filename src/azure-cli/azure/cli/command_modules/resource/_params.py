@@ -226,6 +226,7 @@ def load_arguments(self, _):
         c.argument('scope', help='Scope to which this policy exemption applies.')
         c.argument('disable_scope_strict_match', options_list=['--disable-scope-strict-match', '-i'], action='store_true', help='Include policy exemptions either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy exemption.')
+        c.argument('description', help='Description of policy exemption.')
         c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption. Possible values are Waiver and Mitigated.')
         c.argument('policy_definition_reference_ids', nargs='+', options_list=['--policy-definition-reference-ids', '-r'], help='The policy definition reference ids to exempt in the initiative (policy set).')
         c.argument('expires_on', help='"The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
