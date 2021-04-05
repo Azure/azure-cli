@@ -8,6 +8,7 @@ import datetime as dt
 from datetime import datetime
 import random
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
@@ -305,3 +306,47 @@ def change_str_to_datetime(date_str):
             pass
 
     raise ValidationError("The format of restore time should be %Y-%m-%dT%H:%M:%S+00:00")
+
+
+def get_id_components(rid):
+    parsed_rid = parse_resource_id(rid)
+    subscription = parsed_rid['subscription']
+    resource_group = parsed_rid['resource_group']
+    vnet_name = parsed_rid['name']
+    subnet_name = parsed_rid['child_name_1'] if 'child_name_1' in parsed_rid else None
+
+    return subscription, resource_group, vnet_name, subnet_name
+
+
+def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
+                    parent_name=None, parent_type=None):
+
+    parent_path = ''
+    if parent_name and parent_type:
+        parent_path = '{}/{}'.format(parent_type, parent_name)
+
+    api_version = _resolve_api_version(resource_client, provider_namespace, resource_type, parent_path)
+
+    try:
+        resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
+    except:  # pylint: disable=bare-except
+        return False
+    return True
+
+
+def _resolve_api_version(client, provider_namespace, resource_type, parent_path):
+    provider = client.providers.get(provider_namespace)
+
+    # If available, we will use parent resource's api-version
+    resource_type_str = (parent_path.split('/')[0] if parent_path else resource_type)
+
+    rt = [t for t in provider.resource_types  # pylint: disable=no-member
+          if t.resource_type.lower() == resource_type_str.lower()]
+    if not rt:
+        raise CLIError('Resource type {} not found.'.format(resource_type_str))
+    if len(rt) == 1 and rt[0].api_versions:
+        npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
+        return npv[0] if npv else rt[0].api_versions[0]
+    raise CLIError(
+        'API version is required and could not be resolved for resource {}'
+        .format(resource_type))

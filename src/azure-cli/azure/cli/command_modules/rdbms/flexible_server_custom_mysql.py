@@ -21,7 +21,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
 from .flexible_server_custom_common import user_confirmation
-from .flexible_server_virtual_network import create_vnet, prepare_vnet
+from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator
 
 logger = get_logger(__name__)
@@ -70,16 +70,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     server_name = server_name.lower()
 
     # Handle Vnet scenario
-    if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-        subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
-                                 location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-        delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
-    elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
-        subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                DELEGATION_SERVICE_NAME)
-        delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
+    if public_access is None:
+        subnet_id = prepare_private_network(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
+                                            location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+        delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
     else:
         delegated_subnet_arguments = None
 

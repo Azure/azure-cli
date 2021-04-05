@@ -19,7 +19,7 @@ from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
     DEFAULT_LOCATION_PG, change_str_to_datetime
-from .flexible_server_virtual_network import create_vnet, prepare_vnet
+from .flexible_server_virtual_network import prepare_private_network
 from .validators import pg_arguments_validator
 
 
@@ -75,15 +75,10 @@ def flexible_server_create(cmd, client,
     server_name = server_name.lower()
 
     # Handle Vnet scenario
-    if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-        subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
-    elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
-        subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                DELEGATION_SERVICE_NAME)
-        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
+    if public_access is None:
+        subnet_id = prepare_private_network(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
+                                            location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
     else:
         delegated_subnet_arguments = None
 
