@@ -2139,11 +2139,6 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                     invalid notscopes value: \'%s\'', id_arg)
                     return
             assignment.not_scopes = kwargs_list
-        PolicySku = cmd.get_models('PolicySku')
-        policySku = PolicySku(name='A0', tier='Free')
-        if sku:
-            policySku = policySku if sku.lower() == 'free' else PolicySku(name='A1', tier='Standard')
-        assignment.sku = policySku
 
     if cmd.supported_api_version(min_api='2018-05-01'):
         if location:
@@ -2437,6 +2432,90 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
 
     return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
 
+def create_policy_exemption(cmd, name, policy_assignment=None, exemption_category=None,
+                            policy_definition_reference_ids=None, expires_on=None,
+                            display_name=None, description=None, resource_group_name=None, scope=None,
+                            metadata=None):
+    if policy_assignment is None:
+        raise CLIError('--policy_assignment is required')
+    if exemption_category is None:
+        raise CLIError('--exemption_category is required')
+
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, scope)
+    PolicyExemption = cmd.get_models('PolicyExemption')
+    exemption = PolicyExemption(policy_assignment_id=policy_assignment, policy_definition_reference_ids=policy_definition_reference_ids,
+                                exemption_category=exemption_category, expires_on=expires_on,
+                                display_name=display_name, description=description, metadata=metadata)
+    createdExemption = policy_client.policy_exemptions.create_or_update(scope, name, exemption)
+    return createdExemption
+
+def update_policy_exemption(cmd, name, exemption_category=None,
+                            policy_definition_reference_ids=None, expires_on=None,
+                            display_name=None, description=None, resource_group_name=None, scope=None,
+                            metadata=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, scope)
+    PolicyExemption = cmd.get_models('PolicyExemption')
+    exemption = policy_client.policy_exemptions.get(scope, name)
+    parameters = PolicyExemption(
+        policy_assignment_id=exemption.policy_assignment_id,
+        policy_definition_reference_ids=policy_definition_reference_ids if policy_definition_reference_ids is not None else exemption.policy_definition_reference_ids,
+        exemption_category=exemption_category if exemption_category is not None else exemption.exemption_category,
+        expires_on=expires_on if expires_on is not None else exemption.expires_on,
+        display_name=display_name if display_name is not None else exemption.display_name,
+        description=description if description is not None else exemption.description,
+        metadata=metadata if metadata is not None else exemption.metadata)
+    updatedExemption = policy_client.policy_exemptions.create_or_update(scope, name, parameters)
+    return updatedExemption
+
+def delete_policy_exemption(cmd, name, resource_group_name=None, scope=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, scope)
+    policy_client.policy_exemptions.delete(scope, name)
+
+def get_policy_exemption(cmd, name, resource_group_name=None, scope=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, scope)
+    return policy_client.policy_exemptions.get(scope, name)
+
+def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_name=None, scope=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    _scope = _build_policy_scope(get_subscription_id(cmd.cli_ctx),
+                                 resource_group_name, scope)
+    id_parts = parse_resource_id(_scope)
+    subscription = id_parts.get('subscription')
+    resource_group = id_parts.get('resource_group')
+    resource_type = id_parts.get('child_type_1') or id_parts.get('type')
+    resource_name = id_parts.get('child_name_1') or id_parts.get('name')
+    management_group = _parse_management_group_id(scope)
+
+    if management_group:
+        result = policy_client.policy_exemptions.list_for_management_group(management_group_id=management_group, filter='atScope()')
+    elif all([resource_type, resource_group, subscription]):
+        namespace = id_parts.get('namespace')
+        parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
+        result = policy_client.policy_exemptions.list_for_resource(
+            resource_group, namespace,
+            parent_resource_path, resource_type, resource_name)
+    elif resource_group:
+        result = policy_client.policy_exemptions.list_for_resource_group(resource_group)
+    elif subscription:
+        result = policy_client.policy_exemptions.list()
+    elif scope:
+        raise CLIError('usage error `--scope`: must be a fully qualified ARM ID.')
+    else:
+        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME')
+
+    if not disable_scope_strict_match:
+        result = [i for i in result if i.id.lower().strip('/').startswith(_scope.lower().strip('/') + "/providers/microsoft.authorization/policyexemptions")]
+
+    return result
 
 def _register_rp(cli_ctx, subscription_id=None):
     rp = "Microsoft.Management"
