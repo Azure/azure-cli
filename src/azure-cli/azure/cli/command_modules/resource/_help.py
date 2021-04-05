@@ -1819,7 +1819,7 @@ short-summary: Update a policy exemption.
 examples:
   - name: Update a policy exemption.
     text: |
-        az policy exemption update exemptTestVM \\
+        az policy exemption update -n exemptTestVM \\
             --exemption-category "Mitigated"
   - name: Update a policy exemption in the resource group.
     text: |
