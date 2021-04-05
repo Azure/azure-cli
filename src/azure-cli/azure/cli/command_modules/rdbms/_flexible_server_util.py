@@ -299,13 +299,13 @@ def get_current_time():
 
 
 def change_str_to_datetime(date_str):
-    for fmt in ("%Y-%m-%dT%H:%M:%S+00:00", "%Y-%m-%dT%H:%M:%S.%f+00:00"):
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ"):
         try:
             return datetime.strptime(date_str, fmt)
         except ValueError:
             pass
 
-    raise ValidationError("The format of restore time should be %Y-%m-%dT%H:%M:%S+00:00")
+    raise ValidationError("The format of restore time should be in ISO8601 format")
 
 
 def get_id_components(rid):
