@@ -114,10 +114,11 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
                      .format(database_engine, resource_group, server), checks=[JMESPathCheck('name', 'flexibleserverdb')])
 
+
     def _test_flexible_server_create_non_default_tiers(self, database_engine, resource_group):
 
         if database_engine == 'postgres':
-            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier Burstable --sku-name Standard_B1ms --public-access none --zone 1'
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier Burstable --sku-name Standard_B1ms --public-access none'
                      .format(resource_group, self.location, self.random_name_1))
 
             self.cmd('postgres flexible-server show -g {} -n {}'
@@ -160,6 +161,16 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
             self.cmd('postgres flexible-server show -g {} -n {}'
                      .format(resource_group, self.random_name_3),
                      checks=[JMESPathCheck('version', 11)])
+
+    def _test_flexible_server_create_select_zone(self, database_engine, resource_group):
+
+        if database_engine == 'postgres':
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --zone 1 --public-access none'
+                        .format(resource_group, self.location, self.random_name_4))
+
+            self.cmd('postgres flexible-server show -g {} -n {}'
+                        .format(resource_group, self.random_name_4),
+                        checks=[JMESPathCheck('availabilityZone', 1)])
 
     def _test_flexible_server_update_password(self, database_engine, resource_group, server):
         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
@@ -371,7 +382,7 @@ class FlexibleServerHighAvailabilityMgmt(RdbmsScenarioTest):
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
     def _test_flexible_server_high_availability_restore(self, database_engine, resource_group, server):
-
+        time.sleep(20 * 60)
         restore_server = 'restore-' + server[:55]
         restore_time = (datetime.utcnow() - timedelta(minutes=20)).replace(tzinfo=tzutc()).isoformat()
 
@@ -420,8 +431,8 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
                          JMESPathCheck('sku.tier', 'GeneralPurpose')])
 
     def _test_flexible_server_vnet_server_restore(self, database_engine, resource_group, server, restore_server):
-        time.sleep(10 * 60)
-        restore_time = (datetime.utcnow() - timedelta(minutes=20)).replace(tzinfo=tzutc()).isoformat()
+        time.sleep(30 * 60)
+        restore_time = (datetime.utcnow() - timedelta(minutes=30)).replace(tzinfo=tzutc()).isoformat()
 
         if database_engine == 'postgres':
             self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {} --zone 1'
