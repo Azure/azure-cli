@@ -2431,6 +2431,7 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
 
     return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
 
+
 def create_policy_exemption(cmd, name, policy_assignment=None, exemption_category=None,
                             policy_definition_reference_ids=None, expires_on=None,
                             display_name=None, description=None, resource_group_name=None, scope=None,
@@ -2449,6 +2450,7 @@ def create_policy_exemption(cmd, name, policy_assignment=None, exemption_categor
                                 display_name=display_name, description=description, metadata=metadata)
     createdExemption = policy_client.policy_exemptions.create_or_update(scope, name, exemption)
     return createdExemption
+
 
 def update_policy_exemption(cmd, name, exemption_category=None,
                             policy_definition_reference_ids=None, expires_on=None,
@@ -2470,17 +2472,20 @@ def update_policy_exemption(cmd, name, exemption_category=None,
     updatedExemption = policy_client.policy_exemptions.create_or_update(scope, name, parameters)
     return updatedExemption
 
+
 def delete_policy_exemption(cmd, name, resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_client.policy_exemptions.delete(scope, name)
 
+
 def get_policy_exemption(cmd, name, resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     return policy_client.policy_exemptions.get(scope, name)
+
 
 def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_name=None, scope=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -2515,6 +2520,7 @@ def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_n
         result = [i for i in result if i.id.lower().strip('/').startswith(_scope.lower().strip('/') + "/providers/microsoft.authorization/policyexemptions")]
 
     return result
+
 
 def _register_rp(cli_ctx, subscription_id=None):
     rp = "Microsoft.Management"

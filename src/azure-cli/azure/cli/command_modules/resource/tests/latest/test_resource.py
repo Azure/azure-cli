@@ -2752,7 +2752,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'scope': scope})
             assignment = self.cmd('policy assignment create -d {psid} -n {pan} --scope {scope} --display-name {padn}'.format(psid=policyset['id'], **self.kwargs)).get_output_in_json()
             cmd = self.cmdstring('policy exemption create -n {pen} -a {pa} -e waiver --scope {scope} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
-            exemption = self.cmd(cmd, checks=[
+            self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
                 self.check('exemptionCategory', 'waiver'),
@@ -2762,7 +2762,7 @@ class PolicyScenarioTest(ScenarioTest):
 
             # ensure the exemption appears in the list results
             self.cmd('policy exemption list --scope {scope}'.format(**self.kwargs), checks=self.check("length([?name=='{pen}'])", 1))
-            
+
             # update the exemption
             self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
             self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
@@ -2804,7 +2804,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
 
             cmd = self.cmdstring('policy exemption create -n {pen} -a {pa} -e waiver -g {rg} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
-            exemption = self.cmd(cmd, checks=[
+            self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
                 self.check('exemptionCategory', 'waiver'),
@@ -2814,7 +2814,7 @@ class PolicyScenarioTest(ScenarioTest):
 
             # ensure the exemption appears in the list results
             self.cmd('policy exemption list --resource-group {rg}', checks=self.check("length([?name=='{pen}'])", 1))
-            
+
             # update the exemption
             self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
             self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
@@ -2907,6 +2907,7 @@ class PolicyScenarioTest(ScenarioTest):
                 self.resource_policyexemption_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
         else:
             self.resource_policyexemption_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
 
