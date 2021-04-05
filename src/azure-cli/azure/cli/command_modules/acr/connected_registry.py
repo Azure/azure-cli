@@ -401,9 +401,13 @@ def _get_install_info(cmd,
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
         parent_gateway_endpoint = "<parent gateway endpoint>"
+    if parent_gateway_endpoint.endswith(".data.azurecr.io") or parent_gateway_endpoint.endswith(".data.azurecr-test.io"):
+        parent_endpoint_protocol = "https"
+    else:
+        parent_endpoint_protocol = "<http or https>"
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
 
-    connected_registry_login_server = "<connected registry login server. " + \
+    connected_registry_login_server = "<Optional: connected registry login server. " + \
         "More info at https://aka.ms/acr/connected-registry>"
 
     if regenerate_credentials:
@@ -424,7 +428,7 @@ def _get_install_info(cmd,
 
     connection_string = "ConnectedRegistryName=%s;" % connected_registry_name + \
         "SyncTokenName=%s;SyncTokenPassword=%s;" % (sync_username, connection_string_sync_password) + \
-        "ParentGatewayEndpoint=%s;ParentEndpointProtocol=https" % parent_gateway_endpoint
+        "ParentGatewayEndpoint=%s;ParentEndpointProtocol=%s" % (parent_gateway_endpoint, parent_endpoint_protocol)
     return {
         "ACR_REGISTRY_CONNECTION_STRING": connection_string,
         "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
