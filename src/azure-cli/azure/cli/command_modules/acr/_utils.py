@@ -472,7 +472,7 @@ def parse_repositories_from_actions(actions):
     return list(set(repositories))
 
 
-def parse_scope_map_actions(repository_actions_list, gateway_actions_list):
+def parse_scope_map_actions(repository_actions_list, gateway_actions_list=None):
     from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
     valid_actions = {action.value for action in RepoScopeMapActions}
     actions = _parse_scope_map_actions(repository_actions_list, valid_actions, 'repositories')
@@ -486,7 +486,7 @@ def _parse_scope_map_actions(actions_list, valid_actions, action_prefix):
         return []
     actions = []
     for rule in actions_list:
-        resource = rule[0]
+        resource = rule[0].lower()
         if len(rule) < 2:
             raise CLIError('At least one action must be specified with "{}".'.format(resource))
         for action in rule[1:]:

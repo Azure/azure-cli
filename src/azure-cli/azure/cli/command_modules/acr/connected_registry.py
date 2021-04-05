@@ -11,18 +11,20 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps
 from ._utils import (
-    get_registry_by_name,
-    validate_managed_registry,
-    user_confirmation,
+    build_token_id,
     create_default_scope_map,
+    get_registry_by_name,
+    get_scope_map_from_id,
     get_token_from_id,
-    build_token_id
+    parse_scope_map_actions,
+    user_confirmation,
+    validate_managed_registry
 )
 
 
 class ConnectedRegistryModes(Enum):
-    MIRROR = 'mirror'
-    REGISTRY = 'registry'
+    MIRROR = 'Mirror'
+    REGISTRY = 'Registry'
 
 
 DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message/write']
@@ -68,6 +70,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
     ErrorResponseException = cmd.get_models('ErrorResponseException')
     parent = None
+    mode = mode.capitalize()
     if parent_name:
         try:
             parent = acr_connected_registry_show(cmd, client, parent_name, registry_name, resource_group_name)
@@ -75,7 +78,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             if ex.response.status_code == 404:
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
             raise CLIError(ex)
-        if parent.mode.lower() != ConnectedRegistryModes.REGISTRY.value and parent.mode.lower() != mode.lower():
+        if parent.mode != ConnectedRegistryModes.REGISTRY.value and parent.mode != mode:
             raise CLIError("Can't create the registry '{}' with mode '{}' ".format(connected_registry_name, mode) +
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
@@ -271,19 +274,10 @@ def acr_connected_registry_list(cmd,
         else:
             result = [registry for registry in connected_registry_list if not registry.parent.id]
     elif parent_name:
-        family_tree = {}
-        for registry in connected_registry_list:
-            family_tree[registry.id] = {
-                "registry": registry,
-                "childs": []
-            }
-            if registry.name == parent_name:
-                root_parent_id = registry.id
-        for registry in connected_registry_list:
-            parent_id = registry.parent.id
-            if parent_id and not parent_id.isspace():
-                family_tree[parent_id]["childs"].append(registry.id)
-        result = _get_descendancy(family_tree, root_parent_id)
+        family_tree, parent = _get_family_tree(connected_registry_list, parent_name)
+        if parent is None:
+            raise CLIError("Parent connected registry '{}' doesn't exist.".format(parent_name))
+        result = _get_lineage(family_tree, parent.id)
     else:
         result = connected_registry_list
     return result
@@ -327,7 +321,7 @@ def _create_sync_token(cmd,
                        mode):
     token_client = cf_acr_tokens(cmd.cli_ctx)
 
-    mode = mode.lower()
+    mode = mode.capitalize()
     if not any(option for option in ConnectedRegistryModes if option.value == mode):
         raise CLIError("usage error: --mode supports only 'registry' and 'mirror' values.")
     repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
@@ -360,14 +354,34 @@ def _create_sync_token(cmd,
         raise CLIError(e)
 
 
-def _get_descendancy(family_tree, parent_id):
-    childs = family_tree[parent_id]['childs']
+def _get_family_tree(connected_registry_list, target_connected_registry_name):
+    family_tree = {}
+    targetConnectedRegistry = None
+    # Populate the dictionary
+    for ConnectedRegistry in connected_registry_list:
+        family_tree[ConnectedRegistry.id] = {
+            "connectedRegistry": ConnectedRegistry,
+            "children": []
+        }
+        if ConnectedRegistry.name == target_connected_registry_name:
+            targetConnectedRegistry = ConnectedRegistry
+
+    # Populate Children dependencies
+    for ConnectedRegistry in connected_registry_list:
+        parent_id = ConnectedRegistry.parent.id
+        if parent_id and not parent_id.isspace():
+            family_tree[parent_id]["children"].append(ConnectedRegistry.id)
+    return family_tree, targetConnectedRegistry
+
+
+def _get_lineage(family_tree, parent_id):
+    children = family_tree[parent_id]['children']
     result = []
-    for child_id in childs:
-        result = [family_tree[child_id]["registry"]]
-        descendancy = _get_descendancy(family_tree, child_id)
-        if descendancy:
-            result.extend(descendancy)
+    for child_id in children:
+        result = [family_tree[child_id]["connectedRegistry"]]
+        lineage = _get_lineage(family_tree, child_id)
+        if lineage:
+            result.extend(lineage)
     return result
 
 
@@ -439,4 +453,102 @@ def _get_install_info(cmd,
         "ACR_PARENT_LOGIN_SERVER": parent_registry_endpoint,
         "ACR_PARENT_PROTOCOL": "https"
     }
+# endregion
+
+# region connected-registry repo update
+def _update_repo_permissions(cmd,
+                             resource_group_name,
+                             registry_name,
+                             connected_registry,
+                             add_actions_set,
+                             remove_actions_set,
+                             description=None):
+    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+    sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
+    sync_scope_map = get_scope_map_from_id(cmd, sync_token.scope_map_id)
+    sync_scope_map_name = sync_scope_map.name
+    final_actions_set = set(sync_scope_map.actions).union(add_actions_set).difference(remove_actions_set)
+    current_actions = list(final_actions_set)
+    return scope_map_client.update(
+        resource_group_name,
+        registry_name,
+        sync_scope_map_name,
+        description,
+        current_actions
+    )
+
+def _get_scope_map_actions_set(repos, actions):
+    for i, repo_name in enumerate(repos):
+        repos[i] = [repo_name] + actions
+    return set(parse_scope_map_actions(repos))
+
+
+def acr_connected_registry_repo(cmd,
+                                client,
+                                connected_registry_name,
+                                registry_name,
+                                add_repos=None,
+                                remove_repos=None,
+                                resource_group_name=None):
+    if not (add_repos or remove_repos):
+        raise CLIError('No repository permissions to update.')
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+
+    add_repos_set = set(add_repos) if add_repos is not None else set()
+    remove_repos_set = set(remove_repos) if remove_repos is not None else set()
+    duplicate_repos = set.intersection(add_repos_set, remove_repos_set)
+    if duplicate_repos:
+        errors = sorted(map(lambda action: action[action.rfind('/') + 1:], duplicate_repos))
+        raise CLIError(
+            'Update ambiguity. Duplicate repository names were provided with ' +
+            '--add and --remove arguments.\n{}'.format(errors))
+
+    connected_registry_list = list(client.list(resource_group_name, registry_name))
+    family_tree, target_connected_registry = _get_family_tree(connected_registry_list, connected_registry_name)
+    if target_connected_registry is None:
+        raise CLIError("Connected registry '{}' doesn't exist.".format(connected_registry_name))
+
+    # remove repo permissions from connected registry lineage.
+    remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.REGISTRY.value]
+    if remove_repos is not None:
+        remove_repos_txt = ", ".join(remove_repos)
+        remove_repos_set = _get_scope_map_actions_set(remove_repos, remove_actions)
+        lineage = _get_lineage(family_tree, target_connected_registry.id)
+        for connected_registry in lineage:
+            msg = "Removing '{}' permissions from {}".format(remove_repos_txt, connected_registry.name)
+            logger.warning(msg)
+            _update_repo_permissions(cmd, resource_group_name, registry_name,
+                                     connected_registry, set(), remove_repos_set)
+    else:
+        remove_repos_set = set()
+
+    # add repo permissions to ancestors.
+    add_actions = REPO_SCOPES_BY_MODE[target_connected_registry.mode]
+    if add_repos is not None:
+        add_repos_txt = ", ".join(add_repos)
+        add_repos_set = _get_scope_map_actions_set(add_repos, add_actions)
+        parent_id = target_connected_registry.parent.id
+        while parent_id and not parent_id.isspace():
+            connected_registry = family_tree[parent_id]["connectedRegistry"]
+            msg = "Adding '{}' permissions from {}".format(add_repos_txt, connected_registry.name)
+            logger.warning(msg)
+            _update_repo_permissions(cmd, resource_group_name, registry_name,
+                                     connected_registry, add_repos_set, set())
+            parent_id = connected_registry.parent.id
+    else:
+        add_repos_set = set()
+
+    # update target connected registry repo permissions.
+    if add_repos and remove_repos:
+        msg = "Adding '{}' and removing '{}' permissions from {}".format(
+            add_repos_txt, remove_repos_txt, target_connected_registry.name)
+    elif add_repos:
+        msg = "Adding '{}' permissions from {}".format(add_repos_txt, target_connected_registry.name)
+    else:
+        msg = "Removing '{}' permissions from {}".format(remove_repos_txt, target_connected_registry.name)
+    logger.warning(msg)
+    _update_repo_permissions(cmd, resource_group_name, registry_name,
+                             target_connected_registry, add_repos_set, remove_repos_set)
+    return
 # endregion
