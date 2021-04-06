@@ -279,6 +279,11 @@ def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = _get_policy_from_json(client, policy)
     policy_object.name = name
     policy_object.properties.backup_management_type = "AzureIaasVM"
+
+    additional_properties = policy_object.properties.additional_properties
+    if 'instantRpDetails' in additional_properties:
+        policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
+
     return client.create_or_update(vault_name, resource_group_name, name, policy_object)
 
 
