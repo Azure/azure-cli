@@ -17,8 +17,7 @@ from knack.util import CLIError
 
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import (
-    get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags,
-    validate_edge_zone)
+    get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
 from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
@@ -1810,3 +1809,11 @@ def _validate_count(namespace):
     ]
     if any(param for param in banned_params):
         raise ValidationError('When --count is specified, {} are not allowed'.format(', '.join(params_str)))
+
+
+def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.edge_zone:
+        namespace.edge_zone = {
+            'name': namespace.edge_zone,
+            'type': 'EdgeZone'
+        }
