@@ -2256,7 +2256,8 @@ class VMSSCreateOptions(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_policy_setting')
     def test_vmss_create_with_policy_setting(self, resource_group):
-        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S';
+
+        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S'
         self.kwargs.update({
             'vmss': 'vrfvmss',
             'maxBIP': maxBIP,
@@ -2512,8 +2513,8 @@ class VMSSUpdateTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_policy_')
     def test_vmss_update_policy(self, resource_group):
-        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S';
 
+        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S'
         self.kwargs.update({
             'vmss': 'winvmss',
             'maxBIP': maxBIP,
@@ -2530,7 +2531,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUIP),
             self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
-            self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True),
+            self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
 
