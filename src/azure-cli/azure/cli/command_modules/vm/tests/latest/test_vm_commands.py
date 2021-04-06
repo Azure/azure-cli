@@ -2253,7 +2253,6 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_policy_setting')
     def test_vmss_create_with_policy_setting(self, resource_group):
 
@@ -2275,7 +2274,6 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
@@ -2510,7 +2508,6 @@ class VMSSUpdateTests(ScenarioTest):
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_policy_')
     def test_vmss_update_policy(self, resource_group):
 
@@ -2533,7 +2530,6 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_')
     def test_vmss_update_image(self):
