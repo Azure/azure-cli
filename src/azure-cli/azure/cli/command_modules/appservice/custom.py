@@ -1056,7 +1056,7 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     try:
         url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
         setattr(webapp, 'ftpPublishingUrl', url)
-    except StopIteration as e:
+    except StopIteration:
         pass
     return webapp
 
