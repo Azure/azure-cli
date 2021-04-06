@@ -24,6 +24,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -865,7 +866,6 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
 
         return urlunsplit((scheme, netloc, path, new_query_string, fragment))
     except Exception:  # pylint: disable=broad-except
-        from azure.cli.core.azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
@@ -1037,7 +1037,6 @@ def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_t
     if mg_id is None and registering:
         if is_rpaas:
             if not accept_terms:
-                from azure.cli.core.azclierror import RequiredArgumentMissingError
                 raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
             wait = True
         r = rcf.providers.register(namespace)
@@ -2116,7 +2115,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     """
     if bool(policy) == bool(policy_set_definition):
         raise ArgumentUsageError('usage error: --policy NAME_OR_ID | '
-                       '--policy-set-definition NAME_OR_ID')
+                                 '--policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
