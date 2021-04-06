@@ -21,8 +21,16 @@ DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def prepare_private_network(cmd, server_name, vnet, subnet, resource_group_name, location, delegation_service_name, vnet_address_pref, subnet_address_pref):
+
     nw_client = network_client_factory(cmd.cli_ctx)
     resource_client = resource_client_factory(cmd.cli_ctx)
+
+    # Handle vnet and subnet prefix
+    if (vnet_address_pref is not None and subnet_address_pref is None) or \
+       (vnet_address_pref is None and subnet_address_pref is not None):
+        raise ValidationError("You need to provide both Vnet address prefix and Subnet address prefix.")
+    if (subnet is not None and vnet is None) and (vnet_address_pref or subnet_address_pref):
+        raise ValidationError("If you are providing address prefixes, consider using Vnet id or Vnet name and Subnet name.")
     if vnet_address_pref is None:
         vnet_address_pref = DEFAULT_VNET_ADDRESS_PREFIX
     if subnet_address_pref is None:
@@ -106,7 +114,16 @@ def _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_s
                                                                              address_prefixes=[
                                                                                  vnet_address_pref]))).result()
     else:
-        logger.warning('Using existing Subnet "%s" in resource group "%s"', vnet_name, resource_group)
+        logger.warning('Using existing Vnet "%s" in resource group "%s"', vnet_name, resource_group)
+        # check if vnet prefix is in address space and add if not there
+        vnet = nw_client.virtual_networks.get(resource_group, vnet_name)
+        prefixes = vnet.address_space.address_prefixes
+        if vnet_address_pref not in prefixes:
+            logger.warning('Adding address prefix %s to Vnet %s', vnet_address_pref, vnet_name)
+            nw_client.virtual_networks.begin_create_or_update(resource_group, vnet_name,
+                                                              VirtualNetwork(location=location,
+                                                                             address_space=AddressSpace(
+                                                                                 address_prefixes=prefixes + [vnet_address_pref]))).result()
 
     return _create_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group, vnet_name, subnet_name, location, server_name, subnet_address_pref)
 
@@ -125,35 +142,30 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
             delegations=[delegation],
             service_endpoints=[service_endpoint])
 
-        logger.warning('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group)
+        vnet = nw_client.virtual_networks.get(resource_group, vnet_name)
+        vnet_subnet_prefixes = [subnet.address_prefix for subnet in vnet.subnets]
+        if subnet_address_pref in vnet_subnet_prefixes:
+            raise ValidationError("The Subnet (default) prefix {} is already taken by another Subnet in the Vnet. Please provide a different prefix".format(subnet_address_pref))
+
+        logger.warning('Creating new Subnet "%s" in resource group "%s"', subnet_name, resource_group)
         subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
                                                           subnet_result).result()
     else:
-        logger.warning('Using existing subnet "%s" in resource group "%s"', subnet_name, resource_group)
         subnet = nw_client.subnets.get(resource_group, vnet_name, subnet_name)
-
-        # Add storage endpoint for restore feature
-        end_point_flag = False
-        if subnet.service_endpoints:
-            for end_point in subnet.service_endpoints:
-                if end_point.service == 'Microsoft.Storage':
-                    end_point_flag = True
-
-        if not end_point_flag:
-            subnet.service_endpoints = [service_endpoint]
-            subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet).result()
+        logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
 
         # Add Delegation if not delegated already
         if not subnet.delegations:
             logger.warning('Adding "%s" delegation to the existing subnet %s.', delegation_service_name, subnet_name)
-            subnet.delegations = [delegation]
-            subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
-                                                              subnet).result()
         else:
             for delgtn in subnet.delegations:
                 if delgtn.service_name != delegation_service_name:
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(
                         delegation_service_name))
+
+        subnet.service_endpoints = [service_endpoint]
+        subnet.delegations = [delegation]
+        subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet).result()
 
     return subnet
 

@@ -7,6 +7,7 @@
 import datetime as dt
 from datetime import datetime
 import random
+import pytz
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
 from azure.core.paging import ItemPaged
@@ -299,9 +300,11 @@ def get_current_time():
 
 
 def change_str_to_datetime(date_str):
-    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ"):
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S.%f%Z", "%Y-%m-%dT%H:%M:%S%Z"):
         try:
-            return datetime.strptime(date_str, fmt)
+            restore_time = datetime.strptime(date_str, fmt)
+            target_tz = pytz.timezone('UTC')
+            return target_tz.normalize(restore_time)
         except ValueError:
             pass
 

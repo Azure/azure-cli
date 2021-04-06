@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-import datetime as dt
-from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -19,7 +17,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
-    DEFAULT_LOCATION_MySQL
+    DEFAULT_LOCATION_MySQL, change_str_to_datetime
 from .flexible_server_custom_common import user_confirmation
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator
@@ -51,16 +49,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     if subnet_arm_resource_id is not None and public_access is not None:
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                        "and --public_access is invalid. Use either one of them.")
-
-    # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
-    # pylint: disable=too-many-boolean-expressions
-    if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
-        if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
-                ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
-                ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
-                 ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
-            raise CLIError("Incorrect usage : "
-                           "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
 
     server_result = firewall_id = subnet_id = None
 
@@ -138,11 +126,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    try:
-        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
-    except ValueError:
-        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
-    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
+    restore_point_in_time = change_str_to_datetime(restore_point_in_time)
 
     parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,

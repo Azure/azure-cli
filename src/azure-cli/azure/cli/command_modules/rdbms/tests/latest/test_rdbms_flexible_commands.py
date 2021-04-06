@@ -114,7 +114,6 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
                      .format(database_engine, resource_group, server), checks=[JMESPathCheck('name', 'flexibleserverdb')])
 
-
     def _test_flexible_server_create_non_default_tiers(self, database_engine, resource_group):
 
         if database_engine == 'postgres':
@@ -166,11 +165,11 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
 
         if database_engine == 'postgres':
             self.cmd('postgres flexible-server create -g {} -l {} -n {} --zone 1 --public-access none'
-                        .format(resource_group, self.location, self.random_name_4))
+                     .format(resource_group, self.location, self.random_name_4))
 
             self.cmd('postgres flexible-server show -g {} -n {}'
-                        .format(resource_group, self.random_name_4),
-                        checks=[JMESPathCheck('availabilityZone', 1)])
+                     .format(resource_group, self.random_name_4),
+                     checks=[JMESPathCheck('availabilityZone', 1)])
 
     def _test_flexible_server_update_password(self, database_engine, resource_group, server):
         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
@@ -737,7 +736,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
 
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {}'
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {} --debug'
                  .format(database_engine, resource_group, server, subnet_id, location))
 
         # flexible-server show to validate delegation is added to both the created server
@@ -748,6 +747,9 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # delete server
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server),
                  checks=NoneCheck())
+
+        # This is required because the delegations cannot be removed until the server is completely deleted. In the current implementation, there is a delay. Hence, the wait
+        time.sleep(15 * 60)
 
     def _test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid(self, database_engine, resource_group):
 
@@ -774,18 +776,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + server[6:]))
+                             self.get_subscription_id(), resource_group, vnet_name_2, subnet_name_2))
 
         # Cleanup
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
         # This is required because the delegations cannot be removed until the server is completely deleted. In the current implementation, there is a delay. Hence, the wait
         time.sleep(15 * 60)
-        # remove delegations from vnet
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
-                                                                                                         'Subnet' + server[6:],
-                                                                                                         vnet_name_2))
-        # remove  vnet
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
 
     def _test_flexible_server_vnet_mgmt_supplied_vnet(self, database_engine, resource_group):
 
@@ -844,19 +840,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         time.sleep(15 * 60)
 
-        # remove delegations from all vnets
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
-                                                                                                         'Subnet' + servers[0][6:],
-                                                                                                         vnet_name))
-
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
-                                                                                                         'Subnet' + servers[1][6:],
-                                                                                                         vnet_name_2))
-
-        # remove all vnets
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name))
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
-
     def _test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, database_engine, resource_group, virtual_network):
 
         # flexible-server create
@@ -905,13 +888,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         time.sleep(15 * 60)
-
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
-                                                                                                         'Subnet' + servers[1][6:],
-                                                                                                         vnet_name_2))
-
-        # remove all vnets
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
 
     def _test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, database_engine, resource_group_1, resource_group_2):
         # flexible-server create
@@ -963,7 +939,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         self.assertEqual(show_result_2['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group_2, vnet_name_2, 'Subnet' + servers[1][6:]))
+                             self.get_subscription_id(), resource_group_1, vnet_name_2, subnet_name_2))
 
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group_2, servers[0]),
@@ -973,20 +949,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         time.sleep(15 * 60)
-
-        # remove delegations from all vnets
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_1,
-                                                                                                         subnet_name,
-                                                                                                         vnet_name))
-
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_2,
-                                                                                                         'Subnet' +
-                                                                                                         servers[1][6:],
-                                                                                                         vnet_name_2))
-
-        # remove all vnets
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group_1, vnet_name))
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group_2, vnet_name_2))
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
