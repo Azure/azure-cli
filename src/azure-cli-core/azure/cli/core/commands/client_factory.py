@@ -199,7 +199,7 @@ def _get_mgmt_service_client(cli_ctx,
         # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
         #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
         if getattr(cred, "_external_tenant_token_retriever", None):
-            _, _, _, external_tenant_tokens = cred.get_all_tokens(*resource_to_scopes(resource))
+            *_, external_tenant_tokens = cred.get_all_tokens(*resource_to_scopes(resource))
             # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
             client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
                 ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
