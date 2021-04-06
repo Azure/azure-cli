@@ -98,7 +98,8 @@ def load_arguments(self, _):
 
     edge_zone_type = CLIArgumentType(
         help='Name of edge zone extended location.',
-        min_api='2020-12-01'
+        min_api='2020-12-01',
+        is_preview=True
     )
 
     # region MixedScopes
