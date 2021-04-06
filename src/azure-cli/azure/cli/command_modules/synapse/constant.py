@@ -74,7 +74,6 @@ class PrincipalType(str, Enum):
 
 class ItemType(str, Enum):
     bigDataPools = "bigDataPools"
-    scopePools = "scopePools"
     integrationRuntimes = "integrationRuntimes"
     credentials = "credentials"
     linkedServices = "linkedServices"

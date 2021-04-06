@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.util import is_guid
 from azure.graphrbac.models import GraphErrorException
 from msrestazure.azure_exceptions import CloudError
@@ -15,10 +16,10 @@ from ..constant import ITEM_NAME_MAPPING
 def list_role_assignments(cmd, workspace_name, role=None, assignee=None, assignee_object_id=None,
                           scope=None, item=None, item_type=None):
     if bool(assignee) and bool(assignee_object_id):
-        raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
+        raise ArgumentUsageError('usage error: --assignee STRING | --assignee-object-id GUID')
 
     if bool(item) != bool(item_type):
-        raise CLIError('usage error: --item-type STRING --item STRING')
+        raise ArgumentUsageError('usage error: --item-type STRING --item STRING')
 
     return _list_role_assignments(cmd, workspace_name, role, assignee or assignee_object_id,
                                   scope, resolve_assignee=(not assignee_object_id), item=item, item_type=item_type)
@@ -33,8 +34,6 @@ def _list_role_assignments(cmd, workspace_name, role=None, assignee=None, scope=
     object_id = _resolve_object_id(cmd, assignee, fallback_to_object_id=True) if resolve_assignee else assignee
     client = cf_synapse_role_assignments(cmd.cli_ctx, workspace_name)
     role_assignments = client.list_role_assignments(role_id, object_id, scope).value
-    if scope:
-        role_assignments = [x for x in role_assignments if x.scope == scope]
     return role_assignments
 
 
@@ -48,16 +47,19 @@ def get_role_assignment_by_id(cmd, workspace_name, role_assignment_id):
 def delete_role_assignment(cmd, workspace_name, ids=None, assignee=None, assignee_object_id=None, role=None,
                            scope=None, item=None, item_type=None):
     client = cf_synapse_role_assignments(cmd.cli_ctx, workspace_name)
+    if not any([ids, assignee, assignee_object_id, role, scope, item, item_type]):
+        raise ArgumentUsageError('usage error: No argument are provided. --assignee STRING | --ids GUID')
+
     if ids:
         if any([assignee, assignee_object_id, role, scope, item, item_type]):
-            raise CLIError('You should not provide --role or --assignee or --assignee_object_id '
-                           'or --scope or --principal-type when --ids is provided.')
+            raise ArgumentUsageError('You should not provide --role or --assignee or --assignee_object_id '
+                                     'or --scope or --principal-type when --ids is provided.')
         role_assignments = list_role_assignments(cmd, workspace_name, None, None, None, None, None, None)
         assignment_id_list = [x.id for x in role_assignments]
         # check role assignment id
         for assignment_id in ids:
             if assignment_id not in assignment_id_list:
-                raise CLIError("role assignment id:'{}' doesn't exist.".format(assignment_id))
+                raise ArgumentUsageError("role assignment id:'{}' doesn't exist.".format(assignment_id))
         # delete when all ids check pass
         for assignment_id in ids:
             client.delete_role_assignment_by_id(assignment_id)
@@ -65,6 +67,10 @@ def delete_role_assignment(cmd, workspace_name, ids=None, assignee=None, assigne
 
     role_assignments = list_role_assignments(cmd, workspace_name, role, assignee, assignee_object_id,
                                              scope, item, item_type)
+    if any([scope, item, item_type]):
+        scope = _build_role_scope(workspace_name, scope, item, item_type)
+        role_assignments = [x for x in role_assignments if x.scope == scope]
+
     if role_assignments:
         for assignment in role_assignments:
             client.delete_role_assignment_by_id(assignment.id)
@@ -77,16 +83,16 @@ def create_role_assignment(cmd, workspace_name, role, assignee=None, assignee_ob
                            scope=None, assignee_principal_type=None, item_type=None, item=None, assignment_id=None):
     """Check parameters are provided correctly, then call _create_role_assignment."""
     if assignment_id and not is_guid(assignment_id):
-        raise CLIError('usage error: --id GUID')
+        raise InvalidArgumentValueError('usage error: --id GUID')
 
     if bool(assignee) == bool(assignee_object_id):
-        raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
+        raise ArgumentUsageError('usage error: --assignee STRING | --assignee-object-id GUID')
 
     if assignee_principal_type and not assignee_object_id:
-        raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
+        raise ArgumentUsageError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
 
     if bool(item) != bool(item_type):
-        raise CLIError('usage error: --item-type STRING --item STRING')
+        raise ArgumentUsageError('usage error: --item-type STRING --item STRING')
 
     try:
         return _create_role_assignment(cmd, workspace_name, role, assignee or assignee_object_id, scope, item,
@@ -94,7 +100,9 @@ def create_role_assignment(cmd, workspace_name, role, assignee=None, assignee_ob
                                        assignee_principal_type=assignee_principal_type, assignment_id=assignment_id)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
-            return list_role_assignments(cmd, assignee, role, scope)
+            return list_role_assignments(cmd, workspace_name, role=role,
+                                         assignee=assignee, assignee_object_id=assignee_object_id,
+                                         scope=scope, item=item, item_type=item_type)
         raise
 
 
@@ -118,6 +126,11 @@ def _resolve_object_id(cmd, assignee, fallback_to_object_id=False):
             raise CLIError("Cannot find user or group or service principal in graph database for '{assignee}'. "
                            "If the assignee is a principal id, make sure the corresponding principal is created "
                            "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
+
+        if len(result) > 1:
+            raise CLIError("Find more than one user or group or service principal in graph database for '{assignee}'. "
+                           "Please using --assignee-object-id GUID to specify assignee accurately"
+                           .format(assignee=assignee))
 
         return result[0].object_id
     except (CloudError, GraphErrorException):
@@ -193,10 +206,10 @@ def list_scopes(cmd, workspace_name):
 
 
 # List Synapse Role Definitions
-def list_role_definitions(cmd, workspace_name, is_built_in=None, scope=None, item_type=None):
+def list_role_definitions(cmd, workspace_name, is_built_in=None):
     client = cf_synapse_role_definitions(cmd.cli_ctx, workspace_name)
-    scope = _build_role_scope_format(scope, item_type)
-    return client.list_role_definitions(is_built_in, scope)
+    role_definitions = client.list_role_definitions(is_built_in)
+    return role_definitions
 
 
 def _build_role_scope_format(scope, item_type):

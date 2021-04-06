@@ -739,7 +739,7 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'clitestsynapseworkspace',
             'role': 'Synapse Contributor',
             'userPrincipal': 'username@contoso.com',
-            'servicePrincipal': 'test-sp',
+            'servicePrincipal': 'testsynapsecli',
             'scopeName': 'workspaces/{workspaceName}/bigDataPools/{bigDataPoolName}',
             'itemType': 'bigDataPools',
             'item': 'testitem'})
@@ -752,13 +752,7 @@ class SynapseScenarioTests(ScenarioTest):
         )
 
         self.cmd(
-            'az synapse role definition list --workspace-name {workspace} --scope {scopeName}',
-            checks=[
-                self.check('[0].name', 'Synapse Administrator')
-            ])
-
-        self.cmd(
-            'az synapse role definition list --workspace-name {workspace} --item-type integrationRuntimes',
+            'az synapse role definition list --workspace-name {workspace}',
             checks=[
                 self.check('[0].name', 'Synapse Administrator')
             ])
@@ -774,7 +768,8 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create role assignment
         role_assignment_create = self.cmd(
-            'az synapse role assignment create --workspace-name {workspace} --role "{role}" --assignee  {userPrincipal} --assignment-id 0550e787-7841-4669-9ac8-a8176e900000',
+            'az synapse role assignment create --workspace-name {workspace} --role "{role}" '
+            '--assignee  {servicePrincipal} --assignment-id 0550e787-7841-4669-9ac8-a8176e900002',
             checks=[
                 self.check('roleDefinitionId', self.kwargs['roleId'])
             ]).get_output_in_json()
@@ -784,7 +779,9 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create role assignment at scope
         self.cmd(
-            'az synapse role assignment create --workspace-name {workspace} --role "{role}" --assignee  {userPrincipal} --item-type {itemType} --item {item} --assignment-id 0333e787-7841-4669-9ac8-a8176e900000',
+            'az synapse role assignment create --workspace-name {workspace} --role "{role}" '
+            '--assignee  {servicePrincipal} --item-type {itemType} --item {item} '
+            '--assignment-id 0333e787-7841-4669-9ac8-a8176e900002',
             checks=[
                 self.check('roleDefinitionId', self.kwargs['roleId']),
                 self.check('scope', 'workspaces/{workspace}/{itemType}/{item}')
@@ -802,28 +799,21 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse role assignment list --workspace-name {workspace} --role "{role}" --item-type {itemType} --item {item}',
             checks=[
-                self.check("length([])", 1)
-            ])
-
-        # list role assignment by userPrincipal
-        self.cmd(
-            'az synapse role assignment list --workspace-name {workspace} --assignee {userPrincipal} ',
-            checks=[
-                self.check("length([])", 3)
+                self.check("length([])", 2)
             ])
 
         # list role assignment by servicePrincipal
         self.cmd(
             'az synapse role assignment list --workspace-name {workspace} --assignee {servicePrincipal} ',
             checks=[
-                self.check("length([])", 0)
+                self.check("length([])", 2)
             ])
 
         # list role assignment by object_id
         self.cmd(
             'az synapse role assignment list --workspace-name {workspace} --assignee-object-id {principalId} ',
             checks=[
-                self.check("length([])", 3)
+                self.check("length([])", 2)
             ])
 
         # delete role assignment

@@ -450,8 +450,6 @@ def load_arguments(self, _):
     with self.argument_context('synapse role definition list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('is_built_in', arg_type=get_three_state_flag(), help='Is a Synapse Built-In Role or not.')
-        c.argument('scope', help='Scope at which the role assignment is created.')
-        c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace.')
 
     with self.argument_context('synapse role scope list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)

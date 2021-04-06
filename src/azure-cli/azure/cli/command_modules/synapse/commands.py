@@ -144,7 +144,7 @@ def load_command_table(self, _):
         client_factory=None)
 
     synapse_role_definitions_sdk = CliCommandType(
-        operations_tmpl='azure.synapse.accesscontrol.operations#RoleAssignmentsOperations.{}',
+        operations_tmpl='azure.synapse.accesscontrol.operations#RoleDefinitionsOperations.{}',
         client_factory=None)
 
     synapse_linked_service_sdk = CliCommandType(

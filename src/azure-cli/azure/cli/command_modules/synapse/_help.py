@@ -971,6 +971,10 @@ examples:
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
         --ids 10000000-0000-0000-0000-10000000-10000000-0000-0000-0000-10000000
+  - name: Delete role assignments by scope.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --scope "workspaces/testsynapseworkspace/linkedServices/testlinkedServices"
 """
 
 helps['synapse role definition'] = """
@@ -985,12 +989,6 @@ examples:
   - name: List role definitions.
     text: |-
         az synapse role definition list --workspace-name testsynapseworkspace
-  - name: List role definitions by scope.
-    text: |-
-        az synapse role definition list --workspace-name testsynapseworkspace --scope "workspaces/{workspaceName}"
-  - name: List role definitions by item type.
-    text: |-
-        az synapse role definition list --workspace-name testsynapseworkspace --item-type "bigDataPools"
   - name: List role definitions built-in by Synapse.
     text: |-
         az synapse role definition list --workspace-name testsynapseworkspace --is-built-in True
