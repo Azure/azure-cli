@@ -29,8 +29,6 @@ def prepare_private_network(cmd, server_name, vnet, subnet, resource_group_name,
     if (vnet_address_pref is not None and subnet_address_pref is None) or \
        (vnet_address_pref is None and subnet_address_pref is not None):
         raise ValidationError("You need to provide both Vnet address prefix and Subnet address prefix.")
-    if (subnet is not None and vnet is None) and (vnet_address_pref or subnet_address_pref):
-        raise ValidationError("If you are providing address prefixes, consider using Vnet id or Vnet name and Subnet name.")
     if vnet_address_pref is None:
         vnet_address_pref = DEFAULT_VNET_ADDRESS_PREFIX
     if subnet_address_pref is None:
@@ -145,7 +143,7 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
         vnet = nw_client.virtual_networks.get(resource_group, vnet_name)
         vnet_subnet_prefixes = [subnet.address_prefix for subnet in vnet.subnets]
         if subnet_address_pref in vnet_subnet_prefixes:
-            raise ValidationError("The Subnet (default) prefix {} is already taken by another Subnet in the Vnet. Please provide a different prefix".format(subnet_address_pref))
+            raise ValidationError("The Subnet (default) prefix {} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter".format(subnet_address_pref))
 
         logger.warning('Creating new Subnet "%s" in resource group "%s"', subnet_name, resource_group)
         subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
@@ -153,6 +151,8 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
     else:
         subnet = nw_client.subnets.get(resource_group, vnet_name, subnet_name)
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
+        if subnet_address_pref != DEFAULT_SUBNET_ADDRESS_PREFIX and subnet.address_prefix != subnet_address_pref:
+            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet.address_prefix)
 
         # Add Delegation if not delegated already
         if not subnet.delegations:
