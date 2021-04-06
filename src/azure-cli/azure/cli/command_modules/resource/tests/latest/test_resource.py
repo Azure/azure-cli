@@ -2574,9 +2574,9 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+                self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
         else:
-            self.resource_policyset_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
     @AllowLargeResponse(4096)
@@ -2904,9 +2904,9 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyexemption_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+                self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
         else:
-            self.resource_policyexemption_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):

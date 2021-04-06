@@ -2115,7 +2115,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
     if bool(policy) == bool(policy_set_definition):
-        raise CLIError('usage error: --policy NAME_OR_ID | '
+        raise ArgumentUsageError('usage error: --policy NAME_OR_ID | '
                        '--policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     scope = _build_policy_scope(policy_client.config.subscription_id,
@@ -2209,9 +2209,9 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     elif subscription:
         result = policy_client.policy_assignments.list()
     elif scope:
-        raise CLIError('usage error `--scope`: must be a fully qualified ARM ID.')
+        raise InvalidArgumentValueError('usage error `--scope`: must be a fully qualified ARM ID.')
     else:
-        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME')
+        raise ArgumentUsageError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
         result = [i for i in result if _scope.lower().strip('/') == i.scope.lower().strip('/')]
@@ -2437,9 +2437,9 @@ def create_policy_exemption(cmd, name, policy_assignment=None, exemption_categor
                             display_name=None, description=None, resource_group_name=None, scope=None,
                             metadata=None):
     if policy_assignment is None:
-        raise CLIError('--policy_assignment is required')
+        raise RequiredArgumentMissingError('--policy_assignment is required')
     if exemption_category is None:
-        raise CLIError('--exemption_category is required')
+        raise RequiredArgumentMissingError('--exemption_category is required')
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     scope = _build_policy_scope(policy_client.config.subscription_id,
@@ -2512,9 +2512,9 @@ def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_n
     elif subscription:
         result = policy_client.policy_exemptions.list()
     elif scope:
-        raise CLIError('usage error `--scope`: must be a fully qualified ARM ID.')
+        raise InvalidArgumentValueError('usage error `--scope`: must be a fully qualified ARM ID.')
     else:
-        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME')
+        raise ArgumentUsageError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
         result = [i for i in result if i.id.lower().strip('/').startswith(_scope.lower().strip('/') + "/providers/microsoft.authorization/policyexemptions")]
