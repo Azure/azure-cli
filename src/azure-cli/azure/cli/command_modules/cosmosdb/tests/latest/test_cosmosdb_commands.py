@@ -1353,7 +1353,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert cmk_output["keyVaultKeyUri"] == key_uri
 
-
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
     def test_cosmosdb_managed_service_identity(self, resource_group):
         kv_name = self.create_random_name(prefix='cli', length=15)
         key_name = self.create_random_name(prefix='cli', length=15)
