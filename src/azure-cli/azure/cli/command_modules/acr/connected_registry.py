@@ -402,10 +402,12 @@ def _get_install_info(cmd,
     if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
         parent_gateway_endpoint = "<parent gateway endpoint>"
     parent_id = connected_registry.parent.id
+    # if parent_id is not none, parent is a connected registry
     if parent_id:
-        parent_endpoint_protocol = "https"
-    else:
         parent_endpoint_protocol = "<http or https>"
+    # if parent_id is none, parent is a cloud registry
+    else:
+        parent_endpoint_protocol = "https"
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
 
     connected_registry_login_server = "<Optional: connected registry login server. " + \
