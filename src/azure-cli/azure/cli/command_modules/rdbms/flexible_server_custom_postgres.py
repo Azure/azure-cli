@@ -17,7 +17,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG, change_str_to_datetime
+    DEFAULT_LOCATION_PG
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import pg_arguments_validator
 
@@ -131,8 +131,6 @@ def flexible_server_restore(cmd, client,
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
-
-    restore_point_in_time = change_str_to_datetime(restore_point_in_time)
 
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,

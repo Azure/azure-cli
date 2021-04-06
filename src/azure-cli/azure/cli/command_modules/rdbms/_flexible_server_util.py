@@ -7,13 +7,11 @@
 import datetime as dt
 from datetime import datetime
 import random
-import pytz
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
@@ -297,18 +295,6 @@ def _map_maintenance_window(day_of_week):
 
 def get_current_time():
     return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
-
-
-def change_str_to_datetime(date_str):
-    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S.%f%Z", "%Y-%m-%dT%H:%M:%S%Z"):
-        try:
-            restore_time = datetime.strptime(date_str, fmt)
-            target_tz = pytz.timezone('UTC')
-            return target_tz.normalize(restore_time)
-        except ValueError:
-            pass
-
-    raise ValidationError("The format of restore time should be in ISO8601 format")
 
 
 def get_id_components(rid):

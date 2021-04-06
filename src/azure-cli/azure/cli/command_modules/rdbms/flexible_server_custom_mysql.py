@@ -17,7 +17,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
-    DEFAULT_LOCATION_MySQL, change_str_to_datetime
+    DEFAULT_LOCATION_MySQL
 from .flexible_server_custom_common import user_confirmation
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator
@@ -125,8 +125,6 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
-
-    restore_point_in_time = change_str_to_datetime(restore_point_in_time)
 
     parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,

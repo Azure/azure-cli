@@ -151,7 +151,7 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
     else:
         subnet = nw_client.subnets.get(resource_group, vnet_name, subnet_name)
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-        if subnet_address_pref != DEFAULT_SUBNET_ADDRESS_PREFIX and subnet.address_prefix != subnet_address_pref:
+        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet.address_prefix):
             logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet.address_prefix)
 
         # Add Delegation if not delegated already
