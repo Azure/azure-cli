@@ -364,7 +364,7 @@ def step_disk_access_show_private_link_resource(test, checks=None):
 def step_disk_access_delete(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az vm disk-access delete-a-private-endpoint-connection -y '
+    test.cmd('az vm disk-access delete-a-private-endpoint-connection '
              '--name "{myDiskAccess}" '
              '--private-endpoint-connection-name "myPrivateEndpointConnection" '
              '--resource-group "{rg}"',

@@ -127,18 +127,20 @@ vm_cloud_service_update_domain = CliCommandType(
 
 def load_command_table(self, _):
 
-    with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
+    with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key, is_experimental=True) as g:
         g.custom_command('list', 'sshkey_list')
         g.custom_show_command('show', 'sshkey_show')
         g.custom_command('create', 'sshkey_create')
         g.custom_command('update', 'sshkey_update')
         g.custom_command('delete', 'sshkey_delete', confirmation=True)
 
-    with self.command_group('vm', vm_virtual_machine, client_factory=cf_virtual_machine) as g:
+    with self.command_group('vm', vm_virtual_machine, client_factory=cf_virtual_machine, is_experimental=True) as g:
         g.custom_command('install-patch', 'vm_install_patch')
         g.custom_command('reimage', 'vm_reimage')
 
-    with self.command_group('vmss', vm_virtual_machine_scale_set, client_factory=cf_virtual_machine_scale_set) as g:
+    with self.command_group(
+        'vmss', vm_virtual_machine_scale_set, client_factory=cf_virtual_machine_scale_set, is_experimental=True
+    ) as g:
         g.custom_command(
             'force-recovery-service-fabric-platform-update-domain-walk',
             'vmss_force_recovery_service_fabric_platform_update_domain_walk',
@@ -150,6 +152,7 @@ def load_command_table(self, _):
         'vmss vm-extension',
         vm_virtual_machine_scale_set_vm_extension,
         client_factory=cf_virtual_machine_scale_set_vm_extension,
+        is_experimental=True,
     ) as g:
         g.custom_command('list', 'vmss_vm_extension_list')
         g.custom_show_command('show', 'vmss_vm_extension_show')
@@ -157,7 +160,10 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'vmss_vm_extension_show')
 
     with self.command_group(
-        'vmss v-ms', vm_virtual_machine_scale_set_vms, client_factory=cf_virtual_machine_scale_set_vms
+        'vmss v-ms',
+        vm_virtual_machine_scale_set_vms,
+        client_factory=cf_virtual_machine_scale_set_vms,
+        is_experimental=True,
     ) as g:
         g.custom_command('redeploy', 'vmss_v_ms_redeploy')
         g.custom_command('reimage-all', 'vmss_v_ms_reimage_all')
@@ -167,19 +173,22 @@ def load_command_table(self, _):
         'vmss vm-run',
         vm_virtual_machine_scale_set_vm_run_command,
         client_factory=cf_virtual_machine_scale_set_vm_run_command,
+        is_experimental=True,
     ) as g:
         g.custom_command('list', 'vmss_vm_run_list')
 
-    with self.command_group('vm disk-access', vm_disk_access, client_factory=cf_disk_access) as g:
+    with self.command_group('vm disk-access', vm_disk_access, client_factory=cf_disk_access, is_experimental=True) as g:
         g.custom_command('delete-a-private-endpoint-connection', 'vm_disk_access_delete_a_private_endpoint_connection')
         g.custom_command('list-private-endpoint-connection', 'vm_disk_access_list_private_endpoint_connection')
         g.custom_command('show-private-link-resource', 'vm_disk_access_show_private_link_resource')
 
-    with self.command_group('vm disk-restore-point', vm_disk_restore_point, client_factory=cf_disk_restore_point) as g:
+    with self.command_group(
+        'vm disk-restore-point', vm_disk_restore_point, client_factory=cf_disk_restore_point, is_experimental=True
+    ) as g:
         g.custom_show_command('show', 'vm_disk_restore_point_show')
 
     with self.command_group(
-        'vm gallery-application', vm_gallery_application, client_factory=cf_gallery_application
+        'vm gallery-application', vm_gallery_application, client_factory=cf_gallery_application, is_experimental=True
     ) as g:
         g.custom_command('list', 'vm_gallery_application_list')
         g.custom_show_command('show', 'vm_gallery_application_show')
@@ -188,12 +197,18 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'vm_gallery_application_show')
 
     with self.command_group(
-        'vm gallery-application-version', vm_gallery_application_version, client_factory=cf_gallery_application_version
+        'vm gallery-application-version',
+        vm_gallery_application_version,
+        client_factory=cf_gallery_application_version,
+        is_experimental=True,
     ) as g:
         g.custom_command('list', 'vm_gallery_application_version_list')
 
     with self.command_group(
-        'vm cloud-service-role-instance', vm_cloud_service_role_instance, client_factory=cf_cloud_service_role_instance
+        'vm cloud-service-role-instance',
+        vm_cloud_service_role_instance,
+        client_factory=cf_cloud_service_role_instance,
+        is_experimental=True,
     ) as g:
         g.custom_command('list', 'vm_cloud_service_role_instance_list')
         g.custom_show_command('show', 'vm_cloud_service_role_instance_show')
@@ -203,11 +218,15 @@ def load_command_table(self, _):
         g.custom_command('show-remote-desktop-file', 'vm_cloud_service_role_instance_show_remote_desktop_file')
         g.custom_wait_command('wait', 'vm_cloud_service_role_instance_show')
 
-    with self.command_group('vm cloud-service-role', vm_cloud_service_role, client_factory=cf_cloud_service_role) as g:
+    with self.command_group(
+        'vm cloud-service-role', vm_cloud_service_role, client_factory=cf_cloud_service_role, is_experimental=True
+    ) as g:
         g.custom_command('list', 'vm_cloud_service_role_list')
         g.custom_show_command('show', 'vm_cloud_service_role_show')
 
-    with self.command_group('vm cloud-service', vm_cloud_service, client_factory=cf_cloud_service) as g:
+    with self.command_group(
+        'vm cloud-service', vm_cloud_service, client_factory=cf_cloud_service, is_experimental=True
+    ) as g:
         g.custom_command('list', 'vm_cloud_service_list')
         g.custom_show_command('show', 'vm_cloud_service_show')
         g.custom_command('create', 'vm_cloud_service_create', supports_no_wait=True)
@@ -221,7 +240,10 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'vm_cloud_service_show')
 
     with self.command_group(
-        'vm cloud-service-update-domain', vm_cloud_service_update_domain, client_factory=cf_cloud_service_update_domain
+        'vm cloud-service-update-domain',
+        vm_cloud_service_update_domain,
+        client_factory=cf_cloud_service_update_domain,
+        is_experimental=True,
     ) as g:
         g.custom_command('list-update-domain', 'vm_cloud_service_update_domain_list_update_domain')
         g.custom_command('show-update-domain', 'vm_cloud_service_update_domain_show_update_domain')

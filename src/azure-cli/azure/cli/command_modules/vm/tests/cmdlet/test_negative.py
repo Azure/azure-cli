@@ -1135,3 +1135,561 @@ class NegativeTest(ScenarioTest):
             assert e.message.startswith("(500)")
         except SystemExit as e:
             assert e.__context__.message.startswith("(500)")
+# Test class for Scenario
+class NegativeTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        super(NegativeTest, self).__init__(*args, **kwargs)
+
+    def test_show(self):
+        # From /SshPublicKeys/get/Get an ssh public key.
+        try:
+            self.cmd('az sshkey show '
+                     '--resource-group "myResourceGroup" '
+                     '--name "mySshPublicKeyName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_create(self):
+        # From /SshPublicKeys/put/Create a new SSH public key resource.
+        try:
+            self.cmd('az sshkey create '
+                     '--location "westus" '
+                     '--public-key "{{ssh-rsa public key}}" '
+                     '--resource-group "myResourceGroup" '
+                     '--name "mySshPublicKeyName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_install_patch(self):
+        # From /VirtualMachines/post/Install patch state of a virtual machine.
+        try:
+            self.cmd('az vm install-patch '
+                     '--maximum-duration "PT4H" '
+                     '--reboot-setting "IfRequired" '
+                     '--windows-parameters classifications-to-include="Critical" classifications-to-include="Security" max-patch-publish-date="2020-11-19T02:36:43.0539904+00:00" '
+                     '--resource-group "myResourceGroupName" '
+                     '--name "myVMName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_reimage(self):
+        # From /VirtualMachines/post/Reimage a Virtual Machine.
+        try:
+            self.cmd('az vm reimage '
+                     '--temp-disk true '
+                     '--resource-group "myResourceGroup" '
+                     '--name "myVMName"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_vm_extension_list(self):
+        # From /VirtualMachineScaleSetVMExtensions/get/List extensions in Vmss instance.
+        try:
+            self.cmd('az vmss vm-extension list '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_vm_extension_show(self):
+        # From /VirtualMachineScaleSetVMExtensions/get/Get VirtualMachineScaleSet VM extension.
+        try:
+            self.cmd('az vmss vm-extension show '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-extension-name "myVMExtension" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_vm_extension_create(self):
+        # From /VirtualMachineScaleSetVMExtensions/put/Create VirtualMachineScaleSet VM extension.
+        try:
+            self.cmd('az vmss vm-extension create '
+                     '--type-properties-type "extType" '
+                     '--auto-upgrade-minor-version true '
+                     '--publisher "extPublisher" '
+                     '--settings "{{\\"UserName\\":\\"xyz@microsoft.com\\"}}" '
+                     '--type-handler-version "1.2" '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-extension-name "myVMExtension" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_v_ms_retrieve_boot_diagnostic_data(self):
+        # From /VirtualMachineScaleSetVMs/post/RetrieveBootDiagnosticsData of a virtual machine.
+        try:
+            self.cmd('az vmss v-ms retrieve-boot-diagnostic-data '
+                     '--instance-id "0" '
+                     '--resource-group "ResourceGroup" '
+                     '--sas-uri-expiration-time-in-minutes 60 '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_vm_run_list(self):
+        # From /VirtualMachineScaleSetVMRunCommands/get/List run commands in Vmss instance.
+        try:
+            self.cmd('az vmss vm-run list '
+                     '--instance-id "0" '
+                     '--resource-group "myResourceGroup" '
+                     '--vm-scale-set-name "myvmScaleSet"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_disk_access_delete(self):
+        # From /DiskAccesses/delete/Delete a private endpoint connection under a disk access resource.
+        try:
+            self.cmd('az vm disk-access delete-a-private-endpoint-connection '
+                     '--name "myDiskAccess" '
+                     '--private-endpoint-connection-name "myPrivateEndpointConnection" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_disk_access_list_private_endpoint_connection(self):
+        # From /DiskAccesses/get/Get information about a private endpoint connection under a disk access resource.
+        try:
+            self.cmd('az vm disk-access list-private-endpoint-connection '
+                     '--name "myDiskAccess" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_disk_access_show_private_link_resource(self):
+        # From /DiskAccesses/get/List all possible private link resources under disk access resource.
+        try:
+            self.cmd('az vm disk-access show-private-link-resource '
+                     '--name "myDiskAccess" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_disk_restore_point_show(self):
+        # From /DiskRestorePoint/get/Get an incremental disk restorePoint resource.
+        try:
+            self.cmd('az vm disk-restore-point show '
+                     '--name "TestDisk45ceb03433006d1baee0_b70cd924-3362-4a80-93c2-9415eaa12745" '
+                     '--resource-group "myResourceGroup" '
+                     '--restore-point-collection-name "rpc" '
+                     '--vm-restore-point-name "vmrp"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_gallery_application_list(self):
+        # From /GalleryApplications/get/List gallery Applications in a gallery.
+        try:
+            self.cmd('az vm gallery-application list '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_gallery_application_show(self):
+        # From /GalleryApplications/get/Get a gallery Application.
+        try:
+            self.cmd('az vm gallery-application show '
+                     '--name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_gallery_application_create(self):
+        # From /GalleryApplications/put/Create or update a simple gallery Application.
+        try:
+            self.cmd('az vm gallery-application create '
+                     '--location "West US" '
+                     '--description "This is the gallery application description." '
+                     '--eula "This is the gallery application EULA." '
+                     '--privacy-statement-uri "myPrivacyStatementUri}}" '
+                     '--release-note-uri "myReleaseNoteUri" '
+                     '--supported-os-type "Windows" '
+                     '--name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_gallery_application_delete(self):
+        # From /GalleryApplications/delete/Delete a gallery Application.
+        try:
+            self.cmd('az vm gallery-application delete '
+                     '--name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_gallery_application_version_list(self):
+        # From /GalleryApplicationVersions/get/List gallery Application Versions in a gallery Application Definition.
+        try:
+            self.cmd('az vm gallery-application-version list '
+                     '--gallery-application-name "myGalleryApplicationName" '
+                     '--gallery-name "myGalleryName" '
+                     '--resource-group "myResourceGroup"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role_instance_list(self):
+        # From /CloudServiceRoleInstances/get/List Role Instances in a Cloud Service
+        try:
+            self.cmd('az vm cloud-service-role-instance list '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role_instance_show(self):
+        # From /CloudServiceRoleInstances/get/Get Cloud Service Role Instance
+        try:
+            self.cmd('az vm cloud-service-role-instance show '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--role-instance-name "{roleInstance-name}"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role_instance_reimage(self):
+        # From /CloudServiceRoleInstances/post/Reimage Cloud Service Role Instance
+        try:
+            self.cmd('az vm cloud-service-role-instance reimage '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--role-instance-name "{roleInstance-name}"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role_instance_restart(self):
+        # From /CloudServiceRoleInstances/post/Restart Cloud Service Role Instance
+        try:
+            self.cmd('az vm cloud-service-role-instance restart '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--role-instance-name "{roleInstance-name}"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role(self):
+        # From /CloudServiceRoleInstances/get/Get Instance View of Cloud Service Role Instance
+        try:
+            self.cmd('az vm cloud-service-role-instance show-instance-view '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--role-instance-name "{roleInstance-name}"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role_list(self):
+        # From /CloudServiceRoles/get/List Roles in a Cloud Service
+        try:
+            self.cmd('az vm cloud-service-role list '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_role_show(self):
+        # From /CloudServiceRoles/get/Get Cloud Service Role
+        try:
+            self.cmd('az vm cloud-service-role show '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--role-name "{role-name}"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_list(self):
+        # From /CloudServices/get/List Cloud Services in a Resource Group
+        try:
+            self.cmd('az vm cloud-service list '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_show(self):
+        # From /CloudServices/get/Get Cloud Service with Multiple Roles and RDP Extension
+        try:
+            self.cmd('az vm cloud-service show '
+                     '--name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_create4(self):
+        # From /CloudServices/put/Create New Cloud Service with Multiple Roles
+        try:
+            self.cmd('az vm cloud-service create '
+                     '--name "{{cs-name}}" '
+                     '--location "westus" '
+                     '--configuration "{{ServiceConfiguration}}" '
+                     '--load-balancer-configurations "[{{\\"name\\":\\"contosolb\\",\\"properties\\":{{\\"frontendIPConfigurations\\":[{{\\"name\\":\\"contosofe\\",\\"properties\\":{{\\"publicIPAddress\\":{{\\"id\\":\\"/subscriptions/{{subscription-id}}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/contosopublicip\\"}}}}}}]}}}}]" '
+                     '--package-url "{{PackageUrl}}" '
+                     '--roles "[{{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"Standard\\"}}}},{{\\"name\\":\\"ContosoBackend\\",\\"sku\\":{{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"Standard\\"}}}}]" '
+                     '--upgrade-mode "Auto" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+        # From /CloudServices/put/Create New Cloud Service with Single Role
+        try:
+            self.cmd('az vm cloud-service create '
+                     '--name "{{cs-name}}" '
+                     '--location "westus" '
+                     '--configuration "{{ServiceConfiguration}}" '
+                     '--load-balancer-configurations "[{{\\"name\\":\\"myLoadBalancer\\",\\"properties\\":{{\\"frontendIPConfigurations\\":[{{\\"name\\":\\"myfe\\",\\"properties\\":{{\\"publicIPAddress\\":{{\\"id\\":\\"/subscriptions/{{subscription-id}}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/myPublicIP\\"}}}}}}]}}}}]" '
+                     '--package-url "{{PackageUrl}}" '
+                     '--roles "[{{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"Standard\\"}}}}]" '
+                     '--upgrade-mode "Auto" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+        # From /CloudServices/put/Create New Cloud Service with Single Role and Certificate from Key Vault
+        try:
+            self.cmd('az vm cloud-service create '
+                     '--name "{{cs-name}}" '
+                     '--location "westus" '
+                     '--configuration "{{ServiceConfiguration}}" '
+                     '--load-balancer-configurations "[{{\\"name\\":\\"contosolb\\",\\"properties\\":{{\\"frontendIPConfigurations\\":[{{\\"name\\":\\"contosofe\\",\\"properties\\":{{\\"publicIPAddress\\":{{\\"id\\":\\"/subscriptions/{{subscription-id}}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/contosopublicip\\"}}}}}}]}}}}]" '
+                     '--secrets "[{{\\"sourceVault\\":{{\\"id\\":\\"/subscriptions/{{subscription-id}}/resourceGroups/ConstosoRG/providers/Microsoft.KeyVault/vaults/{{keyvault-name}}\\"}},\\"vaultCertificates\\":[{{\\"certificateUrl\\":\\"https://{{keyvault-name}}.vault.azure.net:443/secrets/ContosoCertificate/{{secret-id}}\\"}}]}}]" '
+                     '--package-url "{{PackageUrl}}" '
+                     '--roles "[{{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"Standard\\"}}}}]" '
+                     '--upgrade-mode "Auto" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+        # From /CloudServices/put/Create New Cloud Service with Single Role and RDP Extension
+        try:
+            self.cmd('az vm cloud-service create '
+                     '--name "{{cs-name}}" '
+                     '--location "westus" '
+                     '--configuration "{{ServiceConfiguration}}" '
+                     '--extensions "[{{\\"name\\":\\"RDPExtension\\",\\"properties\\":{{\\"type\\":\\"RDP\\",\\"autoUpgradeMinorVersion\\":false,\\"protectedSettings\\":\\"<PrivateConfig><Password>{{password}}</Password></PrivateConfig>\\",\\"publisher\\":\\"Microsoft.Windows.Azure.Extensions\\",\\"settings\\":\\"<PublicConfig><UserName>UserAzure</UserName><Expiration>10/22/2021 15:05:45</Expiration></PublicConfig>\\",\\"typeHandlerVersion\\":\\"1.2.1\\"}}}}]" '
+                     '--load-balancer-configurations "[{{\\"name\\":\\"contosolb\\",\\"properties\\":{{\\"frontendIPConfigurations\\":[{{\\"name\\":\\"contosofe\\",\\"properties\\":{{\\"publicIPAddress\\":{{\\"id\\":\\"/subscriptions/{{subscription-id}}/resourceGroups/ConstosoRG/providers/Microsoft.Network/publicIPAddresses/contosopublicip\\"}}}}}}]}}}}]" '
+                     '--package-url "{{PackageUrl}}" '
+                     '--roles "[{{\\"name\\":\\"ContosoFrontend\\",\\"sku\\":{{\\"name\\":\\"Standard_D1_v2\\",\\"capacity\\":1,\\"tier\\":\\"Standard\\"}}}}]" '
+                     '--upgrade-mode "Auto" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_delete(self):
+        # From /CloudServices/delete/Delete Cloud Service
+        try:
+            self.cmd('az vm cloud-service delete '
+                     '--name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_delete_instance(self):
+        # From /CloudServices/post/Delete Cloud Service Role Instances
+        try:
+            self.cmd('az vm cloud-service delete-instance '
+                     '--name "{{cs-name}}" '
+                     '--role-instances "ContosoFrontend_IN_0" "ContosoBackend_IN_1" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_list_all(self):
+        # From /CloudServices/get/List Cloud Services in a Subscription
+        try:
+            self.cmd('az vm cloud-service list-all')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_power_off(self):
+        # From /CloudServices/post/Stop or PowerOff Cloud Service
+        try:
+            self.cmd('az vm cloud-service power-off '
+                     '--name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_restart(self):
+        # From /CloudServices/post/Restart Cloud Service Role Instances
+        try:
+            self.cmd('az vm cloud-service restart '
+                     '--name "{{cs-name}}" '
+                     '--role-instances "ContosoFrontend_IN_0" "ContosoBackend_IN_1" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_show_instance_view(self):
+        # From /CloudServices/get/Get Cloud Service Instance View with Multiple Roles
+        try:
+            self.cmd('az vm cloud-service show-instance-view '
+                     '--name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_start(self):
+        # From /CloudServices/post/Start Cloud Service
+        try:
+            self.cmd('az vm cloud-service start '
+                     '--name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_update3(self):
+        # From /CloudServicesUpdateDomain/get/List Update Domains in Cloud Service
+        try:
+            self.cmd('az vm cloud-service-update-domain list-update-domain '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG"')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_update2(self):
+        # From /CloudServicesUpdateDomain/get/Get Cloud Service Update Domain
+        try:
+            self.cmd('az vm cloud-service-update-domain show-update-domain '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--update-domain 1')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")
+
+    def test_cloud_service_update(self):
+        # From /CloudServicesUpdateDomain/put/Update Cloud Service to specified Domain
+        try:
+            self.cmd('az vm cloud-service-update-domain walk-update-domain '
+                     '--cloud-service-name "{{cs-name}}" '
+                     '--resource-group "ConstosoRG" '
+                     '--update-domain 1')
+            raise Exception("Error Expected!")
+        except ResourceNotFoundError as e:
+            assert e.message.startswith("(500)")
+        except SystemExit as e:
+            assert e.__context__.message.startswith("(500)")

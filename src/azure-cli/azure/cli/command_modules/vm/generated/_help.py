@@ -12,6 +12,11 @@
 from knack.help_files import helps
 
 
+helps['vm'] = '''
+    type: group
+    short-summary: Manage Compute
+'''
+
 helps['sshkey'] = """
     type: group
     short-summary: Manage ssh public key with vm

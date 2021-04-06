@@ -140,10 +140,10 @@ def load_arguments(self, _):
                    'should be automatically upgraded by the platform if there is a newer version of the extension '
                    'available.')
         c.argument('settings', type=validate_file_or_dict, help='Json formatted public settings for the extension. '
-                   'Expected value: json-string/@json-file.')
+                   'Expected value: json-string/json-file/@json-file.')
         c.argument('protected_settings', type=validate_file_or_dict, help='The extension can contain either '
                    'protectedSettings or protectedSettingsFromKeyVault or no protected settings at all. Expected '
-                   'value: json-string/@json-file.')
+                   'value: json-string/json-file/@json-file.')
         c.argument('name', type=str, help='The virtual machine extension name.', arg_group='Instance View')
         c.argument('type_', options_list=['--type'], type=str, help='Specifies the type of the extension; an example '
                    'is "CustomScriptExtension".', arg_group='Instance View')
@@ -359,17 +359,18 @@ def load_arguments(self, _):
                    'UpdateDomain must be called to apply the update. If set to Auto, the update is automatically '
                    'applied to each update domain in sequence.')
         c.argument('extensions', type=validate_file_or_dict, help='List of extensions for the cloud service. Expected '
-                   'value: json-string/@json-file.', arg_group='Extension Profile')
+                   'value: json-string/json-file/@json-file.', arg_group='Extension Profile')
         c.argument('load_balancer_configurations', type=validate_file_or_dict, help='List of Load balancer '
                    'configurations. Cloud service can have up to two load balancer configurations, corresponding to a '
-                   'Public Load Balancer and an Internal Load Balancer. Expected value: json-string/@json-file.',
-                   arg_group='Network Profile')
+                   'Public Load Balancer and an Internal Load Balancer. Expected value: json-string/json-file/@json-fil'
+                   'e.', arg_group='Network Profile')
         c.argument('id_', options_list=['--id'], type=str, help='Resource Id', arg_group='Network Profile Swappable '
                    'Cloud Service')
         c.argument('secrets', type=validate_file_or_dict, help='Specifies set of certificates that should be installed '
-                   'onto the role instances. Expected value: json-string/@json-file.', arg_group='Os Profile')
+                   'onto the role instances. Expected value: json-string/json-file/@json-file.',
+                   arg_group='Os Profile')
         c.argument('roles', type=validate_file_or_dict, help='List of roles for the cloud service. Expected value: '
-                   'json-string/@json-file.', arg_group='Role Profile')
+                   'json-string/json-file/@json-file.', arg_group='Role Profile')
 
     with self.argument_context('vm cloud-service delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
