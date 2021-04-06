@@ -1823,12 +1823,12 @@ examples:
             --exemption-category "Mitigated"
   - name: Update a policy exemption in the resource group.
     text: |
-        az policy exemption create -n exemptTestVM \\
+        az policy exemption update -n exemptTestVM \\
             --exemption-category "Mitigated" \\
             --resource-group "myResourceGroup"
   - name: Update a policy exemption in a management group.
     text: |
-        az policy exemption create -n exemptTestVM \\
+        az policy exemption update -n exemptTestVM \\
             --exemption-category "Mitigated" \\
             --scope "/providers/Microsoft.Management/managementGroups/myMG"
 """
