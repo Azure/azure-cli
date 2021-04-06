@@ -123,8 +123,7 @@ class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
             self.cmd('postgres flexible-server show -g {} -n {}'
                      .format(resource_group, self.random_name_1),
                      checks=[JMESPathCheck('sku.tier', 'Burstable'),
-                             JMESPathCheck('sku.name', 'Standard_B1ms'),
-                             JMESPathCheck('availabilityZone', 1)])
+                             JMESPathCheck('sku.name', 'Standard_B1ms')])
 
             self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
                      .format(resource_group, self.location, self.random_name_2))
@@ -736,7 +735,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
 
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {} --debug'
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {} -l {}'
                  .format(database_engine, resource_group, server, subnet_id, location))
 
         # flexible-server show to validate delegation is added to both the created server
