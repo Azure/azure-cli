@@ -1788,8 +1788,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(token_type, token_entry2['tokenType'])
 
     @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
-    def test_credscache_good_error_on_file_corruption(self, mock_read_file):
-        mock_read_file.side_effect = ValueError('a bad error for you')
+    @mock.patch('os.path.isfile', autospec=True, return_value=True)
+    def test_credscache_good_error_on_file_corruption(self, isfile_mock, get_file_json_mock):
+        get_file_json_mock.side_effect = ValueError('a bad error for you')
         cli = DummyCli()
 
         # action
