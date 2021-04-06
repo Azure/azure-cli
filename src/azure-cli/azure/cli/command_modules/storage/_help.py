@@ -286,7 +286,7 @@ short-summary: Update the data policy rules associated with the specified storag
 examples:
     - name: Update the data policy rules associated with the specified storage account.
       text: |
-        az storage account management-policy update --account-name myaccount --resource-group myresourcegroup
+        az storage account management-policy update --account-name myaccount --resource-group myresourcegroup --add
 """
 
 helps['storage account management-policy show'] = """
