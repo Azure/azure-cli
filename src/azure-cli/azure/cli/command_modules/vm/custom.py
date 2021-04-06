@@ -3663,8 +3663,9 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 
 # disk encryption set
-def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
-                               key_url, source_vault, encryption_type=None, location=None, tags=None, no_wait=False):
+def create_disk_encryption_set(
+        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault, encryption_type=None,
+        location=None, tags=None, no_wait=False, enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
@@ -3674,9 +3675,10 @@ def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption
         source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                    namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     source_vault = SourceVault(id=source_vault)
-    keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    key_vault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
-                                            active_key=keyVault_and_key_reference, encryption_type=encryption_type)
+                                            active_key=key_vault_and_key_reference, encryption_type=encryption_type,
+                                            rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
 
@@ -3687,7 +3689,8 @@ def list_disk_encryption_sets(cmd, client, resource_group_name=None):
     return client.list()
 
 
-def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None):
+def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
+                               enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if not is_valid_resource_id(source_vault):
@@ -3697,6 +3700,8 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
         instance.active_key.key_url = key_url
     if source_vault:
         instance.active_key.source_vault.id = source_vault
+    if enable_auto_key_rotation is not None:
+        instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
     return instance
 
 # endregion
