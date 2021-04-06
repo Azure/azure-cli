@@ -311,6 +311,16 @@ with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME |
 
 The above syntax is the recommended way to test that a specific error occurs. You must pass the type of the error as well as a string used to match the error message. If the error is encountered, the text will be validated and, if matching, the command will be deemed a success (for testing purposes) and execution will continue. If the command does not yield the expected error, the test will fail.
 
+### Sample 10. Serialized Test
+
+```python
+from azure.cli.testsdk.decorators import serial_test
+class DiskTests(ScenarioTest):
+    @serial_test()
+    def test_disk_create(self):
+```
+
+Some test cases will fail when running in parallel. You can add a `@serial_test()` decorator. All test cases with it will run sequentially.
 
 
 ## Test-Related Environment Variables
