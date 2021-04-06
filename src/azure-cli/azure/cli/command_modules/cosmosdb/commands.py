@@ -246,6 +246,11 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_cosmosdb_table_throughput_update')
         g.custom_command('migrate', 'cli_cosmosdb_table_throughput_migrate')
 
+    with self.command_group('cosmosdb identity', None, client_factory=cf_db_accounts) as g:
+        g.custom_command('show', 'cli_cosmosdb_identity_show')
+        g.custom_command('assign', 'cli_cosmosdb_identity_assign')
+        g.custom_command('remove', 'cli_cosmosdb_identity_remove')
+
     # virtual network rules
     with self.command_group('cosmosdb network-rule', None, client_factory=cf_db_accounts) as g:
         g.custom_command('list', 'cli_cosmosdb_network_rule_list')
