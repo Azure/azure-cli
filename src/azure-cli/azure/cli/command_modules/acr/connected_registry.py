@@ -296,7 +296,7 @@ def acr_connected_registry_list(cmd,
         family_tree, parent = _get_family_tree(connected_registry_list, parent_name)
         if parent is None:
             raise CLIError("Parent connected registry '{}' doesn't exist.".format(parent_name))
-        result = _get_lineage(family_tree, parent.id)
+        result = _get_descendants(family_tree, parent.id)
     else:
         result = connected_registry_list
     return result
@@ -393,14 +393,14 @@ def _get_family_tree(connected_registry_list, target_connected_registry_name):
     return family_tree, targetConnectedRegistry
 
 
-def _get_lineage(family_tree, parent_id):
+def _get_descendants(family_tree, parent_id):
     children = family_tree[parent_id]['children']
     result = []
     for child_id in children:
         result = [family_tree[child_id]["connectedRegistry"]]
-        lineage = _get_lineage(family_tree, child_id)
-        if lineage:
-            result.extend(lineage)
+        descendants = _get_descendants(family_tree, child_id)
+        if descendants:
+            result.extend(descendants)
     return result
 
 
@@ -575,13 +575,13 @@ def acr_connected_registry_repo(cmd,
     if target_connected_registry is None:
         raise CLIError("Connected registry '{}' doesn't exist.".format(connected_registry_name))
 
-    # remove repo permissions from connected registry lineage.
+    # remove repo permissions from connected registry descendants.
     remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.REGISTRY.value]
     if remove_repos is not None:
         remove_repos_txt = ", ".join(remove_repos)
         remove_repos_set = _get_scope_map_actions_set(remove_repos, remove_actions)
-        lineage = _get_lineage(family_tree, target_connected_registry.id)
-        for connected_registry in lineage:
+        descendants = _get_descendants(family_tree, target_connected_registry.id)
+        for connected_registry in descendants:
             msg = "Removing '{}' permissions from {}".format(remove_repos_txt, connected_registry.name)
             _update_repo_permissions(cmd, resource_group_name, registry_name,
                                      connected_registry, set(), remove_repos_set, msg=msg)
