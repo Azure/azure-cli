@@ -9,30 +9,30 @@
 ### <a name="CommandGroups">Command groups in `az network` extension </a>
 |CLI Command Group|Group Swagger name|Commands|
 |---------|------------|--------|
-|az network express-route peering connection|ExpressRouteCircuitConnections|[commands](#CommandsInExpressRouteCircuitConnections)|
-|az network express-route|ExpressRouteCircuits|[commands](#CommandsInExpressRouteCircuits)|
+|az network express-route-circuit-connection|ExpressRouteCircuitConnections|[commands](#CommandsInExpressRouteCircuitConnections)|
+|az network express-route-circuit|ExpressRouteCircuits|[commands](#CommandsInExpressRouteCircuits)|
 
 ## COMMANDS
-### <a name="CommandsInExpressRouteCircuits">Commands in `az network express-route` group</a>
+### <a name="CommandsInExpressRouteCircuits">Commands in `az network express-route-circuit` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az network express-route list-route-table-summary](#ExpressRouteCircuitsListRoutesTableSummary)|ListRoutesTableSummary|[Parameters](#ParametersExpressRouteCircuitsListRoutesTableSummary)|[Example](#ExamplesExpressRouteCircuitsListRoutesTableSummary)|
-|[az network express-route show-peering-stat](#ExpressRouteCircuitsGetPeeringStats)|GetPeeringStats|[Parameters](#ParametersExpressRouteCircuitsGetPeeringStats)|[Example](#ExamplesExpressRouteCircuitsGetPeeringStats)|
+|[az network express-route-circuit list-route-table-summary](#ExpressRouteCircuitsListRoutesTableSummary)|ListRoutesTableSummary|[Parameters](#ParametersExpressRouteCircuitsListRoutesTableSummary)|[Example](#ExamplesExpressRouteCircuitsListRoutesTableSummary)|
+|[az network express-route-circuit show-peering-stat](#ExpressRouteCircuitsGetPeeringStats)|GetPeeringStats|[Parameters](#ParametersExpressRouteCircuitsGetPeeringStats)|[Example](#ExamplesExpressRouteCircuitsGetPeeringStats)|
 
-### <a name="CommandsInExpressRouteCircuitConnections">Commands in `az network express-route peering connection` group</a>
+### <a name="CommandsInExpressRouteCircuitConnections">Commands in `az network express-route-circuit-connection` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az network express-route peering connection list](#ExpressRouteCircuitConnectionsList)|List|[Parameters](#ParametersExpressRouteCircuitConnectionsList)|[Example](#ExamplesExpressRouteCircuitConnectionsList)|
+|[az network express-route-circuit-connection list](#ExpressRouteCircuitConnectionsList)|List|[Parameters](#ParametersExpressRouteCircuitConnectionsList)|[Example](#ExamplesExpressRouteCircuitConnectionsList)|
 
 
 ## COMMAND DETAILS
 
-### group `az network express-route`
-#### <a name="ExpressRouteCircuitsListRoutesTableSummary">Command `az network express-route list-route-table-summary`</a>
+### group `az network express-route-circuit`
+#### <a name="ExpressRouteCircuitsListRoutesTableSummary">Command `az network express-route-circuit list-route-table-summary`</a>
 
 ##### <a name="ExamplesExpressRouteCircuitsListRoutesTableSummary">Example</a>
 ```
-az network express-route list-route-table-summary --circuit-name "circuitName" --device-path "devicePath" \
+az network express-route-circuit list-route-table-summary --circuit-name "circuitName" --device-path "devicePath" \
 --peering-name "peeringName" --resource-group "rg1"
 ```
 ##### <a name="ParametersExpressRouteCircuitsListRoutesTableSummary">Parameters</a> 
@@ -43,12 +43,12 @@ az network express-route list-route-table-summary --circuit-name "circuitName" -
 |**--peering-name**|string|The name of the peering.|peering_name|peeringName|
 |**--device-path**|string|The path of the device.|device_path|devicePath|
 
-#### <a name="ExpressRouteCircuitsGetPeeringStats">Command `az network express-route show-peering-stat`</a>
+#### <a name="ExpressRouteCircuitsGetPeeringStats">Command `az network express-route-circuit show-peering-stat`</a>
 
 ##### <a name="ExamplesExpressRouteCircuitsGetPeeringStats">Example</a>
 ```
-az network express-route show-peering-stat --circuit-name "circuitName" --peering-name "peeringName" --resource-group \
-"rg1"
+az network express-route-circuit show-peering-stat --circuit-name "circuitName" --peering-name "peeringName" \
+--resource-group "rg1"
 ```
 ##### <a name="ParametersExpressRouteCircuitsGetPeeringStats">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -57,12 +57,12 @@ az network express-route show-peering-stat --circuit-name "circuitName" --peerin
 |**--circuit-name**|string|The name of the express route circuit.|circuit_name|circuitName|
 |**--peering-name**|string|The name of the peering.|peering_name|peeringName|
 
-### group `az network express-route peering connection`
-#### <a name="ExpressRouteCircuitConnectionsList">Command `az network express-route peering connection list`</a>
+### group `az network express-route-circuit-connection`
+#### <a name="ExpressRouteCircuitConnectionsList">Command `az network express-route-circuit-connection list`</a>
 
 ##### <a name="ExamplesExpressRouteCircuitConnectionsList">Example</a>
 ```
-az network express-route peering connection list --circuit-name "ExpressRouteARMCircuitA" --peering-name \
+az network express-route-circuit-connection list --circuit-name "ExpressRouteARMCircuitA" --peering-name \
 "AzurePrivatePeering" --resource-group "rg1"
 ```
 ##### <a name="ParametersExpressRouteCircuitConnectionsList">Parameters</a> 

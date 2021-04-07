@@ -66,3 +66,30 @@ class PositiveTest(ScenarioTest):
                  '--circuit-name "circuitName" '
                  '--peering-name "peeringName" '
                  '--resource-group "rg1"')
+# Test class for Scenario
+class PositiveTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        super(PositiveTest, self).__init__(*args, **kwargs)
+
+    def test_express_route_circuit_connection_list(self):
+        # From /ExpressRouteCircuitConnections/get/List ExpressRouteCircuit Connection
+        self.cmd('az network express-route-circuit-connection list '
+                 '--circuit-name "ExpressRouteARMCircuitA" '
+                 '--peering-name "AzurePrivatePeering" '
+                 '--resource-group "rg1"')
+
+    def test_express_route_circuit(self):
+        # From /ExpressRouteCircuits/post/List Route Table Summary
+        self.cmd('az network express-route-circuit list-route-table-summary '
+                 '--circuit-name "circuitName" '
+                 '--device-path "devicePath" '
+                 '--peering-name "peeringName" '
+                 '--resource-group "rg1"')
+
+    def test_express_route_circuit_show_peering_stat(self):
+        # From /ExpressRouteCircuits/get/Get ExpressRoute Circuit Peering Traffic Stats
+        self.cmd('az network express-route-circuit show-peering-stat '
+                 '--circuit-name "circuitName" '
+                 '--peering-name "peeringName" '
+                 '--resource-group "rg1"')

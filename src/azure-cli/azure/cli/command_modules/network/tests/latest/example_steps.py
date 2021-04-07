@@ -14,10 +14,10 @@ from .. import try_manual
 
 # EXAMPLE: /ExpressRouteCircuitConnections/get/List ExpressRouteCircuit Connection
 @try_manual
-def step_express_route_peering_connection_list(test, checks=None):
+def step_express_route_circuit_connection_list(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az network express-route peering connection list '
+    test.cmd('az network express-route-circuit-connection list '
              '--circuit-name "ExpressRouteARMCircuitA" '
              '--peering-name "AzurePrivatePeering" '
              '--resource-group "{rg}"',
@@ -26,10 +26,10 @@ def step_express_route_peering_connection_list(test, checks=None):
 
 # EXAMPLE: /ExpressRouteCircuits/get/Get ExpressRoute Circuit Peering Traffic Stats
 @try_manual
-def step_express_route_show_peering_stat(test, checks=None):
+def step_express_route_circuit_show_peering_stat(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az network express-route show-peering-stat '
+    test.cmd('az network express-route-circuit show-peering-stat '
              '--circuit-name "circuitName" '
              '--peering-name "peeringName" '
              '--resource-group "{rg}"',
@@ -38,10 +38,10 @@ def step_express_route_show_peering_stat(test, checks=None):
 
 # EXAMPLE: /ExpressRouteCircuits/post/List Route Table Summary
 @try_manual
-def step_express_route_list_route_table_summary(test, checks=None):
+def step_express_route_circuit(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az network express-route list-route-table-summary '
+    test.cmd('az network express-route-circuit list-route-table-summary '
              '--circuit-name "circuitName" '
              '--device-path "devicePath" '
              '--peering-name "peeringName" '
