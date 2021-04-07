@@ -1053,8 +1053,11 @@ def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
 
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-    setattr(webapp, 'ftpPublishingUrl', url)
+    try:
+        url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
+        setattr(webapp, 'ftpPublishingUrl', url)
+    except StopIteration:
+        pass
     return webapp
 
 
@@ -1080,7 +1083,7 @@ def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None
     web_app = get_webapp(cmd, resource_group_name, name, slot)
     if not web_app:
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
-    linux_fx = fx_version if web_app.reserved else None
+    linux_fx = fx_version if (web_app.reserved or not web_app.is_xenon) else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
                                linux_fx_version=linux_fx, windows_fx_version=windows_fx, slot=slot)
@@ -2009,6 +2012,10 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     if not xml:
         profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
         converted = []
+
+        if not isinstance(profiles, list):
+            profiles = [profiles]
+
         for profile in profiles:
             new = {}
             for key in profile:
@@ -2016,6 +2023,7 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
                 new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
+
     cmd.cli_ctx.invocation.data['output'] = 'tsv'
     return full_xml
 
