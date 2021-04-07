@@ -293,15 +293,14 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             command_name_inferred = self.prog
+            use_dynamic_install = 'no'
             if not self.command_source:
-                from azure.cli.core.extension.dynamic_install import get_extension_use_dynamic_install_config, \
-                    check_value_in_extensions
+                from azure.cli.core.extension.dynamic_install import try_install_extension
                 candidates = []
                 args = self.prog.split() + self._raw_arguments
-                use_dynamic_install = get_extension_use_dynamic_install_config(cli_ctx)
-                if use_dynamic_install != 'no':
-                    # The function will exit if the parse error is caused by the extension for the command not installed
-                    check_value_in_extensions(self, args, use_dynamic_install == 'yes_without_prompt')
+                # Check if the command is from an extension. If yes, try to fix by installing the extension, then exit.
+                # The command will be rerun in another process.
+                use_dynamic_install = try_install_extension(self, args)
                 # parser has no `command_source`, value is part of command itself
                 error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
                 az_error = CommandNotFoundError(error_msg)
