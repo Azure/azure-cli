@@ -25,11 +25,9 @@ def validate_site_create(cmd, namespace):
             and isinstance(namespace.plan, str):
         resource_group_name = namespace.resource_group_name
         plan = namespace.plan
-        print(plan)
         if is_valid_resource_id(plan):
             parsed_result = parse_resource_id(plan)
             plan_info = client.app_service_plans.get(parsed_result['resource_group'], parsed_result['name'])
-            print(plan_info)
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
