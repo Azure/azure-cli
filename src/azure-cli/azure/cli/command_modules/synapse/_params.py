@@ -418,7 +418,10 @@ def load_arguments(self, _):
             c.argument('role', arg_type=role_arg_type)
             c.argument('assignee', arg_type=assignee_arg_type)
             c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
-            c.argument('scope', help='Select the part of the workspace to which want to grant access.')
+            c.argument('scope', help='A scope defines the resources or artifacts that the access applies to. Synapse supports hierarchical scopes. '
+                                     'Permissions granted at a higher-level scope are inherited by objects at a lower level. '
+                                     'In Synapse RBAC, the top-level scope is a workspace. '
+                                     'Assigning a role with workspace scope grants permissions to all applicable objects in the workspace.')
             c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment')
             c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.')
 
@@ -437,7 +440,9 @@ def load_arguments(self, _):
         c.argument('role', arg_type=role_arg_type)
         c.argument('assignee', arg_type=assignee_arg_type)
         c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
-        c.argument('scope', help='Scope at which the role assignment is created.'
+        c.argument('scope', help='A scope defines the resources or artifacts that the access applies to. Synapse supports hierarchical scopes. '
+                                 'Permissions granted at a higher-level scope are inherited by objects at a lower level. '
+                                 'In Synapse RBAC, the top-level scope is a workspace. '
                                  'Using az role assignment with filter condition before executing delete operation '
                                  'to be clearly aware of which assignments will be deleted.')
         c.argument('ids', nargs='+',
