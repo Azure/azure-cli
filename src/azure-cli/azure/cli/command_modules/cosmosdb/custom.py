@@ -1256,11 +1256,13 @@ def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
     cosmos_db_account = client.get(resource_group_name, account_name)
     return cosmos_db_account.virtual_network_rules
 
+
 def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
     """ Show the identity associated with a Cosmos DB account """
 
     cosmos_db_account = client.get(resource_group_name, account_name)
     return cosmos_db_account.identity
+
 
 def cli_cosmosdb_identity_assign(client,
                                  resource_group_name,
@@ -1282,6 +1284,7 @@ def cli_cosmosdb_identity_assign(client,
     cosmos_db_account = client.get(resource_group_name, account_name)  # Workaround
     return cosmos_db_account.identity
 
+
 def cli_cosmosdb_identity_remove(client,
                                  resource_group_name,
                                  account_name):
@@ -1289,7 +1292,7 @@ def cli_cosmosdb_identity_remove(client,
 
     existing = client.get(resource_group_name, account_name)
 
-    if not 'SystemAssigned' in existing.identity.type:
+    if 'SystemAssigned' not in existing.identity.type:
         return existing.identity
 
     if 'UserAssigned' in existing.identity.type:
@@ -1301,6 +1304,7 @@ def cli_cosmosdb_identity_remove(client,
     cosmos_db_account = async_cosmos_db_update.result()
     cosmos_db_account = client.get(resource_group_name, account_name)  # Workaround
     return cosmos_db_account.identity
+
 
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
     from azure.cli.core.commands.client_factory import get_subscription_id

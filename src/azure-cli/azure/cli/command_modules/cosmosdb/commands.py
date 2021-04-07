@@ -247,7 +247,7 @@ def load_command_table(self, _):
         g.custom_command('migrate', 'cli_cosmosdb_table_throughput_migrate')
 
     with self.command_group('cosmosdb identity', None, client_factory=cf_db_accounts) as g:
-        g.custom_command('show', 'cli_cosmosdb_identity_show', is_preview=True)
+        g.custom_show_command('show', 'cli_cosmosdb_identity_show', is_preview=True)
         g.custom_command('assign', 'cli_cosmosdb_identity_assign', is_preview=True)
         g.custom_command('remove', 'cli_cosmosdb_identity_remove', is_preview=True)
 

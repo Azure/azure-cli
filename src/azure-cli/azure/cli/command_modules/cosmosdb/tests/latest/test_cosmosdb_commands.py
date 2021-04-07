@@ -1384,7 +1384,10 @@ class CosmosDBTests(ScenarioTest):
         assert identity_output["type"] == "SystemAssigned"
 
         identity_principal_id = identity_output["principalId"]
-        self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn {identity_principal_id} --key-permissions get unwrapKey wrapKey')
+        self.kwargs.update({
+            'identity_principal_id': identity_principal_id
+        })
+        self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {identity_principal_id} --key-permissions get unwrapKey wrapKey')
 
         cmk_account = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity SystemAssignedIdentity').get_output_in_json()
         assert cmk_account["defaultIdentity"] == 'SystemAssignedIdentity'
