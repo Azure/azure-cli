@@ -30,7 +30,7 @@ def load_command_table(self, _):
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2020_09_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2021_02_01.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )
@@ -116,7 +116,8 @@ def load_command_table(self, _):
 
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,
-                            client_factory=cf_openshift_managed_clusters) as g:
+                            client_factory=cf_openshift_managed_clusters,
+                            deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)

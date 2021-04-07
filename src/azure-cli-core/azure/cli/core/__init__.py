@@ -4,15 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from __future__ import print_function
-
-__version__ = "2.18.0"
+__version__ = "2.21.0"
 
 import os
 import sys
 import timeit
-
-import six
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -35,10 +31,7 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
-# Configure the commands that need to skip command index
-# `az next` needs to search commands from all modules and extensions.
-SKIP_COMMAND_INDEX_FOR = ['next']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
 
 
 def _configure_knack():
@@ -103,8 +96,11 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        if not self.enable_color:
-            format_styled_text.theme = 'none'
+        if self.enable_color:
+            theme = self.config.get('core', 'theme', fallback='dark')
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -115,12 +111,12 @@ class AzCli(CLI):
         import uuid
         self.data['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
 
-    def get_progress_controller(self, det=False):
+    def get_progress_controller(self, det=False, spinner=None):
         import azure.cli.core.commands.progress as progress
         if not self.progress_controller:
             self.progress_controller = progress.ProgressHook()
 
-        self.progress_controller.init_progress(progress.get_progress_view(det))
+        self.progress_controller.init_progress(progress.get_progress_view(det, spinner=spinner))
         return self.progress_controller
 
     def get_cli_version(self):
@@ -409,14 +405,9 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
-        need_skip_command_index = False
-        if isinstance(args, list) and args:
-            need_skip_command_index = args[0] in SKIP_COMMAND_INDEX_FOR
-
         command_index = None
         # Set fallback=False to turn off command index in case of regression
-        use_command_index = (self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True) and
-                             not need_skip_command_index)
+        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
@@ -785,7 +776,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
         kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
-        if operation and not isinstance(operation, six.string_types):
+        if operation and not isinstance(operation, str):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
         if handler and not callable(handler):
             raise TypeError("Handler must be a callable. Got '{}'".format(operation))
@@ -861,7 +852,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 op = getattr(op, part)
             if isinstance(op, types.FunctionType):
                 return op
-            return six.get_method_function(op)
+            return op.__func__
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(operation))
 

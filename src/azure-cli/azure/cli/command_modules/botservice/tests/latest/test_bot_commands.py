@@ -791,7 +791,7 @@ class BotTests(ScenarioTest):
             ])
 
         try:
-            self.cmd('az bot update -g {rg} -n {botname} --encryption-off --cmk-key-vault-key-url test.url')
+            self.cmd('az bot update -g {rg} -n {botname} --cmk-off --cmk-key-vault-key-url test.url')
             raise AssertionError('should have thrown an error.')
         except MutuallyExclusiveArgumentError:
             pass
@@ -872,7 +872,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         assert resultsCreate['properties']['isCmekEnabled'] is True
 
         results = self.cmd('az bot update -g {rg} -n {botname} '
-                           '--encryption-off',
+                           '--cmk-off',
                            checks=[
                                self.check('name', '{botname}'),
                                self.check('resourceGroup', '{rg}')])
@@ -971,7 +971,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         assert resultsShow['properties']['isCmekEnabled'] is True
 
         results = self.cmd('az bot update -g {rg} -n {botname} '
-                           '--encryption-off',
+                           '--cmk-off',
                            checks=[
                                self.check('name', '{botname}'),
                                self.check('resourceGroup', '{rg}')])

@@ -13,7 +13,7 @@ import zipfile
 import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from pkg_resources import parse_version
 
@@ -260,21 +260,30 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 
 def check_version_compatibility(azext_metadata):
-    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    is_compatible, cli_core_version, min_required, max_required, min_ext_required = ext_compat_with_cli(azext_metadata)
     # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
     #              "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
-        min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI core version {} and this extension " \
-                          "requires ".format(azext_metadata.get('name'), cli_core_version)
-        if min_required and max_required:
-            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
+        ext_name = azext_metadata.get('name')
+        ext_version = azext_metadata.get('version')
+        min_max_msgs = [
+            f"The '{ext_name}' extension version {ext_version} is not compatible with your current CLI core version {cli_core_version}."
+        ]
+        if min_ext_required:
+            min_max_msgs.append(f"This CLI core requires a min of {min_ext_required} for the '{ext_name}' extension.")
+            min_max_msgs.append(f"Please run 'az extension update -n {ext_name}' to update it.")
+        elif min_required and max_required:
+            min_max_msgs.append(f'This extension requires a min of {min_required} and max of {max_required} CLI core.')
+            min_max_msgs.append("Please run 'az upgrade' to upgrade to a compatible version.")
         elif min_required:
-            min_max_msg_fmt += 'a min of {}.'.format(min_required)
+            min_max_msgs.append(f'This extension requires a min of {min_required} CLI core.')
+            min_max_msgs.append("Please run 'az upgrade' to upgrade to a compatible version.")
         elif max_required:
-            min_max_msg_fmt += 'a max of {}.'.format(max_required)
-        min_max_msg_fmt += '\nPlease install a compatible extension version or remove it.'
-        raise CLIError(min_max_msg_fmt)
+            min_max_msgs.append(f'This extension requires a max of {max_required} CLI core.')
+            # we do not want users to downgrade CLI core version, so we suggest updating the extension in this case
+            min_max_msgs.append(f"Please run 'az extension update -n {ext_name}' to update the extension.")
+
+        raise CLIError("\n".join(min_max_msgs))
 
 
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
@@ -304,7 +313,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
 
@@ -373,7 +382,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             msg = "Extension {} with version {} not found.".format(extension_name, version) if version else "No updates available for '{}'. Use --debug for more information.".format(extension_name)
@@ -405,8 +414,8 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         raise CLIError(e)
 
 
-def list_available_extensions(index_url=None, show_details=False):
-    index_data = get_index_extensions(index_url=index_url)
+def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
+    index_data = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx)
     if show_details:
         return index_data
     installed_extensions = get_extensions(ext_type=WheelExtension)
@@ -436,8 +445,8 @@ def list_available_extensions(index_url=None, show_details=False):
     return results
 
 
-def list_versions(extension_name, index_url=None):
-    index_data = get_index_extensions(index_url=index_url)
+def list_versions(extension_name, index_url=None, cli_ctx=None):
+    index_data = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx)
 
     try:
         exts = index_data[extension_name]

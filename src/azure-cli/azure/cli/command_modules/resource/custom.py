@@ -6,7 +6,6 @@
 # pylint: disable=too-many-lines
 # pylint: disable=line-too-long
 
-from __future__ import print_function
 from collections import OrderedDict
 import codecs
 import json
@@ -45,6 +44,13 @@ from msrest.pipeline import SansIOHTTPPolicy
 
 from ._validators import MSI_LOCAL_ID
 from ._formatters import format_what_if_operation_result
+from ._bicep import (
+    run_bicep_command,
+    is_bicep_file,
+    ensure_bicep_installation,
+    get_bicep_latest_release_tag,
+    get_bicep_available_release_tags
+)
 
 logger = get_logger(__name__)
 
@@ -315,7 +321,11 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        template_content = read_file_content(template_file)
+        template_content = (
+            run_bicep_command(["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
@@ -884,7 +894,11 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
         template_link = TemplateLink(id=template_spec, mode="Incremental")
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
     else:
-        template_content = read_file_content(template_file)
+        template_content = (
+            run_bicep_command(["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
@@ -1356,13 +1370,13 @@ def show_applicationdefinition(cmd, resource_group_name=None, application_defini
     return racf.application_definitions.get(resource_group_name, application_definition_name)
 
 
-def create_applicationdefinition(cmd, resource_group_name,
-                                 application_definition_name,
-                                 lock_level, authorizations,
-                                 description, display_name,
-                                 package_file_uri=None, create_ui_definition=None,
-                                 main_template=None, location=None, tags=None):
-    """ Create a new managed application definition.
+def create_or_update_applicationdefinition(cmd, resource_group_name,
+                                           application_definition_name,
+                                           lock_level, authorizations,
+                                           description, display_name,
+                                           package_file_uri=None, create_ui_definition=None,
+                                           main_template=None, location=None, tags=None):
+    """ Create or update a new managed application definition.
     :param str resource_group_name:the desired resource group name
     :param str application_definition_name:the managed application definition name
     :param str description:the managed application definition description
@@ -1816,7 +1830,10 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
         return rcf.template_spec_versions.get(resource_group_name, name, version)
-    return rcf.template_specs.get(resource_group_name, name)
+    retrieved_template = rcf.template_specs.get(resource_group_name, name, expand="versions")
+    version_names = list(retrieved_template.versions.keys())
+    retrieved_template.versions = version_names
+    return retrieved_template
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
@@ -1935,7 +1952,9 @@ def export_template_spec(cmd, output_folder, resource_group_name=None, name=None
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    exported_template = rcf.template_spec_versions.get(resource_group_name, name, version) if version else rcf.template_specs.get(resource_group_name, name)
+    if not version:
+        raise IncorrectUsageError('Please specify the template spec version for export')
+    exported_template = rcf.template_spec_versions.get(resource_group_name, name, version)
     from azure.cli.command_modules.resource._packing_engine import (unpack)
     return unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
 
@@ -3163,3 +3182,32 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
         return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type,
                                                   latest_include_preview=latest_include_preview)
+
+
+def install_bicep_cli(cmd, version=None):
+    # The parameter version is actually a git tag here.
+    ensure_bicep_installation(release_tag=version)
+
+
+def upgrade_bicep_cli(cmd):
+    latest_release_tag = get_bicep_latest_release_tag()
+    ensure_bicep_installation(release_tag=latest_release_tag)
+
+
+def build_bicep_file(cmd, files, stdout=None):
+    if stdout:
+        print(run_bicep_command(["build"] + files + ["--stdout"]))
+    else:
+        run_bicep_command(["build"] + files)
+
+
+def decompile_bicep_file(cmd, files):
+    run_bicep_command(["decompile"] + files)
+
+
+def show_bicep_cli_version(cmd):
+    print(run_bicep_command(["--version"], auto_install=False))
+
+
+def list_bicep_cli_versions(cmd):
+    return get_bicep_available_release_tags()

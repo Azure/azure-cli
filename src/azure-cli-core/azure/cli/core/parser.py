@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import difflib
 
 import argparse
@@ -298,11 +296,16 @@ class AzCliCommandParser(CLICommandParser):
             return None
         EXT_CMD_TREE.load(os.path.join(cli_ctx.config.config_dir, 'extensionCommandTree.json'), VALID_SECOND)
         if not EXT_CMD_TREE.data:
+            import posixpath
             import requests
             from azure.cli.core.util import should_disable_connection_verify
             try:
+                azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
+                    cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
+                url = posixpath.join(azmirror_endpoint, 'extensions', 'extensionCommandTree.json') if \
+                    azmirror_endpoint else 'https://aka.ms/azExtCmdTree'
                 response = requests.get(
-                    'https://aka.ms/azExtCmdTree',
+                    url,
                     verify=(not should_disable_connection_verify()),
                     timeout=10)
             except Exception as ex:  # pylint: disable=broad-except
@@ -354,7 +357,8 @@ class AzCliCommandParser(CLICommandParser):
             ...
         }
         """
-
+        if not command_str:
+            return None
         cmd_chain = self._get_extension_command_tree()
         if not cmd_chain:
             return None
@@ -397,6 +401,7 @@ class AzCliCommandParser(CLICommandParser):
             caused_by_extension_not_installed = False
             command_name_inferred = self.prog
             error_msg = None
+            use_dynamic_install = 'no'
             if not self.command_source:
                 candidates = []
                 args = self.prog.split() + self._raw_arguments
@@ -410,9 +415,9 @@ class AzCliCommandParser(CLICommandParser):
                     if isinstance(ext_name, list):
                         if len(ext_name) > 1:
                             from knack.prompting import prompt_choice_list, NoTTYException
+                            prompt_msg = "The command requires the latest version of one of the following " \
+                                "extensions. You need to pick one to install:"
                             try:
-                                prompt_msg = "The command requires the latest version of one of the following " \
-                                    "extensions. You need to pick one to install:"
                                 choice_idx = prompt_choice_list(prompt_msg, ext_name)
                                 ext_name = ext_name[choice_idx]
                                 use_dynamic_install = 'yes_without_prompt'

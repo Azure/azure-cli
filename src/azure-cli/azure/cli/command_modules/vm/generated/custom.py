@@ -10,26 +10,26 @@
 # pylint: disable=too-many-lines
 
 
-def vm_ssh_public_key_list(client,
-                           resource_group_name=None):
+def sshkey_list(client,
+                resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list_by_subscription()
 
 
-def vm_ssh_public_key_show(client,
-                           resource_group_name,
-                           ssh_public_key_name):
+def sshkey_show(client,
+                resource_group_name,
+                ssh_public_key_name):
     return client.get(resource_group_name=resource_group_name,
                       ssh_public_key_name=ssh_public_key_name)
 
 
-def vm_ssh_public_key_create(client,
-                             resource_group_name,
-                             ssh_public_key_name,
-                             location,
-                             tags=None,
-                             public_key=None):
+def sshkey_create(client,
+                  resource_group_name,
+                  ssh_public_key_name,
+                  location,
+                  tags=None,
+                  public_key=None):
     parameters = {}
     parameters['location'] = location
     parameters['tags'] = tags
@@ -39,11 +39,11 @@ def vm_ssh_public_key_create(client,
                          parameters=parameters)
 
 
-def vm_ssh_public_key_update(client,
-                             resource_group_name,
-                             ssh_public_key_name,
-                             tags=None,
-                             public_key=None):
+def sshkey_update(client,
+                  resource_group_name,
+                  ssh_public_key_name,
+                  tags=None,
+                  public_key=None):
     parameters = {}
     parameters['tags'] = tags
     parameters['public_key'] = public_key
@@ -52,15 +52,8 @@ def vm_ssh_public_key_update(client,
                          parameters=parameters)
 
 
-def vm_ssh_public_key_delete(client,
-                             resource_group_name,
-                             ssh_public_key_name):
+def sshkey_delete(client,
+                  resource_group_name,
+                  ssh_public_key_name):
     return client.delete(resource_group_name=resource_group_name,
                          ssh_public_key_name=ssh_public_key_name)
-
-
-def vm_ssh_public_key_generate_key_pair(client,
-                                        resource_group_name,
-                                        ssh_public_key_name):
-    return client.generate_key_pair(resource_group_name=resource_group_name,
-                                    ssh_public_key_name=ssh_public_key_name)

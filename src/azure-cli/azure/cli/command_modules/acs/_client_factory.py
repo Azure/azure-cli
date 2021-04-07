@@ -116,5 +116,6 @@ def get_resource_by_name(cli_ctx, resource_name, resource_type):
                 resource_type, resource_name))
 
 
-def get_msi_client(cli_ctx, **_):
-    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)
+def get_msi_client(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient,
+                                   subscription_id=subscription_id)

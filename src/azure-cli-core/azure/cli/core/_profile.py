@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import collections
 import errno
 import json
@@ -115,6 +113,7 @@ def _load_tokens_from_file(file_path):
             raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                            "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                            "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+    logger.debug("'%s' is not a file or doesn't exist.", file_path)
     return []
 
 
@@ -269,21 +268,9 @@ class Profile:
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             }
-            # For subscription account from Subscriptions - List 2019-06-01 and later.
+
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
-                if hasattr(s, 'home_tenant_id'):
-                    subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
-                if hasattr(s, 'managed_by_tenants'):
-                    if s.managed_by_tenants is None:
-                        # managedByTenants is missing from the response. This is a known service issue:
-                        # https://github.com/Azure/azure-rest-api-specs/issues/9567
-                        # pylint: disable=line-too-long
-                        raise CLIError("Invalid profile is used for cloud '{cloud_name}'. "
-                                       "To configure the cloud profile, run `az cloud set --name {cloud_name} --profile <profile>(e.g. 2019-03-01-hybrid)`. "
-                                       "For more information about using Azure CLI with Azure Stack, see "
-                                       "https://docs.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2"
-                                       .format(cloud_name=self.cli_ctx.cloud.name))
-                    subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+                _transform_subscription_for_multiapi(s, subscription_dict)
 
             consolidated.append(subscription_dict)
 
@@ -622,12 +609,28 @@ class Profile:
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
         """
+        from msal import ClientApplication
+        import posixpath
         account = self.get_subscription()
         username = account[_USER_ENTITY][_USER_NAME]
         tenant = account[_TENANT_ID] or 'common'
         _, refresh_token, _, _ = self.get_refresh_token()
-        certificate = self._creds_cache.retrieve_msal_token(tenant, scopes, data, refresh_token)
-        return username, certificate
+        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
+        app = ClientApplication(_CLIENT_ID, authority=authority)
+        result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
+
+        if 'error' in result:
+            logger.warning(result['error_description'])
+
+            # Retry login with VM SSH as resource
+            token_entry = self._login_with_authorization_code_flow(
+                tenant, 'https://pas.windows.net/CheckMyAccess/Linux')
+            result = app.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
+
+            if 'error' in result:
+                from azure.cli.core.adal_authentication import aad_error_handler
+                aad_error_handler(result)
+        return username, result["access_token"]
 
     def get_refresh_token(self, resource=None,
                           subscription=None):
@@ -670,17 +673,22 @@ class Profile:
             creds = self._get_token_from_cloud_shell(resource)
         else:
             tenant_dest = tenant if tenant else account[_TENANT_ID]
-            if user_type == _USER:
-                # User
-                creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                  tenant_dest, resource)
-            else:
-                # Service Principal
-                use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
-                creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                               resource,
-                                                                               tenant_dest,
-                                                                               use_cert_sn_issuer)
+            import adal
+            try:
+                if user_type == _USER:
+                    # User
+                    creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                      tenant_dest, resource)
+                else:
+                    # Service Principal
+                    use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
+                    creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                                   resource,
+                                                                                   tenant_dest,
+                                                                                   use_cert_sn_issuer)
+            except adal.AdalError as ex:
+                from azure.cli.core.adal_authentication import adal_error_handler
+                adal_error_handler(ex)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
@@ -787,6 +795,18 @@ class Profile:
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
+
+    def _login_with_authorization_code_flow(self, tenant, resource):
+        authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
+        results = _get_authorization_code(resource, authority_url)
+
+        if not results.get('code'):
+            raise CLIError('Login failed')
+
+        context = _authentication_context_factory(self.cli_ctx, tenant, self._creds_cache.adal_token_cache)
+        token_entry = context.acquire_token_with_authorization_code(
+            results['code'], results['reply_url'], resource, _CLIENT_ID)
+        return token_entry
 
 
 class MsiAccountTypes:
@@ -1071,19 +1091,6 @@ class CredsCache:
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
-    def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
-        """
-        This is added only for vmssh feature.
-        It is a temporary solution and will deprecate after MSAL adopted completely.
-        """
-        from azure.cli.core._msal import AdalRefreshTokenBasedClientApplication
-        tenant = tenant or 'organizations'
-        authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
-        app = AdalRefreshTokenBasedClientApplication(_CLIENT_ID, authority=authority)
-        result = app.acquire_token_silent(scopes, None, data=data, refresh_token=refresh_token)
-
-        return result["access_token"]
-
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
@@ -1358,3 +1365,19 @@ def _get_authorization_code(resource, authority_url):
     if results.get('no_browser'):
         raise RuntimeError()
     return results
+
+
+def _transform_subscription_for_multiapi(s, s_dict):
+    """
+    Transforms properties from Subscriptions - List 2019-06-01 and later to the subscription dict.
+
+    :param s: subscription object
+    :param s_dict: subscription dict
+    """
+    if hasattr(s, 'home_tenant_id'):
+        s_dict[_HOME_TENANT_ID] = s.home_tenant_id
+    if hasattr(s, 'managed_by_tenants'):
+        if s.managed_by_tenants is None:
+            s_dict[_MANAGED_BY_TENANTS] = None
+        else:
+            s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]

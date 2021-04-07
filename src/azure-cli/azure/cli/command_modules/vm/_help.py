@@ -11,6 +11,7 @@
 # --------------------------------------------------------------------------
 from knack.help_files import helps  # pylint: disable=unused-import
 
+from .generated._help import helps
 try:
     from .manual._help import helps  # pylint: disable=reimported
 except ImportError:
@@ -635,7 +636,7 @@ examples:
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/images/MyManagedImage
   - name: Add a new image version from a virtual machine
     text: |
-        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
   - name: Add a new image version from another image version
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/galleries/MyGallery/images/MyImageDefinition/versions/1.0.0
@@ -651,7 +652,7 @@ examples:
   - name: Add a new image version from a managed disk and add additional data disks
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk --data-snapshot-luns 0
-  - name: You can Add a new image version containing a mix of snapshots and managed disks
+  - name: Add a new image version containing a mix of snapshots and managed disks
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/snapshots/MyDiskSnapshot1 /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk2 --data-snapshot-luns 1 2
   - name: Add a new image version replicated across multiple regions with different replication counts each. Eastus2 will have it's replica count set to the default replica count.
@@ -693,6 +694,12 @@ examples:
   - name: Replicate to one more region
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+  - name: Add a region with a different regional replica count
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus regionalReplicaCount=3
+  - name: Remove a region
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --remove publishingProfile.targetRegions name=westcentralus
   - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --set publishingProfile.excludeFromLatest=true
@@ -1077,6 +1084,9 @@ examples:
     supported-profiles: latest
     text: >
         az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
+  - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image centos --count 3
 """
 
 helps['vm deallocate'] = """
@@ -1256,7 +1266,7 @@ type: command
 short-summary: Disable disk encryption on the OS disk and/or data disks. Decrypt mounted disks.
 long-summary: |
     For Linux VMs, disabling encryption is only permitted on data volumes.
-    For Windows VMS, disabling encryption is permitted on both OS and data volumes.
+    For Windows VMs, disabling encryption is permitted on both OS and data volumes.
 examples:
   - name: Disable disk encryption on the OS disk and/or data disks. (autogenerated)
     text: |
@@ -1381,11 +1391,11 @@ examples:
 
 
         latest=$(az vm extension image list-versions \\
-          --publisher {publisher} -l {location} -n {extension} \\
+          --publisher ${publisher} -l ${location} -n ${extension} \\
           --query "[].name" -o tsv | sort | tail -n 1)
 
-        az vm extension image show -l {location} \\
-          --publisher {publisher} -n {extension} --version {latest}
+        az vm extension image show -l ${location} \\
+          --publisher ${publisher} -n ${extension} --version ${latest}
 """
 
 helps['vm extension list'] = """
@@ -1458,9 +1468,9 @@ examples:
   - name: Deallocate, generalize, and capture multiple stopped virtual machines.
     text: |
         vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-        az vm deallocate --ids {vms_ids}
-        az vm generalize --ids {vms_ids}
-        az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
+        az vm deallocate --ids ${vms_ids}
+        az vm generalize --ids ${vms_ids}
+        az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
 
 """
 
@@ -1706,7 +1716,7 @@ examples:
     text: >
         latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
             "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-        az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version {latest}
+        az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version ${latest}
   - name: Get the details for a VM image available in the Azure Marketplace. (autogenerated)
     text: |
         az vm image show --location westus --urn publisher:offer:sku:version
@@ -1880,6 +1890,8 @@ examples:
     text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
   - name: Open a range of ports on a VM to inbound traffic with the highest priority.
     text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
+  - name: Open ports 555, 557, 558, and 559 to inbound traffic with the highest priority.
+    text: az vm open-port -g MyResourceGroup -n MyVm --port 555,557-559 --priority 100
   - name: Open all ports for all VMs in a resource group.
     text: >
         az vm open-port --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv) --port '*'
@@ -2748,7 +2760,7 @@ examples:
 
 helps['vmss update'] = """
 type: command
-short-summary: Update a VMSS.
+short-summary: Update a VMSS. Run 'az vmss update-instances' command to roll out the changes to VMs if you have not configured upgrade policy.
 examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
