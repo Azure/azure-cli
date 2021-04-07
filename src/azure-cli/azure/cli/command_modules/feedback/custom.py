@@ -377,7 +377,6 @@ def _build_issue_info_tup(command_log_file=None):
 
     pretty_url_name = _get_extension_repo_url(ext_name) if is_ext else _CLI_ISSUES_URL
 
-    # get issue body without minification
     issue_body = _ISSUES_TEMPLATE.format(**format_dict)
     formatted_issues_url = _get_issue_url(command_log_file, issue_body, is_ext, ext_name)
 
