@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait, user_confirmation
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -203,9 +203,9 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                                                      workernode_size)
 
     if not headnode_size:
-        raise CLIError('Please specify --headnode-size explicitly.')
+        raise RequiredArgumentMissingError('Please specify --headnode-size explicitly.')
     if not workernode_size:
-        raise CLIError('Please specify --workernode-size explicitly.')
+        raise RequiredArgumentMissingError('Please specify --workernode-size explicitly.')
 
     os_profile = OsProfile(
         linux_operating_system_profile=LinuxOperatingSystemProfile(
