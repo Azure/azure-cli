@@ -127,10 +127,10 @@ def cli_cosmosdb_create(cmd, client,
 
     system_assigned_identity = None
     if assign_identity is not None:
-        if assign_identity:
+        if len(assign_identity) == 1 and assign_identity[0] == '[system]':
             system_assigned_identity = ManagedServiceIdentity(type='SystemAssigned')
         else:
-            system_assigned_identity = ManagedServiceIdentity(type='None')
+            raise CLIError("Only '[system]' is supported right now for command argument '--assign-identity'.")
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
