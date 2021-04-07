@@ -912,8 +912,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
         c.argument('target_region_encryption', nargs='+',
                    help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for each region: `<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`. Use "null" as a placeholder.')
-        c.argument('vhd', help='Source VHD URI of OS disk', min_api='2020-09-30')
-        c.argument('vhd_storage_account', help='Name or ID of storage account of source VHD URI of OS disk', min_api='2020-09-30')
+        c.argument('os_vhd', help='Source VHD URI of OS disk')
+        c.argument('os_vhd_storage_account', help='Name or ID of storage account of source VHD URI of OS disk')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
