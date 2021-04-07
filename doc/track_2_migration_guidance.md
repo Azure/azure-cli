@@ -11,6 +11,7 @@ Example PRs:
 4. [Storage PR #15845](https://github.com/Azure/azure-cli/pull/15845)
 5. [KeyVault PR #14150](https://github.com/Azure/azure-cli/pull/14150)
 6. [AppConfig PR #16376](https://github.com/Azure/azure-cli/pull/16376)
+7. [AppService PR #17146](https://github.com/Azure/azure-cli/pull/17146)
 
 Below is a list of typical issues.
 
