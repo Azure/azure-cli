@@ -359,7 +359,6 @@ short-summary: Show the identities for a Azure Cosmos DB database account.
 examples:
   - name: Show the identities for a Azure Cosmos DB database account.
     text: az cosmosdb identity show --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['cosmosdb identity assign'] = """
@@ -368,7 +367,6 @@ short-summary: Assign SystemAssigned identity for a Azure Cosmos DB database acc
 examples:
   - name: Assign SystemAssigned identity for a Azure Cosmos DB database account.
     text: az cosmosdb identity assign --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['cosmosdb identity remove'] = """
@@ -377,7 +375,6 @@ short-summary: Remove SystemAssigned identity for a Azure Cosmos DB database acc
 examples:
   - name: Remove SystemAssigned identity for a Azure Cosmos DB database account.
     text: az cosmosdb identity remove --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['cosmosdb keys'] = """

@@ -9,6 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -130,7 +131,7 @@ def cli_cosmosdb_create(cmd, client,
         if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
             system_assigned_identity = ManagedServiceIdentity(type='SystemAssigned')
         else:
-            raise CLIError("Only '[system]' is supported right now for command argument '--assign-identity'.")
+            raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
