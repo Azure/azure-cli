@@ -16,7 +16,8 @@ from copy import deepcopy
 from adal import AdalError
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK,
+                                     _transform_subscription_for_multiapi)
 if _USE_VENDORED_SUBSCRIPTION_SDK:
     from azure.cli.core.vendored_sdks.subscriptions.models import \
         (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
@@ -1787,8 +1788,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(token_type, token_entry2['tokenType'])
 
     @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
-    def test_credscache_good_error_on_file_corruption(self, mock_read_file):
-        mock_read_file.side_effect = ValueError('a bad error for you')
+    @mock.patch('os.path.isfile', autospec=True, return_value=True)
+    def test_credscache_good_error_on_file_corruption(self, isfile_mock, get_file_json_mock):
+        get_file_json_mock.side_effect = ValueError('a bad error for you')
         cli = DummyCli()
 
         # action
@@ -2037,6 +2039,55 @@ class MSRestAzureAuthStub:
     @token.setter
     def token(self, value):
         self._token = value
+
+
+class TestUtil(unittest.TestCase):
+
+    def test_transform_subscription_for_multiapi(self):
+
+        class SimpleSubscription:
+            pass
+
+        class SimpleManagedByTenant:
+            pass
+
+        tenant_id = "00000001-0000-0000-0000-000000000000"
+
+        # No 2019-06-01 property is set.
+        s = SimpleSubscription()
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {}
+
+        # home_tenant_id is set.
+        s = SimpleSubscription()
+        s.home_tenant_id = tenant_id
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000'}
+
+        # managed_by_tenants is set, but is None. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = None
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': None}
+
+        # managed_by_tenants is set, but is []. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = []
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': []}
+
+        # managed_by_tenants is set, and has valid items. It is preserved.
+        s = SimpleSubscription()
+        t = SimpleManagedByTenant()
+        t.tenant_id = tenant_id
+        s.managed_by_tenants = [t]
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': [{"tenantId": tenant_id}]}
 
 
 if __name__ == '__main__':

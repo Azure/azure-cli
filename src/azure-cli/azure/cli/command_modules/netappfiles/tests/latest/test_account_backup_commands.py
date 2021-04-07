@@ -4,24 +4,17 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-import unittest
-
-LOCATION = "eastus2euap"
-
-# No tidy up of tests required. The resource group is automatically removed
+import time
+LOCATION = "southcentralusstage"
+VNET_LOCATION = "southcentralus"
 
 
-@unittest.skip("Backup unstable so these tests need to be skipped for this version")
 class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
-                 (vnet_name, LOCATION))
+                 (vnet_name, VNET_LOCATION))
         self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.5.0.0/24' "
                  "--delegations 'Microsoft.Netapp/volumes' -g {rg}" % (subnet_name, vnet_name))
-
-    def current_subscription(self):
-        subs = self.cmd("az account show").get_output_in_json()
-        return subs['id']
 
     def create_volume(self, account_name, pool_name, volume_name, volume_only=False, backup_id=None):
         vnet_name = self.create_random_name(prefix='cli-vnet-backup', length=24)
@@ -30,10 +23,9 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         if not volume_only:
             # create vnet, account and pool
             self.setup_vnet(vnet_name, subnet_name)
-            self.cmd("netappfiles account create -g {rg} -a '%s' -l %s" %
-                     (account_name, LOCATION)).get_output_in_json()
+            self.cmd("netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION))
             self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4" %
-                     (account_name, pool_name, LOCATION)).get_output_in_json()
+                     (account_name, pool_name, LOCATION))
 
         # create volume
         if backup_id is None:
@@ -53,24 +45,36 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
             self.create_volume(account_name, pool_name, volume_name)
 
             # get vault
-            vaults = self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
-
-            # create backup policy
-            backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
-            backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s "
-                                     "--backup-policy-name %s -l %s --daily-backups 1  --enabled true" %
-                                     (account_name, backup_policy_name, LOCATION)).get_output_in_json()
+            vaults = self.get_vaults(account_name)
 
             # volume update with backup policy
-            self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s "
-                     "--backup-policy-id %s --policy-enforced %s" %
-                     (account_name, pool_name, volume_name, vaults[0]['id'], True, backup_policy['id'], True)) \
-                .get_output_in_json()
+            self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s " %
+                     (account_name, pool_name, volume_name, vaults[0]['id'], True))
 
         # create backup
-        backup = self.cmd("az netappfiles volume backup create -g {rg} -a %s -p %s -v %s -l %s --backup-name %s" %
-                          (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
-        return backup
+        return self.cmd("az netappfiles volume backup create -g {rg} -a %s -p %s -v %s -l %s --backup-name %s" %
+                        (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
+
+    def delete_backup(self, account_name, pool_name, volume_name):
+        vaults = self.get_vaults(account_name)
+
+        # Delete
+        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s " %
+                 (account_name, pool_name, volume_name, vaults[0]['id'], False))
+
+    def get_vaults(self, account_name):
+        return self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
+
+    def wait_for_backup_created(self, account_name, pool_name, volume_name, backup_name):
+        attempts = 0
+        while attempts < 40:
+            attempts += 1
+            backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
+                              (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
+            if backup['provisioningState'] != "Creating":
+                break
+            if self.is_live or self.in_recording:
+                time.sleep(60)
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
     def test_list_account_backups(self):
@@ -85,6 +89,9 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
 
         assert len(backup_list) == 1
 
+        self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+        self.delete_backup(account_name, pool_name, volume_name)
+
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
     def test_get_account_backup(self):
         # create backup
@@ -95,9 +102,12 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
         backup = self.cmd("az netappfiles account backup show -g {rg} -a %s --backup-name %s" %
-                          account_name, backup_name).get_output_in_json()
+                          (account_name, backup_name)).get_output_in_json()
 
-        assert backup['name'] == backup_name
+        assert backup['name'] == account_name + "/" + backup_name
+
+        self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+        self.delete_backup(account_name, pool_name, volume_name)
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
     def test_delete_account_backup(self):
@@ -108,8 +118,15 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
-        self.cmd("az netappfiles account backup delete -g {rg} -a %s --backup-name %s" % account_name, backup_name)
+        self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+        backup_list = self.cmd("az netappfiles account backup list -g {rg} -a %s" % account_name).get_output_in_json()
+        assert len(backup_list) == 1
+
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s" %
+                 (account_name, pool_name, volume_name))
+        self.cmd("az netappfiles account backup delete -g {rg} -a %s --backup-name %s -y" % (account_name, backup_name))
 
         backup_list = self.cmd("az netappfiles account backup list -g {rg} -a %s" % account_name).get_output_in_json()
 
-        assert len(backup_list) == 0
+        for backup in backup_list['value']:
+            assert backup['name'] != account_name + "/" + backup_name

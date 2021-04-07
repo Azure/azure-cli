@@ -5,7 +5,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 import sys
@@ -71,7 +70,7 @@ DEPENDENCIES = [
     'azure-mgmt-batch~=9.0.0',
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.3.0',
-    'azure-mgmt-cdn==7.0.0',
+    'azure-mgmt-cdn==11.0.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
     'azure-mgmt-compute~=19.0.0',
     'azure-mgmt-consumption~=2.0',
@@ -86,7 +85,7 @@ DEPENDENCIES = [
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
-    'azure-mgmt-eventgrid==3.0.0rc7',
+    'azure-mgmt-eventgrid==3.0.0rc9',
     'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-hdinsight~=2.2.0',
     'azure-mgmt-imagebuilder~=0.4.0',
@@ -99,11 +98,11 @@ DEPENDENCIES = [
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
-    'azure-mgmt-marketplaceordering~=0.1',
+    'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.16.0',
+    'azure-mgmt-netapp~=2.0.0',
     'azure-mgmt-network~=18.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
@@ -120,6 +119,7 @@ DEPENDENCIES = [
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
+    'azure-mgmt-servicefabricmanagedclusters~=1.0.0b1',
     'azure-mgmt-signalr~=0.4.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
@@ -127,7 +127,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse~=0.6.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.48.0',
-    'azure-multiapi-storage~=0.6.0',
+    'azure-multiapi-storage~=0.6.2',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.2.0',
     'azure-synapse-artifacts~=0.3.0',

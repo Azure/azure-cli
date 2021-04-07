@@ -16,10 +16,8 @@ from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profile
 
 def _not_found(message):
     def _inner_not_found(ex):
-        from azure.mgmt.cdn.models import ErrorResponseException
-        if isinstance(ex, ErrorResponseException) \
-                and ex.response is not None \
-                and ex.response.status_code == 404:
+        from azure.core.exceptions import ResourceNotFoundError
+        if isinstance(ex, ResourceNotFoundError):
             raise CLIError(message)
         raise ex
     return _inner_not_found
@@ -165,23 +163,23 @@ def load_command_table(self, _):
     )
 
     with self.command_group('cdn', cdn_sdk) as g:
-        g.command('name-exists', 'check_name_availability')
+        g.custom_command('name-exists', 'check_name_availability', client_factory=cf_cdn)
 
     with self.command_group('cdn', cdn_usage_sdk) as g:
         g.command('usage', 'list')
 
     with self.command_group('cdn endpoint', cdn_endpoints_sdk) as g:
         for name in ['start', 'stop', 'delete']:
-            g.command(name, name, supports_no_wait=True)
+            g.command(name, f"begin_{name}", supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.command('load', 'load_content', supports_no_wait=True)
-        g.command('purge', 'purge_content', supports_no_wait=True)
-        g.command('validate-custom-domain', 'validate_custom_domain')
+        g.custom_command('load', 'load_endpoint_content', client_factory=cf_cdn, supports_no_wait=True)
+        g.custom_command('purge', 'purge_endpoint_content', client_factory=cf_cdn, supports_no_wait=True)
+        g.custom_command('validate-custom-domain', 'validate_custom_domain', client_factory=cf_cdn)
         g.custom_command('create', 'create_endpoint', client_factory=cf_cdn,
                          doc_string_source='azure.mgmt.cdn.models#Endpoint',
                          supports_no_wait=True)
-        g.generic_update_command('update', setter_name='update', setter_arg_name='endpoint_update_properties',
+        g.generic_update_command('update', setter_name='begin_update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='update_endpoint',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
@@ -218,12 +216,13 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_profile', client_factory=cf_cdn)
         g.custom_command('list', 'list_profiles', client_factory=cf_cdn)
         g.custom_command('create', 'create_profile', client_factory=cf_cdn)
-        g.generic_update_command('update', setter_name='update', custom_func_name='update_profile',
+        g.generic_update_command('update', setter_name='begin_update', custom_func_name='update_profile',
+                                 setter_arg_name='profile_update_parameters',
                                  doc_string_source='azure.mgmt.cdn.models#ProfileUpdateParameters')
 
     with self.command_group('cdn custom-domain', cdn_domain_sdk) as g:
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.command('list', 'list_by_endpoint')
         g.custom_command('create', 'create_custom_domain', client_factory=cf_cdn)
         g.custom_command('enable-https', 'enable_custom_https', client_factory=cf_cdn)
@@ -234,14 +233,14 @@ def load_command_table(self, _):
         g.command('list', 'list_by_endpoint')
         g.custom_command('create', 'create_origin', client_factory=cf_origins, is_preview=True)
         g.custom_command('update', 'update_origin', client_factory=cf_origins)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('cdn origin-group', cdn_origin_group_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_endpoint')
         g.custom_command('create', 'create_origin_group', client_factory=cf_origin_groups)
         g.custom_command('update', 'update_origin_group', client_factory=cf_origin_groups)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('cdn edge-node', cdn_edge_sdk) as g:
         g.command('list', 'list')
@@ -302,8 +301,8 @@ def load_command_table(self, _):
                             client_factory=cf_afd_endpoints) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.command('purge', 'purge_content', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('purge', 'purge_afd_endpoint_content', supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
         g.custom_command('update', 'update_afd_endpoint')
         g.custom_command('create', 'create_afd_endpoint',
@@ -315,7 +314,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_origin_group')
         g.custom_command('update', 'update_afd_origin_group')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd origin', cdn_afd_origin_sdk,
                             client_factory=cf_afd_origins) as g:
@@ -323,7 +322,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_origin_group')
         g.custom_command('create', 'create_afd_origin')
         g.custom_command('update', 'update_afd_origin')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd route', cdn_afd_route_sdk,
                             client_factory=cf_afd_routes) as g:
@@ -331,21 +330,21 @@ def load_command_table(self, _):
         g.command('list', 'list_by_endpoint')
         g.custom_command('create', 'create_afd_route')
         g.custom_command('update', 'update_afd_route')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd rule-set', cdn_afd_rule_set_sdk,
                             client_factory=cf_afd_rule_sets) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_rule_set')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd rule', cdn_afd_rule_sdk,
                             client_factory=cf_afd_rules) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_rule_set')
         g.custom_command('create', 'create_afd_rule')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd rule condition',
                             cdn_afd_rule_sdk,
@@ -371,13 +370,13 @@ def load_command_table(self, _):
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_security_policy')
         g.custom_command('update', 'update_afd_security_policy')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd custom-domain', cdn_afd_domain_sdk,
                             client_factory=cf_afd_custom_domain) as g:
         g.show_command('show', 'get')
         g.wait_command('wait')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_custom_domain',
                          supports_no_wait=True)
@@ -386,7 +385,7 @@ def load_command_table(self, _):
     with self.command_group('afd secret', cdn_afd_secret_sdk,
                             client_factory=cf_afd_secrets) as g:
         g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.command('list', 'list_by_profile')
         g.custom_command('create', 'create_afd_secret')
         g.custom_command('update', 'update_afd_secret')
