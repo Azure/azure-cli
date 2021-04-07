@@ -107,7 +107,18 @@ def _get_extension_run_after_dynamic_install_config(cli_ctx):
     return run_after_extension_installed
 
 
-def get_extension_use_dynamic_install_config(cli_ctx):
+def try_install_extension(parser, args):
+    # parser.cli_ctx is None when parser.prog is beyond 'az', such as 'az iot'.
+    # use cli_ctx from cli_help which is not lost.
+    cli_ctx = parser.cli_ctx or (parser.cli_help.cli_ctx if parser.cli_help else None)
+    use_dynamic_install = _get_extension_use_dynamic_install_config(cli_ctx)
+    if use_dynamic_install != 'no':
+        # The function will exit if the parse error is caused by the extension for the command not installed
+        _check_value_in_extensions(cli_ctx, parser, args, use_dynamic_install == 'yes_without_prompt')
+    return use_dynamic_install
+
+
+def _get_extension_use_dynamic_install_config(cli_ctx):
     default_value = 'yes_prompt'
     use_dynamic_install = cli_ctx.config.get(
         'extension', 'use_dynamic_install', default_value).lower() if cli_ctx else default_value
@@ -116,7 +127,7 @@ def get_extension_use_dynamic_install_config(cli_ctx):
     return use_dynamic_install
 
 
-def check_value_in_extensions(parser, args, no_prompt):  # pylint: disable=too-many-statements, too-many-locals
+def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: disable=too-many-statements, too-many-locals
     """Check if the command args can be found in extension commands.
        Exit command if the error is caused by an extension not installed.
        Otherwise return.
@@ -126,9 +137,6 @@ def check_value_in_extensions(parser, args, no_prompt):  # pylint: disable=too-m
     from azure.cli.core.azclierror import NoTTYError
     exit_code = 2
     command_str = roughly_parse_command(args[1:])
-    # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
-    # use cli_ctx from cli_help which is not lost.
-    cli_ctx = parser.cli_ctx or (parser.cli_help.cli_ctx if parser.cli_help else None)
     ext_name = _search_in_extension_commands(cli_ctx, command_str)
     # ext_name is a list if the input command matches the prefix of one or more extension commands,
     # for instance: `az blueprint` when running `az blueprint -h`
