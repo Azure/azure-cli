@@ -380,7 +380,7 @@ def _build_issue_info_tup(command_log_file=None):
 
     # get issue body without minification
     issue_body = _ISSUES_TEMPLATE.format(**format_dict)
-    formatted_issues_url = _get_issue_url(command_log_file, format_dict.copy(), is_ext, ext_name)
+    formatted_issues_url = _get_issue_url(command_log_file, issue_body, is_ext, ext_name)
 
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
@@ -412,9 +412,7 @@ def _is_valid_github_project_url(url):
     return False
 
 
-def _get_issue_url(command_log_file, format_dict, is_ext, ext_name):
-    issue_body = _ISSUES_TEMPLATE.format(**format_dict)
-
+def _get_issue_url(command_log_file, issue_body, is_ext, ext_name):
     # prefix formatted url with 'https://' if necessary and supply empty body to remove any existing issue template
     # aka.ms doesn't work well for long urls / query params
     formatted_issues_url = _get_extension_repo_url(ext_name, raw=True) if is_ext else _RAW_CLI_ISSUES_URL
