@@ -348,6 +348,18 @@ type: command
 short-summary: Update an Gremlin graph under an Azure Cosmos DB Gremlin database.
 """
 
+helps['cosmosdb identity'] = """
+type: group
+short-summary: Manage Azure Cosmos DB managed service identities.
+examples:
+  - name: Show the identities for a Azure Cosmos DB database account.
+    text: az cosmosdb identity show --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup
+  - name: Assign SystemAssigned identity for a Azure Cosmos DB database account.
+    text: az cosmosdb identity assign --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup
+  - name: Remove SystemAssigned identity for a Azure Cosmos DB database account.
+    text: az cosmosdb identity remove --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup
+"""
+
 helps['cosmosdb keys'] = """
 type: group
 short-summary: Manage Azure Cosmos DB keys.
