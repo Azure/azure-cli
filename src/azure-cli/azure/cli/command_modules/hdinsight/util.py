@@ -330,6 +330,4 @@ def map_cluster_type(cluster_type):
     # the cluster type is mlservice in the list billing spec response
     if cluster_type.lower() == 'mlservices' or cluster_type.lower() == 'rserver':
         cluster_type = 'mlservice'
-        return cluster_type
-    else:
-        return cluster_type
+    return cluster_type
