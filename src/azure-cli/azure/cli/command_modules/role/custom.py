@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import base64
 import datetime
 import json
@@ -590,7 +588,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
 
     result = client.applications.list(filter=(' and '.join(sub_filters)))
     if sub_filters or include_all:
-        return result
+        return list(result)
 
     result = list(itertools.islice(result, 101))
     if len(result) == 101:
@@ -1417,7 +1415,6 @@ def create_service_principal_for_rbac(
         existing_sps = list(graph_client.service_principals.list(filter=query_exp))
         if existing_sps:
             app_display_name = existing_sps[0].display_name
-            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)

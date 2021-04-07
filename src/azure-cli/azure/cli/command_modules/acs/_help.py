@@ -379,6 +379,13 @@ parameters:
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: Private dns zone mode for private cluster.
+    long-summary: Allowed values are "system" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
+  - name: --fqdn-subdomain
+    type: string
+    short-summary: Prefix for FQDN that is created for private cluster with custom private dns zone scenario.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.

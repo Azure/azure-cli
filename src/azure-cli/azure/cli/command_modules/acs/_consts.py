@@ -35,6 +35,9 @@ CONST_INGRESS_APPGW_WATCH_NAMESPACE = "watchNamespace"
 CONST_CONFCOM_ADDON_NAME = "ACCSGXDevicePlugin"
 CONST_ACC_SGX_QUOTE_HELPER_ENABLED = "ACCSGXQuoteHelperEnabled"
 
+# private dns zone mode
+CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
+
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     'monitoring': CONST_MONITORING_ADDON_NAME,
