@@ -200,7 +200,6 @@ def cli_cosmosdb_update(client,
                         server_version=None,
                         backup_interval=None,
                         backup_retention=None,
-                        enable_system_assigned_identity=None,
                         default_identity=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
@@ -229,13 +228,6 @@ def cli_cosmosdb_update(client,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
-
-    system_assigned_identity = None
-    if enable_system_assigned_identity is not None:
-        if enable_system_assigned_identity:
-            system_assigned_identity = ManagedServiceIdentity(type='SystemAssigned')
-        else:
-            system_assigned_identity = ManagedServiceIdentity(type='None')
 
     api_properties = {'ServerVersion': server_version}
 
@@ -269,7 +261,7 @@ def cli_cosmosdb_update(client,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         api_properties=api_properties,
         backup_policy=backup_policy,
-        identity=system_assigned_identity,
+        identity=None,
         default_identity=default_identity)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
@@ -1267,7 +1259,7 @@ def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
 
 def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
     """ Show the identity associated with a Cosmos DB account """
-    
+
     cosmos_db_account = client.get(resource_group_name, account_name)
     return cosmos_db_account.identity
 
@@ -1278,10 +1270,13 @@ def cli_cosmosdb_identity_assign(client,
 
     existing = client.get(resource_group_name, account_name)
 
-    if ("SystemAssigned" in existing.identity.type):
+    if 'SystemAssigned' in existing.identity.type:
         return existing.identity
 
-    identity = ManagedServiceIdentity(type='SystemAssigned')
+    if existing.identity.type == 'UserAssigned':
+        identity = ManagedServiceIdentity(type='SystemAssigned,UserAssigned')
+    else:
+        identity = ManagedServiceIdentity(type='SystemAssigned')
     params = DatabaseAccountUpdateParameters(identity=identity)
     async_cosmos_db_update = client.update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
@@ -1291,14 +1286,17 @@ def cli_cosmosdb_identity_assign(client,
 def cli_cosmosdb_identity_remove(client,
                                  resource_group_name,
                                  account_name):
-    """ Show the identity associated with a Cosmos DB account """
+    """ Remove the SystemAssigned identity associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
-    if (not "SystemAssigned" in existing.identity.type):
+    if not 'SystemAssigned' in existing.identity.type:
         return existing.identity
-    
-    identity = ManagedServiceIdentity(type='None')
+
+    if 'UserAssigned' in existing.identity.type:
+        identity = ManagedServiceIdentity(type='UserAssigned')
+    else:
+        identity = ManagedServiceIdentity(type='None')
     params = DatabaseAccountUpdateParameters(identity=identity)
     async_cosmos_db_update = client.update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
