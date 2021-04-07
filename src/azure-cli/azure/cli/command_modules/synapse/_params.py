@@ -437,11 +437,17 @@ def load_arguments(self, _):
         c.argument('role', arg_type=role_arg_type)
         c.argument('assignee', arg_type=assignee_arg_type)
         c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
-        c.argument('scope', help='Scope at which the role assignment is created.')
+        c.argument('scope', help='Scope at which the role assignment is created.'
+                                 'Using az role assignment with filter condition before executing delete operation '
+                                 'to be clearly aware of which assignments will be deleted.')
         c.argument('ids', nargs='+',
                    help='space-separated role assignment ids. You should not provide --role or --assignee when --ids is provided.')
-        c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment')
-        c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.')
+        c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment.'
+                                'Using az role assignment with filter condition before executing delete operation '
+                                'to be clearly aware of which assignments will be deleted.')
+        c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.'
+                                                                       'Using az role assignment with filter condition before executing delete operation '
+                                                                       'to be clearly aware of which assignments will be deleted.')
 
     with self.argument_context('synapse role definition show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
