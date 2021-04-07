@@ -65,8 +65,15 @@ def flexible_server_create(cmd, client,
 
     # Handle Vnet scenario
     if public_access is None:
-        subnet_id = prepare_private_network(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
-                                            location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+        subnet_id = prepare_private_network(cmd,
+                                            resource_group_name,
+                                            server_name,
+                                            vnet=vnet_resource_id,
+                                            subnet=subnet_arm_resource_id,
+                                            location=location,
+                                            delegation_service_name=DELEGATION_SERVICE_NAME,
+                                            vnet_address_pref=vnet_address_prefix,
+                                            subnet_address_pref=subnet_address_prefix)
         delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
     else:
         delegated_subnet_arguments = None

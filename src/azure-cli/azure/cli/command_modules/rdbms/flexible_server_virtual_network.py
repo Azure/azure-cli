@@ -20,7 +20,7 @@ DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-def prepare_private_network(cmd, server_name, vnet, subnet, resource_group_name, location, delegation_service_name, vnet_address_pref, subnet_address_pref):
+def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref):
 
     nw_client = network_client_factory(cmd.cli_ctx)
     resource_client = resource_client_factory(cmd.cli_ctx)

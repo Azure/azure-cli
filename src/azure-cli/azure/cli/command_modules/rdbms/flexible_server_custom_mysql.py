@@ -59,8 +59,15 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
     # Handle Vnet scenario
     if public_access is None:
-        subnet_id = prepare_private_network(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
-                                            location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+        subnet_id = prepare_private_network(cmd,
+                                            resource_group_name,
+                                            server_name,
+                                            vnet=vnet_resource_id,
+                                            subnet=subnet_arm_resource_id,
+                                            location=location,
+                                            delegation_service_name=DELEGATION_SERVICE_NAME,
+                                            vnet_address_pref=vnet_address_prefix,
+                                            subnet_address_pref=subnet_address_prefix)
         delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
     else:
         delegated_subnet_arguments = None

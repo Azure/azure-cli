@@ -8,11 +8,12 @@ import datetime as dt
 from datetime import datetime
 import random
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
-from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.mgmt.resource.resources.models import ResourceGroup
+from msrestazure.tools import parse_resource_id
+from msrestazure.azure_exceptions import CloudError
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
 logger = get_logger(__name__)
@@ -122,8 +123,8 @@ def parse_public_access_input(public_access):
         elif len(parsed_input) == 2:
             return parsed_input[0], parsed_input[1]
         else:
-            raise CLIError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
-                           'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
+            raise InvalidArgumentValueError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
+                                            'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
 
 def server_list_custom_func(client, resource_group_name=None):
@@ -208,7 +209,7 @@ def get_mysql_list_skus_info(cmd, location):
 def _parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
     if not result:
-        raise CLIError("No available SKUs in this location")
+        raise InvalidArgumentValueError("No available SKUs in this location")
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -318,7 +319,7 @@ def check_existence(resource_client, value, resource_group, provider_namespace, 
 
     try:
         resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
-    except:  # pylint: disable=bare-except
+    except CloudError:
         return False
     return True
 
@@ -332,10 +333,10 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
     rt = [t for t in provider.resource_types  # pylint: disable=no-member
           if t.resource_type.lower() == resource_type_str.lower()]
     if not rt:
-        raise CLIError('Resource type {} not found.'.format(resource_type_str))
+        raise InvalidArgumentValueError('Resource type {} not found.'.format(resource_type_str))
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
         return npv[0] if npv else rt[0].api_versions[0]
-    raise CLIError(
+    raise RequiredArgumentMissingError(
         'API version is required and could not be resolved for resource {}'
         .format(resource_type))
