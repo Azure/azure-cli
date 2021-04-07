@@ -42,7 +42,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2.6',
+    'adal~=1.2.7',
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'azure-common~=1.1',
