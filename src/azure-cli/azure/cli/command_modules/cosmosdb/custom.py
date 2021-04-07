@@ -261,7 +261,6 @@ def cli_cosmosdb_update(client,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         api_properties=api_properties,
         backup_policy=backup_policy,
-        identity=None,
         default_identity=default_identity)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
