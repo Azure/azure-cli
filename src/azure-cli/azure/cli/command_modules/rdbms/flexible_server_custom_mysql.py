@@ -10,6 +10,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
@@ -566,24 +567,30 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         database_client.get(resource_group_name, server_name, database_name)
     except ResourceNotFoundError:
         logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
-        parameters = mysql_flexibleservers.models.Database(
-            name=database_name,
-            charset='utf8'
-        )
+        parameters = {
+            'name': database_name,
+            'charset': 'utf8',
+            'collation': 'utf8_general_ci'
+        }
         resolve_poller(
             database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
             '{} Database Create/Update'.format(logging_name))
 
 
 def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
-    if charset is None:
-        charset = 'utf8'
 
-    parameters = mysql_flexibleservers.models.Database(
-        name=database_name,
-        charset=charset,
-        collation=collation
-    )
+    if charset is None and collation is None:
+        charset = 'utf8'
+        collation = 'utf8_general_ci'
+        logger.warning("Creating database with utf8 charset and utf8_general_ci collation")
+    elif (not charset and collation) or (charset and not collation):
+        raise RequiredArgumentMissingError("charset and collation have to be input together.")
+
+    parameters = {
+        'name': database_name,
+        'charset': charset,
+        'collation': collation
+    }
 
     return client.begin_create_or_update(
         resource_group_name,

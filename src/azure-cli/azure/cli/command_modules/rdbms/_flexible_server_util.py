@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 import random
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
-
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
@@ -78,7 +79,6 @@ def generate_password(administrator_login_password):
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
-    from datetime import datetime
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
     now = datetime.now()
@@ -225,7 +225,7 @@ def _parse_list_skus(result, database_engine):
             for vcores in version.supported_vcores:
                 skus.add(vcores.name)
                 if database_engine == 'mysql':
-                    sku_iops_dict[vcores.name] = vcores.additional_properties['supportedIOPS']
+                    sku_iops_dict[vcores.name] = vcores.supported_iops
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 
@@ -294,5 +294,14 @@ def _map_maintenance_window(day_of_week):
 
 
 def get_current_time():
-    import datetime
-    return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc, microsecond=0).isoformat()
+    return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
+
+
+def change_str_to_datetime(date_str):
+    for fmt in ("%Y-%m-%dT%H:%M:%S+00:00", "%Y-%m-%dT%H:%M:%S.%f+00:00"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+
+    raise ValidationError("The format of restore time should be %Y-%m-%dT%H:%M:%S+00:00")

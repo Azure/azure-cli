@@ -351,9 +351,13 @@ def cf_postgres_check_resource_availability(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).check_name_availability
 
 
-def resource_client_factory(cli_ctx, **_):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+def cf_postgres_flexible_db(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).databases
 
 
-def network_client_factory(cli_ctx):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+def resource_client_factory(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
+
+
+def network_client_factory(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, subscription_id=subscription_id)

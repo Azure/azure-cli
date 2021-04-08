@@ -444,7 +444,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
                  .format(database_engine, resource_group, restore_server), checks=NoneCheck())
 
         # Wait until vnet can be detached from the deleted server
-        time.sleep(5 * 60)
+        time.sleep(15 * 60)
 
     def _test_flexible_server_vnet_server_mgmt_delete(self, resource_group):
         self.cmd('az group delete --name {} --yes --no-wait'.format(resource_group), checks=NoneCheck())
@@ -530,7 +530,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(RdbmsScenarioTest):
 
         database_name = 'flexibleserverdbtest'
 
-        self.cmd('{} flexible-server db create -g {} -s {} -d {} --collation utf8'.format(database_engine, resource_group, server, database_name),
+        self.cmd('{} flexible-server db create -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
                  checks=[JMESPathCheck('name', database_name)])
 
         self.cmd('{} flexible-server db show -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
@@ -639,7 +639,7 @@ class FlexibleServerReplicationMgmtScenarioTest(RdbmsScenarioTest):  # pylint: d
                      JMESPathCheck('sourceServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
 
-        time.sleep(5 * 60)
+        time.sleep(15 * 60)
 
     def _test_flexible_server_replica_list(self, database_engine, resource_group, master_server):
 

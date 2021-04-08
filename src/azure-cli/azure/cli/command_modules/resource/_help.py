@@ -2334,26 +2334,24 @@ short-summary: Upgrade Bicep CLI to the latest version.
 
 helps['bicep build'] = """
 type: command
-short-summary: Build one or more Bicep files.
+short-summary: Build a Bicep file.
 examples:
   - name: Build a Bicep file.
-    text: az bicep build --files {bicep_file}
-  - name: Build multiple Bicep files.
-    text: az bicep build --files {bicep_file1} {bicep_file2}
-  - name: Build a Bicep file and prints all output to stdout.
-    text: az bicep build --files {bicep_file} --stdout
-  - name: Build multiple Bicep files and prints all output to stdout.
-    text: az bicep build --files {bicep_file1} {bicep_file2} --stdout
+    text: az bicep build --file {bicep_file}
+  - name: Build a Bicep file and print all output to stdout.
+    text: az bicep build --file {bicep_file} --stdout
+  - name: Build a Bicep file and save the result to the specified directory.
+    text: az bicep build --file {bicep_file} --outdir {out_dir}
+  - name: Build a Bicep file and save the result to the specified file.
+    text: az bicep build --file {bicep_file} --outfile {out_file}
 """
 
 helps['bicep decompile'] = """
 type: command
-short-summary: Attempt to decompile one or more ARM template files to Bicep files
+short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
-    text: az bicep decompile --files {json_template_file}
-  - name: Decompile multiple ARM template files.
-    text: az bicep decompile --files {json_template_file1} {json_template_file2}
+    text: az bicep decompile --file {json_template_file}
 """
 
 helps['bicep version'] = """

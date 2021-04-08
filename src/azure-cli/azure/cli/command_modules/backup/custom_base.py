@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
@@ -106,9 +105,6 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
 
-    if retain_until is None:
-        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
-
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
 
@@ -196,8 +192,15 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
                                                    backup_management_type)
 
 
-def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_name=None,
-                           protectable_item_type=None, server_name=None):
+def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
+                           backup_management_type="AzureWorkload", container_name=None, protectable_item_type=None,
+                           server_name=None):
+
+    if backup_management_type != "AzureWorkload":
+        raise ValidationError("""
+        Only supported value of backup-management-type is 'AzureWorkload' for this command.
+        """)
+
     container_uri = None
     if container_name:
         if custom_help.is_native_name(container_name):
@@ -205,15 +208,15 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
         else:
             container_client = backup_protection_containers_cf(cmd.cli_ctx)
             container = show_container(cmd, container_client, container_name, resource_group_name, vault_name,
-                                       "AzureWorkload")
+                                       backup_management_type)
             custom_help.validate_container(container)
             if isinstance(container, list):
                 raise ValidationError("""
                 Multiple containers with same Friendly Name found. Please give native names instead.
                 """)
             container_uri = container.name
-    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri,
-                                            protectable_item_type, server_name)
+    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type,
+                                            backup_management_type, container_uri, protectable_item_type, server_name)
 
 
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
@@ -223,8 +226,9 @@ def show_protectable_item(cmd, client, resource_group_name, vault_name, name, se
 
 
 def show_protectable_instance(cmd, client, resource_group_name, vault_name, server_name, protectable_item_type,
-                              workload_type, container_name=None):
-    items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_name)
+                              workload_type, container_name=None, backup_management_type="AzureWorkload"):
+    items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, backup_management_type,
+                                   container_name)
     return custom_wl.show_protectable_instance(items, server_name, protectable_item_type)
 
 

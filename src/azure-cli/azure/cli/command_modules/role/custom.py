@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import base64
 import datetime
 import json
@@ -590,7 +588,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
 
     result = client.applications.list(filter=(' and '.join(sub_filters)))
     if sub_filters or include_all:
-        return result
+        return list(result)
 
     result = list(itertools.islice(result, 101))
     if len(result) == 101:
@@ -853,13 +851,17 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
 
 def _get_grant_permissions(graph_client, client_sp_object_id=None, query_filter=None):
     query_filter = query_filter or ("clientId eq '{}'".format(client_sp_object_id) if client_sp_object_id else None)
+    grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
     try:
-        grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
-    except CloudError as ex:  # Graph doesn't follow the ARM error; otherwise would be caught by msrest-azure
+        # Make the REST request immediately so that errors can be raised and handled.
+        return list(grant_info)
+    except CloudError as ex:
         if ex.status_code == 404:
-            return []
+            raise CLIError("Service principal with appId or objectId '{id}' doesn't exist. "
+                           "If '{id}' is an appId, make sure an associated service principal is created "
+                           "for the app. To create one, run `az ad sp create --id {id}`."
+                           .format(id=client_sp_object_id))
         raise
-    return grant_info
 
 
 def list_permissions(cmd, identifier):
@@ -870,13 +872,14 @@ def list_permissions(cmd, identifier):
 
     # first get the permission grant history
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
 
     # get original permissions required by the application, we will cross check the history
     # and mark out granted ones
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     permissions = application.required_resource_access
+    if permissions:
+        grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
     for p in permissions:
         result = list(graph_client.service_principals.list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
@@ -1412,7 +1415,6 @@ def create_service_principal_for_rbac(
         existing_sps = list(graph_client.service_principals.list(filter=query_exp))
         if existing_sps:
             app_display_name = existing_sps[0].display_name
-            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
@@ -1452,10 +1454,14 @@ def create_service_principal_for_rbac(
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
+                err_msg = str(ex)
                 if retry_time < _RETRY_TIMES and (
-                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                        ' does not reference ' in err_msg or
+                        ' does not exist ' in err_msg or
+                        'service principal being created must in the local tenant' in err_msg):
+                    logger.warning("Creating service principal failed with error '%s'. Retrying: %s/%s",
+                                   err_msg, retry_time + 1, _RETRY_TIMES)
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",

@@ -53,110 +53,107 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
         self.location = postgres_location
 
     @pytest.mark.order(1)
+    @pytest.mark.dependency(name="test_postgres_flexible_server_mgmt_prepare")
     def test_postgres_flexible_server_mgmt_prepare(self):
         self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group))
         self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('postgres', postgres_location, self.resource_group, self.server))
 
     @AllowLargeResponse()
     @pytest.mark.order(2)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_mgmt_prepare'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_create(self):
         self._test_flexible_server_create('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(3)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_password(self):
         self._test_flexible_server_update_password('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(4)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_password'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_storage(self):
         self._test_flexible_server_update_storage('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(5)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_storage'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_backup_retention(self):
         self._test_flexible_server_update_backup_retention('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(6)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_backup_retention'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_scale_up(self):
         self._test_flexible_server_update_scale_up('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(7)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_scale_up'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_scale_down(self):
         self._test_flexible_server_update_scale_down('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(8)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_scale_down'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_mmw(self):
         self._test_flexible_server_update_mmw('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(9)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_mmw'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_update_tag(self):
         self._test_flexible_server_update_tag('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(10)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_update_tag'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_restart(self):
         self._test_flexible_server_restart('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(11)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_restart'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_stop(self):
         self._test_flexible_server_stop('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(12)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_stop'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_start(self):
         self._test_flexible_server_start('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(13)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_start'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_list(self):
         self._test_flexible_server_list('postgres', self.resource_group)
         self._test_flexible_server_connection_string('postgres', self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(14)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_list'])
     def test_postgres_flexible_server_list_skus(self):
         self._test_flexible_server_list_skus('postgres', self.location)
 
     @AllowLargeResponse()
     @pytest.mark.order(15)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_list_skus'])
     def test_postgres_flexible_server_create_non_default_tiers_select_zone(self):
         self._test_flexible_server_create_non_default_tiers('postgres', self.resource_group)
 
     @AllowLargeResponse()
     @pytest.mark.order(16)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create_non_default_tiers_select_zone'])
     def test_postgres_flexible_server_create_different_version(self):
         self._test_flexible_server_create_different_version('postgres', self.resource_group)
 
     @AllowLargeResponse()
     @pytest.mark.order(17)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_create_different_version'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_restore(self):
         self._test_flexible_server_restore('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(18)
-    @pytest.mark.depends(on=['PostgresFlexibleServerMgmtScenarioTest::test_postgres_flexible_server_restore'])
     def test_postgres_flexible_server_delete(self):
         self.cmd('az group delete --name {} --yes --no-wait'.format(self.resource_group))
 
@@ -176,61 +173,60 @@ class PostgresFlexibleServerHighAvailabilityMgmt(FlexibleServerHighAvailabilityM
 
     @AllowLargeResponse()
     @pytest.mark.order(2)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_prepare'])
+    @pytest.mark.dependency(name="test_postgres_flexible_server_high_availability_prepare")
     def test_postgres_flexible_server_high_availability_create(self):
         self._test_flexible_server_high_availability_create('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(3)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_create'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_disable(self):
         self._test_flexible_server_high_availability_disable('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(4)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_disable'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_enable(self):
         self._test_flexible_server_high_availability_enable('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(5)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_enable'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_update_scale_up(self):
         self._test_flexible_server_high_availability_update_scale_up('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(6)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_update_scale_up'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_update_parameter(self):
         self._test_flexible_server_high_availability_update_parameter('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(7)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_update_parameter'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_restart(self):
         self._test_flexible_server_high_availability_restart('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(8)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_restart'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_stop(self):
         self._test_flexible_server_high_availability_stop('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(9)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_stop'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_start(self):
         self._test_flexible_server_high_availability_start('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(10)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_start'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_high_availability_prepare"])
     def test_postgres_flexible_server_high_availability_restore(self):
         self._test_flexible_server_high_availability_restore('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(11)
-    @pytest.mark.depends(on=['PostgresFlexibleServerHighAvailabilityMgmt::test_postgres_flexible_server_high_availability_restore'])
     def test_postgres_flexible_server_high_availability_delete(self):
         self._test_flexible_server_high_availability_delete(self.resource_group)
 
@@ -253,55 +249,55 @@ class PostgresFlexibleServerVnetServerMgmtScenarioTest(FlexibleServerVnetServerM
     @unittest.skip("Takes too long. Need to re-record.")
     @AllowLargeResponse()
     @pytest.mark.order(2)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_prepare'])
+    @pytest.mark.dependency(name="test_postgres_flexible_server_vnet_server_create")
     def test_postgres_flexible_server_vnet_server_create(self):
         self._test_flexible_server_vnet_server_create('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(3)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_create'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_server_create"])
     def test_postgres_flexible_server_vnet_server_update_scale_up(self):
         self._test_flexible_server_vnet_server_update_scale_up('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(4)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_update_scale_up'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_server_create"])
     def test_postgres_flexible_server_vnet_server_restore(self):
         self._test_flexible_server_vnet_server_restore('postgres', self.resource_group, self.server, self.restore_server)
 
     @AllowLargeResponse()
     @pytest.mark.order(5)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_restore'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_server_create"])
     def test_postgres_flexible_server_vnet_server_delete(self):
         self._test_flexible_server_vnet_server_delete('postgres', self.resource_group, self.server, self.restore_server)
 
     @unittest.skip("Takes too long. Need to re-record.")
     @AllowLargeResponse()
     @pytest.mark.order(6)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_prepare'])
+    @pytest.mark.dependency(name="test_postgres_flexible_server_vnet_ha_server_create")
     def test_postgres_flexible_server_vnet_ha_server_create(self):
         self._test_flexible_server_vnet_ha_server_create('postgres', self.resource_group, self.server_2)
 
     @AllowLargeResponse()
     @pytest.mark.order(7)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_create'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_ha_server_create"])
     def test_postgres_flexible_server_vnet_ha_server_update_scale_up(self):
         self._test_flexible_server_vnet_server_update_scale_up('postgres', self.resource_group, self.server_2)
 
     @AllowLargeResponse()
     @pytest.mark.order(8)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_update_scale_up'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_ha_server_create"])
     def test_postgres_flexible_server_vnet_ha_server_restore(self):
         self._test_flexible_server_vnet_server_restore('postgres', self.resource_group, self.server_2, self.restore_server_2)
 
     @AllowLargeResponse()
     @pytest.mark.order(9)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_restore'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_ha_server_create"])
     def test_postgres_flexible_server_vnet_ha_server_delete(self):
         self._test_flexible_server_vnet_server_delete('postgres', self.resource_group, self.server_2, self.restore_server_2)
 
     @pytest.mark.order(10)
-    @pytest.mark.depends(on=['PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_ha_server_delete', 'PostgresFlexibleServerVnetServerMgmtScenarioTest::test_postgres_flexible_server_vnet_server_delete'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_vnet_ha_server_create"])
     def test_postgres_flexible_server_vnet_server_mgmt_delete(self):
         self._test_flexible_server_vnet_server_mgmt_delete(self.resource_group)
 
@@ -317,24 +313,31 @@ class PostgresFlexibleServerProxyResourceMgmtScenarioTest(FlexibleServerProxyRes
 
     @AllowLargeResponse()
     @pytest.mark.order(1)
+    @pytest.mark.dependency(name="test_postgres_flexible_server_proxy_resource_mgmt_prepare")
     def test_postgres_flexible_server_proxy_resource_mgmt_prepare(self):
         self.cmd('az group create --location {} --name {}'.format(postgres_location, self.resource_group))
         self.cmd('az {} flexible-server create -l {} -g {} -n {} --public-access none'.format('postgres', postgres_location, self.resource_group, self.server))
 
     @AllowLargeResponse()
     @pytest.mark.order(2)
-    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_proxy_resource_mgmt_prepare'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_proxy_resource_mgmt_prepare"])
     def test_postgres_flexible_server_firewall_rule_mgmt(self):
         self._test_firewall_rule_mgmt('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
     @pytest.mark.order(3)
-    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_firewall_rule_mgmt'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_proxy_resource_mgmt_prepare"])
     def test_postgres_flexible_server_parameter_mgmt(self):
         self._test_parameter_mgmt('postgres', self.resource_group, self.server)
 
+    @AllowLargeResponse()
     @pytest.mark.order(4)
-    @pytest.mark.depends(on=['PostgresFlexibleServerProxyResourceMgmtScenarioTest::test_postgres_flexible_server_parameter_mgmt'])
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_proxy_resource_mgmt_prepare"])
+    def test_postgres_flexible_server_database_mgmt(self):
+        self._test_database_mgmt('postgres', self.resource_group, self.server)
+
+    @pytest.mark.order(5)
+    @pytest.mark.dependency(depends=["test_postgres_flexible_server_proxy_resource_mgmt_prepare"])
     def test_postgres_flexible_server_proxy_resource_mgmt_delete(self):
         self._test_flexible_server_proxy_resource_mgmt_delete(self.resource_group)
 
