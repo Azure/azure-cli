@@ -393,7 +393,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_policy_setdefinition')
         g.custom_command('update', 'update_policy_setdefinition')
 
-    with self.command_group('policy exemption', resource_policy_exemptions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+    with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
         g.custom_command('create', 'create_policy_exemption')
         g.custom_command('delete', 'delete_policy_exemption')
         g.custom_command('list', 'list_policy_exemption')

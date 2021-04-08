@@ -229,7 +229,7 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy exemption.')
         c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption', arg_type=get_enum_type(['Waiver', 'Mitigated']))
         c.argument('policy_definition_reference_ids', nargs='+', options_list=['--policy-definition-reference-ids', '-r'], help='The policy definition reference ids to exempt in the initiative (policy set).')
-        c.argument('expires_on', help='"The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
+        c.argument('expires_on', help='The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
         c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
 
     with self.argument_context('policy exemption create', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
