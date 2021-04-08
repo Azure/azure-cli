@@ -320,7 +320,7 @@ class DiskTests(ScenarioTest):
     def test_disk_create(self):
 ```
 
-Some test cases will fail when running in parallel. You can add a `@serial_test()` decorator. All test cases with it will run sequentially.
+Some test cases will fail when running in parallel. You can add a `@serial_test()` decorator. All test cases with it will run sequentially using `azdev test --mark serial -a "-n 1"`.
 
 
 ## Test-Related Environment Variables
