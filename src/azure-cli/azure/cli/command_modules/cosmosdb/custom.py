@@ -23,6 +23,7 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
+    ResourceIdentityType,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
     SqlTriggerResource,
@@ -129,7 +130,7 @@ def cli_cosmosdb_create(cmd, client,
     system_assigned_identity = None
     if assign_identity is not None:
         if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
-            system_assigned_identity = ManagedServiceIdentity(type='SystemAssigned')
+            system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
         else:
             raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
 
@@ -1272,17 +1273,16 @@ def cli_cosmosdb_identity_assign(client,
 
     existing = client.get(resource_group_name, account_name)
 
-    if 'SystemAssigned' in existing.identity.type:
+    if ResourceIdentityType.system_assigned.value in existing.identity.type:
         return existing.identity
 
-    if existing.identity.type == 'UserAssigned':
-        identity = ManagedServiceIdentity(type='SystemAssigned,UserAssigned')
+    if existing.identity.type == ResourceIdentityType.user_assigned.value:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned_user_assigned.value)
     else:
-        identity = ManagedServiceIdentity(type='SystemAssigned')
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
     params = DatabaseAccountUpdateParameters(identity=identity)
     async_cosmos_db_update = client.update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
-    cosmos_db_account = client.get(resource_group_name, account_name)  # Workaround
     return cosmos_db_account.identity
 
 
@@ -1293,17 +1293,16 @@ def cli_cosmosdb_identity_remove(client,
 
     existing = client.get(resource_group_name, account_name)
 
-    if 'SystemAssigned' not in existing.identity.type:
+    if ResourceIdentityType.system_assigned.value not in existing.identity.type:
         return existing.identity
 
-    if 'UserAssigned' in existing.identity.type:
-        identity = ManagedServiceIdentity(type='UserAssigned')
+    if ResourceIdentityType.user_assigned.value in existing.identity.type:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value)
     else:
-        identity = ManagedServiceIdentity(type='None')
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
     params = DatabaseAccountUpdateParameters(identity=identity)
     async_cosmos_db_update = client.update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
-    cosmos_db_account = client.get(resource_group_name, account_name)  # Workaround
     return cosmos_db_account.identity
 
 
