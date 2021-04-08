@@ -197,7 +197,7 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 
 
 def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_name=None,
-                           protectable_item_type=None):
+                           protectable_item_type=None, server_name=None):
     container_uri = None
     if container_name:
         if custom_help.is_native_name(container_name):
@@ -213,7 +213,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                 """)
             container_uri = container.name
     return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri,
-                                            protectable_item_type)
+                                            protectable_item_type, server_name)
 
 
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,

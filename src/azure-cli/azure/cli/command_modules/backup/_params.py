@@ -253,6 +253,7 @@ def load_arguments(self, _):
         c.argument('protectable_item_type', protectable_item_type)
 
     with self.argument_context('backup protectable-item list') as c:
+        c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
         c.argument('protectable_item_type', protectable_item_type)
 
     # Restore
