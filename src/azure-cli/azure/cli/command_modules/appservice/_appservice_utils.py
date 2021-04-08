@@ -29,8 +29,6 @@ def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_na
                                 setting_properties, slot=None, client=None, api_version=None):
     client = client or web_client_factory(cli_ctx, api_version=api_version)
     operation = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
-    print("settings_properties=")
-    print(setting_properties)
     if slot is None:
         return operation(resource_group_name, name, setting_properties)
 
