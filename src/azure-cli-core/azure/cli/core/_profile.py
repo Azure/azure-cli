@@ -113,6 +113,7 @@ def _load_tokens_from_file(file_path):
             raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                            "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                            "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+    logger.debug("'%s' is not a file or doesn't exist.", file_path)
     return []
 
 
@@ -608,43 +609,49 @@ class Profile:
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
         """
-        from msal import ClientApplication
-        import posixpath
         account = self.get_subscription()
-        username = account[_USER_ENTITY][_USER_NAME]
-        tenant = account[_TENANT_ID] or 'common'
-        _, refresh_token, _, _ = self.get_refresh_token()
-        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
-        app = ClientApplication(_CLIENT_ID, authority=authority)
-        result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
-
-        if 'error' in result:
-            logger.warning(result['error_description'])
-
-            # Retry login with VM SSH as resource
-            token_entry = self._login_with_authorization_code_flow(
-                tenant, 'https://pas.windows.net/CheckMyAccess/Linux')
-            result = app.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
-
-            if 'error' in result:
-                from azure.cli.core.adal_authentication import aad_error_handler
-                aad_error_handler(result)
-        return username, result["access_token"]
-
-    def get_refresh_token(self, resource=None,
-                          subscription=None):
-        account = self.get_subscription(subscription)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
+        identity_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        tenant = account[_TENANT_ID]
 
-        if user_type == _USER:
+        import posixpath
+        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
+
+        if identity_type == _USER:
+            # Use ARM as resource to get the refresh token from ADAL token cache
+            resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
             _, _, token_entry = self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry.get(_REFRESH_TOKEN), token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
+            refresh_token = token_entry.get(_REFRESH_TOKEN)
 
-        sp_secret = self._creds_cache.retrieve_cred_for_service_principal(username_or_sp_id)
-        return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
+            from azure.cli.core.msal_authentication import UserCredential
+            cred = UserCredential(_CLIENT_ID, authority=authority)
+            result = cred.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
+
+            # In case of being rejected by Conditional Access, launch browser automatically to retry
+            # with VM SSH as resource.
+            if 'error' in result:
+                logger.warning(result['error_description'])
+
+                from azure.cli.core.util import scopes_to_resource
+                token_entry = self._login_with_authorization_code_flow(tenant, scopes_to_resource(scopes))
+                result = cred.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
+
+        elif identity_type == _SERVICE_PRINCIPAL:
+            from azure.cli.core.msal_authentication import ServicePrincipalCredential
+
+            sp_id = username_or_sp_id
+            sp_credential = self._creds_cache.retrieve_cred_for_service_principal(sp_id)
+            cred = ServicePrincipalCredential(sp_id, secret_or_certificate=sp_credential, authority=authority)
+            result = cred.get_token(scopes=scopes, data=data)
+        else:
+            raise CLIError("Identity type {} is currently unsupported".format(identity_type))
+
+        if 'error' in result:
+            from azure.cli.core.adal_authentication import aad_error_handler
+            aad_error_handler(result)
+
+        return username_or_sp_id, result["access_token"]
 
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
         logger.debug("Profile.get_raw_token invoked with resource=%r, subscription=%r, tenant=%r",

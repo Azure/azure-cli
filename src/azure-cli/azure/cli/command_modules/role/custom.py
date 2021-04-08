@@ -588,7 +588,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
 
     result = client.applications.list(filter=(' and '.join(sub_filters)))
     if sub_filters or include_all:
-        return result
+        return list(result)
 
     result = list(itertools.islice(result, 101))
     if len(result) == 101:
@@ -1415,7 +1415,6 @@ def create_service_principal_for_rbac(
         existing_sps = list(graph_client.service_principals.list(filter=query_exp))
         if existing_sps:
             app_display_name = existing_sps[0].display_name
-            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
@@ -1455,10 +1454,14 @@ def create_service_principal_for_rbac(
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
+                err_msg = str(ex)
                 if retry_time < _RETRY_TIMES and (
-                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                        ' does not reference ' in err_msg or
+                        ' does not exist ' in err_msg or
+                        'service principal being created must in the local tenant' in err_msg):
+                    logger.warning("Creating service principal failed with error '%s'. Retrying: %s/%s",
+                                   err_msg, retry_time + 1, _RETRY_TIMES)
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",
