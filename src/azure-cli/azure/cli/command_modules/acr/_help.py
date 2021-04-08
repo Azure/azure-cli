@@ -1332,12 +1332,15 @@ helps['acr connected-registry repo'] = """
 type: command
 short-summary: Updates all the necessary connected registry sync scope maps repository permissions.
 examples:
-  - name: Adds the 'myconnectedregistry' mode minimum repository permissions to it and its ancestors' sync scope map actions. Meaning that if the if 'myconnectedregistry' is a mirror, it will only add the mirror permissions to all its ancestors regardless of their mode. 
+  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
-  - name: removes all 'repo1' and 'repo2' existing permissions from 'myconnectedregistry' and its sucesors sync scope maps actions.
+  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
+  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """
 # endregion
 
