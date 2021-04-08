@@ -394,22 +394,23 @@ def _get_install_info(cmd,
                       registry_name,
                       regenerate_credentials,
                       resource_group_name=None):
-    registry, resource_group_name = validate_managed_registry(
+    _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
+    if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
+        parent_gateway_endpoint = "<parent gateway endpoint>"
     parent_id = connected_registry.parent.id
-    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
+    # if parent_id is not none, parent is a connected registry
     if parent_id:
-        parent = parent_id.split('/connectedRegistries/')[1]
-        parent = acr_connected_registry_show(
-            cmd, client, parent, registry_name, resource_group_name)
-        parent_registry_endpoint = parent.login_server.host
+        parent_endpoint_protocol = "<http or https>"
+    # if parent_id is none, parent is a cloud registry
     else:
-        parent_registry_endpoint = registry.login_server
+        parent_endpoint_protocol = "https"
+    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
 
-    connected_registry_login_server = "<connected registry login server. " + \
+    connected_registry_login_server = "<Optional: connected registry login server. " + \
         "More info at https://aka.ms/acr/connected-registry>"
 
     if regenerate_credentials:
@@ -418,28 +419,20 @@ def _get_install_info(cmd,
         cred_client = cf_acr_token_credentials(cmd.cli_ctx)
         poller = acr_token_credential_generate(
             cmd, cred_client, registry_name, sync_token_name,
-            password1=True, password2=True, resource_group_name=resource_group_name)
+            password1=True, password2=False, resource_group_name=resource_group_name)
         credentials = LongRunningOperation(cmd.cli_ctx)(poller)
         sync_username = credentials.username
-        sync_password = {
-            "password1": credentials.passwords[0].value,
-            "password2": credentials.passwords[1].value
-        }
+        sync_password = credentials.passwords[0].value
         logger.warning('Please store your generated credentials safely.')
     else:
         sync_username = sync_token_name
         sync_password = "<sync token password>"
 
-    logger.warning("Value 'ACR_SYNC_TOKEN_USERNAME' has been deprecated and will be removed in a future release."
-                   " Use 'ACR_SYNC_TOKEN_NAME' instead.")
+    connection_string = "ConnectedRegistryName=%s;" % connected_registry_name + \
+        "SyncTokenName=%s;SyncTokenPassword=%s;" % (sync_username, sync_password) + \
+        "ParentGatewayEndpoint=%s;ParentEndpointProtocol=%s" % (parent_gateway_endpoint, parent_endpoint_protocol)
     return {
-        "ACR_REGISTRY_NAME": connected_registry_name,
-        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
-        "ACR_SYNC_TOKEN_NAME": sync_username,
-        "ACR_SYNC_TOKEN_USERNAME": sync_username,
-        "ACR_SYNC_TOKEN_PASSWORD": sync_password,
-        "ACR_PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,
-        "ACR_PARENT_LOGIN_SERVER": parent_registry_endpoint,
-        "ACR_PARENT_PROTOCOL": "https"
+        "ACR_REGISTRY_CONNECTION_STRING": connection_string,
+        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
     }
 # endregion
