@@ -255,3 +255,10 @@ def transform_response_with_bytearray(response):
         if response[item] and isinstance(response[item], (bytes, bytearray)):
             response[item] = Serializer.serialize_bytearray(response[item])
     return response
+
+
+def transform_share_rm_output(result):
+    if hasattr(result, 'snapshot_time') and result.snapshot_time:
+        snapshot = result.snapshot_time
+        result.snapshot_time = snapshot.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+    return result
