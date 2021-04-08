@@ -14,6 +14,7 @@ from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     DatabaseAccountUpdateParameters,
+    DatabaseAccountRegenerateKeyParameters,
     Location,
     DatabaseAccountKind,
     VirtualNetworkRule,
@@ -272,6 +273,11 @@ def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=Cosmos
     if key_type == CosmosKeyTypes.connection_strings.value:
         return client.list_connection_strings(resource_group_name, account_name)
     raise CLIError("az cosmosdb keys list: '{0}' is not a valid value for '--type'. See 'az cosmosdb keys list --help'.".format(key_type))
+
+
+def cli_cosmosdb_regenerate_key(client, resource_group_name, account_name, key_kind):
+    key_to_regenerate = DatabaseAccountRegenerateKeyParameters(key_kind=key_kind)
+    return client.begin_regenerate_key(resource_group_name, account_name, key_to_regenerate)
 
 
 def _handle_exists_exception(http_response_error):
@@ -1287,7 +1293,7 @@ def cli_cosmosdb_network_rule_add(cmd,
     for rule in existing.virtual_network_rules:
         virtual_network_rules.append(
             VirtualNetworkRule(id=rule.id,
-                               ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+                               ignore_missing_v_net_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
         if rule.id == subnet:
             rule_already_exists = True
             logger.warning("The rule exists and will be overwritten")
@@ -1295,7 +1301,7 @@ def cli_cosmosdb_network_rule_add(cmd,
     if not rule_already_exists:
         virtual_network_rules.append(
             VirtualNetworkRule(id=subnet,
-                               ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
+                               ignore_missing_v_net_service_endpoint=ignore_missing_vnet_service_endpoint))
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
 
@@ -1321,7 +1327,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
         if rule.id != subnet:
             virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
-                                   ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+                                   ignore_missing_v_net_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
         else:
             rule_removed = True
     if not rule_removed:

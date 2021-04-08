@@ -362,6 +362,14 @@ examples:
     crafted: true
 """
 
+helps['cosmosdb keys regenerate'] = """
+type: command
+short-summary: Regenerate an access key for a Azure Cosmos DB database account.
+examples:
+  - name: Regenerate primaryReadonly access key for a Azure Cosmos DB database account.
+    text: az cosmosdb keys regenerate --key-kind primaryReadonly --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup --subscription MySubscription
+"""
+
 helps['cosmosdb list'] = """
 type: command
 short-summary: List Azure Cosmos DB database accounts.
