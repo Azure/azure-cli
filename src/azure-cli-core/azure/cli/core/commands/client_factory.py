@@ -117,7 +117,7 @@ def configure_common_settings(cli_ctx, client):
 
 
 def _prepare_client_kwargs_track2(cli_ctx):
-    """Prepare kwargs for Track 2 SDK client."""
+    """Prepare kwargs for Track 2 data and mgmt SDK clients."""
     client_kwargs = {}
 
     # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
@@ -160,6 +160,23 @@ def _prepare_client_kwargs_track2(cli_ctx):
     return client_kwargs
 
 
+def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
+    """Prepare kwargs for Track 2 SDK mgmt client."""
+    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+
+    # Enable CAE support in mgmt SDK
+    from azure.mgmt.core.policies import ARMChallengeAuthenticationPolicy
+
+    # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
+    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+    policy = ARMChallengeAuthenticationPolicy(cred, *scopes)
+
+    client_kwargs['credential_scopes'] = scopes
+    client_kwargs['authentication_policy'] = policy
+
+    return client_kwargs
+
+
 def _get_mgmt_service_client(cli_ctx,
                              client_type,
                              subscription_bound=True,
@@ -167,7 +184,6 @@ def _get_mgmt_service_client(cli_ctx,
                              api_version=None,
                              base_url_bound=True,
                              resource=None,
-                             credential_scopes=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
@@ -181,8 +197,6 @@ def _get_mgmt_service_client(cli_ctx,
     :param api_version:
     :param base_url_bound:
     :param resource: For track 1 SDK which uses msrest and ADAL. It will be passed to get_login_credentials.
-    :param credential_scopes: For track 2 SDK which uses Azure Identity and MSAL. It will be passed to the client's
-        __init__ method.
     :param sdk_profile:
     :param aux_subscriptions:
     :param aux_tenants:
@@ -211,11 +225,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
-        # Track 2 SDK maintains `scopes` and passes `scopes` to get_token. Specify `scopes` via `credential_scopes`
-        # in client's __init__ method.
-        client_kwargs['credential_scopes'] = credential_scopes or \
-            resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred=cred))
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)

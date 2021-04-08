@@ -536,24 +536,24 @@ class Profile:
             adal_cache = AdalCredentialCache()
             adal_cache.remove_cached_creds(user_or_sp)
 
-            logger.warning('Account %s has been logged out from Azure CLI.', user_or_sp)
+            logger.warning("Account '%s' has been logged out from Azure CLI.", user_or_sp)
         else:
             # https://english.stackexchange.com/questions/5302/log-in-to-or-log-into-or-login-to
-            logger.warning("Account %s was not logged in to Azure CLI.", user_or_sp)
+            logger.warning("Account '%s' was not logged in to Azure CLI.", user_or_sp)
 
         # Log out from MSAL cache
         identity = Identity(self._authority)
         accounts = identity.get_user(user_or_sp)
         if accounts:
-            logger.info("The credential of %s were found from MSAL encrypted cache.", user_or_sp)
+            logger.info("The credential of '%s' were found from MSAL encrypted cache.", user_or_sp)
             if clear_credential:
                 identity.logout_user(user_or_sp)
-                logger.warning("The credential of %s were cleared from MSAL encrypted cache. This account is "
+                logger.warning("The credential of '%s' were cleared from MSAL encrypted cache. This account is "
                                "also logged out from other SDK tools which use Azure CLI's credential "
                                "via Single Sign-On.", user_or_sp)
             else:
-                logger.warning('The credential of %s is still stored in MSAL encrypted cached. Other SDK tools may use '
-                               'Azure CLI\'s credential via Single Sign-On. '
+                logger.warning("The credential of '%s' is still stored in MSAL encrypted cached. Other SDK tools may "
+                               "use Azure CLI\'s credential via Single Sign-On. "
                                'To clear the credential, run `az logout --username %s --clear-credential`.',
                                user_or_sp, user_or_sp)
         else:
@@ -582,7 +582,7 @@ class Profile:
                     logger.warning(account['username'])
                 logger.warning('Other SDK tools may use Azure CLI\'s credential via Single Sign-On. '
                                'To clear all credentials, run `az account clear --clear-credential`. '
-                               'To clear one of them, run `az logout --username USERNAME` --clear-credential.')
+                               'To clear one of them, run `az logout --username USERNAME --clear-credential`.')
         else:
             logger.warning('No credential was not found from MSAL encrypted cache.')
 
@@ -888,11 +888,11 @@ class SubscriptionFinder:
         self.authority = self.cli_ctx.cloud.endpoints.active_directory
         self.adal_cache = kwargs.pop("adal_cache", None)
 
-        def create_arm_client_factory(credentials):
+        def create_arm_client_factory(credential):
             if arm_client_factory:
-                return arm_client_factory(credentials)
+                return arm_client_factory(credential)
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
+            from azure.cli.core.commands.client_factory import _prepare_mgmt_client_kwargs_track2
 
             client_type = self._get_subscription_client_class()
             if client_type is None:
@@ -900,11 +900,10 @@ class SubscriptionFinder:
                 raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                        .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+            client_kwargs = _prepare_mgmt_client_kwargs_track2(cli_ctx, credential)
             # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
-            client = client_type(credentials, api_version=api_version,
+            client = client_type(credential, api_version=api_version,
                                  base_url=self.cli_ctx.cloud.endpoints.resource_manager,
-                                 credential_scopes=resource_to_scopes(self._arm_resource_id),
                                  **client_kwargs)
             return client
 

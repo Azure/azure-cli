@@ -103,7 +103,7 @@ def set_active_subscription(cmd, subscription):
     profile.set_active_subscription(subscription)
 
 
-def account_clear(cmd, clear_credential=False):
+def account_clear(cmd, clear_credential=True):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
@@ -190,7 +190,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     return all_subscriptions
 
 
-def logout(cmd, username=None, clear_credential=False):
+def logout(cmd, username=None, clear_credential=True):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)

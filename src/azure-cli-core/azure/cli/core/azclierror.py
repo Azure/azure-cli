@@ -25,9 +25,10 @@ class AzCLIError(CLIError):
     """ Base class for all the AzureCLI defined error classes.
     DO NOT raise this error class in your codes. """
 
-    def __init__(self, error_msg, recommendation=None):
+    def __init__(self, error_msg, recommendation=None, original_error=None):
         # error message
         self.error_msg = error_msg
+        self.original_error = original_error
 
         # manual recommendations provided based on developers' knowledge
         self.recommendations = []
@@ -169,7 +170,32 @@ class BadRequestError(UserFault):
 
 class UnauthorizedError(UserFault):
     """ Unauthorized request: 401 error """
-    pass
+
+    def __init__(self, error_msg, recommendation=None, original_error=None):
+
+        def _extract_claims(challenge):
+            # Copied from azure.mgmt.core.policies._authentication._parse_claims_challenge
+            from azure.mgmt.core.policies._authentication import _parse_challenges
+            parsed_challenges = _parse_challenges(challenge)
+            if len(parsed_challenges) != 1 or "claims" not in parsed_challenges[0].parameters:
+                # no or multiple challenges, or no claims directive
+                return None
+
+            encoded_claims = parsed_challenges[0].parameters["claims"]
+            padding_needed = -len(encoded_claims) % 4
+            return encoded_claims + "=" * padding_needed
+
+        claims = _extract_claims(original_error.response.headers.get('WWW-Authenticate'))
+
+        from azure.cli.core.credential import _generate_login_command, _generate_login_message
+        # login_command = _generate_login_command(claims=claims)
+        login_message = _generate_login_message(claims=claims)
+
+        recommendation = (
+            "The access token has expired or been revoked by Continuous Access Evaluation. "
+            "Silent re-authentication will be attempted in the future.\n{}")
+        recommendation = recommendation.format(login_message)
+        super().__init__(error_msg, recommendation=recommendation, original_error=original_error)
 
 
 class ForbiddenError(UserFault):
@@ -259,7 +285,7 @@ class RecommendationError(ClientError):
     pass
 
 
-class AuthenticationError(ServiceError):
-    """ Raised when AAD authentication fails. """
+class AuthenticationError(AzCLIError):
+    """ Raised when credential.get_token fails. """
 
 # endregion
