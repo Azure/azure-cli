@@ -345,7 +345,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
     )
 
     logger.info('Creating network profile "%s" in resource group "%s"', default_network_profile_name, resource_group_name)
-    network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
+    network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile)
 
     return network_profile.id
 
