@@ -1,3 +1,5 @@
+targetScope = 'managementGroup'
+
 resource policyDef 'Microsoft.Authorization/policyDefinitions@2018-05-01' = {
   name: 'policy-for-bicep-test'
   properties: {
