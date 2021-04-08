@@ -1,8 +1,8 @@
 |Scenario|Result|ErrorMessage|ErrorStack|ErrorNormalized|StartDt|EndDt|
-|step_device_create|successed||||2020-12-22 05:51:21.548213|2020-12-22 05:51:21.739031|
-|step_device_show|successed||||2020-12-22 05:51:21.931000|2020-12-22 05:51:22.011748|
-|step_device_list|successed||||2020-12-22 05:51:22.049533|2020-12-22 05:51:22.096941|
-|step_device_list2|successed||||2020-12-22 05:51:21.845737|2020-12-22 05:51:21.880256|
-|step_device_update|successed||||2020-12-22 05:51:21.880256|2020-12-22 05:51:21.931000|
-|step_device_delete|successed||||2020-12-22 05:51:22.011748|2020-12-22 05:51:22.049533|
+|step_device_create|successed||||2021-03-12 07:18:33.611214|2021-03-12 07:18:33.731722|
+|step_device_show|successed||||2021-03-12 07:18:33.846723|2021-03-12 07:18:33.872724|
+|step_device_list|successed||||2021-03-12 07:18:33.901309|2021-03-12 07:18:33.926724|
+|step_device_list2|successed||||2021-03-12 07:18:33.787724|2021-03-12 07:18:33.813722|
+|step_device_update|successed||||2021-03-12 07:18:33.813722|2021-03-12 07:18:33.845723|
+|step_device_delete|successed||||2021-03-12 07:18:33.872724|2021-03-12 07:18:33.901309|
 Coverage: 6/6

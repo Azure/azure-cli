@@ -316,17 +316,15 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     odata_filters = 'resourceProvider eq Microsoft.Authorization and {}'.format(time_filter)
 
     activity_log = list(client.activity_logs.list(filter=odata_filters))
-    start_events, end_events, offline_events = {}, {}, []
+    start_events, end_events = {}, {}
 
     for item in activity_log:
-        if item.http_request:
+        if item.operation_name.value.startswith('Microsoft.Authorization/roleAssignments'):
             if item.status.value == 'Started':
                 start_events[item.operation_id] = item
             else:
                 end_events[item.operation_id] = item
-        elif item.event_name and item.event_name.value.lower() == 'classicadministrators':
-            offline_events.append(item)
-    return start_events, end_events, offline_events, client
+    return start_events, end_events
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
@@ -334,7 +332,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
-    start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
+    start_events, end_events = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
 
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
@@ -349,8 +347,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                 continue
 
             entry = {}
-            op = e.operation_name and e.operation_name.value
-            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+            if e.status.value == 'Succeeded':
                 s, payload = start_events[op_id], None
                 entry = dict.fromkeys(
                     ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
@@ -408,25 +405,6 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
             if principal_dics:
                 for e in result:
                     e['principalName'] = principal_dics.get(e['principalId'], None)
-
-    offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
-                                                    x.operation_name.value.lower().startswith(
-                                                        'microsoft.authorization/classicadministrators'))]
-    for e in offline_events:
-        entry = {
-            'timestamp': e.event_timestamp,
-            'caller': 'Subscription Admin',
-            'roleDefinitionId': None,
-            'principalId': None,
-            'principalType': 'User',
-            'scope': '/subscriptions/' + client.config.subscription_id,
-            'scopeType': 'Subscription',
-            'scopeName': client.config.subscription_id,
-        }
-        if e.properties:
-            entry['principalName'] = e.properties.get('adminEmail')
-            entry['roleName'] = e.properties.get('adminType')
-        result.append(entry)
 
     return result
 
@@ -875,13 +853,17 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
 
 def _get_grant_permissions(graph_client, client_sp_object_id=None, query_filter=None):
     query_filter = query_filter or ("clientId eq '{}'".format(client_sp_object_id) if client_sp_object_id else None)
+    grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
     try:
-        grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
-    except CloudError as ex:  # Graph doesn't follow the ARM error; otherwise would be caught by msrest-azure
+        # Make the REST request immediately so that errors can be raised and handled.
+        return list(grant_info)
+    except CloudError as ex:
         if ex.status_code == 404:
-            return []
+            raise CLIError("Service principal with appId or objectId '{id}' doesn't exist. "
+                           "If '{id}' is an appId, make sure an associated service principal is created "
+                           "for the app. To create one, run `az ad sp create --id {id}`."
+                           .format(id=client_sp_object_id))
         raise
-    return grant_info
 
 
 def list_permissions(cmd, identifier):
@@ -892,13 +874,14 @@ def list_permissions(cmd, identifier):
 
     # first get the permission grant history
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
 
     # get original permissions required by the application, we will cross check the history
     # and mark out granted ones
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     permissions = application.required_resource_access
+    if permissions:
+        grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
     for p in permissions:
         result = list(graph_client.service_principals.list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))

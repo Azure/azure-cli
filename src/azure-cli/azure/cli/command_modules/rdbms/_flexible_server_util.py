@@ -4,16 +4,17 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 import random
 from knack.log import get_logger
-from msrest.paging import Paged
-
+from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
-
+from .flexible_server_custom_common import firewall_rule_create_func
 logger = get_logger(__name__)
 
 DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
@@ -78,7 +79,6 @@ def generate_password(administrator_login_password):
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
-    from datetime import datetime
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
     now = datetime.now()
@@ -106,9 +106,10 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
     #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
 
-    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip,
-                                                end_ip).result()
-    return firewall.name
+    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
+                                         start_ip_address=start_ip, end_ip_address=end_ip)
+
+    return firewall.result().name
 
 
 # pylint: disable=inconsistent-return-statements
@@ -211,9 +212,11 @@ def _parse_list_skus(result, database_engine):
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
+    iops_dict = {}
     for tier_info in tiers:
         tier_name = tier_info.name
         tier_dict = {}
+        sku_iops_dict = {}
 
         skus = set()
         versions = set()
@@ -221,6 +224,8 @@ def _parse_list_skus(result, database_engine):
             versions.add(version.name)
             for vcores in version.supported_vcores:
                 skus.add(vcores.name)
+                if database_engine == 'mysql':
+                    sku_iops_dict[vcores.name] = vcores.supported_iops
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 
@@ -229,6 +234,7 @@ def _parse_list_skus(result, database_engine):
             tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
             tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
                                           int(storage_info.max_storage_size.storage_size_mb) // 1024)
+            iops_dict[tier_name] = sku_iops_dict
         elif database_engine == 'postgres':
             storage_sizes = set()
             for size in storage_info.supported_storage_mb:
@@ -237,6 +243,8 @@ def _parse_list_skus(result, database_engine):
 
         tiers_dict[tier_name] = tier_dict
 
+    if database_engine == 'mysql':
+        return tiers_dict, iops_dict
     return tiers_dict
 
 
@@ -246,7 +254,7 @@ def _get_available_values(sku_info, argument, tier=None):
 
 
 def _get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
+    return list(obj_list) if isinstance(obj_list, ItemPaged) else obj_list
 
 
 def _update_location(cmd, resource_group_name):
@@ -283,3 +291,17 @@ def _map_maintenance_window(day_of_week):
                "Sun": 0,
                }
     return options[day_of_week]
+
+
+def get_current_time():
+    return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
+
+
+def change_str_to_datetime(date_str):
+    for fmt in ("%Y-%m-%dT%H:%M:%S+00:00", "%Y-%m-%dT%H:%M:%S.%f+00:00"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+
+    raise ValidationError("The format of restore time should be %Y-%m-%dT%H:%M:%S+00:00")

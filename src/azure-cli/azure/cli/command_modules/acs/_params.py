@@ -211,7 +211,8 @@ def load_arguments(self, _):
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', type=str, validator=validate_assign_identity)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels, help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
-        c.argument('enable_node_public_ip', action='store_true', is_preview=True)
+        c.argument('enable_node_public_ip', action='store_true')
+        c.argument('node_public_ip_prefix_id', type=str)
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])
         c.argument('windows_admin_password', options_list=['--windows-admin-password'])
         c.argument('enable_ahub', options_list=['--enable-ahub'])
@@ -223,6 +224,7 @@ def load_arguments(self, _):
         c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
         c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_sgxquotehelper', action='store_true')
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -236,6 +238,7 @@ def load_arguments(self, _):
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('uptime_sla', action='store_true')
+        c.argument('no_uptime_sla', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
@@ -256,6 +259,7 @@ def load_arguments(self, _):
         c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
         c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
         c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
+        c.argument('enable_sgxquotehelper', action='store_true')
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -311,7 +315,8 @@ def load_arguments(self, _):
             c.argument('tags', tags_type)
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
             c.argument('mode', get_enum_type(nodepool_mode_type))
-            c.argument('enable_node_public_ip', action='store_true', is_preview=True)
+            c.argument('enable_node_public_ip', action='store_true')
+            c.argument('node_public_ip_prefix_id', type=str)
             c.argument('ppg', type=str, validator=validate_ppg)
             c.argument('max_surge', type=str, validator=validate_max_surge)
             c.argument('node_os_disk_type', arg_type=get_enum_type([CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))

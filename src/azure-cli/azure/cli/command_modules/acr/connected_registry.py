@@ -430,9 +430,12 @@ def _get_install_info(cmd,
         sync_username = sync_token_name
         sync_password = "<sync token password>"
 
+    logger.warning("Value 'ACR_SYNC_TOKEN_USERNAME' has been deprecated and will be removed in a future release."
+                   " Use 'ACR_SYNC_TOKEN_NAME' instead.")
     return {
         "ACR_REGISTRY_NAME": connected_registry_name,
         "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
+        "ACR_SYNC_TOKEN_NAME": sync_username,
         "ACR_SYNC_TOKEN_USERNAME": sync_username,
         "ACR_SYNC_TOKEN_PASSWORD": sync_password,
         "ACR_PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,

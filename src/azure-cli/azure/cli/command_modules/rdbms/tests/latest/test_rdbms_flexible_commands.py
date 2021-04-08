@@ -7,6 +7,7 @@ import time
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
 from dateutil.tz import tzutc
+import pytest
 from azure_devtools.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.local_context import AzCLILocalContext, ALL, LOCAL_CONTEXT_FILE
@@ -26,10 +27,26 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
+from .conftest import resource_random_name
 
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
+
+
+class RdbmsScenarioTest(ScenarioTest):
+
+    def create_random_name(self, prefix, length):
+        self.test_resources_count += 1
+        moniker = '{}{:06}'.format(prefix, self.test_resources_count)
+
+        if self.in_recording:
+            name = prefix + resource_random_name + '-' + type(self).__name__[22:]
+            name = name[:40].lower()
+            self.name_replacer.register_name_pair(name, moniker)
+            return name
+
+        return moniker
 
 
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
@@ -55,33 +72,17 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: name,
                 self.engine_parameter_name: self.engine_type}
 
-    def remove_resource(self, name, **kwargs):
-        group = self._get_resource_group(**kwargs)
-        execute(self.cli_ctx, 'az {} flexible-server delete -g {} -n {} --yes'.format(self.engine_type, group, name))
+    # def remove_resource(self, name, **kwargs):
+    #     group = self._get_resource_group(**kwargs)
+    #     execute(self.cli_ctx, 'az {} flexible-server delete -g {} -n {} --yes'.format(self.engine_type, group, name))
 
     def _get_resource_group(self, **kwargs):
         return kwargs.get(self.resource_group_parameter_name)
 
 
-class FlexibleServerMgmtScenarioTest(ScenarioTest):
+class FlexibleServerMgmtScenarioTest(RdbmsScenarioTest):
 
-    postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @ServerPreparer(engine_type='postgres', location=postgres_location)
-    def test_postgres_flexible_server_mgmt(self, resource_group, server):
-        self._test_flexible_server_mgmt('postgres', resource_group, server)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    @ServerPreparer(engine_type='mysql', location=mysql_location)
-    def test_mysql_flexible_server_mgmt(self, resource_group, server):
-        self._test_flexible_server_mgmt('mysql', resource_group, server)
-
-    def _test_flexible_server_mgmt(self, database_engine, resource_group, server_name):
-
+    def _test_flexible_server_create(self, database_engine, resource_group, server):
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
@@ -90,23 +91,15 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             sku_name = 'Standard_D2s_v3'
             version = '12'
             storage_size = 128
-            location = self.postgres_location
         elif database_engine == 'mysql':
             tier = 'Burstable'
             sku_name = 'Standard_B1ms'
             storage_size = 10
             version = '5.7'
-            location = self.mysql_location
-        location_result = 'East US 2 EUAP'
-
-        # flexible-server create with user input
-        random_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        random_name2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         storage_size_mb = storage_size * 1024
         backup_retention = 7
 
-        list_checks = [JMESPathCheck('name', server_name),
-                       JMESPathCheck('location', location_result),
+        list_checks = [JMESPathCheck('name', server),
                        JMESPathCheck('resourceGroup', resource_group),
                        JMESPathCheck('sku.name', sku_name),
                        JMESPathCheck('sku.tier', tier),
@@ -114,80 +107,151 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        # self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
-        #          .format(database_engine, resource_group, server_name, location))
-        current_time = datetime.utcnow()
-
-        if database_engine == 'postgres':
-            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier Burstable --sku-name Standard_B1ms --public-access none'
-                     .format(resource_group, location, random_name))
-            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
-                     .format(resource_group, location, random_name2))
-        elif database_engine == 'mysql':
-            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
-                     .format(resource_group, location, random_name))
-            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
-                     .format(resource_group, location, random_name2))
-
         self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=list_checks)
+                 .format(database_engine, resource_group, server), checks=list_checks)
 
         if database_engine == 'mysql':
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
-                     .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('name', 'flexibleserverdb')])
+                     .format(database_engine, resource_group, server), checks=[JMESPathCheck('name', 'flexibleserverdb')])
 
-        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
-                 .format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storageProfile.storageMb', 256 * 1024)])
-
-        self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
-                 .format(database_engine, resource_group, server_name, backup_retention + 10),
-                 checks=[JMESPathCheck('storageProfile.backupRetentionDays', backup_retention + 10)])
+    def _test_flexible_server_create_non_default_tiers(self, database_engine, resource_group):
 
         if database_engine == 'postgres':
-            tier = 'Burstable'
-            sku_name = 'Standard_B1ms'
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier Burstable --sku-name Standard_B1ms --public-access none --zone 1'
+                     .format(resource_group, self.location, self.random_name_1))
+
+            self.cmd('postgres flexible-server show -g {} -n {}'
+                     .format(resource_group, self.random_name_1),
+                     checks=[JMESPathCheck('sku.tier', 'Burstable'),
+                             JMESPathCheck('sku.name', 'Standard_B1ms'),
+                             JMESPathCheck('availabilityZone', 1)])
+
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
+                     .format(resource_group, self.location, self.random_name_2))
+
+            self.cmd('postgres flexible-server show -g {} -n {}'
+                     .format(resource_group, self.random_name_2),
+                     checks=[JMESPathCheck('sku.tier', 'MemoryOptimized'),
+                             JMESPathCheck('sku.name', 'Standard_E2s_v3')])
+
+        elif database_engine == 'mysql':
+            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
+                     .format(resource_group, self.location, self.random_name_1))
+
+            self.cmd('mysql flexible-server show -g {} -n {}'
+                     .format(resource_group, self.random_name_1),
+                     checks=[JMESPathCheck('sku.tier', 'GeneralPurpose'),
+                             JMESPathCheck('sku.name', 'Standard_D2s_v3')])
+
+            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
+                     .format(resource_group, self.location, self.random_name_2))
+
+            self.cmd('mysql flexible-server show -g {} -n {}'
+                     .format(resource_group, self.random_name_2),
+                     checks=[JMESPathCheck('sku.tier', 'MemoryOptimized'),
+                             JMESPathCheck('sku.name', 'Standard_E2s_v3')])
+
+    def _test_flexible_server_create_different_version(self, database_engine, resource_group):
+
+        if database_engine == 'postgres':
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --version 11 --public-access none'
+                     .format(resource_group, self.random_name_3, self.location))
+
+            self.cmd('postgres flexible-server show -g {} -n {}'
+                     .format(resource_group, self.random_name_3),
+                     checks=[JMESPathCheck('version', 11)])
+
+    def _test_flexible_server_update_password(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
+                 .format(database_engine, resource_group, server))
+
+    def _test_flexible_server_update_storage(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('storageProfile.storageMb', 256 * 1024)])
+
+    def _test_flexible_server_update_backup_retention(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
+                 .format(database_engine, resource_group, server, 17),
+                 checks=[JMESPathCheck('storageProfile.backupRetentionDays', 17)])
+
+    def _test_flexible_server_update_scale_up(self, database_engine, resource_group, server):
+
+        # Scale up
+        if database_engine == 'postgres':
+            tier = 'MemoryOptimized'
+            sku_name = 'Standard_E16s_v3'
+        elif database_engine == 'mysql':
+            tier = 'GeneralPurpose'
+            sku_name = 'Standard_D16s_v3'
+
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, server, tier, sku_name),
+                 checks=[JMESPathCheck('sku.tier', tier),
+                         JMESPathCheck('sku.name', sku_name)])
+
+    def _test_flexible_server_update_scale_down(self, database_engine, resource_group, server):
+        # Scale down
+        if database_engine == 'postgres':
+            tier = 'MemoryOptimized'
+            sku_name = 'Standard_E2s_v3'
         elif database_engine == 'mysql':
             tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
 
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, server_name, tier, sku_name),
+                 .format(database_engine, resource_group, server, tier, sku_name),
                  checks=[JMESPathCheck('sku.tier', tier),
                          JMESPathCheck('sku.name', sku_name)])
 
-        if database_engine == 'postgres':
-            self.cmd('{} flexible-server update -g {} -n {} --maintenance-window Mon:1:30'
-                     .format(database_engine, resource_group, server_name),
-                     checks=[JMESPathCheck('maintenanceWindow.dayOfWeek', 1),
-                             JMESPathCheck('maintenanceWindow.startHour', 1),
-                             JMESPathCheck('maintenanceWindow.startMinute', 30)])
+    def _test_flexible_server_update_mmw(self, database_engine, resource_group, server):
 
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window Mon:1:30'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('maintenanceWindow.dayOfWeek', 1),
+                         JMESPathCheck('maintenanceWindow.startHour', 1),
+                         JMESPathCheck('maintenanceWindow.startMinute', 30)])
+
+    def _test_flexible_server_update_tag(self, database_engine, resource_group, server):
         self.cmd('{} flexible-server update -g {} -n {} --tags key=3'
-                 .format(database_engine, resource_group, server_name),
+                 .format(database_engine, resource_group, server),
                  checks=[JMESPathCheck('tags.key', '3')])
 
-        restore_server_name = 'restore-' + server_name
-        restore_time = (current_time + timedelta(minutes=10)).replace(tzinfo=tzutc()).isoformat()
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
-                 .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
-                 checks=[JMESPathCheck('name', restore_server_name),
-                         JMESPathCheck('resourceGroup', resource_group)])
+    def _test_flexible_server_restore(self, database_engine, resource_group, server):
+        restore_server = 'restore-' + server[:50]
+        restore_time = (datetime.utcnow() - timedelta(minutes=20)).replace(tzinfo=tzutc()).isoformat()
 
+        if database_engine == 'postgres':
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {} --zone 2'
+                     .format(database_engine, resource_group, restore_server, server, restore_time),
+                     checks=[JMESPathCheck('name', restore_server),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('availabilityZone', 2)])
+        else:
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
+                     .format(database_engine, resource_group, restore_server, server, restore_time),
+                     checks=[JMESPathCheck('name', restore_server),
+                             JMESPathCheck('resourceGroup', resource_group)])
+
+    def _test_flexible_server_restart(self, database_engine, resource_group, server):
         self.cmd('{} flexible-server restart -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
 
+    def _test_flexible_server_stop(self, database_engine, resource_group, server):
         self.cmd('{} flexible-server stop -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
 
+    def _test_flexible_server_start(self, database_engine, resource_group, server):
         self.cmd('{} flexible-server start -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
 
+    def _test_flexible_server_list(self, database_engine, resource_group):
         self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
+    def _test_flexible_server_connection_string(self, database_engine, server):
         connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
-                                     .format(database_engine, server_name)).get_output_in_json()
+                                     .format(database_engine, server)).get_output_in_json()
 
         self.assertIn('jdbc', connection_string['connectionStrings'])
         self.assertIn('node.js', connection_string['connectionStrings'])
@@ -195,29 +259,198 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertIn('python', connection_string['connectionStrings'])
         self.assertIn('ado.net', connection_string['connectionStrings'])
 
+    def _test_flexible_server_list_skus(self, database_engine, location):
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
 
-class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
+class FlexibleServerIopsMgmtScenarioTest(RdbmsScenarioTest):
 
-    postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
+    def _test_flexible_server_iops_create(self, database_engine, resource_group, server_1, server_2, server_3):
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @ServerPreparer(engine_type='postgres', location=postgres_location)
-    def test_postgres_flexible_server_proxy_resource(self, resource_group, server):
-        self._test_firewall_rule_mgmt('postgres', resource_group, server)
-        self._test_parameter_mgmt('postgres', resource_group, server)
+        # IOPS passed is beyond limit of max allowed by SKU and free storage
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 350 --storage-size 200 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_1, self.location))
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    @ServerPreparer(engine_type='mysql', location=mysql_location)
-    def test_mysql_flexible_server_proxy_resource(self, resource_group, server):
-        self._test_firewall_rule_mgmt('mysql', resource_group, server)
-        self._test_parameter_mgmt('mysql', resource_group, server)
-        self._test_database_mgmt('mysql', resource_group, server)
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_1),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+
+        # IOPS passed is within limit of max allowed by SKU but smaller than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_2, self.location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_2),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 100)])
+
+        # IOPS passed is within limit of max allowed by SKU and bigger than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 110 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_3, self.location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 120)])
+
+    def _test_flexible_server_iops_scale_up(self, database_engine, resource_group, server_1, server_2, server_3):
+
+        # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 400'
+                 .format(database_engine, resource_group, server_1),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 600)])
+
+        # SKU upgraded and IOPS value set bigger than max iops for the sku
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 700'
+                 .format(database_engine, resource_group, server_2),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+
+        # SKU upgraded and IOPS value set lower than max iops for the sku but bigger than free iops
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --storage-size 300 --iops 500'
+                 .format(database_engine, resource_group, server_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+
+    def _test_flexible_server_iops_scale_down(self, database_engine, resource_group, server_1, server_2, server_3):
+
+        # SKU downgraded and IOPS not specified
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_1),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+
+
+class FlexibleServerHighAvailabilityMgmt(RdbmsScenarioTest):
+
+    def _test_flexible_server_high_availability_create(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server create -g {} -l {} -n {} --high-availability Enabled --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
+                 .format(database_engine, resource_group, self.location, server))
+
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('haEnabled', 'Enabled')])
+
+    def _test_flexible_server_high_availability_disable(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability Disabled'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('haEnabled', 'Disabled')])
+
+        time.sleep(3 * 60)
+
+    def _test_flexible_server_high_availability_enable(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability Enabled'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('haEnabled', 'Enabled')])
+
+    def _test_flexible_server_high_availability_update_scale_up(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D4s_v3'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('sku.name', 'Standard_D4s_v3'),
+                         JMESPathCheck('sku.tier', 'GeneralPurpose')])
+
+    def _test_flexible_server_high_availability_update_parameter(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server parameter set --name lock_timeout -v 2000 --source user-override -s {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[JMESPathCheck('value', 2000),
+                         JMESPathCheck('source', 'user-override')])
+
+    def _test_flexible_server_high_availability_restart(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server restart -g {} -n {}'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+    def _test_flexible_server_high_availability_stop(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server stop -g {} -n {}'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+    def _test_flexible_server_high_availability_start(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server start -g {} -n {}'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+    def _test_flexible_server_high_availability_delete(self, database_engine, resource_group, server):
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+    def _test_flexible_server_high_availability_restore(self, database_engine, resource_group, server):
+
+        restore_server = 'restore-' + server[:55]
+        restore_time = (datetime.utcnow() - timedelta(minutes=20)).replace(tzinfo=tzutc()).isoformat()
+
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {} --zone 2'
+                 .format(database_engine, resource_group, restore_server, server, restore_time),
+                 checks=[JMESPathCheck('name', restore_server),
+                         JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('availabilityZone', 2)])
+
+    def _test_flexible_server_high_availability_delete(self, resource_group):
+        self.cmd('az group delete --name {} --yes --no-wait'.format(resource_group), checks=NoneCheck())
+
+
+class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
+
+    def _test_flexible_server_vnet_server_create(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {}'.
+                 format(database_engine, resource_group, server, self.location))
+
+        show_result = self.cmd('{} flexible-server show -g {} -n {}'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, 'VNET' + server[6:], 'Subnet' + server[6:]))
+
+    def _test_flexible_server_vnet_ha_server_create(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --high-availability Enabled'.
+                 format(database_engine, resource_group, server, self.location))
+
+        show_result = self.cmd('{} flexible-server show -g {} -n {}'
+                               .format(database_engine, resource_group, server),
+                               checks=[JMESPathCheck('haEnabled', 'Enabled')]).get_output_in_json()
+        print(show_result)
+        self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, 'VNET' + server[6:], 'Subnet' + server[6:]))
+
+    def _test_flexible_server_vnet_server_update_scale_up(self, database_engine, resource_group, server):
+
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D8s_v3'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('sku.name', 'Standard_D8s_v3'),
+                         JMESPathCheck('sku.tier', 'GeneralPurpose')])
+
+    def _test_flexible_server_vnet_server_restore(self, database_engine, resource_group, server, restore_server):
+        time.sleep(10 * 60)
+        restore_time = (datetime.utcnow() - timedelta(minutes=20)).replace(tzinfo=tzutc()).isoformat()
+
+        if database_engine == 'postgres':
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {} --zone 1'
+                     .format(database_engine, resource_group, restore_server, server, restore_time),
+                     checks=[JMESPathCheck('name', restore_server),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('availabilityZone', 1)])
+        elif database_engine == 'mysql':
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
+                     .format(database_engine, resource_group, restore_server, server, restore_time),
+                     checks=[JMESPathCheck('name', restore_server),
+                             JMESPathCheck('resourceGroup', resource_group)])
+
+    def _test_flexible_server_vnet_server_delete(self, database_engine, resource_group, server, restore_server):
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group, restore_server), checks=NoneCheck())
+
+        # Wait until vnet can be detached from the deleted server
+        time.sleep(5 * 60)
+
+    def _test_flexible_server_vnet_server_mgmt_delete(self, resource_group):
+        self.cmd('az group delete --name {} --yes --no-wait'.format(resource_group), checks=NoneCheck())
+
+
+class FlexibleServerProxyResourceMgmtScenarioTest(RdbmsScenarioTest):
 
     def _test_firewall_rule_mgmt(self, database_engine, resource_group, server):
 
@@ -295,9 +528,9 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     def _test_database_mgmt(self, database_engine, resource_group, server):
 
-        database_name = self.create_random_name('database', 20)
+        database_name = 'flexibleserverdbtest'
 
-        self.cmd('{} flexible-server db create -g {} -s {} -d {} --collation utf8'.format(database_engine, resource_group, server, database_name),
+        self.cmd('{} flexible-server db create -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
                  checks=[JMESPathCheck('name', database_name)])
 
         self.cmd('{} flexible-server db show -g {} -s {} -d {}'.format(database_engine, resource_group, server, database_name),
@@ -311,21 +544,11 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server db delete -g {} -s {} -d {} --yes'.format(database_engine, resource_group, server, database_name),
                  checks=NoneCheck())
 
+    def _test_flexible_server_proxy_resource_mgmt_delete(self, resource_group):
+        self.cmd('az group delete --name {} --yes --no-wait'.format(resource_group), checks=NoneCheck())
+
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
-
-    postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_mgmt_validator(self, resource_group):
-        self._test_mgmt_validator('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_mgmt_validator(self, resource_group):
-        self._test_mgmt_validator('mysql', resource_group)
 
     def _test_mgmt_validator(self, database_engine, resource_group):
 
@@ -355,7 +578,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
             invalid_storage_size = 999999
         self.cmd('{} flexible-server create -g {} -l {} --storage-size {} --public-access none'.format(database_engine, resource_group, location, invalid_storage_size), expect_failure=True)
 
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, RANDOM_VARIABLE_MAX_LENGTH)
+        server = self.create_random_name(SERVER_NAME_PREFIX, RANDOM_VARIABLE_MAX_LENGTH)
         if database_engine == 'postgres':
             tier = 'MemoryOptimized'
             version = 12
@@ -364,12 +587,15 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             tier = 'GeneralPurpose'
             version = 5.7
-            sku_name = 'Standard_D2s_v3'
+            if location == 'eastus2euap':
+                sku_name = 'Standard_D2s_v3'
+            else:
+                sku_name = 'Standard_D2ds_v4'
             storage_size = 20
         storage_size_mb = storage_size * 1024
         backup_retention = 10
 
-        list_checks = [JMESPathCheck('name', server_name),
+        list_checks = [JMESPathCheck('name', server),
                        JMESPathCheck('resourceGroup', resource_group),
                        JMESPathCheck('sku.name', sku_name),
                        JMESPathCheck('sku.tier', tier),
@@ -378,47 +604,32 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --tier {} --version {} --sku-name {} --storage-size {} --backup-retention {} --public-access none'
-                 .format(database_engine, resource_group, server_name, location, tier, version, sku_name, storage_size, backup_retention))
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
+                 .format(database_engine, resource_group, server, location, tier, version, sku_name, storage_size, backup_retention))
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server), checks=list_checks)
 
         # Update
         invalid_storage_size_small = storage_size - 1
-        self.cmd('{} flexible-server update -g {} -n {} --tier {}'.format(database_engine, resource_group, server_name, invalid_tier), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --tier {}'.format(database_engine, resource_group, server, invalid_tier), expect_failure=True)
 
-        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'.format(database_engine, resource_group, server_name, valid_tier, invalid_sku_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'.format(database_engine, resource_group, server, valid_tier, invalid_sku_name), expect_failure=True)
 
-        self.cmd('{} flexible-server update -g {} -n {} --storage-size {}'.format(database_engine, resource_group, server_name, invalid_storage_size_small), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size {}'.format(database_engine, resource_group, server, invalid_storage_size_small), expect_failure=True)
 
-        self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'.format(database_engine, resource_group, server_name, invalid_backup_retention), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'.format(database_engine, resource_group, server, invalid_backup_retention), expect_failure=True)
 
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
 
 
-class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
+class FlexibleServerReplicationMgmtScenarioTest(RdbmsScenarioTest):  # pylint: disable=too-few-public-methods
 
-    mysql_location = 'eastus2euap'
+    def _test_flexible_server_replica_create(self, database_engine, resource_group, master_server, replicas):
 
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_replica_mgmt(self, resource_group):
-        self._test_flexible_server_replica_mgmt('mysql', resource_group)
-
-    def _test_flexible_server_replica_mgmt(self, database_engine, resource_group):
-        location = self.mysql_location
-        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
-                    self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
-
-        # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none'
-                 .format(database_engine, resource_group, master_server, location, 256))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
-        time.sleep(5 * 60)
 
-        # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
-                 .format(database_engine, resource_group, replicas[0], result['id']),
+                 .format(database_engine, resource_group, replicas[0], master_server),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
@@ -428,12 +639,20 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sourceServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
 
-        # test replica list
+        time.sleep(5 * 60)
+
+    def _test_flexible_server_replica_list(self, database_engine, resource_group, master_server):
+
         self.cmd('{} flexible-server replica list -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop
+    def _test_flexible_server_replica_stop(self, database_engine, resource_group, master_server, replicas):
+
+        result = self.cmd('{} flexible-server show -g {} --name {} '
+                          .format(database_engine, resource_group, master_server),
+                          checks=[JMESPathCheck('replicationRole', 'Source')]).get_output_in_json()
+
         self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
@@ -451,9 +670,14 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sourceServerId', ''),
                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
-        # test delete master server
+    def _test_flexible_server_replica_delete_source(self, database_engine, resource_group, master_server, replicas):
+
+        result = self.cmd('{} flexible-server show -g {} --name {} '
+                          .format(database_engine, resource_group, master_server),
+                          checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
+
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
-                 .format(database_engine, resource_group, replicas[1], result['id']),
+                 .format(database_engine, resource_group, replicas[1], master_server),
                  checks=[
                      JMESPathCheck('name', replicas[1]),
                      JMESPathCheck('resourceGroup', resource_group),
@@ -465,7 +689,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, master_server), checks=NoneCheck())
 
-        # test show server with replication info, replica was auto stopped after master server deleted
         self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, replicas[1]),
                  checks=[
@@ -473,69 +696,17 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sourceServerId', ''),
                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
-        # clean up servers
+    def _test_flexible_server_replica_delete(self, database_engine, resource_group, replicas):
+
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
+        self.cmd('az group delete --name {} --yes --no-wait'.format(resource_group), checks=NoneCheck())
+
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
-
-    postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    @VirtualNetworkPreparer(location=mysql_location)
-    def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
-        # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
-        self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
-        # Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
-        self._test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid('mysql', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @VirtualNetworkPreparer(location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
-        # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
-        self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
-        # Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
-        self._test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_supplied_vnet('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_supplied_vnet('mysql', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @VirtualNetworkPreparer(parameter_name='virtual_network', location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
-        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group, virtual_network)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    @VirtualNetworkPreparer(parameter_name='virtual_network', location=mysql_location)
-    def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
-        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group, virtual_network)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
-    def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
-        self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
-    @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_2')
-    def test_mysql_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
-        self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('mysql', resource_group_1, resource_group_2)
 
     def _test_flexible_server_vnet_mgmt_existing_supplied_subnetid(self, database_engine, resource_group):
 
@@ -562,6 +733,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'], subnet_id)
+
         # delete server
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server),
                  checks=NoneCheck())
@@ -807,20 +979,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @live_only()
-    def test_postgres_flexible_server_public_access_mgmt(self, resource_group):
-        self._test_flexible_server_public_access_mgmt('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    @live_only()
-    def test_mysql_flexible_server_public_access_mgmt(self, resource_group):
-        self._test_flexible_server_public_access_mgmt('mysql', resource_group)
 
     def _test_flexible_server_public_access_mgmt(self, database_engine, resource_group):
         # flexible-server create
