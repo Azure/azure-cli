@@ -87,7 +87,8 @@ def load_arguments(self, _):
             c.argument('key_kind', arg_type=get_enum_type(KeyKind), help="The access key to regenerate.")
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
-        c.argument('failover_policies', validator=validate_failover_policies, help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
+        c.argument('failover_parameters', options_list=['--failover-policies'], validator=validate_failover_policies,
+                   help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)
