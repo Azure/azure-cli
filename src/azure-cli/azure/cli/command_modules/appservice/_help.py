@@ -1833,7 +1833,6 @@ examples:
 helps['webapp log tail'] = """
 type: command
 short-summary: Start live log tracing for a web app.
-long-summary: This command may not work with web apps running on Linux.
 """
 
 helps['webapp log deployment'] = """
