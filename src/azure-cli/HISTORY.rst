@@ -17,7 +17,7 @@ Release History
 
 **AKS**
 
-* `az aks create`: add support for --private-dns-zone and --fqdn-subdomain feature (#17430)
+* `az aks create`: Add support for `--private-dns-zone` and `--fqdn-subdomain` feature (#17430)
 
 **App Config**
 
