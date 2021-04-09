@@ -2419,7 +2419,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
-                host_group=None):
+                host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
+                max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
+                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2654,7 +2656,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
             data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period,
             specialized=specialized, os_disk_size_gb=os_disk_size_gb, encryption_at_host=encryption_at_host,
-            host_group=host_group)
+            host_group=host_group, max_batch_instance_percent=max_batch_instance_percent,
+            max_unhealthy_instance_percent=max_unhealthy_instance_percent,
+            max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
+            pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
+            prioritize_unhealthy_instances=prioritize_unhealthy_instances)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2944,7 +2950,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
-                enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
+                enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
+                max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
+                pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
+                **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3023,6 +3032,29 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}
+
+    if max_batch_instance_percent is not None or max_unhealthy_instance_percent is not None \
+            or max_unhealthy_upgraded_instance_percent is not None or pause_time_between_batches is not None \
+            or enable_cross_zone_upgrade is not None or prioritize_unhealthy_instances is not None:
+        if vmss.upgrade_policy is None:
+            vmss.upgrade_policy = {'rolling_upgrade_policy': None}
+        if vmss.upgrade_policy.rolling_upgrade_policy is None:
+            vmss.upgrade_policy.rolling_upgrade_policy = {
+                'maxBatchInstancePercent': max_batch_instance_percent,
+                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
+                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
+                'pauseTimeBetweenBatches': pause_time_between_batches,
+                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
+                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
+            }
+        else:
+            vmss.upgrade_policy.rolling_upgrade_policy.max_batch_instance_percent = max_batch_instance_percent
+            vmss.upgrade_policy.rolling_upgrade_policy.max_unhealthy_instance_percent = max_unhealthy_instance_percent
+            vmss.upgrade_policy.rolling_upgrade_policy.max_unhealthy_upgraded_instance_percent = \
+                max_unhealthy_upgraded_instance_percent
+            vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
+            vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
+            vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -3722,5 +3754,18 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
     disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, disk_access_name, disk_access)
+
+# endregion
+
+
+# region install patches
+def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
+                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, no_wait=False):
+    VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
+    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot)
+    linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
+    install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
+
+    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
 
 # endregion

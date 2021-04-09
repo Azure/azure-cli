@@ -49,6 +49,7 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
         self.random_name_1 = self.create_random_name(SERVER_NAME_PREFIX + '4', SERVER_NAME_MAX_LENGTH)
         self.random_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '5', SERVER_NAME_MAX_LENGTH)
         self.random_name_3 = self.create_random_name(SERVER_NAME_PREFIX + '6', SERVER_NAME_MAX_LENGTH)
+        self.random_name_4 = self.create_random_name(SERVER_NAME_PREFIX + '7', SERVER_NAME_MAX_LENGTH)
         self.current_time = datetime.utcnow()
         self.location = postgres_location
 
@@ -138,22 +139,27 @@ class PostgresFlexibleServerMgmtScenarioTest(FlexibleServerMgmtScenarioTest):
 
     @AllowLargeResponse()
     @pytest.mark.order(15)
-    def test_postgres_flexible_server_create_non_default_tiers_select_zone(self):
+    def test_postgres_flexible_server_create_non_default_tiers(self):
         self._test_flexible_server_create_non_default_tiers('postgres', self.resource_group)
 
     @AllowLargeResponse()
     @pytest.mark.order(16)
+    def test_postgres_flexible_server_create_select_zone(self):
+        self._test_flexible_server_create_select_zone('postgres', self.resource_group)
+
+    @AllowLargeResponse()
+    @pytest.mark.order(17)
     def test_postgres_flexible_server_create_different_version(self):
         self._test_flexible_server_create_different_version('postgres', self.resource_group)
 
     @AllowLargeResponse()
-    @pytest.mark.order(17)
+    @pytest.mark.order(18)
     @pytest.mark.dependency(depends=["test_postgres_flexible_server_mgmt_prepare"])
     def test_postgres_flexible_server_restore(self):
         self._test_flexible_server_restore('postgres', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(18)
+    @pytest.mark.order(19)
     def test_postgres_flexible_server_delete(self):
         self.cmd('az group delete --name {} --yes --no-wait'.format(self.resource_group))
 
