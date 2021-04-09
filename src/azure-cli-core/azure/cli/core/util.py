@@ -783,7 +783,7 @@ def find_child_collection(parent, *args, **kwargs):
     return collection
 
 
-def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout=1):
+def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     import requests
     import timeit
     start = timeit.default_timer()
