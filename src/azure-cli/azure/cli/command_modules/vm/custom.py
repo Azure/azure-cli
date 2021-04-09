@@ -3464,7 +3464,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
-                os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_vhd_storage_account, uri=os_vhd))
+                os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(
+                    id=os_vhd_storage_account, uri=os_vhd))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
