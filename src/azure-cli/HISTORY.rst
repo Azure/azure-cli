@@ -58,7 +58,7 @@ Release History
 
 **Container**
 
-* Fix #16499: az container create: fix handling of return value from network_profiles.create_or_update (#17486)
+* Fix #16499: `az container create`: Fix handling of return value from network_profiles.create_or_update (#17486)
 
 **Cosmos DB**
 
