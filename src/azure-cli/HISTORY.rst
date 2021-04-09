@@ -43,11 +43,11 @@ Release History
 
 **Backup**
 
-* Fix #14776: Fix --force parameter functionality for az backup vault delete command (#16957)
+* Fix #14776: Fix `--force` parameter functionality for `az backup vault delete` command (#16957)
 * Fix on demand backup (#17367)
-* Optional parameter 'backup-management-type' in 'backup protectable-item list' command (#17414)
-* Fixed policy create with rgNamePrefix and rgNameSuffix (#17571)
-* `az backup protectable-item list`: Add server-name as an optional argument (#17614)
+* `az backup protectable-item list`: Add optional parameter `--backup-management-type`(#17414)
+* Fix policy create with rgNamePrefix and rgNameSuffix (#17571)
+* `az backup protectable-item list`: Add `--server-name` as an optional argument (#17614)
 
 **Compute**
 
