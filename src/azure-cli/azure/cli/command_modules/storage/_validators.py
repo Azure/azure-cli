@@ -177,14 +177,17 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There are no credentials provided in your command and environment, we will query for the '
-                       'account key inside your storage account. \nPlease provide --connection-string, '
-                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
-                       'have required RBAC roles in your command. For more information about RBAC roles '
-                       'in storage, visit '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting the corresponding environment variables can avoid inputting credentials in '
-                       'your command. Please use --help to get more information.')
+        message = """
+There are no credentials provided in your command and environment, we will query for account key for your storage account.
+It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
+"""
+        if hasattr(n, 'auth_mode') or hasattr(n, 'token_credential'):
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
+"""
+        logger.warning('{}In addition, setting the corresponding environment variables can avoid inputting credentials '
+                       'in your command. Please use --help to get more information about environment variable usage.'.format(message))
         try:
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
