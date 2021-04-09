@@ -38,34 +38,17 @@ After this, you should be able to run the CLI with `az`.
 
 [Author your command module...](#heading_author_command_mod)
 
-If your command module contributes any commands, they should appear with `az`.
+If your command module contributes any commands, they should appear when running `az`.
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
 thrown whilst attempting to load your module.
 
 
 <a name="heading_author_command_mod"></a>Authoring command modules
 ------
-The `example_module_template` directory gives an example command module with other useful examples.
 
-Command modules should have the following structure:
-```
-.
-|-- README.rst
-|-- azure
-|   |-- __init__.py
-|   `-- cli
-|       |-- __init__.py
-|       `-- command_modules
-|           |-- __init__.py
-|           `-- <MODULE_NAME>
-|               `-- __init__.py
-`-- setup.py
-`-- HISTORY.rst
-```
-
-You could create these files manually, or [create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
-
-You could also consider using [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
+There are two options to initialize a command module:
+1. Use [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
+2. [Create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
 
 **Create an \_\_init__.py for your module**
 
