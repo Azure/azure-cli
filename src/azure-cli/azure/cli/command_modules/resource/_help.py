@@ -1760,6 +1760,79 @@ examples:
             --definition-groups "[{ \\"name\\": \\"CostSaving\\" }, { \\"name\\": \\"Organizational\\" } ]"
 """
 
+helps['policy exemption'] = """
+type: group
+short-summary: Manage resource policy exemptions.
+"""
+
+helps['policy exemption create'] = """
+type: command
+short-summary: Create a policy exemption.
+examples:
+  - name: Create a policy exemption in default subscription.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver"
+  - name: Create a policy exemption in the resource group.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver" \\
+            --resource-group "myResourceGroup"
+  - name: Create a policy exemption in a management group.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/providers/Microsoft.Management/managementGroups/myMG/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver" \\
+            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+"""
+
+helps['policy exemption delete'] = """
+type: command
+short-summary: Delete a policy exemption.
+examples:
+  - name: Delete a policy exemption.
+    text: |
+        az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"
+    crafted: true
+"""
+
+helps['policy exemption list'] = """
+type: command
+short-summary: List policy exemptions.
+"""
+
+helps['policy exemption show'] = """
+type: command
+short-summary: Show a policy exemption.
+examples:
+  - name: Show a policy exemption.
+    text: |
+        az policy exemption show --name MyPolicyExemption --resource-group "myResourceGroup"
+    crafted: true
+"""
+
+helps['policy exemption update'] = """
+type: command
+short-summary: Update a policy exemption.
+examples:
+  - name: Update a policy exemption.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated"
+  - name: Update a policy exemption in the resource group.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated" \\
+            --resource-group "myResourceGroup"
+  - name: Update a policy exemption in a management group.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated" \\
+            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+"""
+
 helps['provider'] = """
 type: group
 short-summary: Manage resource providers.
