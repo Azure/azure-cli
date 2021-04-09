@@ -77,6 +77,7 @@ def load_command_table(self, _):
         g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('list_deleted'))
+        g.custom_command('show-deleted', 'get_deleted_vault_or_hsm')
         g.generic_update_command(
             'update', setter_name='update_vault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_vault',

@@ -565,6 +565,15 @@ examples:
     crafted: true
 """
 
+helps['keyvault show-deleted'] = """
+type: command
+short-summary: Show details of a deleted Vault or HSM.
+examples:
+  - name: Show details of a deleted key vault.
+    text: |
+        az keyvault show-deleted --name MyKeyVault
+"""
+
 helps['keyvault storage'] = """
 type: group
 short-summary: Manage storage accounts.

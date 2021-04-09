@@ -289,8 +289,8 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
 
-    if hsm_name:
-        raise InvalidArgumentValueError('Operation "purge" has not been supported for HSM.')
+    if hsm_name and 'keyvault recover' in cmd.name:
+        raise InvalidArgumentValueError('Operation "recover" has not been supported for HSM.')
 
     if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')
@@ -330,7 +330,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     if not resource:
         raise CLIError('No deleted Vault or HSM was found with name ' + resource_name)
 
-    if 'keyvault purge' not in cmd.name:
+    if 'keyvault purge' not in cmd.name and 'keyvault show-deleted' not in cmd.name:
         setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
 
         # resource_group_name must match the resource group of the deleted vault

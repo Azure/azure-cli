@@ -307,6 +307,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test keyvault delete
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
+        self.cmd('keyvault show-deleted -n {kv}', checks=self.check('type', 'Microsoft.KeyVault/deletedVaults'))
         self.cmd('keyvault purge -n {kv}')
         # ' will be parsed by shlex, so need escaping
         self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
