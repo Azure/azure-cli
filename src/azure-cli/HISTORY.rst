@@ -71,7 +71,7 @@ Release History
 * `az eventgrid [partner topic | system-topic] event-subscription`: Add support for delivery attribute (#17496)
 * `az eventgrid topic create`: Add support for creating topic for azure or azurearc (#17496)
 
-**interactive**
+**Interactive**
 
 * Fix #16931: Fix `KeyError` in `az interactive --update` (#17389)
 
