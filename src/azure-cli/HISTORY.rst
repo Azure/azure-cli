@@ -39,7 +39,7 @@ Release History
 * `az bicep build`: Add a parameter `--outdir` for specifying the output directory (#17547)
 * `az bicep build`: Add a parameter `--outfile` for specifying the output file path (#17547)
 * Fix an issue where checking version upgrade for Bicep CLI throws exception if GitHub API rate limit is hit (#17547)
-* Support policy exemption (#17565)
+* `az policy exemption`: Add new commands to support policy exemption (#17565)
 
 **Backup**
 
