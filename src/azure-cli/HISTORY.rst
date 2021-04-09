@@ -80,7 +80,7 @@ Release History
 * `az netappfiles account ad add`: Optional parameter added named allow-local-ldap-users (#17370)
 * `az netappfiles volume create`: Optional parameter added named ldap-enabled (#17370)
 * `az netappfiles volume backup status show`: Operation added (#17370)
-* Updated backup tests (#17492)
+* Update backup tests (#17492)
 
 **Network**
 
