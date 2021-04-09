@@ -92,8 +92,8 @@ Release History
 
 **RDBMS**
 
-* Allowing DB server private access from different subscription (#17502)
-* Modified server create with private network, fixed restore time bug (#17570)
+* Allow DB server private access from different subscription (#17502)
+* Modify server create with private network, fix restore time bug (#17570)
 
 **Search**
 
