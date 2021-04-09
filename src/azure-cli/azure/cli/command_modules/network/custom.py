@@ -3279,8 +3279,6 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
-
-
     load_balancer_resource = build_load_balancer_resource(
         cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
@@ -5717,7 +5715,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip.dns_settings = PublicIPAddressDnsSettings(
             domain_name_label=dns_name,
             reverse_fqdn=reverse_fqdn)
-    
+
     if edge_zone:
         public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
     return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
