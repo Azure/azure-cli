@@ -114,8 +114,8 @@ Release History
 
 **Synapse**
 
-* [BREAKING CHANGE] az synapse role assignment create: Role names at old version are not allowed, Sql Admin, Apache Spark Admin, Workspace Admin (#17476)
-* [BREAKING CHANGE] az synapse role assignment create: When --assignee argument can't  uniquely determine the principal object, the command will raise error instead of adding a role assignment for the uncertain principal object. (#17476)
+* [BREAKING CHANGE] `az synapse role assignment create`: Role names at old version are not allowed, Sql Admin, Apache Spark Admin, Workspace Admin (#17476)
+* [BREAKING CHANGE] `az synapse role assignment create`: When --assignee argument can't  uniquely determine the principal object, the command will raise error instead of adding a role assignment for the uncertain principal object. (#17476)
 * `az synapse role scope list`:  List all scopes synapse supports. (#17476)
 * `az synapse role assignment create/list/delete`: Adding --scope/--item-type/--item arguments to support manage role assignments based on scope. (#17476)
 * `az synapse role assignment create/list/delete`: Adding --assignee-object-id argument,  it will bypass Graph API and uniquely determine principal object instead of deducing principal object using --assignee argument. (#17476)
