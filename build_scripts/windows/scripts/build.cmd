@@ -9,10 +9,10 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.6.8
+set PYTHON_VERSION=3.8.9
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python368-32.zip"
+set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python389-32.zip"
 set PROPAGATE_ENV_CHANGE_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/propagate_env_change.zip"
 
 :: Set up the output directory and temp. directories
@@ -26,7 +26,7 @@ mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
-set PYTHON_DIR=%ARTIFACTS_DIR%\Python368-32
+set PYTHON_DIR=%ARTIFACTS_DIR%\Python389-32
 set PROPAGATE_ENV_CHANGE_DIR=%~dp0..\propagate_env_change
 
 set REPO_ROOT=%~dp0..\..\..
@@ -75,15 +75,14 @@ if not exist %PYTHON_DIR% (
     mkdir %PYTHON_DIR%
     pushd %PYTHON_DIR%
     echo Downloading Python.
-    curl -o Python368-32.zip %PYTHON_DOWNLOAD_URL% -k
-    unzip -q Python368-32.zip
+    curl -o Python389-32.zip %PYTHON_DOWNLOAD_URL% -k
+    unzip -q Python389-32.zip
     if %errorlevel% neq 0 goto ERROR
-    del Python368-32.zip
+    del Python389-32.zip
     echo Python downloaded and extracted successfully.
     popd
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
-%PYTHON_EXE% -m pip install --upgrade pip==21.0.1 setuptools==52.0.0
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
