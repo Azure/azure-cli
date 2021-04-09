@@ -1940,9 +1940,14 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
         self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
 
-    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    @mock.patch('msal.ConfidentialClientApplication.acquire_token_for_client', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_cred_for_service_principal', autospec=True)
     @mock.patch('msal.ClientApplication.acquire_token_by_refresh_token', autospec=True)
-    def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription', autospec=True)
+    def test_get_msal_token(self, get_subscription_mock, retrieve_token_for_user_mock,
+                            acquire_token_by_refresh_token_mock, retrieve_cred_for_service_principal_mock,
+                            acquire_token_for_client_mock):
         """
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
@@ -1951,15 +1956,27 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
-        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
-        profile._set_subscriptions(consolidated)
-
-        some_token_type = 'Bearer'
-        mock_retrieve_token_for_user.return_value = (some_token_type, TestProfile.raw_token1, TestProfile.token_entry1)
-        mock_acquire_token.return_value = {
-            'access_token': 'fake_access_token'
+        msal_result = {
+            'token_type': 'ssh-cert',
+            'scope': 'https://pas.windows.net/CheckMyAccess/Linux/user_impersonation https://pas.windows.net/CheckMyAccess/Linux/.default',
+            'expires_in': 3599,
+            'ext_expires_in': 3599,
+            'access_token': 'fake_cert'
         }
-        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
+
+        # User
+        get_subscription_mock.return_value = {
+            'tenantId': self.tenant_id,
+            'user': {
+                'name': self.user1,
+                'type': 'user'
+            },
+        }
+
+        retrieve_token_for_user_mock.return_value = ('Bearer', self.raw_token1, self.token_entry1)
+        acquire_token_by_refresh_token_mock.return_value = msal_result
+
+        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/.default"]
         data = {
             "token_type": "ssh-cert",
             "req_cnf": "fake_jwk",
@@ -1967,7 +1984,22 @@ class TestProfile(unittest.TestCase):
         }
         username, access_token = profile.get_msal_token(scopes, data)
         self.assertEqual(username, self.user1)
-        self.assertEqual(access_token, 'fake_access_token')
+        self.assertEqual(access_token, 'fake_cert')
+
+        # Service Principal
+        sp_id = '610a3200-0000-0000-0000-000000000000'
+        get_subscription_mock.return_value = {
+            'tenantId': self.tenant_id,
+            'user': {
+                'name': sp_id,
+                'type': 'servicePrincipal'
+            },
+        }
+        retrieve_cred_for_service_principal_mock.return_value = "some_secret"
+        acquire_token_for_client_mock.return_value = msal_result
+        username, access_token = profile.get_msal_token(scopes, data)
+        self.assertEqual(username, sp_id)
+        self.assertEqual(access_token, 'fake_cert')
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
