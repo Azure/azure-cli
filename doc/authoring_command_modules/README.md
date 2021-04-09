@@ -20,7 +20,7 @@ The document provides instructions and guidelines on how to author command modul
 <a name="heading_set_up"></a>Set Up
 ------
 
-Create you dev environment if you haven't already. This is how to do that.  
+Create your dev environment if you haven't already. This is how to do that.  
 
 Clone the repo, enter the repo directory then create your virtual environment.  
 
