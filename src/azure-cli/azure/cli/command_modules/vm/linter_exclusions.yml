@@ -67,6 +67,23 @@ vm encryption enable:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
+vm install-patches:
+    parameters:
+        classifications_to_include_win:
+            rule_exclusions:
+            - option_length_too_long
+        classifications_to_include_linux:
+            rule_exclusions:
+            - option_length_too_long
+        exclude_kbs_requiring_reboot:
+            rule_exclusions:
+            - option_length_too_long
+        package_name_masks_to_exclude:
+            rule_exclusions:
+            - option_length_too_long
+        package_name_masks_to_include:
+            rule_exclusions:
+            - option_length_too_long
 image create:
     parameters:
         os_type:
