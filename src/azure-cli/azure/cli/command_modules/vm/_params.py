@@ -1011,6 +1011,9 @@ def load_arguments(self, _):
                    help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
+        c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                   options_list=['--enable-auto-key-rotation', '--auto-rotation'],
+                   help='Enable automatic rotation of keys.')
     # endregion
 
     # region DiskAccess
