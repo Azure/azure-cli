@@ -1170,10 +1170,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.argument('expand', default=None)
+        c.argument('x_ms_snapshot', options_list=['--snapshot'], is_preview=True,
+                   help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
-        c.ignore('x_ms_snapshot')  # Ignore first before it is ready
 
-    for item in ['create', 'update']:
+    with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.ignore('x_ms_snapshot')
+
+    for item in ['create', 'update', 'snapshot']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
             t_enabled_protocols, t_root_squash, t_access_tier = \
                 self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
