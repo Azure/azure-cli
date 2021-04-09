@@ -550,6 +550,7 @@ class Profile:
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
+        # Make sure external_tenants_info only contains real external tenant (no current tenant).
         external_tenants_info = []
         if aux_tenants:
             external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
@@ -559,6 +560,10 @@ class Profile:
                 sub = self.get_subscription(ext_sub)
                 if sub[_TENANT_ID] != account[_TENANT_ID]:
                     external_tenants_info.append(sub[_TENANT_ID])
+
+        if external_tenants_info and (identity_type or in_cloud_console()):
+            raise CLIError("Cross-tenant authentication is not supported by managed identity and Cloud Shell. "
+                           "Please run `az login` with a user account or a service principal.")
 
         if identity_type is None:
             def _retrieve_token(sdk_resource=None):

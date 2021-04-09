@@ -3387,30 +3387,12 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._profile import Profile
 
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
         'TargetRegion')
     aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-
-    # Auxiliary tokens, pass it to init or operation
-    external_bearer_token = None
-    if aux_subscriptions:
-        profile = Profile(cli_ctx=cmd.cli_ctx)
-        resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-        cred, _, _ = profile.get_login_credentials(resource=resource,
-                                                   aux_subscriptions=aux_subscriptions)
-        _, _, _, external_tokens = cred.get_all_tokens('https://management.azure.com/.default')
-        if external_tokens:
-            external_token = external_tokens[0]
-            if len(external_token) >= 2:
-                external_bearer_token = external_token[0] + ' ' + external_token[1]
-            else:
-                logger.warning('Getting external tokens failed.')
-        else:
-            logger.warning('Getting external tokens failed.')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
@@ -3468,8 +3450,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         gallery_name=gallery_name,
         gallery_image_name=gallery_image_name,
         gallery_image_version_name=gallery_image_version,
-        gallery_image_version=image_version,
-        headers={'x-ms-authorization-auxiliary': external_bearer_token}
+        gallery_image_version=image_version
     )
 
 
@@ -3695,8 +3676,9 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 
 # disk encryption set
-def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
-                               key_url, source_vault, encryption_type=None, location=None, tags=None, no_wait=False):
+def create_disk_encryption_set(
+        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault, encryption_type=None,
+        location=None, tags=None, no_wait=False, enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
@@ -3706,9 +3688,10 @@ def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption
         source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                    namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     source_vault = SourceVault(id=source_vault)
-    keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    key_vault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
-                                            active_key=keyVault_and_key_reference, encryption_type=encryption_type)
+                                            active_key=key_vault_and_key_reference, encryption_type=encryption_type,
+                                            rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
 
@@ -3719,7 +3702,8 @@ def list_disk_encryption_sets(cmd, client, resource_group_name=None):
     return client.list()
 
 
-def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None):
+def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
+                               enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if not is_valid_resource_id(source_vault):
@@ -3729,6 +3713,8 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
         instance.active_key.key_url = key_url
     if source_vault:
         instance.active_key.source_vault.id = source_vault
+    if enable_auto_key_rotation is not None:
+        instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
     return instance
 
 # endregion
@@ -3754,5 +3740,18 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
     disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, disk_access_name, disk_access)
+
+# endregion
+
+
+# region install patches
+def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
+                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, no_wait=False):
+    VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
+    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot)
+    linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
+    install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
+
+    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
 
 # endregion
