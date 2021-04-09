@@ -1300,7 +1300,7 @@ def cli_cosmosdb_identity_assign(client,
     else:
         identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
     params = DatabaseAccountUpdateParameters(identity=identity)
-    async_cosmos_db_update = client.update(resource_group_name, account_name, params)
+    async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
 
@@ -1320,7 +1320,7 @@ def cli_cosmosdb_identity_remove(client,
     else:
         identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
     params = DatabaseAccountUpdateParameters(identity=identity)
-    async_cosmos_db_update = client.update(resource_group_name, account_name, params)
+    async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
 
@@ -1356,7 +1356,7 @@ def cli_cosmosdb_network_rule_add(cmd,
     for rule in existing.virtual_network_rules:
         virtual_network_rules.append(
             VirtualNetworkRule(id=rule.id,
-                               ignore_missing_v_net_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+                               ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))
         if rule.id == subnet:
             rule_already_exists = True
             logger.warning("The rule exists and will be overwritten")
@@ -1368,7 +1368,7 @@ def cli_cosmosdb_network_rule_add(cmd,
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
 
-    async_docdb_update = client.update(resource_group_name, account_name, params)
+    async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
@@ -1390,7 +1390,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
         if rule.id != subnet:
             virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
-                                   ignore_missing_v_net_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+                                   ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))
         else:
             rule_removed = True
     if not rule_removed:
@@ -1398,7 +1398,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
 
-    async_docdb_update = client.update(resource_group_name, account_name, params)
+    async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
@@ -1416,7 +1416,6 @@ def _update_private_endpoint_connection_status(client, resource_group_name, acco
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          account_name=account_name,
                                          private_endpoint_connection_name=private_endpoint_connection_name,
-                                         private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state,
                                          parameters=private_endpoint_connection)
 
 
