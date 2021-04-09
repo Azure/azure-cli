@@ -4696,5 +4696,105 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
 
+class NetworkExtendedLocation(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
+    def test_network_lb_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb',
+            'lb1': 'lb1',
+            'sku': 'standard',
+            'ip': 'pubip1',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku {sku} --public-ip-address {ip} --edge-zone {edge_name}')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=self.check('extendedLocation.name', '{edge_name}'))
+
+        self.cmd('network lb create -g {rg} -n {lb1} --vnet-name vnet1 --subnet subnet1 --edge-zone {edge_name}')
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_edge_zone', location='eastus2euap')
+    def test_network_nic_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'clitestvnet',
+            'nic': 'clitestnic',
+            'rg': resource_group,
+            'edge_name': 'microsoftrrdclab1'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
+                 checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet} --edge-zone {edge_name}',
+                 checks=self.check('NewNIC.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_edge_zone', location='eastus2euap')
+    def test_network_public_ip_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name}',
+                 checks=self.check('publicIp.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_edge_zone', location='eastus2euap')
+    def test_network_public_ip_prefix_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1-prefix',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network public-ip prefix create -g {rg} -n {ip1} --length 30 --edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+    @unittest.skip('wait for service ready')
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_edge_zone', location='eastus2euap')
+    def test_network_vnet_gateway_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1',
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --public-ip-address {ip1} '
+                 '--edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
+    def test_network_private_endpoint_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+        })
+        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address ip --sku Standard')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --edge-zone {edge_name}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} '
+                 '--disable-private-link-service-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} '
+                 '--disable-private-endpoint-network-policies')
+
+        pls = self.cmd('network private-link-service create -g {rg} -n pls --vnet-name {vnet} --subnet {subnet1} '
+                       '--lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd --edge-zone {edge_name}',
+                       checks=self.check('extendedLocation.name', '{edge_name}')).get_output_in_json()
+        self.kwargs['pls_id'] = pls['id']
+        self.cmd('network private-endpoint create -g {rg} -n pe --vnet-name {vnet} --subnet {subnet2} '
+                 '--private-connection-resource-id {pls_id} --connection-name cn --edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+
 if __name__ == '__main__':
     unittest.main()
