@@ -47,7 +47,7 @@ thrown whilst attempting to load your module.
 ------
 
 There are two options to initialize a command module:
-1. Use [Code-gen tool](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4) to generate code automatically.
+1. Use [Azure CLI Code Generator tool](https://github.com/Azure/autorest.az#how-does-azure-cli-code-generator-work) to generate code automatically.
 2. [Create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
 
 **Create an \_\_init__.py for your module**
