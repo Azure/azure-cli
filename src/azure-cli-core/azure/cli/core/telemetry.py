@@ -537,7 +537,10 @@ def _get_env_string():
 
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_azure_subscription_id():
-    return _get_profile().get_subscription_id()
+    try:
+        return _get_profile().get_subscription_id()
+    except:
+        return '{}'
 
 
 def _get_shell_type():

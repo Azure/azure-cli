@@ -55,7 +55,7 @@ def hash256_result(func):
     @wraps(func)
     def _decorator(*args, **kwargs):
         val = func(*args, **kwargs)
-        if not val:
+        if val is None:
             raise ValueError('Return value is None')
         if not isinstance(val, str):
             raise ValueError('Return value is not string')

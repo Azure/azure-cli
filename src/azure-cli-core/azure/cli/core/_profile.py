@@ -494,32 +494,39 @@ class Profile:
     def get_current_account_user(self):
         try:
             active_account = self.get_subscription()
+            if not active_account:
+                raise CLIError('There are no active accounts.')
+            return active_account[_USER_ENTITY][_USER_NAME]
         except CLIError:
-            raise CLIError('There are no active accounts.')
+            return ''
 
-        return active_account[_USER_ENTITY][_USER_NAME]
 
     def get_subscription(self, subscription=None):  # take id or name
-        subscriptions = self.load_cached_subscriptions()
-        if not subscriptions:
-            raise CLIError(_AZ_LOGIN_MESSAGE)
-
-        result = [x for x in subscriptions if (
-            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
-            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]
-        if not result and subscription:
-            raise CLIError("Subscription '{}' not found. "
-                           "Check the spelling and casing and try again.".format(subscription))
-        if not result and not subscription:
-            raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
-        if len(result) > 1:
-            raise CLIError("Multiple subscriptions with the name '{}' found. "
-                           "Specify the subscription ID.".format(subscription))
-        return result[0]
+        try:
+            subscriptions = self.load_cached_subscriptions()
+            if not subscriptions:
+                raise CLIError(_AZ_LOGIN_MESSAGE)
+            result = [x for x in subscriptions if (
+                not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
+                subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
+                    _SUBSCRIPTION_NAME].lower()])]
+            if not result and subscription:
+                raise CLIError("Subscription '{}' not found. "
+                               "Check the spelling and casing and try again.".format(subscription))
+            if not result and not subscription:
+                raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
+            if len(result) > 1:
+                raise CLIError("Multiple subscriptions with the name '{}' found. "
+                               "Specify the subscription ID.".format(subscription))
+            return result[0]
+        except:
+            return {}
 
     def get_subscription_id(self, subscription=None):  # take id or name
-        return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
+        try:
+            return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
+        except :
+            return ''
 
     def get_access_token_for_resource(self, username, tenant, resource):
         tenant = tenant or 'common'
