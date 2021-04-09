@@ -36,8 +36,8 @@ Release History
 * [BREAKING CHANGE] `az bicep build`: Change the parameter `--files` to `--file` (#17547)
 * [BREAKING CHANGE] `az bicep decompile`: Change the parameter `--files` to `--file` (#17547)
 * Fix #17379: bicep auto install results in invalid json output from deployment (#17380)
-* `az bicep build`: Add a parameter --outdir for specifying the output directory (#17547)
-* `az bicep build`: Add a parameter --outfile for specifying the output file path (#17547)
+* `az bicep build`: Add a parameter `--outdir` for specifying the output directory (#17547)
+* `az bicep build`: Add a parameter `--outfile` for specifying the output file path (#17547)
 * Fix an issue where checking version upgrade for Bicep CLI throws exception if GitHub API rate limit is hit (#17547)
 * Support policy exemption (#17565)
 
