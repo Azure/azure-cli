@@ -497,8 +497,8 @@ class AzCliCommandParser(CLICommandParser):
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
-                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choice}.".format(
-                    prog=self.prog, value=value, param=parameter, choice=', '.join(sorted([str(x) for x in action.choices])))
+                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
+                    prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 az_error = InvalidArgumentValueError(error_msg)
 
