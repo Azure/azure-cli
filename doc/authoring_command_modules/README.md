@@ -27,7 +27,7 @@ Clone the repo, enter the repo directory then create your virtual environment.
 For example:
 ```
 git clone https://github.com/Azure/azure-cli.git
-cd azure-cli
+git clone https://github.com/Azure/azure-cli-extensions.git
 python -m venv env
 source env/bin/activate
 azdev setup -c azure-cli -r azure-cli-extensions
