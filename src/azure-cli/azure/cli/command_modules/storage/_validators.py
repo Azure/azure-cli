@@ -181,12 +181,12 @@ def validate_client_parameters(cmd, namespace):
 There are no credentials provided in your command and environment, we will query for account key for your storage account.
 It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
 """
-        if hasattr(n, 'auth_mode') or hasattr(n, 'token_credential'):
+        if 'auth_mode' in cmd.arguments:
             message += """
 You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
 For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
 """
-        logger.warning('{}In addition, setting the corresponding environment variables can avoid inputting credentials '
+        logger.warning('{}\nIn addition, setting the corresponding environment variables can avoid inputting credentials '
                        'in your command. Please use --help to get more information about environment variable usage.'.format(message))
         try:
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
