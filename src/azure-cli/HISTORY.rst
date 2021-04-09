@@ -53,7 +53,7 @@ Release History
 
 * `az ssh vm`: Support VM SSH with Service Principal (#17554)
 * Add VMSS Rolling Upgrade opt (#17580)
-* New command: vm install-patches (#17549)
+* New command: `vm install-patches` (#17549)
 * Disk encryption set: add --enable-auto-key-rotation (#17577)
 
 **Container**
