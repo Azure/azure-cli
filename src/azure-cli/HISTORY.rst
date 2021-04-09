@@ -29,7 +29,7 @@ Release History
 * Fix #17219: Fix ssl bind bug (#17479)
 * Remove preview flag for Python 3.9 in create function app command (#17546)
 * Bugfix: Handle if only single publish profile is returned (#17495)
-* Fixes#16203: az webapp log tail supports webapps running on Linix. (#17294)
+* Fix #16203: az webapp log tail supports webapps running on Linix. (#17294)
 
 **ARM**
 
