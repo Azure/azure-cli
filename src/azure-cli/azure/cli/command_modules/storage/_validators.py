@@ -186,8 +186,9 @@ It is recommended to provide --connection-string, --account-key or --sas-token i
 You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
 For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
 """
-        logger.warning('{}\nIn addition, setting the corresponding environment variables can avoid inputting credentials '
-                       'in your command. Please use --help to get more information about environment variable usage.'.format(message))
+        logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
+                       'credentials in your command. Please use --help to get more information about environment '
+                       'variable usage.', message)
         try:
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
