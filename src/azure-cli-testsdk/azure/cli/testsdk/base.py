@@ -214,6 +214,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         self.kwargs = {}
         self.test_resources_count = 0
 
+    def setUp(self):
         patch_main_exception_handler(self)
 
     def cmd(self, command, checks=None, expect_failure=False):

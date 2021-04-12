@@ -384,7 +384,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(output, subs)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
-    @mock.patch.dict('os.environ')
+    @mock.patch.dict('os.environ', clear=True)
     def test_login_with_environment_credential_service_principal(self, get_client_class_mock):
         os.environ['AZURE_TENANT_ID'] = self.service_principal_tenant_id
         os.environ['AZURE_CLIENT_ID'] = self.service_principal_id
@@ -1616,7 +1616,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'foo_tenant.onmicrosoft.com')
+        sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'footenant.onmicrosoft.com')
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None)
         consolidated += profile._normalize_properties('http://foo', [sp_subscription1], True)
         profile._set_subscriptions(consolidated)
