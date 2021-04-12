@@ -14,7 +14,7 @@ import traceback
 import uuid
 from collections import defaultdict
 from functools import wraps
-
+from knack.util import CLIError
 import azure.cli.core.decorators as decorators
 
 PRODUCT_NAME = 'azurecli'
@@ -529,8 +529,9 @@ def _get_hash_machine_id():
 def _get_user_azure_id():
     try:
         return _get_profile().get_current_account_user()
-    except:
+    except CLIError:
         return ''
+
 
 def _get_env_string():
     return _remove_cmd_chars(_remove_symbols(str([v for v in os.environ
@@ -541,7 +542,7 @@ def _get_env_string():
 def _get_azure_subscription_id():
     try:
         return _get_profile().get_subscription_id()
-    except:
+    except CLIError:
         return ''
 
 
