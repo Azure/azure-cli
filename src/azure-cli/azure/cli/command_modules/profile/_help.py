@@ -100,6 +100,7 @@ helps['account export-msal-cache'] = """
 type: command
 short-summary: Export MSAL cache in plain text.
 long-summary: >
+    By default export to '~/.azure/msal.cache.snapshot.json'.
     The exported cache is unencrypted.
     It contains login information of all logged-in users. Make sure you protect it safely.
 

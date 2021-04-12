@@ -10,12 +10,6 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from azure.identity import (
-    AuthenticationRecord,
-    InteractiveBrowserCredential,
-    DeviceCodeCredential,
-    UsernamePasswordCredential,
-    ClientSecretCredential,
-    CertificateCredential,
     ManagedIdentityCredential,
     EnvironmentCredential,
     TokenCachePersistenceOptions

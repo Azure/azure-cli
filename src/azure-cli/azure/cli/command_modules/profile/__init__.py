@@ -107,7 +107,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('clear_credential', clear_credential_type)
 
         with self.argument_context('account export-msal-cache') as c:
-            c.argument('path', help='The path to export the MSAL cache.', default='~/.azure/msal.cache.snapshot.json')
+            c.argument('path', help='The path to export the MSAL cache.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
