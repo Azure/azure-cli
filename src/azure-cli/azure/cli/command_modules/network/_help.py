@@ -66,7 +66,11 @@ examples:
   - name: Add to the backend address pool by using backend server IP address.
     text: |
         az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool \\
-            --add backendAddresses "{ \"ip_address\": \"{10.0.0.13}\" }"
+            --add backendAddresses ipAddress=10.0.0.4
+  - name: Remove an existing ip of the backend address pool("0" is the index).
+    text: |
+        az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool \\
+            --remove backendAddresses 0
 """
 
 helps['network application-gateway auth-cert'] = """
