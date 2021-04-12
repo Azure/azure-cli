@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import collections
 
 import os
@@ -388,21 +386,8 @@ class Profile:
             if is_environment:
                 subscription_dict[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL] = True
 
-            # For subscription account from Subscriptions - List 2019-06-01 and later.
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
-                if hasattr(s, 'home_tenant_id'):
-                    subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
-                if hasattr(s, 'managed_by_tenants'):
-                    if s.managed_by_tenants is None:
-                        # managedByTenants is missing from the response. This is a known service issue:
-                        # https://github.com/Azure/azure-rest-api-specs/issues/9567
-                        # pylint: disable=line-too-long
-                        raise CLIError("Invalid profile is used for cloud '{cloud_name}'. "
-                                       "To configure the cloud profile, run `az cloud set --name {cloud_name} --profile <profile>(e.g. 2019-03-01-hybrid)`. "
-                                       "For more information about using Azure CLI with Azure Stack, see "
-                                       "https://docs.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2"
-                                       .format(cloud_name=self.cli_ctx.cloud.name))
-                    subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+                _transform_subscription_for_multiapi(s, subscription_dict)
 
             if cert_sn_issuer_auth:
                 subscription_dict[_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
@@ -1036,3 +1021,19 @@ class SubscriptionFinder:
             from azure.cli.core.profiles._shared import get_client_class
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
         return client_type
+
+
+def _transform_subscription_for_multiapi(s, s_dict):
+    """
+    Transforms properties from Subscriptions - List 2019-06-01 and later to the subscription dict.
+
+    :param s: subscription object
+    :param s_dict: subscription dict
+    """
+    if hasattr(s, 'home_tenant_id'):
+        s_dict[_HOME_TENANT_ID] = s.home_tenant_id
+    if hasattr(s, 'managed_by_tenants'):
+        if s.managed_by_tenants is None:
+            s_dict[_MANAGED_BY_TENANTS] = None
+        else:
+            s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]

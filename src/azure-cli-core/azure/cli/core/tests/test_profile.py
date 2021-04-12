@@ -17,7 +17,8 @@ from copy import deepcopy
 from azure.core.credentials import AccessToken
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _USE_VENDORED_SUBSCRIPTION_SDK,
-                                     _detect_adfs_authority, _attach_token_tenant)
+                                     _detect_adfs_authority, _attach_token_tenant,
+                                     _transform_subscription_for_multiapi)
 if _USE_VENDORED_SUBSCRIPTION_SDK:
     from azure.cli.core.vendored_sdks.subscriptions.models import \
         (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
@@ -1953,30 +1954,6 @@ class MSRestAzureAuthStub:
         self._token = value
 
 
-class TestProfileUtils(unittest.TestCase):
-    def test_get_authority_and_tenant(self):
-        from azure.cli.core._profile import _detect_adfs_authority
-
-        # Public cloud, without tenant
-        expected_authority = "https://login.microsoftonline.com"
-        self.assertEqual(_detect_adfs_authority("https://login.microsoftonline.com", None),
-                         (expected_authority, None))
-        # Public cloud, with tenant
-        self.assertEqual(_detect_adfs_authority("https://login.microsoftonline.com", '00000000-0000-0000-0000-000000000001'),
-                         (expected_authority, '00000000-0000-0000-0000-000000000001'))
-
-        # ADFS, without tenant
-        expected_authority = "https://adfs.redmond.azurestack.corp.microsoft.com"
-        self.assertEqual(_detect_adfs_authority("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", None),
-                         (expected_authority, 'adfs'))
-        # ADFS, without tenant (including a trailing /)
-        self.assertEqual(_detect_adfs_authority("https://adfs.redmond.azurestack.corp.microsoft.com/adfs/", None),
-                         (expected_authority, 'adfs'))
-        # ADFS, with tenant
-        self.assertEqual(_detect_adfs_authority("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", '00000000-0000-0000-0000-000000000001'),
-                         (expected_authority, 'adfs'))
-
-
 class TestUtils(unittest.TestCase):
     def test_detect_adfs_authority(self):
         # Public cloud
@@ -2017,6 +1994,52 @@ class TestUtils(unittest.TestCase):
         _attach_token_tenant(subscription, "token_tenant_1")
         self.assertEqual(subscription.tenant_id, "token_tenant_1")
         self.assertEqual(subscription.home_tenant_id, "home_tenant_1")
+
+    def test_transform_subscription_for_multiapi(self):
+
+        class SimpleSubscription:
+            pass
+
+        class SimpleManagedByTenant:
+            pass
+
+        tenant_id = "00000001-0000-0000-0000-000000000000"
+
+        # No 2019-06-01 property is set.
+        s = SimpleSubscription()
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {}
+
+        # home_tenant_id is set.
+        s = SimpleSubscription()
+        s.home_tenant_id = tenant_id
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000'}
+
+        # managed_by_tenants is set, but is None. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = None
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': None}
+
+        # managed_by_tenants is set, but is []. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = []
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': []}
+
+        # managed_by_tenants is set, and has valid items. It is preserved.
+        s = SimpleSubscription()
+        t = SimpleManagedByTenant()
+        t.tenant_id = tenant_id
+        s.managed_by_tenants = [t]
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': [{"tenantId": tenant_id}]}
 
 
 if __name__ == '__main__':
