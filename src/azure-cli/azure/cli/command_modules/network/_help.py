@@ -2728,6 +2728,15 @@ examples:
             --path primary --peering-name AzurePrivatePeering
 """
 
+helps['network express-route list-route-tables-summary'] = """
+type: command
+short-summary: Show the current routing table summary of an ExpressRoute circuit peering.
+examples:
+  - name: List Route Table Summary
+    text: |
+        az network express-route list-route-tables-summary -g MyResourceGroup -n MyCircuit --path primary --peering-name AzurePrivatePeering
+"""
+
 helps['network express-route list-service-providers'] = """
 type: command
 short-summary: List available ExpressRoute service providers.
@@ -2770,6 +2779,15 @@ examples:
 helps['network express-route peering connection show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute circuit connection.
+"""
+
+helps['network express-route peering connection list'] = """
+type: command
+short-summary: List all global reach connections associated with a private peering in an express route circuit.
+examples:
+  - name: List ExpressRouteCircuit Connection
+    text: |
+        az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup
 """
 
 helps['network express-route peering create'] = """
@@ -2839,6 +2857,15 @@ examples:
     text: |
         az network express-route peering update --circuit-name MyCircuit --name MyPeering --peer-asn 10002 --primary-peer-subnet 2002:db00::/126 --resource-group MyResourceGroup --secondary-peer-subnet 2003:db00::/126 --shared-key Abc123 --vlan-id 103
     crafted: true
+"""
+
+helps['network express-route peering get-stats'] = """
+type: command
+short-summary: Get all traffic stats of an ExpressRoute peering.
+examples:
+  - name: Get ExpressRoute Circuit Peering Traffic Stats
+    text: |
+        az network express-route peering get-stats --circuit-name MyCircuit --name MyPeering --resource-group MyResourceGroup
 """
 
 helps['network express-route port'] = """
