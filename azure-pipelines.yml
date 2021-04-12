@@ -372,31 +372,39 @@ jobs:
 
     displayName: 'Test pip Install'
 
-- job: UnitTest
-  displayName: Unit Test for Core and Telemetry
+- job: TestCore
+  displayName: Unit Test for Core
   timeoutInMinutes: 10
-
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
-        tox_env: 'py36'
       Python38:
         python.version: '3.8'
-        tox_env: 'py38'
   steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python $(python.version)'
-      inputs:
-        versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip tox
-      displayName: 'Install pip and tox'
-    - bash: ./scripts/ci/unittest.sh
-      displayName: 'Run Unit Test'
-      env:
-        TOXENV: $(tox_env)
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-core'
+
+- job: TestTelemetry
+  displayName: Unit Test for Telemetry
+  timeoutInMinutes: 10
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-telemetry'
 
 - job: IntegrationTestAgainstProfiles
   displayName: Integration Test against Profiles
@@ -438,23 +446,6 @@ jobs:
       parameters:
         pythonVersion: '$(python.version)'
         profile: 'latest'
-
-- job: TestCore
-  displayName: Test Core
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-16.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        module: 'azure-cli-core'
 
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
