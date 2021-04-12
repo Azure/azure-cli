@@ -3,10 +3,127 @@
 Release History
 ===============
 
-2.21.0.1
+2.22.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.22.0
+++++++
+
+**ACR**
+
+* [BREAKING CHANGE] `az acr connected-registry install info`: Replace keys ACR_REGISTRY_NAME, ACR_SYNC_TOKEN_NAME, ACR_SYNC_TOKEN_PASSWORD, ACR_PARENT_GATEWAY_ENDPOINT, and ACR_PARENT_PROTOCOL with a new connected string key, ACR_REGISTRY_CONNECTION_STRING. (#17152)
+* [BREAKING CHANGE] `az acr connected-registry install renew-credentials`: Replace keys ACR_REGISTRY_NAME, ACR_SYNC_TOKEN_NAME, ACR_SYNC_TOKEN_PASSWORD, ACR_PARENT_GATEWAY_ENDPOINT, and ACR_PARENT_PROTOCOL with a new connected string key, ACR_REGISTRY_CONNECTION_STRING. (#17152)
+* `az acr connected-registry create`: Verify before the creation of the token and sync scope map that all ancestors are active. (#17566)
+* `az acr connected-registry create`: Add the repository and gateway permissions required for creation to all the ancestors of the new connected registry if needed prior to the connected registry creation. (#17566)
+* `az acr connected-registry delete`: Remove the gateway permissions of the deleted resources from all its ancestors' sync scope maps. (#17566)
+* `az acr connected-registry repo`: New command to add repository permissions to a connected registry and all its ancestors' sync scope maps, and remove repository permissions from the connected registry and all its descendants' sync scope maps (#17566)
+
+**AKS**
+
+* `az aks create`: Add support for `--private-dns-zone` and `--fqdn-subdomain` feature (#17430)
+
+**App Config**
+
+* Configure max line width for YAML parser to stop wrapping output (#17401)
+* Fix bug in print preview of restore command (#17344)
+
+**App Service**
+
+* Fix #17219: Fix ssl bind bug (#17479)
+* Remove preview flag for Python 3.9 in create function app command (#17546)
+* Bugfix: Handle if only single publish profile is returned (#17495)
+* Fix #16203: az webapp log tail supports webapps running on Linix. (#17294)
+
+**ARM**
+
+* [BREAKING CHANGE] `az bicep build`: Change the parameter `--files` to `--file` (#17547)
+* [BREAKING CHANGE] `az bicep decompile`: Change the parameter `--files` to `--file` (#17547)
+* Fix #17379: bicep auto install results in invalid json output from deployment (#17380)
+* `az bicep build`: Add a parameter `--outdir` for specifying the output directory (#17547)
+* `az bicep build`: Add a parameter `--outfile` for specifying the output file path (#17547)
+* Fix an issue where checking version upgrade for Bicep CLI throws exception if GitHub API rate limit is hit (#17547)
+* `az policy exemption`: Add new commands to support policy exemption (#17565)
+
+**Backup**
+
+* Fix #14776: Fix `--force` parameter functionality for `az backup vault delete` command (#16957)
+* Fix on demand backup (#17367)
+* `az backup protectable-item list`: Add optional parameter `--backup-management-type` (#17414)
+* Fix policy create with rgNamePrefix and rgNameSuffix (#17571)
+* `az backup protectable-item list`: Add `--server-name` as an optional argument (#17614)
+
+**Compute**
+
+* `az ssh vm`: Support VM SSH with Service Principal (#17554)
+* Add VMSS Rolling Upgrade opt (#17580)
+* New command: `vm install-patches` (#17549)
+* Disk encryption set: Add `--enable-auto-key-rotation` (#17577)
+
+**Container**
+
+* Fix #16499: `az container create`: Fix handling of return value from network_profiles.create_or_update (#17486)
+
+**Cosmos DB**
+
+* Support for managed service identity & default identity (#17583)
+
+**EventGrid**
+
+* `az eventgrid system-topic create/update`: Add MSI Support (#17361)
+* `az eventgrid [partner topic | system-topic] event-subscription`: Add support for StorageQueueMessageTTL, AdvancedFilters, EnableAdvancedFilteringOnArrays (#17440)
+* `az eventgrid [partner topic | system-topic] event-subscription`: Add support for delivery attribute (#17496)
+* `az eventgrid topic create`: Add support for creating topic for azure or azurearc (#17496)
+
+**Interactive**
+
+* Fix #16931: Fix `KeyError` in `az interactive --update` (#17389)
+
+**NetAppFiles**
+
+* `az netappfiles account ad add`: Optional parameter added named allow-local-ldap-users (#17370)
+* `az netappfiles volume create`: Optional parameter added named ldap-enabled (#17370)
+* `az netappfiles volume backup status show`: Operation added (#17370)
+* Update backup tests (#17492)
+
+**Network**
+
+* `az network vnet-gateway`: `--vpn-auth-type` allow multi value (#17505)
+
+**Packaging**
+
+* [BREAKING CHANGE] RPM installed az now uses `python3` instead of hard-coded `/usr/bin/python3`. (#17491)
+
+**RDBMS**
+
+* Allow DB server private access from different subscription (#17502)
+* Modify server create with private network, fix restore time bug (#17570)
+
+**Search**
+
+* `az search service create`: Add async (--no-wait) options. (#17446)
+* `az search service update`: Add async (--no-wait) options. (#17446)
+* `az search shared-private-link-resource create`: Add async (--no-wait) options. (#17446)
+* `az search shared-private-link-resource update`: Add async (--no-wait) options. (#17446)
+
+**Service Fabric**
+
+* Add managed application cli commands (#17404)
+
+**Storage**
+
+* `az storage fs directory upload/download`: Support adls gen2 file system directory upload&download (#17292)
+* `az storage fs file list`: Support --show-next-marker (#17408)
+* `az storage share-rm`: Support create/show/delete snapshots (#17449)
+
+**Synapse**
+
+* [BREAKING CHANGE] `az synapse role assignment create`: Role names at old version are not allowed, Sql Admin, Apache Spark Admin, Workspace Admin (#17476)
+* [BREAKING CHANGE] `az synapse role assignment create`: When --assignee argument can't  uniquely determine the principal object, the command will raise error instead of adding a role assignment for the uncertain principal object. (#17476)
+* `az synapse role scope list`:  List all scopes synapse supports. (#17476)
+* `az synapse role assignment create/list/delete`: Add --scope/--item-type/--item arguments to support manage role assignments based on scope. (#17476)
+* `az synapse role assignment create/list/delete`: Add --assignee-object-id argument, it will bypass Graph API and uniquely determine principal object instead of deducing principal object using --assignee argument. (#17476)
 
 2.21.0
 ++++++

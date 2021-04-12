@@ -5,7 +5,6 @@ parameters:
   - name: CLIExtensionRepoPath
     type: string
     default: ''
-
 steps:
   - bash: |
       set -ev
@@ -14,13 +13,13 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
       python -m pip install -U pip
-      pip install azdev==0.1.29
+      pip install azdev==0.1.30
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
-        azdev setup -c $CLI_REPO_PATH
+        azdev setup -c $CLI_REPO_PATH --debug
       else
-        azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
+        azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH --debug
       fi
     displayName: 'Azdev Setup'
     env:

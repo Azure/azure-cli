@@ -25,14 +25,18 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    DeliveryRuleCacheExpirationAction, CacheExpirationActionParameters,
                                    DeliveryRuleRequestHeaderAction, HeaderActionParameters,
                                    DeliveryRuleResponseHeaderAction, DeliveryRuleCacheKeyQueryStringAction,
-                                   CacheKeyQueryStringActionParameters, UrlRedirectAction,
-                                   DeliveryRuleAction, UrlRedirectActionParameters,
-                                   UrlRewriteAction, UrlRewriteActionParameters, ErrorResponseException)
+                                   CacheKeyQueryStringActionParameters, UrlRedirectAction, ValidateCustomDomainInput,
+                                   DeliveryRuleAction, UrlRedirectActionParameters, LoadParameters,
+                                   UrlRewriteAction, UrlRewriteActionParameters, PurgeParameters,
+                                   CheckNameAvailabilityInput, CustomDomainParameters, ProbeProtocol,
+                                   HealthProbeRequestType, RequestMethodOperator)
 
+from azure.mgmt.cdn.models._cdn_management_client_enums import CacheType
 from azure.mgmt.cdn.operations import (OriginsOperations, OriginGroupsOperations)
 
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import (sdk_no_wait)
-from azure.cli.core.azclierror import (ResourceNotFoundError)
+from azure.core.exceptions import (ResourceNotFoundError)
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -70,6 +74,24 @@ def list_profiles(client, resource_group_name=None):
             (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door)]
 
 
+def check_name_availability(client, name):
+    """Check the availability of a resource name. This is needed for resources
+    where name is globally unique, such as a CDN endpoint.
+    :param name: The resource name to validate.
+    :type name: str
+    """
+
+    validate_input = CheckNameAvailabilityInput(name=name)
+
+    return client.check_name_availability(validate_input)
+
+
+def validate_custom_domain(client, resource_group_name, profile_name, endpoint_name, host_name):
+    validate_input = ValidateCustomDomainInput(host_name=host_name)
+
+    return client.endpoints.validate_custom_domain(resource_group_name, profile_name, endpoint_name, validate_input)
+
+
 def get_profile(client, resource_group_name, profile_name):
     profile = client.profiles.get(resource_group_name, profile_name)
     if profile.sku.name in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
@@ -84,13 +106,8 @@ def delete_profile(client, resource_group_name, profile_name):
     profile = None
     try:
         profile = client.profiles.get(resource_group_name, profile_name)
-    except ErrorResponseException as e:
-        props = getattr(e.inner_exception, 'additional_properties', {})
-        if not isinstance(props, dict) or not isinstance(props.get('error'), dict):
-            raise e
-        props = props['error']
-        if props.get('code') != 'ResourceNotFound':
-            raise e
+    except ResourceNotFoundError:
+        pass
 
     if profile is None or profile.sku.name in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
         def get_long_running_output(_):
@@ -99,7 +116,7 @@ def delete_profile(client, resource_group_name, profile_name):
         logger.warning('Standard_AzureFrontDoor and Premium_AzureFrontDoor are only supported for AFD profiles')
         return LROPoller(client, None, get_long_running_output, NoPolling())
 
-    return client.profiles.delete(resource_group_name, profile_name)
+    return client.profiles.begin_delete(resource_group_name, profile_name)
 
 
 def update_endpoint(instance,
@@ -165,7 +182,8 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleRequestMethodCondition(
             parameters=RequestMethodMatchConditionParameters(
                 match_values=match_values,
-                negate_condition=negate_condition
+                negate_condition=negate_condition,
+                operator=RequestMethodOperator.EQUAL
             ))
     if match_variable == 'QueryString':
         return DeliveryRuleQueryStringCondition(
@@ -213,7 +231,8 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleRequestSchemeCondition(
             parameters=RequestSchemeMatchConditionParameters(
                 match_values=match_values,
-                negate_condition=negate_condition
+                negate_condition=negate_condition,
+                operator=RequestMethodOperator.EQUAL
             ))
     if match_variable == 'UrlPath':
         return DeliveryRuleUrlPathCondition(
@@ -243,13 +262,15 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleHttpVersionCondition(
             parameters=HttpVersionMatchConditionParameters(
                 match_values=match_values,
-                negate_condition=negate_condition
+                negate_condition=negate_condition,
+                operator=RequestMethodOperator.EQUAL
             ))
     if match_variable == 'IsDevice':
         return DeliveryRuleIsDeviceCondition(
             parameters=IsDeviceMatchConditionParameters(
                 match_values=match_values,
-                negate_condition=negate_condition
+                negate_condition=negate_condition,
+                operator=RequestMethodOperator.EQUAL
             ))
     if match_variable == 'Cookies':
         return DeliveryRuleCookiesCondition(
@@ -273,7 +294,8 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         return DeliveryRuleCacheExpirationAction(
             parameters=CacheExpirationActionParameters(
                 cache_behavior=cache_behavior,
-                cache_duration=cache_duration
+                cache_duration=cache_duration,
+                cache_type=CacheType.ALL
             ))
     if action_name in ('RequestHeader', 'ModifyRequestHeader'):
         return DeliveryRuleRequestHeaderAction(
@@ -355,7 +377,7 @@ def add_rule(client, resource_group_name, profile_name, endpoint_name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
+    return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def add_condition(client, resource_group_name, profile_name, endpoint_name,
@@ -373,7 +395,7 @@ def add_condition(client, resource_group_name, profile_name, endpoint_name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
+    return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def add_action(client, resource_group_name, profile_name, endpoint_name,
@@ -397,7 +419,7 @@ def add_action(client, resource_group_name, profile_name, endpoint_name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
+    return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_name):
@@ -415,7 +437,7 @@ def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_n
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
+    return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def remove_condition(client, resource_group_name, profile_name, endpoint_name, rule_name, index):
@@ -433,7 +455,7 @@ def remove_condition(client, resource_group_name, profile_name, endpoint_name, r
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
+    return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def remove_action(client, resource_group_name, profile_name, endpoint_name, rule_name, index):
@@ -451,7 +473,7 @@ def remove_action(client, resource_group_name, profile_name, endpoint_name, rule
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
+    return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,
@@ -475,20 +497,37 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
     if is_compression_enabled and not endpoint.content_types_to_compress:
         endpoint.content_types_to_compress = default_content_types()
 
-    return sdk_no_wait(no_wait, client.endpoints.create, resource_group_name, profile_name, name, endpoint)
+    return sdk_no_wait(no_wait, client.endpoints.begin_create, resource_group_name, profile_name, name, endpoint)
+
+
+def purge_endpoint_content(client, resource_group_name, profile_name, endpoint_name,
+                           content_paths, no_wait=None):
+    purge_paramters = PurgeParameters(content_paths=content_paths)
+
+    return sdk_no_wait(no_wait, client.endpoints.begin_purge_content, resource_group_name,
+                       profile_name, endpoint_name, purge_paramters)
+
+
+def load_endpoint_content(client, resource_group_name, profile_name, endpoint_name,
+                          content_paths, no_wait=None):
+    load_paramters = LoadParameters(content_paths=content_paths)
+
+    return sdk_no_wait(no_wait, client.endpoints.begin_load_content, resource_group_name, profile_name,
+                       endpoint_name, load_paramters)
 
 
 # pylint: disable=unused-argument
 def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, custom_domain_name,
                          hostname, location=None, tags=None):
-    return client.custom_domains.create(resource_group_name,
-                                        profile_name,
-                                        endpoint_name,
-                                        custom_domain_name,
-                                        hostname)
+
+    return client.custom_domains.begin_create(resource_group_name,
+                                              profile_name,
+                                              endpoint_name,
+                                              custom_domain_name,
+                                              CustomDomainParameters(host_name=hostname))
 
 
-def enable_custom_https(client, resource_group_name, profile_name, endpoint_name,
+def enable_custom_https(cmd, client, resource_group_name, profile_name, endpoint_name,
                         custom_domain_name, user_cert_subscription_id=None, user_cert_group_name=None,
                         user_cert_vault_name=None, user_cert_secret_name=None, user_cert_secret_version=None,
                         user_cert_protocol_type=None, min_tls_version=None):
@@ -499,7 +538,9 @@ def enable_custom_https(client, resource_group_name, profile_name, endpoint_name
                                        KeyVaultCertificateSourceParameters,
                                        CertificateType,
                                        Profile,
-                                       ProtocolType)
+                                       ProtocolType,
+                                       UpdateRule,
+                                       DeleteRule)
 
     profile: Profile = client.profiles.get(resource_group_name, profile_name)
 
@@ -527,7 +568,7 @@ def enable_custom_https(client, resource_group_name, profile_name, endpoint_name
                            "and --user-cert-protocol-type are all required for user managed certificates.")
 
         if user_cert_subscription_id is None:
-            user_cert_subscription_id = client.config.subscription_id
+            user_cert_subscription_id = get_subscription_id(cmd.cli_ctx)
 
         # All BYOC params are set, let's create the https parameters
         if user_cert_protocol_type is None or user_cert_protocol_type.lower() == 'sni':
@@ -541,7 +582,9 @@ def enable_custom_https(client, resource_group_name, profile_name, endpoint_name
                                                                  resource_group_name=user_cert_group_name,
                                                                  vault_name=user_cert_vault_name,
                                                                  secret_name=user_cert_secret_name,
-                                                                 secret_version=user_cert_secret_version)
+                                                                 secret_version=user_cert_secret_version,
+                                                                 update_rule=UpdateRule.NO_ACTION,
+                                                                 delete_rule=DeleteRule.NO_ACTION)
 
         https_params = UserManagedHttpsParameters(protocol_type=user_cert_protocol_type,
                                                   certificate_source_parameters=cert_source_params,
@@ -601,21 +644,21 @@ def update_origin(client: OriginsOperations,
                   private_link_approval_message: Optional[str] = None):
     from azure.mgmt.cdn.models import OriginUpdateParameters
 
-    return client.update(resource_group_name,
-                         profile_name,
-                         endpoint_name,
-                         origin_name,
-                         OriginUpdateParameters(
-                             host_name=host_name,
-                             http_port=http_port,
-                             https_port=https_port,
-                             enabled=not disabled,
-                             origin_host_header=origin_host_header,
-                             priority=priority,
-                             weight=weight,
-                             private_link_resource_id=private_link_resource_id,
-                             private_link_location=private_link_location,
-                             private_link_approval_message=private_link_approval_message))
+    return client.begin_update(resource_group_name,
+                               profile_name,
+                               endpoint_name,
+                               origin_name,
+                               OriginUpdateParameters(
+                                   host_name=host_name,
+                                   http_port=http_port,
+                                   https_port=https_port,
+                                   enabled=not disabled,
+                                   origin_host_header=origin_host_header,
+                                   priority=priority,
+                                   weight=weight,
+                                   private_link_resource_id=private_link_resource_id,
+                                   private_link_location=private_link_location,
+                                   private_link_approval_message=private_link_approval_message))
 
 
 def create_origin(client: OriginsOperations,
@@ -635,21 +678,21 @@ def create_origin(client: OriginsOperations,
                   private_link_approval_message: Optional[str] = None):
     from azure.mgmt.cdn.models import Origin
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         endpoint_name,
-                         origin_name,
-                         Origin(
-                             host_name=host_name,
-                             http_port=http_port,
-                             https_port=https_port,
-                             enabled=not disabled,
-                             origin_host_header=origin_host_header,
-                             priority=priority,
-                             weight=weight,
-                             private_link_resource_id=private_link_resource_id,
-                             private_link_location=private_link_location,
-                             private_link_approval_message=private_link_approval_message))
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               endpoint_name,
+                               origin_name,
+                               Origin(
+                                   host_name=host_name,
+                                   http_port=http_port,
+                                   https_port=https_port,
+                                   enabled=not disabled,
+                                   origin_host_header=origin_host_header,
+                                   priority=priority,
+                                   weight=weight,
+                                   private_link_resource_id=private_link_resource_id,
+                                   private_link_location=private_link_location,
+                                   private_link_approval_message=private_link_approval_message))
 
 
 def update_profile(instance, tags=None):
@@ -667,7 +710,7 @@ def create_profile(client, resource_group_name, name,
                    location=None, tags=None):
     from azure.mgmt.cdn.models import (Profile, Sku)
     profile = Profile(location=location, sku=Sku(name=sku), tags=tags)
-    return client.profiles.create(resource_group_name, name, profile)
+    return client.profiles.begin_create(resource_group_name, name, profile)
 
 
 def _parse_ranges(ranges: str):
@@ -692,7 +735,8 @@ def _parse_ranges(ranges: str):
     return [parse_range(error_range) for error_range in ranges.split(',')]
 
 
-def create_origin_group(client: OriginGroupsOperations,
+def create_origin_group(cmd,
+                        client: OriginGroupsOperations,
                         resource_group_name: str,
                         profile_name: str,
                         endpoint_name: str,
@@ -714,8 +758,8 @@ def create_origin_group(client: OriginGroupsOperations,
                                        ResourceReference)
 
     health_probe_settings = HealthProbeParameters(probe_path=probe_path,
-                                                  probe_request_type=probe_method,
-                                                  probe_protocol=probe_protocol,
+                                                  probe_request_type=HealthProbeRequestType[probe_method.upper()],
+                                                  probe_protocol=ProbeProtocol[probe_protocol.upper()],
                                                   probe_interval_in_seconds=probe_interval)
 
     error_types = None
@@ -732,11 +776,12 @@ def create_origin_group(client: OriginGroupsOperations,
             http_error_ranges=_parse_ranges(response_error_detection_status_code_ranges))
 
     formatted_origins = []
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if origins:
         for origin in origins.split(','):
             # If the origin is not an ID, assume it's a name and format it as an ID.
             if '/' not in origin:
-                origin = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+                origin = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                          f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}' \
                          f'/origins/{origin}'
             formatted_origins.append(ResourceReference(id=origin))
@@ -745,14 +790,15 @@ def create_origin_group(client: OriginGroupsOperations,
                                health_probe_settings=health_probe_settings,
                                response_based_origin_error_detection_settings=error_detection_settings)
 
-    return client.create(resource_group_name,
-                         profile_name,
-                         endpoint_name,
-                         name,
-                         origin_group).result()
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               endpoint_name,
+                               name,
+                               origin_group).result()
 
 
-def update_origin_group(client: OriginGroupsOperations,
+def update_origin_group(cmd,
+                        client: OriginGroupsOperations,
                         resource_group_name: str,
                         profile_name: str,
                         endpoint_name: str,
@@ -772,6 +818,12 @@ def update_origin_group(client: OriginGroupsOperations,
                                        HealthProbeParameters,
                                        ResponseBasedOriginErrorDetectionParameters,
                                        ResourceReference)
+
+    if probe_method is not None:
+        probe_method = HealthProbeRequestType[probe_method.upper()]
+
+    if probe_protocol is not None:
+        probe_protocol = ProbeProtocol[probe_protocol.upper()]
 
     # Get existing health probe settings:
     existing = client.get(resource_group_name,
@@ -818,10 +870,11 @@ def update_origin_group(client: OriginGroupsOperations,
             http_error_ranges=status_code_ranges)
 
     formatted_origins = []
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     for origin in origins.split(','):
         # If the origin is not an ID, assume it's a name and format it as an ID.
         if '/' not in origin:
-            origin = f'/subscriptions/{client.config.subscription_id}/resourceGroups/{resource_group_name}' \
+            origin = f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}' \
                      f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}' \
                      f'/origins/{origin}'
         formatted_origins.append(ResourceReference(id=origin))
@@ -831,11 +884,11 @@ def update_origin_group(client: OriginGroupsOperations,
         health_probe_settings=health_probe_settings,
         response_based_origin_error_detection_settings=error_detection_settings)
 
-    # client.create isn't really a create, it's a PUT which is create or update,
-    # client.update doesn't allow unsetting fields.
-    return client.create(resource_group_name,
-                         profile_name,
-                         endpoint_name,
-                         name,
-                         origin_group)
+    # client.begin_create isn't really a create, it's a PUT which is create or update,
+    # client.begin_update doesn't allow unsetting fields.
+    return client.begin_create(resource_group_name,
+                               profile_name,
+                               endpoint_name,
+                               name,
+                               origin_group)
 # endregion

@@ -3,10 +3,17 @@
 Release History
 ===============
 
-2.21.0.1
+2.22.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
 
 2.21.0
 ++++++

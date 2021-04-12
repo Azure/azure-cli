@@ -22,7 +22,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc/certificates/localdev-wild"
+        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/certificates/localdev-wild"
         use_latest_version = True
         secret_version = None
 

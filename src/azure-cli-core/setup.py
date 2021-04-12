@@ -5,11 +5,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.21.0.1"
+VERSION = "2.22.0.1"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -43,18 +42,18 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2.6',
+    'adal~=1.2.7',
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'azure-common~=1.1',
     'azure-core==1.14.0b1',
+    'azure-identity==1.6.0b3',
     'azure-mgmt-core==1.3.0b1',
     'colorama~=0.4.1',
     'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
-    'knack==0.8.0rc2',
-    'azure-identity==1.6.0b3',
+    'knack~=0.8.0',
     # Dependencies of the vendored subscription SDK
     # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
     'msrest>=0.5.0',
@@ -69,7 +68,7 @@ DEPENDENCIES = [
 
 # dependencies for specific OSes
 if not sys.platform.startswith('cygwin'):
-    DEPENDENCIES.append('psutil~=5.7')
+    DEPENDENCIES.append('psutil~=5.8')
 
 TESTS_REQUIRE = [
     'mock'

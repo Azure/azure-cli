@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from __future__ import print_function
-
 from collections import Counter, OrderedDict
 
 from msrestazure.azure_exceptions import CloudError
@@ -6338,11 +6336,12 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None, custom_routes=None):
+                        gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
+                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
-     VpnClientConfiguration, AddressSpace) = cmd.get_models(
+     VpnClientConfiguration, AddressSpace, VpnClientRootCertificate) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
-         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace')
+         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace', 'VpnClientRootCertificate')
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
@@ -6373,6 +6372,16 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
 
+        # multi authentication
+        if cmd.supported_api_version(min_api='2020-11-01'):
+            vnet_gateway.vpn_client_configuration.vpn_authentication_types = vpn_auth_type
+            vnet_gateway.vpn_client_configuration.aad_tenant = aad_tenant
+            vnet_gateway.vpn_client_configuration.aad_issuer = aad_issuer
+            vnet_gateway.vpn_client_configuration.aad_audience = aad_audience
+            vnet_gateway.vpn_client_configuration.vpn_client_root_certificates = [
+                VpnClientRootCertificate(name=root_cert_name,
+                                         public_cert_data=root_cert_data)] if root_cert_data else None
+
     if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
         vnet_gateway.custom_routes = AddressSpace()
         vnet_gateway.custom_routes.address_prefixes = custom_routes
@@ -6385,9 +6394,11 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None, custom_routes=None):
-    AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration = cmd.get_models(
-        'AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration', 'VpnClientConfiguration')
+                        gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
+                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None):
+    (AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration,
+     VpnClientRootCertificate) = cmd.get_models('AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
+                                                'VpnClientConfiguration', 'VpnClientRootCertificate')
 
     if any((address_prefixes, radius_server, radius_secret, client_protocol)) and not instance.vpn_client_configuration:
         instance.vpn_client_configuration = VpnClientConfiguration()
@@ -6403,6 +6414,15 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
         c.set_param('vpn_client_protocols', client_protocol)
         c.set_param('radius_server_address', radius_server)
         c.set_param('radius_server_secret', radius_secret)
+        if cmd.supported_api_version(min_api='2020-11-01'):
+            c.set_param('aad_tenant', aad_tenant)
+            c.set_param('aad_audience', aad_audience)
+            c.set_param('aad_issuer', aad_issuer)
+            c.set_param('vpn_authentication_types', vpn_auth_type)
+
+    if root_cert_data and cmd.supported_api_version(min_api='2020-11-01'):
+        upsert_to_collection(instance.vpn_client_configuration, 'vpn_client_root_certificates',
+                             VpnClientRootCertificate(name=root_cert_name, public_cert_data=root_cert_data), 'name')
 
     with cmd.update_context(instance.sku) as c:
         c.set_param('name', sku)

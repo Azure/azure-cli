@@ -56,6 +56,8 @@ parameters:
     short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
   - name: --ldap-over-tls
     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+  - name: --allow-local-ldap-users
+    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
 examples:
   - name: Add an active directory to the account
     text: >
@@ -548,6 +550,8 @@ parameters:
     short-summary: Read only access
   - name: --unix-read-write
     short-summary: Read and write access
+  - name: --ldap-enabled
+    short-summary: Specifies whether LDAP is enabled or not for a given NFS volume
 examples:
   - name: Create an ANF volume
     text: >
