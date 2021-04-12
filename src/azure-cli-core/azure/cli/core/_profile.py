@@ -496,6 +496,7 @@ class Profile:
             active_account = self.get_subscription()
         except CLIError:
             raise CLIError('There are no active accounts.')
+        
         return active_account[_USER_ENTITY][_USER_NAME]
 
     def get_subscription(self, subscription=None):  # take id or name
