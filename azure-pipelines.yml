@@ -189,7 +189,7 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-  
+
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
@@ -201,7 +201,7 @@ jobs:
     inputs:
       targetType: inline
       script: |
-        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {  
+        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
           # Start another Powershell process as Admin and execute this script again
           $arguments = "& '" +$myinvocation.mycommand.definition + "'"
           Start-Process powershell -Verb runAs -ArgumentList $arguments
@@ -223,7 +223,7 @@ jobs:
         $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
         if ($pre_installed_version -eq $to_be_installed_version){
           # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
-          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus" 
+          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
           $InstallArgs += $reinstall_option
         }
         Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
@@ -438,6 +438,23 @@ jobs:
       parameters:
         pythonVersion: '$(python.version)'
         profile: 'latest'
+
+- job: TestCore
+  displayName: Test Core
+  timeoutInMinutes: 120
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-core'
 
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
