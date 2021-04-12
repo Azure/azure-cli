@@ -260,9 +260,9 @@ read_scale_param_type = CLIArgumentType(
     arg_type=get_enum_type(['Enabled', 'Disabled']))
 
 read_replicas_param_type = CLIArgumentType(
-    options_list=['--read-replicas'],
+    options_list=['--read-replicas', '--ha-replicas'],
     type=int,
-    help='The number of readonly replicas to provision for the database. '
+    help='The number of high availability replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
 blob_storage_target_state_param_type = CLIArgumentType(
