@@ -5632,10 +5632,12 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
 
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
     def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        account = self.cmd('account show').get_output_in_json()
 
         self.kwargs.update({
             'loc': resource_group_location,
@@ -5655,24 +5657,9 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'edition': 'GeneralPurpose',
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override': "Proxy"
+            'proxy_override': "Proxy",
+            'subscription_id': account['id']
         })
-
-        rg = self.cmd('group show --name {resource_group}').get_output_in_json()
-
-        self.kwargs.update({
-            'rg_id': rg['id'],
-            'policy_name': 'SDOStdPolicyNetwork'
-        })
-
-        policyAssignment = self.cmd('az policy assignment show -n {policy_name}').get_output_in_json()
-        new_assignment = ' '.join(policyAssignment['notScopes'])
-        new_assignment = new_assignment + " " + rg['id']
-
-        self.kwargs.update({
-            'new_assignment': new_assignment
-        })
-        self.cmd('policy assignment create -n {policy_name} --policy {policy_name} --not-scopes \"{new_assignment}\"')
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
@@ -5713,9 +5700,9 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         self.kwargs.update({
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
-            'storage_sas': 'sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2FgjocUpioABFvm5N0BwhKFrukGw41s%3D',
-            'storage_uri': 'https://mijetest.blob.core.windows.net/pcc-remote-replicas-test',
-            'last_backup_name': 'log1.bak'
+            'storage_sas': 'sp=rl&st=2021-04-08T13:05:32Z&se=2021-04-09T21:05:32Z&spr=https&sv=2020-02-10&sr=c&sig=fkWaJ6vNcuHTP5V3Dwg28QdWki69%2BQa6zSQEYXlXWiM%3D',
+            'storage_uri': 'https://mibrkicstorage.blob.core.windows.net/mibrkicportal',
+            'last_backup_name': 'full.bak'
         })
 
         # Start Log Replay Service
