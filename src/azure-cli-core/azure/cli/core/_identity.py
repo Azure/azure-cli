@@ -139,39 +139,16 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = self.msal_app.acquire_token_by_username_password(username, password, scopes)
         return result['id_token_claims']
 
-    def login_with_service_principal_secret(self, client_id, client_secret):
+    def login_with_service_principal(self, client_id, secret_or_certificate):
         # Use ClientSecretCredential
         # TODO: Persist to encrypted cache
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
-        sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, secret=client_secret)
+        sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, secret=secret_or_certificate)
         entry = sp_auth.get_entry_to_persist()
         self._msal_secret_store.save_service_principal_cred(entry)
         # backward compatible with ADAL, to be deprecated
         if self._cred_cache:
             self._cred_cache.save_service_principal_cred(entry)
-
-        credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority,
-                                            **self._credential_kwargs)
-        return credential
-
-    def login_with_service_principal_certificate(self, client_id, certificate_path):
-        # Use CertificateCredential
-        # TODO: support use_cert_sn_issuer in CertificateCredential
-        credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority,
-                                           **self._credential_kwargs)
-
-        # CertificateCredential.__init__ will verify the certificate
-        # Persist to encrypted cache
-        # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
-        sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, certificate_file=certificate_path)
-        entry = sp_auth.get_entry_to_persist()
-        self._msal_secret_store.save_service_principal_cred(entry)
-
-        # backward compatible with ADAL, to be deprecated
-        if self._cred_cache:
-            entry = sp_auth.get_entry_to_persist_legacy()
-            self._cred_cache.save_service_principal_cred(entry)
-        return credential
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
         from msrestazure.tools import is_valid_resource_id
@@ -307,29 +284,17 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        accounts = self.msal_app.get_accounts(username)
-
-        # TODO: Confirm with MSAL team that username can uniquely identify the account
-        if not accounts:
-            raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
-                           "another application that uses Single Sign-On. "
-                           "Please run `az login` to re-login.".format(username))
-        account = accounts[0]
         from azure.cli.core.msal_authentication import UserCredential
-        cred = UserCredential(self.client_id, account=account, authority=self.msal_authority,
+        cred = UserCredential(self.client_id, username=username, authority=self.msal_authority,
                               token_cache=self._load_msal_cache(),
                               verify=self._credential_kwargs.get('connection_verify', True))
         return cred
 
-    def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
-        client_secret, certificate_path = \
-            self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
+    def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
+        secret_or_cert = self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        if client_secret:
-            return ClientSecretCredential(self.tenant_id, client_id, client_secret, **self._credential_kwargs)
-        if certificate_path:
-            return CertificateCredential(self.tenant_id, client_id, certificate_path, **self._credential_kwargs)
-        raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
+        from azure.cli.core.msal_authentication import ServicePrincipalCredential
+        return ServicePrincipalCredential(client_id, secret_or_cert, authority=self.msal_authority)
 
     def get_environment_credential(self):
         username = os.environ.get('AZURE_USERNAME')
@@ -649,7 +614,8 @@ class MsalSecretStore:
                            "Trying credential under tenant %s, assuming that is an app credential.",
                            sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
-        return cred.get(_SERVICE_PRINCIPAL_SECRET, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
+
+        return cred.get(_SERVICE_PRINCIPAL_SECRET, None) or cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
 
     def save_service_principal_cred(self, sp_entry):
         self._load_cached_creds()

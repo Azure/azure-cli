@@ -15,6 +15,7 @@ import os
 from azure.cli.core.credential import aad_error_handler
 from azure.core.credentials import AccessToken
 from knack.log import get_logger
+from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
 logger = get_logger(__name__)
@@ -22,19 +23,23 @@ logger = get_logger(__name__)
 
 class UserCredential(PublicClientApplication):
 
-    def __init__(self, client_id, account=None, **kwargs):
+    def __init__(self, client_id, username=None, **kwargs):
         super().__init__(client_id, **kwargs)
+        accounts = self.get_accounts(username)
+
+        # TODO: Confirm with MSAL team that username can uniquely identify the account
+        if not accounts:
+            raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
+                           "another application that uses Single Sign-On. "
+                           "Please run `az login` to re-login.".format(username))
+        account = accounts[0]
         self.account = account
 
     def get_token(self, *scopes, **kwargs):
-        import time
-        request_time = int(time.time())
-        result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
+        logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        if result and "access_token" in result and "expires_in" in result:
-            return AccessToken(result["access_token"], request_time + int(result["expires_in"]))
-        else:
-            aad_error_handler(result)
+        result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
+        return _convert_to_sdk_access_token(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
@@ -60,4 +65,16 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
-        return self.acquire_token_for_client(list(scopes), **kwargs)
+
+        result = self.acquire_token_for_client(list(scopes), **kwargs)
+        return _convert_to_sdk_access_token(result)
+
+
+def _convert_to_sdk_access_token(token_entry):
+    import time
+    request_time = int(time.time())
+
+    if token_entry and "access_token" in token_entry and "expires_in" in token_entry:
+        return AccessToken(token_entry["access_token"], request_time + int(token_entry["expires_in"]))
+    else:
+        aad_error_handler(token_entry)

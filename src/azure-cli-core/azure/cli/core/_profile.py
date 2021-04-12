@@ -170,7 +170,7 @@ class Profile:
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
                             cred_cache=self._adal_cache)
 
-        id_token_claims = None
+        user_id_token_claims = None
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
         if interactive:
@@ -181,28 +181,34 @@ class Profile:
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    id_token_claims = identity.login_with_interactive_browser(scopes=scopes)
+                    user_id_token_claims = identity.login_with_interactive_browser(scopes=scopes)
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                id_token_claims = identity.login_with_device_code(scopes=scopes)
+                user_id_token_claims = identity.login_with_device_code(scopes=scopes)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
-                if os.path.isfile(password):
-                    credential = identity.login_with_service_principal_certificate(username, password)
-                else:
-                    credential = identity.login_with_service_principal_secret(username, password)
-            else:
-                id_token_claims = identity.login_with_username_password(username, password, scopes=scopes)
 
-        username = id_token_claims['preferred_username']
+                identity.login_with_service_principal(username, password)
+            else:
+                user_id_token_claims = identity.login_with_username_password(username, password, scopes=scopes)
+
+        if user_id_token_claims:
+            # AAD returns "preferred_username", ADFS returns "upn"
+            username = user_id_token_claims.get("preferred_username") or user_id_token_claims["upn"]
+
         # List tenants and find subscriptions by calling ARM
         if find_subscriptions:
-            credential = identity.get_user_credential(username)
+            # Create credentials
+            if user_id_token_claims:
+                credential = identity.get_user_credential(username)
+            else:
+                credential = identity.get_service_principal_credential(username)
+
             if tenant:
                 subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
             else:
@@ -922,12 +928,12 @@ class SubscriptionFinder:
             if not hasattr(t, 'display_name'):
                 t.display_name = None
 
-            tenant_id_name = tenant_id
+            t.tenant_id_name = tenant_id
             if t.display_name:
                 # e.g. '72f988bf-86f1-41af-91ab-2d7cd011db47 Microsoft'
-                tenant_id_name = "{} '{}'".format(tenant_id, t.display_name)
+                t.tenant_id_name = "{} '{}'".format(tenant_id, t.display_name)
 
-            logger.info("Finding subscriptions under tenant %s", tenant_id_name)
+            logger.info("Finding subscriptions under tenant %s", t.tenant_id_name)
 
             identity = Identity(self.authority, tenant_id,
                                 allow_unencrypted=self.cli_ctx.config
@@ -979,20 +985,14 @@ class SubscriptionFinder:
             logger.warning("The following tenants don't contain accessible subscriptions. "
                            "Use 'az login --allow-no-subscriptions' to have tenant level access.")
             for t in empty_tenants:
-                if t.display_name:
-                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
-                else:
-                    logger.warning("%s", t.tenant_id)
+                logger.warning("%s", t.tenant_id_name)
 
         # Show warning for MFA tenants
         if mfa_tenants:
             logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
                            "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
             for t in mfa_tenants:
-                if t.display_name:
-                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
-                else:
-                    logger.warning("%s", t.tenant_id)
+                logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential):
