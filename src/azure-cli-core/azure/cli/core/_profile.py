@@ -170,6 +170,7 @@ class Profile:
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
                             cred_cache=self._adal_cache)
 
+        id_token_claims = None
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
         if interactive:
@@ -180,13 +181,13 @@ class Profile:
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    credential, auth_record = identity.login_with_interactive_browser(scopes=scopes)
+                    id_token_claims = identity.login_with_interactive_browser(scopes=scopes)
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                credential, auth_record = identity.login_with_device_code(scopes=scopes)
+                id_token_claims = identity.login_with_device_code(scopes=scopes)
         else:
             if is_service_principal:
                 if not tenant:
@@ -196,14 +197,16 @@ class Profile:
                 else:
                     credential = identity.login_with_service_principal_secret(username, password)
             else:
-                credential, auth_record = identity.login_with_username_password(username, password, scopes=scopes)
+                id_token_claims = identity.login_with_username_password(username, password, scopes=scopes)
 
+        username = id_token_claims['preferred_username']
         # List tenants and find subscriptions by calling ARM
         if find_subscriptions:
+            credential = identity.get_user_credential(username)
             if tenant:
                 subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
             else:
-                subscriptions = subscription_finder.find_using_common_tenant(auth_record.username, credential)
+                subscriptions = subscription_finder.find_using_common_tenant(username, credential)
 
             if not subscriptions and not allow_no_subscriptions:
                 if username:
@@ -225,9 +228,6 @@ class Profile:
             # Build a tenant account
             bare_tenant = tenant or auth_record.tenant_id
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
-
-        if auth_record:
-            username = auth_record.username
 
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer))
@@ -917,11 +917,17 @@ class SubscriptionFinder:
 
         for t in tenants:
             tenant_id = t.tenant_id
-            logger.debug("Finding subscriptions under tenant %s", tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
                 t.display_name = None
+
+            tenant_id_name = tenant_id
+            if t.display_name:
+                # e.g. '72f988bf-86f1-41af-91ab-2d7cd011db47 Microsoft'
+                tenant_id_name = "{} '{}'".format(tenant_id, t.display_name)
+
+            logger.info("Finding subscriptions under tenant %s", tenant_id_name)
 
             identity = Identity(self.authority, tenant_id,
                                 allow_unencrypted=self.cli_ctx.config
@@ -945,12 +951,6 @@ class SubscriptionFinder:
                 else:
                     logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
-
-            tenant_id_name = tenant_id
-            if t.display_name:
-                # e.g. '72f988bf-86f1-41af-91ab-2d7cd011db47 Microsoft'
-                tenant_id_name = "{} '{}'".format(tenant_id, t.display_name)
-            logger.info("Finding subscriptions under tenant %s", tenant_id_name)
 
             subscriptions = self.find_using_specific_tenant(
                 tenant_id,

@@ -54,11 +54,10 @@ class AzCliLogging(CLILogging):
         if self.log_level:
             # When invoked by pytest, configure() is skipped and log_level will not be set.
             from knack.log import CliLogLevel
-            if self.log_level == CliLogLevel.DEBUG:
-                # As azure.core.pipeline.policies.http_logging_policy is a redacted version of
-                # azure.core.pipeline.policies._universal, disable azure.core.pipeline.policies.http_logging_policy
-                # when debug log is shown.
-                logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
+
+            # As azure.core.pipeline.policies.http_logging_policy is a redacted version of
+            # azure.core.pipeline.policies._universal, always disable it
+            logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
 
             if self.log_level <= CliLogLevel.WARNING:
                 # Disable warnings from Azure Identity

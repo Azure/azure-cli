@@ -59,6 +59,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
+        self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         # self._cred_cache = AdalCredentialCache()
         self._cred_cache = None
@@ -108,75 +109,35 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from msal import PublicClientApplication
         msal_app = PublicClientApplication(authority=authority, client_id=self.client_id,
                                            token_cache=self._load_msal_cache(),
-                                           verify=self._credential_kwargs.get('connection_verify', True))
+                                           verify=self._credential_kwargs.get('connection_verify', True),
+                                           client_capabilities=["CP1"])
         return msal_app
 
     @property
     def msal_app(self):
         if not self._msal_app_instance:
             # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
-            msal_authority = "{}/{}".format(self.authority, self.tenant_id)
-            self._msal_app_instance = self._build_persistent_msal_app(msal_authority)
+            self._msal_app_instance = self._build_persistent_msal_app(self.msal_authority)
         return self._msal_app_instance
 
     def login_with_interactive_browser(self, scopes=None):
-        """
-        :param scopes: Scopes for the `authenticate` method call (initial /authorize API)
-        :return:
-        """
-        # Use InteractiveBrowserCredential
-        credential = InteractiveBrowserCredential(authority=self.authority,
-                                                  tenant_id=self.tenant_id,
-                                                  client_id=self.client_id,
-                                                  cache_persistence_options=self._cache_persistence_options,
-                                                  **self._credential_kwargs)
-        auth_record = credential.authenticate(scopes=scopes)
-        # todo: remove after ADAL token deprecation
-        if self._cred_cache:
-            self._cred_cache.add_credential(credential)
-        return credential, auth_record
+        result = self.msal_app.acquire_token_interactive(scopes)
+        if result:
+            return result['id_token_claims']
+        return None
 
     def login_with_device_code(self, scopes=None):
-        # Use DeviceCodeCredential
-        def prompt_callback(verification_uri, user_code, _):
-            # expires_on is discarded
-            logger.warning("To sign in, use a web browser to open the page %s and enter the code %s to authenticate.",
-                           verification_uri, user_code)
-        try:
-            credential = DeviceCodeCredential(authority=self.authority,
-                                              tenant_id=self.tenant_id,
-                                              client_id=self.client_id,
-                                              prompt_callback=prompt_callback,
-                                              cache_persistence_options=self._cache_persistence_options,
-                                              **self._credential_kwargs)
-
-            auth_record = credential.authenticate(scopes=scopes)
-            # todo: remove after ADAL token deprecation
-            if self._cred_cache:
-                self._cred_cache.add_credential(credential)
-            return credential, auth_record
-        except ValueError as ex:
-            logger.debug('Device code authentication failed: %s', str(ex))
-            if 'PyGObject' in str(ex):
-                raise CLIError("PyGObject is required to encrypt the persistent cache. Please install that lib or "
-                               "allow fallback to plaintext if encrypt credential fail via 'az configure'.")
-            raise
+        flow = self.msal_app.initiate_device_flow(scopes)
+        if "user_code" not in flow:
+            raise ValueError(
+                "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
+        logger.warning(flow["message"])
+        result = self.msal_app.acquire_token_by_device_flow(flow)  # By default it will block
+        return result['id_token_claims']
 
     def login_with_username_password(self, username, password, scopes=None):
-        # Use UsernamePasswordCredential
-        credential = UsernamePasswordCredential(authority=self.authority,
-                                                tenant_id=self.tenant_id,
-                                                client_id=self.client_id,
-                                                username=username,
-                                                password=password,
-                                                cache_persistence_options=self._cache_persistence_options,
-                                                **self._credential_kwargs)
-        auth_record = credential.authenticate(scopes=scopes)
-
-        # todo: remove after ADAL token deprecation
-        if self._cred_cache:
-            self._cred_cache.add_credential(credential, scopes, self.authority)
-        return credential, auth_record
+        result = self.msal_app.acquire_token_by_username_password(username, password, scopes)
+        return result['id_token_claims']
 
     def login_with_service_principal_secret(self, client_id, client_secret):
         # Use ClientSecretCredential
@@ -354,11 +315,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                            "another application that uses Single Sign-On. "
                            "Please run `az login` to re-login.".format(username))
         account = accounts[0]
-        auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
-                                           account['home_account_id'], username)
-        return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
-                                            cache_persistence_options=self._cache_persistence_options,
-                                            **self._credential_kwargs)
+        from azure.cli.core.msal_authentication import UserCredential
+        cred = UserCredential(self.client_id, account=account, authority=self.msal_authority,
+                              token_cache=self._load_msal_cache(),
+                              verify=self._credential_kwargs.get('connection_verify', True))
+        return cred
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = \

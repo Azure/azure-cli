@@ -12,6 +12,8 @@ SDK invocation.
 
 import os
 
+from azure.cli.core.credential import aad_error_handler
+from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from msal import PublicClientApplication, ConfidentialClientApplication
 
@@ -20,8 +22,19 @@ logger = get_logger(__name__)
 
 class UserCredential(PublicClientApplication):
 
-    def get_token(self, scopes, **kwargs):
-        raise NotImplementedError
+    def __init__(self, client_id, account=None, **kwargs):
+        super().__init__(client_id, **kwargs)
+        self.account = account
+
+    def get_token(self, *scopes, **kwargs):
+        import time
+        request_time = int(time.time())
+        result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
+
+        if result and "access_token" in result and "expires_in" in result:
+            return AccessToken(result["access_token"], request_time + int(result["expires_in"]))
+        else:
+            aad_error_handler(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
@@ -45,6 +58,6 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
 
         super().__init__(client_id, client_credential=client_credential, **kwargs)
 
-    def get_token(self, scopes, **kwargs):
+    def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
-        return self.acquire_token_for_client(scopes=scopes, **kwargs)
+        return self.acquire_token_for_client(list(scopes), **kwargs)
