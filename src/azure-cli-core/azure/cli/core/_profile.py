@@ -135,10 +135,10 @@ class Profile:
         self._storage = storage or ACCOUNT
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
-        self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = None
+        self.arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         if store_adal_cache:
             self._adal_cache = AdalCredentialCache()
 
@@ -157,7 +157,8 @@ class Profile:
               use_cert_sn_issuer=None,
               find_subscriptions=True):
 
-        scopes = self._prepare_authenticate_scopes(scopes)
+        if not scopes:
+            scopes = self.arm_scope
 
         credential = None
         auth_record = None
@@ -232,7 +233,7 @@ class Profile:
                     return []
         else:
             # Build a tenant account
-            bare_tenant = tenant or auth_record.tenant_id
+            bare_tenant = tenant or user_id_token_claims['tid']
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
         consolidated = self._normalize_properties(username, subscriptions,
@@ -253,7 +254,9 @@ class Profile:
         # Managed identities for Azure resources is the new name for the service formerly known as
         # Managed Service Identity (MSI).
 
-        scopes = self._prepare_authenticate_scopes(scopes)
+        if not scopes:
+            scopes = self.arm_scope
+
         identity = Identity()
         credential, mi_info = identity.login_with_managed_identity(scopes=scopes, identity_id=identity_id)
 
@@ -846,17 +849,6 @@ class Profile:
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
-
-    def _prepare_authenticate_scopes(self, scopes):
-        """Prepare the scopes to be sent to MSAL. If `scopes` is not a list, it will be put into a list."""
-        if scopes:
-            if not isinstance(scopes, (list, tuple)):
-                # Put scopes into a list
-                scopes = [scopes]
-        else:
-            # If scope is not provided, use the ARM resource ID
-            scopes = resource_to_scopes(self._ad_resource_uri)
-        return scopes
 
 
 # pylint: disable=no-method-argument,no-self-argument,too-few-public-methods

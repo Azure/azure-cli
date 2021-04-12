@@ -59,6 +59,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
+        # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
         self.msal_authority = "{}/{}".format(self.authority, self.tenant_id)
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         # self._cred_cache = AdalCredentialCache()
@@ -104,27 +105,25 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
-    def _build_persistent_msal_app(self, authority):
+    def _build_persistent_msal_app(self, username=None):
         # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
-        from msal import PublicClientApplication
-        msal_app = PublicClientApplication(authority=authority, client_id=self.client_id,
-                                           token_cache=self._load_msal_cache(),
-                                           verify=self._credential_kwargs.get('connection_verify', True),
-                                           client_capabilities=["CP1"])
+        from azure.cli.core.msal_authentication import UserCredential
+        msal_app = UserCredential(self.client_id, username=username,
+                                  authority=self.msal_authority,
+                                  token_cache=self._load_msal_cache(),
+                                  verify=self._credential_kwargs.get('connection_verify', True),
+                                  client_capabilities=["CP1"])
         return msal_app
 
     @property
     def msal_app(self):
         if not self._msal_app_instance:
-            # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
-            self._msal_app_instance = self._build_persistent_msal_app(self.msal_authority)
+            self._msal_app_instance = self._build_persistent_msal_app()
         return self._msal_app_instance
 
     def login_with_interactive_browser(self, scopes=None):
         result = self.msal_app.acquire_token_interactive(scopes)
-        if result:
-            return result['id_token_claims']
-        return None
+        return result['id_token_claims']
 
     def login_with_device_code(self, scopes=None):
         flow = self.msal_app.initiate_device_flow(scopes)
@@ -284,11 +283,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        from azure.cli.core.msal_authentication import UserCredential
-        cred = UserCredential(self.client_id, username=username, authority=self.msal_authority,
-                              token_cache=self._load_msal_cache(),
-                              verify=self._credential_kwargs.get('connection_verify', True))
-        return cred
+        return self._build_persistent_msal_app(username)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
         secret_or_cert = self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)

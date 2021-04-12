@@ -76,6 +76,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        deprecate_info=c.deprecate(target='--environment', hide=True),
                        help='Use EnvironmentCredential. Both user and service principal accounts are supported. '
                             'For required environment variables, see https://docs.microsoft.com/en-us/python/api/overview/azure/identity-readme?view=azure-python#environment-variables')
+            c.argument('scopes', options_list=['--scope'], nargs="+",
+                       help='A space-separated list of scopes to use in the /authorize request. '
+                            'It can cover multiple resources.')
 
         with self.argument_context('logout') as c:
             c.argument('username', options_list=['--username', '-u'], help='account user, if missing, logout the current active account')

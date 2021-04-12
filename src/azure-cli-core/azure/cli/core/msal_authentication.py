@@ -25,15 +25,18 @@ class UserCredential(PublicClientApplication):
 
     def __init__(self, client_id, username=None, **kwargs):
         super().__init__(client_id, **kwargs)
-        accounts = self.get_accounts(username)
+        if username:
+            accounts = self.get_accounts(username)
 
-        # TODO: Confirm with MSAL team that username can uniquely identify the account
-        if not accounts:
-            raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
-                           "another application that uses Single Sign-On. "
-                           "Please run `az login` to re-login.".format(username))
-        account = accounts[0]
-        self.account = account
+            # TODO: Confirm with MSAL team that username can uniquely identify the account
+            if not accounts:
+                raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
+                               "another application that uses Single Sign-On. "
+                               "Please run `az login` to re-login.".format(username))
+            account = accounts[0]
+            self.account = account
+        else:
+            self.account = None
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
