@@ -6568,6 +6568,7 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
 
     return instance
 
+
 def start_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
                                    filter_data=None, no_wait=False):
     VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
@@ -6575,12 +6576,14 @@ def start_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_net
     return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
                        virtual_network_gateway_connection_name, parameters=parameters)
 
+
 def stop_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
                                   sas_url, no_wait=False):
     VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
     parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
     return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
                        virtual_network_gateway_connection_name, parameters=parameters)
+
 
 def show_vpn_connection_device_config_script(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
                                              vendor, device_family, firmware_version):
