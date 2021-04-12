@@ -527,8 +527,10 @@ def _get_hash_machine_id():
 @decorators.suppress_all_exceptions(fallback_return='')
 @decorators.hash256_result
 def _get_user_azure_id():
-    return _get_profile().get_current_account_user()
-
+    try:
+        return _get_profile().get_current_account_user()
+    except:
+        return ''
 
 def _get_env_string():
     return _remove_cmd_chars(_remove_symbols(str([v for v in os.environ
@@ -540,7 +542,7 @@ def _get_azure_subscription_id():
     try:
         return _get_profile().get_subscription_id()
     except:
-        return '{}'
+        return ''
 
 
 def _get_shell_type():
