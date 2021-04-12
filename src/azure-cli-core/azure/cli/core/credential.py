@@ -5,11 +5,12 @@
 
 from typing import Tuple, List
 
+import json
 import requests
 from azure.cli.core._identity import resource_to_scopes
 from azure.cli.core.util import in_cloud_console
 from azure.core.credentials import AccessToken
-from azure.core.exceptions import ClientAuthenticationError
+from azure.identity import CredentialUnavailableError, AuthenticationRequiredError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -44,40 +45,25 @@ class CredentialAdaptor:
             token = self._credential.get_token(*scopes, **kwargs)
             if self._external_credentials:
                 external_tenant_tokens = [cred.get_token(*scopes) for cred in self._external_credentials]
+            return token, external_tenant_tokens
         except CLIError as err:
             if in_cloud_console():
                 CredentialAdaptor._log_hostname()
             raise err
-        except ClientAuthenticationError as err:
-            # pylint: disable=no-member
-            if in_cloud_console():
-                CredentialAdaptor._log_hostname()
-
-            err = getattr(err, 'message', None) or ''
-            if 'authentication is required' in err:
-                raise CLIError("Authentication is migrated to Microsoft identity platform (v2.0). {}".format(
-                    "Please run 'az login' to login." if not in_cloud_console() else ''))
-            if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
-                raise CLIError("Credentials have expired due to inactivity. {}".format(
-                    "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50079' in err:
-                raise CLIError("Configuration of your account was changed. {}".format(
-                    "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50173' in err:
-                raise CLIError("The credential data used by CLI has been expired because you might have changed or "
-                               "reset the password. {}".format(
-                                   "Please clear browser's cookies and run 'az login'"
-                                   if not in_cloud_console() else ''))
-            raise CLIError(err)
+        except AuthenticationRequiredError as err:
+            err_dict = json.loads(err.response.text())
+            aad_error_handler(err_dict, scopes=err.scopes, claims=err.claims)
+        except CredentialUnavailableError as err:
+            err_dict = json.loads(err.response.text())
+            aad_error_handler(err_dict)
         except requests.exceptions.SSLError as err:
             from .util import SSLERROR_TEMPLATE
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
         except requests.exceptions.ConnectionError as err:
             raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
-        return token, external_tenant_tokens
 
     def signed_session(self, session=None):
-        logger.debug("CredentialAdaptor.signed_session invoked by Track 1 SDK")
+        logger.debug("CredentialAdaptor.get_token")
         session = session or requests.Session()
         token, external_tenant_tokens = self._get_token()
         header = "{} {}".format('Bearer', token.token)
@@ -88,8 +74,7 @@ class CredentialAdaptor:
         return session
 
     def get_token(self, *scopes, **kwargs):
-        # type: (*str) -> AccessToken
-        logger.debug("CredentialAdaptor.get_token invoked by Track 2 SDK with scopes=%r", scopes)
+        logger.debug("CredentialAdaptor.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
         scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(scopes, **kwargs)
         return token
@@ -125,3 +110,47 @@ def _normalize_scopes(scopes):
         return scopes[1:]
 
     return scopes
+
+
+def _generate_login_command(scopes=None, claims=None):
+    login_command = ['az login']
+
+    if scopes:
+        login_command.append('--scope {}'.format(' '.join(scopes)))
+
+    if claims:
+        import base64
+        try:
+            base64.urlsafe_b64decode(claims)
+            is_base64 = True
+        except ValueError:
+            is_base64 = False
+
+        if not is_base64:
+            claims = base64.urlsafe_b64encode(claims.encode()).decode()
+
+        login_command.append('--claims {}'.format(claims))
+
+    return ' '.join(login_command)
+
+
+def _generate_login_message(**kwargs):
+    login_command = _generate_login_command(**kwargs)
+    login_command = 'az logout\naz login'
+    msg = "To re-authenticate, please {}" \
+          "If the problem persists, please contact your tenant administrator.".format(
+              "refresh Azure Portal." if in_cloud_console() else "run:\n{}\n".format(login_command))
+
+    return msg
+
+
+def aad_error_handler(error, scopes=None, claims=None):
+    """ Handle the error from AAD server returned by ADAL or MSAL. """
+
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
+    # Search for an error code at https://login.microsoftonline.com/error
+    msg = error.get('error_description')
+    login_message = _generate_login_message(scopes=scopes, claims=claims)
+
+    from azure.cli.core.azclierror import AuthenticationError
+    raise AuthenticationError(msg, recommendation=login_message)

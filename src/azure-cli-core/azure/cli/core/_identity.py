@@ -17,7 +17,8 @@ from azure.identity import (
     ClientSecretCredential,
     CertificateCredential,
     ManagedIdentityCredential,
-    EnvironmentCredential
+    EnvironmentCredential,
+    TokenCachePersistenceOptions
 )
 
 from ._environment import get_config_dir
@@ -65,6 +66,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._msal_app_instance = None
         # Store for Service principal credential persistence
         self._msal_secret_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
+        self._cache_persistence_options = TokenCachePersistenceOptions(name="azcli", allow_unencrypted_storage=True)
 
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
@@ -86,13 +88,19 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         #   - Access token
         #   - Service principal secret
         #   - Service principal certificate
-        # self._credential_kwargs['logging_enable'] = True
+        self._credential_kwargs['logging_enable'] = True
+
+        # Make MSAL remove existing accounts on successful login.
+        # self._credential_kwargs['remove_existing_account'] = True
+        # from azure.cli.core._msal_patch import patch_token_cache_add
+        # patch_token_cache_add(self.msal_app.remove_account)
 
     def _load_msal_cache(self):
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-        from azure.identity._internal.persistent_cache import load_user_cache
+        from azure.identity._persistent_cache import _load_persistent_cache
         # Store for user token persistence
-        cache = load_user_cache(self.allow_unencrypted)
+        cache = _load_persistent_cache(self._cache_persistence_options)
+        cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
     def _build_persistent_msal_app(self, authority):
@@ -104,7 +112,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return msal_app
 
     @property
-    def _msal_app(self):
+    def msal_app(self):
         if not self._msal_app_instance:
             # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
             msal_authority = "{}/{}".format(self.authority, self.tenant_id)
@@ -120,8 +128,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         credential = InteractiveBrowserCredential(authority=self.authority,
                                                   tenant_id=self.tenant_id,
                                                   client_id=self.client_id,
-                                                  enable_persistent_cache=True,
-                                                  allow_unencrypted_cache=self.allow_unencrypted,
+                                                  cache_persistence_options=self._cache_persistence_options,
                                                   **self._credential_kwargs)
         auth_record = credential.authenticate(scopes=scopes)
         # todo: remove after ADAL token deprecation
@@ -139,9 +146,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             credential = DeviceCodeCredential(authority=self.authority,
                                               tenant_id=self.tenant_id,
                                               client_id=self.client_id,
-                                              enable_persistent_cache=True,
                                               prompt_callback=prompt_callback,
-                                              allow_unencrypted_cache=self.allow_unencrypted,
+                                              cache_persistence_options=self._cache_persistence_options,
                                               **self._credential_kwargs)
 
             auth_record = credential.authenticate(scopes=scopes)
@@ -163,8 +169,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                                 client_id=self.client_id,
                                                 username=username,
                                                 password=password,
-                                                enable_persistent_cache=True,
-                                                allow_unencrypted_cache=self.allow_unencrypted,
+                                                cache_persistence_options=self._cache_persistence_options,
                                                 **self._credential_kwargs)
         auth_record = credential.authenticate(scopes=scopes)
 
@@ -305,15 +310,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return credential, cloud_shell_identity_info
 
     def logout_user(self, user):
-        accounts = self._msal_app.get_accounts(user)
+        accounts = self.msal_app.get_accounts(user)
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
         # `accounts` are the same user in all tenants, log out all of them
         for account in accounts:
-            self._msal_app.remove_account(account)
+            self.msal_app.remove_account(account)
 
-        accounts = self._msal_app.get_accounts(user)
+        accounts = self.msal_app.get_accounts(user)
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
 
@@ -323,25 +328,25 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def logout_all(self):
         # TODO: Support multi-authority logout
-        accounts = self._msal_app.get_accounts()
+        accounts = self.msal_app.get_accounts()
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
         for account in accounts:
-            self._msal_app.remove_account(account)
+            self.msal_app.remove_account(account)
 
-        accounts = self._msal_app.get_accounts()
+        accounts = self.msal_app.get_accounts()
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
         # remove service principal secrets
         self._msal_secret_store.remove_all_cached_creds()
 
     def get_user(self, user=None):
-        accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
+        accounts = self.msal_app.get_accounts(user) if user else self.msal_app.get_accounts()
         return accounts
 
     def get_user_credential(self, username):
-        accounts = self._msal_app.get_accounts(username)
+        accounts = self.msal_app.get_accounts(username)
 
         # TODO: Confirm with MSAL team that username can uniquely identify the account
         if not accounts:
@@ -352,8 +357,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
                                            account['home_account_id'], username)
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
-                                            enable_persistent_cache=True,
-                                            allow_unencrypted_cache=self.allow_unencrypted,
+                                            cache_persistence_options=self._cache_persistence_options,
                                             **self._credential_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
@@ -427,7 +431,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                        "It contains login information of all logged-in users. Make sure you protect it safely.", path)
 
         cache = self._load_msal_cache()
-        cache._reload_if_necessary()  # pylint: disable=protected-access
         with open(path, "w") as fd:
             fd.write(cache.serialize())
 

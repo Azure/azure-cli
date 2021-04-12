@@ -57,7 +57,7 @@ class TestIdentity(unittest.TestCase):
         current_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(current_dir, 'err_sp_cert.pem')
         # TODO: wrap exception
-        with self.assertRaisesRegex(ValueError, "Unable to load certificate."):
+        with self.assertRaisesRegex(ValueError, "Could not deserialize key data."):
             identity.login_with_service_principal_certificate("00000000-0000-0000-0000-000000000000", test_cert_file)
 
 

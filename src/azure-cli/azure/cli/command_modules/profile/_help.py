@@ -98,12 +98,12 @@ examples:
 
 helps['account export-msal-cache'] = """
 type: command
-short-summary: Export MSAL cache, by default to `~/.azure/msal.cache.snapshot.json`.
+short-summary: Export MSAL cache in plain text.
 long-summary: >
-    The exported cache is unencrypted. It contains login information of all logged-in users. Make sure you protect
-    it safely.
+    The exported cache is unencrypted.
+    It contains login information of all logged-in users. Make sure you protect it safely.
 
-    You can mount the exported MSAL cache to a container at `~/.IdentityService/msal.cache`, so that Azure CLI
+    You can mount the exported MSAL cache to a container at '~/.IdentityService/msal.cache', so that Azure CLI
     inside the container can automatically authenticate.
 examples:
     - name: Export MSAL cache to the default path.
