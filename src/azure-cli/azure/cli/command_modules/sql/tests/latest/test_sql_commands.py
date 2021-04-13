@@ -5719,7 +5719,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         if self.in_recording or self.is_live:
             sleep(10)
-        
+
         self.cmd('sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
 
         # Complete log replay service
