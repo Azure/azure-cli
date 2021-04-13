@@ -146,6 +146,16 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     if assignee_principal_type and not assignee_object_id:
         raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
 
+    # If assignee object id is provided without assignee principal type, try to get principle type from graph
+    if assignee_object_id and not assignee_principal_type:
+        graph_client = _graph_client_factory(cmd.cli_ctx)
+        try:
+            assignee_object_result = _get_object_stubs(graph_client, [assignee_object_id])
+            if assignee_object_result:
+                assignee_principal_type = assignee_object_result[0].object_type
+        except (CloudError, GraphErrorException):
+            pass
+
     # If condition is set and condition-version is empty, condition-version defaults to "2.0".
     if condition and not condition_version:
         condition_version = "2.0"
@@ -280,6 +290,9 @@ def update_role_assignment(cmd, role_assignment):
     if (assignment.condition_version and original_assignment.condition_version and
             original_assignment.condition_version.startswith('2.') and assignment.condition_version.startswith('1.')):
         raise CLIError("Condition version cannot be downgraded to '1.X'.")
+
+    if not assignment.principal_type:
+        assignment.principal_type = original_assignment.principal_type
 
     return assignments_client.create(scope, name, parameters=assignment)
 
