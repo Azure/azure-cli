@@ -1156,7 +1156,7 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'testsynapseworkspace',
             'name': 'notebook',
             'spark-pool': 'testpool',
-            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.json')
         })
 
         # create notebook
