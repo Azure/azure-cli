@@ -16,7 +16,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name)
+     _get_parent_proc_name, is_wsl)
 from azure.cli.core.mock import DummyCli
 
 
@@ -151,11 +151,13 @@ class TestUtils(unittest.TestCase):
 
     @mock.patch('webbrowser.open', autospec=True)
     @mock.patch('subprocess.Popen', autospec=True)
-    def test_open_page_in_browser(self, sunprocess_open_mock, webbrowser_open_mock):
+    def test_open_page_in_browser(self, subprocess_open_mock, webbrowser_open_mock):
         platform = sys.platform.lower()
         open_page_in_browser('http://foo')
-        if platform == 'darwin':
-            sunprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
+        if is_wsl():
+            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-Command', 'Start-Process "http://foo"'])
+        elif platform == 'darwin':
+            subprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
             webbrowser_open_mock.assert_called_once_with('http://foo', 2)
 
@@ -396,6 +398,12 @@ class TestUtils(unittest.TestCase):
         # resource without trailing slash
         self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
                          'https://managedhsm.azure.com')
+
+        # VM SSH
+        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/.default"]),
+                         'https://pas.windows.net/CheckMyAccess/Linux')
+        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]),
+                         'https://pas.windows.net/CheckMyAccess/Linux')
 
     def test_resource_to_scopes(self):
         from azure.cli.core.util import resource_to_scopes

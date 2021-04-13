@@ -764,7 +764,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
                         specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None,
-                        edge_zone=None):
+                        max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
+                        max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
+                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -922,7 +924,15 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
-            'mode': upgrade_policy_mode
+            'mode': upgrade_policy_mode,
+            'rollingUpgradePolicy': {
+                'maxBatchInstancePercent': max_batch_instance_percent,
+                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
+                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
+                'pauseTimeBetweenBatches': pause_time_between_batches,
+                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
+                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
+            }
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,

@@ -7,9 +7,11 @@
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
+    from argcomplete.completers import DirectoriesCompleter
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
+    from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
 
     from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
@@ -21,7 +23,7 @@ def load_arguments(self, _):
     from knack.arguments import ignore_type, CLIArgumentType
 
     from azure.cli.command_modules.resource._completers import (
-        get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
+        get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list, get_policy_exemption_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
@@ -187,7 +189,7 @@ def load_arguments(self, _):
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
         c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
-        c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']))
+        c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
@@ -199,7 +201,7 @@ def load_arguments(self, _):
         c.argument('identity_role', arg_type=identity_role_type)
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
-        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(['Default', 'DoNotEnforce']))
+        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('identity_scope', arg_type=identity_scope_type)
@@ -219,6 +221,22 @@ def load_arguments(self, _):
 
     with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy set definition.')
+
+    with self.argument_context('policy exemption', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.ignore('_subscription')
+        c.argument('name', options_list=['--name', '-n'], completer=get_policy_exemption_completion_list, help='Name of the policy exemption.')
+        c.argument('scope', help='Scope to which this policy exemption applies.')
+        c.argument('disable_scope_strict_match', options_list=['--disable-scope-strict-match', '-i'], action='store_true', help='Include policy exemptions either inherited from parent scope or at child scope.')
+        c.argument('display_name', help='Display name of the policy exemption.')
+        c.argument('description', help='Description of policy exemption.')
+        c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption', arg_type=get_enum_type(ExemptionCategory))
+        c.argument('policy_definition_reference_ids', nargs='+', options_list=['--policy-definition-reference-ids', '-r'], help='The policy definition reference ids to exempt in the initiative (policy set).')
+        c.argument('expires_on', help='The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
+        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
+
+    with self.argument_context('policy exemption create', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy exemption.')
+        c.argument('policy_assignment', options_list=['--policy-assignment', '-a'], help='The referenced policy assignment Id for the policy exemption.')
 
     with self.argument_context('group') as c:
         c.argument('tag', tag_type)
@@ -572,14 +590,18 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('bicep build') as c:
-        c.argument('files', arg_type=CLIArgumentType(nargs="+", options_list=['--files', '-f'], completer=FilesCompleter(),
-                                                     type=file_type, help="Space separated Bicep file paths in the file system."))
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep file to build in the file system."))
+        c.argument('outdir', arg_type=CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(),
+                                                      help="When set, saves the output at the specified directory."))
+        c.argument('outfile', arg_type=CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(),
+                                                       help="When set, saves the output as the specified file path."))
         c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
                                                       help="When set, prints all output to stdout instead of corresponding files."))
 
     with self.argument_context('bicep decompile') as c:
-        c.argument('files', arg_type=CLIArgumentType(nargs="+", options_list=['--files', '-f'], completer=FilesCompleter(),
-                                                     type=file_type, help="Space separated ARM template paths in the file system."))
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the ARM template to decompile in the file system."))
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

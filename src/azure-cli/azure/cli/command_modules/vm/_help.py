@@ -820,6 +820,16 @@ examples:
     text: az vm assess-patches -g MyResourceGroup -n MyVm
 """
 
+helps['vm install-patches'] = """
+type: command
+short-summary: Install patches on a VM.
+examples:
+  - name: Install patches on a windows VM, allowing the maximum amount of time to be 4 hours, and the VM will reboot if required during the software update operation.
+    text: az vm install-patches -g MyResourceGroup -n MyVm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true
+  - name: Install patches on a linux VM, allowing the maximum amount of time to be 4 hours, and the VM will reboot if required during the software update operation.
+    text: az vm install-patches -g MyResourceGroup -n MyVm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-linux Critical
+"""
+
 helps['vm auto-shutdown'] = """
 type: command
 short-summary: Manage auto-shutdown for VM.
@@ -1756,7 +1766,7 @@ examples:
 helps['vm list'] = """
 type: command
 short-summary: List details of Virtual Machines.
-long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
+long-summary: '`--resource-group` can pass in an empty string as a parameter, which will output all VM information under the subscription. For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
 examples:
   - name: List all VMs.
     text: az vm list

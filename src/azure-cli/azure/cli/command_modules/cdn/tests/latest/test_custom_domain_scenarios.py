@@ -6,13 +6,14 @@ from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest
 from .scenario_mixin import CdnScenarioMixin
 from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, ProtocolType,
-                                   CertificateType, ErrorResponseException)
+                                   CertificateType)
+
+from azure.core.exceptions import (HttpResponseError)
 
 
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
     def test_cdn_custom_domain_errors(self, resource_group):
-        from azure.mgmt.cdn.models import ErrorResponseException
         from knack.util import CLIError
 
         self.kwargs.update({
@@ -30,13 +31,13 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # These will all fail because we don't really have the ability to create the custom endpoint in test.
         # but they should still fail if there was a CLI-level regression.
-        with self.assertRaises(ErrorResponseException):
+        with self.assertRaises(HttpResponseError):
             self.cmd(
                 'cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
         with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(ErrorResponseException):
+        with self.assertRaises(HttpResponseError):
             self.cmd(
                 'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         with self.assertRaises(CLIError):
@@ -45,7 +46,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_cdn_custom_domain_crud(self, resource_group):
-        profile_name = 'profile123'
+        profile_name = self.create_random_name(prefix='profile', length=24)
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
         self.profile_create_cmd(resource_group, profile_name, sku=SkuName.standard_akamai.value)
@@ -71,7 +72,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                           name=custom_domain_name,
                                           hostname=hostname,
                                           checks=checks)
-        except ErrorResponseException as err:
+        except HttpResponseError as err:
             if err.status_code != 400:
                 raise err
             hostname = custom_domain_name + '.cdn-cli-test-dogfood.azfdtest.xyz'
@@ -125,7 +126,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 custom_domain_name,
                                                 checks=checks)
 
-        with self.assertRaises(ErrorResponseException):
+        with self.assertRaises(HttpResponseError):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer()
@@ -164,7 +165,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 min_tls_version='None',
                                                 checks=checks)
 
-        with self.assertRaises(ErrorResponseException):
+        with self.assertRaises(HttpResponseError):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer()
@@ -239,7 +240,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 user_cert_protocol_type='sni',
                                                 checks=checks)
 
-        with self.assertRaises(ErrorResponseException):
+        with self.assertRaises(HttpResponseError):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer()
