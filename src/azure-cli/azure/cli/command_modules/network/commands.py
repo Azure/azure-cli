@@ -1365,8 +1365,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get', transform=transform_vpn_connection)
         g.command('list', 'list', transform=transform_vpn_connection_list)
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
-        g.command('list-ike-sas', 'begin_get_ike_sas', is_preview=True)
-        g.custom_command('show-device-config-script', 'show_vpn_connection_device_config_script', client_factory=cf_virtual_network_gateways, is_preview=True)
+        g.command('list-ike-sas', 'begin_get_ike_sas', is_preview=True, min_api='2020-08-01')
+        g.custom_command('show-device-config-script', 'show_vpn_connection_device_config_script', client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2017-09-01')
 
     with self.command_group('network vpn-connection shared-key', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections) as g:
         g.show_command('show', 'get_shared_key')
