@@ -543,7 +543,7 @@ def _get_azure_subscription_id():
     try:
         return _get_profile().get_subscription_id()
     except CLIError:
-        return ''
+        return None
 
 
 def _get_shell_type():

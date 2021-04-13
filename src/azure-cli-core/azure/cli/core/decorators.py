@@ -59,6 +59,8 @@ def hash256_result(func):
             raise ValueError('Return value is None')
         if not isinstance(val, str):
             raise ValueError('Return value is not string')
+        if not val:
+            return val
         hash_object = hashlib.sha256(val.encode('utf-8'))
         return str(hash_object.hexdigest())
 
