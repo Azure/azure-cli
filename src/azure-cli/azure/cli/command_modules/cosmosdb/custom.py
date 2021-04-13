@@ -9,6 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -22,6 +23,7 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
+    ResourceIdentityType,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
     SqlTriggerResource,
@@ -30,6 +32,7 @@ from azure.mgmt.cosmosdb.models import (
     SqlUserDefinedFunctionCreateUpdateParameters,
     TableResource,
     TableCreateUpdateParameters,
+    ManagedServiceIdentity,
     MongoDBDatabaseResource,
     MongoDBDatabaseCreateUpdateParameters,
     MongoDBCollectionResource,
@@ -99,7 +102,9 @@ def cli_cosmosdb_create(cmd, client,
                         network_acl_bypass=None,
                         network_acl_bypass_resource_ids=None,
                         backup_interval=None,
-                        backup_retention=None):
+                        backup_retention=None,
+                        assign_identity=None,
+                        default_identity=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -121,6 +126,13 @@ def cli_cosmosdb_create(cmd, client,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
+    system_assigned_identity = None
+    if assign_identity is not None:
+        if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
+            system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+        else:
+            raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
@@ -157,7 +169,9 @@ def cli_cosmosdb_create(cmd, client,
         enable_free_tier=enable_free_tier,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
-        backup_policy=backup_policy)
+        backup_policy=backup_policy,
+        identity=system_assigned_identity,
+        default_identity=default_identity)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -187,7 +201,8 @@ def cli_cosmosdb_update(client,
                         network_acl_bypass_resource_ids=None,
                         server_version=None,
                         backup_interval=None,
-                        backup_retention=None):
+                        backup_retention=None,
+                        default_identity=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -247,7 +262,8 @@ def cli_cosmosdb_update(client,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         api_properties=api_properties,
-        backup_policy=backup_policy)
+        backup_policy=backup_policy,
+        default_identity=default_identity)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
@@ -1241,6 +1257,53 @@ def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
     """ Lists the virtual network accounts associated with a Cosmos DB account """
     cosmos_db_account = client.get(resource_group_name, account_name)
     return cosmos_db_account.virtual_network_rules
+
+
+def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
+    """ Show the identity associated with a Cosmos DB account """
+
+    cosmos_db_account = client.get(resource_group_name, account_name)
+    return cosmos_db_account.identity
+
+
+def cli_cosmosdb_identity_assign(client,
+                                 resource_group_name,
+                                 account_name):
+    """ Show the identity associated with a Cosmos DB account """
+
+    existing = client.get(resource_group_name, account_name)
+
+    if ResourceIdentityType.system_assigned.value in existing.identity.type:
+        return existing.identity
+
+    if existing.identity.type == ResourceIdentityType.user_assigned.value:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned_user_assigned.value)
+    else:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+    params = DatabaseAccountUpdateParameters(identity=identity)
+    async_cosmos_db_update = client.update(resource_group_name, account_name, params)
+    cosmos_db_account = async_cosmos_db_update.result()
+    return cosmos_db_account.identity
+
+
+def cli_cosmosdb_identity_remove(client,
+                                 resource_group_name,
+                                 account_name):
+    """ Remove the SystemAssigned identity associated with a Cosmos DB account """
+
+    existing = client.get(resource_group_name, account_name)
+
+    if ResourceIdentityType.system_assigned.value not in existing.identity.type:
+        return existing.identity
+
+    if ResourceIdentityType.user_assigned.value in existing.identity.type:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value)
+    else:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
+    params = DatabaseAccountUpdateParameters(identity=identity)
+    async_cosmos_db_update = client.update(resource_group_name, account_name, params)
+    cosmos_db_account = async_cosmos_db_update.result()
+    return cosmos_db_account.identity
 
 
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):

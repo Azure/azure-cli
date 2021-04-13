@@ -1928,6 +1928,34 @@ examples:
       crafted: true
 """
 
+helps['storage fs directory upload'] = """
+    type: command
+    short-summary: Upload files or subdirectories to a directory in ADLS Gen2 file system.
+    examples:
+        - name: Upload a single file to a storage blob directory.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d directory
+        - name: Upload a local directory to root directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" --recursive
+        - name: Upload a local directory to a directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" -d directory --recursive
+        - name: Upload a set of files in a local directory to a directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file*" -d directory --recursive
+"""
+
+helps['storage fs directory download'] = """
+    type: command
+    short-summary: Download files from the directory in ADLS Gen2 file system to a local file path.
+    examples:
+        - name: Download a single file in a directory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d "<local-path>"
+        - name: Download whole ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount  -d "<local-path>" --recursive
+        - name: Download the entire directory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s SourceDirectoryPath -d "<local-path>" --recursive
+        - name: Download an entire subdirectory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
+"""
+
 helps['storage fs file'] = """
 type: group
 short-summary: Manage files in Azure Data Lake Storage Gen2 account.
@@ -2225,7 +2253,7 @@ examples:
 
 helps['storage share-rm delete'] = """
 type: command
-short-summary: Delete the specified Azure file share.
+short-summary: Delete the specified Azure file share or share snapshot.
 examples:
   - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
@@ -2233,6 +2261,8 @@ examples:
     text: az storage share-rm delete --storage-account mystorageaccount --name myfileshare
   - name: Delete an Azure file share by resource id.
     text: az storage share-rm delete --ids file-share-id
+  - name: Delete an Azure file share snapshot.
+    text: az storage share-rm delete --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
 """
 
 helps['storage share-rm exists'] = """
@@ -2271,14 +2301,16 @@ examples:
 
 helps['storage share-rm show'] = """
 type: command
-short-summary: Show the properties for a specified Azure file share.
+short-summary: Show the properties for a specified Azure file share or share snapshot.
 examples:
   - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm show -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
   - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
     text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
-  - name: Show the properties of an Azure file shares by resource id.
+  - name: Show the properties of an Azure file share by resource id.
     text: az storage share-rm show --ids file-share-id
+  - name: Show the properties of an Azure file share snapshot
+    text: az storage share-rm show --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
 """
 
 helps['storage share-rm stats'] = """
@@ -2299,6 +2331,14 @@ examples:
     text: az storage share-rm update --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
   - name: Update the properties for an Azure file shares by resource id.
     text: az storage share-rm update --ids file-share-id --quota 3 --metadata key1=value1 key2=value2
+"""
+
+helps['storage share-rm snapshot'] = """
+type: command
+short-summary: Create a snapshot of an existing share under the specified account.
+examples:
+  - name: Create a snapshot of an existing share under the specified account.
+    text: az storage share-rm snapshot -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
 """
 
 helps['storage share'] = """

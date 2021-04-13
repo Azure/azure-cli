@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import threading
 import time
 import ast
@@ -1054,8 +1053,11 @@ def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
 
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-    setattr(webapp, 'ftpPublishingUrl', url)
+    try:
+        url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
+        setattr(webapp, 'ftpPublishingUrl', url)
+    except StopIteration:
+        pass
     return webapp
 
 
@@ -1081,7 +1083,7 @@ def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None
     web_app = get_webapp(cmd, resource_group_name, name, slot)
     if not web_app:
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
-    linux_fx = fx_version if web_app.reserved else None
+    linux_fx = fx_version if (web_app.reserved or not web_app.is_xenon) else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
                                linux_fx_version=linux_fx, windows_fx_version=windows_fx, slot=slot)
@@ -2010,6 +2012,10 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     if not xml:
         profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
         converted = []
+
+        if not isinstance(profiles, list):
+            profiles = [profiles]
+
         for profile in profiles:
             new = {}
             for key in profile:
@@ -2017,6 +2023,7 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
                 new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
+
     cmd.cli_ctx.invocation.data['output'] = 'tsv'
     return full_xml
 
@@ -2585,14 +2592,14 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
     if found_cert:
-        if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
+        if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
             return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                               webapp_cert.host_names[0], ssl_type,
+                                               found_cert.host_names[0], ssl_type,
                                                certificate_thumbprint, slot)
 
         query_result = list_hostnames(cmd, resource_group_name, name, slot)
         hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-        to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+        to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
         for h in to_update:
             _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                         h, ssl_type, certificate_thumbprint, slot)

@@ -2253,6 +2253,28 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_policy_setting')
+    def test_vmss_create_with_policy_setting(self, resource_group):
+
+        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S'
+        self.kwargs.update({
+            'vmss': 'vrfvmss',
+            'maxBIP': maxBIP,
+            'maxUIP': maxUIP,
+            'maxUUIP': maxUUIP,
+            'PTB': PTB
+        })
+
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -g {rg} -n {vmss} --instance-count 1 --generate-ssh-keys --admin-username myadmin --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxBatchInstancePercent', maxBIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
+            self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
 
@@ -2485,6 +2507,29 @@ class VMSSUpdateTests(ScenarioTest):
 
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_policy_')
+    def test_vmss_update_policy(self, resource_group):
+
+        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S'
+        self.kwargs.update({
+            'vmss': 'winvmss',
+            'maxBIP': maxBIP,
+            'maxUIP': maxUIP,
+            'maxUUIP': maxUUIP,
+            'PTB': PTB,
+            'prioritizeUI': True,
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1 --generate-ssh-keys')
+        # test rolling upgrade policy
+        self.cmd('vmss update -g {rg} -n {vmss} --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxBatchInstancePercent', maxBIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
+            self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_')
     def test_vmss_update_image(self):
@@ -4374,8 +4419,9 @@ class DiskEncryptionSetTest(ScenarioTest):
             'kid2': kid2
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1}')
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1} --enable-auto-key-rotation true')
         des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
+        self.assertEqual(des_show_output['rotationToLatestKeyVersionEnabled'], True)
         des_sp_id = des_show_output['identity']['principalId']
         des_id = des_show_output['id']
         self.kwargs.update({
@@ -4389,9 +4435,10 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
         time.sleep(15)
 
-        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2}', checks=[
+        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2} --enable-auto-key-rotation false', checks=[
             self.check('activeKey.keyUrl', '{kid2}'),
             self.check('activeKey.sourceVault.id', '{vault2_id}'),
+            self.check('rotationToLatestKeyVersionEnabled', False)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_disk_update_', location='westcentralus')
@@ -5070,6 +5117,21 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         # Create new one
         self.cmd('vm create -g {rg} -n vm3 --image centos --nsg-rule None --ssh-key-name k3 --generate-ssh-keys')
         self.cmd('sshkey show -g {rg} -n k3')
+
+
+class VMInstallPatchesScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
+    def test_vm_install_patches(self, resource_group):
+        # Create new one
+        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('vm create -g {rg} -n vm2 --image UbuntuLTS --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-linux Critical Security', checks=[
+            self.check('status', 'Succeeded')
+        ])
 
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):

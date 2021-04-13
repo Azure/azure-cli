@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-from __future__ import print_function
 import sys
 import json
 import getpass
@@ -15,8 +14,7 @@ import ssl
 import re
 import logging
 
-import six
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.request import urlopen
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -58,7 +56,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
-    from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
@@ -69,89 +66,88 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     # Print the traceback and exception message
     logger.debug(traceback.format_exc())
 
-    with CommandLoggerContext(logger):
-        error_msg = getattr(ex, 'message', str(ex))
-        exit_code = 1
+    error_msg = getattr(ex, 'message', str(ex))
+    exit_code = 1
 
-        if isinstance(ex, azclierror.AzCLIError):
-            az_error = ex
+    if isinstance(ex, azclierror.AzCLIError):
+        az_error = ex
 
-        elif isinstance(ex, JMESPathError):
-            error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
-            az_error = azclierror.InvalidArgumentValueError(error_msg)
-            az_error.set_recommendation(QUERY_REFERENCE)
+    elif isinstance(ex, JMESPathError):
+        error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
+        az_error = azclierror.InvalidArgumentValueError(error_msg)
+        az_error.set_recommendation(QUERY_REFERENCE)
 
-        elif isinstance(ex, SSLError):
+    elif isinstance(ex, SSLError):
+        az_error = azclierror.AzureConnectionError(error_msg)
+        az_error.set_recommendation(SSLERROR_TEMPLATE)
+
+    elif isinstance(ex, CloudError):
+        if extract_common_error_message(ex):
+            error_msg = extract_common_error_message(ex)
+        status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg)
+
+    elif isinstance(ex, ValidationError):
+        az_error = azclierror.ValidationError(error_msg)
+
+    elif isinstance(ex, CLIError):
+        # TODO: Fine-grained analysis here
+        az_error = azclierror.UnclassifiedUserFault(error_msg)
+
+    elif isinstance(ex, AzureError):
+        if extract_common_error_message(ex):
+            error_msg = extract_common_error_message(ex)
+        AzCLIErrorType = get_error_type_by_azure_error(ex)
+        az_error = AzCLIErrorType(error_msg)
+
+    elif isinstance(ex, AzureException):
+        if is_azure_connection_error(error_msg):
+            az_error = azclierror.AzureConnectionError(error_msg)
+        else:
+            # TODO: Fine-grained analysis here for Unknown error
+            az_error = azclierror.UnknownError(error_msg)
+
+    elif isinstance(ex, ClientRequestError):
+        if is_azure_connection_error(error_msg):
+            az_error = azclierror.AzureConnectionError(error_msg)
+        elif isinstance(ex.inner_exception, SSLError):
+            # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
             az_error = azclierror.AzureConnectionError(error_msg)
             az_error.set_recommendation(SSLERROR_TEMPLATE)
-
-        elif isinstance(ex, CloudError):
-            if extract_common_error_message(ex):
-                error_msg = extract_common_error_message(ex)
-            status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
-            AzCLIErrorType = get_error_type_by_status_code(status_code)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, ValidationError):
-            az_error = azclierror.ValidationError(error_msg)
-
-        elif isinstance(ex, CLIError):
-            # TODO: Fine-grained analysis here
-            az_error = azclierror.UnclassifiedUserFault(error_msg)
-
-        elif isinstance(ex, AzureError):
-            if extract_common_error_message(ex):
-                error_msg = extract_common_error_message(ex)
-            AzCLIErrorType = get_error_type_by_azure_error(ex)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, AzureException):
-            if is_azure_connection_error(error_msg):
-                az_error = azclierror.AzureConnectionError(error_msg)
-            else:
-                # TODO: Fine-grained analysis here for Unknown error
-                az_error = azclierror.UnknownError(error_msg)
-
-        elif isinstance(ex, ClientRequestError):
-            if is_azure_connection_error(error_msg):
-                az_error = azclierror.AzureConnectionError(error_msg)
-            elif isinstance(ex.inner_exception, SSLError):
-                # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
-                az_error = azclierror.AzureConnectionError(error_msg)
-                az_error.set_recommendation(SSLERROR_TEMPLATE)
-            else:
-                az_error = azclierror.ClientRequestError(error_msg)
-
-        elif isinstance(ex, HttpOperationError):
-            message, _ = extract_http_operation_error(ex)
-            if message:
-                error_msg = message
-            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
-            AzCLIErrorType = get_error_type_by_status_code(status_code)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, HTTPError):
-            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
-            AzCLIErrorType = get_error_type_by_status_code(status_code)
-            az_error = AzCLIErrorType(error_msg)
-
-        elif isinstance(ex, KeyboardInterrupt):
-            error_msg = 'Keyboard interrupt is captured.'
-            az_error = azclierror.ManualInterrupt(error_msg)
-
         else:
-            error_msg = "The command failed with an unexpected error. Here is the traceback:"
-            az_error = azclierror.CLIInternalError(error_msg)
-            az_error.set_exception_trace(ex)
-            az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+            az_error = azclierror.ClientRequestError(error_msg)
 
-        if isinstance(az_error, azclierror.ResourceNotFoundError):
-            exit_code = 3
+    elif isinstance(ex, HttpOperationError):
+        message, _ = extract_http_operation_error(ex)
+        if message:
+            error_msg = message
+        status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg)
 
-        az_error.print_error()
-        az_error.send_telemetry()
+    elif isinstance(ex, HTTPError):
+        status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg)
 
-        return exit_code
+    elif isinstance(ex, KeyboardInterrupt):
+        error_msg = 'Keyboard interrupt is captured.'
+        az_error = azclierror.ManualInterrupt(error_msg)
+
+    else:
+        error_msg = "The command failed with an unexpected error. Here is the traceback:"
+        az_error = azclierror.CLIInternalError(error_msg)
+        az_error.set_exception_trace(ex)
+        az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+
+    if isinstance(az_error, azclierror.ResourceNotFoundError):
+        exit_code = 3
+
+    az_error.print_error()
+    az_error.send_telemetry()
+
+    return exit_code
 
 
 def extract_common_error_message(ex):
@@ -344,8 +340,8 @@ def _get_local_versions():
 
 def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
-
-    output = six.StringIO()
+    import io
+    output = io.StringIO()
     versions = _get_local_versions()
 
     # get the versions from pypi
@@ -383,9 +379,9 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
-    _print("Python location '{}'".format(sys.executable))
-    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     import os
+    _print("Python location '{}'".format(os.path.abspath(sys.executable)))
+    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
         _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
@@ -514,11 +510,25 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
         try:
             import ast
             return ast.literal_eval(json_or_dict_string)
-        except SyntaxError:
-            raise CLIError(json_ex)
-        except ValueError as ex:
+        except Exception as ex:
             logger.debug(ex)  # log the exception which could be a python dict parsing error.
-            raise CLIError(json_ex)  # raise json_ex error which is more readable and likely.
+
+            # Echo the JSON received by CLI
+            msg = "Failed to parse JSON: {}\nError detail: {}".format(json_or_dict_string, json_ex)
+
+            # Recommendation for all shells
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            recommendation = "The JSON may have been parsed by the shell. See " \
+                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#quoting-issues"
+
+            # Recommendation especially for PowerShell
+            parent_proc = get_parent_proc_name().lower()
+            if parent_proc in ("powershell.exe", "pwsh.exe"):
+                recommendation += "\nPowerShell requires additional quoting rules. See " \
+                                  "https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md"
+
+            # Raise from json_ex error which is more likely to be the original error
+            raise InvalidArgumentValueError(msg, recommendation=recommendation) from json_ex
 
 
 def b64encode(s):
@@ -528,7 +538,7 @@ def b64encode(s):
     :return: base64 encoded string
     :rtype: str
     """
-    encoded = base64.b64encode(six.b(s))
+    encoded = base64.b64encode(s.encode("latin-1"))
     return encoded if encoded is str else encoded.decode('latin-1')
 
 
@@ -647,7 +657,7 @@ def open_page_in_browser(url):
         try:
             # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
-            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
+            return subprocess.Popen(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -715,11 +725,9 @@ def get_command_type_kwarg(custom_command=False):
 
 def reload_module(module):
     # reloading the imported module to update
-    try:
+    if module in sys.modules:
         from importlib import reload
-    except ImportError:
-        pass  # for python 2
-    reload(sys.modules[module])
+        reload(sys.modules[module])
 
 
 def get_default_admin_username():
@@ -887,7 +895,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         value = getattr(endpoints, p)
                     except CloudEndpointNotSetException:
                         continue
-                    if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
+                    if isinstance(value, str) and url.lower().startswith(value.lower()):
                         resource = value
                         break
         if resource:
@@ -1214,8 +1222,12 @@ def scopes_to_resource(scopes):
     :rtype: str
     """
     scope = scopes[0]
-    if scope.endswith("/.default"):
-        scope = scope[:-len("/.default")]
+
+    suffixes = ['/.default', '/user_impersonation']
+
+    for s in suffixes:
+        if scope.endswith(s):
+            return scope[:-len(s)]
 
     return scope
 
@@ -1224,7 +1236,8 @@ def _get_parent_proc_name():
     # Un-cached function to get parent process name.
     try:
         import psutil
-    except ImportError:
+    except ImportError as ex:
+        logger.debug(ex)
         return None
 
     import os
