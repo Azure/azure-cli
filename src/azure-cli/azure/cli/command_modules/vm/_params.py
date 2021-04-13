@@ -165,7 +165,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=snapshot_sku)
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
-        c.ignore('edge_zone')
+        c.argument('edge_zone', edge_zone_type)
     # endregion
 
     # region Images

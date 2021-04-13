@@ -5190,10 +5190,10 @@ class ExtendedLocation(ScenarioTest):
             self.check('extendedLocation.type', 'EdgeZone')
         ])
         # Python SDK not ready
-        # self.cmd('snapshot create -g {rg} -n s1 --size-gb 10 --edge-zone microsoftlosangeles1', checks=[
-        #     self.check('extendedLocation.name', 'microsoftlosangeles1'),
-        #     self.check('extendedLocation.type', 'EdgeZone')
-        # ])
+        self.cmd('snapshot create -g {rg} -n s1 --size-gb 10 --edge-zone microsoftlosangeles1 --sku Premium_LRS', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
         self.cmd('image create -g {rg} -n image --os-type linux --source d1 --edge-zone microsoftlosangeles1', checks=[
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
