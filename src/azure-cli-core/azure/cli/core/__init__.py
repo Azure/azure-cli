@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.21.0"
+__version__ = "2.22.0"
 
 import os
 import sys
@@ -770,6 +770,8 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
+    # Please use add_cli_command instead of _cli_command.
+    # Currently "keyvault" and "batch" modules are still rely on this function, so it cannot be removed now.
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
         from knack.deprecation import Deprecated
@@ -827,6 +829,31 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
             self.command_table[name] = self.command_cls(self, name,
                                                         handler or default_command_handler,
+                                                        **kwargs)
+
+    def add_cli_command(self, name, command_operation, **kwargs):
+        """Register a command in command_table with command operation provided"""
+        from knack.deprecation import Deprecated
+        from .commands.command_operation import BaseCommandOperation
+        if not issubclass(type(command_operation), BaseCommandOperation):
+            raise TypeError("CommandOperation must be an instance of subclass of BaseCommandOperation."
+                            " Got instance of '{}'".format(type(command_operation)))
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
+
+        name = ' '.join(name.split())
+
+        if self.supported_api_version(resource_type=kwargs.get('resource_type'),
+                                      min_api=kwargs.get('min_api'),
+                                      max_api=kwargs.get('max_api'),
+                                      operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
+            self.command_table[name] = self.command_cls(loader=self,
+                                                        name=name,
+                                                        handler=command_operation.handler,
+                                                        arguments_loader=command_operation.arguments_loader,
+                                                        description_loader=command_operation.description_loader,
+                                                        command_operation=command_operation,
                                                         **kwargs)
 
     def get_op_handler(self, operation, operation_group=None):

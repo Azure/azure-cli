@@ -783,7 +783,7 @@ def find_child_collection(parent, *args, **kwargs):
     return collection
 
 
-def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout=1):
     import requests
     import timeit
     start = timeit.default_timer()
@@ -1222,8 +1222,12 @@ def scopes_to_resource(scopes):
     :rtype: str
     """
     scope = scopes[0]
-    if scope.endswith("/.default"):
-        scope = scope[:-len("/.default")]
+
+    suffixes = ['/.default', '/user_impersonation']
+
+    for s in suffixes:
+        if scope.endswith(s):
+            return scope[:-len(s)]
 
     return scope
 
