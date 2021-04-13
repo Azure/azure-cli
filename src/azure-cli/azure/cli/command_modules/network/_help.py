@@ -5696,6 +5696,30 @@ examples:
     text: az network vnet-gateway vpn-client show-health -g MyResourceGroup -n MyVnetGateway
 """
 
+helps['network vnet-gateway vpn-client ipsec-policy'] = """
+type: group
+short-summary: Manage the VPN client connection ipsec-policy for P2S client connection of the virtual network gateway.
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy show'] = """
+type: command
+short-summary: Get the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+examples:
+  - name: Get the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+    text: az network vnet-gateway vpn-client ipsec-policy show -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy set'] = """
+type: command
+short-summary: Set the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+examples:
+  - name: Set the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+    text: |-
+        az network vnet-gateway vpn-client ipsec-policy set -g MyResourceGroup -n MyVnetGateway \
+        --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \
+        --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
+"""
+
 helps['network vnet-gateway wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.

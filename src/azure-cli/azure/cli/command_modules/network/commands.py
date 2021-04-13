@@ -1340,6 +1340,12 @@ def load_command_table(self, _):
         g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
         g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
 
+    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
+        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
+        g.command('show', 'begin_get_vpnclient_ipsec_parameters')
+
+    # with self.command_group
+
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
         g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')

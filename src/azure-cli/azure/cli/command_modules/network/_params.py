@@ -2037,7 +2037,7 @@ def load_arguments(self, _):
         'ipsec_integrity': 'IpsecIntegrity',
         'pfs_group': 'PfsGroup'
     }
-    for scope in ['vpn-connection', 'vnet-gateway']:
+    for scope in ['vpn-connection', 'vnet-gateway', 'vnet-gateway vpn-client']:
         with self.argument_context('network {} ipsec-policy'.format(scope)) as c:
             for dest, model_name in param_map.items():
                 model = self.get_models(model_name)

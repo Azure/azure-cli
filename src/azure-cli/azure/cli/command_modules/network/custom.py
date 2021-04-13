@@ -6478,6 +6478,22 @@ def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gatewa
     # legacy implementation
     return client.begin_generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
 
+def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                sa_life_time_seconds, sa_data_size_kilobytes,
+                                ipsec_encryption, ipsec_integrity,
+                                ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+    VpnClientIPsecParameters = cmd.get_models('VpnClientIPsecParameters')
+    vpnclient_ipsec_params = VpnClientIPsecParameters(sa_life_time_seconds=sa_life_time_seconds,
+                                                      sa_data_size_kilobytes=sa_data_size_kilobytes,
+                                                      ipsec_encryption=ipsec_encryption,
+                                                      ipsec_integrity=ipsec_integrity,
+                                                      ike_encryption=ike_encryption,
+                                                      ike_integrity=ike_integrity,
+                                                      dh_group=dh_group,
+                                                      pfs_group=pfs_group)
+    return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
+                       virtual_network_gateway_name, vpnclient_ipsec_params)
+
 def disconnect_vnet_gateway_vpn_connections(cmd, client, resource_group_name, virtual_network_gateway_name,
                                             vpn_connection_ids, no_wait=False):
     P2SVpnConnectionRequest = cmd.get_models('P2SVpnConnectionRequest')
