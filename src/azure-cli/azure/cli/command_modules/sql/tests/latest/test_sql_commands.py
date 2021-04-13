@@ -5700,7 +5700,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         self.kwargs.update({
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
-            'storage_sas': 'sp=rl&st=2021-04-08T13:05:32Z&se=2021-04-09T21:05:32Z&spr=https&sv=2020-02-10&sr=c&sig=fkWaJ6vNcuHTP5V3Dwg28QdWki69%2BQa6zSQEYXlXWiM%3D',
+            'storage_sas': 'sp=rl&st=2021-04-12T13:07:20Z&se=2021-04-30T21:07:20Z&spr=https&sv=2020-02-10&sr=c&sig=igoGWjvYceuSkuHRzkm6oPPxitRlSYgGvmdwTbr7WTM%3D',
             'storage_uri': 'https://mibrkicstorage.blob.core.windows.net/mibrkicportal',
             'last_backup_name': 'full.bak'
         })
@@ -5711,6 +5711,8 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         if self.in_recording or self.is_live:
             sleep(10)
+        
+        self.cmd('sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
 
         # Complete log replay service
         self.cmd('sql midb log-replay complete -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --last-bn {last_backup_name}',
