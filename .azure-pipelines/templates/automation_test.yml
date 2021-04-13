@@ -1,6 +1,16 @@
+# Azure DevOps task for automation test using azdev and pytest
+
 parameters:
-  pythonVersion: ''
-  profile: ''
+- name: pythonVersion
+  type: string
+  default: 3.8
+- name: profile
+  type: string
+  default: latest
+- name: fullTest
+  displayName: 'Run full test?'
+  type: boolean
+  default: false
 
 steps:
   - task: UsePythonVersion@0
@@ -13,10 +23,17 @@ steps:
 
       source env/bin/activate
 
-      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
-        azdev test --series --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }}
+      echo pythonVersion: ${{ parameters.pythonVersion }}
+      echo profile: ${{ parameters.profile }}
+      echo fullTest: ${{ parameters.fullTest }}
+      echo Build.Reason: $(Build.Reason)
+
+      if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
+        echo "Running incremental test"
+        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series
       else
-        azdev test --series --no-exitfirst --profile ${{ parameters.profile }}
+        echo "Running full test"
+        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series
       fi
     displayName: "Test on Profile ${{ parameters.profile }}"
     env:

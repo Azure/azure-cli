@@ -16,7 +16,8 @@ from copy import deepcopy
 from adal import AdalError
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK,
+                                     _transform_subscription_for_multiapi)
 if _USE_VENDORED_SUBSCRIPTION_SDK:
     from azure.cli.core.vendored_sdks.subscriptions.models import \
         (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
@@ -1787,8 +1788,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(token_type, token_entry2['tokenType'])
 
     @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
-    def test_credscache_good_error_on_file_corruption(self, mock_read_file):
-        mock_read_file.side_effect = ValueError('a bad error for you')
+    @mock.patch('os.path.isfile', autospec=True, return_value=True)
+    def test_credscache_good_error_on_file_corruption(self, isfile_mock, get_file_json_mock):
+        get_file_json_mock.side_effect = ValueError('a bad error for you')
         cli = DummyCli()
 
         # action
@@ -1938,9 +1940,14 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
         self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
 
-    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    @mock.patch('msal.ConfidentialClientApplication.acquire_token_for_client', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_cred_for_service_principal', autospec=True)
     @mock.patch('msal.ClientApplication.acquire_token_by_refresh_token', autospec=True)
-    def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription', autospec=True)
+    def test_get_msal_token(self, get_subscription_mock, retrieve_token_for_user_mock,
+                            acquire_token_by_refresh_token_mock, retrieve_cred_for_service_principal_mock,
+                            acquire_token_for_client_mock):
         """
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
@@ -1949,15 +1956,27 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
-        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
-        profile._set_subscriptions(consolidated)
-
-        some_token_type = 'Bearer'
-        mock_retrieve_token_for_user.return_value = (some_token_type, TestProfile.raw_token1, TestProfile.token_entry1)
-        mock_acquire_token.return_value = {
-            'access_token': 'fake_access_token'
+        msal_result = {
+            'token_type': 'ssh-cert',
+            'scope': 'https://pas.windows.net/CheckMyAccess/Linux/user_impersonation https://pas.windows.net/CheckMyAccess/Linux/.default',
+            'expires_in': 3599,
+            'ext_expires_in': 3599,
+            'access_token': 'fake_cert'
         }
-        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
+
+        # User
+        get_subscription_mock.return_value = {
+            'tenantId': self.tenant_id,
+            'user': {
+                'name': self.user1,
+                'type': 'user'
+            },
+        }
+
+        retrieve_token_for_user_mock.return_value = ('Bearer', self.raw_token1, self.token_entry1)
+        acquire_token_by_refresh_token_mock.return_value = msal_result
+
+        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/.default"]
         data = {
             "token_type": "ssh-cert",
             "req_cnf": "fake_jwk",
@@ -1965,7 +1984,22 @@ class TestProfile(unittest.TestCase):
         }
         username, access_token = profile.get_msal_token(scopes, data)
         self.assertEqual(username, self.user1)
-        self.assertEqual(access_token, 'fake_access_token')
+        self.assertEqual(access_token, 'fake_cert')
+
+        # Service Principal
+        sp_id = '610a3200-0000-0000-0000-000000000000'
+        get_subscription_mock.return_value = {
+            'tenantId': self.tenant_id,
+            'user': {
+                'name': sp_id,
+                'type': 'servicePrincipal'
+            },
+        }
+        retrieve_cred_for_service_principal_mock.return_value = "some_secret"
+        acquire_token_for_client_mock.return_value = msal_result
+        username, access_token = profile.get_msal_token(scopes, data)
+        self.assertEqual(username, sp_id)
+        self.assertEqual(access_token, 'fake_cert')
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
@@ -2037,6 +2071,55 @@ class MSRestAzureAuthStub:
     @token.setter
     def token(self, value):
         self._token = value
+
+
+class TestUtil(unittest.TestCase):
+
+    def test_transform_subscription_for_multiapi(self):
+
+        class SimpleSubscription:
+            pass
+
+        class SimpleManagedByTenant:
+            pass
+
+        tenant_id = "00000001-0000-0000-0000-000000000000"
+
+        # No 2019-06-01 property is set.
+        s = SimpleSubscription()
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {}
+
+        # home_tenant_id is set.
+        s = SimpleSubscription()
+        s.home_tenant_id = tenant_id
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000'}
+
+        # managed_by_tenants is set, but is None. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = None
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': None}
+
+        # managed_by_tenants is set, but is []. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = []
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': []}
+
+        # managed_by_tenants is set, and has valid items. It is preserved.
+        s = SimpleSubscription()
+        t = SimpleManagedByTenant()
+        t.tenant_id = tenant_id
+        s.managed_by_tenants = [t]
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': [{"tenantId": tenant_id}]}
 
 
 if __name__ == '__main__':

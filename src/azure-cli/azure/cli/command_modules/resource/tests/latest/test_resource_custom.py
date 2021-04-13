@@ -412,7 +412,7 @@ class TestCustom(unittest.TestCase):
         ])
 
         # Act.
-        result = _what_if_deploy_arm_template_core(cmd, mock.MagicMock(), True, ["create", "igNoRE"])
+        result = _what_if_deploy_arm_template_core(cmd.cli_ctx, mock.MagicMock(), True, ["create", "igNoRE"])
 
         # Assert.
         self.assertEqual(1, len(result.changes))

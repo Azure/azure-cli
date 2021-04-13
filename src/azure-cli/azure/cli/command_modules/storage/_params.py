@@ -587,7 +587,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
-        c.argument('destination_path', help='The destination path that will be appended to the blob name.')
+        c.argument('destination_path', help='The destination path that will be prepended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
         from ._validators import get_include_help_string
@@ -1170,10 +1170,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.argument('expand', default=None)
+        c.argument('x_ms_snapshot', options_list=['--snapshot'], is_preview=True,
+                   help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
-        c.ignore('x_ms_snapshot')  # Ignore first before it is ready
 
-    for item in ['create', 'update']:
+    with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.ignore('x_ms_snapshot')
+
+    for item in ['create', 'update', 'snapshot']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
             t_enabled_protocols, t_root_squash, t_access_tier = \
                 self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
@@ -1562,6 +1566,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The new directory name the users want to move to. The value must have the following format: '
                         '"{filesystem}/{directory}/{subdirectory}".')
 
+    with self.argument_context('storage fs directory upload') as c:
+        from ._validators import validate_fs_directory_upload_destination_url
+        c.extra('destination_fs', options_list=['--file-system', '-f'], required=True,
+                help='The upload destination file system.')
+        c.extra('destination_path', options_list=['--destination-path', '-d'],
+                validator=validate_fs_directory_upload_destination_url,
+                help='The upload destination directory path. It should be an absolute path to file system. '
+                     'If the specified destination path does not exist, a new directory path will be created.')
+        c.argument('source', options_list=['--source', '-s'],
+                   help='The source file path to upload from.')
+        c.argument('recursive', recursive_type, help='Recursively upload files. If enabled, all the files '
+                                                     'including the files in subdirectories will be uploaded.')
+        c.ignore('destination')
+
+    with self.argument_context('storage fs directory download') as c:
+        from ._validators import validate_fs_directory_download_source_url
+        c.extra('source_fs', options_list=['--file-system', '-f'], required=True,
+                help='The download source file system.')
+        c.extra('source_path', options_list=['--source-path', '-s'],
+                validator=validate_fs_directory_download_source_url,
+                help='The download source directory path. It should be an absolute path to file system.')
+        c.argument('destination', options_list=['--destination-path', '-d'],
+                   help='The destination local directory path to download.')
+        c.argument('recursive', recursive_type, help='Recursively download files. If enabled, all the files '
+                                                     'including the files in subdirectories will be downloaded.')
+        c.ignore('source')
+
     with self.argument_context('storage fs file list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
@@ -1576,6 +1607,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='An opaque continuation token. This value can be retrieved from the next_marker field of a '
                    'previous generator object. If specified, this generator will begin returning results from this '
                    'point.')
+        c.argument('show_next_marker', action='store_true', is_preview=True,
+                   help='Show nextMarker in result when specified.')
 
     for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show', 'metadata update',
                  'metadata show']:
