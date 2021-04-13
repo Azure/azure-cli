@@ -8,12 +8,12 @@ from knack.util import CLIError
 
 def validate_failover_policies(ns):
     """ Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format """
-    from azure.mgmt.cosmosdb.models import FailoverPolicy
+    from azure.mgmt.cosmosdb.models import FailoverPolicy, FailoverPolicies
     fp_dict = []
-    for item in ns.failover_policies:
+    for item in ns.failover_parameters:
         comps = item.split('=', 1)
         fp_dict.append(FailoverPolicy(location_name=comps[0], failover_priority=int(comps[1])))
-    ns.failover_policies = fp_dict
+    ns.failover_parameters = FailoverPolicies(failover_policies=fp_dict)
 
 
 def validate_ip_range_filter(ns):
