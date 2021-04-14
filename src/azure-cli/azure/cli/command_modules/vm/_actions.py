@@ -147,7 +147,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
 def load_extension_images_thru_services(cli_ctx, publisher, name, version, location,
                                         show_latest=False, partial_match=True):
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    from packaging.version import Version  # pylint: disable=no-name-in-module,import-error
+    from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
     all_images = []
     client = _compute_client_factory(cli_ctx)
     if location is None:
@@ -175,7 +175,7 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
 
             if show_latest:
                 # pylint: disable=no-member
-                versions.sort(key=lambda v: Version(v.name), reverse=True)
+                versions.sort(key=lambda v: parse(v.name), reverse=True)
                 try:
                     all_images.append({
                         'publisher': publisher,

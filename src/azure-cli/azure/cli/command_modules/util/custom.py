@@ -40,14 +40,14 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.extension import get_extensions, WheelExtension
-    from packaging.version import Version
+    from packaging.version import parse
     from knack.util import CLIError
 
     update_cli = True
     from azure.cli.core.util import get_latest_from_github
     try:
         latest_version = get_latest_from_github()
-        if latest_version and Version(latest_version) <= Version(local_version):
+        if latest_version and parse(latest_version) <= parse(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
             if not update_all:

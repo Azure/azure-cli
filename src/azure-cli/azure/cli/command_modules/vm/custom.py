@@ -114,10 +114,10 @@ def _get_access_extension_upgrade_info(extensions, name):
 
     if extensions:
         extension = next((e for e in extensions if e.name == name), None)
-        from packaging.version import Version  # pylint: disable=no-name-in-module,import-error
-        if extension and Version(extension.type_handler_version) < Version(version):
+        from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
+        if extension and parse(extension.type_handler_version) < parse(version):
             auto_upgrade = True
-        elif extension and Version(extension.type_handler_version) > Version(version):
+        elif extension and parse(extension.type_handler_version) > parse(version):
             version = extension.type_handler_version
 
     return publisher, version, auto_upgrade
