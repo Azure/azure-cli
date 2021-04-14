@@ -55,6 +55,10 @@ def cf_metric_def(cli_ctx, _):
     return cf_monitor(cli_ctx).metric_definitions
 
 
+def cf_metric_ns(cli_ctx, _):
+    return cf_monitor(cli_ctx).metric_namespaces
+
+
 def cf_activity_log(cli_ctx, _):
     return cf_monitor(cli_ctx).activity_logs
 
