@@ -153,8 +153,11 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
             assignee_object_result = _get_object_stubs(graph_client, [assignee_object_id])
             if assignee_object_result:
                 assignee_principal_type = assignee_object_result[0].object_type
-        except (CloudError, GraphErrorException):
-            pass
+        except (CloudError, GraphErrorException) as ex:
+            logger.warning('Failed to auto complete principal type for %s by invoking graph, err: %s.\n'
+                           'May not support create role assignment by object id without principal type in future.'
+                           'Please specify assignee principal type manually.'
+                           % (assignee_object_id, str(ex)))
 
     # If condition is set and condition-version is empty, condition-version defaults to "2.0".
     if condition and not condition_version:

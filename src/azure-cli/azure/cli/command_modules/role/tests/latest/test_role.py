@@ -381,8 +381,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             from msrestazure.azure_exceptions import CloudError
             import requests
             mock_response = requests.Response()
-            mock_response.status_code = 404
-            mock_response.reason = 'Not found'
+            mock_response.status_code = 403
+            mock_response.reason = 'Forbidden for url: https://graph.windows.net/.../getObjectsByObjectIds?api-version=1.6'
             with mock.patch('azure.graphrbac.operations.ObjectsOperations.get_objects_by_object_ids',
                             side_effect=CloudError(mock_response)):
                 _test_role_assignment(assignee_object_id)
@@ -419,7 +419,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             result = self.cmd('ad sp create-for-rbac --skip-assignment --name {sp_name}').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
             result = self.cmd('ad sp show --id {app_id}').get_output_in_json()
-            self.kwargs['object_id'] = result['objectId']
             try:
                 _test_role_assignment_graph_call(result['objectId'], 'ServicePrincipal')
             finally:
