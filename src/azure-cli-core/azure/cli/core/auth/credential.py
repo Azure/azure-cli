@@ -3,17 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from typing import Tuple, List
 
-import json
 import requests
-from azure.cli.core._identity import resource_to_scopes
 from azure.cli.core.util import in_cloud_console
 from azure.core.credentials import AccessToken
 from azure.identity import CredentialUnavailableError, AuthenticationRequiredError
-
 from knack.log import get_logger
 from knack.util import CLIError
+
+from .util import resource_to_scopes, aad_error_handler
 
 logger = get_logger(__name__)
 
@@ -109,47 +109,3 @@ def _normalize_scopes(scopes):
         return scopes[1:]
 
     return scopes
-
-
-def _generate_login_command(scopes=None, claims=None):
-    login_command = ['az login']
-
-    if scopes:
-        login_command.append('--scope {}'.format(' '.join(scopes)))
-
-    if claims:
-        import base64
-        try:
-            base64.urlsafe_b64decode(claims)
-            is_base64 = True
-        except ValueError:
-            is_base64 = False
-
-        if not is_base64:
-            claims = base64.urlsafe_b64encode(claims.encode()).decode()
-
-        login_command.append('--claims {}'.format(claims))
-
-    return ' '.join(login_command)
-
-
-def _generate_login_message(**kwargs):
-    login_command = _generate_login_command(**kwargs)
-    login_command = 'az logout\naz login'
-    msg = "To re-authenticate, please {}" \
-          "If the problem persists, please contact your tenant administrator.".format(
-              "refresh Azure Portal." if in_cloud_console() else "run:\n{}\n".format(login_command))
-
-    return msg
-
-
-def aad_error_handler(error, scopes=None, claims=None):
-    """ Handle the error from AAD server returned by ADAL or MSAL. """
-
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
-    # Search for an error code at https://login.microsoftonline.com/error
-    msg = error.get('error_description')
-    login_message = _generate_login_message(scopes=scopes, claims=claims)
-
-    from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(msg, recommendation=login_message)

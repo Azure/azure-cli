@@ -14,9 +14,9 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import in_cloud_console, can_launch_browser, resource_to_scopes
+from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID
+from azure.cli.core.auth import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID, resource_to_scopes
 
 logger = get_logger(__name__)
 
@@ -710,7 +710,7 @@ class Profile:
         external_credentials = []
         for sub_tenant_id in external_tenants_info:
             external_credentials.append(self._create_identity_credential(account, sub_tenant_id, client_id=client_id))
-        from azure.cli.core.credential import CredentialAdaptor
+        from azure.cli.core.auth import CredentialAdaptor
         auth_object = CredentialAdaptor(identity_credential,
                                         external_credentials=external_credentials if external_credentials else None,
                                         resource=resource)
@@ -733,7 +733,7 @@ class Profile:
         account = self.get_subscription(subscription)
         identity_credential = self._create_identity_credential(account, tenant)
 
-        from azure.cli.core.credential import CredentialAdaptor, _convert_token_entry
+        from azure.cli.core.auth import CredentialAdaptor
         auth = CredentialAdaptor(identity_credential)
         token = auth.get_token(*scopes)
         # (tokenType, accessToken, tokenEntry)
@@ -760,10 +760,10 @@ class Profile:
                 logger.warning(result['error_description'])
 
             # Retry login with VM SSH as resource
-            result = app.acquire_token_interactive(scopes, prompt='select_account', data=data)
+            result = app.acquire_token_interactive(scopes, login_hint=username, data=data)
 
             if 'error' in result:
-                from azure.cli.core.credential import aad_error_handler
+                from azure.cli.core.auth import aad_error_handler
                 aad_error_handler(result)
         return username, result["access_token"]
 
@@ -921,8 +921,6 @@ class SubscriptionFinder:
         empty_tenants = []
         mfa_tenants = []
 
-        from azure.cli.core.credential import CredentialAdaptor
-        credential = CredentialAdaptor(credential)
         client = self._arm_client_factory(credential)
         tenants = client.tenants.list()
 
@@ -1001,7 +999,7 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential):
-        from azure.cli.core.credential import CredentialAdaptor
+        from azure.cli.core.auth import CredentialAdaptor
         track1_credential = CredentialAdaptor(credential)
         client = self._arm_client_factory(track1_credential)
         subscriptions = client.subscriptions.list()

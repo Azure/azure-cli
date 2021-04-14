@@ -12,11 +12,12 @@ SDK invocation.
 
 import os
 
-from azure.cli.core.credential import aad_error_handler
 from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
+
+from .util import aad_error_handler
 
 logger = get_logger(__name__)
 

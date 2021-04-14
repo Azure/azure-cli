@@ -3,24 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import json
+import os
 
-from knack.util import CLIError
-from knack.log import get_logger
-
+from azure.cli.core._environment import get_config_dir
+from azure.cli.core.util import get_file_json
 from azure.identity import (
     ManagedIdentityCredential,
     EnvironmentCredential,
     TokenCachePersistenceOptions
 )
+from knack.log import get_logger
+from knack.util import CLIError
 
-from ._environment import get_config_dir
-from .util import get_file_json, resource_to_scopes, scopes_to_resource
+from .util import aad_error_handler, resource_to_scopes, scopes_to_resource
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
-
-logger = get_logger(__name__)
 
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
@@ -28,6 +26,8 @@ _ACCESS_TOKEN = 'accessToken'
 _SERVICE_PRINCIPAL_SECRET = 'secret'
 _SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
 _SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
+
+logger = get_logger(__name__)
 
 
 class Identity:  # pylint: disable=too-many-instance-attributes
@@ -101,7 +101,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def _build_persistent_msal_app(self, username=None):
         # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
-        from azure.cli.core.msal_authentication import UserCredential
+        from .msal_authentication import UserCredential
         msal_app = UserCredential(self.client_id, username=username,
                                   authority=self.msal_authority,
                                   token_cache=self._load_msal_cache(),
@@ -115,8 +115,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app_instance = self._build_persistent_msal_app()
         return self._msal_app_instance
 
-    def login_with_interactive_browser(self, scopes=None):
-        result = self.msal_app.acquire_token_interactive(scopes)
+    def login_with_interactive_browser(self, scopes=None, **kwargs):
+        result = self.msal_app.acquire_token_interactive(scopes, **kwargs)
+        if not result or 'error' in result:
+            aad_error_handler(result)
         return result['id_token_claims']
 
     def login_with_device_code(self, scopes=None):
@@ -282,7 +284,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
         secret_or_cert = self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        from azure.cli.core.msal_authentication import ServicePrincipalCredential
+        from .msal_authentication import ServicePrincipalCredential
         return ServicePrincipalCredential(client_id, secret_or_cert, authority=self.msal_authority)
 
     def get_environment_credential(self):

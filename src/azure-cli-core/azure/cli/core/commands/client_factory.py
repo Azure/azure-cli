@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import azure.cli.core._debug as _debug
+from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
-from azure.cli.core.util import get_az_user_agent, is_track2, resource_to_scopes
-
+from azure.cli.core.profiles._shared import get_client_class, SDKProfile
+from azure.cli.core.util import get_az_user_agent, is_track2
 from knack.log import get_logger
 from knack.util import CLIError
 
