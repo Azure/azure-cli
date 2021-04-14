@@ -21,7 +21,7 @@ class SafeNetworkTraceLoggingPolicy(SansIOHTTPPolicy):
     def __init__(self, headers_to_redact=None):
         """
         :param list[str] headers_to_redact: headers that should be redacted from the log.
-          Default to 'Authorization'.
+          Default to 'Authorization', 'x-ms-authorization-auxiliary'.
         """
         if headers_to_redact is not None:
             self.headers_to_redact = headers_to_redact
