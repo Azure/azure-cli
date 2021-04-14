@@ -173,14 +173,14 @@ def load_arguments(self, _):
         c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
         c.argument('skip_custom_domain_verification',
                    help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
         c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -189,7 +189,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None)
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
-        c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
+        c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
+                   deprecate_info=c.deprecate(expiration='2.23.0'))
 
     with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
