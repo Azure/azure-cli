@@ -38,6 +38,7 @@ _config_dir = get_config_dir()
 _bicep_installation_dir = os.path.join(_config_dir, "bin")
 _bicep_version_check_file_path = os.path.join(_config_dir, "bicepVersionCheck.json")
 _bicep_version_check_cache_ttl = timedelta(minutes=10)
+_bicep_version_check_time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 _logger = get_logger(__name__)
 
@@ -149,7 +150,7 @@ def _load_bicep_version_check_result_from_cache():
         with open(_bicep_version_check_file_path, "r") as version_check_file:
             version_check_data = json.load(version_check_file)
             latest_release_tag = version_check_data["latestReleaseTag"]
-            last_check_time = datetime.fromisoformat(version_check_data["lastCheckTime"])
+            last_check_time = datetime.strptime(version_check_data["lastCheckTime"], _bicep_version_check_time_format)
             cache_expired = datetime.now() - last_check_time > _bicep_version_check_cache_ttl
 
             return latest_release_tag, cache_expired
@@ -160,7 +161,7 @@ def _load_bicep_version_check_result_from_cache():
 def _refresh_bicep_version_check_cache(lastest_release_tag):
     with open(_bicep_version_check_file_path, "w+") as version_check_file:
         version_check_data = {
-            "lastCheckTime": datetime.now().isoformat(timespec="microseconds"),
+            "lastCheckTime": datetime.now().strftime(_bicep_version_check_time_format),
             "latestReleaseTag": lastest_release_tag,
         }
         json.dump(version_check_data, version_check_file)
