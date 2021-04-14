@@ -29,7 +29,7 @@ class UserCredential(PublicClientApplication):
         if username:
             accounts = self.get_accounts(username)
 
-            # TODO: Confirm with MSAL team that username can uniquely identify the account
+            # TODO: Confirm with AAD team that username can uniquely identify the account
             if not accounts:
                 raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
                                "another application that uses Single Sign-On. "

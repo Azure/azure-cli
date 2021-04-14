@@ -208,7 +208,7 @@ def list_locations(cmd):
 
 
 def export_msal_cache(cmd, path=None):  # pylint: disable=unused-argument
-    from azure.cli.core._identity import Identity
+    from azure.cli.core.auth import Identity
     identity = Identity()
     identity.serialize_token_cache(path)
 

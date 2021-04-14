@@ -748,24 +748,36 @@ class Profile:
         data contains token_type (ssh-cert), key_id and JWK.
         """
         account = self.get_subscription()
-        username = account[_USER_ENTITY][_USER_NAME]
-        tenant = account[_TENANT_ID] or 'common'
-        app = Identity(authority=self._authority, tenant_id=tenant).msal_app
-        msal_accounts = app.get_accounts(username)[0]
-        result = app.acquire_token_silent_with_error(scopes, msal_accounts, data=data)
+        identity_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+        tenant = account[_TENANT_ID]
+        identity = Identity(authority=self._authority, tenant_id=tenant)
 
-        # If acquire_token_silent_with_error failed, interactively get new RT and AT
-        if not result or 'error' in result:
-            if result:
-                logger.warning(result['error_description'])
+        if identity_type == _USER:
+            username = username_or_sp_id
+            app = identity.get_user_credential(username)
+            result = app.acquire_token_silent_with_error(scopes, app.account, data=data)
 
-            # Retry login with VM SSH as resource
-            result = app.acquire_token_interactive(scopes, login_hint=username, data=data)
+            # If acquire_token_silent_with_error failed, interactively get new RT and AT
+            if not result or 'error' in result:
+                if result:
+                    logger.warning(result['error_description'])
 
-            if 'error' in result:
-                from azure.cli.core.auth import aad_error_handler
-                aad_error_handler(result)
-        return username, result["access_token"]
+                # Retry login with VM SSH as resource
+                result = app.acquire_token_interactive(scopes, login_hint=username, data=data)
+
+        elif identity_type == _SERVICE_PRINCIPAL:
+            app = identity.get_service_principal_credential(username_or_sp_id)
+            result = app.acquire_token_for_client(scopes, data=data)
+
+        else:
+            raise CLIError("Identity type {} is currently unsupported".format(identity_type))
+
+        if 'error' in result:
+            from azure.cli.core.auth import aad_error_handler
+            aad_error_handler(result)
+
+        return username_or_sp_id, result["access_token"]
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()
