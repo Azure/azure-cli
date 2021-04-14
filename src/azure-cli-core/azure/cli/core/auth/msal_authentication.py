@@ -74,7 +74,10 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
     def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        result = self.acquire_token_for_client(list(scopes), **kwargs)
+        scopes = list(scopes)
+        result = self.acquire_token_silent(scopes, None, **kwargs)
+        if not result:
+            result = self.acquire_token_for_client(scopes, **kwargs)
         return _convert_to_sdk_access_token(result)
 
 

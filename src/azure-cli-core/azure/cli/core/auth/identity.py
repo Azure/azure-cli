@@ -16,6 +16,7 @@ from azure.identity import (
 from knack.log import get_logger
 from knack.util import CLIError
 
+from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .util import aad_error_handler, resource_to_scopes, scopes_to_resource
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
@@ -63,6 +64,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Store for Service principal credential persistence
         self._msal_secret_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
         self._cache_persistence_options = TokenCachePersistenceOptions(name="azcli", allow_unencrypted_storage=True)
+        self._msal_app_kwargs = {
+            "authority": self.msal_authority,
+            "token_cache": self._load_msal_cache(),
+            "client_capabilities": ["CP1"]
+        }
 
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
@@ -99,14 +105,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         cache._reload_if_necessary()  # pylint: disable=protected-access
         return cache
 
-    def _build_persistent_msal_app(self, username=None):
+    def _build_persistent_msal_app(self):
         # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
-        from .msal_authentication import UserCredential
-        msal_app = UserCredential(self.client_id, username=username,
-                                  authority=self.msal_authority,
-                                  token_cache=self._load_msal_cache(),
-                                  verify=self._credential_kwargs.get('connection_verify', True),
-                                  client_capabilities=["CP1"])
+        from msal import PublicClientApplication
+        msal_app = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
         return msal_app
 
     @property
@@ -279,13 +281,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        return self._build_persistent_msal_app(username)
+        return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer=False):
         secret_or_cert = self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        from .msal_authentication import ServicePrincipalCredential
-        return ServicePrincipalCredential(client_id, secret_or_cert, authority=self.msal_authority)
+        return ServicePrincipalCredential(client_id, secret_or_cert, **self._msal_app_kwargs)
 
     def get_environment_credential(self):
         username = os.environ.get('AZURE_USERNAME')
