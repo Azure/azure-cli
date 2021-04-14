@@ -26,6 +26,7 @@ logger = get_logger(__name__)
 NETWORK_API_VERSION = '2019-02-01'
 ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdid', 'x-fd-healthprobe']
 
+
 def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     access_restrictions = json.dumps(configs.ip_security_restrictions, default=lambda x: x.__dict__)
@@ -78,7 +79,7 @@ def add_webapp_access_restriction(
         access_rules.append(rule_instance)
     if http_headers:
         logger.info(http_headers)
-        rule_instance.headers = _parse_http_headers(cmd.cli_ctx, http_headers=http_headers)
+        rule_instance.headers = _parse_http_headers(http_headers=http_headers)
 
     result = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
@@ -173,14 +174,15 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
     subnet_id_parts = parse_resource_id(subnet_id)
-    subnet_subscription_id = subnet_id_parts['subscription'] 
+    subnet_subscription_id = subnet_id_parts['subscription']
     subnet_resource_group = subnet_id_parts['resource_group']
     subnet_vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
 
     if get_subscription_id(cli_ctx).lower() != subnet_subscription_id.lower():
         raise ArgumentUsageError('Cannot validate subnet in different subscription for missing service endpoint.'
-                                 ' Use --ignore-missing-endpoint or -i to skip validation and manually verify service endpoint.')
+                                 ' Use --ignore-missing-endpoint or -i to'
+                                 ' skip validation and manually verify service endpoint.')
 
     vnet_client = network_client_factory(cli_ctx, api_version=NETWORK_API_VERSION)
     subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
@@ -200,7 +202,8 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
         # Ensure subnet is updated to avoid update conflict
         LongRunningOperation(cli_ctx)(poller)
 
-def _parse_http_headers(cli_ctx, http_headers):
+
+def _parse_http_headers(http_headers):
     logger.info(http_headers)
     header_dict = {}
     for header_str in http_headers:

@@ -208,7 +208,6 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('length([0].headers.\"x-forwarded-host\")', 1)
         ])
 
-
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_service_endpoint(self, resource_group):
         self.kwargs.update({
