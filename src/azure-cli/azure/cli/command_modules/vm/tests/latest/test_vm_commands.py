@@ -5167,9 +5167,9 @@ class VMCreateCountScenarioTest(ScenarioTest):
 
 
 class DiskZRSScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='eastus2euap')
     def test_disk_zrs(self, resource_group):
-        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku')
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS')
 
 
 if __name__ == '__main__':
