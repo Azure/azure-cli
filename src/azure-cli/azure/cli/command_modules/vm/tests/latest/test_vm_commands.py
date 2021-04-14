@@ -4618,12 +4618,11 @@ class DiskAccessTest(ScenarioTest):
         ])
 
         self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
-        disk_access_output = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
+        self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
             self.check('name', '{diskaccess}'),
             self.check('location', '{loc}'),
             self.check('tags.tag1', 'val1')
-        ]).get_output_in_json()
-        disk_access_id = disk_access_output['id']
+        ])
 
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('disk show -g {rg} -n {disk}', checks=[
@@ -5187,7 +5186,6 @@ class ExtendedLocation(ScenarioTest):
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
         ])
-        # Python SDK not ready
         self.cmd('snapshot create -g {rg} -n s1 --size-gb 10 --edge-zone microsoftlosangeles1 --sku Premium_LRS', checks=[
             self.check('extendedLocation.name', 'microsoftlosangeles1'),
             self.check('extendedLocation.type', 'EdgeZone')
