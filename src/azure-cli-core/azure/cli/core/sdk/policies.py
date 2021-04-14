@@ -26,7 +26,7 @@ class SafeNetworkTraceLoggingPolicy(SansIOHTTPPolicy):
         if headers_to_redact is not None:
             self.headers_to_redact = headers_to_redact
         else:
-            self.headers_to_redact = ['authorization']
+            self.headers_to_redact = ['authorization', 'x-ms-authorization-auxiliary']
 
     def on_request(self, request):
         http_request = request.http_request

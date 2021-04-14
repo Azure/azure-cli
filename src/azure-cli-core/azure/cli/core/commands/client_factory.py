@@ -150,6 +150,16 @@ def _prepare_client_kwargs_track2(cli_ctx):
     if 'x-ms-client-request-id' in cli_ctx.data['headers']:
         client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
 
+    # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
+    #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
+    from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
+    client_kwargs['logging_policy'] = SafeNetworkTraceLoggingPolicy()
+
+    # Disable ARMHttpLoggingPolicy.
+    #   ARMHttpLoggingPolicy: Only log allowed information.
+    from azure.core.pipeline.policies import SansIOHTTPPolicy
+    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+
     return client_kwargs
 
 
@@ -172,16 +182,6 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
         # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
         client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
             ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
-
-    # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
-    #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
-    from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
-    client_kwargs['logging_policy'] = SafeNetworkTraceLoggingPolicy(['authorization', 'x-ms-authorization-auxiliary'])
-
-    # Disable ARMHttpLoggingPolicy.
-    #   ARMHttpLoggingPolicy: Only log allowed information.
-    from azure.core.pipeline.policies import SansIOHTTPPolicy
-    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
 
     return client_kwargs
 
