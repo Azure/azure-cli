@@ -135,7 +135,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2019-06-01',
+        ResourceType.MGMT_STORAGE: '2021-01-01',
         ResourceType.MGMT_NETWORK: '2020-07-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
@@ -213,7 +213,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
     '2020-09-01-hybrid': {
-        ResourceType.MGMT_STORAGE: '2019-06-01',
+        ResourceType.MGMT_STORAGE: '2021-01-01',
         ResourceType.MGMT_NETWORK: '2018-11-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
