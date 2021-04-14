@@ -1769,7 +1769,7 @@ examples:
 helps['vm list'] = """
 type: command
 short-summary: List details of Virtual Machines.
-long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
+long-summary: '`--resource-group` can pass in an empty string as a parameter, which will output all VM information under the subscription. For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
 examples:
   - name: List all VMs.
     text: az vm list
