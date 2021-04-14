@@ -744,15 +744,28 @@ class Profile:
 
     def get_msal_token(self, scopes, data):
         """
-        This is added for vmssh feature with backward compatible interface.
+        This is added for VM SSH feature with backward compatible interface.
         data contains token_type (ssh-cert), key_id and JWK.
         """
         account = self.get_subscription()
         username = account[_USER_ENTITY][_USER_NAME]
-        subscription_id = account[_SUBSCRIPTION_ID]
-        credential, _, _ = self.get_login_credentials(subscription_id=subscription_id)
-        certificate = credential.get_token(*scopes, data=data)
-        return username, certificate.token
+        tenant = account[_TENANT_ID] or 'common'
+        app = Identity(authority=self._authority, tenant_id=tenant).msal_app
+        msal_accounts = app.get_accounts(username)[0]
+        result = app.acquire_token_silent_with_error(scopes, msal_accounts, data=data)
+
+        # If acquire_token_silent_with_error failed, interactively get new RT and AT
+        if not result or 'error' in result:
+            if result:
+                logger.warning(result['error_description'])
+
+            # Retry login with VM SSH as resource
+            result = app.acquire_token_interactive(scopes, prompt='select_account', data=data)
+
+            if 'error' in result:
+                from azure.cli.core.credential import aad_error_handler
+                aad_error_handler(result)
+        return username, result["access_token"]
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()

@@ -1854,15 +1854,9 @@ class TestProfile(unittest.TestCase):
         credential_mock.get_token.assert_called_with(*self.msal_scopes)
         self.assertEqual(token, self.raw_token1)
 
-    @mock.patch('azure.cli.core._identity.Identity.get_user_credential', autospec=True)
-    def test_get_msal_token(self, get_user_credential_mock):
-        """
-        This is added only for vmssh feature.
-        It is a temporary solution and will deprecate after MSAL adopted completely.
-        """
-        credential_mock = get_user_credential_mock.return_value
-        credential_mock.get_token.return_value = self.access_token
-
+    @mock.patch('msal.PublicClientApplication.acquire_token_silent_with_error', autospec=True)
+    @mock.patch('msal.PublicClientApplication.get_accounts', autospec=True)
+    def test_get_msal_token(self, get_accounts_mock, acquire_token_silent_with_error_mock):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
@@ -1876,10 +1870,21 @@ class TestProfile(unittest.TestCase):
             "req_cnf": "fake_jwk",
             "key_id": "fake_id"
         }
+        mock_return_value = {
+            'token_type': 'ssh-cert',
+            'scope': 'https://pas.windows.net/CheckMyAccess/Linux/user_impersonation https://pas.windows.net/CheckMyAccess/Linux/.default',
+            'expires_in': 3599,
+            'ext_expires_in': 3599,
+            'access_token': 'fake access token',
+            'refresh_token': 'fake refresh token',
+            'id_token': 'fake id token'
+        }
+        acquire_token_silent_with_error_mock.return_value = mock_return_value
+
         username, access_token = profile.get_msal_token(scopes, data)
         self.assertEqual(username, self.user1)
-        self.assertEqual(access_token, self.raw_token1)
-        credential_mock.get_token.assert_called_with(*scopes, data=data)
+        self.assertEqual(access_token, 'fake access token')
+        acquire_token_silent_with_error_mock.assert_called_with(mock.ANY, scopes, get_accounts_mock.return_value[0], data=data)
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
