@@ -14,7 +14,7 @@ from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import HostingEnvironmentProfile
 from azure.mgmt.network.models import (Subnet, RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
-from azure.cli.core.credential import CredentialAdaptor
+from azure.cli.core.auth import CredentialAdaptor
 
 from azure.cli.command_modules.appservice.appservice_environment import (show_appserviceenvironment,
                                                                          list_appserviceenvironments,

@@ -7,7 +7,7 @@ import mock
 import os
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.credential import CredentialAdaptor
+from azure.cli.core.auth import CredentialAdaptor
 from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,

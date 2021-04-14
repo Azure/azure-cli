@@ -187,7 +187,7 @@ class UnauthorizedError(UserFault):
 
         claims = _extract_claims(original_error.response.headers.get('WWW-Authenticate'))
 
-        from azure.cli.core.credential import _generate_login_command, _generate_login_message
+        from azure.cli.core.auth import _generate_login_command, _generate_login_message
         # login_command = _generate_login_command(claims=claims)
         login_message = _generate_login_message(claims=claims)
 

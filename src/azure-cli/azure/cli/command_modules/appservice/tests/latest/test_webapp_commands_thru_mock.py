@@ -8,7 +8,7 @@ import mock
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.credential import CredentialAdaptor
+from azure.cli.core.auth import CredentialAdaptor
 from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,

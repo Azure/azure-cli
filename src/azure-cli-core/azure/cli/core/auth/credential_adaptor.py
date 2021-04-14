@@ -18,12 +18,6 @@ from .util import resource_to_scopes, aad_error_handler
 logger = get_logger(__name__)
 
 
-def _convert_token_entry(token):
-    import datetime
-    return {'accessToken': token.token,
-            'expiresOn': datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")}
-
-
 class CredentialAdaptor:
     """Adaptor to both
       - Track 1: msrest.authentication.Authentication, which exposes signed_session

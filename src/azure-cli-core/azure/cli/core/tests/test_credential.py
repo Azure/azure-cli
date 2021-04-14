@@ -5,7 +5,7 @@
 
 import unittest
 
-from azure.cli.core.credential import _generate_login_command
+from azure.cli.core.auth import _generate_login_command
 
 
 class TestUtils(unittest.TestCase):

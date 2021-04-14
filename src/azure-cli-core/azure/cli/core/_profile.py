@@ -731,13 +731,12 @@ class Profile:
             raise CLIError("Please specify only one of subscription and tenant, not both")
 
         account = self.get_subscription(subscription)
-        identity_credential = self._create_identity_credential(account, tenant)
+        cred = self._create_identity_credential(account, tenant)
 
-        from azure.cli.core.auth import CredentialAdaptor
-        auth = CredentialAdaptor(identity_credential)
-        token = auth.get_token(*scopes)
+        from azure.cli.core.auth import sdk_access_token_to_adal_token_entry
+        token = cred.get_token(*scopes)
         # (tokenType, accessToken, tokenEntry)
-        cred = 'Bearer', token.token, _convert_token_entry(token)
+        cred = 'Bearer', token.token, sdk_access_token_to_adal_token_entry(token)
         return (cred,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))

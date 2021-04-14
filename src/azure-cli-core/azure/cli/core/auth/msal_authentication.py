@@ -29,11 +29,15 @@ class UserCredential(PublicClientApplication):
         if username:
             accounts = self.get_accounts(username)
 
-            # TODO: Confirm with AAD team that username can uniquely identify the account
             if not accounts:
                 raise CLIError("User {} doesn't exist in the credential cache. The user could have been logged out by "
                                "another application that uses Single Sign-On. "
                                "Please run `az login` to re-login.".format(username))
+
+            if len(accounts) > 1:
+                raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
+                               "https://github.com/Azure/azure-cli/issues/new")
+
             account = accounts[0]
             self.account = account
         else:
