@@ -10,6 +10,8 @@ import json
 import unittest
 import jmespath
 from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError)
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
 from knack.cli import CLIError
 from knack.log import get_logger
@@ -224,10 +226,6 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
         self.cmd('az network vnet create -g {rg} -n {vnet_name} --address-prefixes 10.0.0.0/16 --subnet-name endpoint-subnet --subnet-prefixes 10.0.0.0/24', checks=[
             JMESPathCheck('subnets[0].serviceEndpoints', None)
         ])
-
-        # Subnet name cannot be provided without vNet name - only when subnet refers to full subnet resource id
-        with self.assertRaisesRegexp(CLIError, "Usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
-            self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --subnet endpoint-subnet --priority 150')
 
         self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --vnet-name {vnet_name} --subnet endpoint-subnet --priority 150', checks=[
             JMESPathCheck('length(@)', 2),

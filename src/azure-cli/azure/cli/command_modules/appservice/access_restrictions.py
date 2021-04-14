@@ -5,21 +5,18 @@
 
 import json
 
-# Models
+from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import shell_safe_json_parse
-from azure.mgmt.web.models import IpSecurityRestriction
-from azure.mgmt.network.models import ServiceEndpointPropertiesFormat
-
-# Utils
-from knack.log import get_logger
-from azure.cli.command_modules.appservice.custom import get_site_configs
-from azure.cli.command_modules.appservice._appservice_utils import _generic_site_operation
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.mgmt.network.models import ServiceEndpointPropertiesFormat
+from azure.mgmt.web.models import IpSecurityRestriction
+from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+
+from ._appservice_utils import _generic_site_operation
+from .custom import get_site_configs
 
 logger = get_logger(__name__)
 
@@ -88,12 +85,12 @@ def add_webapp_access_restriction(
 
 def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=None, action='Allow',
                                      ip_address=None, subnet=None, vnet_name=None, scm_site=False, slot=None,
-                                     service_tag=None, multi_source=None):
+                                     service_tag=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     input_rule_types = (int(service_tag is not None) + int(ip_address is not None) +
-                        int(subnet is not None) + int(multi_source is not None))
+                        int(subnet is not None))
     if input_rule_types > 1:
-        err_msg = 'Please specify either: --subnet or --ip-address or --service-tag or --multi-source'
+        err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
     rule_instance = None
     # get rules list
@@ -110,13 +107,7 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
                 rule_instance = rule
                 break
         elif service_tag:
-            if rule.ip_address.lower() == service_tag.lower() and rule.action == action:
-                if rule_name and (not rule.name or (rule.name and rule.name.lower() != rule_name.lower())):
-                    continue
-                rule_instance = rule
-                break
-        elif multi_source:
-            if rule.ip_address.lower() == multi_source.lower() and rule.action == action:
+            if rule.ip_address and rule.ip_address.lower() == service_tag.lower() and rule.action == action:
                 if rule_name and (not rule.name or (rule.name and rule.name.lower() != rule_name.lower())):
                     continue
                 rule_instance = rule

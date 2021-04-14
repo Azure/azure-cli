@@ -4,15 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import ipaddress
+
+from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
-from azure.cli.core.profiles import ResourceType
-
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from ._client_factory import web_client_factory
+
 from ._appservice_utils import _generic_site_operation
+from ._client_factory import web_client_factory
 from .utils import _normalize_sku
 
 logger = get_logger(__name__)
