@@ -144,6 +144,7 @@ DEPENDENCIES = [
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'
+    'azure-mgmt-webpubsub~=0.1.0'
 ]
 
 TESTS_REQUIRE = [
