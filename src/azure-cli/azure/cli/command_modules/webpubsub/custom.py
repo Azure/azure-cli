@@ -9,7 +9,7 @@ from azure.mgmt.webpubsub.models import (
 )
 
 
-def create_webpubsub(client, resource_group_name, webpubsub_name, sku, unit_count=1, location=None, tags=None):
+def webpubsub_create(client, resource_group_name, webpubsub_name, sku, unit_count=1, location=None, tags=None):
     sku = ResourceSku(name=sku, capacity=unit_count)
     parameter = WebPubSubResource(
         sku=sku,
@@ -19,16 +19,19 @@ def create_webpubsub(client, resource_group_name, webpubsub_name, sku, unit_coun
 
     return client.create_or_update(parameter, resource_group_name, webpubsub_name)
 
-def list_webpubsub(client, resource_group_name=None):
+def webpubsub_list(client, resource_group_name=None):
     if not resource_group_name:
         return client.list_by_subscription()
     return client.list_by_resource_group(resource_group_name)
 
-def delete_webpubsub(client, webpubsub_name, resource_group_name):
+def webpubsub_delete(client, webpubsub_name, resource_group_name):
     return client.delete(resource_group_name, webpubsub_name)
 
-def show_webpubsub(client, webpubsub_name, resource_group_name):
+def webpubsub_show(client, webpubsub_name, resource_group_name):
     return client.get(resource_group_name, webpubsub_name)
+
+def webpubsub_restart(client, webpubsub_name, resource_group_name):
+    return client.restart(resource_group_name, webpubsub_name)
 
 def webpubsub_get():
     return WebPubSubResource()
