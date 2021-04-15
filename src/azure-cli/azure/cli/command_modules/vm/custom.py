@@ -3391,7 +3391,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
-                         target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None):
+                         target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
+                         data_vhds_uri=None, data_vhds_luns=None, data_vhds_storage_accounts=None):
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
