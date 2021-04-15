@@ -131,7 +131,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     interactive = False
 
-    profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
 
     if identity:
         if in_cloud_console():

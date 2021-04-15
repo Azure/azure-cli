@@ -89,3 +89,23 @@ def sdk_access_token_to_adal_token_entry(token):
     import datetime
     return {'accessToken': token.token,
             'expiresOn': datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")}
+
+
+def check_result(result):
+    from azure.cli.core.azclierror import AuthenticationError
+
+    if not result:
+        raise AuthenticationError("Can't find token from MSAL cache.")
+    if 'error' in result:
+        raise AuthenticationError(result['error_description'])
+
+    # For user authentication
+    if 'id_token_claims' in result:
+        idt = result['id_token_claims']
+        return {
+            # AAD returns "preferred_username", ADFS returns "upn"
+            'username': idt.get("preferred_username") or idt["upn"],
+            'tenantId': idt['tid']
+        }
+
+    return None

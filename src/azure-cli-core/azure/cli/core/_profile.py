@@ -114,20 +114,8 @@ def _attach_token_tenant(subscription, tenant):
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
 class Profile:
 
-    def __init__(self, cli_ctx=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
-                 async_persist=True, store_adal_cache=False):
+    def __init__(self, cli_ctx=None, storage=None):
         """Class to manage CLI's accounts (profiles) and identities (credentials).
-
-        :param cli_ctx:
-        :param storage:
-        :param auth_ctx_factory:
-        :param use_global_creds_cache:
-        :param async_persist:
-        :param client_id: The AAD client ID for the CLI application. Default to Azure CLI's client ID.
-        :param scopes: The initial scopes for authentication (/authorize), it must include all scopes
-            for following get_token calls. Default to Azure Resource Manager of the current cloud.
-        :param store_adal_cache: Save tokens to the old ~/.azure/accessToken.json for backward compatibility.
-            This option will be deprecated very soon.
         """
         from azure.cli.core import get_default_cli
 
@@ -138,9 +126,7 @@ class Profile:
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = None
-        self.arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
-        if store_adal_cache:
-            self._adal_cache = AdalCredentialCache()
+        self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     # pylint: disable=too-many-branches,too-many-statements,too-many-locals
     def login(self,
@@ -158,10 +144,8 @@ class Profile:
               find_subscriptions=True):
 
         if not scopes:
-            scopes = self.arm_scope
+            scopes = self._arm_scope
 
-        credential = None
-        auth_record = None
         # For ADFS, auth_tenant is 'adfs'
         # https://github.com/Azure/azure-sdk-for-python/blob/661cd524e88f480c14220ed1f86de06aaff9a977/sdk/identity/azure-identity/CHANGELOG.md#L19
         authority, auth_tenant = _detect_adfs_authority(self.cli_ctx.cloud.endpoints.active_directory, tenant)
@@ -171,9 +155,7 @@ class Profile:
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
                             cred_cache=self._adal_cache)
 
-        user_id_token_claims = None
-        if not subscription_finder:
-            subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
+        user_identity = None
         if interactive:
             if not use_device_code and (in_cloud_console() or not can_launch_browser()):
                 logger.info('Detect no GUI is available, so fall back to device code')
@@ -182,30 +164,29 @@ class Profile:
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    user_id_token_claims = identity.login_with_interactive_browser(scopes=scopes)
+                    user_identity = identity.login_with_interactive_browser(scopes=scopes)
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                user_id_token_claims = identity.login_with_device_code(scopes=scopes)
+                user_identity = identity.login_with_device_code(scopes=scopes)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
 
-                identity.login_with_service_principal(username, password)
+                identity.login_with_service_principal(username, password, scopes=scopes)
             else:
-                user_id_token_claims = identity.login_with_username_password(username, password, scopes=scopes)
+                user_identity = identity.login_with_username_password(username, password, scopes=scopes)
 
-        if user_id_token_claims:
-            # AAD returns "preferred_username", ADFS returns "upn"
-            username = user_id_token_claims.get("preferred_username") or user_id_token_claims["upn"]
+        if user_identity:
+            username = user_identity['username']
 
         # List tenants and find subscriptions by calling ARM
         if find_subscriptions:
             # Create credentials
-            if user_id_token_claims:
+            if user_identity:
                 credential = identity.get_user_credential(username)
             else:
                 credential = identity.get_service_principal_credential(username)
@@ -233,7 +214,7 @@ class Profile:
                     return []
         else:
             # Build a tenant account
-            bare_tenant = tenant or user_id_token_claims['tid']
+            bare_tenant = tenant or user_identity['tid']
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
         consolidated = self._normalize_properties(username, subscriptions,
@@ -255,7 +236,7 @@ class Profile:
         # Managed Service Identity (MSI).
 
         if not scopes:
-            scopes = self.arm_scope
+            scopes = self._arm_scope
 
         identity = Identity()
         credential, mi_info = identity.login_with_managed_identity(scopes=scopes, identity_id=identity_id)

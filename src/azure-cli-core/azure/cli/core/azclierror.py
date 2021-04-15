@@ -286,6 +286,9 @@ class RecommendationError(ClientError):
 
 
 class AuthenticationError(AzCLIError):
-    """ Raised when credential.get_token fails. """
+    """ Raised when authentication fails. """
+    def __init__(self, error_msg, recommendation=None, msal_result=None):
+        super().__init__(error_msg, recommendation)
+        self.msal_result = msal_result
 
 # endregion
