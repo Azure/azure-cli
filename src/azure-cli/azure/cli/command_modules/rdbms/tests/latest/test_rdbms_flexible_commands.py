@@ -407,7 +407,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
 
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, 'VNET' + server[6:], 'Subnet' + server[6:]))
+                             self.get_subscription_id(), resource_group, 'Vnet' + server[6:], 'Subnet' + server[6:]))
 
     def _test_flexible_server_vnet_ha_server_create(self, database_engine, resource_group, server):
 
@@ -420,7 +420,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
         print(show_result)
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, 'VNET' + server[6:], 'Subnet' + server[6:]))
+                             self.get_subscription_id(), resource_group, 'Vnet' + server[6:], 'Subnet' + server[6:]))
 
     def _test_flexible_server_vnet_server_update_scale_up(self, database_engine, resource_group, server):
 
@@ -454,7 +454,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
                  .format(database_engine, resource_group, restore_server), checks=NoneCheck())
 
         # Wait until vnet can be detached from the deleted server
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
     def _test_flexible_server_vnet_server_mgmt_delete(self, resource_group):
         self.cmd('az group delete --name {} --yes --no-wait'.format(resource_group), checks=NoneCheck())
@@ -649,7 +649,7 @@ class FlexibleServerReplicationMgmtScenarioTest(RdbmsScenarioTest):  # pylint: d
                      JMESPathCheck('sourceServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
 
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
     def _test_flexible_server_replica_list(self, database_engine, resource_group, master_server):
 
@@ -749,7 +749,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         # This is required because the delegations cannot be removed until the server is completely deleted. In the current implementation, there is a delay. Hence, the wait
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
     def _test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid(self, database_engine, resource_group):
 
@@ -781,7 +781,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Cleanup
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
         # This is required because the delegations cannot be removed until the server is completely deleted. In the current implementation, there is a delay. Hence, the wait
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
     def _test_flexible_server_vnet_mgmt_supplied_vnet(self, database_engine, resource_group):
 
@@ -838,7 +838,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
 
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
     def _test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, database_engine, resource_group, virtual_network):
 
@@ -887,7 +887,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
 
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
     def _test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, database_engine, resource_group_1, resource_group_2):
         # flexible-server create
@@ -948,7 +948,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group_2, servers[1]),
                  checks=NoneCheck())
 
-        time.sleep(15 * 60)
+        time.sleep(20 * 60)
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
