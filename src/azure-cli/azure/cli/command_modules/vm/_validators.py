@@ -1770,7 +1770,8 @@ def _validate_vmss_create_host_group(cmd, namespace):
 
 def _validate_count(namespace):
     if namespace.count < 2 or namespace.count > 250:
-        raise ValidationError('--count should be in [2, 250]')
+        raise ValidationError(
+            '--count should be in [2, 250]. Please make sure your subscription has enough quota of resources')
     banned_params = [
         namespace.attach_data_disks,
         namespace.attach_os_disk,
@@ -1785,9 +1786,7 @@ def _validate_count(namespace):
         namespace.public_ip_address_dns_name,
         namespace.storage_account,
         namespace.storage_container_name,
-        namespace.subnet,
         namespace.use_unmanaged_disk,
-        namespace.vnet_name
     ]
     params_str = [
         '--attach-data-disks',
