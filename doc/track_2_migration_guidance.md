@@ -1,6 +1,6 @@
 # Track 2 Migration Guidance
 
-Azure CLI is built upon Azure Python SDK. Recently Azure Python SDK announced next generation product. It is named Track 2 SDK. The old version of SDK is named Track 1. It claims that it has great advantages than Track 1 SDK. It is not compatible with Track 1 SDK. Azure CLI developers need to spend considerable time and do some work to migrate from Track 1 SDK to Track 2 SDK. Let's see an example of Track 2 SDK. [azure-mgmt-compute 17.0.0b1](https://pypi.org/project/azure-mgmt-compute/17.0.0b1/) introduces important breaking changes and important new features like unified authentication and asynchronous programming.
+Azure CLI is built on Azure Python SDKs. Recently, Azure Python SDK team announced the next generation product, named Track 2 SDK. The old version of SDK is called Track 1 SDK. It claims that it has some advantages than Track 1 SDK. It is not compatible with Track 1 SDK. A considerable number of work days are required for Azure CLI developers to migrate their modules from Track 1 SDK to Track 2 SDK. Let's see an example of Track 2 SDK. [azure-mgmt-compute 17.0.0b1](https://pypi.org/project/azure-mgmt-compute/17.0.0b1/) introduces important breaking changes and important new features like unified authentication and asynchronous programming.
 
 This document summarizes typical issues and solutions when adopting Track 2 SDK in Azure CLI.
 
@@ -11,6 +11,7 @@ Example PRs:
 4. [Storage PR #15845](https://github.com/Azure/azure-cli/pull/15845)
 5. [KeyVault PR #14150](https://github.com/Azure/azure-cli/pull/14150)
 6. [AppConfig PR #16376](https://github.com/Azure/azure-cli/pull/16376)
+7. [AppService PR #17146](https://github.com/Azure/azure-cli/pull/17146)
 
 Below is a list of typical issues.
 
@@ -29,6 +30,7 @@ Below is a list of typical issues.
 ### Long running operation function name change
 
 Long running operations have changed their function names in Track 2 SDK. A `begin_` prefix is added. For example, `create_or_update` becomes `begin_create_or_update`. `delete` becomes `begin_delete`. It is a naming convention in Track 2 SDK to indicate that an operation is a long running operation. Test cases can reveal most instances, but if a command has no test, it may be missed. A reliable approach is going through all methods to see whether they are long running operations.
+
 
 ### Property name change
 
@@ -119,6 +121,8 @@ The problem I met is property name change. It is hard to find the line of code t
 ### Modifying patch_models.py to include missing packages
 
 It is only used in CI jobs. It patches some code to SDK. This file should be deprecated. It was written long time ago. But for now, just modify this file and add missing packages.
+
+[Example](https://github.com/Azure/azure-cli/pull/15750/files#diff-e1256a3d1d91aea524b252fa7dc4a64b83d183b7f57fb5c326b270a1c4b224a7)
 
 ### Missing external tenant authentication support
 
