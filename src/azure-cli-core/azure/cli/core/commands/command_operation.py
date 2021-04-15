@@ -6,6 +6,8 @@ import argparse
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.arguments import CLICommandArgument, ignore_type
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 
 class BaseCommandOperation:
@@ -166,8 +168,9 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         from knack.util import CLIError
         from azure.cli.core.commands import cached_get, cached_put, _is_poller
         from azure.cli.core.util import find_child_item, augment_no_wait_handler_args
-        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage,\
+        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, ge_update_arg_ref, \
             add_properties, remove_properties, set_properties
+        from msrest.serialization import SerializationError
 
         self.cmd = command_args.get('cmd')
 
@@ -201,7 +204,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
 
         # apply generic updates after custom updates
         setter, setterargs = self._extract_op_handler_and_args(command_args, self.setter_op_path)
-
+        json_parse_fail_args = []
         for arg in ordered_arguments:
             arg_type, arg_values = arg
             if arg_type == '--set':
@@ -212,7 +215,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
                     raise CLIError('invalid syntax: {}'.format(set_usage))
             elif arg_type == '--add':
                 try:
-                    add_properties(instance, arg_values, force_string)
+                    json_parse_fail_args = add_properties(instance, arg_values, force_string)
                 except ValueError:
                     raise CLIError('invalid syntax: {}'.format(add_usage))
             elif arg_type == '--remove':
@@ -236,11 +239,17 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             if no_wait_param:
                 setterargs[no_wait_param] = command_args[no_wait_param]
 
-        if self.setter_arg_name == 'parameters':
-            result = cached_put(self.cmd, setter, **setterargs)
-        else:
-            result = cached_put(self.cmd, setter, setterargs[self.setter_arg_name],
-                                setter_arg_name=self.setter_arg_name, **setterargs)
+        try:
+            if self.setter_arg_name == 'parameters':
+                result = cached_put(self.cmd, setter, **setterargs)
+            else:
+                result = cached_put(self.cmd, setter, setterargs[self.setter_arg_name],
+                                    setter_arg_name=self.setter_arg_name, **setterargs)
+        except SerializationError:
+            if json_parse_fail_args:
+                logger.warning("JSON parse fail for '--add' argument value '%s'. If you want to pass a JSON string, "
+                               "read more in %s", ' '.join(json_parse_fail_args), ge_update_arg_ref)
+            raise
 
         if supports_no_wait and no_wait_enabled:
             return None
@@ -277,7 +286,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
 
     def arguments_loader(self):
         """ Callback function of CLICommand arguments_loader """
-        from azure.cli.core.commands.arm import set_usage, add_usage, remove_usage
+        from azure.cli.core.commands.arm import set_usage, add_usage, remove_usage, ge_update_arg_ref
 
         arguments = self.load_getter_op_arguments(self.getter_op_path)
         arguments.update(self.load_setter_op_arguments())
@@ -292,20 +301,22 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         arguments['properties_to_set'] = CLICommandArgument(
             'properties_to_set', options_list=['--set'], nargs='+',
             action=self.OrderedArgsAction, default=[],
-            help='Update an object by specifying a property path and value to set.  Example: {}'.format(set_usage),
+            help='Update an object by specifying a property path and value to set.  Example: {}. '
+                 'Read more in reference docs: {}'.format(set_usage, ge_update_arg_ref),
             metavar='KEY=VALUE', arg_group=group_name
         )
         arguments['properties_to_add'] = CLICommandArgument(
             'properties_to_add', options_list=['--add'], nargs='+',
             action=self.OrderedArgsAction, default=[],
             help='Add an object to a list of objects by specifying a path and '
-                 'key value pairs.  Example: {}'.format(add_usage),
+                 'key value pairs.  Example: {}. Read more in reference docs: {}'.format(add_usage, ge_update_arg_ref),
             metavar='LIST KEY=VALUE', arg_group=group_name
         )
         arguments['properties_to_remove'] = CLICommandArgument(
             'properties_to_remove', options_list=['--remove'], nargs='+',
             action=self.OrderedArgsAction, default=[],
-            help='Remove a property or an element from a list.  Example: {}'.format(remove_usage),
+            help='Remove a property or an element from a list.  Example: {}. '
+                 'Read more in reference docs: {}'.format(remove_usage, ge_update_arg_ref),
             metavar='LIST INDEX', arg_group=group_name
         )
         arguments['force_string'] = CLICommandArgument(

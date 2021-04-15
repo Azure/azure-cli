@@ -374,6 +374,7 @@ def register_global_subscription_argument(cli_ctx):
     cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
 
+ge_update_arg_ref = 'https://aka.ms/AAby4o3'
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
@@ -524,6 +525,7 @@ def add_properties(instance, argument_values, force_string):
         raise ValueError
 
     dict_entry = {}
+    json_parse_fail_args = []
     for argument in argument_values:
         if '=' in argument:
             # consecutive key=value entries get added to the same dictionary
@@ -542,12 +544,14 @@ def add_properties(instance, argument_values, force_string):
                 try:
                     argument = shell_safe_json_parse(argument)
                 except (ValueError, CLIError):
-                    pass
+                    json_parse_fail_args.append(argument)
+
             list_to_add_to.append(argument)
 
     # if only key=value pairs used, must check at the end to append the dictionary
     if dict_entry:
         list_to_add_to.append(dict_entry)
+    return json_parse_fail_args
 
 
 def remove_properties(instance, argument_values):
