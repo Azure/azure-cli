@@ -21,5 +21,5 @@ def load_command_table(self, _):
         g.command('delete', 'delete_webpubsub')
         g.command('list', 'list_webpubsub')
         g.show_command('show', 'show_webpubsub', exception_handler=empty_on_404)
-        g.generic_update_command('update', getter_name='show_webpubsub',
+        g.generic_update_command('update', getter_name='webpubsub_get',
                                  setter_name='webpubsub_set', custom_func_name='update_webpubsub')

@@ -30,6 +30,9 @@ def delete_webpubsub(client, webpubsub_name, resource_group_name):
 def show_webpubsub(client, webpubsub_name, resource_group_name):
     return client.get(resource_group_name, webpubsub_name)
 
+def webpubsub_get():
+    return WebPubSubResource()
+
 def webpubsub_set(client, webpubsub_name, resource_group_name, parameters):
     return client.update(parameters, resource_group_name, webpubsub_name)
 
