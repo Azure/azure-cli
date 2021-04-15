@@ -12,6 +12,7 @@ import tempfile
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.testsdk import (
     ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
@@ -4216,8 +4217,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
                  '--vnet-gateway2 {gw1} --vnet-gateway1 {gw2}')
         self.cmd('network vnet-gateway disconnect-vpn-connections -g {rg} -n {gw1} --vpn-connections {conn12}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_package_capture', location='westus')
-    @StorageAccountPreparer(name_prefix='clitestvpngw', location='westus')
+    @StorageAccountPreparer(name_prefix='clitestvpngw')
     def test_network_vpn_gateway_package_capture(self, resource_group, storage_account):
         from datetime import datetime, timedelta
         self.kwargs.update({
@@ -4226,13 +4228,13 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'gw1_sku': 'Standard',
             'ip1': 'pubip1',
             'storage_account': storage_account,
-            'ctn': 'vpngw',
+            'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
             'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
 
-        self.cmd('storage container create -n {ctn} --account-name {storage_account}')
+        self.cmd('storage container create --account-name {storage_account} --name {ctn}')
         sas = self.cmd(
-            'storage blob generate-sas -n {src} --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
+            'storage blob generate-sas -n src --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
         self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
                                                                           self.kwargs['ctn'], sas)
 
