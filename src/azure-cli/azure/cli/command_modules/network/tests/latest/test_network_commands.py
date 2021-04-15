@@ -4216,28 +4216,68 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
                  '--vnet-gateway2 {gw1} --vnet-gateway1 {gw2}')
         self.cmd('network vnet-gateway disconnect-vpn-connections -g {rg} -n {gw1} --vpn-connections {conn12}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_package_capture', location='westus')
+    @StorageAccountPreparer(name_prefix='clitestvpngw', location='westus')
+    def test_network_vpn_gateway_package_capture(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'gw1': 'gateway1',
+            'gw1_sku': 'Standard',
+            'ip1': 'pubip1',
+            'storage_account': storage_account,
+            'ctn': 'vpngw',
+            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
+        })
+
+        self.cmd('storage container create -n {ctn} --account-name {storage_account}')
+        sas = self.cmd(
+            'storage blob generate-sas -n {src} --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
+        self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
+                                                                          self.kwargs['ctn'], sas)
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --public-ip-address {ip1} --sku {gw1_sku}')
+        output = self.cmd('network vnet-gateway packet-capture start -g {rg} -n {gw1}').output.strip()
+        self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
+        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+            self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
+
+
 class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
-
         self.kwargs.update({
             'vnet': 'vnet1',
             'public_ip': 'pip1',
             'gateway_prefix': '100.1.1.0/24',
             'gateway': 'vgw1',
+            'gw_sku': 'Standard',
             'cert': 'cert1',
-            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+            'cert_path': os.path.join(TEST_DIR, 'test-vpn-client-package-root-cert.cer')
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
         self.cmd('network public-ip create -g {rg} -n {public_ip}')
-        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
         output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+        self.cmd('network vnet-gateway vpn-client ipsec-policy set -g {rg} -n {gateway} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
+        self.cmd('network vnet-gateway vpn-client ipsec-policy show -g {rg} -n {gateway}', checks=[
+            self.check('dhGroup', 'DHGroup24'),
+            self.check('ikeEncryption', 'AES256'),
+            self.check('ikeIntegrity', 'SHA384'),
+            self.check('ipsecEncryption', 'GCMAES256'),
+            self.check('ipsecIntegrity', 'GCMAES256'),
+            self.check('pfsGroup', 'PFS24'),
+            self.check('saDataSizeKilobytes', 2048),
+            self.check('saLifeTimeSeconds', 7200),
+        ])
 
 
 class NetworkTrafficManagerScenarioTest(ScenarioTest):

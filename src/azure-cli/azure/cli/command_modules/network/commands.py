@@ -1335,6 +1335,10 @@ def load_command_table(self, _):
         g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
         g.custom_command('disconnect-vpn-connections', 'disconnect_vnet_gateway_vpn_connections', client_factory=cf_virtual_network_gateways, supports_no_wait=True, is_preview=True, min_api='2019-11-01')
 
+    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
+        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
+        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
+
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
         g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')

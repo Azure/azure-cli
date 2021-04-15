@@ -6463,6 +6463,22 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
     return instance
 
 
+def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                       filter_data=None, no_wait=False):
+    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
+    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
+    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
+                       virtual_network_gateway_name, parameters=parameters)
+
+
+def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                      sas_url, no_wait=False):
+    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
+    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
+    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
+                       virtual_network_gateway_name, parameters=parameters)
+
+
 def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):

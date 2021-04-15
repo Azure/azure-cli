@@ -5659,6 +5659,27 @@ examples:
     crafted: true
 """
 
+helps['network vnet-gateway packet-capture'] = """
+type: group
+short-summary: Manage packet capture on a virtual network gateway.
+"""
+
+helps['network vnet-gateway packet-capture start'] = """
+type: command
+short-summary: Start packet capture on a virtual network gateway.
+examples:
+  - name: Start packet capture on a virtual network gateway.
+    text: az network vnet-gateway packet-capture start -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway packet-capture stop'] = """
+type: command
+short-summary: Stop packet capture on a virtual network gateway.
+examples:
+  - name: Stop packet capture on a virtual network gateway.
+    text: az network vnet-gateway packet-capture stop -g MyResourceGroup -n MyVnetGateway --sas-url https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
+"""
+
 helps['network vnet-gateway vpn-client'] = """
 type: group
 short-summary: Download a VPN client configuration required to connect to Azure via point-to-site.

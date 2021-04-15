@@ -1949,6 +1949,13 @@ def load_arguments(self, _):
     with self.argument_context('network vnet-gateway revoked-cert create') as c:
         c.argument('thumbprint', help='Certificate thumbprint.')
 
+    with self.argument_context('network vnet-gateway packet-capture start') as c:
+        c.argument('filter_data', options_list=['--filter'], help='Data filter.')
+
+    with self.argument_context('network vnet-gateway packet-capture stop') as c:
+        c.argument('sas_url', options_list=['--sas-url'],
+                   help='The SAS url to be used for packet capture.')
+
     with self.argument_context('network vnet-gateway vpn-client') as c:
         c.argument('processor_architecture', help='Processor architecture of the target system.', arg_type=get_enum_type(ProcessorArchitecture))
         c.argument('authentication_method', help='Method used to authenticate with the generated client.', arg_type=get_enum_type(AuthenticationMethod))
