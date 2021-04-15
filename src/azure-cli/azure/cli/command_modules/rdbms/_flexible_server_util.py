@@ -4,16 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+import datetime as dt
+from datetime import datetime
 import random
 from knack.log import get_logger
-from msrest.paging import Paged
-
+from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
-from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.mgmt.resource.resources.models import ResourceGroup
+from msrestazure.tools import parse_resource_id
+from msrestazure.azure_exceptions import CloudError
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
-
+from .flexible_server_custom_common import firewall_rule_create_func
 logger = get_logger(__name__)
 
 DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
@@ -78,7 +80,6 @@ def generate_password(administrator_login_password):
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
-    from datetime import datetime
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
     now = datetime.now()
@@ -106,9 +107,10 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
     #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
 
-    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip,
-                                                end_ip).result()
-    return firewall.name
+    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
+                                         start_ip_address=start_ip, end_ip_address=end_ip)
+
+    return firewall.result().name
 
 
 # pylint: disable=inconsistent-return-statements
@@ -121,8 +123,8 @@ def parse_public_access_input(public_access):
         elif len(parsed_input) == 2:
             return parsed_input[0], parsed_input[1]
         else:
-            raise CLIError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
-                           'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
+            raise InvalidArgumentValueError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
+                                            'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
 
 def server_list_custom_func(client, resource_group_name=None):
@@ -207,13 +209,15 @@ def get_mysql_list_skus_info(cmd, location):
 def _parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
     if not result:
-        raise CLIError("No available SKUs in this location")
+        raise InvalidArgumentValueError("No available SKUs in this location")
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
+    iops_dict = {}
     for tier_info in tiers:
         tier_name = tier_info.name
         tier_dict = {}
+        sku_iops_dict = {}
 
         skus = set()
         versions = set()
@@ -221,6 +225,8 @@ def _parse_list_skus(result, database_engine):
             versions.add(version.name)
             for vcores in version.supported_vcores:
                 skus.add(vcores.name)
+                if database_engine == 'mysql':
+                    sku_iops_dict[vcores.name] = vcores.supported_iops
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
 
@@ -229,6 +235,7 @@ def _parse_list_skus(result, database_engine):
             tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
             tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
                                           int(storage_info.max_storage_size.storage_size_mb) // 1024)
+            iops_dict[tier_name] = sku_iops_dict
         elif database_engine == 'postgres':
             storage_sizes = set()
             for size in storage_info.supported_storage_mb:
@@ -237,6 +244,8 @@ def _parse_list_skus(result, database_engine):
 
         tiers_dict[tier_name] = tier_dict
 
+    if database_engine == 'mysql':
+        return tiers_dict, iops_dict
     return tiers_dict
 
 
@@ -246,7 +255,7 @@ def _get_available_values(sku_info, argument, tier=None):
 
 
 def _get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
+    return list(obj_list) if isinstance(obj_list, ItemPaged) else obj_list
 
 
 def _update_location(cmd, resource_group_name):
@@ -283,3 +292,51 @@ def _map_maintenance_window(day_of_week):
                "Sun": 0,
                }
     return options[day_of_week]
+
+
+def get_current_time():
+    return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
+
+
+def get_id_components(rid):
+    parsed_rid = parse_resource_id(rid)
+    subscription = parsed_rid['subscription']
+    resource_group = parsed_rid['resource_group']
+    vnet_name = parsed_rid['name']
+    subnet_name = parsed_rid['child_name_1'] if 'child_name_1' in parsed_rid else None
+
+    return subscription, resource_group, vnet_name, subnet_name
+
+
+def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
+                    parent_name=None, parent_type=None):
+
+    parent_path = ''
+    if parent_name and parent_type:
+        parent_path = '{}/{}'.format(parent_type, parent_name)
+
+    api_version = _resolve_api_version(resource_client, provider_namespace, resource_type, parent_path)
+
+    try:
+        resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
+    except CloudError:
+        return False
+    return True
+
+
+def _resolve_api_version(client, provider_namespace, resource_type, parent_path):
+    provider = client.providers.get(provider_namespace)
+
+    # If available, we will use parent resource's api-version
+    resource_type_str = (parent_path.split('/')[0] if parent_path else resource_type)
+
+    rt = [t for t in provider.resource_types  # pylint: disable=no-member
+          if t.resource_type.lower() == resource_type_str.lower()]
+    if not rt:
+        raise InvalidArgumentValueError('Resource type {} not found.'.format(resource_type_str))
+    if len(rt) == 1 and rt[0].api_versions:
+        npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
+        return npv[0] if npv else rt[0].api_versions[0]
+    raise RequiredArgumentMissingError(
+        'API version is required and could not be resolved for resource {}'
+        .format(resource_type))

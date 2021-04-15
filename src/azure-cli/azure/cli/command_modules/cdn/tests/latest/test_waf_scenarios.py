@@ -8,8 +8,7 @@ from azure.mgmt.cdn.models import (SkuName,
                                    CdnEndpoint,
                                    EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink,
                                    PolicyMode,
-                                   ActionType,
-                                   ErrorResponseException)
+                                   ActionType)
 from .scenario_mixin import CdnScenarioMixin
 from base64 import b64encode
 from knack.util import CLIError

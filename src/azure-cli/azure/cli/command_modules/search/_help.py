@@ -27,6 +27,26 @@ type: group
 short-summary: Manage Azure Search services.
 """
 
+helps['search private-endpoint-connection'] = """
+type: group
+short-summary: Manage Azure Search private endpoint connections.
+"""
+
+helps['search private-link-resource'] = """
+type: group
+short-summary: Manage Azure Search private link resources.
+"""
+
+helps['search shared-private-link-resource'] = """
+type: group
+short-summary: Manage Azure Search shared private link resources.
+"""
+
+helps['search shared-private-link-resource wait'] = """
+type: command
+short-summary: Wait for async shared private link resource operations.
+"""
+
 helps['search service create'] = """
 type: command
 short-summary: Creates a Search service in the given resource group.
@@ -38,4 +58,9 @@ parameters:
 helps['search service update'] = """
 type: command
 short-summary: Update partition and replica of the given search service.
+"""
+
+helps['search service wait'] = """
+type: command
+short-summary: Wait for async service operations.
 """

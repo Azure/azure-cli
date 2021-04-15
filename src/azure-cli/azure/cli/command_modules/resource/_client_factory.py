@@ -100,6 +100,10 @@ def cf_policy_set_definitions(cli_ctx, _):
     return _resource_policy_client_factory(cli_ctx).policy_set_definitions
 
 
+def cf_policy_exemptions(cli_ctx, _):
+    return _resource_policy_client_factory(cli_ctx).policy_exemptions
+
+
 def cf_management_locks(cli_ctx, _):
     return _resource_lock_client_factory(cli_ctx).management_locks
 

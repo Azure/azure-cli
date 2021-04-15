@@ -29,37 +29,57 @@ class AzCLIError(CLIError):
         # error message
         self.error_msg = error_msg
 
-        # set recommendations to fix the error if the message is not actionable,
-        # they will be printed to users after the error message, one recommendation per line
+        # manual recommendations provided based on developers' knowledge
         self.recommendations = []
         self.set_recommendation(recommendation)
+
+        # AI recommendations provided by Aladdin service, with tuple form: (recommendation, description)
+        self.aladdin_recommendations = []
 
         # exception trace for the error
         self.exception_trace = None
         super().__init__(error_msg)
 
     def set_recommendation(self, recommendation):
+        """" Set manual recommendations for the error.
+        Command module or extension authors could call this method to provide recommendations,
+        the recommendations will be printed after the error message, one recommendation per line
+        """
         if isinstance(recommendation, str):
             self.recommendations.append(recommendation)
         elif isinstance(recommendation, list):
             self.recommendations.extend(recommendation)
+
+    def set_aladdin_recommendation(self, recommendations):
+        """ Set aladdin recommendations for the error.
+        One item should be a tuple with the form: (recommendation, description)
+        """
+        self.aladdin_recommendations.extend(recommendations)
 
     def set_exception_trace(self, exception_trace):
         self.exception_trace = exception_trace
 
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
+        from azure.cli.core.style import print_styled_text
         with CommandLoggerContext(logger):
-            # print error type and error message
-            message = '{}: {}'.format(self.__class__.__name__, self.error_msg)
-            logger.error(message)
+            # print error message
+            logger.error(self.error_msg)
+
             # print exception trace if there is
             if self.exception_trace:
                 logger.exception(self.exception_trace)
-            # print recommendations to action
-            if self.recommendations:
-                for recommendation in self.recommendations:
-                    print(recommendation, file=sys.stderr)
+
+        # print recommendations to action
+        if self.recommendations:
+            for recommendation in self.recommendations:
+                print(recommendation, file=sys.stderr)
+
+        if self.aladdin_recommendations:
+            print('\nTRY THIS:', file=sys.stderr)
+            for recommendation, description in self.aladdin_recommendations:
+                print_styled_text(recommendation, file=sys.stderr)
+                print_styled_text(description, file=sys.stderr)
 
     def send_telemetry(self):
         telemetry.set_error_type(self.__class__.__name__)
@@ -101,15 +121,6 @@ class UnknownError(AzCLIError):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
 
-    def print_error(self):
-        from azure.cli.core.azlogging import CommandLoggerContext
-        with CommandLoggerContext(logger):
-            # print only error message (no error type)
-            logger.error(self.error_msg)
-            # print recommendations to action
-            if self.recommendations:
-                for recommendation in self.recommendations:
-                    print(recommendation, file=sys.stderr)
 # endregion
 
 
@@ -209,6 +220,11 @@ class ManualInterrupt(UserFault):
     pass
 
 
+class NoTTYError(UserFault):
+    """ No tty available for prompt. """
+    pass
+
+
 # ARM template related error types
 class InvalidTemplateError(UserFault):
     """ ARM template validation fails. It could be caused by incorrect template files or parameters """
@@ -233,20 +249,22 @@ class UnclassifiedUserFault(UserFault):
     Avoid using this class unless the error can not be classified into
     the UserFault related specific error types.
     """
-    def print_error(self):
-        from azure.cli.core.azlogging import CommandLoggerContext
-        with CommandLoggerContext(logger):
-            # print only error message (no error type)
-            logger.error(self.error_msg)
-            # print recommendations to action
-            if self.recommendations:
-                for recommendation in self.recommendations:
-                    print(recommendation, file=sys.stderr)
+    pass
 
 
 # CLI internal error type
 class CLIInternalError(ClientError):
     """ AzureCLI internal error """
     pass
+
+
+# Client error for az next
+class RecommendationError(ClientError):
+    """ The client error raised by `az next`. It is needed in `az next` to skip error records. """
+    pass
+
+
+class AuthenticationError(ServiceError):
+    """ Raised when AAD authentication fails. """
 
 # endregion

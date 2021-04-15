@@ -29,9 +29,11 @@ from azure.cli.command_modules.network._client_factory import (
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
-    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites)
+    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
+    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections)
 from azure.cli.command_modules.network._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
+    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
+    delete_lb_resource_property_entry)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -62,7 +64,8 @@ from azure.cli.command_modules.network._validators import (
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
-ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
+NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
+NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -345,6 +348,42 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
+    network_virtual_hub_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualHubsOperations.{}',
+        client_factory=cf_virtual_hub,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_hub,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionOperations.{}',
+        client_factory=cf_virtual_hub_bgp_connection,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connection_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_hub_bgp_connection,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionsOperations.{}',
+        client_factory=cf_virtual_hub_bgp_connections,
+        min_api='2020-07-01'
+    )
+
+    network_virtual_hub_bgp_connections_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_hub_bgp_connections,
+        min_api='2020-07-01'
+    )
+
     network_vrouter_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRoutersOperations.{}',
         client_factory=cf_virtual_router,
@@ -406,6 +445,12 @@ def load_command_table(self, _):
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
+
+    network_load_balancers_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_load_balancers,
+        min_api='2020-08-01'
+    )
 
     # endregion
 
@@ -622,6 +667,16 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_waf_managed_rule_exclusion')
         g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
         g.custom_command('list', 'list_waf_managed_rule_exclusion')
+
+    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+        g.custom_command('add', 'add_trusted_client_certificate')
+        g.custom_command('remove', 'remove_trusted_client_certificate')
+        g.custom_command('list', 'list_trusted_client_certificate')
+
+    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+        g.custom_command('add', 'add_ssl_profile')
+        g.custom_command('remove', 'remove_ssl_profile')
+        g.custom_command('list', 'list_ssl_profile')
     # endregion
 
     # region ApplicationSecurityGroups
@@ -694,7 +749,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('get-stats', 'get_stats')
         g.command('list-arp-tables', 'begin_list_arp_table')
-        g.custom_command('list-route-tables', 'list_express_route_route_tables')
+        g.command('list-route-tables', 'begin_list_routes_table', is_preview=True)
+        g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
         g.custom_command('create', 'create_express_route', supports_no_wait=True)
         g.custom_command('list', 'list_express_route_circuits')
         g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
@@ -727,12 +783,14 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
+        g.command('get-stats', 'get_peering_stats', command_type=network_er_sdk, is_preview=True)
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
 
     with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
         g.custom_command('create', 'create_express_route_peering_connection')
         g.command('delete', 'begin_delete')
         g.show_command('show')
+        g.command('list', 'list')
 
     with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
         g.show_command('show', is_preview=True)
@@ -817,7 +875,8 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_lbs')
         g.wait_command('wait')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
+        g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
+                                 setter_name='begin_create_or_update')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -830,11 +889,13 @@ def load_command_table(self, _):
         with self.command_group('network lb {}'.format(alias), network_util) as g:
             g.command('list', list_network_resource_property('load_balancers', subresource))
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_network_resource_property_entry('load_balancers', subresource))
+            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
 
     with self.command_group('network lb frontend-ip', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_frontend_ip_configuration', validator=process_lb_frontend_ip_namespace)
         g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_frontend_ip_configuration',
                                  validator=process_lb_frontend_ip_namespace)
@@ -842,12 +903,16 @@ def load_command_table(self, _):
     with self.command_group('network lb inbound-nat-rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_inbound_nat_rule')
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_rules',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_inbound_nat_rule')
 
     with self.command_group('network lb inbound-nat-pool', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_inbound_nat_pool')
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_pools',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_inbound_nat_pool')
 
@@ -863,7 +928,7 @@ def load_command_table(self, _):
     with self.command_group('network lb address-pool', network_util, max_api='2020-03-01') as g:
         g.command('list', list_network_resource_property('load_balancers', 'backend_address_pools'))
         g.show_command('show', get_network_resource_property_entry('load_balancers', 'backend_address_pools'))
-        g.command('delete', delete_network_resource_property_entry('load_balancers', 'backend_address_pools'))
+        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'backend_address_pools'))
 
     with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
         g.custom_command('add', 'add_lb_backend_address_pool_address')
@@ -873,25 +938,31 @@ def load_command_table(self, _):
     with self.command_group('network lb rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_rule')
         g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
     with self.command_group('network lb probe', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_probe')
         g.generic_update_command('update', child_collection_prop_name='probes',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_probe')
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
         g.generic_update_command('update', child_collection_prop_name='outbound_rules',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
 
     with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
         g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
         g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
-        g.command('delete', delete_network_resource_property_entry('load_balancers', 'outbound_rules'))
+        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
     # endregion
 
     # region cross-region load balancer
@@ -913,7 +984,7 @@ def load_command_table(self, _):
         with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
             g.command('list', list_network_resource_property('load_balancers', subresource))
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_network_resource_property_entry('load_balancers', subresource))
+            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
 
     with self.command_group('network cross-region-lb frontend-ip', network_lb_sdk) as g:
         g.custom_command('create', 'create_cross_region_lb_frontend_ip_configuration', validator=process_cross_region_lb_frontend_ip_namespace)
@@ -1160,7 +1231,7 @@ def load_command_table(self, _):
     # endregion
 
     # region RouteTables
-    with self.command_group('network route-table', network_rt_sdk, deprecate_info=self.deprecate(redirect=ROUTE_TABLE_DEPRECATION_INFO, hide=False)) as g:
+    with self.command_group('network route-table', network_rt_sdk) as g:
         g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
@@ -1309,7 +1380,8 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualRouter
-    with self.command_group('network vrouter', network_vrouter_sdk) as g:
+    with self.command_group('network vrouter', network_vrouter_sdk,
+                            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'create_virtual_router')
         g.generic_update_command('update',
                                  getter_name='virtual_router_update_getter',
@@ -1321,7 +1393,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_virtual_router')
         g.custom_command('list', 'list_virtual_router')
 
-    with self.command_group('network vrouter peering', network_vrouter_peering_sdk) as g:
+    with self.command_group(
+            'network vrouter peering', network_vrouter_peering_sdk,
+            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_PEERING_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'create_virtual_router_peering')
         g.generic_update_command('update',
                                  getter_name='virtual_router_peering_update_getter',
@@ -1332,6 +1406,35 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_virtual_router_peering')
         g.custom_show_command('show', 'show_virtual_router_peering')
         g.custom_command('list', 'list_virtual_router_peering')
+    # endregion
+
+    # region VirtualHub
+    with self.command_group('network routeserver', network_virtual_hub_sdk,
+                            custom_command_type=network_virtual_hub_update_sdk) as g:
+        g.custom_command('create', 'create_virtual_hub')
+        g.generic_update_command('update',
+                                 setter_name='virtual_hub_update_setter',
+                                 setter_type=network_virtual_hub_update_sdk,
+                                 custom_func_name='update_virtual_hub')
+        g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_virtual_hub')
+
+    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
+                            custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
+        g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
+        g.generic_update_command('update',
+                                 setter_name='virtual_hub_bgp_connection_update_setter',
+                                 setter_type=network_virtual_hub_bgp_connection_update_sdk,
+                                 custom_func_name='update_virtual_hub_bgp_connection')
+        g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
+        g.show_command('show', 'get')
+
+    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
+                            custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
+        g.command('list', 'list')
+        g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')
+        g.custom_command('list-advertised-routes', 'list_virtual_hub_bgp_connection_advertised_routes')
     # endregion
 
     # region Bastion

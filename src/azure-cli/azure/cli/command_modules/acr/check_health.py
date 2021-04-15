@@ -3,15 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import re
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
 from .helm import get_helm_command
-from ._utils import get_registry_by_name
+from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
 
 logger = get_logger(__name__)
@@ -295,11 +293,13 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     print_pass("Fetch access token for registry '{}'".format(login_server))
 
 
-def _check_health_connectivity(cmd, registry_name, ignore_errors):
+def _check_registry_health(cmd, registry_name, ignore_errors):
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
 
+    registry = None
+    # Connectivity
     try:
         registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
         login_server = registry.login_server.rstrip('/')
@@ -318,6 +318,24 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
+    # CMK settings
+    if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
+        client_id = registry.encryption.key_vault_properties.identity
+        valid_identity = False
+        if registry.identity:
+            valid_identity = (client_id == 'system') and bool(registry.identity.principal_id)  # use system identity?
+            if not valid_identity and registry.identity.user_assigned_identities:
+                for k, v in registry.identity.user_assigned_identities.items():
+                    if v.client_id == client_id:
+                        from msrestazure.azure_exceptions import CloudError
+                        try:
+                            valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
+                        except CloudError:
+                            pass
+        if not valid_identity:
+            from ._errors import CMK_MANAGED_IDENTITY_ERROR
+            _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
+
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
@@ -332,7 +350,7 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
 
-    _check_health_connectivity(cmd, registry_name, ignore_errors)
+    _check_registry_health(cmd, registry_name, ignore_errors)
 
     if not in_cloud_console:
         _get_helm_version(ignore_errors)

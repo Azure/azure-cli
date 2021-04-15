@@ -15,7 +15,7 @@ from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningO
 from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
-    cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
+    cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
     cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out
 
@@ -109,6 +109,12 @@ def load_command_table(self, _):
     resource_policy_set_definitions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.{}',
         client_factory=cf_policy_set_definitions,
+        resource_type=ResourceType.MGMT_RESOURCE_POLICY
+    )
+
+    resource_policy_exemptions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.policy.operations#PolicyExemptionsOperations.{}',
+        client_factory=cf_policy_exemptions,
         resource_type=ResourceType.MGMT_RESOURCE_POLICY
     )
 
@@ -387,6 +393,13 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_policy_setdefinition')
         g.custom_command('update', 'update_policy_setdefinition')
 
+    with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+        g.custom_command('create', 'create_policy_exemption')
+        g.custom_command('delete', 'delete_policy_exemption')
+        g.custom_command('list', 'list_policy_exemption')
+        g.custom_show_command('show', 'get_policy_exemption')
+        g.custom_command('update', 'update_policy_exemption')
+
     with self.command_group('lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
@@ -408,7 +421,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_applications')
 
     with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.custom_command('create', 'create_applicationdefinition')
+        g.custom_command('create', 'create_or_update_applicationdefinition')
+        g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'delete')
         g.custom_show_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
@@ -431,3 +445,11 @@ def load_command_table(self, _):
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
+
+    with self.command_group('bicep') as g:
+        g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('upgrade', 'upgrade_bicep_cli')
+        g.custom_command('build', 'build_bicep_file')
+        g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('version', 'show_bicep_cli_version')
+        g.custom_command('list-versions', 'list_bicep_cli_versions')

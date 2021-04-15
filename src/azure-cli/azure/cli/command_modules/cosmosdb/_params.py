@@ -45,7 +45,7 @@ class ThroughputTypes(str, Enum):
 
 def load_arguments(self, _):
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind, TriggerType, TriggerOperation, ServerVersion
+    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind, TriggerType, TriggerOperation, ServerVersion, NetworkAclBypass
 
     with self.argument_context('cosmosdb') as c:
         c.argument('account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part='name')
@@ -55,7 +55,7 @@ def load_arguments(self, _):
         c.argument('account_name', completer=None)
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
-        c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
+        c.argument('assign_identity', nargs='*', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity. Currently only system assigned identity is supported.", is_preview=True)
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -75,13 +75,20 @@ def load_arguments(self, _):
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
             c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.", is_preview=True)
+            c.argument('network_acl_bypass', arg_type=get_enum_type(NetworkAclBypass), options_list=['--network-acl-bypass'], help="Flag to enable or disable Network Acl Bypass.")
+            c.argument('network_acl_bypass_resource_ids', nargs='+', options_list=['--network-acl-bypass-resource-ids', '-i'], help="List of Resource Ids to allow Network Acl Bypass.")
+            c.argument('backup_interval', type=int, help="the frequency(in minutes) with which backups are taken (only for accounts with periodic mode backups)", arg_group='Backup Policy')
+            c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)", arg_group='Backup Policy')
+            c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
+            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.", is_preview=True)
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
-            c.argument('key_kind', arg_type=get_enum_type(KeyKind))
+            c.argument('key_kind', arg_type=get_enum_type(KeyKind), help="The access key to regenerate.")
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
-        c.argument('failover_policies', validator=validate_failover_policies, help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
+        c.argument('failover_parameters', options_list=['--failover-policies'], validator=validate_failover_policies,
+                   help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)

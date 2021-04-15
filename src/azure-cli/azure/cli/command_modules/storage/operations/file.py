@@ -21,9 +21,25 @@ from azure.cli.core.profiles import ResourceType
 def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                     enabled_protocols=None, root_squash=None, access_tier=None):
 
+    return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
+                            share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
+                            access_tier=access_tier, snapshot=False)
+
+
+def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
+                      enabled_protocols=None, root_squash=None, access_tier=None):
+
+    return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
+                            share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
+                            access_tier=access_tier, snapshot=True)
+
+
+def _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
+                     enabled_protocols=None, root_squash=None, access_tier=None, snapshot=None):
     FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
 
     file_share = FileShare()
+    expand = None
     if share_quota is not None:
         file_share.share_quota = share_quota
     if enabled_protocols is not None:
@@ -34,9 +50,12 @@ def create_share_rm(cmd, client, resource_group_name, account_name, share_name, 
         file_share.metadata = metadata
     if access_tier is not None:
         file_share.access_tier = access_tier
+    if snapshot:
+        PutSharesExpand = cmd.get_models('PutSharesExpand', resource_type=ResourceType.MGMT_STORAGE)
+        expand = PutSharesExpand.SNAPSHOTS
 
     return client.create(resource_group_name=resource_group_name, account_name=account_name, share_name=share_name,
-                         file_share=file_share)
+                         file_share=file_share, expand=expand)
 
 
 def get_stats(client, resource_group_name, account_name, share_name):
@@ -44,9 +63,11 @@ def get_stats(client, resource_group_name, account_name, share_name):
                       expand='stats')
 
 
-def list_share_rm(client, resource_group_name, account_name, include_deleted=None):
+def list_share_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
+    ListSharesExpand = cmd.get_models('ListSharesExpand')
     if include_deleted:
-        return client.list(resource_group_name=resource_group_name, account_name=account_name)
+        return client.list(resource_group_name=resource_group_name, account_name=account_name,
+                           expand=ListSharesExpand.DELETED)
 
     return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=None)
 

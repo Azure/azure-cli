@@ -19,6 +19,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -234,6 +235,12 @@ def read_base_64_file(filename):
 def validate_cert(namespace):
     if namespace.cert_data:
         namespace.cert_data = read_base_64_file(namespace.cert_data)
+
+
+def validate_trusted_client_cert(namespace):
+    if namespace.client_cert_data is None or namespace.client_cert_name is None:
+        raise RequiredArgumentMissingError('To use this cmd, you must specify both name and data')
+    namespace.client_cert_data = read_base_64_file(namespace.client_cert_data)
 
 
 def validate_ssl_cert(namespace):
@@ -1012,7 +1019,7 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
         logger.warning('[Coming breaking change] In the coming release, the default behavior will be changed as follows'
                        ' when sku is Standard and zone is not provided:'
                        ' For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"];'
-                       ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:[].')
+                       ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
 
 
 def process_route_table_create_namespace(cmd, namespace):
@@ -1102,6 +1109,12 @@ def process_vnet_create_namespace(cmd, namespace):
         namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
+def _validate_cert(namespace, param_name):
+    attr = getattr(namespace, param_name)
+    if attr and os.path.isfile(attr):
+        setattr(namespace, param_name, read_base_64_file(attr))
+
+
 def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
@@ -1124,12 +1137,17 @@ def process_vnet_gateway_create_namespace(cmd, namespace):
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
 
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        _validate_cert(namespace, 'root_cert_data')
+
 
 def process_vnet_gateway_update_namespace(cmd, namespace):
     ns = namespace
     get_virtual_network_validator()(cmd, ns)
     get_public_ip_validator()(cmd, ns)
     validate_tags(ns)
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        _validate_cert(namespace, 'root_cert_data')
     public_ip_count = len(ns.public_ip_address or [])
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '

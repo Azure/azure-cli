@@ -4,15 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from __future__ import print_function
-
-__version__ = "2.17.1"
+__version__ = "2.22.0"
 
 import os
 import sys
 import timeit
-
-import six
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -35,7 +31,26 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
+
+
+def _configure_knack():
+    """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
+    from knack.util import status_tag_messages
+    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
+    # Override the preview message.
+    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
+    # Override the experimental message.
+    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append('azure')
+
+
+_configure_knack()
 
 
 class AzCli(CLI):
@@ -49,6 +64,7 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.style import format_styled_text
         from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
@@ -80,7 +96,11 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        _configure_knack()
+        if self.enable_color:
+            theme = self.config.get('core', 'theme', fallback='dark')
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -91,12 +111,12 @@ class AzCli(CLI):
         import uuid
         self.data['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
 
-    def get_progress_controller(self, det=False):
+    def get_progress_controller(self, det=False, spinner=None):
         import azure.cli.core.commands.progress as progress
         if not self.progress_controller:
             self.progress_controller = progress.ProgressHook()
 
-        self.progress_controller.init_progress(progress.get_progress_view(det))
+        self.progress_controller.init_progress(progress.get_progress_view(det, spinner=spinner))
         return self.progress_controller
 
     def get_cli_version(self):
@@ -104,8 +124,8 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
-                                                       UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
+        from azure.cli.core.commands.constants import SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED
+        from azure.cli.core.style import print_styled_text
 
         ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
@@ -113,8 +133,9 @@ class AzCli(CLI):
 
         show_link = self.config.getboolean('output', 'show_survey_link', True)
         if show_link:
-            print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
-            print(UX_SURVEY_PROMPT_COLOR if self.enable_color else UX_SURVEY_PROMPT)
+            print_styled_text()
+            print_styled_text(SURVEY_PROMPT_STYLED)
+            print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -749,13 +770,15 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
+    # Please use add_cli_command instead of _cli_command.
+    # Currently "keyvault" and "batch" modules are still rely on this function, so it cannot be removed now.
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
         from knack.deprecation import Deprecated
 
         kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
-        if operation and not isinstance(operation, six.string_types):
+        if operation and not isinstance(operation, str):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
         if handler and not callable(handler):
             raise TypeError("Handler must be a callable. Got '{}'".format(operation))
@@ -808,6 +831,31 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                         handler or default_command_handler,
                                                         **kwargs)
 
+    def add_cli_command(self, name, command_operation, **kwargs):
+        """Register a command in command_table with command operation provided"""
+        from knack.deprecation import Deprecated
+        from .commands.command_operation import BaseCommandOperation
+        if not issubclass(type(command_operation), BaseCommandOperation):
+            raise TypeError("CommandOperation must be an instance of subclass of BaseCommandOperation."
+                            " Got instance of '{}'".format(type(command_operation)))
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
+
+        name = ' '.join(name.split())
+
+        if self.supported_api_version(resource_type=kwargs.get('resource_type'),
+                                      min_api=kwargs.get('min_api'),
+                                      max_api=kwargs.get('max_api'),
+                                      operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
+            self.command_table[name] = self.command_cls(loader=self,
+                                                        name=name,
+                                                        handler=command_operation.handler,
+                                                        arguments_loader=command_operation.arguments_loader,
+                                                        description_loader=command_operation.description_loader,
+                                                        command_operation=command_operation,
+                                                        **kwargs)
+
     def get_op_handler(self, operation, operation_group=None):
         """ Import and load the operation handler """
         # Patch the unversioned sdk path to include the appropriate API version for the
@@ -831,7 +879,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 op = getattr(op, part)
             if isinstance(op, types.FunctionType):
                 return op
-            return six.get_method_function(op)
+            return op.__func__
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -853,19 +901,3 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
-
-
-def _configure_knack():
-    """Override consts defined in knack to make them Azure CLI-specific."""
-
-    # Customize status tag messages.
-    from knack.util import status_tag_messages
-    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
-    # Override the preview message.
-    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
-    # Override the experimental message.
-    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
-
-    # Allow logs from 'azure' logger to be displayed.
-    from knack.log import cli_logger_names
-    cli_logger_names.append("azure")

@@ -12,14 +12,21 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
-from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, \
-    SqlPoolConnectionClientAuthenticationType
+from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnectionClientType, PrincipalType, \
+    SqlPoolConnectionClientAuthenticationType, ItemType
 from .action import AddFilters, AddOrderBy
 
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.',
                                           completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
 assignee_arg_type = CLIArgumentType(
-    help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+    help='Represent a user or service principal. Supported format: object id, user sign-in name, or service principal name.')
+
+assignee_object_id_arg_type = CLIArgumentType(
+    help="Use this parameter instead of '--assignee' to bypass Graph API invocation in case of insufficient privileges. "
+         "This parameter only works with object ids for users, groups, service principals, and "
+         "managed identities. For managed identities use the principal id. For service principals, "
+         "use the object id and not the app id.")
+
 role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the principal.',
                                 completer=get_role_definition_name_completion_list)
 definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=FilesCompleter(),
@@ -48,7 +55,7 @@ def _configure_security_or_audit_policy_storage_params(arg_ctx):
 
 def load_arguments(self, _):
     # synapse workspace
-    for scope in ['show', 'create', 'update', 'delete']:
+    for scope in ['show', 'create', 'update', 'delete', 'activate']:
         with self.argument_context('synapse workspace ' + scope) as c:
             c.argument('workspace_name', arg_type=name_type, id_part='name', help='The workspace name.')
 
@@ -57,6 +64,8 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
+            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use ""(\'""\' in PowerShell) to disable all allowed tenant ids.")
+            c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -69,6 +78,9 @@ def load_arguments(self, _):
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
+        c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
+                   help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
+        c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -311,6 +323,32 @@ def load_arguments(self, _):
             c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
                                               'Must be greater than or equal to startIpAddress.')
 
+    # synapse workspace key
+    with self.argument_context('synapse workspace key') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+
+    with self.argument_context('synapse workspace key list') as c:
+        c.argument('workspace_name', id_part=None, help='The workspace name.')
+
+    for scope in ['show', 'create', 'delete', 'update']:
+        with self.argument_context('synapse workspace key ' + scope) as c:
+            c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
+
+    with self.argument_context('synapse workspace key create') as c:
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+
+    with self.argument_context('synapse workspace key update') as c:
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+        c.argument('is_active', arg_type=get_three_state_flag(), help='Set True to change the workspace state from pending to success state.')
+
+    # synapse workspace managed-identity
+    with self.argument_context('synapse workspace managed-identity') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+
+    for scope in ['grant-sql-access', 'revoke-sql-access', ' show-sql-access']:
+        with self.argument_context('synapse workspace managed-identity ' + scope) as c:
+            c.argument('workspace_name', id_part='name', help='The workspace name.')
+
     # synapse spark job
     for scope in ['job', 'session', 'statement']:
         with self.argument_context('synapse spark ' + scope) as c:
@@ -379,6 +417,18 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('role', arg_type=role_arg_type)
             c.argument('assignee', arg_type=assignee_arg_type)
+            c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
+            c.argument('scope', help='A scope defines the resources or artifacts that the access applies to. Synapse supports hierarchical scopes. '
+                                     'Permissions granted at a higher-level scope are inherited by objects at a lower level. '
+                                     'In Synapse RBAC, the top-level scope is a workspace. '
+                                     'Assigning a role with workspace scope grants permissions to all applicable objects in the workspace.')
+            c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment')
+            c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.')
+
+    with self.argument_context('synapse role assignment create') as c:
+        c.argument('assignee_principal_type', options_list=['--assignee-principal-type', '--assignee-type'], arg_type=get_enum_type(PrincipalType),
+                   help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+        c.argument('assignment_id', help='Custom role assignment id in guid format, if not specified, assignment id will be randomly generated.')
 
     with self.argument_context('synapse role assignment show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
@@ -389,14 +439,30 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('role', arg_type=role_arg_type)
         c.argument('assignee', arg_type=assignee_arg_type)
+        c.argument('assignee_object_id', arg_type=assignee_object_id_arg_type)
+        c.argument('scope', help='A scope defines the resources or artifacts that the access applies to. Synapse supports hierarchical scopes. '
+                                 'Permissions granted at a higher-level scope are inherited by objects at a lower level. '
+                                 'In Synapse RBAC, the top-level scope is a workspace. '
+                                 'Using az role assignment with filter condition before executing delete operation '
+                                 'to be clearly aware of which assignments will be deleted.')
         c.argument('ids', nargs='+',
                    help='space-separated role assignment ids. You should not provide --role or --assignee when --ids is provided.')
+        c.argument('item', help='Item granted access in the workspace. Using with --item-type to combine the scope of assignment.'
+                                'Using az role assignment with filter condition before executing delete operation '
+                                'to be clearly aware of which assignments will be deleted.')
+        c.argument('item_type', arg_type=get_enum_type(ItemType), help='Item type granted access in the workspace. Using with --item to combine the scope of assignment.'
+                                                                       'Using az role assignment with filter condition before executing delete operation '
+                                                                       'to be clearly aware of which assignments will be deleted.')
 
     with self.argument_context('synapse role definition show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('role', arg_type=role_arg_type)
 
     with self.argument_context('synapse role definition list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('is_built_in', arg_type=get_three_state_flag(), help='Is a Synapse Built-In Role or not.')
+
+    with self.argument_context('synapse role scope list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     # synapse artifacts linked-service

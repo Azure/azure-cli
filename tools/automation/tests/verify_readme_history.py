@@ -5,8 +5,6 @@
 
 """Verify the README and HISTORY files for each module so they format correctly on PyPI. """
 
-from __future__ import print_function
-
 import os
 import sys
 import argparse

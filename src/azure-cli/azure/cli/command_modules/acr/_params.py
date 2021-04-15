@@ -80,9 +80,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
+            default_allow_suffix = " The Default is to allow." if "create" in scope else ""
+
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
-            c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry. The Default is allowed")
+            c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
+            c.argument('allow_trusted_services', get_three_state_flag(), is_preview=True, help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
 
     with self.argument_context('acr create', arg_group="Customer managed key") as c:
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
@@ -90,6 +93,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr update', arg_group='Network Rule') as c:
         c.argument('data_endpoint_enabled', get_three_state_flag(), help="Enable dedicated data endpoint for client firewall configuration")
+
+    with self.argument_context('acr update') as c:
+        c.argument('anonymous_pull_enabled', get_three_state_flag(), help="Enable registry-wide pull from unauthenticated clients")
 
     with self.argument_context('acr import') as c:
         c.argument('source_image', options_list=['--source'], help="Source image name or fully qualified source containing the registry login server. If `--registry` is used, `--source` will always be interpreted as a source image, even if it contains the login server.")
@@ -396,7 +402,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
         c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the connected registry. Name must be between 5 to 40 character long, start with a letter and contain only alphanumeric characters (including ‘_’ or ‘-’). Name must be unique under the Cloud ACR hierarchy.', required=True)
         c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.', required=False)
-        c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
+        c.argument('repositories', options_list=['--repository', c.deprecate(target='-t', redirect='--repository', hide=True)], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.', required=False)
         c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.', required=False)
         c.argument('no_children', help='Used to remove all children from the list.', required=False, action='store_true')
@@ -404,7 +410,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
-        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
+        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="Registry")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...', required=False)
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
@@ -419,6 +425,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False)
         c.argument('sync_message_ttl', help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
+
+    with self.argument_context('acr connected-registry repo') as c:
+        c.argument('add_repos', options_list=['--add'], nargs='*', required=False,
+                   help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('remove_repos', options_list=['--remove'], nargs='*', required=False,
+                   help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
 
 def _get_helm_default_install_location():

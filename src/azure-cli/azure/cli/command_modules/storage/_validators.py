@@ -14,7 +14,8 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
                                                                file_data_service_factory,
-                                                               storage_client_factory)
+                                                               storage_client_factory,
+                                                               cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -104,6 +105,7 @@ def validate_bypass(namespace):
 
 
 def get_config_value(cmd, section, key, default):
+    logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
 
 
@@ -144,7 +146,8 @@ def validate_client_parameters(cmd, namespace):
                            ' ,'.join(account_key_args))
         return
 
-    if not n.connection_string:
+    # When there is no input for credential, we will read environment variable
+    if not n.connection_string and not n.account_key and not n.sas_token:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
@@ -157,7 +160,7 @@ def validate_client_parameters(cmd, namespace):
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
         n.account_name = get_config_value(cmd, 'storage', 'account', None)
-    if not n.account_key:
+    if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
         n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
@@ -174,15 +177,22 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There are no credentials provided in your command and environment, we will query for the '
-                       'account key inside your storage account. \nPlease provide --connection-string, '
-                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
-                       'have required RBAC roles in your command. For more information about RBAC roles '
-                       'in storage, visit '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting the corresponding environment variables can avoid inputting credentials in '
-                       'your command. Please use --help to get more information.')
-        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        message = """
+There are no credentials provided in your command and environment, we will query for account key for your storage account.
+It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
+"""
+        if 'auth_mode' in cmd.arguments:
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
+"""
+        logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
+                       'credentials in your command. Please use --help to get more information about environment '
+                       'variable usage.', message)
+        try:
+            n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("\nSkip querying account key due to failure: %s", ex)
 
 
 def validate_encryption_key(cmd, namespace):
@@ -1025,6 +1035,21 @@ def get_datetime_type(to_string):
     return datetime_type
 
 
+def get_api_version_type():
+    """ Examples of accepted forms: 2017-12-31 """
+    from datetime import datetime
+
+    def api_version_type(string):
+        """ Validates api version format. Examples of accepted form: 2017-12-31 """
+        accepted_format = '%Y-%m-%d'
+        try:
+            return datetime.strptime(string, accepted_format).strftime(accepted_format)
+        except ValueError:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("Input '{}' not valid. Valid example: 2008-10-27.".format(string))
+    return api_version_type
+
+
 def ipv4_range_type(string):
     """ Validates an IPv4 address or address range. """
     import re
@@ -1122,6 +1147,12 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_download_file_path_validator(namespace):
+    if os.path.isdir(namespace.file_path):
+        from azure.cli.core.azclierror import FileOperationError
+        raise FileOperationError('File is expected, not a directory: {}'.format(namespace.file_path))
+
+
 def blob_rehydrate_priority_validator(namespace):
     if namespace.blob_type == 'page' and namespace.rehydrate_priority:
         raise ValueError('--rehydrate-priority is only applicable to block blob.')
@@ -1207,6 +1238,28 @@ def as_user_validator(namespace):
                 (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
+
+
+def validator_change_feed_retention_days(namespace):
+    enable = namespace.enable_change_feed
+    days = namespace.change_feed_retention_days
+
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if enable is False and days is not None:
+        raise InvalidArgumentValueError("incorrect usage: "
+                                        "'--change-feed-retention-days' is invalid "
+                                        "when '--enable-change-feed' is set to false")
+    if enable is None and days is not None:
+        raise InvalidArgumentValueError("incorrect usage: "
+                                        "please specify '--enable-change-feed true' if you "
+                                        "want to set the value for '--change-feed-retention-days'")
+    if days is not None:
+        if days < 1:
+            raise InvalidArgumentValueError("incorrect usage: "
+                                            "'--change-feed-retention-days' must be greater than or equal to 1")
+        if days > 146000:
+            raise InvalidArgumentValueError("incorrect usage: "
+                                            "'--change-feed-retention-days' must be less than or equal to 146000")
 
 
 def validator_delete_retention_days(namespace, enable=None, days=None):
@@ -1320,6 +1373,7 @@ def validate_client_auth_parameter(cmd, ns):
                        "when creating container.")
     else:
         validate_client_parameters(cmd, ns)
+    validate_metadata(ns)
 
 
 def validate_encryption_scope_client_params(ns):
@@ -1407,7 +1461,6 @@ def validate_or_policy(namespace):
 
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
     import re
-    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     # usage check
     if not container and blob:
@@ -1424,7 +1477,7 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
 
     # get url
     storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
-
+    service = None
     if url is not None:
         # validate source is uri or local path
         storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
@@ -1438,6 +1491,9 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
                 service = 'file'
             else:
                 raise ValueError('{} is not valid storage endpoint.'.format(url))
+        else:
+            logger.info("%s is not Azure storage url.", url)
+            return service, url
     # validate credential
     validate_client_parameters(cmd, namespace)
     kwargs = {'account_name': namespace.account_name,
@@ -1461,18 +1517,7 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         service = 'blob'
         url = 'https://{}.{}.{}'.format(namespace.account_name, service, storage_endpoint)
 
-    # Add sas in url
-    if namespace.sas_token:
-        sas_token = namespace.sas_token.lstrip('?')
-    else:
-        try:
-            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.debug("Cannot generate sas token. %s", ex)
-            sas_token = None
-    if sas_token:
-        return '{}?{}'.format(url, sas_token)
-    return url
+    return service, url
 
 
 def _is_valid_uri(uri):
@@ -1486,14 +1531,34 @@ def _is_valid_uri(uri):
     return False
 
 
+def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions):
+    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+
+    if sas_token:
+        sas_token = sas_token.lstrip('?')
+    else:
+        try:
+            sas_token = _generate_sas_token(cmd, account_name, account_key, service,
+                                            resource_types=resource_types, permissions=permissions)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Cannot generate sas token. %s", ex)
+            sas_token = None
+    if sas_token:
+        return'{}?{}'.format(url, sas_token)
+    return url
+
+
 def validate_azcopy_credential(cmd, namespace):
     # Get destination uri
     if not _is_valid_uri(namespace.destination):
         namespace.url = namespace.destination
-        namespace.destination = get_url_with_sas(
+        service, namespace.destination = get_url_with_sas(
             cmd, namespace, url=namespace.destination,
             container=namespace.destination_container, blob=namespace.destination_blob,
             share=namespace.destination_share, file_path=namespace.destination_file_path)
+        namespace.destination = _add_sas_for_url(cmd, url=namespace.destination, account_name=namespace.account_name,
+                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                 service=service, resource_types='co', permissions='wac')
 
     if not _is_valid_uri(namespace.source):
         # determine if source account is same with destination
@@ -1509,10 +1574,68 @@ def validate_azcopy_credential(cmd, namespace):
 
         # Get source uri
         namespace.url = namespace.source
-        namespace.source = get_url_with_sas(
+        service, namespace.source = get_url_with_sas(
             cmd, namespace, url=namespace.source,
             container=namespace.source_container, blob=namespace.source_blob,
             share=namespace.source_share, file_path=namespace.source_file_path)
+        namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service=service, resource_types='sco', permissions='rl')
+
+
+def is_directory(props):
+    return 'hdi_isfolder' in props.metadata.keys() and props.metadata['hdi_isfolder'] == 'true'
+
+
+def validate_fs_directory_upload_destination_url(cmd, namespace):
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token,
+              'file_system_name': namespace.destination_fs}
+    client = cf_adls_file_system(cmd.cli_ctx, kwargs)
+    url = client.url
+    if namespace.destination_path:
+        from azure.core.exceptions import AzureError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        file_client = client.get_file_client(file_path=namespace.destination_path)
+        try:
+            props = file_client.get_file_properties()
+            if not is_directory(props):
+                raise InvalidArgumentValueError('usage error: You are specifying --destination-path with a file name, '
+                                                'not directory name. Please change to a valid directory name. '
+                                                'If you want to upload to a file, please use '
+                                                '`az storage fs file upload` command.')
+        except AzureError:
+            pass
+        url = file_client.url
+
+    if _is_valid_uri(url):
+        namespace.destination = url
+    else:
+        namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                 service='blob', resource_types='co', permissions='rwdlac')
+    del namespace.destination_fs
+    del namespace.destination_path
+
+
+def validate_fs_directory_download_source_url(cmd, namespace):
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token,
+              'file_system_name': namespace.source_fs}
+    client = cf_adls_file_system(cmd.cli_ctx, kwargs)
+    url = client.url
+    if namespace.source_path:
+        file_client = client.get_file_client(file_path=namespace.source_path)
+        url = file_client.url
+    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                        service='blob', resource_types='co', permissions='rl')
+    del namespace.source_fs
+    del namespace.source_path
 
 
 def validate_text_configuration(cmd, ns):
@@ -1566,3 +1689,9 @@ def get_not_none_validator(attribute_name):
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
     return validate_not_none
+
+
+def validate_policy(namespace):
+    if namespace.id is not None:
+        logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
+                       "policy.")

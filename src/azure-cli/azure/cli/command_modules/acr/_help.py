@@ -1224,7 +1224,7 @@ examples:
   - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
     text: |
         az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
-            --repository "app/hello-world service/mycomponent"
+            --repository "app/hello-world" "service/mycomponent"
   - name: Create a mirror connected registry with only read permissions and pass the sync token
     text: |
         az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
@@ -1232,7 +1232,7 @@ examples:
   - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
         az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
-            -t app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
+            --repository "app/mycomponent" -m mirror -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
 """
 
@@ -1326,6 +1326,21 @@ examples:
   - name: Prints the values in json format requiered to activate a connected registry and the newly generated sync token credentials.
     text: >
         az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry
+"""
+
+helps['acr connected-registry repo'] = """
+type: command
+short-summary: Updates all the necessary connected registry sync scope maps repository permissions.
+examples:
+  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
+  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
+  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+    text: >
+        az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """
 # endregion
 

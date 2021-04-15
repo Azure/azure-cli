@@ -15,7 +15,8 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
+     _get_parent_proc_name, is_wsl)
 from azure.cli.core.mock import DummyCli
 
 
@@ -150,11 +151,13 @@ class TestUtils(unittest.TestCase):
 
     @mock.patch('webbrowser.open', autospec=True)
     @mock.patch('subprocess.Popen', autospec=True)
-    def test_open_page_in_browser(self, sunprocess_open_mock, webbrowser_open_mock):
+    def test_open_page_in_browser(self, subprocess_open_mock, webbrowser_open_mock):
         platform = sys.platform.lower()
         open_page_in_browser('http://foo')
-        if platform == 'darwin':
-            sunprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
+        if is_wsl():
+            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-Command', 'Start-Process "http://foo"'])
+        elif platform == 'darwin':
+            subprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
             webbrowser_open_mock.assert_called_once_with('http://foo', 2)
 
@@ -396,6 +399,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
                          'https://managedhsm.azure.com')
 
+        # VM SSH
+        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/.default"]),
+                         'https://pas.windows.net/CheckMyAccess/Linux')
+        self.assertEqual(scopes_to_resource(["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]),
+                         'https://pas.windows.net/CheckMyAccess/Linux')
+
     def test_resource_to_scopes(self):
         from azure.cli.core.util import resource_to_scopes
         # resource converted to a scopes list
@@ -411,6 +420,41 @@ class TestUtils(unittest.TestCase):
         # resource without trailing slash
         self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
                          ['https://managedhsm.azure.com/.default'])
+
+    @mock.patch("psutil.Process")
+    def test_get_parent_proc_name(self, mock_process_type):
+        process = mock_process_type.return_value
+        parent1 = process.parent.return_value
+        parent2 = parent1.parent.return_value
+        parent3 = parent2.parent.return_value
+
+        # Windows, in a virtual env, launched by pwsh.exe
+        process.name.return_value = "python.exe"
+        parent1.name.return_value = "python.exe"
+        parent2.name.return_value = "cmd.exe"
+        parent3.name.return_value = "pwsh.exe"
+        self.assertEqual(_get_parent_proc_name(), "pwsh.exe")
+
+        # Windows, in a virtual env, launched by powershell.exe
+        parent3.name.return_value = "powershell.exe"
+        self.assertEqual(_get_parent_proc_name(), "powershell.exe")
+
+        # Windows, launched by cmd.exe
+        parent1.name.return_value = "cmd.exe"
+        parent2.name.return_value = "explorer.exe"
+        self.assertEqual(_get_parent_proc_name(), "cmd.exe")
+
+        # Linux, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "bash"
+        parent2.name.return_value = "init"
+        self.assertEqual(_get_parent_proc_name(), "bash")
+
+        # Linux, launched by pwsh, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "pwsh"
+        parent2.name.return_value = "bash"
+        self.assertEqual(_get_parent_proc_name(), "pwsh")
 
 
 class TestBase64ToHex(unittest.TestCase):
