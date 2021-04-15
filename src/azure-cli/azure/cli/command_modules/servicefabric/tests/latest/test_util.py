@@ -85,3 +85,31 @@ def _wait_for_cluster_state_ready(test, kwargs):
             raise CLIError("Cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(state))
         if test.in_recording or test.is_live:
             time.sleep(60)
+
+
+# Manged Cluster helpers
+def _create_managed_cluster(test, kwargs):
+    test.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password}',
+             checks=[test.check('provisioningState', 'Succeeded'),
+                     test.check('clusterState', 'WaitingForNodes')])
+
+    test.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
+             checks=[test.check('provisioningState', 'Succeeded')])
+
+
+def _wait_for_managed_cluster_state_ready(test, kwargs):
+    timeout = time.time() + 900
+    while True:
+        cluster = test.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}').get_output_in_json()
+
+        if cluster['clusterState']:
+            if cluster['clusterState'] == 'Ready':
+                return
+
+        if time.time() > timeout:
+            state = "unknown"
+            if cluster['clusterState']:
+                state = cluster['clusterState']
+            raise CLIError("Managed cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(state))
+        if test.in_recording or test.is_live:
+            time.sleep(60)

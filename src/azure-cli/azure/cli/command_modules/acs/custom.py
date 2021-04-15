@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import binascii
 import datetime
 import errno
@@ -46,7 +45,9 @@ from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
-                                       InvalidArgumentValueError)
+                                       InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError,
+                                       ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -62,21 +63,21 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentity
-from azure.mgmt.containerservice.v2020_09_01.models import AgentPool
-from azure.mgmt.containerservice.v2020_09_01.models import AgentPoolUpgradeSettings
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterSKU
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterWindowsProfile
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2021_02_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2021_02_01.models import AgentPool
+from azure.mgmt.containerservice.v2021_02_01.models import AgentPoolUpgradeSettings
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterSKU
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterWindowsProfile
+from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -95,7 +96,7 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
-from ._client_factory import cf_managed_clusters
+from ._client_factory import cf_agent_pools
 from ._client_factory import get_msi_client
 
 from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
@@ -116,7 +117,10 @@ from ._consts import CONST_INGRESS_APPGW_ADDON_NAME
 from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
+from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
 from ._consts import ADDONS
+from ._consts import CONST_CANIPULL_IMAGE
+from ._consts import CONST_PRIVATE_DNS_ZONE_SYSTEM
 
 logger = get_logger(__name__)
 
@@ -769,13 +773,14 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
 
 
 def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
-    msi_client = get_msi_client(cli_ctx)
-    pattern = '/subscriptions/.*?/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'
+    pattern = '/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'  # pylint: disable=line-too-long
     resource_id = resource_id.lower()
     match = re.search(pattern, resource_id)
     if match:
-        resource_group_name = match.group(1)
-        identity_name = match.group(2)
+        subscription_id = match.group(1)
+        resource_group_name = match.group(2)
+        identity_name = match.group(3)
+        msi_client = get_msi_client(cli_ctx, subscription_id)
         try:
             identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                                resource_name=identity_name)
@@ -1483,6 +1488,97 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
+def aks_check_acr(cmd, client, resource_group_name, name, acr):
+    if not which("kubectl"):
+        raise ValidationError("Can not find kubectl executable in PATH")
+
+    _, browse_path = tempfile.mkstemp()
+    aks_get_credentials(
+        cmd, client, resource_group_name, name, admin=False, path=browse_path
+    )
+
+    # Get kubectl minor version
+    kubectl_minor_version = -1
+    try:
+        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        jsonS, _ = output.communicate()
+        kubectl_version = json.loads(jsonS)
+        kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        kubectl_server_minor_version = int(kubectl_version["serverVersion"]["minor"])
+        kubectl_server_patch = int(kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
+                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
+                           'more information.')
+    except subprocess.CalledProcessError as err:
+        raise ValidationError("Could not find kubectl minor version: {}".format(err))
+    if kubectl_minor_version == -1:
+        raise ValidationError("Failed to get kubectl version")
+
+    podName = "canipull-" + str(uuid.uuid4())
+    overrides = {
+        "spec": {
+            "restartPolicy": "Never",
+            "hostNetwork": True,
+            "containers": [
+                {
+                    "securityContext": {"runAsUser": 0},
+                    "name": podName,
+                    "image": CONST_CANIPULL_IMAGE,
+                    "args": ["-v6", acr],
+                    "stdin": True,
+                    "stdinOnce": True,
+                    "tty": True,
+                    "volumeMounts": [
+                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                    ],
+                }
+            ],
+            "tolerations": [
+                {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                {"effect": "NoExecute", "operator": "Exists"},
+            ],
+            "volumes": [
+                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+            ],
+        }
+    }
+
+    try:
+        cmd = [
+            "kubectl",
+            "run",
+            "--kubeconfig",
+            browse_path,
+            "--rm",
+            "--quiet",
+            "--image",
+            CONST_CANIPULL_IMAGE,
+            "--overrides",
+            json.dumps(overrides),
+            "-it",
+            podName,
+        ]
+
+        # Support kubectl versons < 1.18
+        if kubectl_minor_version < 18:
+            cmd += ["--generator=run-pod/v1"]
+
+        output = subprocess.check_output(
+            cmd,
+            universal_newlines=True,
+        )
+    except subprocess.CalledProcessError as err:
+        raise CLIError("Failed to check the ACR: {}".format(err))
+    if output:
+        print(output)
+    else:
+        raise CLIError("Failed to check the ACR.")
+
+
 # pylint: disable=too-many-statements,too-many-branches
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                listen_address='127.0.0.1', listen_port='8001'):
@@ -1785,9 +1881,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                tags=None,
                zones=None,
                enable_node_public_ip=False,
+               node_public_ip_prefix_id=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
+               private_dns_zone=None,
+               fqdn_subdomain=None,
                enable_managed_identity=True,
                assign_identity=None,
                attach_acr=None,
@@ -1799,11 +1898,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_id=None,
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
+               enable_sgxquotehelper=False,
                no_wait=False,
                yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    if not dns_name_prefix:
+    if dns_name_prefix and fqdn_subdomain:
+        raise MutuallyExclusiveArgumentError('--dns-name-prefix and --fqdn-subdomain cannot be used at same time')
+    if not dns_name_prefix and not fqdn_subdomain:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -1827,6 +1929,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         proximity_placement_group_id=ppg,
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
+        node_public_ip_prefix_id=node_public_ip_prefix_id,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -1886,7 +1989,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                       service_principal=service_principal, client_secret=client_secret,
                                                       subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                      location=location, name=name)
+                                                      fqdn_subdomain=fqdn_subdomain, location=location, name=name)
         service_principal_profile = ManagedClusterServicePrincipalProfile(
             client_id=principal_obj.get("service_principal"),
             secret=principal_obj.get("client_secret"),
@@ -1992,6 +2095,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         appgw_id,
         appgw_subnet_id,
         appgw_watch_namespace,
+        enable_sgxquotehelper
     )
     monitoring = False
     if CONST_MONITORING_ADDON_NAME in addon_profiles:
@@ -2077,6 +2181,24 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity,
         disk_encryption_set_id=node_osdisk_diskencryptionset_id
     )
+
+    use_custom_private_dns_zone = False
+    if private_dns_zone:
+        if not enable_private_cluster:
+            raise InvalidArgumentValueError("Invalid private dns zone for public cluster. "
+                                            "It should always be empty for public cluster")
+        mc.api_server_access_profile.private_dns_zone = private_dns_zone
+        from msrestazure.tools import is_valid_resource_id
+        if private_dns_zone.lower() != CONST_PRIVATE_DNS_ZONE_SYSTEM:
+            if is_valid_resource_id(private_dns_zone):
+                use_custom_private_dns_zone = True
+            else:
+                raise InvalidArgumentValueError(private_dns_zone + " is not a valid Azure resource ID.")
+    if fqdn_subdomain:
+        if not use_custom_private_dns_zone:
+            raise ArgumentUsageError("--fqdn-subdomain should only be used for "
+                                     "private cluster with custom private dns zone")
+        mc.fqdn_subdomain = fqdn_subdomain
 
     if uptime_sla:
         mc.sku = ManagedClusterSKU(
@@ -2187,6 +2309,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       appgw_id=None,
                       appgw_subnet_id=None,
                       appgw_watch_namespace=None,
+                      enable_sgxquotehelper=False,
                       no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2199,6 +2322,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               appgw_id=appgw_id,
                               appgw_subnet_id=appgw_subnet_id,
                               appgw_watch_namespace=appgw_watch_namespace,
+                              enable_sgxquotehelper=enable_sgxquotehelper,
                               no_wait=no_wait)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
@@ -2347,6 +2471,7 @@ def aks_update(cmd, client, resource_group_name, name,
                cluster_autoscaler_profile=None,
                min_count=None, max_count=None,
                uptime_sla=False,
+               no_uptime_sla=False,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -2374,6 +2499,7 @@ def aks_update(cmd, client, resource_group_name, name,
             not attach_acr and
             not detach_acr and
             not uptime_sla and
+            not no_uptime_sla and
             api_server_authorized_ip_ranges is None and
             not enable_aad and
             not update_aad_profile and
@@ -2390,6 +2516,7 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-idle-timeout" or'
                        '"--attach-acr" or "--detach-acr" or'
                        '"--uptime-sla" or'
+                       '"--no-uptime-sla" or '
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
                        '"--aad-tenant-id" or '
@@ -2445,7 +2572,7 @@ def aks_update(cmd, client, resource_group_name, name,
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     client_id = ""
-    if instance.identity is not None and instance.identity.type == "SystemAssigned":
+    if _is_msi_cluster(instance):
         if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
             raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
                            'Please do not set --attach-acr or --detach-acr. '
@@ -2470,10 +2597,19 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
+    if uptime_sla and no_uptime_sla:
+        raise CLIError('Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.')
+
     if uptime_sla:
         instance.sku = ManagedClusterSKU(
             name="Basic",
             tier="Paid"
+        )
+
+    if no_uptime_sla:
+        instance.sku = ManagedClusterSKU(
+            name="Basic",
+            tier="Free"
         )
 
     if update_lb_profile:
@@ -2553,7 +2689,9 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets cluster.')
-            _upgrade_single_nodepool_image_version(True, client, resource_group_name, name, agent_pool_profile.name)
+            agent_pool_client = cf_agent_pools(cmd.cli_ctx)
+            _upgrade_single_nodepool_image_version(True, agent_pool_client,
+                                                   resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
 
@@ -2674,6 +2812,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    appgw_id=None,
                    appgw_subnet_id=None,
                    appgw_watch_namespace=None,
+                   enable_sgxquotehelper=False,
                    no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
@@ -2742,6 +2881,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
                 if appgw_watch_namespace is not None:
                     addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+            elif addon == CONST_CONFCOM_ADDON_NAME:
+                if addon_profile.enabled:
+                    raise ValidationError('The confcom addon is already enabled for this managed cluster.',
+                                          recommendation='To change confcom configuration, run '
+                                          f'"az aks disable-addons -a confcom -n {name} -g {resource_group_name}" '
+                                          'before enabling it again.')
+                addon_profile = ManagedClusterAddonProfile(
+                    enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+                if enable_sgxquotehelper:
+                    addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -2782,7 +2931,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
                         appgw_subnet_cidr=None,
                         appgw_id=None,
                         appgw_subnet_id=None,
-                        appgw_watch_namespace=None):
+                        appgw_watch_namespace=None,
+                        enable_sgxquotehelper=False):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -2837,6 +2987,12 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
         addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
         addons.remove('ingress-appgw')
+    if 'confcom' in addons:
+        addon_profile = ManagedClusterAddonProfile(enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
+        if enable_sgxquotehelper:
+            addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+        addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
+        addons.remove('confcom')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
@@ -2887,92 +3043,83 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # log analytics workspaces cannot be created in WCUS region due to capacity limits
     # so mapped to EUS per discussion with log analytics team
     AzureCloudLocationToOmsRegionCodeMap = {
-        "southcentralus": "SCUS",
-        "uksouth": "SUK",
-        "southeastasia": "SEA",
-        "westeurope": "WEU",
-        "eastus": "EUS",
+        "australiasoutheast": "ASE",
         "australiaeast": "EAU",
-        "eastus2": "EUS2",
-        "northeurope": "NEU",
-        "japaneast": "EJP",
-        "brazilsouth": "CQ",
+        "australiacentral": "CAU",
+        "canadacentral": "CCA",
+        "centralindia": "CIN",
         "centralus": "CUS",
-        "norwayeast": "NOE",
-        "chinaeast2": "CNE2",
         "eastasia": "EA",
-        "switzerlandnorth": "CHN",
-        "southafricanorth": "JNB",
+        "eastus": "EUS",
+        "eastus2": "EUS2",
+        "eastus2euap": "EAP",
         "francecentral": "PAR",
-        "northcentralus": "NCUS",
+        "japaneast": "EJP",
+        "koreacentral": "SE",
+        "northeurope": "NEU",
+        "southcentralus": "SCUS",
+        "southeastasia": "SEA",
+        "uksouth": "SUK",
+        "usgovvirginia": "USGV",
+        "westcentralus": "EUS",
+        "westeurope": "WEU",
         "westus": "WUS",
         "westus2": "WUS2",
-        "centralindia": "CIN",
-        "koreacentral": "SE",
+        "brazilsouth": "CQ",
+        "brazilsoutheast": "BRSE",
+        "norwayeast": "NOE",
+        "southafricanorth": "JNB",
+        "northcentralus": "NCUS",
         "uaenorth": "DXB",
         "germanywestcentral": "DEWC",
-        "usgovvirginia": "USGV",
-        "canadacentral": "CAC",
-        "usgovarizona": "PHX",
         "ukwest": "WUK",
-        "australiasoutheast": "SEAU",
-        "westcentralus": "EUS",
+        "switzerlandnorth": "CHN",
         "switzerlandwest": "CHW",
-        "australiacentral": "CAU",
-        "uaecentral": "AUH",
-        "eastus2euap": "EASTUS2EUAP",
-        "brazilsoutheast": "BRSE"
+        "uaecentral": "AUH"
     }
     AzureCloudRegionToOmsRegionMap = {
-        "southcentralus": "southcentralus",
-        "uksouth": "uksouth",
-        "southeastasia": "southeastasia",
-        "westeurope": "westeurope",
-        "eastus": "eastus",
+        "australiacentral": "australiacentral",
+        "australiacentral2": "australiacentral",
         "australiaeast": "australiaeast",
-        "eastus2": "eastus2",
-        "northeurope": "northeurope",
-        "japaneast": "japaneast",
+        "australiasoutheast": "australiasoutheast",
         "brazilsouth": "brazilsouth",
+        "canadacentral": "canadacentral",
+        "canadaeast": "canadacentral",
         "centralus": "centralus",
-        "norwayeast": "norwayeast",
-        "chinaeast2": "chinaeast2",
+        "centralindia": "centralindia",
         "eastasia": "eastasia",
-        "switzerlandnorth": "switzerlandnorth",
-        "southafricanorth": "southafricanorth",
+        "eastus": "eastus",
+        "eastus2": "eastus2",
         "francecentral": "francecentral",
+        "francesouth": "francecentral",
+        "japaneast": "japaneast",
+        "japanwest": "japaneast",
+        "koreacentral": "koreacentral",
+        "koreasouth": "koreacentral",
         "northcentralus": "northcentralus",
+        "northeurope": "northeurope",
+        "southafricanorth": "southafricanorth",
+        "southafricawest": "southafricanorth",
+        "southcentralus": "southcentralus",
+        "southeastasia": "southeastasia",
+        "southindia": "centralindia",
+        "uksouth": "uksouth",
+        "ukwest": "ukwest",
+        "westcentralus": "eastus",
+        "westeurope": "westeurope",
+        "westindia": "centralindia",
         "westus": "westus",
         "westus2": "westus2",
-        "centralindia": "centralindia",
-        "koreacentral": "koreacentral",
+        "norwayeast": "norwayeast",
+        "norwaywest": "norwayeast",
+        "switzerlandnorth": "switzerlandnorth",
+        "switzerlandwest": "switzerlandwest",
         "uaenorth": "uaenorth",
         "germanywestcentral": "germanywestcentral",
-        "usgovvirginia": "usgovvirginia",
-        "canadacentral": "canadacentral",
-        "usgovarizona": "usgovarizona",
-        "ukwest": "ukwest",
-        "australiasoutheast": "australiasoutheast",
-        "westcentralus": "eastus",
-        "switzerlandwest": "switzerlandwest",
-        "australiacentral": "australiacentral",
+        "germanynorth": "germanywestcentral",
         "uaecentral": "uaecentral",
         "eastus2euap": "eastus2euap",
-        "brazilsoutheast": "brazilsoutheast",
-        "southafricawest": "southafricanorth",
-        "westindia": "centralindia",
-        "chinaeast": "chinaeast2",
-        "chinanorth": "chinaeast2",
-        "australiacentral2": "australiacentral",
-        "norwaywest": "norwayeast",
-        "germanynorth": "germanywestcentral",
-        "southindia": "centralindia",
-        "koreasouth": "koreacentral",
-        "chinanorth2": "chinaeast2",
-        "francesouth": "francecentral",
-        "canadaeast": "canadacentral",
-        "usgovtexas": "usgovvirginia",
-        "japanwest": "japaneast"
+        "brazilsoutheast": "brazilsoutheast"
     }
 
     # mapping for azure china cloud
@@ -2992,10 +3139,13 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # mapping for azure us governmner cloud
     AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV"
+        "usgovvirginia": "USGV",
+        "usgovarizona": "PHX"
     }
     AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia"
+        "usgovvirginia": "usgovvirginia",
+        "usgovtexas": "usgovvirginia",
+        "usgovarizona": "usgovarizona"
     }
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -3232,6 +3382,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       kubernetes_version=None,
                       zones=None,
                       enable_node_public_ip=False,
+                      node_public_ip_prefix_id=None,
                       node_vm_size=None,
                       node_osdisk_type=None,
                       node_osdisk_size=0,
@@ -3293,6 +3444,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         availability_zones=zones,
         scale_set_priority=priority,
         enable_node_public_ip=enable_node_public_ip,
+        node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
         mode=mode
@@ -3340,9 +3492,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                        'If you only want to upgrade the node version please use the "--node-image-only" option only.')
 
     if node_image_only:
-        managed_cluster_client = cf_managed_clusters(cmd.cli_ctx)
         return _upgrade_single_nodepool_image_version(no_wait,
-                                                      managed_cluster_client,
+                                                      client,
                                                       resource_group_name,
                                                       cluster_name,
                                                       nodepool_name)
@@ -3475,6 +3626,7 @@ def _ensure_aks_service_principal(cli_ctx,
                                   client_secret=None,
                                   subscription_id=None,
                                   dns_name_prefix=None,
+                                  fqdn_subdomain=None,
                                   location=None,
                                   name=None):
     aad_session_key = None
@@ -3485,7 +3637,10 @@ def _ensure_aks_service_principal(cli_ctx,
         if not client_secret:
             client_secret = _create_client_secret()
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        if dns_name_prefix:
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        else:
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, fqdn_subdomain, location)
 
         service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
@@ -3902,14 +4057,14 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
 
 def openshift_show(cmd, client, resource_group_name, name):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     mc = client.get(resource_group_name, name)
     return _remove_osa_nulls([mc])[0]
 
 
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
@@ -3929,7 +4084,7 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
 
 
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
     workspace_id = _format_workspace_id(workspace_id)
@@ -3940,9 +4095,15 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
 
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
-    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     instance = client.get(resource_group_name, name)
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def _is_msi_cluster(managed_cluster):
+    return (managed_cluster and managed_cluster.identity and
+            (managed_cluster.identity.type.casefold() == "systemassigned" or
+             managed_cluster.identity.type.casefold() == "userassigned"))

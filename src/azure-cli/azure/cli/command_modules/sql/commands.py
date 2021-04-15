@@ -29,6 +29,7 @@ from ._util import (
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
     get_sql_server_blob_auditing_policies_operations,
+    get_sql_server_dev_ops_audit_settings_operations,
     get_sql_database_long_term_retention_backups_operations,
     get_sql_database_long_term_retention_policies_operations,
     get_sql_database_sensitivity_labels_operations,
@@ -54,6 +55,7 @@ from ._util import (
     get_sql_managed_instance_keys_operations,
     get_sql_managed_instance_operations_operations,
     get_sql_managed_instances_operations,
+    get_sql_server_trust_groups_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
     get_sql_restorable_dropped_managed_databases_operations,
@@ -66,8 +68,7 @@ from ._util import (
     get_sql_subscription_usages_operations,
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
-    get_sql_instance_failover_groups_operations,
-    get_sql_import_export_operations
+    get_sql_instance_failover_groups_operations
 )
 
 from ._validators import (
@@ -107,10 +108,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
 
-    import_export_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#ImportExportOperations.{}',
-        client_factory=get_sql_import_export_operations)
-
     database_lro_transform = LongRunningOperationResultTransform(
         self.cli_ctx, db_transform)
 
@@ -149,11 +146,6 @@ def load_command_table(self, _):
                                  table_transformer=db_table_format)
 
         g.custom_command('export', 'db_export')
-
-    with self.command_group('sql db',
-                            import_export_operations,
-                            client_factory=get_sql_import_export_operations) as g:
-
         g.custom_command('import', 'db_import')
 
     capabilities_operations = CliCommandType(
@@ -279,6 +271,23 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'server_audit_policy_show')
         g.generic_update_command('update', custom_func_name='server_audit_policy_update', supports_no_wait=True)
         g.wait_command('wait')
+
+    server_dev_ops_audit_settings_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ServerDevOpsAuditSettingsOperations.{}',
+        client_factory=get_sql_server_dev_ops_audit_settings_operations)
+
+    with self.command_group('sql server ms-support audit-policy',
+                            server_dev_ops_audit_settings_operations,
+                            client_factory=get_sql_server_dev_ops_audit_settings_operations) as g:
+
+        g.custom_show_command('show', 'server_ms_support_audit_policy_show')
+        g.generic_update_command('update', custom_func_name='server_ms_support_audit_policy_update',
+                                 setter_name='server_ms_support_audit_policy_set',
+                                 setter_type=CliCommandType(operations_tmpl='azure.cli.command_modules.sql.custom#{}'),
+                                 getter_name='server_ms_support_audit_policy_get',
+                                 getter_type=CliCommandType(operations_tmpl='azure.cli.command_modules.sql.custom#{}'),
+                                 supports_no_wait=True)
+        g.custom_wait_command('wait', 'server_ms_support_audit_policy_get')
 
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
@@ -586,6 +595,20 @@ def load_command_table(self, _):
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')
         g.show_command('get', 'get')
+
+    ###############################################
+    #           sql server trust groups           #
+    ###############################################
+
+    server_trust_groups_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ServerTrustGroupsOperations.{}',
+        client_factory=get_sql_server_trust_groups_operations)
+
+    with self.command_group('sql stg', server_trust_groups_operations, client_factory=get_sql_server_trust_groups_operations, is_preview=True) as g:
+        g.custom_command('create', 'server_trust_group_create', supports_no_wait=True)
+        g.custom_command('delete', 'server_trust_group_delete', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'server_trust_group_get')
+        g.custom_command('list', 'server_trust_group_list')
 
     ###############################################
     #                sql managed instance         #

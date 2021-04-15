@@ -32,6 +32,12 @@ examples:
         az synapse workspace create --name fromcli4 --resource-group rg \\
           --storage-account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
+  - name: Create a Synapse workspace using customer-managed key
+    text: |-
+        az synapse workspace create --name fromcli4 --resource-group rg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
+          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
 """
 
 helps['synapse workspace list'] = """
@@ -544,6 +550,105 @@ examples:
         --state Disabled
 """
 
+helps['synapse workspace key'] = """
+type: group
+short-summary:  Manage workspace's keys.
+"""
+
+helps['synapse workspace key create'] = """
+type: command
+short-summary: Create a workspace's key.
+examples:
+  - name: Create a workspace's key.
+    text: |-
+        az synapse workspace key create --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
+"""
+
+helps['synapse workspace key update'] = """
+type: command
+short-summary: Update a workspace's key or update the state of key to change the workspace state from pending to success state when the workspace is first being provisioned.
+examples:
+  - name: Update a workspace's key.
+    text: |-
+        az synapse workspace key update --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
+"""
+
+helps['synapse workspace key delete'] = """
+type: command
+short-summary: Delete a workspace's key. The key at active status can't be deleted.
+examples:
+  - name: Delete a workspace's key.
+    text: |-
+        az synapse workspace key delete --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace key show'] = """
+type: command
+short-summary: Show a workspace's key by name.
+examples:
+  - name: Show a workspace's key.
+    text: |-
+        az synapse workspace key show --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace key list'] = """
+type: command
+short-summary: List keys under specified workspace.
+examples:
+  - name: List keys under specified workspace.
+    text: |-
+        az synapse workspace key list --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse workspace key wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a workspace key is met.
+"""
+
+helps['synapse workspace managed-identity'] = """
+type: group
+short-summary:  Manage workspace's managed-identity.
+"""
+
+helps['synapse workspace managed-identity show-sql-access'] = """
+type: command
+short-summary: Show workspace's sql-access state to managed-identity.
+examples:
+  - name: Show workspace's sql-access state to managed-identity.
+    text: |-
+        az synapse workspace managed-identity show-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity revoke-sql-access'] = """
+type: command
+short-summary: Revoke workspace's sql-access to managed-identity.
+examples:
+  - name: Revoke workspace's sql-access to managed-identity.
+    text: |-
+        az synapse workspace managed-identity revoke-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity grant-sql-access'] = """
+type: command
+short-summary: Grant workspace's sql-access to managed-identity.
+examples:
+  - name: Grant workspace's sql-access to managed-identity.
+    text: |-
+        az synapse workspace managed-identity grant-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of sql-access state to managed-identity is met.
+"""
+
 helps['synapse workspace firewall-rule'] = """
 type: group
 short-summary:  Manage a workspace's firewall rules.
@@ -753,6 +858,20 @@ type: group
 short-summary: Manage Synapse's role assignments and definitions.
 """
 
+helps['synapse role scope'] = """
+type: group
+short-summary: Manage Synapse's role scopes.
+"""
+
+helps['synapse role scope list'] = """
+type: command
+short-summary: List role scopes.
+examples:
+  - name: List role scopes.
+    text: |-
+        az synapse role scope list --workspace-name testsynapseworkspace
+"""
+
 helps['synapse role assignment'] = """
 type: group
 short-summary: Manage Synapse's role assignments.
@@ -778,7 +897,7 @@ examples:
   - name: List role assignments by role id/name.
     text: |-
         az synapse role assignment list --workspace-name testsynapseworkspace \\
-        --role "Sql Admin"
+        --role "Synapse Apache Spark Administrator"
   - name: List role assignments by assignee.
     text: |-
         az synapse role assignment list --workspace-name testsynapseworkspace \\
@@ -786,7 +905,15 @@ examples:
   - name: List role assignments by objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment list --workspace-name testsynapseworkspace \\
-        --assignee 00000000-0000-0000-0000-000000000000
+        --assignee-object-id 00000000-0000-0000-0000-000000000000
+  - name: List role assignments by scope.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --scope "workspaces/{workspaceName}"
+  - name: List role assignments by item type and item name.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --item-type "bigDataPools" --item "bigDataPoolName"
 """
 
 helps['synapse role assignment create'] = """
@@ -796,15 +923,24 @@ examples:
   - name: Create a role assignment using service principal name.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee sp_name
+        --role "Synapse Administrator" --assignee sp_name
   - name: Create a role assignment using user principal name.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee username@contoso.com
+        --role "Synapse Administrator" --assignee username@contoso.com
   - name: Create a role assignment using objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee 00000000-0000-0000-0000-000000000000
+        --role "Synapse Administrator" --assignee 00000000-0000-0000-0000-000000000000
+  - name: Create a role assignment at scope.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --scope "workspaces/{workspaceName}" --role "Synapse Administrator" --assignee username@contoso.com
+  - name: Create a role assignment at scope that combination of item type and item name.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --item-type "bigDataPools" --item "bigDataPoolName" --role "Synapse Administrator" \\
+        --assignee username@contoso.com
 """
 
 helps['synapse role assignment delete'] = """
@@ -814,11 +950,11 @@ examples:
   - name: Delete role assignments by role and assignee.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee sp_name
+        --role "Synapse Administrator" --assignee sp_name
   - name: Delete role assignments by role id/name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
-        --role "Sql Admin"
+        --role "Synapse Administrator"
   - name: Delete role assignments by service principal name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
@@ -835,6 +971,10 @@ examples:
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
         --ids 10000000-0000-0000-0000-10000000-10000000-0000-0000-0000-10000000
+  - name: Delete role assignments by scope.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --scope "workspaces/testsynapseworkspace/linkedServices/testlinkedServices"
 """
 
 helps['synapse role definition'] = """
@@ -849,6 +989,9 @@ examples:
   - name: List role definitions.
     text: |-
         az synapse role definition list --workspace-name testsynapseworkspace
+  - name: List role definitions built-in by Synapse.
+    text: |-
+        az synapse role definition list --workspace-name testsynapseworkspace --is-built-in True
 """
 
 helps['synapse role definition show'] = """
@@ -859,6 +1002,10 @@ examples:
     text: |-
         az synapse role definition show --workspace-name testsynapseworkspace \\
         --role 00000000-0000-0000-0000-000000000000
+  - name: Get role definition by role name.
+    text: |-
+        az synapse role definition show --workspace-name testsynapseworkspace \\
+        --role "Synapse SQL Administrator"
 """
 
 helps['synapse linked-service'] = """

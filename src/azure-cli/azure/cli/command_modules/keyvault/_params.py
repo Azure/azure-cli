@@ -20,7 +20,7 @@ from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
-    get_vault_base_url_type, get_hsm_base_url_type,
+    get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_type,
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
@@ -70,6 +70,16 @@ def load_arguments(self, _):
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
+
+    class CLIJsonWebKeyCurveName(str, Enum):
+        p_256 = "P-256"  #: The NIST P-256 elliptic curve, AKA SECG curve SECP256R1.
+        p_256k = "P-256K"  #: The SECG SECP256K1 elliptic curve.
+        p_384 = "P-384"  #: The NIST P-384 elliptic curve, AKA SECG curve SECP384R1.
+        p_521 = "P-521"  #: The NIST P-521 elliptic curve, AKA SECG curve SECP521R1.
+
+    class CLISecurityDomainOperation(str, Enum):
+        download = "download"  #: Download operation
+        upload = "upload"  #: Upload operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
@@ -124,7 +134,7 @@ def load_arguments(self, _):
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(),
                    help='[Vault Only] Property to specify whether Azure Resource Manager is permitted to retrieve '
                         'secrets from the key vault.')
-        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag())
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
             message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
                                    'deprecated by December 2020. All key vaults will be required to have soft delete '
@@ -347,8 +357,10 @@ def load_arguments(self, _):
                    help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
-        c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport),
+        c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
                    help='The type of key to import (only for BYOK).')
+        c.argument('curve', arg_type=get_enum_type(CLIJsonWebKeyCurveName), validator=validate_key_import_type,
+                   help='The curve name of the key to import (only for BYOK).')
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
@@ -459,6 +471,7 @@ def load_arguments(self, _):
             c.argument('hsm_name', hsm_url_type, required=False,
                        help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+            c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain init-recovery') as c:
         c.argument('sd_exchange_key', help='Local file path to store the exported key.')
@@ -487,6 +500,9 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
         c.argument('resource_group_name', options_list=['--resource-group', '-g'],
                    help='Proceed only if HSM belongs to the specified resource group.')
+        c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
+                   help='Target operation that needs waiting.')
+        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
@@ -702,6 +718,16 @@ def load_arguments(self, _):
                         'use the object id and not the app id.')
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('role', help='role name or id')
+
+    with self.argument_context('keyvault role definition') as c:
+        c.argument('hsm_name', hsm_url_type)
+        c.argument('role_definition', help='Description of a role as JSON, or a path to a file containing a JSON description.')
+        c.argument('role_id', help='The role definition ID.')
+        c.argument('role_definition_name', options_list=['--name', '-n'], help='The role definition name. '
+                   'This is a GUID in the "name" property of a role definition.')
+
+    with self.argument_context('keyvault role definition list') as c:
+        c.argument('custom_role_only', arg_type=get_three_state_flag(), help='Only show custom role definitions.')
 
     class PrincipalType(str, Enum):  # Copied from azure.mgmt.authorization v2018_09_01_preview
         user = "User"

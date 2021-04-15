@@ -5,8 +5,6 @@
 
 # pylint: disable=too-many-lines
 
-from __future__ import print_function
-
 import argparse
 import datetime
 import json
@@ -17,7 +15,6 @@ import sys
 import time
 import copy
 from importlib import import_module
-import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
@@ -26,10 +23,11 @@ from azure.cli.core.commands.constants import (
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
-from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
+from azure.cli.core.util import (
+    get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
-
+from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -712,7 +710,7 @@ class AzCliCommandInvoker(CommandInvoker):
         except Exception as ex:  # pylint: disable=broad-except
             if cmd_copy.exception_handler:
                 return cmd_copy.exception_handler(ex)
-            six.reraise(*sys.exc_info())
+            raise
 
     def _run_jobs_serially(self, jobs, ids):
         results, exceptions = [], []
@@ -868,7 +866,8 @@ class AzCliCommandInvoker(CommandInvoker):
 
 
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
-    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=500.0,
+                 progress_bar=None):
 
         self.cli_ctx = cli_ctx
         self.start_msg = start_msg
@@ -876,6 +875,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
+        self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -947,16 +947,17 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.cli_ctx.get_progress_controller().begin()
+        self.progress_bar.begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
+
         telemetry.poll_start()
         poll_flag = False
         while not poller.done():
             poll_flag = True
-            self.cli_ctx.get_progress_controller().add(message='Running')
+
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -974,9 +975,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
+                self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
-                self.cli_ctx.get_progress_controller().stop()
+                self.progress_bar.stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -984,12 +986,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.cli_ctx.get_progress_controller().stop()
+            self.progress_bar.stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.cli_ctx.get_progress_controller().end()
+        self.progress_bar.end()
         if poll_flag:
             telemetry.poll_end()
+
         return result
 
 
@@ -1159,6 +1162,12 @@ class CliCommandType:
 class AzCommandGroup(CommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
+        """
+        :param command_loader: The command loader that commands will be registered into
+        :type command_loader: azure.cli.core.AzCommandsLoader
+        :param group_name: The name of the group of commands in the command hierarchy
+        :type group_name: str
+        """
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         operations_tmpl = merged_kwargs.pop('operations_tmpl', None)
         super(AzCommandGroup, self).__init__(command_loader, group_name,
@@ -1246,16 +1255,24 @@ class AzCommandGroup(CommandGroup):
         return self._command(name, method_name=method_name, custom_command=True, **kwargs)
 
     def _command(self, name, method_name, custom_command=False, **kwargs):
+        from .command_operation import CommandOperation
+
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         self._apply_tags(merged_kwargs, kwargs, name)
 
         operations_tmpl = merged_kwargs['operations_tmpl']
-        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
-        self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
-                                         operation=operations_tmpl.format(method_name),
-                                         **merged_kwargs)
+        op_path = operations_tmpl.format(method_name)
 
+        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        command_operation = CommandOperation(
+            command_loader=self.command_loader,
+            op_path=op_path,
+            **merged_kwargs
+        )
+        self.command_loader.add_cli_command(command_name,
+                                            command_operation=command_operation,
+                                            **merged_kwargs)
         return command_name
 
     # pylint: disable=no-self-use
@@ -1285,27 +1302,31 @@ class AzCommandGroup(CommandGroup):
                                setter_name='create_or_update', setter_type=None, setter_arg_name='parameters',
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
                                custom_func_name=None, custom_func_type=None, **kwargs):
-        from azure.cli.core.commands.arm import _cli_generic_update_command
+        from azure.cli.core.commands.command_operation import GenericUpdateCommandOperation
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg())
         merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
         self._apply_tags(merged_kwargs, kwargs, name)
 
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
-        setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
-        custom_func_op = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
-                                                 custom_command=True) if custom_func_name else None
-        _cli_generic_update_command(
-            self.command_loader,
-            '{} {}'.format(self.group_name, name),
-            getter_op=getter_op,
-            setter_op=setter_op,
+        getter_op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type)
+        setter_op_path = self._resolve_operation(merged_kwargs, setter_name, setter_type)
+        custom_function_op_path = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
+                                                          custom_command=True) if custom_func_name else None
+        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        command_operation = GenericUpdateCommandOperation(
+            command_loader=self.command_loader,
+            getter_op_path=getter_op_path,
+            setter_op_path=setter_op_path,
             setter_arg_name=setter_arg_name,
-            custom_function_op=custom_func_op,
+            custom_function_op_path=custom_function_op_path,
             child_collection_prop_name=child_collection_prop_name,
             child_collection_key=child_collection_key,
             child_arg_name=child_arg_name,
-            **merged_kwargs)
+            **merged_kwargs
+        )
+        self.command_loader.add_cli_command(command_name,
+                                            command_operation=command_operation,
+                                            **merged_kwargs)
 
     def wait_command(self, name, getter_name='get', **kwargs):
         self._wait_command(name, getter_name=getter_name, custom_command=False, **kwargs)
@@ -1317,16 +1338,24 @@ class AzCommandGroup(CommandGroup):
         self._wait_command(name, getter_name=getter_name, getter_type=getter_type, **kwargs)
 
     def _wait_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
-        from azure.cli.core.commands.arm import _cli_wait_command
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         self._apply_tags(merged_kwargs, kwargs, name)
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
-        _cli_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
-                          custom_command=custom_command, **merged_kwargs)
+        getter_op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+
+        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        command_operation = WaitCommandOperation(
+            command_loader=self.command_loader,
+            op_path=getter_op_path,
+            **merged_kwargs
+        )
+        self.command_loader.add_cli_command(command_name,
+                                            command_operation=command_operation,
+                                            **merged_kwargs)
 
     def show_command(self, name, getter_name='get', **kwargs):
         self._show_command(name, getter_name=getter_name, custom_command=False, **kwargs)
@@ -1335,16 +1364,24 @@ class AzCommandGroup(CommandGroup):
         self._show_command(name, getter_name=getter_name, custom_command=True, **kwargs)
 
     def _show_command(self, name, getter_name='get', getter_type=None, custom_command=False, **kwargs):
-        from azure.cli.core.commands.arm import _cli_show_command
+        from azure.cli.core.commands.command_operation import ShowCommandOperation
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         self._apply_tags(merged_kwargs, kwargs, name)
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
-        getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
-        _cli_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
-                          custom_command=custom_command, **merged_kwargs)
+        op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+
+        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        command_operation = ShowCommandOperation(
+            command_loader=self.command_loader,
+            op_path=op_path,
+            **merged_kwargs
+        )
+        self.command_loader.add_cli_command(command_name,
+                                            command_operation=command_operation,
+                                            **merged_kwargs)
 
     def _apply_tags(self, merged_kwargs, kwargs, command_name):
         # don't inherit deprecation or preview info from command group

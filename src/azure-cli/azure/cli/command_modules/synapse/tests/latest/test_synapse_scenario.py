@@ -5,6 +5,7 @@
 
 
 import os
+import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
@@ -110,6 +111,107 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse spark pool delete --name {spark-pool} --workspace {workspace} --resource-group {rg} --yes')
         self.cmd('az synapse spark pool show --name {spark-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
+
+    @record_only()
+    def test_workspace_with_cmk(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspacecmk',
+            'rg': 'testrg',
+            'storage-account': 'teststorageforsynapsecmk',
+            'file-system': self.create_random_name(prefix='fs', length=16),
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16),
+            'key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newcmk',
+            'new-key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newkey',
+            'managed-identity': '00000000-0000-1111-2222-333333333333'
+        })
+
+        # create workspace supporting cmk, data exfiltration
+        workspace_cmk = self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
+            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids \'""\' ', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ]).get_output_in_json()
+
+        self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+
+        # active workspace
+        self.cmd(
+            'az synapse workspace key update --name default --key-identifier {key-identifier} --is-active True  --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'default'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys')
+            ])
+        import time
+        time.sleep(120)
+
+        # create workspace key
+        self.cmd(
+            'az synapse workspace key create --name newkey --key-identifier {new-key-identifier}  --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'newkey'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys')
+            ])
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+
+        # list workspace key
+        self.cmd(
+            'az synapse workspace key list --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('[0].name', 'default'),
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/keys'),
+                self.check('[0].keyVaultUrl', self.kwargs['key-identifier']),
+            ])
+
+        # show workspace key
+        self.cmd(
+            'az synapse workspace key show --name default --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'default'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys'),
+                self.check('keyVaultUrl', self.kwargs['key-identifier']),
+            ])
+
+        # show sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity show-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Disabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # grant sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity grant-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Enabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # invoke sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity revoke-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Disabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # switch active key
+        self.cmd(
+            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ', checks=[
+                self.check('encryption.cmk.key.name', 'newkey')
+            ])
+
+        # update allowed tenant ids
+        self.cmd(
+            'az synapse workspace update --resource-group {rg} --name {workspace} --allowed-tenant-ids 72f988bf-86f1-41af-91ab-2d7cd011db47 ', checks=[
+                self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
+            ])
 
     @record_only()
     def test_sql_pool(self):
@@ -635,15 +737,25 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_access_control(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
-            'role': 'Sql Admin',
-            'userPrincipal': 'username@microsoft.com',
-            'servicePrincipal': 'http://username-sp'})
+            'workspace': 'clitestsynapseworkspace',
+            'role': 'Synapse Contributor',
+            'userPrincipal': 'username@contoso.com',
+            'servicePrincipal': 'testsynapsecli',
+            'scopeName': 'workspaces/{workspaceName}/bigDataPools/{bigDataPoolName}',
+            'itemType': 'bigDataPools',
+            'item': 'testitem'})
 
         self.cmd(
-            'az synapse role definition list --workspace-name {workspace} ',
+            'az synapse role scope list --workspace-name {workspace} ',
             checks=[
-                self.check('length([])', 3)
+                self.check("contains([], '{scopeName}')", True)
+            ]
+        )
+
+        self.cmd(
+            'az synapse role definition list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].name', 'Synapse Administrator')
             ])
 
         # get role definition
@@ -652,52 +764,57 @@ class SynapseScenarioTests(ScenarioTest):
             checks=[
                 self.check('name', self.kwargs['role'])
             ]).get_output_in_json()
+
         self.kwargs['roleId'] = role_definition_get['id']
 
         # create role assignment
         role_assignment_create = self.cmd(
-            'az synapse role assignment create --workspace-name {workspace} --role "{role}" --assignee  {userPrincipal} ',
+            'az synapse role assignment create --workspace-name {workspace} --role "{role}" '
+            '--assignee  {servicePrincipal} --assignment-id 0550e787-7841-4669-9ac8-a8176e900002',
             checks=[
-                self.check('roleId', self.kwargs['roleId'])
+                self.check('roleDefinitionId', self.kwargs['roleId'])
             ]).get_output_in_json()
         self.kwargs['roleAssignmentId'] = role_assignment_create['id']
-        self.kwargs['roleId'] = role_assignment_create['roleId']
+        self.kwargs['roleId'] = role_assignment_create['roleDefinitionId']
         self.kwargs['principalId'] = role_assignment_create['principalId']
+
+        # create role assignment at scope
+        self.cmd(
+            'az synapse role assignment create --workspace-name {workspace} --role "{role}" '
+            '--assignee  {servicePrincipal} --item-type {itemType} --item {item} '
+            '--assignment-id 0333e787-7841-4669-9ac8-a8176e900002',
+            checks=[
+                self.check('roleDefinitionId', self.kwargs['roleId']),
+                self.check('scope', 'workspaces/{workspace}/{itemType}/{item}')
+            ])
 
         # get role assignment
         self.cmd(
             'az synapse role assignment show --workspace-name {workspace} --id {roleAssignmentId} ',
             checks=[
-                self.check('roleId', self.kwargs['roleId']),
+                self.check('roleDefinitionId', self.kwargs['roleId']),
                 self.check('principalId', self.kwargs['principalId'])
             ])
 
-        # list role assignment by role
+        # list role assignment by role and scope
         self.cmd(
-            'az synapse role assignment list --workspace-name {workspace} --role "{role}" ',
+            'az synapse role assignment list --workspace-name {workspace} --role "{role}" --item-type {itemType} --item {item}',
             checks=[
-                self.check('length([])', 2)
-            ])
-
-        # list role assignment by userPrincipal
-        self.cmd(
-            'az synapse role assignment list --workspace-name {workspace} --assignee {userPrincipal} ',
-            checks=[
-                self.check('length([])', 2)
+                self.check("length([])", 2)
             ])
 
         # list role assignment by servicePrincipal
         self.cmd(
             'az synapse role assignment list --workspace-name {workspace} --assignee {servicePrincipal} ',
             checks=[
-                self.check('length([])', 1)
+                self.check("length([])", 2)
             ])
 
         # list role assignment by object_id
         self.cmd(
-            'az synapse role assignment list --workspace-name {workspace} --assignee {principalId} ',
+            'az synapse role assignment list --workspace-name {workspace} --assignee-object-id {principalId} ',
             checks=[
-                self.check('length([])', 2)
+                self.check("length([])", 2)
             ])
 
         # delete role assignment
@@ -755,11 +872,13 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-    @record_only()
+    # @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_linked_service(self):
         self.kwargs.update({
-            'name': 'linkedservice'})
+            'name': 'linkedservice',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkedservice.json')
+        })
 
         # create a workspace
         self._create_workspace()
@@ -775,7 +894,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create linked service
         self.cmd(
-            'az synapse linked-service create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/linkedservice.json',
+            'az synapse linked-service create --workspace-name {workspace} --name {name} --file @"{file}"',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -855,11 +974,13 @@ class SynapseScenarioTests(ScenarioTest):
     def test_pipeline(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
-            'name': 'pipeline'})
+            'name': 'pipeline',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'pipeline.json')
+        })
 
         # create pipeline
         self.cmd(
-            'az synapse pipeline create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/pipeline.json',
+            'az synapse pipeline create --workspace-name {workspace} --name {name} --file @"{file}"',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -920,11 +1041,13 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'trigger',
             'event-trigger': 'EventTrigger',
             'tumbling-window-trigger': 'TumblingWindowTrigger',
-            'run-id': '08586024051698130326966471413CU40'})
+            'run-id': '08586024051698130326966471413CU40',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'trigger.json')
+        })
 
         # create trigger
         self.cmd(
-            'az synapse trigger create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/trigger.json',
+            'az synapse trigger create --workspace-name {workspace} --name {name} --file @"{file}"',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -990,15 +1113,18 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse trigger stop --workspace-name {workspace} --name {tumbling-window-trigger}')
 
-    @record_only()
+    # @record_only()
+    @unittest.skip('(InvalidTokenIssuer) Token Authentication failed with SecurityTokenInvalidIssuerException')
     def test_data_flow(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
-            'name': 'dataflow'})
+            'name': 'dataflow',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'dataflow.json')
+        })
 
         # create data flow
         self.cmd(
-            'az synapse data-flow create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/dataflow.json',
+            'az synapse data-flow create --workspace-name {workspace} --name {name} --file @"{file}"',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1029,11 +1155,13 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
             'name': 'notebook',
-            'spark-pool': 'testpool'})
+            'spark-pool': 'testpool',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
+        })
 
         # create notebook
         self.cmd(
-            'az synapse notebook create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/notebook.ipynb '
+            'az synapse notebook create --workspace-name {workspace} --name {name} --file @"{file}" '
             '--spark-pool-name {spark-pool}',
             checks=[
                 self.check('name', self.kwargs['name'])

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from __future__ import print_function
 from collections import Counter, OrderedDict
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError

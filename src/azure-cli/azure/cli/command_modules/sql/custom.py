@@ -40,7 +40,8 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess
+    ServerPublicNetworkAccess,
+    ServerInfo
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -413,6 +414,24 @@ def failover_group_update_common(
         grace_period = int(grace_period) * 60
         instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
 
+
+def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
+    '''
+    Completes maintenance configuration id from short to full type if needed
+    '''
+
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if argument_value and not is_valid_resource_id(argument_value):
+        return resource_id(
+            subscription=get_subscription_id(cli_ctx),
+            namespace='Microsoft.Maintenance',
+            type='publicMaintenanceConfigurations',
+            name=argument_value)
+
+    return argument_value
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -776,6 +795,7 @@ def _db_dw_create(
         dest_db,
         no_wait,
         sku=None,
+        secondary_type=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -799,6 +819,9 @@ def _db_dw_create(
     if source_db:
         kwargs['source_database_id'] = source_db.id()
 
+    if secondary_type:
+        kwargs['secondary_type'] = secondary_type
+
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_db_sku_from_capabilities(
@@ -813,6 +836,11 @@ def _db_dw_create(
         kwargs['elastic_pool_id'],
         dest_db.server_name,
         dest_db.resource_group_name)
+
+    # Expand maintenance configuration id if needed
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cli_ctx,
+        kwargs['maintenance_configuration_id'])
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -961,6 +989,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        secondary_type=None,
         no_wait=False,
         **kwargs):
     '''
@@ -996,13 +1025,13 @@ def db_create_replica(
         if kwargs['storage_account_type'] == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
 
-    # Replica must have the same database name as the source db
     return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
+        secondary_type=secondary_type,
         **kwargs)
 
 
@@ -1345,14 +1374,16 @@ def db_update(
         family=None,
         capacity=None,
         read_scale=None,
-        read_replica_count=None,
+        high_availability_replica_count=None,
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None,
-        storage_account_type=None):
+        storage_account_type=None,
+        maintenance_configuration_id=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
+
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -1426,13 +1457,17 @@ def db_update(
     if read_scale is not None:
         instance.read_scale = read_scale
 
-    if read_replica_count is not None:
-        instance.read_replica_count = read_replica_count
+    if high_availability_replica_count is not None:
+        instance.high_availability_replica_count = high_availability_replica_count
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
     # and will potentially conflict with a previously requested update
     instance.storage_account_type = storage_account_type
+
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     #####
     # Set other (serverless related) properties
@@ -1639,16 +1674,46 @@ def _get_diagnostic_settings(
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
 
-def _fetch_first_audit_diagnostic_setting(diagnostic_settings):
+def _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name):
     return next((ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
                  next((log for log in ds.logs if log.enabled and
-                       log.category == 'SQLSecurityAuditEvents'), None) is not None), None)
+                       log.category == category_name), None) is not None), None)
 
 
-def _fetch_all_audit_diagnostic_settings(diagnostic_settings):
+def _fetch_all_audit_diagnostic_settings(diagnostic_settings, category_name):
     return [ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
             next((log for log in ds.logs if log.enabled and
-                  log.category == 'SQLSecurityAuditEvents'), None) is not None]
+                  log.category == category_name), None) is not None]
+
+
+def server_ms_support_audit_policy_get(
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Get server Microsoft support operations audit policy
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dev_ops_auditing_settings_name='default')
+
+
+def server_ms_support_audit_policy_set(
+        client,
+        server_name,
+        resource_group_name,
+        parameters):
+    '''
+    Set server Microsoft support operations audit policy
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dev_ops_auditing_settings_name='default',
+        parameters=parameters)
 
 
 def _audit_policy_show(
@@ -1656,16 +1721,23 @@ def _audit_policy_show(
         client,
         resource_group_name,
         server_name,
-        database_name=None):
+        database_name=None,
+        category_name=None):
     '''
-    Common code to get server or database audit policy including diagnostic settings
+    Common code to get server (DevOps) or database audit policy including diagnostic settings
     '''
 
     # Request audit policy
     if database_name is None:
-        audit_policy = client.get(
-            resource_group_name=resource_group_name,
-            server_name=server_name)
+        if category_name == 'DevOpsOperationsAudit':
+            audit_policy = server_ms_support_audit_policy_get(
+                client=client,
+                resource_group_name=resource_group_name,
+                server_name=server_name)
+        else:
+            audit_policy = client.get(
+                resource_group_name=resource_group_name,
+                server_name=server_name)
     else:
         audit_policy = client.get(
             resource_group_name=resource_group_name,
@@ -1696,7 +1768,7 @@ def _audit_policy_show(
 
     # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
     diagnostic_settings.value.sort(key=lambda d: d.name)
-    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
 
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
@@ -1725,7 +1797,8 @@ def server_audit_policy_show(
         cmd=cmd,
         client=client,
         resource_group_name=resource_group_name,
-        server_name=server_name)
+        server_name=server_name,
+        category_name='SQLSecurityAuditEvents')
 
 
 def db_audit_policy_show(
@@ -1743,7 +1816,25 @@ def db_audit_policy_show(
         client=client,
         resource_group_name=resource_group_name,
         server_name=server_name,
-        database_name=database_name)
+        database_name=database_name,
+        category_name='SQLSecurityAuditEvents')
+
+
+def server_ms_support_audit_policy_show(
+        cmd,
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Show server Microsoft support operations audit policy
+    '''
+
+    return _audit_policy_show(
+        cmd=cmd,
+        client=client,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        category_name='DevOpsOperationsAudit')
 
 
 def _audit_policy_validate_arguments(
@@ -1791,7 +1882,7 @@ def _audit_policy_validate_arguments(
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
             (storage_account is not None or storage_endpoint is not None or
-             storage_account_access_key is not None or retention_days is not None):
+             storage_account_access_key is not None):
         raise CLIError('Blob storage account arguments cannot be specified'
                        ' if blob-storage-target-state is not provided or disabled')
 
@@ -1799,8 +1890,8 @@ def _audit_policy_validate_arguments(
         if storage_account is not None and storage_endpoint is not None:
             raise CLIError('storage-account and storage-endpoint cannot be provided at the same time')
 
-        if storage_account is None and storage_endpoint is None and retention_days is None:
-            raise CLIError('Either storage-account or storage-endpoint or retention-days must be provided')
+        if storage_account is None and storage_endpoint is None:
+            raise CLIError('Either storage-account or storage-endpoint must be provided')
 
     # Server upper limit
     max_retention_days = 3285
@@ -1833,21 +1924,22 @@ def _audit_policy_create_diagnostic_setting(
         resource_group_name,
         server_name,
         database_name=None,
+        category_name=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
         event_hub_authorization_rule_id=None,
         event_hub_name=None):
     '''
-    Create audit diagnostic setting, i.e. containing single category - "SQLSecurityAuditEvents"
+    Create audit diagnostic setting, i.e. containing single category - SQLSecurityAuditEvents or DevOpsOperationsAudit
     '''
 
     # Generate diagnostic settings name to be created
-    name = "SQLSecurityAuditEvents"
+    name = category_name
 
     import inspect
-    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or
-                      e.function == "test_sql_server_security_mgmt"), None) is not None
+    test_methods = ["test_sql_db_security_mgmt", "test_sql_server_security_mgmt", "test_sql_server_ms_support_mgmt"]
+    test_mode = next((e for e in inspect.stack() if e.function in test_methods), None) is not None
 
     # For test environment the name should be constant, i.e. match the name written in recorded yaml file
     if test_mode:
@@ -1879,7 +1971,7 @@ def _audit_policy_create_diagnostic_setting(
         client=azure_monitor_client.diagnostic_settings,
         name=name,
         resource_uri=diagnostic_settings_url,
-        logs=[LogSettings(category="SQLSecurityAuditEvents", enabled=True,
+        logs=[LogSettings(category=category_name, enabled=True,
                           retention_policy=RetentionPolicy(enabled=False, days=0))],
         metrics=None,
         event_hub=event_hub_name,
@@ -1894,6 +1986,7 @@ def _audit_policy_update_diagnostic_settings(
         resource_group_name,
         database_name=None,
         diagnostic_settings=None,
+        category_name=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -1904,7 +1997,7 @@ def _audit_policy_update_diagnostic_settings(
     '''
 
     # Fetch all audit diagnostic settings
-    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value)
+    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value, category_name)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
 
     # If more than 1 audit diagnostic settings found then throw error
@@ -1928,6 +2021,7 @@ def _audit_policy_update_diagnostic_settings(
                 resource_group_name=resource_group_name,
                 server_name=server_name,
                 database_name=database_name,
+                category_name=category_name,
                 log_analytics_target_state=log_analytics_target_state,
                 log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
                 event_hub_target_state=event_hub_target_state,
@@ -1960,9 +2054,9 @@ def _audit_policy_update_diagnostic_settings(
         event_hub_authorization_rule_id is not None
 
     has_other_categories = next((log for log in audit_diagnostic_setting.logs
-                                 if log.enabled and log.category != 'SQLSecurityAuditEvents'), None) is not None
+                                 if log.enabled and log.category != category_name), None) is not None
 
-    # If there is no other categories except SQLSecurityAuditEvents update or delete
+    # If there is no other categories except SQLSecurityAuditEvents\DevOpsOperationsAudit update or delete
     # the existing single diagnostic settings
     if not has_other_categories:
         # If azure monitor is enabled then update existing single audit diagnostic setting
@@ -1988,10 +2082,11 @@ def _audit_policy_update_diagnostic_settings(
         return [("create", audit_diagnostic_setting)]
 
     # In case there are other categories in the existing single audit diagnostic setting a "split" must be performed:
-    #   1. Disable SQLSecurityAuditEvents category in found audit diagnostic setting
-    #   2. Create new diagnostic setting with SQLSecurityAuditEvents category, i.e. audit diagnostic setting
+    #   1. Disable SQLSecurityAuditEvents\DevOpsOperationsAudit category in found audit diagnostic setting
+    #   2. Create new diagnostic setting with SQLSecurityAuditEvents\DevOpsOperationsAudit category,
+    #      i.e. audit diagnostic setting
 
-    # Build updated logs list with disabled 'SQLSecurityAuditEvents' category
+    # Build updated logs list with disabled SQLSecurityAuditEvents\DevOpsOperationsAudit category
     updated_logs = []
 
     LogSettings = cmd.get_models(
@@ -2005,7 +2100,7 @@ def _audit_policy_update_diagnostic_settings(
         operation_group='diagnostic_settings')
 
     for log in audit_diagnostic_setting.logs:
-        if log.category == "SQLSecurityAuditEvents":
+        if log.category == category_name:
             updated_logs.append(LogSettings(category=log.category, enabled=False,
                                             retention_policy=RetentionPolicy(enabled=False, days=0)))
         else:
@@ -2026,13 +2121,15 @@ def _audit_policy_update_diagnostic_settings(
     # Add original 'audit_diagnostic_settings' to rollback_data list
     rollback_data = [("update", audit_diagnostic_setting)]
 
-    # Create new diagnostic settings with enabled 'SQLSecurityAuditEvents' category only if azure monitor is enabled
+    # Create new diagnostic settings with enabled SQLSecurityAuditEvents\DevOpsOperationsAudit category
+    # only if azure monitor is enabled
     if is_azure_monitor_target_enabled:
         created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
             cmd=cmd,
             resource_group_name=resource_group_name,
             server_name=server_name,
             database_name=database_name,
+            category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
             event_hub_target_state=event_hub_target_state,
@@ -2056,6 +2153,10 @@ def _audit_policy_update_apply_blob_storage_details(
     '''
     Apply blob storage details on policy update
     '''
+    if hasattr(instance, 'is_storage_secondary_key_in_use'):
+        is_storage_secondary_key_in_use = instance.is_storage_secondary_key_in_use
+    else:
+        is_storage_secondary_key_in_use = False
 
     if blob_storage_target_state is None:
         # Original audit policy has no storage_endpoint
@@ -2071,7 +2172,7 @@ def _audit_policy_update_apply_blob_storage_details(
                 cli_ctx=cmd.cli_ctx,
                 storage_account=storage_account,
                 resource_group_name=storage_resource_group,
-                use_secondary_key=instance.is_storage_secondary_key_in_use)
+                use_secondary_key=is_storage_secondary_key_in_use)
     elif _is_audit_policy_state_enabled(blob_storage_target_state):
         # Resolve storage_endpoint using provided storage_account
         if storage_account is not None:
@@ -2094,10 +2195,10 @@ def _audit_policy_update_apply_blob_storage_details(
                 cli_ctx=cmd.cli_ctx,
                 storage_account=storage_account,
                 resource_group_name=storage_resource_group,
-                use_secondary_key=instance.is_storage_secondary_key_in_use)
+                use_secondary_key=is_storage_secondary_key_in_use)
 
         # Apply retenation days
-        if retention_days is not None:
+        if hasattr(instance, 'retention_days') and retention_days is not None:
             instance.retention_days = retention_days
     else:
         instance.storage_endpoint = None
@@ -2107,6 +2208,7 @@ def _audit_policy_update_apply_blob_storage_details(
 def _audit_policy_update_apply_azure_monitor_target_enabled(
         instance,
         diagnostic_settings,
+        category_name,
         log_analytics_target_state,
         event_hub_target_state):
     '''
@@ -2124,7 +2226,7 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
         # Sort received diagnostic settings by name and get first element to ensure consistency
         # between command executions
         diagnostic_settings.value.sort(key=lambda d: d.name)
-        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
+        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
 
         # Determine value of is_azure_monitor_target_enabled
         if audit_diagnostic_setting is None:
@@ -2148,6 +2250,7 @@ def _audit_policy_update_global_settings(
         cmd,
         instance,
         diagnostic_settings=None,
+        category_name=None,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2178,19 +2281,21 @@ def _audit_policy_update_global_settings(
             retention_days=retention_days)
 
         # Apply audit_actions_and_groups
-        if audit_actions_and_groups is not None:
-            instance.audit_actions_and_groups = audit_actions_and_groups
+        if hasattr(instance, 'audit_actions_and_groups'):
+            if audit_actions_and_groups is not None:
+                instance.audit_actions_and_groups = audit_actions_and_groups
 
-        if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
-            instance.audit_actions_and_groups = [
-                "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-                "FAILED_DATABASE_AUTHENTICATION_GROUP",
-                "BATCH_COMPLETED_GROUP"]
+            if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
+                instance.audit_actions_and_groups = [
+                    "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+                    "FAILED_DATABASE_AUTHENTICATION_GROUP",
+                    "BATCH_COMPLETED_GROUP"]
 
         # Apply is_azure_monitor_target_enabled
         _audit_policy_update_apply_azure_monitor_target_enabled(
             instance=instance,
             diagnostic_settings=diagnostic_settings,
+            category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
 
@@ -2244,6 +2349,7 @@ def _audit_policy_update(
         storage_account_access_key=None,
         audit_actions_and_groups=None,
         retention_days=None,
+        category_name=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -2279,6 +2385,7 @@ def _audit_policy_update(
             resource_group_name=resource_group_name,
             database_name=database_name,
             diagnostic_settings=diagnostic_settings,
+            category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
             event_hub_target_state=event_hub_target_state,
@@ -2294,6 +2401,7 @@ def _audit_policy_update(
             cmd=cmd,
             instance=instance,
             diagnostic_settings=diagnostic_settings,
+            category_name=category_name,
             state=state,
             blob_storage_target_state=blob_storage_target_state,
             storage_account=storage_account,
@@ -2354,6 +2462,7 @@ def server_audit_policy_update(
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
         retention_days=retention_days,
+        category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
         log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
         event_hub_target_state=event_hub_target_state,
@@ -2396,6 +2505,47 @@ def db_audit_policy_update(
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
         retention_days=retention_days,
+        category_name='SQLSecurityAuditEvents',
+        log_analytics_target_state=log_analytics_target_state,
+        log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+        event_hub_target_state=event_hub_target_state,
+        event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+        event_hub_name=event_hub)
+
+
+def server_ms_support_audit_policy_update(
+        cmd,
+        instance,
+        server_name,
+        resource_group_name,
+        state=None,
+        blob_storage_target_state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub=None):
+    '''
+    Update server Microsoft support operations audit policy
+    '''
+
+    return _audit_policy_update(
+        cmd=cmd,
+        instance=instance,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=None,
+        state=state,
+        blob_storage_target_state=blob_storage_target_state,
+        storage_account=storage_account,
+        storage_endpoint=storage_endpoint,
+        storage_account_access_key=storage_account_access_key,
+        audit_actions_and_groups=None,
+        retention_days=None,
+        category_name='DevOpsOperationsAudit',
         log_analytics_target_state=log_analytics_target_state,
         log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
         event_hub_target_state=event_hub_target_state,
@@ -2901,6 +3051,7 @@ def elastic_pool_create(
         resource_group_name,
         elastic_pool_name,
         sku=None,
+        maintenance_configuration_id=None,
         **kwargs):
     '''
     Creates an elastic pool.
@@ -2915,6 +3066,11 @@ def elastic_pool_create(
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+
+    # Expand maintenance configuration id if needed
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     # Create
     return client.create_or_update(
@@ -2933,7 +3089,8 @@ def elastic_pool_update(
         zone_redundant=None,
         tier=None,
         family=None,
-        capacity=None):
+        capacity=None,
+        maintenance_configuration_id=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -2967,6 +3124,10 @@ def elastic_pool_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     return instance
 
@@ -3362,6 +3523,7 @@ def server_key_delete(
         key_name=key_name)
 
 
+# pylint: disable=line-too-long
 def _get_server_key_name_from_uri(uri):
     '''
     Gets the key's name to use as a SQL server key.
@@ -3371,11 +3533,12 @@ def _get_server_key_name_from_uri(uri):
     '''
     import re
 
-    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
 
     if match is None:
         raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
-                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
+                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
     vault = uri.split('.')[0].split('/')[-1]
     key = uri.split('/')[-2]
@@ -3480,6 +3643,62 @@ def server_aad_only_enable(
         server_name=server_name,
         azure_ad_only_authentication=True
     )
+
+###############################################
+#           sql server trust groups           #
+###############################################
+
+
+def server_trust_group_create(
+        client,
+        resource_group_name,
+        name,
+        location,
+        group_member,
+        trust_scope,
+        no_wait=False):
+
+    members = [ServerInfo(server_id=member) for member in group_member]
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name,
+                       group_members=members,
+                       trust_scopes=trust_scope)
+
+
+def server_trust_group_delete(
+        client,
+        resource_group_name,
+        name,
+        location,
+        no_wait=False):
+
+    return sdk_no_wait(no_wait, client.delete,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name)
+
+
+def server_trust_group_get(
+        client,
+        resource_group_name,
+        name,
+        location):
+
+    return client.get(resource_group_name=resource_group_name,
+                      location_name=location,
+                      server_trust_group_name=name)
+
+
+def server_trust_group_list(
+        client,
+        resource_group_name,
+        instance_name=None,
+        location=None):
+    if instance_name:
+        return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=instance_name)
+    return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
 
 
 ###############################################
@@ -3598,7 +3817,8 @@ def managed_instance_update(
         tier=None,
         family=None,
         minimal_tls_version=None,
-        tags=None):
+        tags=None,
+        maintenance_configuration_id=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -3636,6 +3856,8 @@ def managed_instance_update(
 
     if tags is not None:
         instance.tags = tags
+
+    instance.maintenance_configuration_id = maintenance_configuration_id
 
     return instance
 
@@ -4267,7 +4489,7 @@ def managed_db_log_replay_start(
     if auto_complete and not last_backup_name:
         raise CLIError('Please specify a last backup name when using auto complete flag.')
 
-    kwargs['auto_complete'] = auto_complete
+    kwargs['auto_complete_restore'] = auto_complete
     kwargs['last_backup_name'] = last_backup_name
 
     kwargs['storageContainerUri'] = storage_container_uri
