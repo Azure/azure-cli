@@ -247,8 +247,8 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
                                     setter_arg_name=self.setter_arg_name, **setterargs)
         except SerializationError:
             if json_parse_warning:
-                logger.warning("'--add' option value: %s. If you want to pass a JSON string, "
-                               "read more in %s", ' '.join([e.error_msg for e in json_parse_warning]), generic_update_arg_ref)
+                logger.warning("'--add' option value: %s. If you want to pass a JSON string, read more in %s",
+                               ' '.join([e.error_msg for e in json_parse_warning]), generic_update_arg_ref)
             raise
         if supports_no_wait and no_wait_enabled:
             return None
@@ -307,8 +307,8 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         arguments['properties_to_add'] = CLICommandArgument(
             'properties_to_add', options_list=['--add'], nargs='+',
             action=self.OrderedArgsAction, default=[],
-            help='Add an object to a list of objects by specifying a path and '
-                 'key value pairs.  Example: {}. Read more in reference docs: {}'.format(add_usage, generic_update_arg_ref),
+            help='Add an object to a list of objects by specifying a path and key value pairs.  Example: {}. '
+                 'Read more in reference docs: {}'.format(add_usage, generic_update_arg_ref),
             metavar='LIST KEY=VALUE', arg_group=group_name
         )
         arguments['properties_to_remove'] = CLICommandArgument(
