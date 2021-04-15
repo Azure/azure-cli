@@ -1176,6 +1176,7 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+    validate_edge_zone(cmd, namespace)
     if namespace.count is not None:
         _validate_count(namespace)
     validate_asg_names_or_ids(cmd, namespace)
@@ -1440,6 +1441,7 @@ def process_vmss_create_namespace(cmd, namespace):
         else:
             namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
+    validate_edge_zone(cmd, namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
@@ -1496,6 +1498,7 @@ def validate_vmss_disk(cmd, namespace):
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
+    validate_edge_zone(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
@@ -1510,6 +1513,7 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
 def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
     validate_tags(namespace)
+    validate_edge_zone(cmd, namespace)
     source_from_vm = False
     try:
         # try capturing from VM, a most common scenario
@@ -1805,3 +1809,11 @@ def _validate_count(namespace):
     ]
     if any(param for param in banned_params):
         raise ValidationError('When --count is specified, {} are not allowed'.format(', '.join(params_str)))
+
+
+def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.edge_zone:
+        namespace.edge_zone = {
+            'name': namespace.edge_zone,
+            'type': 'EdgeZone'
+        }
