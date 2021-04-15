@@ -17,7 +17,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result
+from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result, can_launch_browser
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -117,7 +117,13 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app_instance = self._build_persistent_msal_app()
         return self._msal_app_instance
 
-    def login_with_interactive_browser(self, scopes=None, **kwargs):
+    def login_with_auth_code(self, scopes=None, **kwargs):
+        # Emit a warning to inform that a browser is opened.
+        # Only show the path part of the URL and hide the query string.
+        logger.warning("The default web browser has been opened at %s/oauth2/v2.0/authorize. "
+                       "Please continue the login in the web browser. "
+                       "If no web browser is available or if the web browser fails to open, use device code flow "
+                       "with `az login --use-device-code`.", self.msal_authority)
         result = self.msal_app.acquire_token_interactive(scopes, **kwargs)
         if not result or 'error' in result:
             aad_error_handler(result)

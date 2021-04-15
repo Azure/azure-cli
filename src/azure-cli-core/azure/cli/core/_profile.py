@@ -14,9 +14,10 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import in_cloud_console, can_launch_browser
+from azure.cli.core.util import in_cloud_console
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.auth import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID, resource_to_scopes
+from azure.cli.core.auth import (Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID,
+                                 resource_to_scopes, can_launch_browser)
 
 logger = get_logger(__name__)
 
@@ -124,8 +125,6 @@ class Profile:
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
-        self._ad = self.cli_ctx.cloud.endpoints.active_directory
-        self._adal_cache = None
         self._arm_scope = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     # pylint: disable=too-many-branches,too-many-statements,too-many-locals
@@ -139,7 +138,6 @@ class Profile:
               client_id=AZURE_CLI_CLIENT_ID,
               use_device_code=False,
               allow_no_subscriptions=False,
-              subscription_finder=None,
               use_cert_sn_issuer=None,
               find_subscriptions=True):
 
@@ -152,39 +150,33 @@ class Profile:
         identity = Identity(authority=authority, tenant_id=auth_tenant,
                             client_id=client_id,
                             allow_unencrypted=self.cli_ctx.config
-                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
-                            cred_cache=self._adal_cache)
+                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
 
         user_identity = None
         if interactive:
-            if not use_device_code and (in_cloud_console() or not can_launch_browser()):
-                logger.info('Detect no GUI is available, so fall back to device code')
+            if not use_device_code and not can_launch_browser():
+                logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
             if not use_device_code:
-                from azure.identity import CredentialUnavailableError
-                try:
-                    user_identity = identity.login_with_interactive_browser(scopes=scopes)
-                except CredentialUnavailableError:
-                    use_device_code = True
-                    logger.warning('Not able to launch a browser to log you in, falling back to device code...')
-
-            if use_device_code:
+                user_identity = identity.login_with_auth_code(scopes=scopes)
+            else:
                 user_identity = identity.login_with_device_code(scopes=scopes)
         else:
-            if is_service_principal:
+            if not is_service_principal:
+                user_identity = identity.login_with_username_password(username, password, scopes=scopes)
+            else:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
-
                 identity.login_with_service_principal(username, password, scopes=scopes)
-            else:
-                user_identity = identity.login_with_username_password(username, password, scopes=scopes)
 
         if user_identity:
             username = user_identity['username']
 
         # List tenants and find subscriptions by calling ARM
         if find_subscriptions:
+            subscription_finder = SubscriptionFinder(self.cli_ctx)
+
             # Create credentials
             if user_identity:
                 credential = identity.get_user_credential(username)
@@ -221,10 +213,6 @@ class Profile:
                                                   is_service_principal, bool(use_cert_sn_issuer))
 
         self._set_subscriptions(consolidated)
-        # todo: remove after ADAL token deprecation
-        if self._adal_cache:
-            self._adal_cache.persist_cached_creds()
-        # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None, find_subscriptions=True,
@@ -283,8 +271,9 @@ class Profile:
         return deepcopy(consolidated)
 
     def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True, scopes=None):
-        # TODO: deprecate allow_no_subscriptions
-        scopes = self._prepare_authenticate_scopes(scopes)
+        if not scopes:
+            scopes = self._arm_scope
+
         identity = Identity()
         credential, identity_info = identity.login_in_cloud_shell(scopes)
 
@@ -626,8 +615,7 @@ class Profile:
         # _IS_ENVIRONMENT_CREDENTIAL doesn't exist for normal account
         is_environment = account[_USER_ENTITY].get(_IS_ENVIRONMENT_CREDENTIAL)
 
-        identity = Identity(client_id=client_id, authority=self._authority, tenant_id=tenant_id,
-                            cred_cache=self._adal_cache)
+        identity = Identity(client_id=client_id, authority=self._authority, tenant_id=tenant_id)
 
         if identity_type is None:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -763,7 +751,7 @@ class Profile:
         subscriptions = self.load_cached_subscriptions()
         to_refresh = subscriptions
 
-        subscription_finder = subscription_finder or SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
+        subscription_finder = subscription_finder or SubscriptionFinder(self.cli_ctx)
         refreshed_list = set()
         result = []
         for s in to_refresh:

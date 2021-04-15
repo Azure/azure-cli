@@ -109,3 +109,12 @@ def check_result(result):
         }
 
     return None
+
+
+def can_launch_browser():
+    import webbrowser
+    try:
+        webbrowser.get()
+        return True
+    except webbrowser.Error:
+        return False
