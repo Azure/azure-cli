@@ -36,7 +36,7 @@ Long running operations have changed their function names in Track 2 SDK. A `beg
 
 Some of property names change in Track 2 SDK.
 
-Examples:
+Here are some examples. `->` is not Python code. It represents the left one is updated to the right one.
 
 ```
 hyperVgeneration -> hyperVGeneration
@@ -55,7 +55,7 @@ Some changes are unnecessary, even wrong in English. I opened [Azure/autorest.py
 
 Some of class names change in Track 2 SDK.
 
-Examples:
+[Example](https://github.com/Azure/azure-cli/pull/15750/files#diff-fd5160263d5431e9cdbf0f83abad213589c44c4c2724ff66b1172218caeb8396R629):
 
 ```
 VirtualMachineIdentityUserAssignedIdentitiesValue -> UserAssignedIdentitiesValue
@@ -83,18 +83,20 @@ The class hierarchy may change in Track 2 SDK. Some properties are not flattened
 
 Examples:
 
-In VMSS `begin_update_instances`, a new type `VirtualMachineScaleSetVMInstanceRequiredIDs` is added.
+In [VMSS](https://github.com/Azure/azure-cli/pull/15750/files?file-filters%5B%5D=.py#diff-fd5160263d5431e9cdbf0f83abad213589c44c4c2724ff66b1172218caeb8396R2688) `begin_update_instances`, a new type `VirtualMachineScaleSetVMInstanceRequiredIDs` is added.
 
-In DiskAccess `begin_create_or_update`, location and tags are moved to a nested structure `DiskAccess`, `disk_access = DiskAccess(location=location, tags=tags)`
+In [DiskAccess](https://github.com/Azure/azure-cli/pull/15750/files#diff-fd5160263d5431e9cdbf0f83abad213589c44c4c2724ff66b1172218caeb8396R3602) `begin_create_or_update`, location and tags are moved to a nested structure `DiskAccess`, `disk_access = DiskAccess(location=location, tags=tags)`
 
-In Storage,
+In [Storage](https://github.com/Azure/azure-cli/pull/15845/files#diff-4cfe9a680ae04774e116b45bc06a679db751bfad1de211c6d2b3bc471900d8bfR23),
 ```
-track1: client.check_name_availability(account_name) // account_name is string
-track2: account_name = StorageAccountCheckNameAvailabilityParameters(name=name) client.check_name_availability(account_name)
+client.check_name_availability(account_name) // account_name is string
+```
+turns into
+```
+account_name = StorageAccountCheckNameAvailabilityParameters(name=name) client.check_name_availability(account_name)
 ```
 
-In AppConfig,
-`id` cannot be passed directly to `regenerate_key method`. It needs to be wrapped in the new model `RegenerateKeyParameters`.
+In [AppConfig](https://github.com/Azure/azure-cli/pull/16376/files#diff-1796b5bb574aca9235e83b02a207cb8a42aafab920f3aae1c46af22bf0ce5aa4R191), `id` cannot be passed directly to `regenerate_key method`. It needs to be wrapped in the new model `RegenerateKeyParameters`.
 
 ### Obtaining subscription
 
