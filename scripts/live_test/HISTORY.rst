@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.12.0 (4/15/2021)
+++++++
+
+* Add job databoxedge and synapse
+
 0.11.0 (1/18/2021)
 ++++++
 
