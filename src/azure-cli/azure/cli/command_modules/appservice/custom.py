@@ -4424,6 +4424,7 @@ def delete_function(cmd, resource_group_name, name, function_name):
 
 def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value=None, slot=None):
     # pylint: disable=protected-access
+    key_info = KeyInfo(name=key_name, value=key_value)
     KeyInfo._attribute_map = {
         'name': {'key': 'properties.name', 'type': 'str'},
         'value': {'key': 'properties.value', 'type': 'str'},
@@ -4435,14 +4436,12 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
                                                                      function_name,
                                                                      key_name,
                                                                      slot,
-                                                                     name1=key_name,
-                                                                     value=key_value)
+                                                                     key_info)
     return client.web_apps.create_or_update_function_secret(resource_group_name,
                                                             name,
                                                             function_name,
                                                             key_name,
-                                                            name1=key_name,
-                                                            value=key_value)
+                                                            key_info)
 
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
