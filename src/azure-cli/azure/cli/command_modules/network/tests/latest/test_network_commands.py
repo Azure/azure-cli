@@ -4140,7 +4140,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest, StorageAccountSASReplacer):
         self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
         self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
         self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
-            self.check('length(@)', 2)
+            self.check('length(@)', 1)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
