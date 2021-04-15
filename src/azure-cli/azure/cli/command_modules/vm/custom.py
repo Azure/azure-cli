@@ -292,7 +292,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=None):
+                        tier=None, enable_bursting=None, edge_zone=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -396,6 +396,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.tier = tier
     if enable_bursting is not None:
         disk.bursting_enabled = enable_bursting
+    if edge_zone:
+        disk.extended_location = edge_zone
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -465,7 +467,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
-                 tags=None, zone_resilient=None):
+                 tags=None, zone_resilient=None, edge_zone=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
@@ -507,6 +509,9 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     if hyper_v_generation:
         image.hyper_v_generation = hyper_v_generation
 
+    if edge_zone:
+        image.extended_location = edge_zone
+
     client = _compute_client_factory(cmd.cli_ctx)
     return client.images.begin_create_or_update(resource_group_name, name, image)
 
@@ -532,7 +537,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
-                    encryption_type=None, network_access_policy=None, disk_access=None):
+                    encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -583,6 +588,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         snapshot.network_access_policy = network_access_policy
     if disk_access is not None:
         snapshot.disk_access_id = disk_access
+    if edge_zone:
+        snapshot.extended_location = edge_zone
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
@@ -720,7 +727,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-              enable_vtpm=None, count=None):
+              enable_vtpm=None, count=None, edge_zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -914,7 +921,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2421,7 +2428,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
-                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None):
+                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2660,7 +2667,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_instance_percent=max_unhealthy_instance_percent,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
-            prioritize_unhealthy_instances=prioritize_unhealthy_instances)
+            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
