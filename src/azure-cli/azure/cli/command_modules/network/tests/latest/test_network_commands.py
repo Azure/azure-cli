@@ -13,6 +13,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.core.exceptions import HttpResponseError
+from .recording_processors import StorageAccountSASReplacer
 
 from azure.cli.testsdk import (
     ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
@@ -4045,7 +4046,13 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
 
 
-class NetworkVpnGatewayScenarioTest(ScenarioTest):
+class NetworkVpnGatewayScenarioTest(ScenarioTest, StorageAccountSASReplacer):
+
+    def __init__(self, method_name):
+        self.sas_replacer = StorageAccountSASReplacer()
+        super(NetworkVpnGatewayScenarioTest, self).__init__(method_name, recording_processors=[
+            self.sas_replacer
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
     def test_network_vpn_gateway(self, resource_group):
@@ -4235,6 +4242,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('storage container create --account-name {storage_account} --name {ctn}')
         sas = self.cmd(
             'storage blob generate-sas -n src --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
+        self.sas_replacer.add_sas_token(sas)
         self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
                                                                           self.kwargs['ctn'], sas)
 
