@@ -3384,7 +3384,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
-                         target_region_encryption=None, os_vhd=None, os_vhd_storage_account=None):
+                         target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None):
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -3415,7 +3415,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
-        if managed_image is None and os_snapshot is None and os_vhd is None:
+        if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise CLIError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
@@ -3439,15 +3439,15 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                                              lun=data_snapshot_luns[i]))
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
-            if os_vhd and os_vhd_storage_account is None or os_vhd is None and os_vhd_storage_account:
+            if os_vhd_uri and os_vhd_storage_account is None or os_vhd_uri is None and os_vhd_storage_account:
                 raise ValidationError('--vhd and --vhd-storage-account should be used together.')
-            if os_vhd and os_vhd_storage_account:
+            if os_vhd_uri and os_vhd_storage_account:
                 if not is_valid_resource_id(os_vhd_storage_account):
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
                 os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(
-                    id=os_vhd_storage_account, uri=os_vhd))
+                    id=os_vhd_storage_account, uri=os_vhd_uri))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)

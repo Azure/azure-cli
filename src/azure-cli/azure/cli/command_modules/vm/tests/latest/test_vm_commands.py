@@ -3836,7 +3836,7 @@ class VMGalleryImage(ScenarioTest):
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd {vhd} --os-vhd-storage-account {stac} --replica-count 1', checks=[
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --replica-count 1', checks=[
             self.check('storageProfile.osDiskImage.source.uri', vhd_uri)
         ])
 
