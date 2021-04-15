@@ -232,6 +232,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
+    @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_slot(self, resource_group, location):
