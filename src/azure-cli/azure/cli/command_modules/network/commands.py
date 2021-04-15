@@ -1346,7 +1346,7 @@ def load_command_table(self, _):
 
     with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
         g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.command('show', 'begin_get_vpnclient_ipsec_parameters')
+        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
 
     # with self.command_group
 

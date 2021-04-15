@@ -4251,6 +4251,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest, StorageAccountSASReplacer):
         self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --public-ip-address {ip1} --sku {gw1_sku}')
         output = self.cmd('network vnet-gateway packet-capture start -g {rg} -n {gw1}').output.strip()
         self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
+        # currently we cannot create traffic by cli command. So it will return an error when stop.
         with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
             self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
 
