@@ -123,16 +123,8 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
 # Get current CLI version
 def _get_cli_version():
-    from pkg_resources import working_set
-
-    # working_set.by_key is a dictionary with component names as key
-    cli_component_name = "azure-cli"
-    cli_version = "not found"
-
-    if cli_component_name in working_set.by_key:
-        cli_version = working_set.by_key[cli_component_name].version
-
-    logger.warning('Azure CLI version: %s', cli_version)
+    from azure.cli.core import __version__ as core_version
+    logger.warning('Azure CLI version: %s', core_version)
 
 
 # Get helm versions
