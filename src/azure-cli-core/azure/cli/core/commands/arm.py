@@ -17,6 +17,7 @@ from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import shell_safe_json_parse, get_command_type_kwarg
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature
@@ -374,7 +375,7 @@ def register_global_subscription_argument(cli_ctx):
     cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
 
-ge_update_arg_ref = 'https://aka.ms/AAby4o3'
+generic_update_arg_ref = 'https://aka.ms/cligenericupdate'
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
@@ -525,7 +526,7 @@ def add_properties(instance, argument_values, force_string):
         raise ValueError
 
     dict_entry = {}
-    json_parse_fail_args = []
+    json_parse_warning = []
     for argument in argument_values:
         if '=' in argument:
             # consecutive key=value entries get added to the same dictionary
@@ -543,15 +544,17 @@ def add_properties(instance, argument_values, force_string):
                 # attempt to convert anything else to JSON and fallback to string if error
                 try:
                     argument = shell_safe_json_parse(argument)
-                except (ValueError, CLIError):
-                    json_parse_fail_args.append(argument)
+                    if isinstance(argument, list):
+                        json_parse_warning.append(InvalidArgumentValueError('{} is a json array which may not conform to the property\'s format'.format(argument)))
+                except (ValueError, CLIError) as err:
+                    json_parse_warning.append(err)
 
             list_to_add_to.append(argument)
 
     # if only key=value pairs used, must check at the end to append the dictionary
     if dict_entry:
         list_to_add_to.append(dict_entry)
-    return json_parse_fail_args
+    return json_parse_warning
 
 
 def remove_properties(instance, argument_values):
