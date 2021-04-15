@@ -89,9 +89,9 @@ def load_command_table(self, _):
                                 client_factory=mgmt_hsms_entity.client_factory) as g:
             g.generic_update_command(
                 'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-                custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
+                custom_func_name='update_hsm', supports_no_wait=True,
                 doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
-            g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
+            g.custom_wait_command('wait-hsm', 'wait_hsm')
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -125,18 +125,15 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault backup', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault backup', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_backup',
                               doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_backup'))
 
-        with self.command_group('keyvault restore', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_restore',
                               doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_restore'))
 
-        with self.command_group('keyvault security-domain', private_data_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
             g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
@@ -170,7 +167,7 @@ def load_command_table(self, _):
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
-        g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
+        g.keyvault_custom('get-policy-template', 'get_policy_template')
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
