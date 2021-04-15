@@ -593,7 +593,7 @@ def acr_task_credential_add(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
-    if not existingCreds or not existingCreds.custom_registries
+    if not existingCreds or not existingCreds.custom_registries:
         existingCreds = {}
     else:
         existingCreds = existingCreds.custom_registries
@@ -632,7 +632,7 @@ def acr_task_credential_update(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
-    if not existingCreds or not existingCreds.custom_registries
+    if not existingCreds or not existingCreds.custom_registries:
         existingCreds = {}
     else:
         existingCreds = existingCreds.custom_registries
