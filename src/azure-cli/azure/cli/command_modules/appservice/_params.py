@@ -665,7 +665,7 @@ def load_arguments(self, _):
         c.argument('src_path', options_list=['--src-path'], help='Path of the artifact to be deployed. Ex: "myapp.zip" or "/myworkspace/apps/myapp.war"')
         c.argument('src_url', options_list=['--src-url'], help='URL of the artifact. The webapp will pull the artifact from this URL. Ex: "http://mysite.com/files/myapp.war?key=123"')
         c.argument('target_path', options_list=['--target-path'], help='Absolute path that the artifact should be deployed to. Defaults to "home/site/wwwroot/" Ex: "/home/site/deployments/tools/", "/home/site/scripts/startup-script.sh".'   )
-        c.argument('artifact_type', options_list=['--type'], help='Used to override the type of artifact being deployed.' choices=['war'|'jar'|'ear'|'lib'|'startup'|'static'|'zip'])
+        c.argument('artifact_type', options_list=['--type'], help='Used to override the type of artifact being deployed.', choices=['war'|'jar'|'ear'|'lib'|'startup'|'static'|'zip'])
         c.argument('is_async', options_list=['--async'], help='Asynchronous deployment', choices=['true', 'false'])
         c.argument('restart', options_list=['--restart'], help='If true, the web app will be restarted following the deployment, default value is true. Set this to false if you are deploying multiple artifacts and do not want to restart the site on the earlier deployments.', choices=['true', 'false'])
         c.argument('clean', options_list=['--clean'], help='If true, cleans the target driectory prior to deploying the file(s). Default value is determined based on artifact type.', choices=['true', 'false'])
