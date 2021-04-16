@@ -168,7 +168,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         from knack.util import CLIError
         from azure.cli.core.commands import cached_get, cached_put, _is_poller
         from azure.cli.core.util import find_child_item, augment_no_wait_handler_args
-        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, generic_update_arg_ref, \
+        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, \
             add_properties, remove_properties, set_properties
         from msrest.serialization import SerializationError
 
@@ -247,8 +247,8 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
                                     setter_arg_name=self.setter_arg_name, **setterargs)
         except SerializationError:
             if json_parse_warning:
-                logger.warning("'--add' option value: %s. If you want to pass a JSON string, read more in %s",
-                               ' '.join([e.error_msg for e in json_parse_warning]), generic_update_arg_ref)
+                logger.warning('--add option value: %s',
+                               ' '.join([e.error_msg + " ".join(e.recommendations) for e in json_parse_warning]))
             raise
         if supports_no_wait and no_wait_enabled:
             return None

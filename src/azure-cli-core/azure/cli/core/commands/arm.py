@@ -546,7 +546,8 @@ def add_properties(instance, argument_values, force_string):
                     argument = shell_safe_json_parse(argument)
                     if isinstance(argument, list):
                         json_parse_warning.append(InvalidArgumentValueError(
-                            '{} is a json array which may not conform to the property\'s format'.format(argument)))
+                            '{} is a json array which may not conform to the property\'s format.'.format(argument),
+                            recommendation="Read more in {}".format(generic_update_arg_ref)))
                 except (ValueError, CLIError) as err:
                     json_parse_warning.append(err)
 
