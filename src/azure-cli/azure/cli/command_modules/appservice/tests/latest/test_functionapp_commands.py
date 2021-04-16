@@ -340,7 +340,8 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net'),
+                     JMESPathCheck('clientCertMode', 'Required')])
 
         self.cmd('functionapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].kind', 'functionapp'),
@@ -350,8 +351,8 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
         ])
-        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name),
-                 checks=[self.check('clientAffinityEnabled', True)]
+        self.cmd('functionapp update -g {} -n {} --set clientCertMode=Optional'.format(resource_group, functionapp_name),
+                 checks=[self.check('clientCertMode', 'Optional')]
                  )
 
         self.cmd(
@@ -1198,7 +1199,7 @@ class FunctionAppFunctionTests(LiveScenarioTest):
         self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
 
         self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
-            JMESPathCheck('config', {})])
+            JMESPathCheck('config.bindings[0].type', 'httpTrigger')])
 
 
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
