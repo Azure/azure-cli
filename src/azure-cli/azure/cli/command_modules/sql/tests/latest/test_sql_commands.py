@@ -5642,13 +5642,10 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
-    @StorageAccountPreparer(name_prefix='logreplay', location='westcentralus', kind='StorageV2')
-    def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location, storage_account):
+    def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         account = self.cmd('account show').get_output_in_json()
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        backup_file = os.path.join(curr_dir, 'full.bak')
 
         self.kwargs.update({
             'loc': resource_group_location,
@@ -5669,28 +5666,8 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
-            'subscription_id': account['id'],
-            'storage_account': storage_account,
-            'container_name': 'logreplaycontainer',
-            'file': backup_file
+            'subscription_id': account['id']
         })
-
-        # Setup storage
-
-        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
-        self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
-
-        self.cmd('storage blob upload -c {container_name} -f "{file}" -n "full.bak" --account-name {storage_account} --account-key {storage_key}')
-
-        from datetime import datetime, timedelta
-        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
-
-        self.kwargs['sas_token'] = self.cmd(
-            'storage container generate-sas --account-name {storage_account} --name {container_name} --permissions lr --expiry {expiry} --https-only').output.strip()
-
-        blob_url = self.cmd('storage blob url -c {container_name} -n full.bak --account-name {storage_account}').output.strip()
-        index = blob_url.index('/full.bak')
-        self.kwargs['container_url'] = blob_url[:index]
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
@@ -5731,11 +5708,13 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         self.kwargs.update({
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
+            'storage_sas': 'sp=rl&st=2021-04-12T13:07:20Z&se=2021-04-30T21:07:20Z&spr=https&sv=2020-02-10&sr=c&sig=igoGWjvYceuSkuHRzkm6oPPxitRlSYgGvmdwTbr7WTM%3D',
+            'storage_uri': 'https://mibrkicstorage.blob.core.windows.net/mibrkicportal',
             'last_backup_name': 'full.bak'
         })
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {sas_token} --su {container_url} --no-wait',
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {storage_sas} --su {storage_uri} --no-wait',
                  checks=NoneCheck())
 
         if self.in_recording or self.is_live:
@@ -5758,7 +5737,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         # Cancel test for Log replay
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {sas_token} --su {container_url} --no-wait',
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --ss {storage_sas} --su {storage_uri} --no-wait',
                  checks=NoneCheck())
 
         # Wait a minute to start restoring
