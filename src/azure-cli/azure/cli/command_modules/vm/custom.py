@@ -26,6 +26,7 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import CLIInternalError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.azclierror import ValidationError
@@ -678,6 +679,10 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
             vm.identity.user_assigned_identities = {}
+            if not cmd.supported_api_version(min_api='2018-06-01', resource_type=ResourceType.MGMT_COMPUTE):
+                raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
+                                       "You can set the cloud's profile to latest with 'az cloud set --profile latest"
+                                       " --name <cloud name>'")
             for identity in external_identities:
                 vm.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
