@@ -5574,6 +5574,14 @@ examples:
     text: az network vnet-gateway list-learned-routes -g MyResourceGroup -n MyVnetGateway
 """
 
+helps['network vnet-gateway show-supported-devices'] = """
+type: command
+short-summary: Get a xml format representation for supported vpn devices.
+examples:
+  - name: Get a xml format representation for supported vpn devices.
+    text: az network vnet-gateway show-supported-devices -g MyResourceGroup -n MyVnetGateway
+"""
+
 helps['network vnet-gateway reset'] = """
 type: command
 short-summary: Reset a virtual network gateway.
@@ -5882,6 +5890,14 @@ examples:
     text: az network vpn-connection list -g MyResourceGroup --vnet-gateway MyVnetGateway
 """
 
+helps['network vpn-connection list-ike-sas'] = """
+type: command
+short-summary: List IKE Security Associations for a VPN connection.
+examples:
+  - name: List IKE Security Associations for a VPN connection.
+    text: az network vpn-connection list-ike-sas -g MyResourceGroup -n MyConnection
+"""
+
 helps['network vpn-connection shared-key'] = """
 type: group
 short-summary: Manage VPN shared keys.
@@ -5941,6 +5957,35 @@ examples:
     text: |
         az network vpn-connection update --name MyConnection --resource-group MyResourceGroup --use-policy-based-traffic-selectors true
     crafted: true
+"""
+
+helps['network vpn-connection show-device-config-script'] = """
+type: command
+short-summary: Get a XML format representation for VPN connection device configuration script.
+examples:
+  - name: Get a XML format representation for VPN connection device configuration script.
+    text: az network vpn-connection show-device-config-script -g MyResourceGroup -n MyConnection --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"
+"""
+
+helps['network vpn-connection packet-capture'] = """
+type: group
+short-summary: Manage packet capture on a VPN connection.
+"""
+
+helps['network vpn-connection packet-capture start'] = """
+type: command
+short-summary: Start packet capture on a VPN connection.
+examples:
+  - name: Start packet capture on a VPN connection.
+    text: az network vpn-connection packet-capture start -g MyResourceGroup -n MyConnection
+"""
+
+helps['network vpn-connection packet-capture stop'] = """
+type: command
+short-summary: Stop packet capture on a VPN connection.
+examples:
+  - name: Stop packet capture on a VPN connection.
+    text: az network vpn-connection packet-capture stop -g MyResourceGroup -n MyConnection --sas-url https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
 """
 
 helps['network vrouter'] = """

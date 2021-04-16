@@ -1996,6 +1996,18 @@ def load_arguments(self, _):
         c.argument('key_length', type=int, help='The virtual network connection reset shared key length, should between 1 and 128.')
         c.argument('value', help='The virtual network connection shared key value.')
 
+    with self.argument_context('network vpn-connection show-device-config-script') as c:
+        c.argument('vendor', help='The vendor for the VPN device.')
+        c.argument('device_family', help='The device family for the vpn device.')
+        c.argument('firmware_version', help='The firmware version for the vpn device.')
+
+    with self.argument_context('network vpn-connection packet-capture start') as c:
+        c.argument('filter_data', options_list=['--filter'], help='Data filter.')
+
+    with self.argument_context('network vpn-connection packet-capture stop') as c:
+        c.argument('sas_url', options_list=['--sas-url'],
+                   help='The SAS url to be used for packet capture on VPN connection.')
+
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
         c.argument('hosted_gateway',
