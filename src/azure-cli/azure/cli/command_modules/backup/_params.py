@@ -75,6 +75,9 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('location', validator=get_default_location_from_resource_group)
 
+    with self.argument_context('backup vault create') as c:
+        c.argument('tags', type=file_type, help='JSON encoded tags. Use the show command with JSON output to see tags format. Modify the values accordingly using a file editor and pass here.', completer=FilesCompleter())
+
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
         c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')

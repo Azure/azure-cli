@@ -95,11 +95,12 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location):
+def create_vault(client, vault_name, resource_group_name, location, tags=None):
     vault_sku = Sku(name=SkuName.standard)
     vault_properties = VaultProperties()
-
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
+    if tags is not None:
+        tags = _get_or_read_json(tags)
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
 
