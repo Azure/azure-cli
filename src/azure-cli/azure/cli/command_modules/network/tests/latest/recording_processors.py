@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure_devtools.scenario_tests import RecordingProcessor
 
+
 def byte_to_str(byte_or_str):
     return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
 

@@ -2036,21 +2036,25 @@ def load_arguments(self, _):
     with self.argument_context('network routeserver peering list') as c:
         c.argument('virtual_hub_name', id_part=None)
 
-    param_map = {
-        'dh_group': 'DhGroup',
-        'ike_encryption': 'IkeEncryption',
-        'ike_integrity': 'IkeIntegrity',
-        'ipsec_encryption': 'IpsecEncryption',
-        'ipsec_integrity': 'IpsecIntegrity',
-        'pfs_group': 'PfsGroup'
-    }
     for scope in ['vpn-connection', 'vnet-gateway', 'vnet-gateway vpn-client']:
-        with self.argument_context('network {} ipsec-policy'.format(scope)) as c:
-            for dest, model_name in param_map.items():
-                model = self.get_models(model_name)
-                c.argument(dest, arg_type=get_enum_type(model))
-            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
-            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='Security Association') as c:
+            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int, help='The payload size in KB for P2S client.')
+            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int, help='The lifetime in seconds for P2S client.')
+        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 1') as c:
+            c.argument('dh_group', arg_type=get_enum_type(self.get_models('DhGroup')),
+                       help='The DH Groups used for initial SA.')
+            c.argument('ipsec_encryption', arg_type=get_enum_type(self.get_models('IpsecEncryption')),
+                       help='The IPSec encryption algorithm.')
+            c.argument('ipsec_integrity', arg_type=get_enum_type(self.get_models('IpsecIntegrity')),
+                       help='The IPSec integrity algorithm.')
+        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 2') as c:
+            c.argument('pfs_group', arg_type=get_enum_type(self.get_models('PfsGroup')),
+                       help='The Pfs Groups used for new child SA.')
+            c.argument('ike_encryption', arg_type=get_enum_type(self.get_models('IkeEncryption')),
+                       help='The IKE encryption algorithm.')
+            c.argument('ike_integrity', arg_type=get_enum_type(self.get_models('IkeIntegrity')),
+                       help='The IKE integrity algorithm.')
+
     # endregion
 
     # region Remove --ids from listsaz

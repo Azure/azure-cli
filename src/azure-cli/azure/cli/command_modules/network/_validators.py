@@ -116,6 +116,7 @@ def _validate_vpn_gateway_generation(namespace):
     if namespace.gateway_type != 'Vpn' and namespace.vpn_gateway_generation:
         raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
+
 def validate_vpn_connection_name_or_id(cmd, namespace):
     if namespace.vpn_connection_ids:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -129,6 +130,7 @@ def validate_vpn_connection_name_or_id(cmd, namespace):
                     type='connections',
                     name=vpn_connection_id
                 )
+
 
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
