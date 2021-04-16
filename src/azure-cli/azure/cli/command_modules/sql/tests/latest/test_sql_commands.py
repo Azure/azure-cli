@@ -590,15 +590,15 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         edition = 'Hyperscale'
         family = 'Gen5'
         capacity = 2
-        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}'
-                 .format(resource_group, server, database_name, edition, family, capacity),
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {} --ha-replicas {}'
+                 .format(resource_group, server, database_name, edition, family, capacity, 4),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', edition),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('highAvailabilityReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '4')])
 
         # Increase read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
@@ -613,6 +613,13 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('readScale', 'Disabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '0')])
+
+        # Alternate syntax
+        self.cmd('sql db update -g {} --server {} --name {} --ha-replicas {}'
+                 .format(resource_group, server, database_name, 2),
+                 checks=[
+                     JMESPathCheck('readScale', 'Enabled'),
+                     JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
@@ -2318,14 +2325,15 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         # Create a named replica
         secondary_type = "Named"
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {}'
+                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {} --ha-replicas {}'
                  .format(s1.group, s1.name, hs_database_name,
-                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type),
+                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type, 2),
                  checks=[
                      JMESPathCheck('name', hs_target_database_name),
                      JMESPathCheck('resourceGroup', s1.group),
                      JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
-                     JMESPathCheck('secondaryType', secondary_type)])
+                     JMESPathCheck('secondaryType', secondary_type),
+                     JMESPathCheck('highAvailabilityReplicaCount', 2)])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'pool1'
@@ -5632,7 +5640,10 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
 
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
+    import unittest
+
+    @unittest.skip('The live run succeed, but run record failed. It should be a test bug. Please fix the issue and remove dependency of policy command module. You can set the policy assignment enforcement mode disabled to let the resource creation go through temporarily')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='eastus')
     def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)

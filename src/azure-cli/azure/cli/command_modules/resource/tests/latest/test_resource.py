@@ -1034,7 +1034,8 @@ class TemplateSpecsExportTest(LiveScenarioTest):
             'template_spec_name': 'CLITestTemplateSpecExport',
             'output_folder': os.path.dirname(os.path.realpath(__file__)).replace('\\', '\\\\')
         })
-        with self.assertRaises(IncorrectUsageError) as err:
+        # Because exit_code is 1, so the exception caught should be an AssertionError
+        with self.assertRaises(AssertionError) as err:
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
             self.assertTrue('Please specify the template spec version for export' in str(err.exception))
 
@@ -1186,6 +1187,8 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment sub cancel -n {dn2}')
+
+        self.cmd('deployment sub wait -n {dn2} --custom "provisioningState==Canceled"')
 
         self.cmd('deployment sub show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
@@ -2120,9 +2123,7 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}"', checks=[
             self.check('name', '{pan}'),
-            self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free')
+            self.check('displayName', '{padn}')
         ])
 
         # create a policy assignment with not scopes and standard sku
@@ -2135,11 +2136,9 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
         self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}" --sku standard', checks=[
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A1'),
-            self.check('sku.tier', 'Standard'),
             self.check('notScopes[0]', '{notscope}')
         ])
 
@@ -2181,8 +2180,6 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free'),
             self.check('enforcementMode', '{em}')
         ])
 
@@ -2357,9 +2354,7 @@ class PolicyScenarioTest(ScenarioTest):
 
             self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} -g {rg}', checks=[
                 self.check('name', '{pan}'),
-                self.check('displayName', '{padn}'),
-                self.check('sku.name', 'A0'),
-                self.check('sku.tier', 'Free'),
+                self.check('displayName', '{padn}')
             ])
 
             # ensure the assignment appears in the list results
@@ -2391,7 +2386,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('displayName', '{psdn}'),
             self.check('description', '{ps_desc}'),
             self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
-            self.check('parameters.allowedLocations.type', 'Array'),
+            self.check('parameters.allowedLocations.type', 'array'),
             self.check('metadata.category', '{updated_metadata}')
         ])
 
@@ -2536,12 +2531,12 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(IncorrectUsageError):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
 
-    @record_only()
+    @live_only()
     @unittest.skip('mock doesnt work when the subscription comes from --scope')
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse()
@@ -2683,9 +2678,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
 
         self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params "{params}"', checks=[
-            self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free'),
+            self.check('displayName', '{padn}')
         ]).get_output_in_json()['name']
 
         # clean policy assignment and policy
@@ -2697,6 +2690,223 @@ class PolicyScenarioTest(ScenarioTest):
         time.sleep(10)
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+
+    def resource_policyexemption_operations(self, resource_group, management_group=None, subscription=None):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'pn': self.create_random_name('clitest', 30),
+            'pdn': self.create_random_name('clitest', 20),
+            'desc': 'desc_for_test_policy_123',
+            'dpn': self.create_random_name('clitest-dp', 30),
+            'dpdn': self.create_random_name('clitest_dp', 20),
+            'dp_desc': 'desc_for_clitest_data_policy_123',
+            'dp_mode': 'Microsoft.DataCatalog.Data',
+            'psn': self.create_random_name('clitest', 30),
+            'psdn': self.create_random_name('clitest', 20),
+            'pan': self.create_random_name('clitest', 24),
+            'padn': self.create_random_name('clitest', 20),
+            'pen': self.create_random_name('clitest', 24),
+            'pedn': self.create_random_name('clitest', 20),
+            'pe_desc': 'desc_for_clitest_policyexemption_123',
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'dprf': os.path.join(curr_dir, 'sample_data_policy_rule.json').replace('\\', '\\\\'),
+            'psf': os.path.join(curr_dir, 'sample_policy_set_exemption_test.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'metadata': 'test',
+            'updated_metadata': 'test2',
+        })
+        if (management_group):
+            self.kwargs.update({'mg': management_group})
+        if (subscription):
+            self.kwargs.update({'sub': subscription})
+
+        time.sleep(60)
+
+        # create a policy
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
+        policy = self.cmd(cmd).get_output_in_json()
+
+        # create a data policy
+        cmd = self.cmdstring('policy definition create -n {dpn} --rules "{dprf}" --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
+        datapolicy = self.cmd(cmd).get_output_in_json()
+
+        # create a policy set
+        policyset = get_file_json(self.kwargs['psf'])
+        policyset[0]['policyDefinitionId'] = policy['id']
+        policyset[1]['policyDefinitionId'] = datapolicy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set_exemption_test.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn}', management_group, subscription)
+        policyset = self.cmd(cmd).get_output_in_json()
+        self.kwargs.update({'prids': policyset['policyDefinitions'][0]['policyDefinitionReferenceId']})
+
+        scope = None
+        if management_group:
+            scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+        elif subscription:
+            scope = '/subscriptions/{sub}'.format(sub=subscription)
+
+        if scope:
+            self.kwargs.update({'scope': scope})
+            assignment = self.cmd('policy assignment create -d {psid} -n {pan} --scope {scope} --display-name {padn}'.format(psid=policyset['id'], **self.kwargs)).get_output_in_json()
+            cmd = self.cmdstring('policy exemption create -n {pen} -a {pa} -e waiver --scope {scope} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('exemptionCategory', 'waiver'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{metadata}')
+            ]).get_output_in_json()
+
+            # ensure the exemption appears in the list results
+            self.cmd('policy exemption list --scope {scope}'.format(**self.kwargs), checks=self.check("length([?name=='{pen}'])", 1))
+
+            # update the exemption
+            self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
+            self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
+            self.kwargs['expiration'] = '3021-04-05T00:45:13+00:00'
+            cmd = self.cmdstring('policy exemption update -n {pen} -e mitigated --scope {scope} -r {prids} --expires-on {expiration} --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('exemptionCategory', 'mitigated'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('expiresOn', '{expiration}')
+            ])
+
+            cmd = self.cmdstring('policy exemption show -n {pen} --scope {scope}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('exemptionCategory', 'mitigated'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('expiresOn', '{expiration}')
+            ])
+
+            # delete the exemption and validate it's gone
+            self.cmd('policy exemption delete -n {pen} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy exemption list --disable-scope-strict-match', checks=self.check("length([?name=='{pen}'])", 0))
+            self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
+        else:
+            assignment = self.cmd('policy assignment create -d {psn} -n {pan} -g {rg} --display-name {padn}'.format(**self.kwargs), checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}')
+            ]).get_output_in_json()
+
+            # ensure the assignment appears in the list results
+            self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
+
+            cmd = self.cmdstring('policy exemption create -n {pen} -a {pa} -e waiver -g {rg} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('exemptionCategory', 'waiver'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{metadata}')
+            ]).get_output_in_json()
+
+            # ensure the exemption appears in the list results
+            self.cmd('policy exemption list --resource-group {rg}', checks=self.check("length([?name=='{pen}'])", 1))
+
+            # update the exemption
+            self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
+            self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
+            self.kwargs['expiration'] = '3021-04-05T00:45:13+00:00'
+            cmd = self.cmdstring('policy exemption update -n {pen} -e mitigated -g {rg} -r {prids} --expires-on {expiration} --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('exemptionCategory', 'mitigated'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('expiresOn', '{expiration}')
+            ])
+
+            cmd = self.cmdstring('policy exemption show -n {pen} -g {rg}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('exemptionCategory', 'mitigated'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('expiresOn', '{expiration}')
+            ])
+
+            # delete the exemption and validate it's gone
+            self.cmd('policy exemption delete -n {pen} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy exemption list', checks=self.check("length([?name=='{pen}'])", 0))
+
+        # list and show it
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 1))
+
+        cmd = self.cmdstring('policy set-definition show -n {psn}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}')
+        ])
+
+        # delete the policy set
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)  # ensure the policy is gone when run live.
+
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
+
+        # delete the policy
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)
+
+        # delete the data policy
+        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)
+
+        # ensure the policy is gone when run live.
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+        self.cmd(cmd, checks=self.check("length([?name=='{dpn}'])", 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyexemption')
+    @AllowLargeResponse(4096)
+    def test_resource_policyexemption_default(self, resource_group):
+        self.resource_policyexemption_operations(resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_management_group')
+    @AllowLargeResponse(4096)
+    def test_resource_policyexemption_management_group(self, resource_group):
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policyexemption_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
+
+    # mock doesnt work when the subscription comes from --scope, so it cannot be rerecord.
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_subscription')
+    @AllowLargeResponse(4096)
+    def test_resource_policyexemption_subscription(self, resource_group):
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+        else:
+            self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
@@ -3299,7 +3509,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def test_subscription_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'policy_definition_deploy.bicep').replace('\\', '\\\\'),
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy_sub.bicep').replace('\\', '\\\\'),
         })
 
         self.cmd('deployment sub validate --location westus --template-file "{tf}"', checks=[
@@ -3317,7 +3527,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def test_management_group_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'policy_definition_deploy.bicep').replace('\\', '\\\\'),
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy_mg.bicep').replace('\\', '\\\\'),
             'mg': self.create_random_name('azure-cli-management', 30)
         })
 
@@ -3338,7 +3548,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def test_tenent_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'role_definition_deploy.bicep').replace('\\', '\\\\')
+            'tf': os.path.join(curr_dir, 'role_definition_deploy_tenant.bicep').replace('\\', '\\\\')
         })
 
         self.cmd('deployment tenant validate --location WestUS --template-file "{tf}"', checks=[

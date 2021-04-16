@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from six import StringIO
+from io import StringIO
 from azure.cli.core.commands.transform import _parse_id, _add_resource_group
 
 

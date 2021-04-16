@@ -32,33 +32,35 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | Compute     | Yes|**Completed** | 04/30/2021 |Catherine||GA (18.0.0) | GA (14.0.0) | High (Once a month) | Module |
 | KeyVault    | Yes|**Completed** | 04/30/2021 |Catherine||GA (8.0.0) | GA (2.2.0) | Medium (Once three months) | Module |
 | Monitor     |Yes |**Completed** | 04/30/2021 |Yong||Monitor: GA (2.0.0)<br> LogAnalytics: GA (8.0.0) | Monitor: Preview (0.12.0)<br> LogAnalytics: GA (2.0.0) | Medium (Once two months) | Module |
-| Resource   | Yes |Not Started | 04/30/2021 |Yong ||GA (15.0.0) | GA (12.0.0) | Medium (Once two months) | Module |
-| AppService   |  Yes|Not Started | 04/30/2021 |Catherine||GA (1.0.0) | Preview (0.48.0) | Medium (Once three months) | Module |
+| Resource   | Yes |**In progress** | 04/30/2021 |Yong ||GA (15.0.0) | GA (12.0.0) | Medium (Once two months) | Module |
+| AppService   |  Yes | **Completed** | 04/30/2021 |Catherine||GA (1.0.0) | Preview (0.48.0) | Medium (Once three months) | Module |
 | ACS   |  Yes |Not Started | 04/30/2021 |Catherine||ContainerService: GA (14.0.0)<br> ContainerInstance: GA (7.0.0) | ContainerService: GA (11.0.0)<br> ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
 | ACR   | Yes |Not Started | 04/30/2021 |Catherine||Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
-| CosmosDB   | Yes |Not Started | 04/30/2021 |Yong||GA (6.0.0) | Preview (2.0.0rc1) |  Medium (Once two months) |Module|
+| CosmosDB   | Yes |**Completed** | 04/30/2021 |Yong||GA (6.0.0) | Preview (2.0.0rc1) |  Medium (Once two months) |Module|
 | ServiceBus   | Yes |Not Started | 04/30/2021 |Catherine||GA (6.0.0) | GA (1.0.0) | Medium (Once four months) | Module |
-| CDN   | Yes |Not Started | 04/30/2021 |Yong||GA (10.0.0) | GA (6.0.0) | Low (Once half year) | Module |
-| NetAppFiles |  Yes |Not Started | 04/30/2021 |Yong||GA (1.0.0) | Preview (0.15.0) | Medium (Once two months) | Module|
-| PrivateDNS | Yes | Not Started | 04/30/2021 |Yong||Preview (1.0.0b1) | Preview (0.1.0) |N/A | Module |
-| ApplicationInsights   |Yes | Not Started | 04/30/2021 |Yong||GA (1.0.0) | Vendored_Preview (0.2.0) | N/A | Extension |
-| Firewall   |Yes| Not Started | 04/30/2021 |Yong|| Network: GA (17.0.0) | Network: Vendored_GA (13.0.0) | N/A | Extension |
-| Frontdoor   | Yes | Not Started | 04/30/2021 |Yong||Preview (1.0.0b1) | Vendored_Preview (0.3.1) | N/A | Extension |
+| CDN   | Yes |**Completed** | 04/30/2021 |Yong||GA (10.0.0) | GA (6.0.0) | Low (Once half year) | Module |
+| NetAppFiles |  Yes |**Completed** | 04/30/2021 |Yong||GA (1.0.0) | Preview (0.15.0) | Medium (Once two months) | Module|
+| DNS |  Yes |**In progress** | 04/30/2021 |Yong||Preview (8.0.0b1) | GA (3.0.0) | Medium (Once two months) | Module|
+| PrivateDNS | Yes | **In progress** | 04/30/2021 |Yong||Preview (1.0.0b1) | Preview (0.1.0) |N/A | Module |
+| ApplicationInsights   |Yes | **Completed** | 04/30/2021 |Yong||GA (1.0.0) | Vendored_Preview (0.2.0) | N/A | Extension |
+| Firewall   |Yes| **Completed** | 04/30/2021 |Yong|| Network: GA (17.0.0) | Network: Vendored_GA (13.0.0) | N/A | Extension |
+| Frontdoor   | Yes | **In progress** | 04/30/2021 |Yong||Preview (1.0.0b1) | Vendored_Preview (0.3.1) | N/A | Extension |
+| VirtualWan   | Yes| **In progress** | 04/30/2021 |Yong||N/A |Vendored_Preview (0.1.0) | N/A | Extension |
 |**Phase 2: Management&Governance&others** |  |  | |  | |  |||||
-| CostManagement   | Yes | **Completed** | 06/30/2021 |||Vendored_GA (1.2.0) | N/A | N/A | Extension |
-| DataFactory   | Yes | **Completed** | 06/30/2021 |||Vendored_SDK | N/A | N/A | Extension |
-| RDBMS |  Yes|Not Started | 06/30/2021 |Yong||GA (8.0.0) | Preview (3.1.0rc1) | Medium (Once two months) | Module |
+| CostManagement   | Yes | **Completed** | 06/30/2021 |Yong||Vendored_GA (1.2.0) | N/A | N/A | Extension |
+| DataFactory   | Yes | **Completed** | 06/30/2021 |Catherine||Vendored_SDK | N/A | N/A | Extension |
+| RDBMS |  Yes|**Completed** | 06/30/2021 |Yong||GA (8.0.0) | Preview (3.1.0rc1) | Medium (Once two months) | Module |
 | EventGrid | Yes |Not Started | 06/30/2021 |Catherine|| GA (8.0.0) | Preview (3.0.0rc8) | Medium (Once three months) | Module |
 | HDInsight | Yes |Not Started | 06/30/2021 |Catherine|| GA (7.0.0) | GA (2.1.0) | Medium (Once two months) | Module |
 | Kusto |  Yes |Not Started | 06/30/2021 |Catherine||Preview (1.0.0b1) | Preview (0.10.0) | Medium (Once two months | Module |
-| SQL   | No |Not Started | 06/30/2021 |Yong||GA (1.0.0) | Preview (0.25.0) | Medium (Once two months) | Module |
+| SQL   | No |**In progress** | 06/30/2021 |Yong||GA (1.0.0) | Preview (0.25.0) | Medium (Once two months) | Module |
 | Role   | No |Not Started | 06/30/2021 |Yong|| Authorization: GA (1.0.0)<br>MSI: N/A | Authorization: Preview (0.61.0)<br>MSI: GA (1.0.0) | Low (Once a year) | Module |
 |**Phase 3** |  |  | |  | |  ||||
 | NatGateway || **Completed** | N/A || |Network: GA (8.0.0) | Network: GA (2.2.0) | Use Network package| Module |
 | Synapse |  |Not Started | N/A |||Preview (1.0.0b1) | Preview (0.6.0) | Medium (Once two months) | Module |
 | EventHub   |  |Not Started | N/A |||GA (8.0.0) | GA (4.2.0) | Low (Once a year) | Module |
 | Search |  |**Completed** | N/A |||GA (8.0.0) | GA (3.0.0) | Low (Once a year) | Module |
-| AppConfiguration  |  |Not Started | N/A |||GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
+| AppConfiguration  |  |**Completed** | N/A |||GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Security |  |Not Started | N/A |||GA (1.0.0) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Batch   |  |Not Started | N/A |||GA (14.0.0) | GA (9.0.0) | Low (Once half year) | Module |
 | CognitiveServices | |Not Started | N/A ||| GA (11.0.0) | GA (6.3.0) | Low (Once half year) | Module |
@@ -137,7 +139,6 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | Support   | | Not Started | N/A |||N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | TimeSeriesInsights   | | Not Started | N/A |||N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | VMWare   | | Not Started | N/A |||N/A | Vendored_Preview (0.1.0) | N/A | Extension |
-| VirtualWan   | | Not Started | N/A |||N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Swiftlet   | | Not Started | N/A |||N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | ScheduledQuery   | | Not Started | N/A| ||N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | *Below services don't exist in CLI repo*|  |  | |  | |  |||||

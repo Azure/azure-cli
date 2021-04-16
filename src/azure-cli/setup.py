@@ -5,7 +5,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 import sys
@@ -18,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.21.0"
+VERSION = "2.22.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -71,13 +70,13 @@ DEPENDENCIES = [
     'azure-mgmt-batch~=9.0.0',
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.3.0',
-    'azure-mgmt-cdn==7.0.0',
+    'azure-mgmt-cdn==11.0.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
-    'azure-mgmt-compute~=19.0.0',
+    'azure-mgmt-compute~=20.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc17',
-    'azure-mgmt-cosmosdb~=3.0.0',
+    'azure-mgmt-cosmosdb~=6.2.0',
     'azure-mgmt-containerservice~=11.1.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -86,7 +85,7 @@ DEPENDENCIES = [
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
-    'azure-mgmt-eventgrid==3.0.0rc7',
+    'azure-mgmt-eventgrid==3.0.0rc9',
     'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-hdinsight~=2.2.0',
     'azure-mgmt-imagebuilder~=0.4.0',
@@ -99,11 +98,11 @@ DEPENDENCIES = [
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
-    'azure-mgmt-marketplaceordering~=0.1',
+    'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.16.0',
+    'azure-mgmt-netapp~=2.0.0',
     'azure-mgmt-network~=18.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
@@ -115,21 +114,22 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     # 'azure-mgmt-reservations~=0.6.0',
-    'azure-mgmt-resource==12.0.0',
+    'azure-mgmt-resource==12.1.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
+    'azure-mgmt-servicefabricmanagedclusters~=1.0.0b1',
     'azure-mgmt-signalr~=0.4.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
     'azure-mgmt-storage~=17.0.0',
     'azure-mgmt-synapse~=0.6.0',
     'azure-mgmt-trafficmanager~=0.51.0',
-    'azure-mgmt-web~=0.48.0',
-    'azure-multiapi-storage~=0.6.0',
+    'azure-mgmt-web~=2.0.0',
+    'azure-multiapi-storage~=0.6.2',
     'azure-storage-common~=1.4',
-    'azure-synapse-accesscontrol~=0.2.0',
+    'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'fabric~=2.4',

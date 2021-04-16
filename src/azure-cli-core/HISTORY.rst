@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
+
 2.21.0
 ++++++
 * Unify ADAL and MSAL error handler (#17072)
