@@ -3691,6 +3691,14 @@ examples:
     text: az network lb list -g MyResourceGroup
 """
 
+helps['network lb list-nic'] = """
+type: command
+short-summary: List associated load balancer network interfaces.
+examples:
+  - name: List associated load balancer network interfaces.
+    text: az network lb list -nic -g MyResourceGroup --name MyLb
+"""
+
 helps['network lb outbound-rule'] = """
 type: group
 short-summary: Manage outbound rules of a load balancer.

@@ -2892,6 +2892,9 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
             self.check('length(NewNIC.dnsSettings.dnsServers)', 1)
         ])
+        self.cmd('network lb list-nic -g {rg} -n {lb}', checks=[
+            self.check('length(@)', 1)
+        ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
             self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
