@@ -16,8 +16,8 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 KeyVaultProperties,
                                                 RegenerateKeyParameters)
 
-from ._utils import resolve_store_metadata, user_confirmation
-
+from ._utils import resolve_store_metadata
+from azure.cli.core.util import user_confirmation
 
 logger = get_logger(__name__)
 
