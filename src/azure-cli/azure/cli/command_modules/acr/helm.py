@@ -12,7 +12,7 @@ from knack.log import get_logger
 
 from azure.cli.core.util import in_cloud_console
 
-from ._utils import user_confirmation
+from azure.cli.core.util import user_confirmation
 
 from ._docker_utils import (
     get_access_credentials,
