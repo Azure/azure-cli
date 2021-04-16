@@ -120,7 +120,6 @@ def _validate_vpn_gateway_generation(namespace):
 def validate_vpn_connection_name_or_id(cmd, namespace):
     if namespace.vpn_connection_ids:
         from msrestazure.tools import is_valid_resource_id, resource_id
-        from azure.cli.core.commands.client_factory import get_subscription_id
         for index, vpn_connection_id in enumerate(namespace.vpn_connection_ids):
             if not is_valid_resource_id(vpn_connection_id):
                 namespace.vpn_connection_ids[index] = resource_id(
