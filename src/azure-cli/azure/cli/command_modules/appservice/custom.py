@@ -557,7 +557,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
                                              progress_callback=progress_callback)
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
     BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
