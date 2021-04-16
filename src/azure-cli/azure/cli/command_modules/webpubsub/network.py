@@ -8,6 +8,7 @@ from azure.mgmt.webpubsub.models import (
     WebPubSubResource
 )
 
+
 # pylint: disable=dangerous-default-value
 def update_network_rules(client, webpubsub_name, resource_group_name, public_network, connection_name=[], allow=[], deny=[]):
     resource = client.get(resource_group_name, webpubsub_name)
@@ -28,4 +29,3 @@ def update_network_rules(client, webpubsub_name, resource_group_name, public_net
 def list_network_rules(client, webpubsub_name, resource_group_name):
     resource = client.get(resource_group_name, webpubsub_name)
     return resource.network_ac_ls
-    

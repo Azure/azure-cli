@@ -16,8 +16,7 @@ class WebpubsubCommandsLoader(AzCommandsLoader):
         webpubsub_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.webpubsub.custom#{}',
             client_factory=cf_webpubsub)
-        super(WebpubsubCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                  custom_command_type=webpubsub_custom)
+        super(WebpubsubCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=webpubsub_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.webpubsub.commands import load_command_table

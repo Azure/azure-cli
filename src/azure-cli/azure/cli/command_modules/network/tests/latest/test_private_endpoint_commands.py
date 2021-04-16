@@ -1757,5 +1757,104 @@ class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
         self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
 
 
+class AzureWebPubSubServicePrivateEndpointScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_webpubsub_private_endpoint(self, resource_group):
+        webpubsub_name = self.create_random_name('webpubsub', 16)
+        sku = 'Standard_S1'
+        unit_count = 1
+        location = 'centraluseuap'
+
+        self.kwargs.update({
+            'location': location,
+            'webpubsub_name': webpubsub_name,
+            'sku': sku,
+            'unit_count': unit_count,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'private_endpoint': 'private_endpoint1',
+            'private_endpoint_connection': 'private_endpoint_connection1'
+        })
+
+        webpubsub = self.cmd('az webpubsub create -n {webpubsub_name} -g {rg} --sku {sku} -l {location}', checks=[
+            self.check('name', '{webpubsub_name}'),
+            self.check('location', '{location}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{sku}')
+        ]).get_output_in_json()
+
+        # Prepare network
+        self.cmd('network vnet create -g {rg} -n {vnet} -l {location} --subnet-name {subnet}')
+        self.cmd('network vnet subnet update --name {subnet} --resource-group {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true')
+
+        self.kwargs.update({
+            'webpubsub_id': webpubsub['id']
+        })
+
+        # Create a private endpoint connection
+        self.cmd('network private-endpoint create --resource-group {rg} --vnet-name {vnet} --subnet {subnet} --name {private_endpoint}  --private-connection-resource-id {webpubsub_id} --group-ids webpubsub --connection-name {private_endpoint_connection} --location {location} --manual-request')
+
+        # Test private link resource list
+        self.cmd('network private-link-resource list -n {webpubsub_name} -g {rg} --type Microsoft.SignalRService/webpubsub', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        s_r = self.cmd('webpubsub show -n {webpubsub_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'private_endpoint_connection_id': s_r['privateEndpointConnections'][0]['id']
+        })
+
+        # Test show private endpoint connection
+        self.cmd('network private-endpoint-connection show --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        ])
+
+        # Test list private endpoint connection
+        self.cmd('network private-endpoint-connection list --id {webpubsub_id}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Test approve private endpoint connection
+        self.cmd('network private-endpoint-connection approve --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+        ])
+
+        # Test reject private endpoint connection
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+        ])
+
+        # Test update public network rules
+        self.cmd('webpubsub network-rule update --public-network -n {webpubsub_name} -g {rg} --allow RESTAPI', checks=[
+            self.check('networkAcLs.publicNetwork.allow[0]', 'RESTAPI'),
+            self.check('length(networkAcLs.publicNetwork.deny)', 0),
+        ])
+
+        # Test list network rules
+        n_r = self.cmd('webpubsub network-rule list -n {webpubsub_name} -g {rg}', checks=[
+            self.check('length(privateEndpoints)', 1)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'connection_name': n_r['privateEndpoints'][0]['name']
+        })
+
+        # Test update private network rules
+        self.cmd('webpubsub network-rule update --connection-name {connection_name} -n {webpubsub_name} -g {rg} --allow RESTAPI', checks=[
+            self.check('networkAcLs.privateEndpoints[0].allow[0]', 'RESTAPI'),
+            self.check('length(networkAcLs.privateEndpoints[0].deny)', 0),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private_endpoint_connection_id} -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list --id {webpubsub_id}', checks=[
+            self.check('length(@)', 0)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

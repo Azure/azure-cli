@@ -82,10 +82,6 @@ helps['webpubsub key regenerate'] = """
         text: >
           az webpubsub key regenerate -n MyWebPubSub -g MyResourceGroup --key-type primary --query primaryKey -o tsv
 """
-helps['webpubsub upstream clear'] = """
-    type: command
-    short-summary: List upstream settings of an existing WebPubSub Service.
-"""
 
 helps['webpubsub network-rule list'] = """
     type: command

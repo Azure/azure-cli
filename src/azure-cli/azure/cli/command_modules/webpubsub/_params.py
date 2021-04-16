@@ -7,19 +7,14 @@
 from knack.arguments import CLIArgumentType
 from azure.mgmt.webpubsub.models import WebPubSubRequestType
 from azure.cli.core.commands.parameters import (
-    resource_group_name_type,
-    get_location_type,
-    get_resource_name_completion_list,
     tags_type,
-    get_enum_type,
     get_three_state_flag
 )
 
 WEBPUBSUB_KEY_TYPE = ['primary', 'secondary']
 
-def load_arguments(self, _):
 
-    from azure.cli.core.commands.parameters import tags_type
+def load_arguments(self, _):
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     webpubsub_name_type = CLIArgumentType(options_list='--webpubsub-name-name', help='Name of the Webpubsub.', id_part='name')

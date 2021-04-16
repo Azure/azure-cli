@@ -10,6 +10,7 @@ from azure.mgmt.webpubsub.models import (
     EventHandlerSettings
 )
 
+
 def event_handler_list(client, resource_group_name, webpubsub_name):
     resource = client.get(resource_group_name, webpubsub_name)
     return resource.event_handler

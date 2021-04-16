@@ -8,5 +8,6 @@ def _webpubsub_client_factory(cli_ctx, *_):
     from azure.mgmt.webpubsub import WebPubSubManagementClient
     return get_mgmt_service_client(cli_ctx, WebPubSubManagementClient)
 
+
 def cf_webpubsub(cli_ctx, *_):
     return _webpubsub_client_factory(cli_ctx).web_pub_sub
