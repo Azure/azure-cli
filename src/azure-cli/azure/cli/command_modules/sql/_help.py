@@ -847,7 +847,7 @@ examples:
   - name: Update a managed instance with maintenance configuration
     text: az sql mi update -g mygroup  -n myinstance -m SQL_{Region}_{MaintenanceConfigName}
   - name: Remove maintenance configuration from managed instance
-    text: az sql mi update -g mygroup  -n myinstance -m SQL_Default
+    text: az sql mi update -g mygroup -n myinstance -m SQL_Default
 """
 
 helps['sql midb'] = """
