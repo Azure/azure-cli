@@ -4070,6 +4070,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
             self.cmd('network vpn-connection packet-capture stop -g {rg} -n {conn12} --sas-url {sas_url}')
 
+
 class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
