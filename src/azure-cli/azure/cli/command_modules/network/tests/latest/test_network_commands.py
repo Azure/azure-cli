@@ -3999,9 +3999,17 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disa
 
 class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
-    def test_network_active_active_vnet_connection(self, resource_group):
+    def __init__(self, method_name):
+        self.sas_replacer = StorageAccountSASReplacer()
+        super(NetworkActiveActiveVnetScenarioTest, self).__init__(method_name, recording_processors=[
+            self.sas_replacer
+        ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
+    @StorageAccountPreparer(name_prefix='clitestvpncnn')
+    def test_network_active_active_vnet_connection(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
         self.kwargs.update({
             'subnet': 'GatewaySubnet',
             'vnet1': 'vnet1',
@@ -4022,8 +4030,18 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'conn12': 'vnet1to2',
             'conn21': 'vnet2to1',
             'bgp_peer1': '10.52.255.253',
-            'bgp_peer2': '10.53.255.253'
+            'bgp_peer2': '10.53.255.253',
+            'storage_account': storage_account,
+            'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
+            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
+
+        self.cmd('storage container create --account-name {storage_account} --name {ctn}')
+        sas = self.cmd(
+            'storage blob generate-sas -n src --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
+        self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
+                                                                          self.kwargs['ctn'], sas)
+        self.sas_replacer.add_sas_token(sas)
 
         # Create one VNet with two public IPs
         self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet1_prefix} --subnet-name {subnet} --subnet-prefix {gw1_prefix}')
@@ -4045,9 +4063,14 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         # create and connect the VNet gateways
         self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
         self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
+        self.cmd('network vpn-connection list-ike-sas -g {rg} -n {conn12}')
+        output = self.cmd('network vpn-connection packet-capture start -g {rg} -n {conn12}').output.strip()
+        self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
+        # currently we cannot create traffic by cli command. So it will return an error when stop.
+        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+            self.cmd('network vpn-connection packet-capture stop -g {rg} -n {conn12} --sas-url {sas_url}')
 
-
-class NetworkVpnGatewayScenarioTest(ScenarioTest, StorageAccountSASReplacer):
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
@@ -4243,9 +4266,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest, StorageAccountSASReplacer):
         self.cmd('storage container create --account-name {storage_account} --name {ctn}')
         sas = self.cmd(
             'storage blob generate-sas -n src --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
-        self.sas_replacer.add_sas_token(sas)
         self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
                                                                           self.kwargs['ctn'], sas)
+        self.sas_replacer.add_sas_token(sas)
 
         self.cmd('network public-ip create -n {ip1} -g {rg}')
         self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')

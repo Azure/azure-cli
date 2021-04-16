@@ -24,6 +24,6 @@ class StorageAccountSASReplacer(RecordingProcessor):
     def process_request(self, request):
         for sas_token in self._sas_tokens:
             body_string = byte_to_str(request.body)
-            if sas_token in body_string:
+            if body_string and sas_token in body_string:
                 request.body = body_string.replace(sas_token, self.SAS_REPLACEMENT)
         return request
