@@ -5705,6 +5705,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         managed_database_name = 'logReplayTestDb'
         managed_database_name1 = 'logReplayTestDb1'
+        # Uploading bak file to blob is restricted by testing framework, so only mitigation for now is to use hard-coded values
         self.kwargs.update({
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
