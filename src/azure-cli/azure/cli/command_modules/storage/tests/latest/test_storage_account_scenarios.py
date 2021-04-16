@@ -962,6 +962,25 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer(location='westus', name_prefix='cliedgezone')
+    def test_storage_account_extended_location(self, resource_group):
+        self.kwargs = {
+            'sa1': self.create_random_name(prefix='edge1', length=12),
+            'sa2': self.create_random_name(prefix='edge2', length=12),
+            'rg': resource_group
+        }
+        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab1 -l eastus2euap --sku Premium_LRS',
+                 checks=[
+                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab1'),
+                     JMESPathCheck('extendedLocation.type', 'EdgeZone')
+                 ])
+        self.cmd('storage account create -n {sa2} -g {rg} --edge-zone microsoftlosangeles1 --sku Premium_LRS',
+                 checks=[
+                     JMESPathCheck('extendedLocation.name', 'microsoftlosangeles1'),
+                     JMESPathCheck('extendedLocation.type', 'EdgeZone')
+                 ])
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):

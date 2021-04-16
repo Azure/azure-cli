@@ -26,6 +26,7 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import CLIInternalError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.azclierror import ValidationError
@@ -678,6 +679,10 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
             vm.identity.user_assigned_identities = {}
+            if not cmd.supported_api_version(min_api='2018-06-01', resource_type=ResourceType.MGMT_COMPUTE):
+                raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
+                                       "You can set the cloud's profile to latest with 'az cloud set --profile latest"
+                                       " --name <cloud name>'")
             for identity in external_identities:
                 vm.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
@@ -3274,7 +3279,7 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.start_extension_upgrade,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.begin_start_extension_upgrade,
                        resource_group_name, vm_scale_set_name)
 # endregion
 

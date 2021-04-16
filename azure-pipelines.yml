@@ -858,6 +858,7 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
+      python scripts/ci/service_name.py
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
