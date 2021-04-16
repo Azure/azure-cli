@@ -845,7 +845,7 @@ examples:
     text: az sql mi update --name myinstance --public-data-endpoint-enabled true --resource-group mygroup --subscription MySubscription
     crafted: true
   - name: Update a managed instance with maintenance configuration
-    text: az sql mi update -g mygroup  -n myinstance -m SQL_{Region}_{MaintenanceConfigName}
+    text: az sql mi update -g mygroup -n myinstance -m SQL_{Region}_{MaintenanceConfigName}
   - name: Remove maintenance configuration from managed instance
     text: az sql mi update -g mygroup -n myinstance -m SQL_Default
 """
