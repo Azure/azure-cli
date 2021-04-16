@@ -30,7 +30,7 @@ from azure.cli.command_modules.monitor.validators import validate_metric_dimensi
 from azure.cli.command_modules.monitor.actions import get_period_type
 
 
-# pylint: disable=too-many-statements, too-many-branches, too-many-locals
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
 def load_arguments(self, _):
     # Model imports
     StorageAccountTypes = self.get_models('StorageAccountTypes')
@@ -97,6 +97,12 @@ def load_arguments(self, _):
         help='Specify the scale-in policy (space delimited) that decides which virtual machines are chosen for removal when a Virtual Machine Scale Set is scaled-in.'
     )
 
+    edge_zone_type = CLIArgumentType(
+        help='Name of edge zone extended location.',
+        min_api='2020-12-01',
+        is_preview=True
+    )
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -149,6 +155,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/en-us/pricing/details/managed-disks/. Does not apply to Ultra disks.')
+        c.argument('edge_zone', edge_zone_type)
     # endregion
 
     # region Snapshots
@@ -158,6 +165,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=snapshot_sku)
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
+        c.argument('edge_zone', edge_zone_type)
     # endregion
 
     # region Images
@@ -179,6 +187,7 @@ def load_arguments(self, _):
                    help="Storage caching type for the image's data disk.")
         c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
+        c.argument('edge_zone', edge_zone_type, )
     # endregion
 
     # region Image Templates
@@ -727,6 +736,7 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
+            c.argument('edge_zone', edge_zone_type)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -921,7 +931,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
-    with self.argument_context('sig image-version create') as c:
+    with self.argument_context('sig image-version create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
         c.argument('description', help='the description of the gallery image version')
@@ -936,6 +946,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
         c.argument('target_region_encryption', nargs='+',
                    help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for each region: `<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`. Use "null" as a placeholder.')
+        c.argument('os_vhd_uri', help='Source VHD URI of OS disk')
+        c.argument('os_vhd_storage_account', help='Name or ID of storage account of source VHD URI of OS disk')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
