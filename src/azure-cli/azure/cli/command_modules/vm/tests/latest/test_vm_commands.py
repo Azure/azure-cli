@@ -1629,7 +1629,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('provisionAfterExtensions[1]', '{script-ext}'),
         ])
 
-        self.cmd('vmss extension upgrade --ids 100')
+        self.cmd('vmss extension upgrade -g {rg} -n {vmss}')
 
         # delete all the extensions
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
