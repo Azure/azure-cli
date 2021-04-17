@@ -344,7 +344,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     if registry_name is None:
-        logger.warning("Registry name must be provided to check connectivity.")
+        logger.warning("Registry name must be provided to verify DNS routings of its private endpoints")
         return
 
     registry = None
@@ -353,11 +353,13 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
     try:
         registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
     except CLIError:
-        logger.warning("Registry resource must be accessible to verify private endpoint setting")
+        logger.warning('Registry resource of "%s" must be accessible to verify DNS routings of its private endpoints.',
+                       registry_name)
         return
 
     if not registry.private_endpoint_connections:
-        logger.warning("Registry doesn't have private endpoints")
+        logger.warning('Registry "%s" doesn\'t have private endpoints to verify DNS routings.', registry_name)
+        return
 
     if not is_valid_resource_id(vnet_of_private_endpoint):
         res = parse_resource_id(registry.id)
@@ -379,19 +381,26 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
             nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
             for dns_config in nic.ip_configurations:
                 if dns_config.private_link_connection_properties.fqdns[0] in dns_mappings:
-                    logger.warning("More than one private endpoint exist in %s. DNS routing will be unreliable",
-                                   vnet_of_private_endpoint)
+                    err = ('Registry "%s" has more than one private endpoint in the vnet of "%s".'
+                           ' DNS routing will be unreliable')
+                    logger.warning(err, registry_name, vnet_of_private_endpoint)
                 dns_mappings[dns_config.private_link_connection_properties.fqdns[0]] = dns_config.private_ip_address
 
     dns_ok = True
+    if not dns_mappings:
+        logger.warning('Registry "%s" doesn\'t have private endpoints in the vnet of "%s".',
+                       registry_name, vnet_of_private_endpoint)
+        return
+
     for fqdn in dns_mappings:
         result = socket.gethostbyname(fqdn)
         if result not in dns_mappings[fqdn]:
-            logger.warning("DNS routing is incorrect. Expect: %s, Actual: %s", dns_mappings[fqdn], result)
+            err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
+            logger.warning(err, registry_name, dns_mappings[fqdn], result)
             dns_ok = False
 
     if dns_ok:
-        print_pass("DNS routing of private endpoint")
+        print_pass('DNS routing to private endpoint')
 
 
 # General command
