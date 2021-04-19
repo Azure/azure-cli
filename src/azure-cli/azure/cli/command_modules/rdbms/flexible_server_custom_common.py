@@ -7,6 +7,7 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.util import user_confirmation
 
 logger = get_logger(__name__)
 
@@ -124,16 +125,3 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
     return result
-
-
-def user_confirmation(message, yes=False):
-    if yes:
-        return True
-    from knack.prompting import prompt_y_n, NoTTYException
-    try:
-        if not prompt_y_n(message):
-            raise CLIError('Operation cancelled.')
-        return True
-    except NoTTYException:
-        raise CLIError(
-            'Unable to prompt for confirmation as no tty available. Use --yes.')
