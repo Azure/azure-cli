@@ -44,7 +44,6 @@ ROLE_ASSIGNMENT_CREATE_WARNING = (
 
 logger = get_logger(__name__)
 
-
 # pylint: disable=too-many-lines
 
 
@@ -523,9 +522,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
         assignments = [a for a in assignments if (
-                not scope or
-                include_inherited and re.match(worker.get_role_property(a, 'scope'), scope, re.I) or
-                worker.get_role_property(a, 'scope').lower() == scope.lower()
+            not scope or
+            include_inherited and re.match(worker.get_role_property(a, 'scope'), scope, re.I) or
+            worker.get_role_property(a, 'scope').lower() == scope.lower()
         )]
 
         if role:
@@ -1042,6 +1041,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None,
                        credential_description=None, app_roles=None, optional_claims=None):
+
     # propagate the values
     app_patch_param = ApplicationUpdateParameters()
     properties = [attr for attr in dir(instance)
@@ -1328,6 +1328,7 @@ def _resolve_service_principal(client, identifier):
 
 def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
                                      password, keyvault):
+
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
         return _random_password(34), None, None, None, None
@@ -1540,8 +1541,7 @@ def _get_keyvault_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[
-            0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
@@ -1598,8 +1598,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
 
-def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault,
-                                           keyvault_cert_name):  # pylint: disable=too-many-locals
+def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
     import time
 
     kv_client = _get_keyvault_client(cli_ctx)
@@ -1639,8 +1638,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault,
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
     kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
-    while kv_client.get_certificate_operation(vault_base_url,
-                                              keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
+    while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
         time.sleep(5)
 
     cert = kv_client.get_certificate(vault_base_url, keyvault_cert_name, '')
