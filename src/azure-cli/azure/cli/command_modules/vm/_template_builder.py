@@ -279,7 +279,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-        enable_vtpm=None, count=None):
+        enable_vtpm=None, count=None, edge_zone=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -528,8 +528,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         'dependsOn': [],
         'properties': vm_properties,
     }
+
     if zone:
         vm['zones'] = zone
+
     if count:
         vm['copy'] = {
             'name': 'vmcopy',
@@ -537,6 +539,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             'count': count
         }
         vm['name'] = "[concat('{}', copyIndex())]".format(name)
+
+    if edge_zone:
+        vm['extendedLocation'] = edge_zone
+
     return vm
 
 
@@ -757,7 +763,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
-                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None):
+                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None,
+                        max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
+                        max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
+                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -915,7 +924,15 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
-            'mode': upgrade_policy_mode
+            'mode': upgrade_policy_mode,
+            'rollingUpgradePolicy': {
+                'maxBatchInstancePercent': max_batch_instance_percent,
+                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
+                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
+                'pauseTimeBetweenBatches': pause_time_between_batches,
+                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
+                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
+            }
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,
@@ -999,8 +1016,13 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         },
         'properties': vmss_properties
     }
+
     if zones:
         vmss['zones'] = zones
+
+    if edge_zone:
+        vmss['extendedLocation'] = edge_zone
+
     return vmss
 
 

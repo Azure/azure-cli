@@ -8,9 +8,13 @@ parameters:
   type: string
   default: latest
 - name: fullTest
-  displayName: 'Run full test?'
+  displayName: Run full test?
   type: boolean
   default: false
+- name: module
+  displayName: Run test for specific module
+  type: string
+  default: ''
 
 steps:
   - task: UsePythonVersion@0
@@ -26,7 +30,16 @@ steps:
       echo pythonVersion: ${{ parameters.pythonVersion }}
       echo profile: ${{ parameters.profile }}
       echo fullTest: ${{ parameters.fullTest }}
+      echo module: ${{ parameters.module }}
       echo Build.Reason: $(Build.Reason)
+
+      # Test specific module
+      module="${{ parameters.module }}"
+      if [[ -n $module ]]; then
+        echo "Running test for module '$module'"
+        azdev test --no-exitfirst --verbose --series $module
+        exit 0
+      fi
 
       if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
         echo "Running incremental test"
@@ -35,6 +48,6 @@ steps:
         echo "Running full test"
         azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series
       fi
-    displayName: "Test on Profile ${{ parameters.profile }}"
+    displayName: "azdev test"
     env:
       ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)

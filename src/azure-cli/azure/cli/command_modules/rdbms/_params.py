@@ -313,7 +313,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type,
                        help='The name of the new server that is created by the restore command.')
             c.argument('restore_point_in_time', options_list=['--restore-time'], default=get_current_time(),
-                       help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+                       help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00')
             if command_group == 'postgres':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name of the source server to restore from.')
