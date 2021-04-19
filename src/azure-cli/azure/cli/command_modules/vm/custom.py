@@ -3397,7 +3397,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
-                         data_vhds_uri=None, data_vhds_luns=None, data_vhds_storage_accounts=None):
+                         data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None):
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -3452,8 +3452,9 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                                              lun=data_snapshot_luns[i]))
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
+            # OS disk
             if os_vhd_uri and os_vhd_storage_account is None or os_vhd_uri is None and os_vhd_storage_account:
-                raise ValidationError('--vhd and --vhd-storage-account should be used together.')
+                raise ValidationError('--os-vhd-uri and --os-vhd-storage-account should be used together.')
             if os_vhd_uri and os_vhd_storage_account:
                 if not is_valid_resource_id(os_vhd_storage_account):
                     os_vhd_storage_account = resource_id(
@@ -3461,6 +3462,35 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
                 os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(
                     id=os_vhd_storage_account, uri=os_vhd_uri))
+
+            # Data disks
+            if data_vhds_uris and data_vhds_storage_accounts is None or \
+                    data_vhds_uris is None and data_vhds_storage_accounts:
+                raise ValidationError('--data-vhds-uris and --data-vhds-storage-accounts should be used together.')
+            if data_vhds_luns and data_vhds_uris is None:
+                raise ValidationError('--data-vhds-luns must be used together with --data-vhds-uris')
+            if data_vhds_uris:
+                # Generate LUNs
+                if data_vhds_luns is None:
+                    # 0, 1, 2, ...
+                    data_vhds_luns = [i for i in range(len(data_vhds_uris))]
+                # Check length
+                len_data_vhds_uris = len(data_vhds_uris)
+                len_data_vhds_luns = len(data_vhds_luns)
+                len_data_vhds_storage_accounts = len(data_vhds_storage_accounts)
+                if len_data_vhds_uris != len_data_vhds_luns or len_data_vhds_uris != len_data_vhds_storage_accounts:
+                    raise ValidationError('Length of --data-vhds-uris, --data-vhds-luns, --data-vhds-storage-accounts '
+                                          'must be same.')
+                # Generate full storage account ID
+                for i, storage_account in enumerate(data_vhds_storage_accounts):
+                    if not is_valid_resource_id(storage_account):
+                        data_vhds_storage_accounts[i] = resource_id(
+                            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                            namespace='Microsoft.Storage', type='storageAccounts', name=storage_account)
+            data_disk_images = []
+            for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
+                data_disk_images.append(GalleryDataDiskImage(
+                    source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
