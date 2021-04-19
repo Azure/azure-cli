@@ -18,7 +18,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
-from azure.cli.core.util import user_confirmation
+from .flexible_server_custom_common import user_confirmation
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator
 

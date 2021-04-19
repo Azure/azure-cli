@@ -48,6 +48,17 @@ def resolve_store_metadata(cmd, config_store_name):
     raise CLIError("Failed to find the App Configuration store '{}'.".format(config_store_name))
 
 
+def user_confirmation(message, yes=False):
+    if yes:
+        return
+    try:
+        if not prompt_y_n(message):
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):
     string = ''
     error_message = '''You may have specified both store name and connection string, which is a conflict.
