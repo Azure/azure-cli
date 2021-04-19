@@ -35,7 +35,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         })
 
         # Check for the NameSpace name Availability
-        self.cmd('servicebus namespace exists --name {namespacename}',
+        self.cmd('servicebus namespace exists --parameters {namespacename}',
                  checks=[self.check('nameAvailable', True)])
 
         # Create Namespace

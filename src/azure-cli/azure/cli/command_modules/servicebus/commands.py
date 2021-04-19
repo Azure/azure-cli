@@ -58,8 +58,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_namespace_create')
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
-        g.command('delete', 'delete')
-        g.command('exists', 'check_name_availability_method')
+        g.command('delete', 'begin_delete')
+        g.command('exists', 'check_name_availability')
         g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom)
 
     with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:

@@ -16,7 +16,7 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
                          capacity=None, default_action=None):
 
     from azure.mgmt.servicebus.models import SBNamespace, SBSku
-    client.create_or_update(
+    client.begin_create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         parameters=SBNamespace(
