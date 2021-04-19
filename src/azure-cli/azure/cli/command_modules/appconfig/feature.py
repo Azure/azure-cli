@@ -24,8 +24,9 @@ from ._constants import (FeatureFlagConstants, SearchFilterOptions, StatusCodes)
 from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import (get_appconfig_data_client, user_confirmation,
+from ._utils import (get_appconfig_data_client,
                      prep_label_filter_for_url_encoding)
+from azure.cli.core.util import user_confirmation
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter)
