@@ -2485,6 +2485,7 @@ def aks_update(cmd, client, resource_group_name, name,
                aad_admin_group_object_ids=None,
                enable_ahub=False,
                disable_ahub=False,
+               windows_admin_password=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2504,7 +2505,8 @@ def aks_update(cmd, client, resource_group_name, name,
             not enable_aad and
             not update_aad_profile and
             not enable_ahub and
-            not disable_ahub):
+            not disable_ahub and
+            not windows_admin_password):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2522,7 +2524,8 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--aad-tenant-id" or '
                        '"--aad-admin-group-object-ids" or '
                        '"--enable-ahub" or '
-                       '"--disable-ahub"')
+                       '"--disable-ahub" or '
+                       '"--windows-admin-password"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2648,6 +2651,9 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.windows_profile.license_type = 'Windows_Server'
     if disable_ahub:
         instance.windows_profile.license_type = 'None'
+
+    if windows_admin_password:
+        instance.windows_profile.admin_password = windows_admin_password
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
