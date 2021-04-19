@@ -11,7 +11,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
-from ._client_factory import resource_client_factory, network_client_factory
+from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory
 from ._flexible_server_util import get_id_components, check_existence
 
 logger = get_logger(__name__)
@@ -168,6 +168,44 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
         subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet).result()
 
     return subnet
+
+
+def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id):
+    private_dns_zone_suffix = ".private.{}.database.azure.com".format(database_engine)
+    subscription, resource_group, vnet, subnet = get_id_components(subnet_id)
+
+    if private_dns_zone is None:
+        private_dns_zone = server_name + private_dns_zone_suffix
+
+    private_dns_client = private_dns_client_factory(cmd.cli_ctx)
+    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx)
+    resource_client = resource_client_factory(cmd.cli_ctx)
+
+    if not _check_if_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):  # if input is ID
+        subscription, resource_group, name = get_id_components(private_dns_zone)
+        if subscription != get_subscription_id(cmd.cli_ctx):
+            logger.warning('The private DNS zone ID provided is in different subscription from the server')
+            resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription)
+            private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription)
+            private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription)
+
+    if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
+        logger.warning('Creating a private dns zone %s..', private_dns_zone)
+        from azure.mgmt.privatedns.models import PrivateZone
+        private_zone = private_dns_client.create_or_update(resource_group_name=resource_group,
+                                                           private_zone_name=private_dns_zone,
+                                                           parameters=PrivateZone(location='global'),
+                                                           if_none_match='*')
+        private_zone_link = private_dns_link_client.create_or_update(resource_group_name=resource_group,
+                                                                     private_zone_name=private_dns_zone,
+                                                                     virtual_network_link_name=server_name+'link',
+                                                                     parameters={'virtual_network': vnet})
+    else:
+        logger.warning('Using the existing private dns zone %s', private_dns_zone)
+        private_zone = private_dns_client.get(resource_group_name=resource_group,
+                                              private_zone_name=private_dns_zone)
+    
+    return private_zone.id
 
 
 def _check_if_resource_name(resource):

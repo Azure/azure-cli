@@ -361,3 +361,13 @@ def resource_client_factory(cli_ctx, subscription_id=None):
 
 def network_client_factory(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, subscription_id=subscription_id)
+
+
+def private_dns_client_factory(cli_ctx, subscription_id=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient, subscription_id=subscription_id).private_zones
+
+
+def private_dns_link_client_factory(cli_ctx, subscription_id=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient).virtual_network_links
