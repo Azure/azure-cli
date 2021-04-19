@@ -81,7 +81,8 @@ def flexible_server_create(cmd, client,
                                                        resource_group_name,
                                                        server_name,
                                                        private_dns_zone=private_dns_zone_arguments,
-                                                       subnet_id=subnet_id)
+                                                       subnet_id=subnet_id,
+                                                       location=location)
         private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
     else:
         delegated_subnet_arguments = None
@@ -161,6 +162,7 @@ def flexible_server_restore(cmd, client,
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
+        parameters.private_dns_zone_arguments = source_server_objec.private_dns_zone_arguments
     except Exception as e:
         raise ResourceNotFoundError(e)
 
