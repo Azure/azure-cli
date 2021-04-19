@@ -741,6 +741,26 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
         self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
 
+        # Clear a UserAssigned identity when in use with CMK will break access to the account
+        result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type None ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'None')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+
+        # Recover from Identity clear
+        result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type UserAssigned --user-identity-id {iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
         # MMK at create
         result = self.cmd('az storage account create -n {sa2} -g {rg} --encryption-key-source Microsoft.Storage')\
             .get_output_in_json()
@@ -817,6 +837,74 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
         self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
 
+        # Clear a SystemAssigned identity when in use with CMK will break access to the account
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --identity-type None ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'None')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+
+        # Recover account if SystemAssignedIdentity used for CMK is cleared
+        # 1. Create a new $UserAssignedIdentity that has access to $KeyVaultUri and update the account to use the new $UserAssignedIdentity for encryption (if not present already).
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {iid} '
+                          '--key-vault-user-identity-id {iid} ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # 2. Update account to use SAI,UAI identity.
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --identity-type SystemAssigned,UserAssigned')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # 3. Clear the $UserAssignedIdentity used for encryption.
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --key-vault-user-identity-id ""')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], '')
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # 4. Remove $UserAssignedIdentity from the top level identity bag.
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --identity-type SystemAssigned')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], '')
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        self.kwargs['sid'] = result['identity']['principalId']
+
         # CMK with SAI -> CMK with UAI
         result = self.cmd('az storage account update -n {sa2} -g {rg} '
                           '--encryption-key-source Microsoft.Keyvault '
@@ -854,7 +942,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
         self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
 
-        # CMK wth SAI -> MMK
+        # CMK with SAI -> MMK
         result = self.cmd('az storage account update -n {sa2} -g {rg} '
                           '--encryption-key-source Microsoft.Storage ').get_output_in_json()
 
@@ -888,18 +976,27 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
         self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
         self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
-        #
-        # # Remove identity for storage account
-        # result = self.cmd('az storage account create -n {sa} -g {rg} --identity-type None').get_output_in_json()
-        #
-        # self.assertEqual(result['identity']['type'], 'UserAssigned')
-        # self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
-        # self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
-        # self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
-        # self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
-        # self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
-        # self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
-        # self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Clear a UserAssigned identity when in use with CMK will break access to the account
+        result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type None ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'None')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+
+        # Recover from Identity clear
+        result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type UserAssigned '
+                          '--user-identity-id {new_iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['new_iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['new_iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

@@ -323,13 +323,12 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         user_assigned_identities = {user_identity_id: {}}
         if instance.identity.user_assigned_identities:
             for item in instance.identity.user_assigned_identities:
-                user_assigned_identities[item] = None
+                if item != user_identity_id:
+                    user_assigned_identities[item] = None
         params.identity = Identity(type=identity_type, user_assigned_identities=user_assigned_identities)
     elif identity_type:
         params.identity = Identity(type=identity_type)
-        # if identity_type == 'None':
-        #     params.encryption.key_vault_properties = None
-        #     params.encryption.key_source = KeySource.microsoft_storage
+
     if key_vault_user_identity_id is not None:
         EncryptionIdentity = cmd.get_models('EncryptionIdentity')
         params.encryption.encryption_identity = EncryptionIdentity(
