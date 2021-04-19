@@ -1372,6 +1372,7 @@ def _error_caused_by_role_assignment_exists(ex):
 
 
 def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date):
+
     if not cert_start_date and not cert_end_date:
         return app_start_date, app_end_date, None, None
 
@@ -1805,20 +1806,19 @@ def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_pri
         elif is_guid(assignee):
             result = _get_object_stubs(client, [assignee])
 
-        if not result:
-            # If no result found for assignee, raise exception
-            # If no result found for assignee object id, use user input as --assignee-object-id should be able to bypass Graph API
-            if assignee:
-                raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
-                               "If the assignee is an appId, make sure the corresponding service principal is created "
-                               "with 'az ad sp create --id {assignee}'."
-                               .format(assignee=assignee or assignee_object_id))
-            else:
-                return assignee_object_id, assignee_principal_type
-
-        return result[0].object_id, result[0].object_type
+        if result:
+            return result[0].object_id, result[0].object_type
+        # If no result found for assignee, raise exception
+        # If no result found for assignee object id, use user input
+        # as --assignee-object-id is designed to bypass Graph API
+        if assignee:
+            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
+                           "If the assignee is an appId, make sure the corresponding service principal is created "
+                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
+        return assignee_object_id, assignee_principal_type
     except CloudError as ex:
-        # If failed to verify assignee object id, DO NOT raise exception since --assignee-object-id is exposed to bypass Graph API
+        # If failed to verify assignee object id, DO NOT raise exception
+        # since --assignee-object-id is exposed to bypass Graph API
         if assignee_object_id:
             if not assignee_principal_type:
                 logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API. Err: %s\n'
