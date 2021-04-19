@@ -17,10 +17,10 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import ResourceReadOnlyError
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.util import user_confirmation
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants)
 from ._utils import prep_label_filter_for_url_encoding
-from azure.cli.core.util import user_confirmation
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,

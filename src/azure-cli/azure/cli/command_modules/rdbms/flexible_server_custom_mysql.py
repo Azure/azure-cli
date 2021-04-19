@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
@@ -18,7 +18,6 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
-from azure.cli.core.util import user_confirmation
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator
 

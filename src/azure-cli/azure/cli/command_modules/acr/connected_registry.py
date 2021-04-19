@@ -9,6 +9,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import user_confirmation
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps
 from ._utils import (
     build_token_id,
@@ -19,7 +20,6 @@ from ._utils import (
     parse_scope_map_actions,
     validate_managed_registry
 )
-from azure.cli.core.util import user_confirmation
 
 
 class ConnectedRegistryModes(Enum):

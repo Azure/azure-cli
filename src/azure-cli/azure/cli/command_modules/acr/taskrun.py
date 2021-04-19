@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.util import user_confirmation
 from ._stream_utils import stream_logs
 from ._utils import validate_managed_registry
-from azure.cli.core.util import user_confirmation
 
 
 TASKRUN_NOT_SUPPORTED = 'TaskRun is only supported for managed registries.'

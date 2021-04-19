@@ -16,6 +16,7 @@ from knack.util import CLIError
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
 from azure.core import MatchConditions
+from azure.cli.core.util import user_confirmation
 from azure.core.exceptions import (HttpResponseError,
                                    ResourceNotFoundError,
                                    ResourceModifiedError)
@@ -26,7 +27,6 @@ from ._models import (KeyValue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client,
                      prep_label_filter_for_url_encoding)
-from azure.cli.core.util import user_confirmation
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter)
