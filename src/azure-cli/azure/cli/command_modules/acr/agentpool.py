@@ -9,8 +9,8 @@ from knack.util import CLIError
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
-    user_confirmation
 )
+from azure.cli.core.util import user_confirmation
 
 DEFAULT_COUNT = 1
 DEFAULT_TIER = 'S1'

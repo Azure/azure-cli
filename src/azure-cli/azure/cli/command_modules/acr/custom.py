@@ -12,9 +12,9 @@ from ._utils import (
     validate_managed_registry,
     validate_sku_update,
     get_resource_group_name_by_registry_name,
-    user_confirmation,
     resolve_identity_client_id
 )
+from azure.cli.core.util import user_confirmation
 from ._docker_utils import get_login_credentials, EMPTY_GUID
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 

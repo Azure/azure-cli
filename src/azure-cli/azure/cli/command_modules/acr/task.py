@@ -19,8 +19,8 @@ from ._utils import (
     remove_timer_trigger,
     get_task_id_from_task_name,
     prepare_source_location,
-    user_confirmation
 )
+from azure.cli.core.util import user_confirmation
 from ._stream_utils import stream_logs
 from ._constants import (
     ACR_NULL_CONTEXT,
