@@ -17,9 +17,9 @@ from ._utils import (
     get_scope_map_from_id,
     get_token_from_id,
     parse_scope_map_actions,
-    user_confirmation,
     validate_managed_registry
 )
+from azure.cli.core.util import user_confirmation
 
 
 class ConnectedRegistryModes(Enum):
