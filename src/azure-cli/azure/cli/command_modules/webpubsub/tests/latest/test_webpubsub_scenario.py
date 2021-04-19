@@ -94,8 +94,8 @@ class WebpubsubScenarioTest(ScenarioTest):
             self.exists('secondaryKey')
         ])
 
-        # Test key renew
-        self.cmd('webpubsub key renew -n {name} -g {rg} --key-type secondary', checks=[
+        # Test key regenerate
+        self.cmd('webpubsub key regenerate -n {name} -g {rg} --key-type secondary', checks=[
             self.exists('primaryKey'),
             self.exists('secondaryKey')
         ])

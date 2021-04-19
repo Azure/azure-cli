@@ -53,3 +53,7 @@ def load_command_table(self, _):
         g.command('list', 'event_handler_list')
         g.command('update', 'event_handler_update')
         g.command('clear', 'event_handler_clear')
+
+    with self.command_group('webpubsub event-handler hub', webpubsub_eventhandler_utils) as g:
+        g.command('remove', 'event_handler_hub_remove')
+        g.command('update', 'event_handler_hub_update')

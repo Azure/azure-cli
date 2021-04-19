@@ -10,6 +10,9 @@ from azure.cli.core.commands.parameters import (
     tags_type,
     get_three_state_flag
 )
+from ._actions import (
+    EventHandlerTemplateUpdateAction
+)
 
 WEBPUBSUB_KEY_TYPE = ['primary', 'secondary']
 
@@ -47,3 +50,9 @@ def load_arguments(self, _):
 
     with self.argument_context('webpubsub event-handler update') as c:
         c.argument('items', help='A JSON-formatted string containing event handler items')
+
+    with self.argument_context('webpubsub event-handler hub') as c:
+        c.argument('hub_name', help='The hub whose event handler settings need to delete.')
+
+    with self.argument_context('webpubsub event-handler hub update') as c:
+        c.argument('template', action=EventHandlerTemplateUpdateAction, nargs='+', help='Template item for event handler settings. Use key=value pattern to set properties. Supported keys are "url-template", "user-event-pattern", "system-event-pattern".')

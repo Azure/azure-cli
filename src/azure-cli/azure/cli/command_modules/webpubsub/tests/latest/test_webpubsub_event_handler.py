@@ -13,14 +13,14 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-class WebpubsubScenarioTest(ScenarioTest):
+class WebpubsubEventHandlerTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_webpubsub(self, resource_group):
         tags_key = 'key'
         tags_val = 'value'
         updated_tags_val = 'value2'
-
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'name': self.create_random_name('webpubsub', 16),
             'sku': 'Standard_S1',
@@ -28,10 +28,18 @@ class WebpubsubScenarioTest(ScenarioTest):
             'tags': '{}={}'.format(tags_key, tags_val),
             'unit_count': 1,
             'updated_tags': '{}={}'.format(tags_key, updated_tags_val),
-            'updated_sku': 'Free_F1'
+            'updated_sku': 'Free_F1',
+            'hub': 'myHub',
+            'urlTemplate1': 'http://host.com',
+            'userEventPattern1': 'event1,event2',
+            'systemEventPattern1': 'connect',
+            'urlTemplate2': 'http://host2.com',
+            'userEventPattern2': 'event3,event4',
+            'systemEventPattern2': 'disconnect,connected',
+            'params': os.path.join(curr_dir, 'parameter.json').replace('\\', '\\\\'),
         })
 
-        # Test create
+        # Create
         self.cmd('webpubsub create -g {rg} -n {name} --tags {tags} -l {location} --sku {sku} --unit-count {unit_count}', checks=[
             self.check('name', '{name}'),
             self.check('location', '{location}'),
@@ -46,58 +54,22 @@ class WebpubsubScenarioTest(ScenarioTest):
             self.exists('eventHandler')
         ])
 
-        # Test show
-        self.cmd('webpubsub show -g {rg} -n {name}', checks=[
-            self.check('name', '{name}'),
-            self.check('location', '{location}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('sku.name', '{sku}'),
-            self.check('sku.capacity', '{unit_count}'),
-            self.exists('hostName'),
-            self.exists('publicPort'),
-            self.exists('serverPort'),
-            self.exists('externalIp'),
-            self.exists('eventHandler')
+        # Test event handler update
+        self.cmd('webpubsub event-handler update -g {rg} -n {name} --items @"{params}"', checks=[
+            self.check('eventHandler.items.{hub}[0].urlTemplate', '{urlTemplate1}'),
+            self.check('eventHandler.items.{hub}[0].userEventPattern', '{userEventPattern1}'),
+            self.check('eventHandler.items.{hub}[0].systemEventPattern', '{systemEventPattern1}'),
         ])
 
-        # Test list
-        self.cmd('webpubsub list -g {rg}', checks=[
-            self.check('[0].name', '{name}'),
-            self.check('[0].location', '{location}'),
-            self.check('[0].provisioningState', 'Succeeded'),
-            self.check('[0].sku.name', '{sku}'),
-            self.check('[0].sku.capacity', '{unit_count}'),
-            self.exists('[0].hostName'),
-            self.exists('[0].publicPort'),
-            self.exists('[0].serverPort'),
-            self.exists('[0].externalIp'),
-            self.exists('[0].eventHandler')
-        ])
-
-        # Test update
-        self.cmd('webpubsub update -g {rg} -n {name} --tags {updated_tags} --sku {updated_sku}', checks=[
-            self.check('name', '{name}'),
-            self.check('location', '{location}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('sku.name', '{updated_sku}'),
-            self.check('tags.{}'.format(tags_key), updated_tags_val),
-            self.exists('hostName'),
-            self.exists('publicPort'),
-            self.exists('serverPort'),
-            self.exists('externalIp'),
-            self.exists('eventHandler')
-        ])
-
-        # Test key list
-        self.cmd('webpubsub key list -n {name} -g {rg}', checks=[
-            self.exists('primaryKey'),
-            self.exists('secondaryKey')
-        ])
-
-        # Test key renew
-        self.cmd('webpubsub key renew -n {name} -g {rg} --key-type secondary', checks=[
-            self.exists('primaryKey'),
-            self.exists('secondaryKey')
+        # Test event handler remove
+        count = len(self.cmd('webpubsub event-handler hub remove  -g {rg} -n {name} --hub-name {hub}').get_output_in_json()['eventHandler'].items)
+        self.assertTrue(0, count)
+        
+        # Test event handler update
+        self.cmd('webpubsub event-handler update -g {rg} -n {name} --hub-name {hub} --template url-template={urlTemplate2} user-event-pattern={userEventPattern2} system-event-pattern={systemEventPattern2}', checks=[
+            self.check('eventHandler.items.{hub}[0].urlTemplate', '{urlTemplate2}'),
+            self.check('eventHandler.items.{hub}[0].userEventPattern', '{userEventPattern2}'),
+            self.check('eventHandler.items.{hub}[0].systemEventPattern', '{systemEventPattern2}'),
         ])
 
         # Test delete

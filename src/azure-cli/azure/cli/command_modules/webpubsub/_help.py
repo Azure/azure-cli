@@ -9,22 +9,27 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['webpubsub'] = """
     type: group
-    short-summary: Commands to manage Webpubsubs.
+    short-summary: Commands to manage Webpubsub.
 """
 
 helps['webpubsub key'] = """
     type: group
-    short-summary: Commands to manage Webpubsubs keys.
+    short-summary: Commands to manage Webpubsub keys.
 """
 
 helps['webpubsub event-handler'] = """
     type: group
-    short-summary: Commands to manage Webpubsubs event handler settings.
+    short-summary: Commands to manage Webpubsub event handler settings.
+"""
+
+helps['webpubsub event-handler hub'] = """
+    type: group
+    short-summary: Commands to manage Webpubsub hub settings.
 """
 
 helps['webpubsub network-rule'] = """
     type: group
-    short-summary: Commands to manage Webpubsubs network rules.
+    short-summary: Commands to manage Webpubsub network rules.
 """
 
 helps['webpubsub create'] = """
@@ -38,7 +43,7 @@ helps['webpubsub create'] = """
 
 helps['webpubsub list'] = """
     type: command
-    short-summary: List Webpubsubs.
+    short-summary: List Webpubsub.
 """
 
 helps['webpubsub delete'] = """
@@ -102,6 +107,7 @@ helps['webpubsub network-rule update'] = """
         text: >
             az webpubsub network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MyWebPubSub -g MyResourceGroup --deny ClientConnection
 """
+
 helps['webpubsub event-handler list'] = """
     type: command
     short-summary: List event handler settings for WebPubSub Service.
@@ -114,9 +120,36 @@ helps['webpubsub event-handler clear'] = """
 
 helps['webpubsub event-handler update'] = """
     type: command
+    short-summary: Update event handler settings for WebPubSub Service with json. For updating settings per hub, see help in hub subgroup.
+    examples:
+      - name: Update event handler to handler connect event.
+        text: >
+            az webpubsub event-handler update -n MyWebPubSub -g MyResourceGroup --items '{\"myHub\": [{\"urlTemplate\": \"http://host.com\", \"systemEventPattern\": \"connect\"}]}'
+"""
+
+helps['webpubsub event-handler update'] = """
+    type: command
     short-summary: Update event handler settings for WebPubSub Service.
     examples:
       - name: Update event handler to handler connect event.
         text: >
             az webpubsub event-handler update -n MyWebPubSub -g MyResourceGroup --items '{\"myHub\": [{\"urlTemplate\": \"http://host.com\", \"systemEventPattern\": \"connect\"}]}'
+"""
+
+helps['webpubsub event-handler hub remove'] = """
+    type: command
+    short-summary: Remove a hub's event handler settings
+    examples:
+      - name: Remove all event handler settings in a hub
+        text: >
+            az webpubsub event-handler hub remove -n MyWebPubSub -g MyResourceGroup --hub-name MyHub'
+"""
+
+helps['webpubsub event-handler hub update'] = """
+    type: command
+    short-summary: Update a hub's event handler settings
+    examples:
+      - name: Update two event handler settings in a hub
+        text: >
+            az webpubsub event-handler hub update -n MyWebPubSub -g MyResourceGroup --hub-name MyHub --template url-template="http://host.com user-event-pattern="MyEvent" --template url-template="http://host2.com" system-event-pattern="connect"'
 """
