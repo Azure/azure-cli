@@ -12,7 +12,7 @@ from knack.arguments import CLIArgumentType
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.parameters import \
     (get_resource_name_completion_list, file_type, get_three_state_flag,
-     get_enum_type)
+     get_enum_type, tags_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.command_modules.backup._validators import \
     (datetime_type)
@@ -76,7 +76,7 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
 
     with self.argument_context('backup vault create') as c:
-        c.argument('tags', type=file_type, help='JSON encoded tags. Use the show command with JSON output to see tags format. Modify the values accordingly using a file editor and pass the file path here.', completer=FilesCompleter())
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
