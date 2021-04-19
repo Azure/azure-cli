@@ -9,7 +9,6 @@ import tempfile
 from knack.util import CLIError
 from knack.log import get_logger
 
-from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription

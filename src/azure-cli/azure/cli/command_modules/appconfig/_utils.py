@@ -5,7 +5,6 @@
 
 # pylint: disable=line-too-long
 from knack.log import get_logger
-from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
