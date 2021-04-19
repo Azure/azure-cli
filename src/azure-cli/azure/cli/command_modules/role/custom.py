@@ -1806,14 +1806,19 @@ def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_pri
             result = _get_object_stubs(client, [assignee])
 
         if not result:
-            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
-                           "If the assignee is an appId, make sure the corresponding service principal is created "
-                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee or assignee_object_id))
+            # If no result found for assignee, raise exception
+            # If no result found for assignee object id, use user input as --assignee-object-id should be able to bypass Graph API
+            if assignee:
+                raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
+                               "If the assignee is an appId, make sure the corresponding service principal is created "
+                               "with 'az ad sp create --id {assignee}'."
+                               .format(assignee=assignee or assignee_object_id))
+            else:
+                return assignee_object_id, assignee_principal_type
 
         return result[0].object_id, result[0].object_type
     except CloudError as ex:
-        # If failed to verify assignee object id, DO NOT raise exception
-        # since --assignee-object-id is exposed to bypass Graph API
+        # If failed to verify assignee object id, DO NOT raise exception since --assignee-object-id is exposed to bypass Graph API
         if assignee_object_id:
             if not assignee_principal_type:
                 logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API. Err: %s\n'
