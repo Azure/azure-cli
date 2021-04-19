@@ -2837,7 +2837,7 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
             'instance_ids': []
         })
 
-        # simulate-eviction on a Regular VMSS, ure
+        # simulate-eviction on a Regular VMSS, expect failure
         self.cmd('vmss create --resource-group {rg} --name {vmss1} --location {loc} --instance-count 2 --image Centos --priority Regular')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss1}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
