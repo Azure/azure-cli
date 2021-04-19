@@ -124,7 +124,7 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.commands.constants import SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED
+        from azure.cli.core.commands.constants import SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED, MSG_PROMPT_USER_STYLED
         from azure.cli.core.style import print_styled_text
 
         ver_string, updates_available_components = get_az_version_string()
@@ -136,6 +136,7 @@ class AzCli(CLI):
             print_styled_text()
             print_styled_text(SURVEY_PROMPT_STYLED)
             print_styled_text(UX_SURVEY_PROMPT_STYLED)
+            print_styled_text(MSG_PROMPT_USER_STYLED)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception

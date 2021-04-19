@@ -43,3 +43,10 @@ UX_SURVEY_PROMPT_STYLED = [
     (Style.PRIMARY, 'and let us know if you\'re interested in trying out our newest features: '),
     (Style.HYPERLINK, 'https://aka.ms/CLIUXstudy'),
 ]
+
+MSG_PROMPT_USER = 'To hide the survey link, you can execute `az config set output.show_survey_link=no`.\n' \
+                  'If show_survey_link equals `yes`, it will be displayed.'
+MSG_PROMPT_USER_STYLED = [
+    (Style.PRIMARY, 'To hide the survey link, you can execute `az config set output.show_survey_link=no`.\n'
+                    'If show_survey_link equals `yes`, it will be displayed.'),
+]
