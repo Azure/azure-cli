@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-def aad_error_handler(error, scopes=None, claims=None):
+def aad_error_handler(error, **kwargs):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
     msg = error.get('error_description')
-    login_message = _generate_login_message(scopes=scopes, claims=claims)
+    login_message = _generate_login_message(**kwargs)
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(msg, recommendation=login_message)
@@ -33,6 +33,7 @@ def _generate_login_command(scopes=None, claims=None):
             claims = base64.urlsafe_b64encode(claims.encode()).decode()
 
         login_command.append('--claims {}'.format(claims))
+        login_command.insert(0, 'az logout')
 
     return ' '.join(login_command)
 
@@ -40,7 +41,7 @@ def _generate_login_command(scopes=None, claims=None):
 def _generate_login_message(**kwargs):
     from azure.cli.core.util import in_cloud_console
     login_command = _generate_login_command(**kwargs)
-    login_command = 'az logout\naz login'
+
     msg = "To re-authenticate, please {}" \
           "If the problem persists, please contact your tenant administrator.".format(
               "refresh Azure Portal." if in_cloud_console() else "run:\n{}\n".format(login_command))
@@ -91,13 +92,14 @@ def sdk_access_token_to_adal_token_entry(token):
             'expiresOn': datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")}
 
 
-def check_result(result):
+def check_result(result, **kwargs):
     from azure.cli.core.azclierror import AuthenticationError
 
     if not result:
-        raise AuthenticationError("Can't find token from MSAL cache.")
+        raise AuthenticationError("Can't find token from MSAL cache.",
+                                  recommendation="To re-authenticate, please run:\naz login")
     if 'error' in result:
-        raise AuthenticationError(result['error_description'])
+        aad_error_handler(result, **kwargs)
 
     # For user authentication
     if 'id_token_claims' in result:
@@ -118,3 +120,13 @@ def can_launch_browser():
         return True
     except webbrowser.Error:
         return False
+
+
+def decode_access_token(access_token):
+    # Decode the access token. We can do the same with https://jwt.ms
+    from msal.oauth2cli.oidc import decode_part
+    import json
+
+    # Access token consists of headers.claims.signature. Decode the claim part
+    decoded_str = decode_part(access_token.split('.')[1])
+    return json.loads(decoded_str)

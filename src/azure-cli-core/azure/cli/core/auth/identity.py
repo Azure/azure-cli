@@ -17,7 +17,8 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result, can_launch_browser
+from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result, can_launch_browser, \
+    decode_access_token
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -216,7 +217,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             credential = ManagedIdentityCredential(**self._credential_kwargs)
             token = credential.get_token(*scopes)
 
-        decoded = _decode_access_token(token)
+        decoded = decode_access_token(token)
         resource_id = decoded.get('xms_mirid')
         # User-assigned identity has resourceID as
         # /subscriptions/xxx/resourcegroups/xxx/providers/Microsoft.ManagedIdentity/userAssignedIdentities/xxx
@@ -243,7 +244,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
         # The scopes is only used for acquiring the initial access token
         token = credential.get_token(*scopes)
-        decoded = _decode_access_token(token)
+        decoded = decode_access_token(token)
 
         cloud_shell_identity_info = {
             self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
@@ -712,13 +713,3 @@ class MsalSecretStore:
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
         with open(self._token_file + ".json", "w") as fd:
             fd.write(json.dumps(self._service_principal_creds))
-
-
-def _decode_access_token(token):
-    # Decode the access token. We can do the same with https://jwt.ms
-    from msal.oauth2cli.oidc import decode_part
-    access_token = token.token
-
-    # Access token consists of headers.claims.signature. Decode the claim part
-    decoded_str = decode_part(access_token.split('.')[1])
-    return json.loads(decoded_str)

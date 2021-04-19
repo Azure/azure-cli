@@ -102,6 +102,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='ADAL', help='Type of well-known resource.')
             c.argument('scopes', options_list=['--scope'], nargs='*', arg_group='MSAL', help='Space-separated AAD scopes in AAD v2.0.')
             c.argument('tenant', options_list=['--tenant', '-t'], help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
+            c.argument('decode', help='Show the decoded access token.', arg_type=get_three_state_flag(),
+                       deprecate_info=c.deprecate(target='--decode', hide=True))
 
         with self.argument_context('account clear') as c:
             c.argument('clear_credential', clear_credential_type)

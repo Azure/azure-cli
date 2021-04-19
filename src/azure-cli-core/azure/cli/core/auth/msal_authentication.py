@@ -17,7 +17,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import aad_error_handler
+from .util import aad_error_handler, check_result
 
 logger = get_logger(__name__)
 
@@ -44,9 +44,11 @@ class UserCredential(PublicClientApplication):
             self.account = None
 
     def get_token(self, *scopes, **kwargs):
+        # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
         logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
         result = self.acquire_token_silent_with_error(list(scopes), self.account, **kwargs)
+        check_result(result, scopes=scopes, **kwargs)
         return _convert_to_sdk_access_token(result)
 
 
@@ -78,6 +80,7 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         result = self.acquire_token_silent(scopes, None, **kwargs)
         if not result:
             result = self.acquire_token_for_client(scopes, **kwargs)
+        check_result(result, scopes=scopes, **kwargs)
         return _convert_to_sdk_access_token(result)
 
 
@@ -85,7 +88,4 @@ def _convert_to_sdk_access_token(token_entry):
     import time
     request_time = int(time.time())
 
-    if token_entry and "access_token" in token_entry and "expires_in" in token_entry:
-        return AccessToken(token_entry["access_token"], request_time + int(token_entry["expires_in"]))
-    else:
-        aad_error_handler(token_entry)
+    return AccessToken(token_entry["access_token"], request_time + int(token_entry["expires_in"]))
