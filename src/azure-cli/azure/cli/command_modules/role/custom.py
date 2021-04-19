@@ -44,6 +44,7 @@ ROLE_ASSIGNMENT_CREATE_WARNING = (
 
 logger = get_logger(__name__)
 
+
 # pylint: disable=too-many-lines
 
 
@@ -146,19 +147,6 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     if assignee_principal_type and not assignee_object_id:
         raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
 
-    # If assignee object id is provided without assignee principal type, try to get principle type from graph
-    if assignee_object_id and not assignee_principal_type:
-        graph_client = _graph_client_factory(cmd.cli_ctx)
-        try:
-            assignee_object_result = _get_object_stubs(graph_client, [assignee_object_id])
-            if assignee_object_result:
-                assignee_principal_type = assignee_object_result[0].object_type
-        except CloudError as ex:
-            logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API. Err: %s\n'
-                           'RBAC server might reject creating role assignment by --assignee-object-id without '
-                           '--assignee-principal-type in the future. Better to specify --assignee-principal-type '
-                           'manually.', assignee_object_id, str(ex))
-
     # If condition is set and condition-version is empty, condition-version defaults to "2.0".
     if condition and not condition_version:
         condition_version = "2.0"
@@ -167,10 +155,12 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     if condition_version and not condition:
         raise CLIError('usage error: When --condition-version is set, --condition must be set as well.')
 
+    object_id, principal_type = _resolve_assignee_object(cmd.cli_ctx, assignee, assignee_object_id,
+                                                         assignee_principal_type)
+
     try:
-        return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
-                                       resolve_assignee=(not assignee_object_id),
-                                       assignee_principal_type=assignee_principal_type, description=description,
+        return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
+                                       assignee_principal_type=principal_type, description=description,
                                        condition=condition, condition_version=condition_version)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
@@ -533,9 +523,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
         assignments = [a for a in assignments if (
-            not scope or
-            include_inherited and re.match(worker.get_role_property(a, 'scope'), scope, re.I) or
-            worker.get_role_property(a, 'scope').lower() == scope.lower()
+                not scope or
+                include_inherited and re.match(worker.get_role_property(a, 'scope'), scope, re.I) or
+                worker.get_role_property(a, 'scope').lower() == scope.lower()
         )]
 
         if role:
@@ -1052,7 +1042,6 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None,
                        credential_description=None, app_roles=None, optional_claims=None):
-
     # propagate the values
     app_patch_param = ApplicationUpdateParameters()
     properties = [attr for attr in dir(instance)
@@ -1339,7 +1328,6 @@ def _resolve_service_principal(client, identifier):
 
 def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
                                      password, keyvault):
-
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
         return _random_password(34), None, None, None, None
@@ -1383,7 +1371,6 @@ def _error_caused_by_role_assignment_exists(ex):
 
 
 def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date):
-
     if not cert_start_date and not cert_end_date:
         return app_start_date, app_end_date, None, None
 
@@ -1553,7 +1540,8 @@ def _get_keyvault_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[
+            0]._token_retriever()  # pylint: disable=protected-access
 
     return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
@@ -1610,7 +1598,8 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
 
-def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
+def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault,
+                                           keyvault_cert_name):  # pylint: disable=too-many-locals
     import time
 
     kv_client = _get_keyvault_client(cli_ctx)
@@ -1650,7 +1639,8 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
     kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
-    while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
+    while kv_client.get_certificate_operation(vault_base_url,
+                                              keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
         time.sleep(5)
 
     cert = kv_client.get_certificate(vault_base_url, keyvault_cert_name, '')
@@ -1794,6 +1784,46 @@ def _encode_custom_key_description(key_description):
     # utf16 is used by AAD portal. Do not change it to other random encoding
     # unless you know what you are doing.
     return key_description.encode('utf-16')
+
+
+def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_principal_type):
+    client = _graph_client_factory(cli_ctx)
+    result = None
+
+    # resolve user name/service principal assignee
+    if assignee:
+        if assignee.find('@') >= 0:  # looks like a user principal name
+            result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+        if not result:
+            result = list(client.service_principals.list(
+                filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+        if result:
+            return result[0].object_id, result[0].object_type
+
+    # verify object id
+    try:
+        if assignee_object_id:
+            result = _get_object_stubs(client, [assignee_object_id])
+        elif is_guid(assignee):
+            result = _get_object_stubs(client, [assignee])
+
+        if not result:
+            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
+                           "If the assignee is an appId, make sure the corresponding service principal is created "
+                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee or assignee_object_id))
+
+        return result[0].object_id, result[0].object_type
+    except CloudError as ex:
+        # If failed to verify assignee object id, DO NOT raise exception
+        # since --assignee-object-id is exposed to bypass Graph API
+        if assignee_object_id:
+            if not assignee_principal_type:
+                logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API. Err: %s\n'
+                               'RBAC server might reject creating role assignment without --assignee-principal-type '
+                               'in the future. Better to specify --assignee-principal-type manually.',
+                               assignee_object_id, str(ex))
+            return assignee_object_id, assignee_principal_type
+        raise
 
 
 def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
