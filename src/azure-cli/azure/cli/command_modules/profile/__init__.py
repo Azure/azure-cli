@@ -79,6 +79,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('scopes', options_list=['--scope'], nargs="+",
                        help='A space-separated list of scopes to use in the /authorize request. '
                             'It can cover multiple resources.')
+            c.argument('claims_challenge', options_list=['--claims'], help='Claims challenge used for interactive authentication.')
 
         with self.argument_context('logout') as c:
             c.argument('username', options_list=['--username', '-u'], help='account user, if missing, logout the current active account')

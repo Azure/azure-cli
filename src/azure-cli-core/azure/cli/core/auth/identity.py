@@ -17,7 +17,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result, can_launch_browser, \
+from .util import aad_error_handler, resource_to_scopes, scopes_to_resource, check_result, \
     decode_access_token
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
@@ -130,17 +130,17 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             aad_error_handler(result)
         return check_result(result)
 
-    def login_with_device_code(self, scopes=None):
-        flow = self.msal_app.initiate_device_flow(scopes)
+    def login_with_device_code(self, scopes=None, **kwargs):
+        flow = self.msal_app.initiate_device_flow(scopes, **kwargs)
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
         logger.warning(flow["message"])
-        result = self.msal_app.acquire_token_by_device_flow(flow)  # By default it will block
+        result = self.msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
-    def login_with_username_password(self, username, password, scopes=None):
-        result = self.msal_app.acquire_token_by_username_password(username, password, scopes)
+    def login_with_username_password(self, username, password, scopes=None, **kwargs):
+        result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
     def login_with_service_principal(self, client_id, secret_or_certificate, scopes=None):

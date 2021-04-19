@@ -9,7 +9,7 @@ def aad_error_handler(error, **kwargs):
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
     msg = error.get('error_description')
-    login_message = _generate_login_message(**kwargs)
+    login_message = generate_login_message(**kwargs)
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(msg, recommendation=login_message)
@@ -18,35 +18,27 @@ def aad_error_handler(error, **kwargs):
 def _generate_login_command(scopes=None, claims=None):
     login_command = ['az login']
 
-    if scopes:
-        login_command.append('--scope {}'.format(' '.join(scopes)))
-
+    # Rejected by Continuous Access Evaluation, then by Conditional Access
     if claims:
-        import base64
-        try:
-            base64.urlsafe_b64decode(claims)
-            is_base64 = True
-        except ValueError:
-            is_base64 = False
+        login_command.append('--claims {}'.format(encode_claims(claims)))
+        return 'az logout\n' + ' '.join(login_command)
 
-        if not is_base64:
-            claims = base64.urlsafe_b64encode(claims.encode()).decode()
-
-        login_command.append('--claims {}'.format(claims))
-        login_command.insert(0, 'az logout')
+    # Rejected by Conditional Access policy, like MFA
+    elif scopes:
+        login_command.append('--scope {}'.format(' '.join(scopes)))
 
     return ' '.join(login_command)
 
 
-def _generate_login_message(**kwargs):
+def generate_login_message(**kwargs):
     from azure.cli.core.util import in_cloud_console
     login_command = _generate_login_command(**kwargs)
 
-    msg = "To re-authenticate, please {}" \
-          "If the problem persists, please contact your tenant administrator.".format(
-              "refresh Azure Portal." if in_cloud_console() else "run:\n{}\n".format(login_command))
+    login_msg = "To re-authenticate, please {}" .format(
+        "refresh Azure Portal." if in_cloud_console() else "run:\n{}".format(login_command))
 
-    return msg
+    contact_admin_msg = "If the problem persists, please contact your tenant administrator."
+    return "{}\n\n{}".format(login_msg, contact_admin_msg)
 
 
 def resource_to_scopes(resource):
@@ -130,3 +122,52 @@ def decode_access_token(access_token):
     # Access token consists of headers.claims.signature. Decode the claim part
     decoded_str = decode_part(access_token.split('.')[1])
     return json.loads(decoded_str)
+
+
+def encode_claims(claims: str):
+    import base64
+    try:
+        base64.urlsafe_b64decode(claims)
+        is_base64 = True
+    except ValueError:
+        is_base64 = False
+
+    if not is_base64:
+        claims = base64.urlsafe_b64encode(claims.encode()).decode()
+
+    return claims
+
+
+def decode_claims(claims: str):
+    import base64
+    try:
+        claims = base64.urlsafe_b64decode(claims).decode()
+    except ValueError:
+        pass
+
+    return claims
+
+
+def handle_response_401_track1(response):
+    """Generate recommendation when ARM returns 401 to Track 1 SDK."""
+    challenge = response.headers.get('WWW-Authenticate')
+    claims = _extract_claims(challenge)
+
+    recommendation = (
+        "The access token has expired or been revoked by Continuous Access Evaluation. "
+        "Silent re-authentication will be attempted in the future.\n{}")
+    login_message = generate_login_message(claims=claims)
+    return recommendation.format(login_message)
+
+
+def _extract_claims(challenge):
+    # Copied from azure.mgmt.core.policies._authentication._parse_claims_challenge
+    from azure.mgmt.core.policies._authentication import _parse_challenges
+    parsed_challenges = _parse_challenges(challenge)
+    if len(parsed_challenges) != 1 or "claims" not in parsed_challenges[0].parameters:
+        # no or multiple challenges, or no claims directive
+        return None
+
+    encoded_claims = parsed_challenges[0].parameters["claims"]
+    padding_needed = -len(encoded_claims) % 4
+    return encoded_claims + "=" * padding_needed

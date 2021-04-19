@@ -119,7 +119,7 @@ def account_clear(cmd, clear_credential=True):
 # pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
           identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False, environment=False,
-          scopes=None):
+          scopes=None, claims_challenge=None):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
@@ -135,6 +135,10 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+
+    if claims_challenge:
+        from azure.cli.core.auth.util import decode_claims
+        claims_challenge = decode_claims(claims_challenge)
 
     interactive = False
 
@@ -170,7 +174,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
             use_device_code=use_device_code,
             allow_no_subscriptions=allow_no_subscriptions,
             use_cert_sn_issuer=use_cert_sn_issuer,
-            find_subscriptions=not tenant_access)
+            find_subscriptions=not tenant_access,
+            claims_challenge=claims_challenge)
     except AdalError as err:
         # try polish unfriendly server errors
         if username:

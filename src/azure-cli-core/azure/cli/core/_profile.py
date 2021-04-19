@@ -139,7 +139,8 @@ class Profile:
               use_device_code=False,
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
-              find_subscriptions=True):
+              find_subscriptions=True,
+              **kwargs):
 
         if not scopes:
             scopes = self._arm_scope
@@ -159,12 +160,12 @@ class Profile:
                 use_device_code = True
 
             if not use_device_code:
-                user_identity = identity.login_with_auth_code(scopes=scopes)
+                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs)
             else:
-                user_identity = identity.login_with_device_code(scopes=scopes)
+                user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
         else:
             if not is_service_principal:
-                user_identity = identity.login_with_username_password(username, password, scopes=scopes)
+                user_identity = identity.login_with_username_password(username, password, scopes=scopes, **kwargs)
             else:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
