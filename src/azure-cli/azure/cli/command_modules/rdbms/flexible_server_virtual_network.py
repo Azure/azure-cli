@@ -96,7 +96,7 @@ def _change_client_with_different_subscription(cmd, subscription, nw_client, res
 
 def _resource_group_verify_and_create(resource_client, resource_group, location):
     if not resource_client.resource_groups.check_existence(resource_group):
-        logger.warning("Provided resource group in the Vnet/Subnet ID doesn't exist. Creating the resource group %s", resource_group)
+        logger.warning("Provided resource group in the resource ID doesn't exist. Creating the resource group %s", resource_group)
         resource_client.resource_groups.create_or_update(resource_group, {'location': location})
 
 
@@ -170,24 +170,26 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
     return subnet
 
 
-def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id):
+def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
     private_dns_zone_suffix = ".private.{}.database.azure.com".format(database_engine)
-    subscription, resource_group, vnet, subnet = get_id_components(subnet_id)
-
-    if private_dns_zone is None:
-        private_dns_zone = server_name + private_dns_zone_suffix
-
+    _, _, vnet, _ = get_id_components(subnet_id)
     private_dns_client = private_dns_client_factory(cmd.cli_ctx)
     private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx)
     resource_client = resource_client_factory(cmd.cli_ctx)
 
-    if not _check_if_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):  # if input is ID
-        subscription, resource_group, name = get_id_components(private_dns_zone)
+    if private_dns_zone is None:
+        private_dns_zone = server_name + private_dns_zone_suffix
+    elif not _check_if_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
+        subscription, resource_group, private_dns_zone, _ = get_id_components(private_dns_zone)
+        _resource_group_verify_and_create(resource_client, resource_group, location)
         if subscription != get_subscription_id(cmd.cli_ctx):
             logger.warning('The private DNS zone ID provided is in different subscription from the server')
             resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription)
             private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription)
             private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription)
+    elif _check_if_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
+            or not _check_if_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
+        raise ValidationError("Check if the private dns zone name or id is in correct format.")
 
     if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
         logger.warning('Creating a private dns zone %s..', private_dns_zone)
@@ -196,15 +198,15 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
                                                            private_zone_name=private_dns_zone,
                                                            parameters=PrivateZone(location='global'),
                                                            if_none_match='*')
-        private_zone_link = private_dns_link_client.create_or_update(resource_group_name=resource_group,
-                                                                     private_zone_name=private_dns_zone,
-                                                                     virtual_network_link_name=server_name+'link',
-                                                                     parameters={'virtual_network': vnet})
+        private_dns_link_client.create_or_update(resource_group_name=resource_group,
+                                                 private_zone_name=private_dns_zone,
+                                                 virtual_network_link_name=server_name + 'link',
+                                                 parameters={'virtual_network': vnet})
     else:
         logger.warning('Using the existing private dns zone %s', private_dns_zone)
         private_zone = private_dns_client.get(resource_group_name=resource_group,
                                               private_zone_name=private_dns_zone)
-    
+
     return private_zone.id
 
 

@@ -162,7 +162,7 @@ def flexible_server_restore(cmd, client,
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
-        parameters.private_dns_zone_arguments = source_server_objec.private_dns_zone_arguments
+        parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
     except Exception as e:
         raise ResourceNotFoundError(e)
 
