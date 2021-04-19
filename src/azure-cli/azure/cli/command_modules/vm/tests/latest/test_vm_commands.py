@@ -2837,7 +2837,7 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
             'instance_ids': []
         })
 
-        # simulate-eviction on a Regular VMSS, expect failure
+        # simulate-eviction on a Regular VMSS, ure
         self.cmd('vmss create --resource-group {rg} --name {vmss1} --location {loc} --instance-count 2 --image Centos --priority Regular')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss1}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
@@ -5234,6 +5234,8 @@ class DiskZRSScenarioTest(ScenarioTest):
             self.check('sku.name', 'Premium_ZRS')
         ])
         self.cmd('vm create -g {rg} -n d1 --image ubuntults --zone 1 --attach-data-disks d1 --generate-ssh-keys --nsg-rule None')
+        # ZRS disks cannot be pinned with a zone
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
 
 
 if __name__ == '__main__':
