@@ -8,14 +8,14 @@ from collections import OrderedDict
 
 
 def transform_dns_record_set_output(result):
-    from azure.mgmt.dns.models import RecordSetPaged
+    from azure.mgmt.dns.models import RecordSetListResult
 
     def _strip_null_records(item):
         for prop in [x for x in dir(item) if 'record' in x]:
             if not getattr(item, prop):
                 delattr(item, prop)
 
-    if isinstance(result, RecordSetPaged):
+    if isinstance(result, RecordSetListResult):
         result = list(result)
         for item in result:
             _strip_null_records(item)
