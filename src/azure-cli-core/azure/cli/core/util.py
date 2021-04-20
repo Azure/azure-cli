@@ -1123,12 +1123,11 @@ def get_az_rest_user_agent():
 
 def user_confirmation(message, yes=False):
     if yes:
-        return True
+        return
     from knack.prompting import prompt_y_n, NoTTYException
     try:
         if not prompt_y_n(message):
             raise CLIError('Operation cancelled.')
-        return True
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
