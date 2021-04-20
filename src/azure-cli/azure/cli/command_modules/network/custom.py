@@ -4606,7 +4606,7 @@ def create_nw_connection_monitor(cmd,
         client = get_mgmt_service_client(
             cmd.cli_ctx,
             ResourceType.MGMT_NETWORK,
-            api_version=AD_HOC_API_VERSIONS['MGMT_NETWORK']['nw_connection_monitor']
+            api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['nw_connection_monitor']
         ).connection_monitors
     elif any(v2_required_parameter_set):  # V2 creation
         connection_monitor = _create_nw_connection_monitor_v2(cmd,
