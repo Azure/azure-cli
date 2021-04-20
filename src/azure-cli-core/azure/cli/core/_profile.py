@@ -19,7 +19,7 @@ from knack.util import CLIError
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl
+    is_windows, is_wsl, scopes_to_resource
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -172,6 +172,7 @@ class Profile:
                                     password,
                                     is_service_principal,
                                     tenant,
+                                    scopes=None,
                                     use_device_code=False,
                                     allow_no_subscriptions=False,
                                     subscription_finder=None,
@@ -179,6 +180,12 @@ class Profile:
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
         subscriptions = []
+
+        if scopes:
+            auth_resource = scopes_to_resource(scopes)
+        else:
+            auth_resource = self._ad_resource_uri
+
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx,
@@ -193,14 +200,14 @@ class Profile:
                 try:
                     authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
                     subscriptions = subscription_finder.find_through_authorization_code_flow(
-                        tenant, self._ad_resource_uri, authority_url)
+                        tenant, self._ad_resource_uri, authority_url, auth_resource=auth_resource)
                 except RuntimeError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
                 subscriptions = subscription_finder.find_through_interactive_flow(
-                    tenant, self._ad_resource_uri)
+                    tenant, self._ad_resource_uri, auth_resource=auth_resource)
         else:
             if is_service_principal:
                 if not tenant:
@@ -894,9 +901,9 @@ class SubscriptionFinder:
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+    def find_through_authorization_code_flow(self, tenant, resource, authority_url, auth_resource=None):
         # launch browser and get the code
-        results = _get_authorization_code(resource, authority_url)
+        results = _get_authorization_code(auth_resource, authority_url)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
@@ -913,9 +920,9 @@ class SubscriptionFinder:
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_interactive_flow(self, tenant, resource):
+    def find_through_interactive_flow(self, tenant, resource, auth_resource=None):
         context = self._create_auth_context(tenant)
-        code = context.acquire_user_code(resource, _CLIENT_ID)
+        code = context.acquire_user_code(auth_resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
