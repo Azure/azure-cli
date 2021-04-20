@@ -711,7 +711,7 @@ def show_ag_backend_health(cmd, client, resource_group_name, application_gateway
                     child_type_1='backendAddressPools',
                     child_name_1=address_pool
                 )
-            probe_request.backend_address_pool=SubResource(id=address_pool)
+            probe_request.backend_address_pool = SubResource(id=address_pool)
             probe_assigned = True
         if http_settings is not None:
             if not is_valid_resource_id(http_settings):
@@ -724,7 +724,7 @@ def show_ag_backend_health(cmd, client, resource_group_name, application_gateway
                     child_type_1='backendHttpSettingsCollection',
                     child_name_1=http_settings
                 )
-            probe_request.backend_http_settings=SubResource(id=http_settings)
+            probe_request.backend_http_settings = SubResource(id=http_settings)
             probe_assigned = True
 
         if probe_assigned:
