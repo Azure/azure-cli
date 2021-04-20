@@ -21,6 +21,8 @@ steps:
       else
         azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH --debug
       fi
+      # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+      python $CLI_REPO_PATH/build_scripts/windows/scripts/remove_unused_api_versions.py
     displayName: 'Azdev Setup'
     env:
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}

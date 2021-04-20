@@ -98,6 +98,7 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
 if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
+%BUILDING_DIR%\python.exe %~dp0\remove_unused_api_versions.py
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
 popd
 
@@ -121,10 +122,6 @@ for /f %%a in ('dir /b /s *_py3.*.pyc') do (
     if exist !PY3_FILE! del !PY3_FILE!
 )
 popd
-
-:: Remove unused Network SDK API versions
-pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt\network
-rmdir /s /q v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_07_01 v2018_10_01 v2018_12_01 v2019_04_01 v2019_07_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01
 
 :: Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
