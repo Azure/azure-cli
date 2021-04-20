@@ -190,7 +190,7 @@ def load_command_table(self, _):
         g.custom_command('check-name', 'custom_check_name_availability',
                          command_type=synapse_operations_sdk,
                          client_factory=cf_synapse_client_operations_factory)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --SparkPool
@@ -211,7 +211,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_workspace')
         g.custom_command('create', 'create_sql_pool', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('update', 'update_sql_pool')
         g.command('pause', 'pause')
         g.command('resume', 'resume')
@@ -232,7 +232,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'sqlpool_sensitivity_label_show')
         g.command('list', 'list_current')
         g.custom_command('create', 'sqlpool_sensitivity_label_create')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('update', 'sqlpool_sensitivity_label_update')
 
     with self.command_group('synapse sql pool classification recommendation',
@@ -276,7 +276,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_workspace_sql_aad_admin', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
                                  setter_arg_name='aad_admin_info', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --Sql audit-policy
@@ -298,7 +298,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_firewall_rule', supports_no_wait=True)
         g.custom_command('update', 'update_firewall_rule', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --IntegrationRuntime
@@ -308,7 +308,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.command('update', 'update')
         g.command('upgrade', 'upgrade')
         g.command('list-auth-key', 'list', command_type=synapse_integrationruntimeauthkeys_sdk,
@@ -333,7 +333,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_key', supports_no_wait=True)
         g.custom_command('update', 'update_workspace_key', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --Managed-Identity
@@ -349,7 +349,7 @@ def load_command_table(self, _):
                             client_factory=cf_synapse_client_integrationruntimenodes_factory) as g:
         g.show_command('show', 'get')
         g.command('update', 'update')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.command('get-ip-address', 'get', command_type=synapse_integrationruntimenodeipaddress_sdk,
                   client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory)
 

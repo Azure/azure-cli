@@ -51,7 +51,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         encryption=encryption,
         tags=tags
     )
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, workspace_info)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, workspace_info)
 
 
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
@@ -70,7 +70,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
 
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=tenant_ids_list) if allowed_aad_tenant_ids is not None else None
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings)
-    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, workspace_name, workspace_patch_info)
 
 
 def get_resource_group_by_workspace_name(cmd, client, workspace_name):
@@ -87,8 +87,8 @@ def custom_check_name_availability(cmd, client, name):
 
 def create_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_name, start_ip_address, end_ip_address,
                          no_wait=False):
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, rule_name,
-                       start_ip_address=start_ip_address, end_ip_address=end_ip_address)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, rule_name,
+                       ip_firewall_rule_info ='', start_ip_address=start_ip_address, end_ip_address=end_ip_address)
 
 
 def update_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_name, start_ip_address=None,
