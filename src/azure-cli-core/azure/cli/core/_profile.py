@@ -903,7 +903,7 @@ class SubscriptionFinder:
 
     def find_through_authorization_code_flow(self, tenant, resource, authority_url, auth_resource=None):
         # launch browser and get the code
-        results = _get_authorization_code(auth_resource, authority_url)
+        results = _get_authorization_code(auth_resource or resource, authority_url)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
@@ -922,7 +922,7 @@ class SubscriptionFinder:
 
     def find_through_interactive_flow(self, tenant, resource, auth_resource=None):
         context = self._create_auth_context(tenant)
-        code = context.acquire_user_code(auth_resource, _CLIENT_ID)
+        code = context.acquire_user_code(auth_resource or resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
