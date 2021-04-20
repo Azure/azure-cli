@@ -3306,6 +3306,7 @@ def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
     client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
     return client.list(resource_group_name, load_balancer_name)
 
+
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
         backend_port, frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
