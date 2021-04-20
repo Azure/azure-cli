@@ -3764,6 +3764,7 @@ def managed_instance_create(
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(cmd.cli_ctx, kwargs['maintenance_configuration_id'])
 
     if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
         if kwargs['storage_account_type'] == 'GRS':
@@ -3857,7 +3858,7 @@ def managed_instance_update(
     if tags is not None:
         instance.tags = tags
 
-    instance.maintenance_configuration_id = maintenance_configuration_id
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(cmd.cli_ctx, maintenance_configuration_id)
 
     return instance
 

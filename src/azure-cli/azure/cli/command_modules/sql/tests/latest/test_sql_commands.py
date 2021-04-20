@@ -3951,19 +3951,25 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
+    DEFAULT_MC = "SQL_Default"
+    MMI1 = "SQL_WestEurope_MI_1"
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(self.get_subscription_id(), name)
+
     @AllowLargeResponse()
     def test_sql_managed_instance_mgmt(self):
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
-        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/fmwtest/providers/Microsoft.Network/virtualNetworks/vnet-fmwnopolicy/subnets/ManagedInstance'
+        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/fmwtestweu/providers/Microsoft.Network/virtualNetworks/vnet-fmwnopolicy/subnets/ManagedInstance'
         license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
+        loc = 'westeurope'
         v_cores = 8
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        resource_group_1 = "fmwtest"
+        resource_group_1 = "fmwtestweu"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
         # proxy_override_update = "Redirect"
@@ -3998,28 +4004,29 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('timezoneId', timezone_id),
                                           JMESPathCheck('minimalTlsVersion', tls1_2),
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
-                                          JMESPathCheck('storageAccountType', backup_storage_redundancy_internal)]).get_output_in_json()
+                                          JMESPathCheck('storageAccountType', backup_storage_redundancy_internal),
+                                          JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.DEFAULT_MC))]).get_output_in_json()
 
-        maintenance_configuration_id = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_EastUS2EUAP_MI_2'
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
 
         # test create sql managed_instance with FMW
-        self.cmd('sql mi create -g {} -n {} -l {} '
-                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maint-config-id "{}"'
-                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, maintenance_configuration_id),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('name', managed_instance_name_2),
-                     JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('licenseType', license_type),
-                     JMESPathCheck('vCores', v_cores),
-                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('sku.family', families[0]),
-                     JMESPathCheck('collation', collation),
-                     JMESPathCheck('proxyOverride', proxy_override),
-                     JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                     JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
+        managed_instance_2 = self.cmd('sql mi create -g {} -n {} -l {} '
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maint-config-id "{}"'
+                                      .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, self.MMI1),
+                                      checks=[
+                                          JMESPathCheck('resourceGroup', resource_group_1),
+                                          JMESPathCheck('name', managed_instance_name_2),
+                                          JMESPathCheck('administratorLogin', user),
+                                          JMESPathCheck('licenseType', license_type),
+                                          JMESPathCheck('vCores', v_cores),
+                                          JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                                          JMESPathCheck('sku.tier', edition),
+                                          JMESPathCheck('sku.family', families[0]),
+                                          JMESPathCheck('collation', collation),
+                                          JMESPathCheck('proxyOverride', proxy_override),
+                                          JMESPathCheck('publicDataEndpointEnabled', 'True'),
+                                          JMESPathCheck('timezoneId', timezone_id),
+                                          JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -4037,7 +4044,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
-        # test update sql managed_instance
+        # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
                  .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
                  checks=[
@@ -4112,9 +4119,13 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
-        # test delete sql managed instance
+        # test delete sql managed instance 1
         self.cmd('sql mi delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())
+
+        # test delete sql managed instance 2
+        self.cmd('sql mi delete --id {} --yes'
+                 .format(managed_instance_2['id']), checks=NoneCheck())
 
         # test show sql managed instance doesn't return anything
         self.cmd('sql mi show -g {} -n {}'

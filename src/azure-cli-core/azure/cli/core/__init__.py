@@ -64,7 +64,6 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
-        from azure.cli.core.style import format_styled_text
         from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
@@ -96,11 +95,7 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        if self.enable_color:
-            theme = self.config.get('core', 'theme', fallback='dark')
-        else:
-            theme = 'none'
-        format_styled_text.theme = theme
+        self._configure_style()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -181,6 +176,26 @@ class AzCli(CLI):
                 args_str.append('{}: {}'.format(name, value))
             logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
                            'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
+
+    def _configure_style(self):
+        from azure.cli.core.util import in_cloud_console
+        from azure.cli.core.style import format_styled_text, get_theme_dict, Style
+
+        # Configure Style
+        if self.enable_color:
+            theme = self.config.get('core', 'theme',
+                                    fallback="cloud-shell" if in_cloud_console() else "dark")
+
+            theme_dict = get_theme_dict(theme)
+
+            if theme_dict:
+                # If theme is used, also apply it to knack's logger
+                from knack.util import color_map
+                color_map['error'] = theme_dict[Style.ERROR]
+                color_map['warning'] = theme_dict[Style.WARNING]
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
 
 class MainCommandsLoader(CLICommandsLoader):
