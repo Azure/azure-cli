@@ -1482,9 +1482,14 @@ def create_service_principal_for_rbac(
             logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
+            from azure.cli.core.profiles import get_sdk
+
+            PrincipalType = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'PrincipalType', mod='models',
+                                    operation_group='role_assignments')
             for retry_time in range(0, _RETRY_TIMES):
                 try:
-                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
+                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
+                                            assignee_principal_type=PrincipalType.service_principal)
                     break
                 except Exception as ex:
                     if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
@@ -1789,44 +1794,39 @@ def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_pri
     client = _graph_client_factory(cli_ctx)
     result = None
 
-    # resolve user name/service principal assignee
+    # resolve assignee (same as _resolve_object_id)
     if assignee:
         if assignee.find('@') >= 0:  # looks like a user principal name
             result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
         if not result:
             result = list(client.service_principals.list(
                 filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-        if result:
-            return result[0].object_id, result[0].object_type
-
-    # verify object id
-    try:
-        if assignee_object_id:
-            result = _get_object_stubs(client, [assignee_object_id])
-        elif is_guid(assignee):
+        if not result and is_guid(assignee):  # assume an object id, let us verify it
             result = _get_object_stubs(client, [assignee])
 
-        if result:
-            return result[0].object_id, result[0].object_type
-        # If no result found for assignee, raise exception
-        # If no result found for assignee object id, use user input
-        # as --assignee-object-id is designed to bypass Graph API
-        if assignee:
+        # 2+ matches should never happen, so we only check 'no match' here
+        if not result:
             raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
                            "If the assignee is an appId, make sure the corresponding service principal is created "
                            "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
-        return assignee_object_id, assignee_principal_type
-    except CloudError as ex:
-        # If failed to verify assignee object id, DO NOT raise exception
-        # since --assignee-object-id is exposed to bypass Graph API
-        if assignee_object_id:
-            if not assignee_principal_type:
-                logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API. Err: %s\n'
-                               'RBAC server might reject creating role assignment without --assignee-principal-type '
-                               'in the future. Better to specify --assignee-principal-type manually.',
-                               assignee_object_id, str(ex))
-            return assignee_object_id, assignee_principal_type
-        raise
+
+        return result[0].object_id, result[0].object_type
+
+    # try to resolve assignee object id
+    try:
+        result = _get_object_stubs(client, [assignee_object_id])
+        if result:
+            return result[0].object_id, result[0].object_type
+    except CloudError:
+        pass
+
+    # If failed to verify assignee object id, DO NOT raise exception
+    # since --assignee-object-id is exposed to bypass Graph API
+    if not assignee_principal_type:
+        logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API.\n'
+                       'RBAC server might reject creating role assignment without --assignee-principal-type '
+                       'in the future. Better to specify --assignee-principal-type manually.', assignee_object_id)
+    return assignee_object_id, assignee_principal_type
 
 
 def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
