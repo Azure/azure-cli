@@ -61,12 +61,13 @@ class WebpubsubEventHandlerTest(ScenarioTest):
             self.check('eventHandler.items.{hub}[0].systemEventPattern', '{systemEventPattern1}'),
         ])
 
-        # Test event handler remove
-        count = len(self.cmd('webpubsub event-handler hub remove  -g {rg} -n {name} --hub-name {hub}').get_output_in_json()['eventHandler'].items)
-        self.assertTrue(0, count)
-        
-        # Test event handler update
-        self.cmd('webpubsub event-handler update -g {rg} -n {name} --hub-name {hub} --template url-template={urlTemplate2} user-event-pattern={userEventPattern2} system-event-pattern={systemEventPattern2}', checks=[
+        # Test event handler hub remove
+        self.cmd('webpubsub event-handler hub remove  -g {rg} -n {name} --hub-name {hub}', checks=[
+            self.check('length(eventHandler.items)', 0)
+        ])
+
+        # Test event handler hub update
+        self.cmd('webpubsub event-handler hub update -g {rg} -n {name} --hub-name {hub} --template url-template={urlTemplate2} user-event-pattern={userEventPattern2} system-event-pattern={systemEventPattern2}', checks=[
             self.check('eventHandler.items.{hub}[0].urlTemplate', '{urlTemplate2}'),
             self.check('eventHandler.items.{hub}[0].userEventPattern', '{userEventPattern2}'),
             self.check('eventHandler.items.{hub}[0].systemEventPattern', '{systemEventPattern2}'),
