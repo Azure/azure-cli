@@ -398,11 +398,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.tier = tier
     if enable_bursting is not None:
         disk.bursting_enabled = enable_bursting
-    if edge_zone:
+    if edge_zone is not None:
         disk.extended_location = edge_zone
-    if security_type:
+    if security_type is not None:
         disk.security_profile = {'securityType': security_type}
-    if support_hibernation:
+    if support_hibernation is not None:
         disk.supports_hibernation = support_hibernation
 
     client = _compute_client_factory(cmd.cli_ctx)
