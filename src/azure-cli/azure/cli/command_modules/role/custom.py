@@ -1482,14 +1482,10 @@ def create_service_principal_for_rbac(
             logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
-            from azure.cli.core.profiles import get_sdk
-
-            PrincipalType = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'PrincipalType', mod='models',
-                                    operation_group='role_assignments')
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
-                                            assignee_principal_type=PrincipalType.service_principal)
+                                            assignee_principal_type='ServicePrincipal')
                     break
                 except Exception as ex:
                     if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
