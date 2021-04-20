@@ -3824,18 +3824,30 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
-    def test_gallery_image_version_vhd(self, resource_group):
+    @StorageAccountPreparer()
+    def test_gallery_image_version_vhd(self, resource_group, storage_account, storage_account_info):
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'account_key': storage_account_info[1]
         })
 
-        self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
-        vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
-        storage_account = vhd_uri.split('.')[0].split('/')[-1]
-        self.kwargs.update({
-            'vhd': vhd_uri,
-            'stac': storage_account
-        })
+        # self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
+        # vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+        # storage_account = vhd_uri.split('.')[0].split('/')[-1]
+        # self.kwargs.update({
+        #     'vhd': vhd_uri,
+        #     'stac': storage_account
+        # })
+
+        local_file_1 = self.create_temp_file(2 * 1024 * 1024, full_random=True)
+        local_file_2 = self.create_temp_file(2 * 1024 * 1024, full_random=True)
+
+        self.cmd('storage container create -n ct --account-name {sa} --account-key {account_key} --public-access container')
+        self.cmd('storage blob upload -c {} -f {} -n file1'.format(storage_account, local_file_1))
+        self.cmd('storage blob upload -c {} -f {} -n file2'.format(storage_account, local_file_2))
+
+
+
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --replica-count 1', checks=[
