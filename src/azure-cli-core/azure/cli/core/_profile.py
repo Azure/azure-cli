@@ -186,7 +186,6 @@ class Profile:
         else:
             auth_resource = self._ad_resource_uri
 
-
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx,
                                                      self.auth_ctx_factory,
@@ -645,7 +644,6 @@ class Profile:
             if 'error' in result:
                 logger.warning(result['error_description'])
 
-                from azure.cli.core.util import scopes_to_resource
                 token_entry = self._login_with_authorization_code_flow(tenant, scopes_to_resource(scopes))
                 result = cred.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
 
