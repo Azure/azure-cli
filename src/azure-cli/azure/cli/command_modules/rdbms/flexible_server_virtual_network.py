@@ -5,14 +5,14 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name  # pylint: disable=import-error
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory
-from ._flexible_server_util import get_id_components, check_existence
+from ._flexible_server_util import get_id_components, check_existence, _get_list_from_paged_response
 
 logger = get_logger(__name__)
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
@@ -172,7 +172,7 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
 
 def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
     private_dns_zone_suffix = ".private.{}.database.azure.com".format(database_engine)
-    _, _, vnet, _ = get_id_components(subnet_id)
+    vnet_sub, vnet_rg, vnet, _ = get_id_components(subnet_id)
     private_dns_client = private_dns_client_factory(cmd.cli_ctx)
     private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx)
     resource_client = resource_client_factory(cmd.cli_ctx)
@@ -206,6 +206,21 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
         logger.warning('Using the existing private dns zone %s', private_dns_zone)
         private_zone = private_dns_client.get(resource_group_name=resource_group,
                                               private_zone_name=private_dns_zone)
+        # private dns zone link list
+        vnet_id = resource_id(subscription=vnet_sub,
+                              resource_group=vnet_rg,
+                              namespace='Microsoft.Network',
+                              type='virtualNetworks',
+                              name=vnet)
+
+        links = private_dns_link_client.list(resource_group_name=resource_group,
+                                            private_zone_name=private_dns_zone)
+
+        private_dns_link_client.create_or_update(resource_group_name=resource_group,
+                                                 private_zone_name=private_dns_zone,
+                                                 virtual_network_link_name=server_name + 'link',
+                                                 parameters={'virtual_network': vnet_id})
+
 
     return private_zone.id
 
