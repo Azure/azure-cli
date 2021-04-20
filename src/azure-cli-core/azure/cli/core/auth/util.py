@@ -9,7 +9,7 @@ def aad_error_handler(error, **kwargs):
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
     msg = error.get('error_description')
-    login_message = generate_login_message(**kwargs)
+    login_message = _generate_login_message(**kwargs)
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(msg, recommendation=login_message)
@@ -30,7 +30,7 @@ def _generate_login_command(scopes=None, claims=None):
     return ' '.join(login_command)
 
 
-def generate_login_message(**kwargs):
+def _generate_login_message(**kwargs):
     from azure.cli.core.util import in_cloud_console
     login_command = _generate_login_command(**kwargs)
 
@@ -156,7 +156,7 @@ def handle_response_401_track1(response):
     recommendation = (
         "The access token has expired or been revoked by Continuous Access Evaluation. "
         "Silent re-authentication will be attempted in the future.\n{}")
-    login_message = generate_login_message(claims=claims)
+    login_message = _generate_login_message(claims=claims)
     return recommendation.format(login_message)
 
 

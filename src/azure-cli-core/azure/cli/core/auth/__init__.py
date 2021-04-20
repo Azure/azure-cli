@@ -6,4 +6,4 @@
 from .credential_adaptor import CredentialAdaptor
 from .identity import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID
 from .util import resource_to_scopes, aad_error_handler, sdk_access_token_to_adal_token_entry, can_launch_browser, \
-    decode_access_token, generate_login_message
+    decode_access_token

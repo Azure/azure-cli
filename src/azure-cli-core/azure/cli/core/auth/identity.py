@@ -125,7 +125,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                        "Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
                        "with `az login --use-device-code`.", self.msal_authority)
-        result = self.msal_app.acquire_token_interactive(scopes, **kwargs)
+        result = self.msal_app.acquire_token_interactive(scopes, prompt='select_account', **kwargs)
         if not result or 'error' in result:
             aad_error_handler(result)
         return check_result(result)

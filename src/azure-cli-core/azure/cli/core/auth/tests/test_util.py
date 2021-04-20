@@ -21,6 +21,10 @@ class TestUtil(unittest.TestCase):
         result = _extract_claims(challenge)
         assert expected == result
 
+        # Multiple www-authenticate headers
+        result = _extract_claims(', '.join((challenge, challenge)))
+        assert result is None
+
     def test_scopes_to_resource(self):
         # scopes as a list
         self.assertEqual(scopes_to_resource(['https://management.core.windows.net//.default']),
