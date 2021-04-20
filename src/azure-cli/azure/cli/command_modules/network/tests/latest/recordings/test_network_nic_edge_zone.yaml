@@ -1,0 +1,477 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_nic_edge_zone000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001","name":"test_network_nic_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2021-04-08T09:25:09Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:25:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "tags": {}, "extendedLocation": {"name": "microsoftrrdclab1",
+      "type": "EdgeZone"}, "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]},
+      "dhcpOptions": {}, "subnets": [{"name": "subnet1", "properties": {"addressPrefix":
+      "10.0.0.0/24"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '281'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2020-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
+        \ \"etag\": \"W/\\\"31de7d54-ee3a-47ff-b054-3918bb3eadff\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"resourceGuid\": \"49d3909e-9391-4859-b2ca-a29fa55aa972\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"31de7d54-ee3a-47ff-b054-3918bb3eadff\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/c3d0e3d0-da3c-4511-b6e5-fef5e566041f?api-version=2020-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1515'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:25:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f1120d63-04fa-46f5-b999-a23ac363b3a1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/c3d0e3d0-da3c-4511-b6e5-fef5e566041f?api-version=2020-11-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:25:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 743844e4-0f14-4498-b90f-106f5c7d6068
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2020-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
+        \ \"etag\": \"W/\\\"30da500f-5d54-4bb8-a28f-ccd6fd861556\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"49d3909e-9391-4859-b2ca-a29fa55aa972\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"30da500f-5d54-4bb8-a28f-ccd6fd861556\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1517'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:25:23 GMT
+      etag:
+      - W/"30da500f-5d54-4bb8-a28f-ccd6fd861556"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 86d217d4-1453-4a52-95e8-b908b1fe0141
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --vnet-name --edge-zone
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_nic_edge_zone000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001","name":"test_network_nic_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2021-04-08T09:25:09Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:25:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "extendedLocation": {"name": "microsoftrrdclab1",
+      "type": "EdgeZone"}, "properties": {"ipConfigurations": [{"name": "ipconfig1",
+      "properties": {"privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
+      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1"}}}],
+      "dnsSettings": {"dnsServers": []}, "enableIPForwarding": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '550'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --subnet --vnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic?api-version=2020-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitestnic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic\",\r\n
+        \ \"etag\": \"W/\\\"5fe35e20-3a41-4830-8db1-2a6dd2b2c3b2\\\"\",\r\n  \"location\":
+        \"eastus2euap\",\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"2d14e692-a078-4b84-a5f1-b382be2dc1e7\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"5fe35e20-3a41-4830-8db1-2a6dd2b2c3b2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"t0ingsmrsnmurmwkukp0kwvjoc.cbnx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/a95d02e8-29ca-4df8-bcf3-e38a5c0e2d3c?api-version=2020-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1916'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:25:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f0012cab-b6cd-468b-ac22-1b60375cb117
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --vnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/a95d02e8-29ca-4df8-bcf3-e38a5c0e2d3c?api-version=2020-11-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:26:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d2a7afb2-30b6-460b-8bde-50e98b95cb4c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --vnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic?api-version=2020-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitestnic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic\",\r\n
+        \ \"etag\": \"W/\\\"5fe35e20-3a41-4830-8db1-2a6dd2b2c3b2\\\"\",\r\n  \"location\":
+        \"eastus2euap\",\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"2d14e692-a078-4b84-a5f1-b382be2dc1e7\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"5fe35e20-3a41-4830-8db1-2a6dd2b2c3b2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"t0ingsmrsnmurmwkukp0kwvjoc.cbnx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1916'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Apr 2021 09:26:02 GMT
+      etag:
+      - W/"5fe35e20-3a41-4830-8db1-2a6dd2b2c3b2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dcf970f4-c1ac-41f0-91b1-e964ce51d3d1
+    status:
+      code: 200
+      message: OK
+version: 1
