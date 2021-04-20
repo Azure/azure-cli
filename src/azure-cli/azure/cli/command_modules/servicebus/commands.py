@@ -59,15 +59,16 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
         g.command('delete', 'begin_delete')
-        g.command('exists', 'check_name_availability')
-        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom)
+        g.custom_command('exists', 'cli_namespace_exists')
+        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom, setter_name='begin_create_or_update')
 
     with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update_authorization_rule')
+        g.custom_command('create', 'cli_namespaceautho_create')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
-        g.command('keys renew', 'regenerate_keys')
+        # g.command('keys renew', 'regenerate_keys')
+        g.custom_command('keys renew', 'cli_keys_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
 
@@ -128,7 +129,7 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('break-pair', 'break_pairing')
         g.command('fail-over', 'fail_over')
-        g.command('exists', 'check_name_availability_method')
+        g.command('exists', 'check_name_availability')
         g.command('delete', 'delete')
 
 # DisasterRecoveryConfigs Authorization Region
