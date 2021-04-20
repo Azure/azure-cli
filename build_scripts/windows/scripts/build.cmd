@@ -98,8 +98,8 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
 if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
-%BUILDING_DIR%\python.exe %~dp0\remove_unused_api_versions.py
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
+%BUILDING_DIR%\python.exe %~dp0\remove_unused_api_versions.py
 popd
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
