@@ -336,6 +336,19 @@ AZURE_API_PROFILES = {
 }
 
 
+# We should avoid using ad hoc API versions,
+# use the version in a profile as much as possible.
+AD_HOC_API_VERSIONS = {
+    ResourceType.MGMT_NETWORK: {
+        'vm_default_target_network': '2018-01-01',
+        'nw_connection_monitor': '2019-06-01',
+        'container_network': '2018-08-01',
+        'appservice_network': '2020-04-01',
+        'appservice_ensure_subnet': '2019-02-01'
+    }
+}
+
+
 class _ApiVersions:  # pylint: disable=too-few-public-methods
     def __init__(self, client_type, sdk_profile, post_process):
         self._client_type = client_type
