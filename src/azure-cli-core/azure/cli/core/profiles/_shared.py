@@ -139,19 +139,19 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK: '2020-11-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-12-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2020-09-30',
-            'disk_encryption_sets': '2020-06-30',
+            'disks': '2020-12-01',
+            'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2020-05-01',
+            'snapshots': '2020-12-01',
             'galleries': '2019-12-01',
             'gallery_images': '2020-09-30',
-            'gallery_image_versions': '2019-12-01',
+            'gallery_image_versions': '2020-09-30',
             'virtual_machine_scale_sets': '2020-12-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2020-10-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
@@ -207,7 +207,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2019-08-01',
+        ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'

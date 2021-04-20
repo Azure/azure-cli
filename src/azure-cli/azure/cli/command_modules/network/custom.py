@@ -2576,15 +2576,6 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
     return instance
 
 
-def list_express_route_route_tables(cmd, resource_group_name, circuit_name, peering_name, device_path):
-    from azure.cli.core.commands import LongRunningOperation
-
-    client = network_client_factory(cmd.cli_ctx).express_route_circuits
-
-    return LongRunningOperation(cmd.cli_ctx)(
-        client.begin_list_routes_table(resource_group_name, circuit_name, peering_name, device_path)).value
-
-
 def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
                                             peer_circuit, address_prefix, authorization_key=None):
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
@@ -3003,7 +2994,7 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None):
+                            request_message=None, manual_request=None, edge_zone=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
@@ -3023,6 +3014,8 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     else:
         private_endpoint.private_link_service_connections = [pls_connection]
 
+    if edge_zone:
+        private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
@@ -3099,7 +3092,7 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
                                 virtual_network_name=None, public_ip_address=None,
                                 location=None, tags=None, load_balancer_name=None,
                                 visibility=None, auto_approval=None, fqdns=None,
-                                enable_proxy_protocol=None):
+                                enable_proxy_protocol=None, edge_zone=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
     FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
         cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
@@ -3124,6 +3117,8 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
         tags=tags,
         enable_proxy_protocol=enable_proxy_protocol
     )
+    if edge_zone:
+        link_service.extended_location = _edge_zone_model(cmd, edge_zone)
     return client.begin_create_or_update(resource_group_name, service_name, link_service)
 
 
@@ -3208,6 +3203,11 @@ def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name
 # endregion
 
 
+def _edge_zone_model(cmd, edge_zone):
+    ExtendedLocation, ExtendedLocationTypes = cmd.get_models('ExtendedLocation', 'ExtendedLocationTypes')
+    return ExtendedLocation(name=edge_zone, type=ExtendedLocationTypes.EDGE_ZONE)
+
+
 # region LoadBalancers
 def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
@@ -3217,7 +3217,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
                          no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None,
-                         private_ip_address_version=None):
+                         private_ip_address_version=None, edge_zone=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -3246,6 +3246,11 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
+    if edge_zone and cmd.supported_api_version(min_api='2020-08-01'):
+        edge_zone_type = 'EdgeZone'
+    else:
+        edge_zone_type = None
+
     if subnet_type == 'new':
         lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
         vnet = build_vnet_resource(
@@ -3261,14 +3266,14 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                                                               tags,
                                                               public_ip_address_allocation,
                                                               public_ip_dns_name,
-                                                              sku, public_ip_zone))
+                                                              sku, public_ip_zone, None, edge_zone, edge_zone_type))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
         cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
-        frontend_ip_zone, private_ip_address_version)
+        frontend_ip_zone, private_ip_address_version, None, edge_zone, edge_zone_type)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -4055,7 +4060,7 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
                private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
                application_security_groups=None, no_wait=False,
-               app_gateway_backend_address_pools=None):
+               app_gateway_backend_address_pools=None, edge_zone=None):
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     (NetworkInterface, NetworkInterfaceDnsSettings, NetworkInterfaceIPConfiguration, NetworkSecurityGroup,
      PublicIPAddress, Subnet, SubResource) = cmd.get_models(
@@ -4093,6 +4098,9 @@ def create_nic(cmd, resource_group_name, network_interface_name, subnet, locatio
     if public_ip_address:
         ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
     nic.ip_configurations = [ip_config]
+
+    if edge_zone:
+        nic.extended_location = _edge_zone_model(cmd, edge_zone)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, network_interface_name, nic)
 
 
@@ -5661,7 +5669,7 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None):
+                     public_ip_prefix=None, edge_zone=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
@@ -5698,6 +5706,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip.dns_settings = PublicIPAddressDnsSettings(
             domain_name_label=dns_name,
             reverse_fqdn=reverse_fqdn)
+
+    if edge_zone:
+        public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
     return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
 
@@ -5733,7 +5744,7 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None):
+                            version=None, location=None, tags=None, zone=None, edge_zone=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
@@ -5746,6 +5757,8 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
     if cmd.supported_api_version(min_api='2019-08-01'):
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
 
+    if edge_zone:
+        prefix.extended_location = _edge_zone_model(cmd, edge_zone)
     return client.begin_create_or_update(resource_group_name, public_ip_prefix_name, prefix)
 
 
@@ -6018,7 +6031,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None,
-                ddos_protection_plan=None, network_security_group=None):
+                ddos_protection_plan=None, network_security_group=None, edge_zone=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
                        'SubResource', 'NetworkSecurityGroup')
@@ -6043,6 +6056,8 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.enable_vm_protection = vm_protection
     if cmd.supported_api_version(min_api='2018-02-01'):
         vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
+    if edge_zone:
+        vnet.extended_location = _edge_zone_model(cmd, edge_zone)
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
@@ -6337,7 +6352,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
-                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None):
+                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace, VpnClientRootCertificate) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
@@ -6386,6 +6401,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.custom_routes = AddressSpace()
         vnet_gateway.custom_routes.address_prefixes = custom_routes
 
+    if edge_zone:
+        vnet_gateway.virtual_network_extended_location = _edge_zone_model(cmd, edge_zone)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
 

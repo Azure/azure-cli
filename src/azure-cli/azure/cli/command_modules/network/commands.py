@@ -749,7 +749,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('get-stats', 'get_stats')
         g.command('list-arp-tables', 'begin_list_arp_table')
-        g.custom_command('list-route-tables', 'list_express_route_route_tables')
+        g.command('list-route-tables', 'begin_list_routes_table', is_preview=True)
+        g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
         g.custom_command('create', 'create_express_route', supports_no_wait=True)
         g.custom_command('list', 'list_express_route_circuits')
         g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
@@ -782,12 +783,14 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
+        g.command('get-stats', 'get_peering_stats', command_type=network_er_sdk, is_preview=True)
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
 
     with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
         g.custom_command('create', 'create_express_route_peering_connection')
         g.command('delete', 'begin_delete')
         g.show_command('show')
+        g.command('list', 'list')
 
     with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
         g.show_command('show', is_preview=True)

@@ -2006,6 +2006,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         self.cmd('network express-route auth list --resource-group {rg} --circuit-name {er}', checks=self.is_empty())
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route(self, resource_group):
 
@@ -2056,6 +2057,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         # so we will just verify that the command makes it through the SDK without error.
         self.cmd('network express-route list-arp-tables --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
         self.cmd('network express-route list-route-tables --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
+        self.cmd('network express-route list-route-tables-summary --resource-group {rg} --name {er} --peering-name azureprivatepeering --path primary')
 
         self.cmd('network express-route delete --resource-group {rg} --name {er}')
         # Expecting no results as we just deleted the only express route in the resource group
@@ -2156,6 +2158,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
     def test_network_express_route_ipv6_peering(self, resource_group):
 
@@ -2173,7 +2176,11 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
             self.check('ipv6PeeringConfig.microsoftPeeringConfig.customerAsn', 100001),
             self.check('ipv6PeeringConfig.state', 'Enabled')
         ])
+        self.cmd('network express-route peering get-stats -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
+            self.check('type(@)', 'object'),
+        ])
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering2', location='eastus')
     def test_network_express_route_ipv6_peering2(self, resource_group):
         self.kwargs['er'] = 'test_circuit'
@@ -2209,6 +2216,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+        self.cmd('network express-route peering connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
     @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
@@ -4694,6 +4702,106 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         ])
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
+
+
+class NetworkExtendedLocation(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
+    def test_network_lb_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb',
+            'lb1': 'lb1',
+            'sku': 'standard',
+            'ip': 'pubip1',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku {sku} --public-ip-address {ip} --edge-zone {edge_name}')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=self.check('extendedLocation.name', '{edge_name}'))
+
+        self.cmd('network lb create -g {rg} -n {lb1} --vnet-name vnet1 --subnet subnet1 --edge-zone {edge_name}')
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_edge_zone', location='eastus2euap')
+    def test_network_nic_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'clitestvnet',
+            'nic': 'clitestnic',
+            'rg': resource_group,
+            'edge_name': 'microsoftrrdclab1'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
+                 checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet} --edge-zone {edge_name}',
+                 checks=self.check('NewNIC.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_edge_zone', location='eastus2euap')
+    def test_network_public_ip_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name}',
+                 checks=self.check('publicIp.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_edge_zone', location='eastus2euap')
+    def test_network_public_ip_prefix_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1-prefix',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network public-ip prefix create -g {rg} -n {ip1} --length 30 --edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+    @unittest.skip('wait for service ready')
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_edge_zone', location='eastus2euap')
+    def test_network_vnet_gateway_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1',
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --public-ip-address {ip1} '
+                 '--edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
+    def test_network_private_endpoint_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+        })
+        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address ip --sku Standard')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --edge-zone {edge_name}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} '
+                 '--disable-private-link-service-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} '
+                 '--disable-private-endpoint-network-policies')
+
+        pls = self.cmd('network private-link-service create -g {rg} -n pls --vnet-name {vnet} --subnet {subnet1} '
+                       '--lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd --edge-zone {edge_name}',
+                       checks=self.check('extendedLocation.name', '{edge_name}')).get_output_in_json()
+        self.kwargs['pls_id'] = pls['id']
+        self.cmd('network private-endpoint create -g {rg} -n pe --vnet-name {vnet} --subnet {subnet2} '
+                 '--private-connection-resource-id {pls_id} --connection-name cn --edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
 
 
 if __name__ == '__main__':
