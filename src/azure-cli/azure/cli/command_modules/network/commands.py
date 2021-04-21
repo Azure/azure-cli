@@ -477,7 +477,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_application_gateways')
         g.command('start', 'begin_start')
         g.command('stop', 'begin_stop')
-        g.command('show-backend-health', 'begin_backend_health', min_api='2016-09-01')
+        g.custom_command('show-backend-health', 'show_ag_backend_health', min_api='2016-09-01', client_factory=cf_application_gateways)
         g.generic_update_command('update', supports_no_wait=True, setter_name='begin_create_or_update', custom_func_name='update_application_gateway')
         g.wait_command('wait')
 

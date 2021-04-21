@@ -669,6 +669,57 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
                        application_gateway_name, appgw)
 
 
+def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
+                           protocol=None, host=None, path=None, timeout=None, host_name_from_http_settings=None,
+                           match_body=None, match_status_codes=None, address_pool=None, http_settings=None):
+    from azure.cli.core.commands import LongRunningOperation
+    on_demand_arguments = {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes,
+                           address_pool, http_settings}
+    if on_demand_arguments.difference({None}) and cmd.supported_api_version(min_api='2019-04-01'):
+        SubResource, ApplicationGatewayOnDemandProbe, ApplicationGatewayProbeHealthResponseMatch = cmd.get_models(
+            "SubResource", "ApplicationGatewayOnDemandProbe", "ApplicationGatewayProbeHealthResponseMatch")
+        probe_request = ApplicationGatewayOnDemandProbe(
+            protocol=protocol,
+            host=host,
+            path=path,
+            timeout=timeout,
+            pick_host_name_from_backend_http_settings=host_name_from_http_settings
+        )
+        if match_body is not None or match_status_codes is not None:
+            probe_request.match = ApplicationGatewayProbeHealthResponseMatch(
+                body=match_body,
+                status_codes=match_status_codes,
+            )
+        if address_pool is not None:
+            if not is_valid_resource_id(address_pool):
+                address_pool = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='applicationGateways',
+                    name=application_gateway_name,
+                    child_type_1='backendAddressPools',
+                    child_name_1=address_pool
+                )
+            probe_request.backend_address_pool = SubResource(id=address_pool)
+        if http_settings is not None:
+            if not is_valid_resource_id(http_settings):
+                http_settings = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='applicationGateways',
+                    name=application_gateway_name,
+                    child_type_1='backendHttpSettingsCollection',
+                    child_name_1=http_settings
+                )
+            probe_request.backend_http_settings = SubResource(id=http_settings)
+        return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health_on_demand(
+            resource_group_name, application_gateway_name, probe_request, expand))
+
+    return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health(
+        resource_group_name, application_gateway_name, expand))
+
 # endregion
 
 
