@@ -31,7 +31,7 @@ def _data_file(filename):
 class BatchAIEndToEndScenariosTest(ScenarioTest):
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
-    def test_batchai_manual_scale_scenario(self, resource_group, storage_account):
+    def test_batchai_manual_scale_scenario(self, resource_group, storage_account_info):
         # Typical usage scenario for regular (not auto scale) cluster.
         # 1. Create a compute cluster
         # 2. Execute some jobs on the cluster
@@ -40,7 +40,8 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         # 5. Execute more jobs and examine execution results
         # 6. Delete the cluster
         # 7. Delete the jobs
-        with self._given_configured_environment(resource_group, storage_account):
+        with self._given_configured_environment(resource_group, storage_account_info):
+            storage_account, account_key = storage_account_info
             # Create a file share 'share' to be mounted on the cluster
             self.cmd('az storage share create -n share')
             # Create a workspace
@@ -151,14 +152,15 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
-    def test_batchai_auto_scale_scenario(self, resource_group, storage_account):
+    def test_batchai_auto_scale_scenario(self, resource_group, storage_account_info):
         # Typical usage scenario for auto scale cluster.
         # 1. Create a compute cluster
         # 2. Submit a job
         # 3. The cluster will auto scale to execute the job
         # 4. Examine the job execution results
         # 5. The cluster will down scale
-        with self._given_configured_environment(resource_group, storage_account):
+        with self._given_configured_environment(resource_group, storage_account_info):
+            storage_account, account_key = storage_account_info
             # Create a file share 'share' to be mounted on the cluster
             self.cmd('az storage share create -n share')
             # Create a workspace
@@ -212,12 +214,13 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
-    def test_batchai_cluster_with_file_systems(self, resource_group, storage_account):
+    def test_batchai_cluster_with_file_systems(self, resource_group, storage_account_info):
         # Tests creation of a cluster with mounted file systems defined in config.
         # 1. Create an Azure File Share and Azure Blob Container to mount on the cluster.
         # 2. Create a cluster and verify parameters.
         # 3. Verify that cluster was able to start nodes.
-        with self._given_configured_environment(resource_group, storage_account):
+        with self._given_configured_environment(resource_group, storage_account_info):
+            storage_account, account_key = storage_account_info
             # Create a file share 'share' and blob container 'container' to be mounted on cluster nodes.
             self.cmd('az storage share create -n share')
             self.cmd('az storage container create -n container')
@@ -249,9 +252,10 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
-    def test_batchai_config_less_cluster_with_file_systems(self, resource_group, storage_account):
+    def test_batchai_config_less_cluster_with_file_systems(self, resource_group, storage_account_info):
         # Test creation of a cluster with mount file systems defined via command line.
-        with self._given_configured_environment(resource_group, storage_account):
+        with self._given_configured_environment(resource_group, storage_account_info):
+            storage_account, account_key = storage_account_info
             self.cmd('az storage share create -n share')
             self.cmd('az storage container create -n container')
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group))
@@ -327,14 +331,15 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
-    def test_batchai_job_level_mounting_scenario(self, resource_group, storage_account):
+    def test_batchai_job_level_mounting_scenario(self, resource_group, storage_account_info):
         # Typical usage scenario for regular (not auto scale) cluster.
         # 1. Create a compute cluster.
         # 2. Execute a job with job level filesystems when file systems specified in config file.
         # 3. Check the job succeeded and files are generated.
         # 4. Execute a job with job level filesystems when file systems specified via command line.
         # 5. Check the job succeeded and files are generated.
-        with self._given_configured_environment(resource_group, storage_account):
+        with self._given_configured_environment(resource_group, storage_account_info):
+            storage_account, account_key = storage_account_info
             # Create a file share 'share' to be mounted on the cluster
             self.cmd('az storage share create -n share')
             self.cmd('az storage container create -n container')
@@ -417,11 +422,10 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             StringContainCheck("Cluster")])
 
     @contextmanager
-    def _given_configured_environment(self, resource_group, storage_account):
+    def _given_configured_environment(self, resource_group, storage_account_info):
 
         # Configure storage account related environment variables.
-        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'.format(
-            storage_account, resource_group)).output[:-1]
+        storage_account, account_key = storage_account_info
         self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)
         self.set_env('AZURE_STORAGE_KEY', account_key)
         self.set_env('AZURE_BATCHAI_STORAGE_ACCOUNT', storage_account)
