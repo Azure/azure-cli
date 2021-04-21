@@ -17,6 +17,7 @@ from azure.cli.testsdk import (
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 
+
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
     def _test_flexible_server_local_context(self, database_engine, resource_group):

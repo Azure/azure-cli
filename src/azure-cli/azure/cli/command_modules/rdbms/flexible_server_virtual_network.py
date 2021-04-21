@@ -211,7 +211,6 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
 
     link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
     link.registration_enabled = True
-    print
 
     if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
         logger.warning('Creating a private dns zone %s..', private_dns_zone)
@@ -235,7 +234,6 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
                                                      private_zone_name=private_dns_zone)
 
         link_exist_flag = False
-        etag = None
         for virtual_link in virtual_links:
             if virtual_link.virtual_network.id == vnet_id:
                 link_exist_flag = True
