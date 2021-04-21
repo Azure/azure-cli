@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.22.1
+++++++
+* Minor fixes
+
 2.22.0
 ++++++
 * Add spinner progress bar for long running operation (#17262)
