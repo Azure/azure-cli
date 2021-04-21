@@ -5651,13 +5651,12 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
 
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
-    import unittest
-
-    @unittest.skip('The live run succeed, but run record failed. It should be a test bug. Please fix the issue and remove dependency of policy command module. You can set the policy assignment enforcement mode disabled to let the resource creation go through temporarily')
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='eastus')
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
     def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        account = self.cmd('account show').get_output_in_json()
 
         self.kwargs.update({
             'loc': resource_group_location,
@@ -5677,24 +5676,9 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'edition': 'GeneralPurpose',
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override': "Proxy"
+            'proxy_override': "Proxy",
+            'subscription_id': account['id']
         })
-
-        rg = self.cmd('group show --name {resource_group}').get_output_in_json()
-
-        self.kwargs.update({
-            'rg_id': rg['id'],
-            'policy_name': 'SDOStdPolicyNetwork'
-        })
-
-        policyAssignment = self.cmd('az policy assignment show -n {policy_name}').get_output_in_json()
-        new_assignment = ' '.join(policyAssignment['notScopes'])
-        new_assignment = new_assignment + " " + rg['id']
-
-        self.kwargs.update({
-            'new_assignment': new_assignment
-        })
-        self.cmd('policy assignment create -n {policy_name} --policy {policy_name} --not-scopes \"{new_assignment}\"')
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
@@ -5732,12 +5716,13 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         managed_database_name = 'logReplayTestDb'
         managed_database_name1 = 'logReplayTestDb1'
+        # Uploading bak file to blob is restricted by testing framework, so only mitigation for now is to use hard-coded values
         self.kwargs.update({
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
-            'storage_sas': 'sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2FgjocUpioABFvm5N0BwhKFrukGw41s%3D',
-            'storage_uri': 'https://mijetest.blob.core.windows.net/pcc-remote-replicas-test',
-            'last_backup_name': 'log1.bak'
+            'storage_sas': 'sp=rl&st=2021-04-12T13:07:20Z&se=2021-04-30T21:07:20Z&spr=https&sv=2020-02-10&sr=c&sig=igoGWjvYceuSkuHRzkm6oPPxitRlSYgGvmdwTbr7WTM%3D',
+            'storage_uri': 'https://mibrkicstorage.blob.core.windows.net/mibrkicportal',
+            'last_backup_name': 'full.bak'
         })
 
         # Start Log Replay Service
@@ -5746,6 +5731,8 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         if self.in_recording or self.is_live:
             sleep(10)
+
+        self.cmd('sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
 
         # Complete log replay service
         self.cmd('sql midb log-replay complete -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --last-bn {last_backup_name}',
