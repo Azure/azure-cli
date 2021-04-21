@@ -3823,6 +3823,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+    @unittest.skip('Service failed')
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
     @StorageAccountPreparer()
     def test_gallery_image_version_vhd(self, resource_group, storage_account, storage_account_info):
@@ -3831,27 +3832,36 @@ class VMGalleryImage(ScenarioTest):
             'account_key': storage_account_info[1]
         })
 
-        # self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
-        # vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
-        # storage_account = vhd_uri.split('.')[0].split('/')[-1]
-        # self.kwargs.update({
-        #     'vhd': vhd_uri,
-        #     'stac': storage_account
-        # })
+        self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
+        vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+        storage_account_os = vhd_uri.split('.')[0].split('/')[-1]
+        self.kwargs.update({
+            'vhd': vhd_uri,
+            'stac': storage_account_os
+        })
 
-        local_file_1 = self.create_temp_file(2 * 1024 * 1024, full_random=True)
-        local_file_2 = self.create_temp_file(2 * 1024 * 1024, full_random=True)
+        local_file_1 = self.create_temp_file(1024)
+        local_file_2 = self.create_temp_file(1024)
 
-        self.cmd('storage container create -n ct --account-name {sa} --account-key {account_key} --public-access container')
-        self.cmd('storage blob upload -c {} -f {} -n file1'.format(storage_account, local_file_1))
-        self.cmd('storage blob upload -c {} -f {} -n file2'.format(storage_account, local_file_2))
+        self.cmd('storage container create -n container1 --account-name {sa} --account-key {account_key} --public-access container')
+        self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file1.vhd --type page'.format(storage_account, local_file_1))
+        self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file2.vhd --type page'.format(storage_account, local_file_2))
 
-
+        vhd1_uri = 'https://{}.blob.core.windows.net/container1/file1.vhd'.format(storage_account)
+        vhd2_uri = 'https://{}.blob.core.windows.net/container1/file2.vhd'.format(storage_account)
+        self.kwargs.update({
+            'vhd1': vhd1_uri,
+            'vhd2': vhd2_uri
+        })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --replica-count 1', checks=[
-            self.check('storageProfile.osDiskImage.source.uri', vhd_uri)
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --data-vhds-uris {vhd1} {vhd2} --data-vhds-luns 0 1 --data-vhds-storage-accounts {sa} {sa} --replica-count 1', checks=[
+            self.check('storageProfile.osDiskImage.source.uri', vhd_uri),
+            self.check('storageProfile.dataDiskImages[0].source.uri', vhd1_uri),
+            self.check('storageProfile.dataDiskImages[1].source.uri', vhd2_uri),
+            self.check('storageProfile.dataDiskImages[0].lun', 0),
+            self.check('storageProfile.dataDiskImages[1].lun', 1),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
