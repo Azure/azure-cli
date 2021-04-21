@@ -563,7 +563,7 @@ class Profile:
 
         if external_tenants_info and \
                 (in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID) or identity_type):
-            raise CLIError("Cross-tenant authentication is not supported by managed identity and Cloud Shell. "
+            raise CLIError("Cross-tenant authentication is not supported by managed identity and Cloud Shell account. "
                            "Please run `az login` with a user account or a service principal.")
 
         if identity_type is None:
