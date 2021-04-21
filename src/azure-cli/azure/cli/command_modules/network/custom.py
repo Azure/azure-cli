@@ -674,9 +674,9 @@ def show_ag_backend_health(cmd, client, resource_group_name, application_gateway
                            protocol=None, host=None, path=None, timeout=None, host_name_from_http_settings=None,
                            match_body=None, match_status_codes=None, address_pool=None, http_settings=None):
     from azure.cli.core.commands import LongRunningOperation
-    if {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes, address_pool,
-        http_settings}.difference({None}) and cmd.supported_api_version(min_api='2019-04-01'):
-
+    on_demand_arguments = {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes,
+                           address_pool, http_settings}
+    if on_demand_arguments.difference({None}) and cmd.supported_api_version(min_api='2019-04-01'):
         SubResource, ApplicationGatewayOnDemandProbe, ApplicationGatewayProbeHealthResponseMatch = cmd.get_models(
             "SubResource", "ApplicationGatewayOnDemandProbe", "ApplicationGatewayProbeHealthResponseMatch")
         probe_request = ApplicationGatewayOnDemandProbe(
