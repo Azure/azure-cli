@@ -174,7 +174,7 @@ class UnauthorizedError(UserFault):
     def __init__(self, error_msg, recommendation=None, original_error=None):
 
         from azure.cli.core.auth.util import handle_response_401_track1
-        super().__init__(error_msg, recommendation=handle_response_401_track1(original_error.response),
+        super().__init__(error_msg, recommendation=handle_response_401_track1(original_error),
                          original_error=original_error)
 
 

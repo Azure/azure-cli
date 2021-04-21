@@ -150,7 +150,7 @@ def decode_claims(claims: str):
 
 def handle_response_401_track1(response):
     """Generate recommendation when ARM returns 401 to Track 1 SDK."""
-    challenge = response.headers.get('WWW-Authenticate')
+    challenge = response.response.headers.get('WWW-Authenticate')
     claims = _extract_claims(challenge)
 
     recommendation = (

@@ -119,6 +119,7 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
 
         # Check re-login recommendation
         re_login_command = 'az login --scope {scope}'.format(**self.kwargs)
+        assert 'AADSTS50076' in cm.exception.error_msg
         assert re_login_command in cm.exception.recommendations[0]
 
         # endregion

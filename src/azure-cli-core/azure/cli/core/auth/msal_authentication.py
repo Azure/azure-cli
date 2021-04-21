@@ -10,14 +10,12 @@ These credentials implements azure.core.credentials.TokenCredential by exposing 
 SDK invocation.
 """
 
-import os
-
 from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import aad_error_handler, check_result
+from .util import check_result
 
 logger = get_logger(__name__)
 
@@ -51,13 +49,14 @@ class UserCredential(PublicClientApplication):
         result = self.acquire_token_silent_with_error(list(scopes), self.account, claims_challenge=claims,
                                                       **kwargs)
         check_result(result, scopes=scopes, claims=claims)
-        return _convert_to_sdk_access_token(result)
+        return _build_sdk_access_token(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
 
     def __init__(self, client_id, secret_or_certificate=None, **kwargs):
 
+        import os
         # If certificate file path is provided, transfer it to MSAL input
         if os.path.isfile(secret_or_certificate):
             cert_file = secret_or_certificate
@@ -82,11 +81,11 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         result = self.acquire_token_silent(scopes, None, **kwargs)
         if not result:
             result = self.acquire_token_for_client(scopes, **kwargs)
-        check_result(result, scopes=scopes, **kwargs)
-        return _convert_to_sdk_access_token(result)
+        check_result(result)
+        return _build_sdk_access_token(result)
 
 
-def _convert_to_sdk_access_token(token_entry):
+def _build_sdk_access_token(token_entry):
     import time
     request_time = int(time.time())
 
