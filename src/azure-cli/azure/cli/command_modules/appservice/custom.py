@@ -61,7 +61,9 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_REDIRECT_URI)
+from ._github_oauth import (get_github_access_token)
 
 logger = get_logger(__name__)
 
