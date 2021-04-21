@@ -399,8 +399,8 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
 
     def _test_flexible_server_vnet_server_create(self, database_engine, resource_group, server):
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {}'.
-                 format(database_engine, resource_group, server, self.location))
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --private-dns-zone {}'.
+                 format(database_engine, resource_group, server, self.location, 'testdnsname.private.postgres.database.azure.com'))
 
         show_result = self.cmd('{} flexible-server show -g {} -n {}'
                                .format(database_engine, resource_group, server)).get_output_in_json()
@@ -408,6 +408,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                              self.get_subscription_id(), resource_group, 'Vnet' + server[6:], 'Subnet' + server[6:]))
+        self.assertIn('testdnsname.private.postgres.database.azure.com', show_result['privateDnsZoneArguments']['privateDnsZoneArmResourceId'])
 
     def _test_flexible_server_vnet_ha_server_create(self, database_engine, resource_group, server):
 
@@ -417,7 +418,7 @@ class FlexibleServerVnetServerMgmtScenarioTest(RdbmsScenarioTest):
         show_result = self.cmd('{} flexible-server show -g {} -n {}'
                                .format(database_engine, resource_group, server),
                                checks=[JMESPathCheck('haEnabled', 'Enabled')]).get_output_in_json()
-        print(show_result)
+
         self.assertEqual(show_result['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                              self.get_subscription_id(), resource_group, 'Vnet' + server[6:], 'Subnet' + server[6:]))

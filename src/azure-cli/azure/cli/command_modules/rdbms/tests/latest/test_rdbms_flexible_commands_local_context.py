@@ -17,7 +17,6 @@ from azure.cli.testsdk import (
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 
-
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
     def _test_flexible_server_local_context(self, database_engine, resource_group):
@@ -50,6 +49,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('{} flexible-server delete --yes'.format(database_engine))
 
         delete_local_context_info = self.cmd('config param-persist show').get_output_in_json()
+        print(delete_local_context_info)
         self.assertNotIn(database_engine + ' flexible-server', delete_local_context_info)
         self.assertNotIn(local_context_info[database_engine + ' flexible-server']['server_name'], delete_local_context_info)
         self.assertNotIn(local_context_info[database_engine + ' flexible-server']['administrator_login'], delete_local_context_info)

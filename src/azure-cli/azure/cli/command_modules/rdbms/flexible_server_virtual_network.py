@@ -189,20 +189,29 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
 
     if private_dns_zone is None:
         private_dns_zone = server_name + private_dns_zone_suffix
+
     elif not _check_if_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
         subscription, resource_group, private_dns_zone, _ = get_id_components(private_dns_zone)
-        _resource_group_verify_and_create(resource_client, resource_group, location)
+        if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
+            raise ValidationError('The suffix for the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+
         if subscription != get_subscription_id(cmd.cli_ctx):
-            logger.warning('The private DNS zone ID provided is in different subscription from the server')
+            logger.warning('The provided private DNS zone ID is in different subscription from the server')
             resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription)
             private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription)
             private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription)
+        _resource_group_verify_and_create(resource_client, resource_group, location)
+
     elif _check_if_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
             or not _check_if_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
         raise ValidationError("Check if the private dns zone name or id is in correct format.")
 
+    elif _check_if_resource_name(private_dns_zone) and private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
+        raise ValidationError('The suffix for the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+
     link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
     link.registration_enabled = True
+    print
 
     if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
         logger.warning('Creating a private dns zone %s..', private_dns_zone)
@@ -215,19 +224,20 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
         private_dns_link_client.create_or_update(resource_group_name=resource_group,
                                                  private_zone_name=private_dns_zone,
                                                  virtual_network_link_name=vnet_name + '-link',
-                                                 parameters=link, if_none_match='*')
+                                                 parameters=link, if_none_match='*').result()
     else:
         logger.warning('Using the existing private dns zone %s', private_dns_zone)
         private_zone = private_dns_client.get(resource_group_name=resource_group,
                                               private_zone_name=private_dns_zone)
         # private dns zone link list
 
-        links = private_dns_link_client.list(resource_group_name=resource_group,
-                                             private_zone_name=private_dns_zone)
+        virtual_links = private_dns_link_client.list(resource_group_name=resource_group,
+                                                     private_zone_name=private_dns_zone)
 
         link_exist_flag = False
-        for link in links:
-            if link.virtual_network.id == vnet_id:
+        etag = None
+        for virtual_link in virtual_links:
+            if virtual_link.virtual_network.id == vnet_id:
                 link_exist_flag = True
                 break
 
@@ -235,7 +245,7 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
             private_dns_link_client.create_or_update(resource_group_name=resource_group,
                                                      private_zone_name=private_dns_zone,
                                                      virtual_network_link_name=vnet_name + '-link',
-                                                     parameters=link, if_none_match='*')
+                                                     parameters=link, if_none_match='*').result()
 
     return private_zone.id
 

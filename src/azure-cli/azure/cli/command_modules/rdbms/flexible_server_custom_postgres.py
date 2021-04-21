@@ -86,6 +86,7 @@ def flexible_server_create(cmd, client,
         private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
     else:
         delegated_subnet_arguments = None
+        private_dns_zone_arguments = None
 
     administrator_login_password = generate_password(administrator_login_password)
     if server_result is None:
