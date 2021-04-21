@@ -376,7 +376,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
     if hyper_v_generation:
-        disk.hyper_vgeneration = hyper_v_generation
+        disk.hyper_v_generation = hyper_v_generation
 
     if zone:
         disk.zones = zone
@@ -589,7 +589,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                         sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental,
                         encryption=encryption)
     if hyper_v_generation:
-        snapshot.hyper_vgeneration = hyper_v_generation
+        snapshot.hyper_v_generation = hyper_v_generation
     if network_access_policy is not None:
         snapshot.network_access_policy = network_access_policy
     if disk_access is not None:

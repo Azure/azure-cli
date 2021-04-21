@@ -5177,7 +5177,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @unittest.skip('Service does not work')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_trusted_launch_')
     def test_disk_trusted_launch_update(self):
-        self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180 --security-type TrustedLaunch', checks=[
+        self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18.04-LTS:latest --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch')
         ])
 
