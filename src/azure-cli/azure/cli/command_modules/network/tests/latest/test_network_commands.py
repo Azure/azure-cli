@@ -495,6 +495,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check("frontendIpConfigurations[0].subnet.contains(id, 'default')", True)
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
+
         self.cmd('network application-gateway stop --resource-group {rg} -n ag1')
         self.cmd('network application-gateway start --resource-group {rg} -n ag1')
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
@@ -502,8 +503,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
-        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+        self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1')
 
         self.cmd('network application-gateway list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -516,6 +517,9 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('resourceGroup', resource_group),
             self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
+        self.cmd('network application-gateway show-backend-health -g {rg} -n ag1 '
+                 '--host-name-from-http-settings --path /test --timeout 100 '
+                 '--http-settings appGatewayBackendHttpSettings --address-pool appGatewayBackendPool')
 
     @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
     def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
@@ -1111,7 +1115,6 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'rg': resource_group,
             'gateway_ip': 'gateway_ip',
             'ag': 'ag1',
-            'res': 'application-gateway probe',
             'name': 'myprobe'
         })
 
@@ -1120,7 +1123,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--sku WAF_v2 '
                  '--public-ip-address {gateway_ip} ')
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait '
+        self.cmd('network application-gateway probe create -g {rg} --gateway-name {ag} -n {name} --no-wait '
                  '--path /test '
                  '--protocol http '
                  '--interval 25 '
@@ -1131,7 +1134,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--match-status-codes 200 204 '
                  '--host-name-from-http-settings false '
                  '--port 2048 ')
-        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+        self.cmd('network application-gateway probe show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test'),
             self.check('protocol', 'Http'),
             self.check('interval', 25),
@@ -1143,7 +1146,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('pickHostNameFromBackendHttpSettings', False),
             self.check('port', 2048)
         ])
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait '
+        self.cmd('network application-gateway probe update -g {rg} --gateway-name {ag} -n {name} --no-wait '
                  '--path /test2 '
                  '--protocol https '
                  '--interval 26 '
@@ -1154,7 +1157,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--match-status-codes 201 '
                  '--host-name-from-http-settings '
                  '--port 4096 ')
-        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+        self.cmd('network application-gateway probe show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test2'),
             self.check('protocol', 'Https'),
             self.check('interval', 26),
@@ -1166,9 +1169,9 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('pickHostNameFromBackendHttpSettings', True),
             self.check('port', 4096)
         ])
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
-        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
+        self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+        self.cmd('network application-gateway probe delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
+        self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_rule')
     def test_network_ag_rule(self, resource_group):
@@ -2891,6 +2894,9 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('NewNIC.provisioningState', 'Succeeded'),
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
             self.check('length(NewNIC.dnsSettings.dnsServers)', 1)
+        ])
+        self.cmd('network lb list-nic -g {rg} -n {lb}', checks=[
+            self.check('length(@)', 1)
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
