@@ -90,7 +90,7 @@ cli:
   cli-directive:
     - where:
         group: 'DiskAccesses'
-        op: ListPrivateEndpointConnections|DeleteAPrivateEndpointConnection
+        op: ListPrivateEndpointConnections
         apiVersion: '2020-09-30'
       hidden: false
     - where:
