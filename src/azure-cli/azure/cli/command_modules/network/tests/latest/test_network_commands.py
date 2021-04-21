@@ -495,6 +495,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check("frontendIpConfigurations[0].subnet.contains(id, 'default')", True)
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
+
         self.cmd('network application-gateway stop --resource-group {rg} -n ag1')
         self.cmd('network application-gateway start --resource-group {rg} -n ag1')
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
@@ -502,8 +503,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
-        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+        self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1')
 
         self.cmd('network application-gateway list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -516,6 +517,9 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('resourceGroup', resource_group),
             self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
+        self.cmd('network application-gateway show-backend-health -g {rg} -n ag1 '
+                 '--host-name-from-http-settings --path /test --timeout 100 '
+                 '--http-settings appGatewayBackendHttpSettings --address-pool appGatewayBackendPool')
 
     @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
     def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
@@ -1111,7 +1115,6 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'rg': resource_group,
             'gateway_ip': 'gateway_ip',
             'ag': 'ag1',
-            'res': 'application-gateway probe',
             'name': 'myprobe'
         })
 
@@ -1120,7 +1123,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--sku WAF_v2 '
                  '--public-ip-address {gateway_ip} ')
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait '
+        self.cmd('network application-gateway probe create -g {rg} --gateway-name {ag} -n {name} --no-wait '
                  '--path /test '
                  '--protocol http '
                  '--interval 25 '
@@ -1131,7 +1134,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--match-status-codes 200 204 '
                  '--host-name-from-http-settings false '
                  '--port 2048 ')
-        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+        self.cmd('network application-gateway probe show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test'),
             self.check('protocol', 'Http'),
             self.check('interval', 25),
@@ -1143,7 +1146,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('pickHostNameFromBackendHttpSettings', False),
             self.check('port', 2048)
         ])
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait '
+        self.cmd('network application-gateway probe update -g {rg} --gateway-name {ag} -n {name} --no-wait '
                  '--path /test2 '
                  '--protocol https '
                  '--interval 26 '
@@ -1154,7 +1157,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--match-status-codes 201 '
                  '--host-name-from-http-settings '
                  '--port 4096 ')
-        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+        self.cmd('network application-gateway probe show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test2'),
             self.check('protocol', 'Https'),
             self.check('interval', 26),
@@ -1166,9 +1169,9 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('pickHostNameFromBackendHttpSettings', True),
             self.check('port', 4096)
         ])
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
-        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
+        self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+        self.cmd('network application-gateway probe delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
+        self.cmd('network application-gateway probe list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_rule')
     def test_network_ag_rule(self, resource_group):
@@ -2891,6 +2894,9 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('NewNIC.provisioningState', 'Succeeded'),
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
             self.check('length(NewNIC.dnsSettings.dnsServers)', 1)
+        ])
+        self.cmd('network lb list-nic -g {rg} -n {lb}', checks=[
+            self.check('length(@)', 1)
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
@@ -4702,6 +4708,106 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         ])
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
+
+
+class NetworkExtendedLocation(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
+    def test_network_lb_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb',
+            'lb1': 'lb1',
+            'sku': 'standard',
+            'ip': 'pubip1',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku {sku} --public-ip-address {ip} --edge-zone {edge_name}')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=self.check('extendedLocation.name', '{edge_name}'))
+
+        self.cmd('network lb create -g {rg} -n {lb1} --vnet-name vnet1 --subnet subnet1 --edge-zone {edge_name}')
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_edge_zone', location='eastus2euap')
+    def test_network_nic_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'clitestvnet',
+            'nic': 'clitestnic',
+            'rg': resource_group,
+            'edge_name': 'microsoftrrdclab1'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
+                 checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet} --edge-zone {edge_name}',
+                 checks=self.check('NewNIC.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_edge_zone', location='eastus2euap')
+    def test_network_public_ip_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name}',
+                 checks=self.check('publicIp.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_edge_zone', location='eastus2euap')
+    def test_network_public_ip_prefix_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1-prefix',
+            'edge_name': 'microsoftrrdclab1'
+        })
+
+        self.cmd('network public-ip prefix create -g {rg} -n {ip1} --length 30 --edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+    @unittest.skip('wait for service ready')
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_edge_zone', location='eastus2euap')
+    def test_network_vnet_gateway_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip1': 'pubip1',
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --public-ip-address {ip1} '
+                 '--edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
+    def test_network_private_endpoint_edge_zone(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+        })
+        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address ip --sku Standard')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --edge-zone {edge_name}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} '
+                 '--disable-private-link-service-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} '
+                 '--disable-private-endpoint-network-policies')
+
+        pls = self.cmd('network private-link-service create -g {rg} -n pls --vnet-name {vnet} --subnet {subnet1} '
+                       '--lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd --edge-zone {edge_name}',
+                       checks=self.check('extendedLocation.name', '{edge_name}')).get_output_in_json()
+        self.kwargs['pls_id'] = pls['id']
+        self.cmd('network private-endpoint create -g {rg} -n pe --vnet-name {vnet} --subnet {subnet2} '
+                 '--private-connection-resource-id {pls_id} --connection-name cn --edge-zone {edge_name}',
+                 checks=self.check('extendedLocation.name', '{edge_name}'))
 
 
 if __name__ == '__main__':

@@ -477,7 +477,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_application_gateways')
         g.command('start', 'begin_start')
         g.command('stop', 'begin_stop')
-        g.command('show-backend-health', 'begin_backend_health', min_api='2016-09-01')
+        g.custom_command('show-backend-health', 'show_ag_backend_health', min_api='2016-09-01', client_factory=cf_application_gateways)
         g.generic_update_command('update', supports_no_wait=True, setter_name='begin_create_or_update', custom_func_name='update_application_gateway')
         g.wait_command('wait')
 
@@ -702,7 +702,7 @@ def load_command_table(self, _):
         g.command('list-references', 'get_by_target_resources')
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.show_command('show', 'get', table_transformer=transform_dns_zone_table_output)
         g.custom_command('list', 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
         g.custom_command('import', 'import_zone')
@@ -877,6 +877,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update')
+        g.custom_command('list-nic', 'list_load_balancer_nic', min_api='2017-06-01')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -1419,6 +1420,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_virtual_hub')
+        g.wait_command('wait')
 
     with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
                             custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
@@ -1429,6 +1431,7 @@ def load_command_table(self, _):
                                  custom_func_name='update_virtual_hub_bgp_connection')
         g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
+        g.wait_command('wait')
 
     with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
                             custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:

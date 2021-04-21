@@ -3,6 +3,17 @@
 Release History
 ===============
 
+2.22.1
+++++++
+
+**ARM**
+
+* Hotfix: Fix the issue that bicep build broken in Python 3.6
+
+**Key Vault**
+
+* Hotfix: GA for managed-HSM ralated commands and parameters
+
 2.22.0
 ++++++
 
