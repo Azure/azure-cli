@@ -7,7 +7,7 @@
 import argparse
 from azure.mgmt.webpubsub.models import EventHandlerTemplate
 from knack.log import get_logger
-from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 logger = get_logger(__name__)
 
@@ -24,7 +24,7 @@ class EventHandlerTemplateUpdateAction(argparse._AppendAction):
                 key, value = item.split('=', 1)
                 kwargs[key.replace('-', '_')] = value
             except ValueError:
-                raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
         logger.warning(kwargs)
         value = EventHandlerTemplate(**kwargs)
         super().__call__(parser, namespace, value, option_string)
