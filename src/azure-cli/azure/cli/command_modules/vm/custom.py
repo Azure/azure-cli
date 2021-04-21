@@ -3487,10 +3487,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                         data_vhds_storage_accounts[i] = resource_id(
                             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                             namespace='Microsoft.Storage', type='storageAccounts', name=storage_account)
-            data_disk_images = []
-            for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
-                data_disk_images.append(GalleryDataDiskImage(
-                    source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
+                data_disk_images = []
+                for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
+                    data_disk_images.append(GalleryDataDiskImage(
+                        source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
