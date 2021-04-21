@@ -5992,6 +5992,11 @@ type: command
 short-summary: Delete a route server under a resource group.
 """
 
+helps['network routeserver wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the route server is met.
+"""
+
 helps['network routeserver peering'] = """
 type: group
 short-summary: Manage the route server peering.
@@ -6030,6 +6035,11 @@ short-summary: List all routes the route server bgp connection has learned.
 helps['network routeserver peering list-advertised-routes'] = """
 type: command
 short-summary: List all routes the route server bgp connection is advertising to the specified peer.
+"""
+
+helps['network routeserver peering wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the route server peering is met.
 """
 
 helps['network watcher'] = """
