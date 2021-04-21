@@ -877,6 +877,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
                                  setter_name='begin_create_or_update')
+        g.custom_command('list-nic', 'list_load_balancer_nic', min_api='2017-06-01')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -1419,6 +1420,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_virtual_hub')
+        g.wait_command('wait')
 
     with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
                             custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
@@ -1429,6 +1431,7 @@ def load_command_table(self, _):
                                  custom_func_name='update_virtual_hub_bgp_connection')
         g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
+        g.wait_command('wait')
 
     with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
                             custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
