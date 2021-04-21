@@ -77,10 +77,10 @@ def firewall_rule_delete_func(client, resource_group_name, server_name, firewall
         user_confirmation(
             "Are you sure you want to delete the firewall-rule '{0}' in server '{1}', resource group '{2}'".format(
                 firewall_rule_name, server_name, resource_group_name))
-        try:
-            result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
+    try:
+        result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
     return result
 
 
