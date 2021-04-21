@@ -143,7 +143,8 @@ DEPENDENCIES = [
     'urllib3[secure]>=1.25.9,<2.0.0',
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
-    'xmltodict~=0.12'
+    'xmltodict~=0.12',
+    'azure-mgmt-webpubsub~=1.0.0b1'
 ]
 
 TESTS_REQUIRE = [

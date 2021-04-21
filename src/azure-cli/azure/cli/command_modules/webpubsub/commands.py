@@ -31,7 +31,7 @@ def load_command_table(self, _):
         client_factory=cf_webpubsub
     )
 
-    with self.command_group('webpubsub', webpubsub_general_utils) as g:
+    with self.command_group('webpubsub', webpubsub_general_utils, is_preview=True) as g:
         g.command('create', 'webpubsub_create')
         g.command('delete', 'webpubsub_delete')
         g.command('list', 'webpubsub_list')
