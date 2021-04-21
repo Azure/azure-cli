@@ -464,6 +464,22 @@ def load_arguments(self, _):
         c.argument('trusted_client_certificates', options_list=['--trusted-client-certificates', '--trusted-client-cert'], nargs='+', help='Array of references to application gateway trusted client certificates.')
         c.argument('client_auth_configuration', options_list=['--client-auth-configuration', '--client-auth-config'], help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
 
+    with self.argument_context('network application-gateway show-backend-health') as c:
+        c.argument('expand', help='Expands BackendAddressPool and BackendHttpSettings referenced in backend health.')
+
+    with self.argument_context('network application-gateway show-backend-health', min_api='2019-04-01', is_preview=True, arg_group="Probe Operation") as c:
+        c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
+        c.argument('host', help='The name of the host to send the probe.')
+        c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
+        c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.',
+                   arg_type=get_three_state_flag())
+        c.argument('match_body', help='Body that must be contained in the health response.')
+        c.argument('match_status_codes', nargs='+',
+                   help='Space-separated list of allowed ranges of healthy status codes for the health response.')
+        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_settings', help='The name or ID of the HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
     # endregion
 
     # region WebApplicationFirewallPolicy

@@ -869,6 +869,9 @@ short-summary: Get information on the backend health of an application gateway.
 examples:
   - name: Show backend health of an application gateway.
     text: az network application-gateway show-backend-health -g MyResourceGroup -n MyAppGateway
+  - name: Show backend health of an application gateway for given combination of backend pool and http setting.
+    text: |-
+        az network application-gateway show-backend-health -g MyResourceGroup -n MyAppGateway --host-name-from-http-settings --path /test --timeout 100 --http-settings appGatewayBackendHttpSettings --address-pool appGatewayBackendPool
 """
 
 helps['network application-gateway ssl-cert'] = """
