@@ -5,58 +5,71 @@
 
 from time import sleep
 
-import jwt
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.testsdk import LiveScenarioTest
 from azure.cli.core.auth.util import decode_access_token
 from msrestazure.azure_exceptions import CloudError
 
 ARM_URL = "https://eastus2euap.management.azure.com/"  # ARM canary
+ARM_MAX_RETRY = 30
 ARM_RETRY_INTERVAL = 10
 
 
 class CAEScenarioTest(LiveScenarioTest):
 
+    def setUp(self):
+        super().setUp()
+        # Clear MSAL cache to avoid unexpected tokens from cache
+        self.cmd('az account clear')
+
+    def _retry_until_error(self, cmd):
+        remaining_reties = ARM_MAX_RETRY
+        while remaining_reties > 0:
+            remaining_reties -= 1
+            sleep(ARM_RETRY_INTERVAL)
+            self.cmd(cmd)
+        raise AssertionError("Retry chance exhausted.")
+
     def test_client_capabilities(self):
         self.cmd('login')
 
         # Verify the access token has CAE enabled
-        out = self.cmd('account get-access-token').get_output_in_json()
-        access_token = out['accessToken']
-        decoded = jwt.decode(access_token, verify=False, algorithms=['RS256'])
+        result = self.cmd('account get-access-token').get_output_in_json()
+        access_token = result['accessToken']
+        decoded = decode_access_token(access_token)
         self.assertEqual(decoded['xms_cc'], ['CP1'])  # xms_cc: extension microsoft client capabilities
         self.assertEqual(decoded['xms_ssm'], '1')  # xms_ssm: extension microsoft smart session management
 
-    def _test_revoke_session(self, command, expected_error, checks=None):
+    def test_revoke_session(self):
+        track2_cmd = "storage account list"
+        track1_cmd = "group list"
+
         self.test_client_capabilities()
 
         # Test access token is working
-        self.cmd(command)
+        self.cmd(track2_cmd)
+        self.cmd(track1_cmd)
 
         self._revoke_sign_in_sessions()
 
         # CAE is currently only available in canary endpoint
         # with mock.patch.object(self.cli_ctx.cloud.endpoints, "resource_manager", ARM_URL):
-        exit_code = 0
-        with self.assertRaises(expected_error) as ex:
-            while exit_code == 0:
-                exit_code = self.cmd(command).exit_code
-                sleep(ARM_RETRY_INTERVAL)
-        if checks:
-            checks(ex.exception)
 
-    def test_revoke_session_track2(self):
-        def check_aad_error_code(ex):
-            self.assertIn('AADSTS50173', str(ex))
+        # Keep trying until failure
 
-        self._test_revoke_session("storage account list", AuthenticationError, check_aad_error_code)
+        # Track 2
+        with self.assertRaises(AuthenticationError) as cm:
+            self._retry_until_error(track2_cmd)
 
-    def test_revoke_session_track1(self):
-        def check_arm_error(ex):
-            self.assertEqual(ex.status_code, 401)
-            self.assertIsNotNone(ex.response.headers["WWW-Authenticate"])
+        assert 'AADSTS50173' in cm.exception.error_msg
+        assert 'az login --claims' in cm.exception.recommendations[0]
 
-        self._test_revoke_session('group list', CloudError, check_arm_error)
+        # Track 1
+        with self.assertRaises(CloudError) as cm:
+            self._retry_until_error(track1_cmd)
+
+        self.assertEqual(cm.exception.status_code, 401)
+        self.assertIsNotNone(cm.exception.response.headers["WWW-Authenticate"])
 
     def _revoke_sign_in_sessions(self):
         # Manually revoke sign in sessions
