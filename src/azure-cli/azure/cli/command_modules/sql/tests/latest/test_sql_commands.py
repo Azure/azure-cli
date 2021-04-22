@@ -5632,7 +5632,10 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
 
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
+    import unittest
+
+    @unittest.skip('The live run succeed, but run record failed. It should be a test bug. Please fix the issue and remove dependency of policy command module. You can set the policy assignment enforcement mode disabled to let the resource creation go through temporarily')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='eastus')
     def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
