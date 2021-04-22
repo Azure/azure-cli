@@ -6,13 +6,13 @@
 # pylint: disable=line-too-long
 from collections import Counter, OrderedDict
 from knack.log import get_logger
-from azure.core.exceptions import ResourceNotFoundError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
+from azure.core.exceptions import HttpResponseError
 
 logger = get_logger(__name__)
 
@@ -129,7 +129,7 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
-        except ResourceNotFoundError as ex:
+        except HttpResponseError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
           .format(cum_records, total_records, private_zone_name), file=sys.stderr)
@@ -359,7 +359,7 @@ def _privatedns_add_save_record(client, record, record_type, relative_record_set
     try:
         record_set = client.get(
             resource_group_name, private_zone_name, record_type, relative_record_set_name)
-    except ResourceNotFoundError:
+    except HttpResponseError:
         record_set = RecordSet(ttl=3600)
 
     _privatedns_add_record(record_set, record, record_type, is_list)
