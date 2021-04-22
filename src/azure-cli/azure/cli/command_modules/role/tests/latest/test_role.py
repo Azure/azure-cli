@@ -357,19 +357,44 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
         self.kwargs['rg'] = resource_group
 
+        def _test_role_assignment(assignee_object_id, assignee_principal_type=None):
+            self.kwargs['object_id'] = assignee_object_id
+            self.kwargs['principal_type'] = assignee_principal_type
+            # test role assignment on subscription level
+            if assignee_principal_type:
+                self.cmd(
+                    'role assignment create --assignee-object-id {object_id} --assignee-principal-type {principal_type} --role Reader -g {rg}')
+            else:
+                self.cmd('role assignment create --assignee-object-id {object_id} --role Reader -g {rg}')
+            self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+            self.cmd('role assignment delete -g {rg}')
+            self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+
+        def _test_role_assignment_graph_call(assignee_object_id, assignee_principal_type):
+            # test role assignment with principal type which won't trigger graph call
+            _test_role_assignment(assignee_object_id, assignee_principal_type)
+
+            # test role assignment without principal type which will trigger graph call to complete principal type
+            _test_role_assignment(assignee_object_id)
+
+            # test role assignment without principal type and graph call fail
+            from msrestazure.azure_exceptions import CloudError
+            import requests
+            mock_response = requests.Response()
+            mock_response.status_code = 403
+            mock_response.reason = 'Forbidden for url: https://graph.windows.net/.../getObjectsByObjectIds?api-version=1.6'
+            with mock.patch('azure.graphrbac.operations.ObjectsOperations.get_objects_by_object_ids',
+                            side_effect=CloudError(mock_response)):
+                _test_role_assignment(assignee_object_id)
+
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             # User
             user = self.create_random_name('testuser', 15)
             self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
-            self.kwargs['object_id'] = result['objectId']
             try:
-                # test role assignment on subscription level
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role Reader -g {rg}')
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
-                self.cmd('role assignment delete -g {rg}')
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+                _test_role_assignment_graph_call(result['objectId'], 'User')
             finally:
                 try:
                     self.cmd('ad user delete --upn-or-object-id {upn}')
@@ -380,14 +405,9 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             self.kwargs['group_name'] = self.create_random_name('testgroup', 15)
             result = self.cmd(
                 'ad group create --display-name {group_name} --mail-nickname {group_name}').get_output_in_json()
-            self.kwargs['object_id'] = result['objectId']
             time.sleep(10)
             try:
-                # test role assignment on subscription level
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type Group --role Reader -g {rg}')
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
-                self.cmd('role assignment delete -g {rg}')
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+                _test_role_assignment_graph_call(result['objectId'], 'Group')
             finally:
                 try:
                     self.cmd('ad group delete --group {object_id}')
@@ -399,13 +419,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             result = self.cmd('ad sp create-for-rbac --skip-assignment --name {sp_name}').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
             result = self.cmd('ad sp show --id {app_id}').get_output_in_json()
-            self.kwargs['object_id'] = result['objectId']
             try:
-                # test role assignment on subscription level
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type ServicePrincipal --role Reader -g {rg}')
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
-                self.cmd('role assignment delete -g {rg}')
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+                _test_role_assignment_graph_call(result['objectId'], 'ServicePrincipal')
             finally:
                 try:
                     self.cmd('ad sp delete --id {object_id}')
