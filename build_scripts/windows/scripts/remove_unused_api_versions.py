@@ -16,14 +16,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def remove_unused_network_api_versions():
+    # Hard-coded API versions
     used_network_api_versions = set(AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK].values())
+
+    # API versions in profile
     for _, profile in AZURE_API_PROFILES.items():
         if ResourceType.MGMT_NETWORK in profile:
             used_network_api_versions.add(profile[ResourceType.MGMT_NETWORK])
 
+    # Normalize API version: 2019-02-01 -> v2019_02_01
     used_network_api_vers = {f"v{api.replace('-','_')}" for api in used_network_api_versions}
 
-    # network SDK has a set of versions imported in models.py.
+    # Network SDK has a set of versions imported in models.py.
     # Let's keep them before we figure out how to remove a version in all related SDK files.
     path = azure.mgmt.network.__path__[0]
     model_file = os.path.join(path, 'models.py')
@@ -40,7 +44,7 @@ def remove_unused_network_api_versions():
     _LOGGER.info(sorted(all_api_vers))
 
     remove_api_vers = sorted(all_api_vers - used_network_api_vers)
-    _LOGGER.info('Network API versions that can be removed:')
+    _LOGGER.info('Network API versions that will be removed:')
     _LOGGER.info(remove_api_vers)
 
     for ver in remove_api_vers:
