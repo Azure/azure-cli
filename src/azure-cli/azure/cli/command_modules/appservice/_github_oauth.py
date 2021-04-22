@@ -3,87 +3,79 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
+from azure.cli.core.azclierror import (ValidationError, CLIInternalError, UnclassifiedUserFault)
 from knack.log import get_logger
 
 from ._client_factory import web_client_factory
-from ._constants import (GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_REDIRECT_URI, GITHUB_OAUTH_SCOPES)
+from ._constants import (GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_SCOPES)
 
 logger = get_logger(__name__)
 
+
 '''
-This function opens a web browser to prompt for github login
-then spins up a server on localhost:3000 to listen for callback
-to receive access token
+Get Github personal access token following Github oauth for command line tools
+https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow
 '''
 def get_github_access_token(cmd, scope_list=None):
-    import os
-    random_state = os.urandom(5).hex()
-
-    authorize_url = 'https://github.com/login/oauth/authorize?' \
-                    'client_id={}&state={}&redirect_uri={}'.format(
-                        GITHUB_OAUTH_CLIENT_ID, random_state, GITHUB_OAUTH_REDIRECT_URI)
     if scope_list:
         for scope in scope_list:
             if scope not in GITHUB_OAUTH_SCOPES:
                 raise ValidationError("Requested github oauth scope is invalid")
-        _scope_string = "&scope="
-        for i in range(len(scope_list)):
-            if i != 0:
-                _scope_string += "+"
-            _scope_string += scope_list[i]
-        authorize_url += _scope_string
-    logger.warning('Opening OAuth URL')
+        scope_list = ' '.join(scope_list)
 
-    access_code = _start_http_server(random_state, authorize_url)  # use localhost to get code to exchange for access token
+    authorize_url = 'https://github.com/login/device/code'
+    authorize_url_data = {
+        'scope': scope_list,
+        'client_id': GITHUB_OAUTH_CLIENT_ID
+    }
 
-    if access_code:
-        client = web_client_factory(cmd.cli_ctx)
-        response = client.generate_github_access_token_for_appservice_cli_async(access_code, random_state)
-
-        if response.access_token:
-            return response.access_token
-    return None
-
-
-def _start_http_server(random_state, authorize_url):
-    ip = '127.0.0.1'
-    port = 3000
-    
-    import http.server
-    import webbrowser
-    import socketserver
-    import urllib.parse as urlparse
-
-    class Server(socketserver.TCPServer):
-        allow_reuse_address = True
-
-    class CallBackHandler(http.server.BaseHTTPRequestHandler):
-        access_token = None
-        
-        def do_GET(self):
-            parsed_params = urlparse.parse_qs(urlparse.urlparse(self.path).query)
-            received_state = parsed_params.get('state', [None])[0]
-            received_code = parsed_params.get('code', [None])[0]
-
-            if (self.path.startswith('/TokenAuthorize') and received_state and received_code and (random_state == received_state)):
-                CallBackHandler.received_code = received_code
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write('GitHub account authenticated. You may close this tab'.encode('utf-8'))
-            else:
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write('Unable to authenticate GitHub account. Please close this tab'.encode('utf-8'))
+    import base64
+    import json
+    import requests
+    import time
+    from urllib.parse import urlparse, parse_qs
 
     try:
-        server = Server((ip, port), CallBackHandler)
-        webbrowser.open(authorize_url)
-        logger.warning('Listening at port: {}'.format(port))
-        server.handle_request()
-    except Exception as e:
-        raise CLIError('Socket error: {}. Please try again, or provide personal access token'.format(e))
+        response = requests.post(authorize_url, data=authorize_url_data)
+        parsed_response = parse_qs(response.content.decode('ascii'))
 
-    return CallBackHandler.received_code if hasattr(CallBackHandler, 'received_code') else None
+        device_code = parsed_response['device_code'][0]
+        user_code = parsed_response['user_code'][0]
+        verification_uri = parsed_response['verification_uri'][0]
+        interval = int(parsed_response['interval'][0])
+        expires_in_seconds = int(parsed_response['expires_in'][0])
+
+        logger.warning('Please go to {} and enter the user code {} to activate and retrieve your github personal access token'.format(verification_uri, user_code))
+
+        timeout = time.time() + expires_in_seconds
+        logger.warning('Waiting up to {} minutes for activation'.format(str(expires_in_seconds//60)))
+
+        confirmation_url = 'https://github.com/login/oauth/access_token'
+        confirmation_url_data = {
+            'client_id': GITHUB_OAUTH_CLIENT_ID,
+            'device_code': device_code,
+            'grant_type': 'urn:ietf:params:oauth:grant-type:device_code'
+        }
+
+        pending = True
+        while pending:
+            time.sleep(interval)
+
+            if time.time() > timeout:
+                raise UnclassifiedUserFault('Activation did not happen in time. Please try again')
+
+            confirmation_response = requests.post(confirmation_url, data=confirmation_url_data)
+            parsed_confirmation_response = parse_qs(confirmation_response.content.decode('ascii'))
+
+            if 'error' in parsed_confirmation_response and parsed_confirmation_response['error'][0]:
+                if parsed_confirmation_response['error'][0] == 'slow_down':
+                    interval += 5  # if slow_down error is received, 5 seconds is added to minimum polling interval
+                elif not(parsed_confirmation_response['error'][0] == 'authorization_pending'):
+                    pending = False
+
+            if 'access_token' in parsed_confirmation_response and parsed_confirmation_response['access_token'][0]:
+                return parsed_confirmation_response['access_token'][0]
+    except Exception as e:
+        raise CLIInternalError('Error: {}. Please try again, or retrieve personal access token from the Github website'.format(e))
+
+    raise UnclassifiedUserFault('Activation did not happen in time. Please try again')

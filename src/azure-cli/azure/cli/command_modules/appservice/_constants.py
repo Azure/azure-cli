@@ -38,7 +38,6 @@ FUNCTIONS_NO_V2_REGIONS = {
     "USSec East"
 }
 GITHUB_OAUTH_CLIENT_ID = "8d8e1f6000648c575489"
-GITHUB_OAUTH_REDIRECT_URI = "http://localhost:3000/TokenAuthorize"
 GITHUB_OAUTH_SCOPES = [
     "admin:repo_hook",
     "repo",
