@@ -48,7 +48,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
     @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_upload_10G_file(self, resource_group, storage_account, storage_account_info):
+    def test_storage_blob_upload_10G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
                                              'block', skip_download=True)
 
