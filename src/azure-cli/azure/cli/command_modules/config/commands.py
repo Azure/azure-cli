@@ -14,6 +14,7 @@ def load_command_table(self, _):
         g.command('set', 'config_set')
         g.command('get', 'config_get')
         g.command('unset', 'config_unset')
+        g.command('list-available', 'list_available')
 
     with self.command_group('config param-persist', config_custom, is_experimental=True) as g:
         g.command('on', 'turn_param_persist_on')

@@ -18,6 +18,9 @@ def _normalize_config_value(value):
         value = '' if value in ["''", '""'] else value
     return value
 
+def list_available(cmd):
+    print("running")
+
 
 def config_set(cmd, key_value=None, local=False):
     if key_value:

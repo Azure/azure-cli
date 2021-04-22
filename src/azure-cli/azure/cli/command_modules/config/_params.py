@@ -32,6 +32,9 @@ def load_arguments(self, _):
     with self.argument_context('config param-persist show') as c:
         c.positional('name', nargs='*', help='Space-separated list of parameter persistence names.')
 
+    with self.argument_context('config list-available') as c:
+        pass
+
     with self.argument_context('config param-persist delete') as c:
         c.positional('name', nargs='*', help='Space-separated list of parameter persistence names. Either positional name argument or --all can be specified.')
         c.argument('all', help='Clear all parameter persistence data. Either positional name argument  or --all can be specified.', action='store_true')
