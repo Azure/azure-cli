@@ -30,6 +30,7 @@ from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
 
+@unittest.skip("Out of maintenance")
 class TestProfile(unittest.TestCase):
 
     @classmethod

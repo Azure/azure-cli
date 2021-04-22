@@ -572,11 +572,7 @@ class Profile:
                            "Please run `az login` with a user account or a service principal.")
 
         if identity_type is None:
-            def _retrieve_token(sdk_resource=None):
-                # When called by
-                #   - Track 1 SDK, use `resource` specified by CLI
-                #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
-                token_resource = sdk_resource or resource
+            def _retrieve_token(token_resource):
                 logger.debug("Retrieving token from ADAL for resource %r", token_resource)
 
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -589,8 +585,7 @@ class Profile:
                                                                               account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
-            def _retrieve_tokens_from_external_tenants(sdk_resource=None):
-                token_resource = sdk_resource or resource
+            def _retrieve_tokens_from_external_tenants(token_resource):
                 logger.debug("Retrieving token from ADAL for external tenants and resource %r", token_resource)
 
                 external_tokens = []
@@ -605,7 +600,8 @@ class Profile:
 
             from azure.cli.core.adal_authentication import AdalAuthentication
             auth_object = AdalAuthentication(_retrieve_token,
-                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
+                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None,
+                                             resource=resource)
         else:
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
@@ -658,7 +654,7 @@ class Profile:
             raise CLIError("Identity type {} is currently unsupported".format(identity_type))
 
         if 'error' in result:
-            from azure.cli.core.adal_authentication import aad_error_handler
+            from azure.cli.core.auth.util import aad_error_handler
             aad_error_handler(result)
 
         return username_or_sp_id, result["access_token"]
