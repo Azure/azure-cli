@@ -501,8 +501,11 @@ def configure_log_analytic_common_parameters(c):
 # pylint: disable=protected-access
 def configure_rule_parameters(c):
     c.argument('rule_name', help='Name of the rule.')
-    c.argument('order', help='The order of the rule. The order number must start from 0 and consecutive. '
-                             "Rule with higher order will be applied later.")
+    c.argument('order', type=int,
+               help='The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. '
+               'A rule with a lesser order will be applied before a rule with a greater order. '
+               'Rule with order 0 is a special rule. '
+               'It does not require any condition and actions listed in it will always be applied.')
     c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition.',
                arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
     c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
