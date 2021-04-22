@@ -302,7 +302,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('assign_identity', options_list=['--assign-identity'],
                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
             c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'], help='The name or id of private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. CLI creates a new private dns zone within the same resource group if not provided by users.')
-            c.ignore('database_name')
+            c.argument('database_name', id_part=None, arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of the database to be created when provisioning the database server')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('resource_group_name', required=True)
