@@ -987,11 +987,15 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         except ClientException as client_exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
             self.progress_bar.stop()
+            if getattr(client_exception, 'status_code', None) == 404 and 'delete' in self.cli_ctx.data['command']:
+                logger.debug('Service returned 404 on the long-running delete operation. CLI treats it as delete '
+                             'successfully but service should fix this behavior.')
+                return None
             handle_long_running_operation_exception(client_exception)
-
-        self.progress_bar.end()
-        if poll_flag:
-            telemetry.poll_end()
+        finally:
+            self.progress_bar.end()
+            if poll_flag:
+                telemetry.poll_end()
 
         return result
 
