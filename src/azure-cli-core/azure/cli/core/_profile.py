@@ -700,7 +700,8 @@ class Profile:
                                                                                    use_cert_sn_issuer)
             except adal.AdalError as ex:
                 from azure.cli.core.adal_authentication import adal_error_handler
-                adal_error_handler(ex)
+                from azure.cli.core.util import resource_to_scopes
+                adal_error_handler(ex, scopes=resource_to_scopes(resource))
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))

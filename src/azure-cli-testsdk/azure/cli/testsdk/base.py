@@ -214,6 +214,9 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         self.kwargs = {}
         self.test_resources_count = 0
 
+    def setUp(self):
+        patch_main_exception_handler(self)
+
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)

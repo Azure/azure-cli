@@ -29,8 +29,17 @@ def _generate_login_message(**kwargs):
     from azure.cli.core.util import in_cloud_console
     login_command = _generate_login_command(**kwargs)
 
-    msg = "To re-authenticate, please {}" \
-          "If the problem persists, please contact your tenant administrator.".format(
-              "refresh Azure Portal." if in_cloud_console() else "run:\n{}\n".format(login_command))
+    msg = "To re-authenticate, please {}" .format(
+        "refresh Azure Portal." if in_cloud_console() else "run:\n{}".format(login_command))
 
     return msg
+
+
+def decode_access_token(access_token):
+    # Decode the access token. We can do the same with https://jwt.ms
+    from msal.oauth2cli.oidc import decode_part
+    import json
+
+    # Access token consists of headers.claims.signature. Decode the claim part
+    decoded_str = decode_part(access_token.split('.')[1])
+    return json.loads(decoded_str)
