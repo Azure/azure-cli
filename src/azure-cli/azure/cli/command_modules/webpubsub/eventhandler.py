@@ -20,13 +20,13 @@ def event_handler_update(client, resource_group_name, webpubsub_name, items):
     parsedItem = json.loads(items)
     event_handler = EventHandlerSettings(items=parsedItem)
     parameters = WebPubSubResource(event_handler=event_handler)
-    return client.update(parameters, resource_group_name, webpubsub_name)
+    return client.begin_update(resource_group_name, webpubsub_name, parameters)
 
 
 def event_handler_clear(client, resource_group_name, webpubsub_name):
     event_handler = EventHandlerSettings(items={})
     parameters = WebPubSubResource(event_handler=event_handler)
-    return client.update(parameters, resource_group_name, webpubsub_name)
+    return client.begin_update(resource_group_name, webpubsub_name, parameters)
 
 
 def event_handler_hub_update(client, resource_group_name, webpubsub_name, hub_name, template):
@@ -38,7 +38,7 @@ def event_handler_hub_update(client, resource_group_name, webpubsub_name, hub_na
     items[hub_name] = template
     parameters = WebPubSubResource(event_handler=event_handler)
     print(parameters.event_handler)
-    return client.update(parameters, resource_group_name, webpubsub_name)
+    return client.begin_update(resource_group_name, webpubsub_name, parameters)
 
 
 def event_handler_hub_remove(client, resource_group_name, webpubsub_name, hub_name):
@@ -48,4 +48,4 @@ def event_handler_hub_remove(client, resource_group_name, webpubsub_name, hub_na
     items = event_handler.items
     items.pop(hub_name, None)
     parameters = WebPubSubResource(event_handler=event_handler)
-    return client.update(parameters, resource_group_name, webpubsub_name)
+    return client.begin_update(resource_group_name, webpubsub_name, parameters)

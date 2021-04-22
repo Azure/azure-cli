@@ -17,7 +17,7 @@ def webpubsub_create(client, resource_group_name, webpubsub_name, sku, unit_coun
         tags=tags
     )
 
-    return client.create_or_update(parameter, resource_group_name, webpubsub_name)
+    return client.begin_create_or_update(resource_group_name, webpubsub_name, parameter)
 
 
 def webpubsub_list(client, resource_group_name=None):
@@ -27,7 +27,7 @@ def webpubsub_list(client, resource_group_name=None):
 
 
 def webpubsub_delete(client, webpubsub_name, resource_group_name):
-    return client.delete(resource_group_name, webpubsub_name)
+    return client.begin_delete(resource_group_name, webpubsub_name)
 
 
 def webpubsub_show(client, webpubsub_name, resource_group_name):
@@ -35,7 +35,7 @@ def webpubsub_show(client, webpubsub_name, resource_group_name):
 
 
 def webpubsub_restart(client, webpubsub_name, resource_group_name):
-    return client.restart(resource_group_name, webpubsub_name)
+    return client.begin_restart(resource_group_name, webpubsub_name)
 
 
 def webpubsub_get():
@@ -43,7 +43,7 @@ def webpubsub_get():
 
 
 def webpubsub_set(client, webpubsub_name, resource_group_name, parameters):
-    return client.update(parameters, resource_group_name, webpubsub_name)
+    return client.begin_update(resource_group_name, webpubsub_name, parameters)
 
 
 def update_webpubsub(instance, tags=None, sku=None, unit_count=1):

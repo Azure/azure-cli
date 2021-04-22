@@ -8,7 +8,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.webpubsub._help import helps  # pylint: disable=unused-import
 
 
-class WebpubsubCommandsLoader(AzCommandsLoader):
+class WebPubSubCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
@@ -16,7 +16,7 @@ class WebpubsubCommandsLoader(AzCommandsLoader):
         webpubsub_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.webpubsub.custom#{}',
             client_factory=cf_webpubsub)
-        super(WebpubsubCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=webpubsub_custom)
+        super(WebPubSubCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=webpubsub_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.webpubsub.commands import load_command_table
@@ -28,4 +28,4 @@ class WebpubsubCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-COMMAND_LOADER_CLS = WebpubsubCommandsLoader
+COMMAND_LOADER_CLS = WebPubSubCommandsLoader

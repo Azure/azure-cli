@@ -23,7 +23,7 @@ def update_network_rules(client, webpubsub_name, resource_group_name, public_net
                 x.allow = allow
                 x.deny = deny
 
-    return client.update(WebPubSubResource(network_ac_ls=network_acl), resource_group_name, webpubsub_name)
+    return client.begin_update(resource_group_name, webpubsub_name, WebPubSubResource(network_ac_ls=network_acl))
 
 
 def list_network_rules(client, webpubsub_name, resource_group_name):
