@@ -15,21 +15,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.22.0 azsdk-python-azure-mgmt-storage/17.1.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-02-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-04-19T11:32:31.7265697Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-04-19T11:32:31.7265697Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '380'
       content-type:
       - application/json
       date:
-      - Fri, 06 Nov 2020 11:03:12 GMT
+      - Mon, 19 Apr 2021 11:32:51 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11987'
+      - '11995'
     status:
       code: 200
       message: OK
@@ -57,9 +57,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.22.0
       x-ms-date:
-      - Fri, 06 Nov 2020 11:03:13 GMT
+      - Mon, 19 Apr 2021 11:32:52 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -71,11 +71,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 11:03:19 GMT
+      - Mon, 19 Apr 2021 11:32:52 GMT
       etag:
-      - '"0x8D8824391F5C763"'
+      - '"0x8D90326DEFD52E3"'
       last-modified:
-      - Fri, 06 Nov 2020 11:03:19 GMT
+      - Mon, 19 Apr 2021 11:32:53 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -86,28 +86,28 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <KeyInfo><Start>2020-11-06T11:03:20Z</Start><Expiry>2020-11-06T12:03:00Z</Expiry></KeyInfo>'
+      <KeyInfo><Start>2021-04-19T11:32:53Z</Start><Expiry>2021-04-19T12:32:00Z</Expiry></KeyInfo>'
     headers:
       Connection:
       - keep-alive
       Content-Length:
       - '130'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.22.0
       x-ms-date:
-      - Fri, 06 Nov 2020 11:03:20 GMT
+      - Mon, 19 Apr 2021 11:32:53 GMT
       x-ms-version:
       - '2018-11-09'
     method: POST
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=userdelegationkey
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>7f2b9f1e-23ea-4ef8-a76b-d1ff0fe05120</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2020-11-06T11:03:20Z</SignedStart><SignedExpiry>2020-11-06T12:03:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>FJZcnPFfM9GFmrJzOINIIi1RO83NAMDx/EZwbepcSKQ=</Value></UserDelegationKey>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>3707fb2f-ac10-4591-a04f-8b0d786ea37d</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2021-04-19T11:32:53Z</SignedStart><SignedExpiry>2021-04-19T12:32:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>j8iwccVXpl+wgE2CMyLqxcjLtbOYuDBuSxXK3CR3xf8=</Value></UserDelegationKey>"
     headers:
       content-type:
       - application/xml
       date:
-      - Fri, 06 Nov 2020 11:03:25 GMT
+      - Mon, 19 Apr 2021 11:32:54 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -120,28 +120,28 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <KeyInfo><Start>2020-11-06T11:03:26Z</Start><Expiry>2020-11-06T12:03:00Z</Expiry></KeyInfo>'
+      <KeyInfo><Start>2021-04-19T11:32:55Z</Start><Expiry>2021-04-19T12:32:00Z</Expiry></KeyInfo>'
     headers:
       Connection:
       - keep-alive
       Content-Length:
       - '130'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.8; Windows 10) AZURECLI/2.14.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.22.0
       x-ms-date:
-      - Fri, 06 Nov 2020 11:03:26 GMT
+      - Mon, 19 Apr 2021 11:32:55 GMT
       x-ms-version:
       - '2018-11-09'
     method: POST
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=userdelegationkey
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>7f2b9f1e-23ea-4ef8-a76b-d1ff0fe05120</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2020-11-06T11:03:26Z</SignedStart><SignedExpiry>2020-11-06T12:03:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>+8WxR++YgD2D7eHePrV4PgjSD4Jg4ILbJEkkhSCzp10=</Value></UserDelegationKey>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>3707fb2f-ac10-4591-a04f-8b0d786ea37d</SignedOid><SignedTid>54826b22-38d6-4fb2-bad9-b7b93a3e9c5a</SignedTid><SignedStart>2021-04-19T11:32:55Z</SignedStart><SignedExpiry>2021-04-19T12:32:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>CEJYPeXG6vInUjZ9VNvR/qhXkX6rBlVmUHz9yKx4jr4=</Value></UserDelegationKey>"
     headers:
       content-type:
       - application/xml
       date:
-      - Fri, 06 Nov 2020 11:03:30 GMT
+      - Mon, 19 Apr 2021 11:32:55 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:

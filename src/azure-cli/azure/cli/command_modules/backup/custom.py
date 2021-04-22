@@ -7,7 +7,7 @@ import time
 import json
 import re
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 # pylint: disable=too-many-lines
 from knack.log import get_logger
@@ -30,7 +30,7 @@ from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
-    backup_protected_items_crr_cf)
+    backup_protected_items_crr_cf, protection_container_operation_results_cf)
 
 logger = get_logger(__name__)
 
@@ -95,38 +95,75 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location):
+def create_vault(client, vault_name, resource_group_name, location, tags=None):
     vault_sku = Sku(name=SkuName.standard)
     vault_properties = VaultProperties()
-
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
     logger.warning('Attemping to force delete vault: %s', vault_name)
     container_client = backup_protection_containers_cf(cmd.cli_ctx)
+    protection_containers_client = protection_containers_cf(cmd.cli_ctx)
     backup_item_client = backup_protected_items_cf(cmd.cli_ctx)
     item_client = protected_items_cf(cmd.cli_ctx)
     vault_client = vaults_cf(cmd.cli_ctx)
+    # delete the AzureIaasVM backup management type items
     containers = _get_containers(
         container_client, 'AzureIaasVM', 'Registered',
         resource_group_name, vault_name)
     for container in containers:
         container_name = container.name.rsplit(';', 1)[1]
         items = list_items(
-            cmd, backup_item_client, resource_group_name, vault_name, container_name)
+            cmd, backup_item_client, resource_group_name, vault_name, container.name)
         for item in items:
             item_name = item.name.rsplit(';', 1)[1]
             logger.warning("Deleting backup item '%s' in container '%s'",
                            item_name, container_name)
             disable_protection(cmd, item_client, resource_group_name, vault_name,
                                item, True)
+
+    # delete the AzureWorkload backup management type items
+    containers = _get_containers(
+        container_client, 'AzureWorkload', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items_sql = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureWorkload', 'SQLDataBase')
+        items_hana = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureWorkload',
+            'SAPHanaDatabase')
+        items = items_sql + items_hana
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            disable_protection(cmd, item_client, resource_group_name, vault_name,
+                               item, True)
+        _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
+
+    # delete the AzureStorage backup management type items
+    containers = _get_containers(
+        container_client, 'AzureStorage', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureStorage', 'AzureFileShare')
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            disable_protection(cmd, item_client, resource_group_name, vault_name,
+                               item, True)
+        _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
     # now delete the vault
     try:
         vault_client.delete(resource_group_name, vault_name)
-    except Exception:
-        raise CLIError("Vault cannot be deleted as there are existing resources within the vault")
+    except Exception as ex:
+        raise ex
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
@@ -241,6 +278,11 @@ def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = _get_policy_from_json(client, policy)
     policy_object.name = name
     policy_object.properties.backup_management_type = "AzureIaasVM"
+
+    additional_properties = policy_object.properties.additional_properties
+    if 'instantRpDetails' in additional_properties:
+        policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
+
     return client.create_or_update(vault_name, resource_group_name, name, policy_object)
 
 
@@ -256,7 +298,15 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
     return _get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def check_protection_enabled_for_vm(cmd, vm_id):
+def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    if vm_id is None:
+        if is_valid_resource_id(vm):
+            vm_id = vm
+        else:
+            if vm is None or resource_group_name is None:
+                raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required "
+                                                   "arguments.")
+            vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
     vaults = list_vaults(vaults_cf(cmd.cli_ctx))
     for vault in vaults:
         vault_rg = _get_resource_group_from_id(vault.id)
@@ -438,6 +488,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -471,6 +525,8 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
                          use_secondary_region=None):
+    if cmd.name.split()[2] == 'show-log-chain':
+        raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -791,6 +847,11 @@ def _get_containers(client, container_type, status, resource_group_name, vault_n
     return containers
 
 
+def _unregister_containers(cmd, client, resource_group_name, vault_name, container_name):
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
+    return _track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
+
+
 def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
     protection_containers_client = protection_containers_cf(cli_ctx)
 
@@ -1005,6 +1066,20 @@ def _track_backup_job(cli_ctx, result, vault_name, resource_group):
         job_id = operation_status.properties.job_id
         job_details = job_details_client.get(vault_name, resource_group, job_id)
         return job_details
+
+
+def _track_register_operation(cli_ctx, result, vault_name, resource_group, container_name):
+    protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
+
+    operation_id = _get_operation_id_from_header(result.response.headers['Location'])
+    result = protection_container_operation_results_client.get(vault_name, resource_group,
+                                                               fabric_name, container_name,
+                                                               operation_id, raw=True)
+    while result.response.status_code == 202:
+        time.sleep(1)
+        result = protection_container_operation_results_client.get(vault_name, resource_group,
+                                                                   fabric_name, container_name,
+                                                                   operation_id, raw=True)
 
 
 def _track_backup_operation(cli_ctx, resource_group, result, vault_name):

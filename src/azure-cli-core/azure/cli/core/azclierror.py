@@ -8,7 +8,6 @@ import sys
 import azure.cli.core.telemetry as telemetry
 from knack.util import CLIError
 from knack.log import get_logger
-from .util import log_latest_error_info
 
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
@@ -71,20 +70,19 @@ class AzCLIError(CLIError):
             if self.exception_trace:
                 logger.exception(self.exception_trace)
 
-            # print recommendations to action
-            if self.recommendations:
-                for recommendation in self.recommendations:
-                    print(recommendation, file=sys.stderr)
+        # print recommendations to action
+        if self.recommendations:
+            for recommendation in self.recommendations:
+                print(recommendation, file=sys.stderr)
 
-            if self.aladdin_recommendations:
-                print('\nTRY THIS:', file=sys.stderr)
-                for recommendation, description in self.aladdin_recommendations:
-                    print_styled_text(recommendation, file=sys.stderr)
-                    print_styled_text(description, file=sys.stderr)
+        if self.aladdin_recommendations:
+            print('\nTRY THIS:', file=sys.stderr)
+            for recommendation, description in self.aladdin_recommendations:
+                print_styled_text(recommendation, file=sys.stderr)
+                print_styled_text(description, file=sys.stderr)
 
     def send_telemetry(self):
         telemetry.set_error_type(self.__class__.__name__)
-        log_latest_error_info(self.error_msg, self.__class__.__name__)
 # endregion
 
 
@@ -222,6 +220,11 @@ class ManualInterrupt(UserFault):
     pass
 
 
+class NoTTYError(UserFault):
+    """ No tty available for prompt. """
+    pass
+
+
 # ARM template related error types
 class InvalidTemplateError(UserFault):
     """ ARM template validation fails. It could be caused by incorrect template files or parameters """
@@ -259,5 +262,9 @@ class CLIInternalError(ClientError):
 class RecommendationError(ClientError):
     """ The client error raised by `az next`. It is needed in `az next` to skip error records. """
     pass
+
+
+class AuthenticationError(ServiceError):
+    """ Raised when AAD authentication fails. """
 
 # endregion

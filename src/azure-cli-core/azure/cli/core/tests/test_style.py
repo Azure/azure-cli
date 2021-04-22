@@ -7,7 +7,7 @@ import sys
 import unittest
 from unittest import mock
 
-from azure.cli.core.style import Style, Theme, format_styled_text, print_styled_text, _is_modern_terminal
+from azure.cli.core.style import Style, Theme, format_styled_text, print_styled_text, _rgb_hex
 
 
 class TestStyle(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestStyle(unittest.TestCase):
             (Style.WARNING, "Bright Yellow: Warning message indicator\n"),
         ]
         formatted = format_styled_text(styled_text)
-        excepted = """\x1b[39mWhite: Primary text color
+        excepted = """\x1b[0mWhite: Primary text color
 \x1b[90mBright Black: Secondary text color
 \x1b[95mBright Magenta: Important text color
 \x1b[94mBright Blue: Commands, parameters, and system inputs
@@ -41,19 +41,19 @@ class TestStyle(unittest.TestCase):
 \x1b[91mBright Red: Error message indicator
 \x1b[92mBright Green: Success message indicator
 \x1b[93mBright Yellow: Warning message indicator
-\x1b[39m"""
+\x1b[0m"""
         self.assertEqual(formatted, excepted)
 
         # Test str input
         styled_text = "Primary text color"
         formatted = format_styled_text(styled_text)
-        excepted = "\x1b[39mPrimary text color\x1b[39m"
+        excepted = "\x1b[0mPrimary text color\x1b[0m"
         self.assertEqual(formatted, excepted)
 
         # Test tuple input
         styled_text = (Style.PRIMARY, "Primary text color")
         formatted = format_styled_text(styled_text)
-        excepted = "\x1b[39mPrimary text color\x1b[39m"
+        excepted = "\x1b[0mPrimary text color\x1b[0m"
         self.assertEqual(formatted, excepted)
 
     def test_format_styled_text_on_error(self):
@@ -111,9 +111,9 @@ class TestStyle(unittest.TestCase):
             (Style.SECONDARY, "Bright Black: Secondary text color\n"),
         ]
         formatted = format_styled_text(styled_text)
-        excepted = """\x1b[39mWhite: Primary text color
+        excepted = """\x1b[0mWhite: Primary text color
 \x1b[90mBright Black: Secondary text color
-\x1b[39m"""
+\x1b[0m"""
         self.assertEqual(formatted, excepted)
 
         # Color is turned off via param
@@ -156,16 +156,13 @@ class TestStyle(unittest.TestCase):
         print_styled_text("test text 1", "test text 2")
         mock_print.assert_called_with("test text 1", "test text 2", file=sys.stderr)
 
+    def test_rgb_hex(self):
 
-class TestUtils(unittest.TestCase):
+        result = _rgb_hex("#13A10E")
+        self.assertEqual(result, '\x1b[38;2;19;161;14m')
 
-    def test_is_modern_terminal(self):
-        with mock.patch.dict("os.environ", clear=True):
-            self.assertEqual(_is_modern_terminal(), False)
-        with mock.patch.dict("os.environ", WT_SESSION='c25cb945-246a-49e5-b37a-1e4b6671b916'):
-            self.assertEqual(_is_modern_terminal(), True)
-        with mock.patch.dict("os.environ", TERM_PROGRAM='vscode'):
-            self.assertEqual(_is_modern_terminal(), True)
+        result = _rgb_hex("3A96DD")
+        self.assertEqual(result, '\x1b[38;2;58;150;221m')
 
 
 if __name__ == '__main__':

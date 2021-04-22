@@ -77,6 +77,10 @@ def load_arguments(self, _):
         p_384 = "P-384"  #: The NIST P-384 elliptic curve, AKA SECG curve SECP384R1.
         p_521 = "P-521"  #: The NIST P-521 elliptic curve, AKA SECG curve SECP521R1.
 
+    class CLISecurityDomainOperation(str, Enum):
+        download = "download"  #: Download operation
+        upload = "upload"  #: Upload operation
+
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
          'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
@@ -91,24 +95,24 @@ def load_arguments(self, _):
         help='Name of the deleted Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None)
 
     hsm_name_type = CLIArgumentType(help='Name of the HSM.',
-                                    options_list=['--hsm-name'], id_part=None, is_preview=True)
+                                    options_list=['--hsm-name'], id_part=None)
     hsm_url_type = CLIArgumentType(help='Name of the HSM.', type=get_hsm_base_url_type(self.cli_ctx),
-                                   options_list=['--hsm-name'], id_part=None, is_preview=True)
+                                   options_list=['--hsm-name'], id_part=None)
 
     mgmt_plane_hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --name/-n are mutually '
                                                     'exclusive, please specify just one of them)',
-                                               options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                               options_list=['--hsm-name'], id_part=None,
                                                validator=validate_vault_name_and_hsm_name)
 
     data_plane_hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name are '
                                                     'mutually exclusive, please specify just one of them)',
                                                type=get_hsm_base_url_type(self.cli_ctx),
-                                               options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                               options_list=['--hsm-name'], id_part=None,
                                                validator=set_vault_base_url)
 
     deleted_hsm_name_type = CLIArgumentType(help='Name of the deleted HSM. (--hsm-name and --name/-n are '
                                                  'mutually exclusive, please specify just one of them)',
-                                            options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                            options_list=['--hsm-name'], id_part=None,
                                             validator=validate_vault_name_and_hsm_name)
 
     # region vault (management)
@@ -154,7 +158,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
-        c.argument('administrators', nargs='+', is_preview=True,
+        c.argument('administrators', nargs='+',
                    help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
                         'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
@@ -467,6 +471,7 @@ def load_arguments(self, _):
             c.argument('hsm_name', hsm_url_type, required=False,
                        help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+            c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain init-recovery') as c:
         c.argument('sd_exchange_key', help='Local file path to store the exported key.')
@@ -495,6 +500,9 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
         c.argument('resource_group_name', options_list=['--resource-group', '-g'],
                    help='Proceed only if HSM belongs to the specified resource group.')
+        c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
+                   help='Target operation that needs waiting.')
+        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
@@ -710,6 +718,16 @@ def load_arguments(self, _):
                         'use the object id and not the app id.')
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('role', help='role name or id')
+
+    with self.argument_context('keyvault role definition') as c:
+        c.argument('hsm_name', hsm_url_type)
+        c.argument('role_definition', help='Description of a role as JSON, or a path to a file containing a JSON description.')
+        c.argument('role_id', help='The role definition ID.')
+        c.argument('role_definition_name', options_list=['--name', '-n'], help='The role definition name. '
+                   'This is a GUID in the "name" property of a role definition.')
+
+    with self.argument_context('keyvault role definition list') as c:
+        c.argument('custom_role_only', arg_type=get_three_state_flag(), help='Only show custom role definitions.')
 
     class PrincipalType(str, Enum):  # Copied from azure.mgmt.authorization v2018_09_01_preview
         user = "User"

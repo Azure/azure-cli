@@ -123,13 +123,6 @@ def _prepare_client_kwargs_track2(cli_ctx):
     # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
-    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
-    client_kwargs['logging_enable'] = True
-
-    # Disable ARMHttpLoggingPolicy which logs only allowed headers
-    # from azure.core.pipeline.policies import SansIOHTTPPolicy
-    # client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
-
     # Prepare User-Agent header, used by UserAgentPolicy
     client_kwargs['user_agent'] = get_az_user_agent()
 
@@ -157,6 +150,39 @@ def _prepare_client_kwargs_track2(cli_ctx):
     if 'x-ms-client-request-id' in cli_ctx.data['headers']:
         client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
 
+    # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
+    #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
+    from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
+    client_kwargs['logging_policy'] = SafeNetworkTraceLoggingPolicy()
+
+    # Disable ARMHttpLoggingPolicy.
+    #   ARMHttpLoggingPolicy: Only log allowed information.
+    from azure.core.pipeline.policies import SansIOHTTPPolicy
+    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+
+    return client_kwargs
+
+
+def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
+    """Prepare kwargs for Track 2 SDK mgmt client."""
+    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+
+    from azure.cli.core.util import resource_to_scopes
+    # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
+    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+
+    client_kwargs['credential_scopes'] = scopes
+
+    # Track 2 currently lacks the ability to take external credentials.
+    #   https://github.com/Azure/azure-sdk-for-python/issues/8313
+    # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
+    #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+    if getattr(cred, "_external_tenant_token_retriever", None):
+        *_, external_tenant_tokens = cred.get_all_tokens(*scopes)
+        # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
+        client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
+            ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
+
     return client_kwargs
 
 
@@ -172,7 +198,6 @@ def _get_mgmt_service_client(cli_ctx,
                              aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
-    from azure.cli.core.util import resource_to_scopes
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
@@ -191,8 +216,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
-        client_kwargs['credential_scopes'] = resource_to_scopes(resource)
+        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred))
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
@@ -253,3 +277,6 @@ def _get_add_headers_callback(cli_ctx):
             pass
 
     return _add_headers
+
+
+prepare_client_kwargs_track2 = _prepare_client_kwargs_track2

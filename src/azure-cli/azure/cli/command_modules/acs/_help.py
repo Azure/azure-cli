@@ -154,12 +154,12 @@ short-summary: Manage Azure Kubernetes Services.
 
 helps["aks check-acr"] = """
 type: command
-short-summary: Validate an ACR is accesible from an AKS cluster.
+short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
   - name: --acr
     short-summary: The FQDN of the ACR.
 examples:
-  - name: Validate the ACR is accesible from the AKS cluster.
+  - name: Validate the ACR is accessible from the AKS cluster.
     text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
     crafted: true
 """
@@ -233,10 +233,28 @@ parameters:
     short-summary: User account to create on node VMs for SSH access.
   - name: --windows-admin-username
     type: string
-    short-summary: Username to create on Windows node VMs.
+    short-summary: User account to create on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-username:
+          - restriction: Cannot end in "."
+          - Disallowed values: "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5".
+          - Minimum-length: 1 character
+          - Max-length: 20 characters
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
   - name: --windows-admin-password
     type: string
-    short-summary: Password to create on Windows node VMs.
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-ahub
     type: bool
     short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
@@ -321,6 +339,7 @@ parameters:
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
                          aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
+            confcom      - enable confcom addon, this will enable SGX device plugin by default.
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -363,6 +382,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -375,6 +397,13 @@ parameters:
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: Private dns zone mode for private cluster.
+    long-summary: Allowed values are "system" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
+  - name: --fqdn-subdomain
+    type: string
+    short-summary: Prefix for FQDN that is created for private cluster with custom private dns zone scenario.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
@@ -405,6 +434,9 @@ parameters:
   - name: --appgw-watch-namespace
     type: string
     short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
+  - name: --enable-sgxquotehelper
+    type: bool
+    short-summary: Enable SGX quote helper for confcom addon.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -466,6 +498,9 @@ parameters:
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
+  - name: --no-uptime-sla
+    type: bool
+    short-summary: Change a paid managed cluster to a free one.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -510,6 +545,20 @@ parameters:
   - name: --disable-ahub
     type: bool
     short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --windows-admin-password
+    type: string
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -535,6 +584,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
   - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
+  - name: Update Windows password of a kubernetes cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --windows-admin-password "Repl@cePassw0rd12345678"
 """
 
 helps['aks delete'] = """
@@ -593,6 +644,9 @@ parameters:
   - name: --appgw-watch-namespace
     type: string
     short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
+  - name: --enable-sgxquotehelper
+    type: bool
+    short-summary: Enable SGX quote helper for confcom addon.
 examples:
   - name: Enable Kubernetes addons. (autogenerated)
     text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
@@ -690,6 +744,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
@@ -964,7 +1021,7 @@ helps['aks rotate-certs'] = """
 helps['openshift'] = """
 type: group
 short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift create'] = """
@@ -1020,7 +1077,7 @@ examples:
 helps['openshift delete'] = """
 type: command
 short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Delete an Azure Red Hat OpenShift 3.11 cluster.
     text: az openshift delete --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
@@ -1030,13 +1087,13 @@ examples:
 helps['openshift list'] = """
 type: command
 short-summary: List Azure Red Hat OpenShift 3.11 clusters.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift scale'] = """
 type: command
 short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 parameters:
   - name: --compute-count -c
     type: int
@@ -1060,7 +1117,7 @@ examples:
 helps['openshift wait'] = """
 type: command
 short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
-long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete. Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
     text: |-
@@ -1070,13 +1127,13 @@ examples:
 helps['openshift monitor'] = """
 type: group
 short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift monitor enable'] = """
 type: command
 short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Enable Log Analytics monitoring.
     text: |-
@@ -1086,7 +1143,7 @@ examples:
 helps['openshift monitor disable'] = """
 type: command
 short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Disable Log Analytics monitoring.
     text: |-

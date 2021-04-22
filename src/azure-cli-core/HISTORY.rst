@@ -3,6 +3,30 @@
 Release History
 ===============
 
+2.22.1
+++++++
+* Minor fixes
+
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
+
+2.21.0
+++++++
+* Unify ADAL and MSAL error handler (#17072)
+* Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+
+2.20.0
+++++++
+* Minor fixes
+
+2.19.1
+++++++
+* No changes
+
 2.19.0
 ++++++
 * New error output: Support multiple failure recommendations with colorization (#16257)

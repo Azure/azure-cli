@@ -40,7 +40,8 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess
+    ServerPublicNetworkAccess,
+    ServerInfo
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -413,6 +414,24 @@ def failover_group_update_common(
         grace_period = int(grace_period) * 60
         instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
 
+
+def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
+    '''
+    Completes maintenance configuration id from short to full type if needed
+    '''
+
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if argument_value and not is_valid_resource_id(argument_value):
+        return resource_id(
+            subscription=get_subscription_id(cli_ctx),
+            namespace='Microsoft.Maintenance',
+            type='publicMaintenanceConfigurations',
+            name=argument_value)
+
+    return argument_value
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -776,6 +795,7 @@ def _db_dw_create(
         dest_db,
         no_wait,
         sku=None,
+        secondary_type=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -799,6 +819,9 @@ def _db_dw_create(
     if source_db:
         kwargs['source_database_id'] = source_db.id()
 
+    if secondary_type:
+        kwargs['secondary_type'] = secondary_type
+
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_db_sku_from_capabilities(
@@ -813,6 +836,11 @@ def _db_dw_create(
         kwargs['elastic_pool_id'],
         dest_db.server_name,
         dest_db.resource_group_name)
+
+    # Expand maintenance configuration id if needed
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cli_ctx,
+        kwargs['maintenance_configuration_id'])
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -961,6 +989,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        secondary_type=None,
         no_wait=False,
         **kwargs):
     '''
@@ -996,13 +1025,13 @@ def db_create_replica(
         if kwargs['storage_account_type'] == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
 
-    # Replica must have the same database name as the source db
     return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
+        secondary_type=secondary_type,
         **kwargs)
 
 
@@ -1349,10 +1378,12 @@ def db_update(
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None,
-        storage_account_type=None):
+        storage_account_type=None,
+        maintenance_configuration_id=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
+
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -1433,6 +1464,10 @@ def db_update(
     # Otherwise, empty value defaults to current storage_account_type
     # and will potentially conflict with a previously requested update
     instance.storage_account_type = storage_account_type
+
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     #####
     # Set other (serverless related) properties
@@ -3016,6 +3051,7 @@ def elastic_pool_create(
         resource_group_name,
         elastic_pool_name,
         sku=None,
+        maintenance_configuration_id=None,
         **kwargs):
     '''
     Creates an elastic pool.
@@ -3030,6 +3066,11 @@ def elastic_pool_create(
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+
+    # Expand maintenance configuration id if needed
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     # Create
     return client.create_or_update(
@@ -3048,7 +3089,8 @@ def elastic_pool_update(
         zone_redundant=None,
         tier=None,
         family=None,
-        capacity=None):
+        capacity=None,
+        maintenance_configuration_id=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3082,6 +3124,10 @@ def elastic_pool_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx,
+        maintenance_configuration_id)
 
     return instance
 
@@ -3598,6 +3644,62 @@ def server_aad_only_enable(
         azure_ad_only_authentication=True
     )
 
+###############################################
+#           sql server trust groups           #
+###############################################
+
+
+def server_trust_group_create(
+        client,
+        resource_group_name,
+        name,
+        location,
+        group_member,
+        trust_scope,
+        no_wait=False):
+
+    members = [ServerInfo(server_id=member) for member in group_member]
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name,
+                       group_members=members,
+                       trust_scopes=trust_scope)
+
+
+def server_trust_group_delete(
+        client,
+        resource_group_name,
+        name,
+        location,
+        no_wait=False):
+
+    return sdk_no_wait(no_wait, client.delete,
+                       resource_group_name=resource_group_name,
+                       location_name=location,
+                       server_trust_group_name=name)
+
+
+def server_trust_group_get(
+        client,
+        resource_group_name,
+        name,
+        location):
+
+    return client.get(resource_group_name=resource_group_name,
+                      location_name=location,
+                      server_trust_group_name=name)
+
+
+def server_trust_group_list(
+        client,
+        resource_group_name,
+        instance_name=None,
+        location=None):
+    if instance_name:
+        return client.list_by_instance(resource_group_name=resource_group_name, managed_instance_name=instance_name)
+    return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
+
 
 ###############################################
 #                sql managed instance         #
@@ -3662,6 +3764,7 @@ def managed_instance_create(
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(cmd.cli_ctx, kwargs['maintenance_configuration_id'])
 
     if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
         if kwargs['storage_account_type'] == 'GRS':
@@ -3755,7 +3858,7 @@ def managed_instance_update(
     if tags is not None:
         instance.tags = tags
 
-    instance.maintenance_configuration_id = maintenance_configuration_id
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(cmd.cli_ctx, maintenance_configuration_id)
 
     return instance
 
@@ -4387,7 +4490,7 @@ def managed_db_log_replay_start(
     if auto_complete and not last_backup_name:
         raise CLIError('Please specify a last backup name when using auto complete flag.')
 
-    kwargs['auto_complete'] = auto_complete
+    kwargs['auto_complete_restore'] = auto_complete
     kwargs['last_backup_name'] = last_backup_name
 
     kwargs['storageContainerUri'] = storage_container_uri

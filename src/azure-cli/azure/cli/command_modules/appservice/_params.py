@@ -18,7 +18,8 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 from ._completers import get_hostname_completion_list
 from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_service_tag)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -173,14 +174,14 @@ def load_arguments(self, _):
         c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
         c.argument('skip_custom_domain_verification',
                    help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
         c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.23.0'))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -189,7 +190,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None)
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
-        c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
+        c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
+                   deprecate_info=c.deprecate(expiration='2.23.0'))
 
     with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
@@ -233,6 +235,8 @@ def load_arguments(self, _):
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
+            c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
+            c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
         with self.argument_context(scope + ' config ssl show') as c:
             c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
@@ -640,15 +644,41 @@ def load_arguments(self, _):
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
         c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help="The name of the subnet",
+        c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
+
+    with self.argument_context('webapp deploy') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to connect to')
+        c.argument('src_path', options_list=['--src-path'], help='Path of the file to be deployed. Example: /mnt/apps/myapp.war')
+        c.argument('src_url', options_list=['--src-url'], help='url to download the package from. Example: http://mysite.com/files/myapp.war?key=123')
+        c.argument('target_path', options_list=['--target-path'], help='Target path relative to wwwroot to which the file will be deployed to.')
+        c.argument('artifact_type', options_list=['--type'], help='Type of deployment requested')
+        c.argument('is_async', options_list=['--async'], help='Asynchronous deployment', choices=['true', 'false'])
+        c.argument('restart', options_list=['--restart'], help='restart or not. default behavior is to restart.', choices=['true', 'false'])
+        c.argument('clean', options_list=['--clean'], help='clean or not. default is target-type specific.', choices=['true', 'false'])
+        c.argument('ignore_stack', options_list=['--ignore-stack'], help='should override the default stack check', choices=['true', 'false'])
+        c.argument('timeout', options_list=['--timeout'], help='Timeout for operation in milliseconds')
+        c.argument('slot', help="Name of the deployment slot to use")
+
+    with self.argument_context('functionapp deploy') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the functionapp to connect to')
+        c.argument('src_path', options_list=['--src-path'], help='Path of the file to be deployed. Example: /mnt/apps/myapp.war')
+        c.argument('src_url', options_list=['--src-url'], help='url to download the package from. Example: http://mysite.com/files/myapp.war?key=123')
+        c.argument('target_path', options_list=['--target-path'], help='Target path relative to wwwroot to which the file will be deployed to.')
+        c.argument('artifact_type', options_list=['--type'], help='Type of deployment requested')
+        c.argument('is_async', options_list=['--async'], help='Asynchronous deployment', choices=['true', 'false'])
+        c.argument('restart', options_list=['--restart'], help='restart or not. default behavior is to restart.', choices=['true', 'false'])
+        c.argument('clean', options_list=['--clean'], help='clean or not. default is target-type specific.', choices=['true', 'false'])
+        c.argument('ignore_stack', options_list=['--ignore-stack'], help='should override the default stack check', choices=['true', 'false'])
+        c.argument('timeout', options_list=['--timeout'], help='Timeout for operation in milliseconds')
+        c.argument('slot', help="Name of the deployment slot to use")
 
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
         c.argument('vnet', help="The name or resource ID of the Vnet", validator=validate_add_vnet,
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help="The name of the subnet",
+        c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('functionapp') as c:
@@ -834,7 +864,10 @@ def load_arguments(self, _):
             c.argument('description', help='Description of the access restriction rule')
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
-            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
+            c.argument('ip_address', help="IP address or CIDR range (optional comma separated list of up to 8 ranges)",
+                       validator=validate_ip_address)
+            c.argument('service_tag', help="Service Tag (optional comma separated list of up to 8 tags)",
+                       validator=validate_service_tag)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('ignore_missing_vnet_service_endpoint',
@@ -845,11 +878,15 @@ def load_arguments(self, _):
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
+            c.argument('http_headers', nargs='+', help="space-separated http headers in a format of `<name>=<value>`")
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
-            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
+            c.argument('ip_address', help="IP address or CIDR range (optional comma separated list of up to 8 ranges)",
+                       validator=validate_ip_address)
+            c.argument('service_tag', help="Service Tag (optional comma separated list of up to 8 tags)",
+                       validator=validate_service_tag)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',

@@ -22,12 +22,12 @@ from azure.cli.command_modules.keyvault._validators import (
 
 def transform_assignment_list(result):
     return [OrderedDict([('Principal', r['principalName']),
-                         ('Role', r['roleDefinitionName']),
+                         ('RoleName', r['roleName']),
                          ('Scope', r['scope'])]) for r in result]
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+    return [OrderedDict([('Name', r['name']), ('RoleName', r['roleName']), ('Type', r['type']),
                          ('Description', r['description'])]) for r in result]
 
 
@@ -89,9 +89,9 @@ def load_command_table(self, _):
                                 client_factory=mgmt_hsms_entity.client_factory) as g:
             g.generic_update_command(
                 'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-                custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
+                custom_func_name='update_hsm', supports_no_wait=True,
                 doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
-            g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
+            g.custom_wait_command('wait-hsm', 'wait_hsm')
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -125,21 +125,18 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault backup', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault backup', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_backup',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_backup'))
 
-        with self.command_group('keyvault restore', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_restore',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_restore'))
 
-        with self.command_group('keyvault security-domain', private_data_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
-            g.keyvault_custom('download', 'security_domain_download')
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_entity.command_type) as g:
@@ -279,6 +276,10 @@ def load_command_table(self, _):
 
         with self.command_group('keyvault role definition', data_access_control_entity.command_type) as g:
             g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
+            g.keyvault_custom('create', 'create_role_definition')
+            g.keyvault_custom('update', 'update_role_definition')
+            g.keyvault_custom('delete', 'delete_role_definition')
+            g.keyvault_custom('show', 'show_role_definition')
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')

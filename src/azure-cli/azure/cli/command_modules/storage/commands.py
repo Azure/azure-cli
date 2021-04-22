@@ -77,11 +77,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_sa)
 
-    cloud_data_plane_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.common#CloudStorageAccount.{}',
-        client_factory=cloud_storage_account_service_factory
-    )
-
     block_blob_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
         client_factory=blob_data_service_factory,
@@ -139,8 +134,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
-    with self.command_group('storage account', cloud_data_plane_sdk) as g:
-        g.storage_command('generate-sas', 'generate_shared_access_signature')
+    with self.command_group('storage account',
+                            command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
+        g.storage_command('generate-sas', 'generate_sas')
 
     encryption_scope_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#EncryptionScopesOperations.{}',
@@ -302,6 +298,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        table_transformer=transform_blob_output)
         g.storage_custom_command_oauth('query', 'query_blob',
                                        is_preview=True, min_api='2019-12-12')
+        g.storage_custom_command_oauth('rewrite', 'rewrite_blob', is_preview=True, min_api='2020-04-08')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -504,15 +501,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                cf_mgmt_file_shares,
                                                                resource_type=ResourceType.MGMT_STORAGE),
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01') as g:
+        from ._transformers import transform_share_rm_output
         g.custom_command('create', 'create_share_rm')
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
         g.custom_command('list', 'list_share_rm')
-        g.show_command('show', 'get')
+        g.show_command('show', 'get', transform=transform_share_rm_output)
         g.generic_update_command('update', setter_name='update', setter_arg_name='file_share',
                                  custom_func_name='update_share_rm')
         g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
         g.custom_command('restore', 'restore_share_rm')
+        g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview', is_preview=True,
+                         transform=transform_share_rm_output)
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
@@ -781,6 +781,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata update', 'set_metadata')
         g.storage_command_oauth('metadata show', 'get_directory_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
+
+    with self.command_group('storage fs directory', custom_command_type=get_custom_sdk('azcopy', None))as g:
+        g.storage_custom_command_oauth('upload', 'storage_fs_directory_copy', is_preview=True)
+        g.storage_custom_command_oauth('download', 'storage_fs_directory_copy', is_preview=True)
 
     with self.command_group('storage fs file', adls_file_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file), min_api='2018-11-09') as g:

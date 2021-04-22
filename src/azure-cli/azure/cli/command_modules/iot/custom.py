@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods,too-many-lines,too-many-arguments,too-many-locals
 
-from __future__ import print_function
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
@@ -1091,8 +1090,7 @@ def iot_central_app_list(client, resource_group_name=None):
 
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
-    etag = parameters.additional_properties['etag']
-    return client.apps.update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
+    return client.apps.update(resource_group_name, app_name, parameters)
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):

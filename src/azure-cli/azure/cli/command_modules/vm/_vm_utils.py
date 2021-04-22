@@ -6,6 +6,9 @@
 import json
 import os
 import re
+
+from azure.cli.core.commands.arm import ArmTemplateBuilder
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -103,7 +106,7 @@ def create_keyvault_data_plane_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
 
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
@@ -352,3 +355,10 @@ def update_disk_sku_info(info_dict, skus):
             except ValueError:
                 raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
             _update(info_dict, lun, value)
+
+
+class ArmTemplateBuilder20190401(ArmTemplateBuilder):
+
+    def __init__(self):
+        super().__init__()
+        self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'

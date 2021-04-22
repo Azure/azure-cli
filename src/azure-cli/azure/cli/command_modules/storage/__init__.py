@@ -82,7 +82,9 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('content_disposition', default=None, arg_group=arg_group,
                    help='Conveys additional information about how to process the response payload, and can also be '
                         'used to attach additional metadata.')
-        self.extra('content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
+        self.extra('content_cache_control', options_list=['--content-cache-control', '--content-cache'],
+                   default=None, help='The cache control string.',
+                   arg_group=arg_group)
         self.extra('content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
         if update:
             self.extra('clear_content_settings', help='If this flag is set, then if any one or more of the '
@@ -106,25 +108,27 @@ class StorageArgumentContext(AzArgumentContext):
         self.ignore('file_name')
         self.ignore('directory_name')
 
-    def register_source_uri_arguments(self, validator, blob_only=False):
+    def register_source_uri_arguments(self, validator, blob_only=False, arg_group='Copy Source'):
         self.argument('copy_source', options_list=('--source-uri', '-u'), validator=validator, required=False,
-                      arg_group='Copy Source')
-        self.extra('source_sas', default=None, arg_group='Copy Source',
+                      arg_group=arg_group)
+        self.argument('source_url', options_list=('--source-uri', '-u'), validator=validator, required=False,
+                      arg_group=arg_group)
+        self.extra('source_sas', default=None, arg_group=arg_group,
                    help='The shared access signature for the source storage account.')
-        self.extra('source_container', default=None, arg_group='Copy Source',
+        self.extra('source_container', default=None, arg_group=arg_group,
                    help='The container name for the source storage account.')
-        self.extra('source_blob', default=None, arg_group='Copy Source',
+        self.extra('source_blob', default=None, arg_group=arg_group,
                    help='The blob name for the source storage account.')
-        self.extra('source_snapshot', default=None, arg_group='Copy Source',
+        self.extra('source_snapshot', default=None, arg_group=arg_group,
                    help='The blob snapshot for the source storage account.')
-        self.extra('source_account_name', default=None, arg_group='Copy Source',
+        self.extra('source_account_name', default=None, arg_group=arg_group,
                    help='The storage account name of the source blob.')
-        self.extra('source_account_key', default=None, arg_group='Copy Source',
+        self.extra('source_account_key', default=None, arg_group=arg_group,
                    help='The storage account key of the source blob.')
         if not blob_only:
-            self.extra('source_path', default=None, arg_group='Copy Source',
+            self.extra('source_path', default=None, arg_group=arg_group,
                        help='The file path for the source storage account.')
-            self.extra('source_share', default=None, arg_group='Copy Source',
+            self.extra('source_share', default=None, arg_group=arg_group,
                        help='The share name for the source storage account.')
 
     def register_common_storage_account_options(self):
@@ -153,15 +157,25 @@ class StorageArgumentContext(AzArgumentContext):
                           resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01', nargs='+',
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')
 
-    def register_precondition_options(self):
-        self.extra('if_modified_since')
-        self.extra('if_unmodified_since')
-        self.extra('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform the "
+    def register_precondition_options(self, prefix=''):
+        from ._validators import (get_datetime_type)
+        self.extra('{}if_modified_since'.format(prefix), arg_group='Precondition',
+                   help="Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
+                   type=get_datetime_type(False))
+        self.extra('{}if_unmodified_since'.format(prefix), arg_group='Precondition',
+                   help="Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
+                   type=get_datetime_type(False))
+        self.extra('{}if_match'.format(prefix), arg_group='Precondition',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform the "
                    "operation only if the resource's ETag matches the value specified.")
-        self.extra('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+        self.extra('{}if_none_match'.format(prefix), arg_group='Precondition',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform "
                    "the operation only if the resource's ETag does not match the value specified. Specify the wildcard "
                    "character (*) to perform the operation only if the resource does not exist, and fail the operation "
                    "if it does exist.")
+        self.extra('{}if_tags_match_condition'.format(prefix), arg_group='Precondition',
+                   options_list=['--{}tags-condition'.format(prefix.replace('_', '-'))],
+                   help='Specify a SQL where clause on blob tags to operate only on blobs with a matching value.')
 
     def register_blob_arguments(self):
         from ._validators import get_not_none_validator

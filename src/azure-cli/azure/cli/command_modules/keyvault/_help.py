@@ -481,6 +481,63 @@ type: group
 short-summary: Manage role definitions.
 """
 
+helps['keyvault role definition create'] = """
+type: command
+short-summary: Create a custom role definition.
+examples:
+  - name: Create a role by a JSON string.
+    text: |
+        az keyvault role definition create --hsm-name MyHSM --role-definition '{
+            "roleName": "My Custom Role",
+            "description": "The description of the custom rule.",
+            "actions": [],
+            "notActions": [],
+            "dataActions": [
+                "Microsoft.KeyVault/managedHsm/keys/read/action"
+            ],
+            "notDataActions": []
+        }'
+  - name: Create a role from a file containing a JSON description.
+    text: >
+        az keyvault role definition create --hsm-name MyHSM --role-definition @keyvault-role.json
+"""
+
+helps['keyvault role definition update'] = """
+type: command
+short-summary: Update a role definition.
+examples:
+  - name: Update a role by a JSON string.
+    text: |
+        az keyvault role definition update --hsm-name MyHSM --role-definition '{
+            "roleName": "My Custom Role",
+            "name": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "id": "Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "description": "The description of the custom rule.",
+            "actions": [],
+            "notActions": [],
+            "dataActions": [
+                "Microsoft.KeyVault/managedHsm/keys/read/action",
+                "Microsoft.KeyVault/managedHsm/keys/write/action",
+                "Microsoft.KeyVault/managedHsm/keys/backup/action",
+                "Microsoft.KeyVault/managedHsm/keys/create"
+            ],
+            "notDataActions": []
+        }'
+  - name: Update a role from a file containing a JSON description.
+    text: >
+        az keyvault role definition update --hsm-name MyHSM --role-definition @keyvault-role.json
+"""
+
+helps['keyvault role definition delete'] = """
+type: command
+short-summary: Delete a role definition.
+"""
+
+helps['keyvault role definition show'] = """
+type: command
+short-summary: Show the details of a role definition.
+"""
+
 helps['keyvault secret'] = """
 type: group
 short-summary: Manage secrets.
@@ -489,6 +546,13 @@ short-summary: Manage secrets.
 helps['keyvault secret set'] = """
 type: command
 short-summary: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+examples:
+  - name: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+    text: |
+        az keyvault secret set --name MySecretName --vault-name MyKeyVault --value MyVault
+  - name: Create a secret (if one doesn't exist) or update a secret in a KeyVault through a file.
+    text: |
+        az keyvault secret set --name MySecretName --vault-name MyKeyVault --file /path/to/file --encoding MyEncoding
 """
 
 helps['keyvault show'] = """
