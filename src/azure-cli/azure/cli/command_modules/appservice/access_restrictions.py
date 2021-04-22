@@ -163,7 +163,6 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
-    from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
     subnet_id_parts = parse_resource_id(subnet_id)
     subnet_subscription_id = subnet_id_parts['subscription']
