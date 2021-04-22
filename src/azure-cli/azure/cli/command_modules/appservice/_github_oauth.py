@@ -11,6 +11,11 @@ from ._constants import (GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_REDIRECT_URI, GITH
 
 logger = get_logger(__name__)
 
+'''
+This function opens a web browser to prompt for github login
+then spins up a server on localhost:3000 to listen for callback
+to receive access token
+'''
 def get_github_access_token(cmd, scope_list=None):
     import os
     random_state = os.urandom(5).hex()
@@ -30,8 +35,7 @@ def get_github_access_token(cmd, scope_list=None):
         authorize_url += _scope_string
     logger.warning('Opening OAuth URL')
 
-    # Get code to exchange for access token
-    access_code = _start_http_server(random_state, authorize_url)
+    access_code = _start_http_server(random_state, authorize_url)  # use localhost to get code to exchange for access token
 
     if access_code:
         client = web_client_factory(cmd.cli_ctx)
