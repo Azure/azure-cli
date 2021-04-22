@@ -7,7 +7,7 @@ import json
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            Notebook)
+                                            Notebook, NotebookResource)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from .sparkpool import get_spark_pool
 from .workspace import get_resource_group_by_workspace_name
@@ -245,7 +245,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
-    properties = Notebook.from_dict(definition_file)
+    properties = NotebookResource(name =notebook_name,properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)
 
