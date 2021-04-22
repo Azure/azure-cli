@@ -124,7 +124,7 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
             rs.soa_record.host = root_soa.soa_record.host
             rs_name = '@'
         try:
-            client.record_sets.begin_create_or_update(
+            client.record_sets.create_or_update(
                 resource_group_name, private_zone_name, rs_type, rs_name, rs)
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
@@ -307,7 +307,7 @@ def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_
 
     aux_subscription = parse_resource_id(link.virtual_network.id)['subscription']
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
+    return client.begin_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
 
 
 def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, relative_record_set_name, record_type, metadata=None, ttl=3600):
@@ -315,7 +315,7 @@ def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, re
     from azure.mgmt.privatedns.models import RecordSet
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient).record_sets
     record_set = RecordSet(ttl=ttl, metadata=metadata)
-    return client.begin_create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set, if_none_match='*')
+    return client.create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set, if_none_match='*')
 
 
 def list_privatedns_record_set(cmd, resource_group_name, private_zone_name, record_type=None):
@@ -363,7 +363,7 @@ def _privatedns_add_save_record(client, record, record_type, relative_record_set
         record_set = RecordSet(ttl=3600)
 
     _privatedns_add_record(record_set, record, record_type, is_list)
-    return client.begin_create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set)
+    return client.create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set)
 
 
 def add_privatedns_aaaa_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, ipv6_address):
@@ -557,9 +557,9 @@ def _privatedns_remove_record(client, record, record_type, relative_record_set_n
 
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, relative_record_set_name)
-        return client.begin_delete(resource_group_name, private_zone_name, record_type, relative_record_set_name)
+        return client.delete(resource_group_name, private_zone_name, record_type, relative_record_set_name)
 
-    return client.begin_create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set)
+    return client.create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set)
 
 
 def dict_matches_filter(d, filter_dict):
