@@ -54,7 +54,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
-                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None):
+                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
+                           sas_expiration_period=None, key_expiration_period_in_days=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -160,6 +161,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.extended_location = ExtendedLocation(name=edge_zone,
                                                     type=ExtendedLocationTypes.EDGE_ZONE)
 
+    if key_expiration_period_in_days is not None:
+        KeyPolicy = cmd.get_models('KeyPolicy')
+        params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
+
+    if sas_expiration_period:
+        SasPolicy = cmd.get_models('SasPolicy')
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -235,7 +244,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None):
+                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
+                           sas_expiration_period=None, key_expiration_period_in_days=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -384,6 +394,14 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_shared_key_access is not None:
         params.allow_shared_key_access = allow_shared_key_access
+
+    if key_expiration_period_in_days is not None:
+        KeyPolicy = cmd.get_models('KeyPolicy')
+        params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
+
+    if sas_expiration_period:
+        SasPolicy = cmd.get_models('SasPolicy')
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
 
     return params
 

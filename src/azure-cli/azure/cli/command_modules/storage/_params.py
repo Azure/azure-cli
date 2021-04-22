@@ -174,6 +174,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
 
+    sas_expiration_period_type = CLIArgumentType(
+        options_list=['--sas-expiration-period', '--sas-exp'], min_api='2021-02-01',
+        help='Expiration period of the SAS Policy assigned to the storage account, DD.HH:MM:SS.'
+    )
+
+    key_expiration_period_in_days_type = CLIArgumentType(
+        options_list=['--key-expiration-period-in-days', '--key-exp-days'], min_api='2021-02-01', type=int,
+        help='Expiration period in days of the Key Policy assigned to the storage account'
+    )
+
     t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
 
@@ -271,6 +281,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
+        c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -324,6 +336,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
+        c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
