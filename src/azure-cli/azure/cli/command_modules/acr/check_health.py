@@ -337,7 +337,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
             _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
-def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
+def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals
     import socket
     from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
     from azure.cli.core.profiles import ResourceType
@@ -368,7 +368,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
                                                subscription=res['subscription'])
 
     # retrieve FQDNs for registry and its data endpoint
-    pe_ids = [e.private_endpoint and e.private_endpoint.id for e in registry.private_endpoint_connections]
+    pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
     dns_mappings = {}
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
@@ -393,10 +393,14 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):
         return
 
     for fqdn in dns_mappings:
-        result = socket.gethostbyname(fqdn)
-        if result not in dns_mappings[fqdn]:
-            err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
-            logger.warning(err, registry_name, dns_mappings[fqdn], result)
+        try:
+            result = socket.gethostbyname(fqdn)
+            if result != dns_mappings[fqdn]:
+                err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
+                logger.warning(err, registry_name, dns_mappings[fqdn], result)
+                dns_ok = False
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning('Error resolving DNS for %s. Ex: %s', fqdn, e)
             dns_ok = False
 
     if dns_ok:
