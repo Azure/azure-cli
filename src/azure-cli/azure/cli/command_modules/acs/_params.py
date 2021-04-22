@@ -249,6 +249,7 @@ def load_arguments(self, _):
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('windows_admin_password', options_list=['--windows-admin-password'])
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])

@@ -176,7 +176,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  '--description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Succeeded')
+                     self.check('provisioningState', 'Updating')
                  ])
 
 
@@ -883,9 +883,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs['key_file'] = os.path.join(tempfile.mkdtemp(), 'backup.key')
         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file "{key_file}"')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault key purge --vault-name {kv} -n {key}')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault key delete --vault-name {kv} -n {key2}')
         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
         self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
@@ -1524,9 +1524,9 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = os.path.join(tempfile.mkdtemp(), 'backup.secret')
         self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file "{bak_file}"')
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}', checks=self.check('name', '{sec}'))
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault secret purge --vault-name {kv} -n {sec}')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec2}', checks=self.check('name', '{sec2}'))
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
@@ -1862,7 +1862,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = bak_file
         self.cmd('keyvault certificate backup --vault-name {kv} -n cert1 --file {bak_file}')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert1')
         time.sleep(10)
 
