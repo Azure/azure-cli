@@ -9,21 +9,142 @@
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
+# pylint: disable=bad-continuation
+# pylint: disable=line-too-long
 
 from azure.cli.core.commands import CliCommandType
+from ..generated._client_factory import (
+    cf_ssh_public_key,
+    cf_virtual_machine,
+    cf_virtual_machine_scale_set,
+    cf_virtual_machine_scale_set_vm_extension,
+    cf_virtual_machine_scale_set_vms,
+    cf_virtual_machine_scale_set_vm_run_command,
+    cf_disk_access,
+    cf_disk_restore_point,
+)
+
+
+vm_ssh_public_key = CliCommandType(
+    operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
+    client_factory=cf_ssh_public_key,
+)
+
+
+vm_virtual_machine = CliCommandType(
+    operations_tmpl='azure.mgmt.compute.operations._virtual_machines_operations#VirtualMachinesOperations.{}',
+    client_factory=cf_virtual_machine,
+)
+
+
+vm_virtual_machine_scale_set = CliCommandType(
+    operations_tmpl=(
+        'azure.mgmt.compute.operations._virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.{}'
+    ),
+    client_factory=cf_virtual_machine_scale_set,
+)
+
+
+vm_virtual_machine_scale_set_vm_extension = CliCommandType(
+    operations_tmpl='azure.mgmt.compute.operations._virtual_machine_scale_set_vm_extensions_operations#VirtualMachineScaleSetVmExtensionsOperations.{}',
+    client_factory=cf_virtual_machine_scale_set_vm_extension,
+)
+
+
+vm_virtual_machine_scale_set_vms = CliCommandType(
+    operations_tmpl=(
+        'azure.mgmt.compute.operations._virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.{}'
+    ),
+    client_factory=cf_virtual_machine_scale_set_vms,
+)
+
+
+vm_virtual_machine_scale_set_vm_run_command = CliCommandType(
+    operations_tmpl='azure.mgmt.compute.operations._virtual_machine_scale_set_vm_run_commands_operations#VirtualMachineScaleSetVmRunCommandsOperations.{}',
+    client_factory=cf_virtual_machine_scale_set_vm_run_command,
+)
+
+
+vm_disk_access = CliCommandType(
+    operations_tmpl='azure.mgmt.compute.operations._disk_accesses_operations#DiskAccessesOperations.{}',
+    client_factory=cf_disk_access,
+)
+
+
+vm_disk_restore_point = CliCommandType(
+    operations_tmpl='azure.mgmt.compute.operations._disk_restore_point_operations#DiskRestorePointOperations.{}',
+    client_factory=cf_disk_restore_point,
+)
 
 
 def load_command_table(self, _):
 
-    from ..generated._client_factory import cf_ssh_public_key
-
-    vm_ssh_public_key = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
-        client_factory=cf_ssh_public_key,
-    )
-    with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
+    with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key, is_experimental=True) as g:
         g.custom_command('list', 'sshkey_list')
         g.custom_show_command('show', 'sshkey_show')
         g.custom_command('create', 'sshkey_create')
         g.custom_command('update', 'sshkey_update')
         g.custom_command('delete', 'sshkey_delete', confirmation=True)
+
+    with self.command_group(
+        'vm virtual-machine', vm_virtual_machine, client_factory=cf_virtual_machine, is_experimental=True
+    ) as g:
+        g.custom_command('install-patch', 'vm_virtual_machine_install_patch')
+        g.custom_command('reimage', 'vm_virtual_machine_reimage')
+
+    with self.command_group(
+        'vm virtual-machine-scale-set',
+        vm_virtual_machine_scale_set,
+        client_factory=cf_virtual_machine_scale_set,
+        is_experimental=True,
+    ) as g:
+        g.custom_command(
+            'convert-to-single-placement-group', 'vm_virtual_machine_scale_set_convert_to_single_placement_group'
+        )
+        g.custom_command(
+            'force-recovery-service-fabric-platform-update-domain-walk',
+            'vm_virtual_machine_scale_set_force_recovery_service_fabric_platform_update_domain_walk',
+        )
+        g.custom_command('redeploy', 'vm_virtual_machine_scale_set_redeploy')
+        g.custom_command('reimage-all', 'vm_virtual_machine_scale_set_reimage_all')
+
+    with self.command_group(
+        'vm virtual-machine-scale-set-vm-extension',
+        vm_virtual_machine_scale_set_vm_extension,
+        client_factory=cf_virtual_machine_scale_set_vm_extension,
+        is_experimental=True,
+    ) as g:
+        g.custom_command('list', 'vm_virtual_machine_scale_set_vm_extension_list')
+        g.custom_show_command('show', 'vm_virtual_machine_scale_set_vm_extension_show')
+        g.custom_command('create', 'vm_virtual_machine_scale_set_vm_extension_create', supports_no_wait=True)
+        g.custom_wait_command('wait', 'vm_virtual_machine_scale_set_vm_extension_show')
+
+    with self.command_group(
+        'vm virtual-machine-scale-set-v-ms',
+        vm_virtual_machine_scale_set_vms,
+        client_factory=cf_virtual_machine_scale_set_vms,
+        is_experimental=True,
+    ) as g:
+        g.custom_command('redeploy', 'vm_virtual_machine_scale_set_v_ms_redeploy')
+        g.custom_command('reimage-all', 'vm_virtual_machine_scale_set_v_ms_reimage_all')
+        g.custom_command(
+            'retrieve-boot-diagnostic-data', 'vm_virtual_machine_scale_set_v_ms_retrieve_boot_diagnostic_data'
+        )
+
+    with self.command_group(
+        'vm virtual-machine-scale-set-vm-run-command',
+        vm_virtual_machine_scale_set_vm_run_command,
+        client_factory=cf_virtual_machine_scale_set_vm_run_command,
+        is_experimental=True,
+    ) as g:
+        g.custom_command('list', 'vm_virtual_machine_scale_set_vm_run_command_list')
+
+    with self.command_group('vm disk-access', vm_disk_access, client_factory=cf_disk_access, is_experimental=True) as g:
+        g.custom_command('delete-a-private-endpoint-connection', 'vm_disk_access_delete_a_private_endpoint_connection')
+        g.custom_command('list-private-endpoint-connection', 'vm_disk_access_list_private_endpoint_connection')
+        g.custom_command('show-private-link-resource', 'vm_disk_access_show_private_link_resource')
+
+    with self.command_group(
+        'vm disk-restore-point', vm_disk_restore_point, client_factory=cf_disk_restore_point, is_experimental=True
+    ) as g:
+        g.custom_show_command('show', 'vm_disk_restore_point_show')
