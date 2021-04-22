@@ -1543,7 +1543,7 @@ def _get_keyvault_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
 
     return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
