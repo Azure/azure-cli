@@ -77,23 +77,22 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
                 "Could not find a fileshare with name " + afs_name +
                 " to protect or a protected fileshare of name " + afs_name)
         return item
-    else:
-        policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
-        helper.validate_policy(policy)
+    policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+    helper.validate_policy(policy)
 
-        helper.validate_azurefileshare_item(protectable_item)
+    helper.validate_azurefileshare_item(protectable_item)
 
-        container_uri = helper.get_protection_container_uri_from_id(protectable_item.id)
-        item_uri = helper.get_protectable_item_uri_from_id(protectable_item.id)
-        item_properties = AzureFileshareProtectedItem()
+    container_uri = helper.get_protection_container_uri_from_id(protectable_item.id)
+    item_uri = helper.get_protectable_item_uri_from_id(protectable_item.id)
+    item_properties = AzureFileshareProtectedItem()
 
-        item_properties.policy_id = policy.id
-        item_properties.source_resource_id = protectable_item.properties.parent_container_fabric_id
-        item = ProtectedItemResource(properties=item_properties)
+    item_properties.policy_id = policy.id
+    item_properties.source_resource_id = protectable_item.properties.parent_container_fabric_id
+    item = ProtectedItemResource(properties=item_properties)
 
-        result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                         container_uri, item_uri, item, raw=True)
-        return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, item, raw=True)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
