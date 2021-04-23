@@ -82,7 +82,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.encryption.key_source = encryption_key_source
 
     KeySource = cmd.get_models('KeySource')
-    if params.encryption.key_source == KeySource.microsoft_keyvault:
+    if params.encryption.key_source is not None and params.encryption.key_source == KeySource.microsoft_keyvault:
         if params.encryption.key_vault_properties is None:
             KeyVaultProperties = cmd.get_models('KeyVaultProperties')
             params.encryption.key_vault_properties = KeyVaultProperties(key_name=encryption_key_name,
