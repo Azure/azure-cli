@@ -34,9 +34,11 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
+            print(cmd)
             execute(self.cli_ctx, cmd)
             if not self.soft_delete:
                 cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
+                print(cmd)
                 execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -65,18 +67,24 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
     def _cleanup(self, vault_name, resource_group):
         containers = execute(self.cli_ctx, 'az backup container list --backup-management-type AzureIaasVM -v {} -g {} --query [].properties.friendlyName'
                              .format(vault_name, resource_group)).get_output_in_json()
+        print('az backup container list --backup-management-type AzureIaasVM -v {} -g {} --query [].properties.friendlyName'
+                             .format(vault_name, resource_group))
         for container in containers:
             items = execute(self.cli_ctx, 'az backup item list --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} --query [].properties.friendlyName'
                             .format(resource_group, vault_name, container)).get_output_in_json()
+            print('az backup item list --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} --query [].properties.friendlyName'
+                            .format(resource_group, vault_name, container))
             for item in items:
                 execute(self.cli_ctx,
                         'az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
-        from msrestazure.azure_exceptions import CloudError
+                print('az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                        .format(resource_group, vault_name, container, item))
+        from azure.core.exceptions import HttpResponseError
         try:
             execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
-        except CloudError as ex:
-            if 'Recovery Services vault cannot be deleted as there are backup items in soft deleted state in the vault' not in str(ex):
+        except HttpResponseError as ex:
+            if "Operation returned an invalid status 'Bad Request'" not in str(ex):
                 raise ex
 
 
