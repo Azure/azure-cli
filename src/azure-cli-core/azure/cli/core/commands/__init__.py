@@ -945,6 +945,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
+        from azure.core.exceptions import HttpResponseError
 
         correlation_message = ''
         self.progress_bar.begin()
@@ -984,14 +985,18 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         try:
             result = poller.result()
-        except ClientException as client_exception:
+        except (ClientException, HttpResponseError) as exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
             self.progress_bar.stop()
-            if getattr(client_exception, 'status_code', None) == 404 and 'delete' in self.cli_ctx.data['command']:
-                logger.debug('Service returned 404 on the long-running delete operation. CLI treats it as delete '
-                             'successfully but service should fix this behavior.')
+            if getattr(exception, 'status_code', None) == 404 and \
+               ('delete' in self.cli_ctx.data['command'] or 'purge' in self.cli_ctx.data['command']):
+                logger.debug('Service returned 404 on the long-running delete or purge operation. CLI treats it as '
+                             'delete or purge successfully but service should fix this behavior.')
                 return None
-            handle_long_running_operation_exception(client_exception)
+            if isinstance(exception, ClientException):
+                handle_long_running_operation_exception(exception)
+            else:
+                raise exception
         finally:
             self.progress_bar.end()
             if poll_flag:
