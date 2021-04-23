@@ -24,7 +24,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
     from argcomplete.completers import FilesCompleter
     from six import u as unicode_string
 
