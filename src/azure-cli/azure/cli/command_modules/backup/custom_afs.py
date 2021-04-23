@@ -76,8 +76,7 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
             raise CLIError(
                 "Could not find a fileshare with name " + afs_name +
                 " to protect or a protected fileshare of name " + afs_name)
-        else:
-            return item
+        return item
     else:
         policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
         helper.validate_policy(policy)
@@ -93,7 +92,7 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
         item = ProtectedItemResource(properties=item_properties)
 
         result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                        container_uri, item_uri, item, raw=True)
+                                         container_uri, item_uri, item, raw=True)
         return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
