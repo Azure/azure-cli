@@ -24,7 +24,7 @@ class WebpubsubScenarioTest(ScenarioTest):
         self.kwargs.update({
             'name': self.create_random_name('webpubsub', 16),
             'sku': 'Standard_S1',
-            'location': 'centraluseuap',
+            'location': 'eastus',
             'tags': '{}={}'.format(tags_key, tags_val),
             'unit_count': 1,
             'updated_tags': '{}={}'.format(tags_key, updated_tags_val),
@@ -104,4 +104,4 @@ class WebpubsubScenarioTest(ScenarioTest):
         count = len(self.cmd('webpubsub list').get_output_in_json())
         self.cmd('webpubsub delete -g {rg} -n {name}')
         final_count = len(self.cmd('webpubsub list').get_output_in_json())
-        self.assertTrue(final_count, count - 1)
+        self.assertTrue(final_count == count - 1)
