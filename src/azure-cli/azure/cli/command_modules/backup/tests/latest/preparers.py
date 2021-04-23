@@ -72,11 +72,11 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
                 execute(self.cli_ctx,
                         'az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import HttpResponseError
         try:
             execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
-        except CloudError as ex:
-            if 'Recovery Services vault cannot be deleted as there are backup items in soft deleted state in the vault' not in str(ex):
+        except HttpResponseError as ex:
+            if "Operation returned an invalid status 'Bad Request'" not in str(ex):
                 raise ex
 
 
