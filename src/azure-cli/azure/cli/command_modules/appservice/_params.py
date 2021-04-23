@@ -67,6 +67,11 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
+    static_web_app_sku_arg_type = CLIArgumentType(
+        help = 'The pricing tiers for Static Web Spp, e.g., F1(Free), S1(Standard)',
+        arg_type=get_enum_type(['F1', 'FREE', 'S1'])
+    )
+
     functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
@@ -1013,6 +1018,20 @@ def load_arguments(self, _):
     with self.argument_context('staticwebapp create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)
+        c.argument('sku', arg_type=static_web_app_sku_arg_type)
+        c.argument('app_location', options_list=['--app-location'],
+                   help="Location of your application code. For example, '/' represents the root of your app, "
+                        "while '/app' represents a directory called 'app'")
+        c.argument('api_location', options_list=['--api-location'],
+                   help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.")
+        c.argument('app_artifact_location', options_list=['--app-artifact-location'],
+                   help="The path of your build output relative to your apps location. For example, setting a value "
+                        "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
+                        "be served.")
+    with self.argument_context('staticwebapp update') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('tags', arg_type=tags_type)
+        c.argument('sku', arg_type=static_web_app_sku_arg_type)
         c.argument('app_location', options_list=['--app-location'],
                    help="Location of your application code. For example, '/' represents the root of your app, "
                         "while '/app' represents a directory called 'app'")

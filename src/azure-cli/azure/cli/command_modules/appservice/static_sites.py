@@ -8,6 +8,8 @@ from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
 from knack.log import get_logger
 
+from .utils import get_sku_name
+
 logger = get_logger(__name__)
 
 
@@ -190,7 +192,7 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', app_artifact_location='.github/workflows',
-                       tags=None, no_wait=False):
+                       tags=None, no_wait=False, sku='Free'):
     if not token:
         _raise_missing_token_suggestion()
 
@@ -202,7 +204,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
         api_location=api_location,
         app_artifact_location=app_artifact_location)
 
-    sku = SkuDescription(name='Free', tier='Free')
+    sku_def = SkuDescription(name=get_sku_name(sku), tier=get_sku_name(sku))
 
     staticsite_deployment_properties = StaticSiteARMResource(
         location=location,
@@ -211,10 +213,42 @@ def create_staticsites(cmd, resource_group_name, name, location,
         branch=branch,
         repository_token=token,
         build_properties=build,
-        sku=sku)
+        sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.create_or_update_static_site,
+                       resource_group_name=resource_group_name, name=name,
+                       static_site_envelope=staticsite_deployment_properties)
+
+
+def update_staticsites(cmd, resource_group_name, name, location,
+                       source, branch, token=None,
+                       app_location='.', api_location='.', app_artifact_location='.github/workflows',
+                       tags=None, no_wait=False, sku='Free'):
+    if not token:
+        _raise_missing_token_suggestion()
+
+    StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
+        'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
+
+    build = StaticSiteBuildProperties(
+        app_location=app_location,
+        api_location=api_location,
+        app_artifact_location=app_artifact_location)
+
+    sku_def = SkuDescription(name=get_sku_name(sku), tier=get_sku_name(sku))
+
+    staticsite_deployment_properties = StaticSiteARMResource(
+        location=location,
+        tags=tags,
+        repository_url=source,
+        branch=branch,
+        repository_token=token,
+        build_properties=build,
+        sku=sku_def)
+
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, client.update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
 
