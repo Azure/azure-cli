@@ -375,7 +375,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK,
                                                  subscription_id=res['subscription'])
         pe = network_client.private_endpoints.get(res['resource_group'], res['name'])
-        if bool(re.match(vnet_of_private_endpoint, pe.subnet.id, re.I)):
+        if pe.subnet.id.lower().startswith(vnet_of_private_endpoint.lower()):
             nic_id = pe.network_interfaces[0].id
             nic_res = parse_resource_id(nic_id)
             nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
