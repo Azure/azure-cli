@@ -8,12 +8,14 @@
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     DatabaseAccountUpdateParameters,
+    DatabaseAccountRegenerateKeyParameters,
     Location,
     DatabaseAccountKind,
     VirtualNetworkRule,
@@ -22,6 +24,7 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
+    ResourceIdentityType,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
     SqlTriggerResource,
@@ -30,6 +33,7 @@ from azure.mgmt.cosmosdb.models import (
     SqlUserDefinedFunctionCreateUpdateParameters,
     TableResource,
     TableCreateUpdateParameters,
+    ManagedServiceIdentity,
     MongoDBDatabaseResource,
     MongoDBDatabaseCreateUpdateParameters,
     MongoDBCollectionResource,
@@ -99,7 +103,9 @@ def cli_cosmosdb_create(cmd, client,
                         network_acl_bypass=None,
                         network_acl_bypass_resource_ids=None,
                         backup_interval=None,
-                        backup_retention=None):
+                        backup_retention=None,
+                        assign_identity=None,
+                        default_identity=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -121,6 +127,13 @@ def cli_cosmosdb_create(cmd, client,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
+    system_assigned_identity = None
+    if assign_identity is not None:
+        if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
+            system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+        else:
+            raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
@@ -157,9 +170,11 @@ def cli_cosmosdb_create(cmd, client,
         enable_free_tier=enable_free_tier,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
-        backup_policy=backup_policy)
+        backup_policy=backup_policy,
+        identity=system_assigned_identity,
+        default_identity=default_identity)
 
-    async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
+    async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
@@ -187,7 +202,8 @@ def cli_cosmosdb_update(client,
                         network_acl_bypass_resource_ids=None,
                         server_version=None,
                         backup_interval=None,
-                        backup_retention=None):
+                        backup_retention=None,
+                        default_identity=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -247,9 +263,10 @@ def cli_cosmosdb_update(client,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         api_properties=api_properties,
-        backup_policy=backup_policy)
+        backup_policy=backup_policy,
+        default_identity=default_identity)
 
-    async_docdb_update = client.update(resource_group_name, account_name, params)
+    async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
@@ -274,10 +291,15 @@ def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=Cosmos
     raise CLIError("az cosmosdb keys list: '{0}' is not a valid value for '--type'. See 'az cosmosdb keys list --help'.".format(key_type))
 
 
-def _handle_exists_exception(cloud_error):
-    if cloud_error.status_code == 404:
+def cli_cosmosdb_regenerate_key(client, resource_group_name, account_name, key_kind):
+    key_to_regenerate = DatabaseAccountRegenerateKeyParameters(key_kind=key_kind)
+    return client.begin_regenerate_key(resource_group_name, account_name, key_to_regenerate)
+
+
+def _handle_exists_exception(http_response_error):
+    if http_response_error.status_code == 404:
         return False
-    raise cloud_error
+    raise http_response_error
 
 
 def cli_cosmosdb_sql_database_create(client,
@@ -293,10 +315,10 @@ def cli_cosmosdb_sql_database_create(client,
         resource=SqlDatabaseResource(id=database_name),
         options=options)
 
-    return client.create_update_sql_database(resource_group_name,
-                                             account_name,
-                                             database_name,
-                                             sql_database_resource)
+    return client.begin_create_update_sql_database(resource_group_name,
+                                                   account_name,
+                                                   database_name,
+                                                   sql_database_resource)
 
 
 def cli_cosmosdb_sql_database_exists(client,
@@ -306,7 +328,7 @@ def cli_cosmosdb_sql_database_exists(client,
     """Checks if an Azure Cosmos DB SQL database exists"""
     try:
         client.get_sql_database(resource_group_name, account_name, database_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -382,11 +404,11 @@ def cli_cosmosdb_sql_container_create(client,
         resource=sql_container_resource,
         options=options)
 
-    return client.create_update_sql_container(resource_group_name,
-                                              account_name,
-                                              database_name,
-                                              container_name,
-                                              sql_container_create_update_resource)
+    return client.begin_create_update_sql_container(resource_group_name,
+                                                    account_name,
+                                                    database_name,
+                                                    container_name,
+                                                    sql_container_create_update_resource)
 
 
 def cli_cosmosdb_sql_container_update(client,
@@ -422,11 +444,11 @@ def cli_cosmosdb_sql_container_update(client,
         resource=sql_container_resource,
         options={})
 
-    return client.create_update_sql_container(resource_group_name,
-                                              account_name,
-                                              database_name,
-                                              container_name,
-                                              sql_container_create_update_resource)
+    return client.begin_create_update_sql_container(resource_group_name,
+                                                    account_name,
+                                                    database_name,
+                                                    container_name,
+                                                    sql_container_create_update_resource)
 
 
 def cli_cosmosdb_sql_container_exists(client,
@@ -437,7 +459,7 @@ def cli_cosmosdb_sql_container_exists(client,
     """Checks if an Azure Cosmos DB SQL container exists"""
     try:
         client.get_sql_container(resource_group_name, account_name, database_name, container_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -459,12 +481,12 @@ def cli_cosmosdb_sql_stored_procedure_create_update(client,
         resource=sql_stored_procedure_resource,
         options={})
 
-    return client.create_update_sql_stored_procedure(resource_group_name,
-                                                     account_name,
-                                                     database_name,
-                                                     container_name,
-                                                     stored_procedure_name,
-                                                     sql_stored_procedure_create_update_resource)
+    return client.begin_create_update_sql_stored_procedure(resource_group_name,
+                                                           account_name,
+                                                           database_name,
+                                                           container_name,
+                                                           stored_procedure_name,
+                                                           sql_stored_procedure_create_update_resource)
 
 
 def cli_cosmosdb_sql_user_defined_function_create_update(client,
@@ -483,12 +505,12 @@ def cli_cosmosdb_sql_user_defined_function_create_update(client,
         resource=sql_user_defined_function_resource,
         options={})
 
-    return client.create_update_sql_user_defined_function(resource_group_name,
-                                                          account_name,
-                                                          database_name,
-                                                          container_name,
-                                                          user_defined_function_name,
-                                                          sql_user_defined_function_create_update_resource)
+    return client.begin_create_update_sql_user_defined_function(resource_group_name,
+                                                                account_name,
+                                                                database_name,
+                                                                container_name,
+                                                                user_defined_function_name,
+                                                                sql_user_defined_function_create_update_resource)
 
 
 def _populate_sql_trigger_definition(sql_trigger_resource,
@@ -537,12 +559,12 @@ def cli_cosmosdb_sql_trigger_create(client,
         resource=sql_trigger_resource,
         options={})
 
-    return client.create_update_sql_trigger(resource_group_name,
-                                            account_name,
-                                            database_name,
-                                            container_name,
-                                            trigger_name,
-                                            sql_trigger_create_update_resource)
+    return client.begin_create_update_sql_trigger(resource_group_name,
+                                                  account_name,
+                                                  database_name,
+                                                  container_name,
+                                                  trigger_name,
+                                                  sql_trigger_create_update_resource)
 
 
 def cli_cosmosdb_sql_trigger_update(client,
@@ -574,12 +596,12 @@ def cli_cosmosdb_sql_trigger_update(client,
         resource=sql_trigger_resource,
         options={})
 
-    return client.create_update_sql_trigger(resource_group_name,
-                                            account_name,
-                                            database_name,
-                                            container_name,
-                                            trigger_name,
-                                            sql_trigger_create_update_resource)
+    return client.begin_create_update_sql_trigger(resource_group_name,
+                                                  account_name,
+                                                  database_name,
+                                                  container_name,
+                                                  trigger_name,
+                                                  sql_trigger_create_update_resource)
 
 
 def cli_cosmosdb_gremlin_database_create(client,
@@ -595,10 +617,10 @@ def cli_cosmosdb_gremlin_database_create(client,
         resource=GremlinDatabaseResource(id=database_name),
         options=options)
 
-    return client.create_update_gremlin_database(resource_group_name,
-                                                 account_name,
-                                                 database_name,
-                                                 gremlin_database_resource)
+    return client.begin_create_update_gremlin_database(resource_group_name,
+                                                       account_name,
+                                                       database_name,
+                                                       gremlin_database_resource)
 
 
 def cli_cosmosdb_gremlin_database_exists(client,
@@ -608,7 +630,7 @@ def cli_cosmosdb_gremlin_database_exists(client,
     """Checks if an Azure Cosmos DB Gremlin database exists"""
     try:
         client.get_gremlin_database(resource_group_name, account_name, database_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -666,11 +688,11 @@ def cli_cosmosdb_gremlin_graph_create(client,
         resource=gremlin_graph_resource,
         options=options)
 
-    return client.create_update_gremlin_graph(resource_group_name,
-                                              account_name,
-                                              database_name,
-                                              graph_name,
-                                              gremlin_graph_create_update_resource)
+    return client.begin_create_update_gremlin_graph(resource_group_name,
+                                                    account_name,
+                                                    database_name,
+                                                    graph_name,
+                                                    gremlin_graph_create_update_resource)
 
 
 def cli_cosmosdb_gremlin_graph_update(client,
@@ -702,11 +724,11 @@ def cli_cosmosdb_gremlin_graph_update(client,
         resource=gremlin_graph_resource,
         options={})
 
-    return client.create_update_gremlin_graph(resource_group_name,
-                                              account_name,
-                                              database_name,
-                                              graph_name,
-                                              gremlin_graph_create_update_resource)
+    return client.begin_create_update_gremlin_graph(resource_group_name,
+                                                    account_name,
+                                                    database_name,
+                                                    graph_name,
+                                                    gremlin_graph_create_update_resource)
 
 
 def cli_cosmosdb_gremlin_graph_exists(client,
@@ -717,7 +739,7 @@ def cli_cosmosdb_gremlin_graph_exists(client,
     """Checks if an Azure Cosmos DB Gremlin graph exists"""
     try:
         client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -736,10 +758,10 @@ def cli_cosmosdb_mongodb_database_create(client,
         resource=MongoDBDatabaseResource(id=database_name),
         options=options)
 
-    return client.create_update_mongo_db_database(resource_group_name,
-                                                  account_name,
-                                                  database_name,
-                                                  mongodb_database_resource)
+    return client.begin_create_update_mongo_db_database(resource_group_name,
+                                                        account_name,
+                                                        database_name,
+                                                        mongodb_database_resource)
 
 
 def cli_cosmosdb_mongodb_database_exists(client,
@@ -749,7 +771,7 @@ def cli_cosmosdb_mongodb_database_exists(client,
     """Checks if an Azure Cosmos DB MongoDB database exists"""
     try:
         client.get_mongo_db_database(resource_group_name, account_name, database_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -792,11 +814,11 @@ def cli_cosmosdb_mongodb_collection_create(client,
         resource=mongodb_collection_resource,
         options=options)
 
-    return client.create_update_mongo_db_collection(resource_group_name,
-                                                    account_name,
-                                                    database_name,
-                                                    collection_name,
-                                                    mongodb_collection_create_update_resource)
+    return client.begin_create_update_mongo_db_collection(resource_group_name,
+                                                          account_name,
+                                                          database_name,
+                                                          collection_name,
+                                                          mongodb_collection_create_update_resource)
 
 
 def cli_cosmosdb_mongodb_collection_update(client,
@@ -824,11 +846,11 @@ def cli_cosmosdb_mongodb_collection_update(client,
         resource=mongodb_collection_resource,
         options={})
 
-    return client.create_update_mongo_db_collection(resource_group_name,
-                                                    account_name,
-                                                    database_name,
-                                                    collection_name,
-                                                    mongodb_collection_create_update_resource)
+    return client.begin_create_update_mongo_db_collection(resource_group_name,
+                                                          account_name,
+                                                          database_name,
+                                                          collection_name,
+                                                          mongodb_collection_create_update_resource)
 
 
 def cli_cosmosdb_mongodb_collection_exists(client,
@@ -839,7 +861,7 @@ def cli_cosmosdb_mongodb_collection_exists(client,
     """Checks if an Azure Cosmos DB MongoDB collection exists"""
     try:
         client.get_mongo_db_collection(resource_group_name, account_name, database_name, collection_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -858,10 +880,10 @@ def cli_cosmosdb_cassandra_keyspace_create(client,
         resource=CassandraKeyspaceResource(id=keyspace_name),
         options=options)
 
-    return client.create_update_cassandra_keyspace(resource_group_name,
-                                                   account_name,
-                                                   keyspace_name,
-                                                   cassandra_keyspace_resource)
+    return client.begin_create_update_cassandra_keyspace(resource_group_name,
+                                                         account_name,
+                                                         keyspace_name,
+                                                         cassandra_keyspace_resource)
 
 
 def cli_cosmosdb_cassandra_keyspace_exists(client,
@@ -871,7 +893,7 @@ def cli_cosmosdb_cassandra_keyspace_exists(client,
     """Checks if an Azure Cosmos DB Cassandra keyspace exists"""
     try:
         client.get_cassandra_keyspace(resource_group_name, account_name, keyspace_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -914,11 +936,11 @@ def cli_cosmosdb_cassandra_table_create(client,
         resource=cassandra_table_resource,
         options=options)
 
-    return client.create_update_cassandra_table(resource_group_name,
-                                                account_name,
-                                                keyspace_name,
-                                                table_name,
-                                                cassandra_table_create_update_resource)
+    return client.begin_create_update_cassandra_table(resource_group_name,
+                                                      account_name,
+                                                      keyspace_name,
+                                                      table_name,
+                                                      cassandra_table_create_update_resource)
 
 
 def cli_cosmosdb_cassandra_table_update(client,
@@ -945,11 +967,11 @@ def cli_cosmosdb_cassandra_table_update(client,
         resource=cassandra_table_resource,
         options={})
 
-    return client.create_update_cassandra_table(resource_group_name,
-                                                account_name,
-                                                keyspace_name,
-                                                table_name,
-                                                cassandra_table_create_update_resource)
+    return client.begin_create_update_cassandra_table(resource_group_name,
+                                                      account_name,
+                                                      keyspace_name,
+                                                      table_name,
+                                                      cassandra_table_create_update_resource)
 
 
 def cli_cosmosdb_cassandra_table_exists(client,
@@ -960,7 +982,7 @@ def cli_cosmosdb_cassandra_table_exists(client,
     """Checks if an Azure Cosmos DB Cassandra table exists"""
     try:
         client.get_cassandra_table(resource_group_name, account_name, keyspace_name, table_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -979,7 +1001,7 @@ def cli_cosmosdb_table_create(client,
         resource=TableResource(id=table_name),
         options=options)
 
-    return client.create_update_table(resource_group_name, account_name, table_name, table)
+    return client.begin_create_update_table(resource_group_name, account_name, table_name, table)
 
 
 def cli_cosmosdb_table_exists(client,
@@ -989,7 +1011,7 @@ def cli_cosmosdb_table_exists(client,
     """Checks if an Azure Cosmos DB table exists"""
     try:
         client.get_table(resource_group_name, account_name, table_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         return _handle_exists_exception(ex)
 
     return True
@@ -1003,7 +1025,10 @@ def cli_cosmosdb_sql_database_throughput_update(client,
                                                 max_throughput=None):
     """Update an Azure Cosmos DB SQL database throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_sql_database_throughput(resource_group_name, account_name, database_name, throughput_update_resource)
+    return client.begin_update_sql_database_throughput(resource_group_name,
+                                                       account_name,
+                                                       database_name,
+                                                       throughput_update_resource)
 
 
 def cli_cosmosdb_sql_database_throughput_migrate(client,
@@ -1012,8 +1037,8 @@ def cli_cosmosdb_sql_database_throughput_migrate(client,
                                                  database_name,
                                                  throughput_type):
     if throughput_type == "autoscale":
-        return client.migrate_sql_database_to_autoscale(resource_group_name, account_name, database_name)
-    return client.migrate_sql_database_to_manual_throughput(resource_group_name, account_name, database_name)
+        return client.begin_migrate_sql_database_to_autoscale(resource_group_name, account_name, database_name)
+    return client.begin_migrate_sql_database_to_manual_throughput(resource_group_name, account_name, database_name)
 
 
 def cli_cosmosdb_sql_container_throughput_update(client,
@@ -1025,11 +1050,11 @@ def cli_cosmosdb_sql_container_throughput_update(client,
                                                  max_throughput=None):
     """Update an Azure Cosmos DB SQL container throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_sql_container_throughput(resource_group_name,
-                                                  account_name,
-                                                  database_name,
-                                                  container_name,
-                                                  throughput_update_resource)
+    return client.begin_update_sql_container_throughput(resource_group_name,
+                                                        account_name,
+                                                        database_name,
+                                                        container_name,
+                                                        throughput_update_resource)
 
 
 def cli_cosmosdb_sql_container_throughput_migrate(client,
@@ -1040,8 +1065,10 @@ def cli_cosmosdb_sql_container_throughput_migrate(client,
                                                   throughput_type):
     """Migrate an Azure Cosmos DB SQL container throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_sql_container_to_autoscale(resource_group_name, account_name, database_name, container_name)
-    return client.migrate_sql_container_to_manual_throughput(resource_group_name, account_name, database_name, container_name)
+        return client.begin_migrate_sql_container_to_autoscale(resource_group_name, account_name,
+                                                               database_name, container_name)
+    return client.begin_migrate_sql_container_to_manual_throughput(resource_group_name, account_name,
+                                                                   database_name, container_name)
 
 
 def cli_cosmosdb_mongodb_database_throughput_update(client,
@@ -1052,10 +1079,10 @@ def cli_cosmosdb_mongodb_database_throughput_update(client,
                                                     max_throughput=None):
     """Update an Azure Cosmos DB MongoDB database throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_mongo_db_database_throughput(resource_group_name,
-                                                      account_name,
-                                                      database_name,
-                                                      throughput_update_resource)
+    return client.begin_update_mongo_db_database_throughput(resource_group_name,
+                                                            account_name,
+                                                            database_name,
+                                                            throughput_update_resource)
 
 
 def cli_cosmosdb_mongodb_database_throughput_migrate(client,
@@ -1065,8 +1092,8 @@ def cli_cosmosdb_mongodb_database_throughput_migrate(client,
                                                      throughput_type):
     """Migrate an Azure Cosmos DB MongoDB database throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_mongo_db_database_to_autoscale(resource_group_name, account_name, database_name)
-    return client.migrate_mongo_db_database_to_manual_throughput(resource_group_name, account_name, database_name)
+        return client.begin_migrate_mongo_db_database_to_autoscale(resource_group_name, account_name, database_name)
+    return client.begin_migrate_mongo_db_database_to_manual_throughput(resource_group_name, account_name, database_name)
 
 
 def cli_cosmosdb_mongodb_collection_throughput_update(client,
@@ -1078,11 +1105,11 @@ def cli_cosmosdb_mongodb_collection_throughput_update(client,
                                                       max_throughput=None):
     """Update an Azure Cosmos DB MongoDB collection throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_mongo_db_collection_throughput(resource_group_name,
-                                                        account_name,
-                                                        database_name,
-                                                        collection_name,
-                                                        throughput_update_resource)
+    return client.begin_update_mongo_db_collection_throughput(resource_group_name,
+                                                              account_name,
+                                                              database_name,
+                                                              collection_name,
+                                                              throughput_update_resource)
 
 
 def cli_cosmosdb_mongodb_collection_throughput_migrate(client,
@@ -1093,8 +1120,10 @@ def cli_cosmosdb_mongodb_collection_throughput_migrate(client,
                                                        throughput_type):
     """Migrate an Azure Cosmos DB MongoDB collection throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_mongo_db_collection_to_autoscale(resource_group_name, account_name, database_name, collection_name)
-    return client.migrate_mongo_db_collection_to_manual_throughput(resource_group_name, account_name, database_name, collection_name)
+        return client.begin_migrate_mongo_db_collection_to_autoscale(resource_group_name, account_name,
+                                                                     database_name, collection_name)
+    return client.begin_migrate_mongo_db_collection_to_manual_throughput(resource_group_name, account_name,
+                                                                         database_name, collection_name)
 
 
 def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
@@ -1105,10 +1134,10 @@ def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
                                                       max_throughput=None):
     """Update an Azure Cosmos DB Cassandra keyspace throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_cassandra_keyspace_throughput(resource_group_name,
-                                                       account_name,
-                                                       keyspace_name,
-                                                       throughput_update_resource)
+    return client.begin_update_cassandra_keyspace_throughput(resource_group_name,
+                                                             account_name,
+                                                             keyspace_name,
+                                                             throughput_update_resource)
 
 
 def cli_cosmosdb_cassandra_keyspace_throughput_migrate(client,
@@ -1118,8 +1147,9 @@ def cli_cosmosdb_cassandra_keyspace_throughput_migrate(client,
                                                        throughput_type):
     """Migrate an Azure Cosmos DB Cassandra keyspace throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_cassandra_keyspace_to_autoscale(resource_group_name, account_name, keyspace_name)
-    return client.migrate_cassandra_keyspace_to_manual_throughput(resource_group_name, account_name, keyspace_name)
+        return client.begin_migrate_cassandra_keyspace_to_autoscale(resource_group_name, account_name, keyspace_name)
+    return client.begin_migrate_cassandra_keyspace_to_manual_throughput(resource_group_name,
+                                                                        account_name, keyspace_name)
 
 
 def cli_cosmosdb_cassandra_table_throughput_update(client,
@@ -1131,11 +1161,11 @@ def cli_cosmosdb_cassandra_table_throughput_update(client,
                                                    max_throughput=None):
     """Update an Azure Cosmos DB Cassandra table throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_cassandra_table_throughput(resource_group_name,
-                                                    account_name,
-                                                    keyspace_name,
-                                                    table_name,
-                                                    throughput_update_resource)
+    return client.begin_update_cassandra_table_throughput(resource_group_name,
+                                                          account_name,
+                                                          keyspace_name,
+                                                          table_name,
+                                                          throughput_update_resource)
 
 
 def cli_cosmosdb_cassandra_table_throughput_migrate(client,
@@ -1146,8 +1176,10 @@ def cli_cosmosdb_cassandra_table_throughput_migrate(client,
                                                     throughput_type):
     """Migrate an Azure Cosmos DB Cassandra table throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_cassandra_table_to_autoscale(resource_group_name, account_name, keyspace_name, table_name)
-    return client.migrate_cassandra_table_to_manual_throughput(resource_group_name, account_name, keyspace_name, table_name)
+        return client.begin_migrate_cassandra_table_to_autoscale(resource_group_name, account_name,
+                                                                 keyspace_name, table_name)
+    return client.begin_migrate_cassandra_table_to_manual_throughput(resource_group_name, account_name,
+                                                                     keyspace_name, table_name)
 
 
 def cli_cosmosdb_gremlin_database_throughput_update(client,
@@ -1158,10 +1190,10 @@ def cli_cosmosdb_gremlin_database_throughput_update(client,
                                                     max_throughput=None):
     """Update an Azure Cosmos DB Gremlin database throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_gremlin_database_throughput(resource_group_name,
-                                                     account_name,
-                                                     database_name,
-                                                     throughput_update_resource)
+    return client.begin_update_gremlin_database_throughput(resource_group_name,
+                                                           account_name,
+                                                           database_name,
+                                                           throughput_update_resource)
 
 
 def cli_cosmosdb_gremlin_database_throughput_migrate(client,
@@ -1171,8 +1203,8 @@ def cli_cosmosdb_gremlin_database_throughput_migrate(client,
                                                      throughput_type):
     """Migrate an Azure Cosmos DB Gremlin database throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_gremlin_database_to_autoscale(resource_group_name, account_name, database_name)
-    return client.migrate_gremlin_database_to_manual_throughput(resource_group_name, account_name, database_name)
+        return client.begin_migrate_gremlin_database_to_autoscale(resource_group_name, account_name, database_name)
+    return client.begin_migrate_gremlin_database_to_manual_throughput(resource_group_name, account_name, database_name)
 
 
 def cli_cosmosdb_gremlin_graph_throughput_update(client,
@@ -1184,11 +1216,11 @@ def cli_cosmosdb_gremlin_graph_throughput_update(client,
                                                  max_throughput=None):
     """Update an Azure Cosmos DB Gremlin graph throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_gremlin_graph_throughput(resource_group_name,
-                                                  account_name,
-                                                  database_name,
-                                                  graph_name,
-                                                  throughput_update_resource)
+    return client.begin_update_gremlin_graph_throughput(resource_group_name,
+                                                        account_name,
+                                                        database_name,
+                                                        graph_name,
+                                                        throughput_update_resource)
 
 
 def cli_cosmosdb_gremlin_graph_throughput_migrate(client,
@@ -1199,8 +1231,10 @@ def cli_cosmosdb_gremlin_graph_throughput_migrate(client,
                                                   throughput_type):
     """Migrate an Azure Cosmos DB Gremlin database throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_gremlin_graph_to_autoscale(resource_group_name, account_name, database_name, graph_name)
-    return client.migrate_gremlin_graph_to_manual_throughput(resource_group_name, account_name, database_name, graph_name)
+        return client.begin_migrate_gremlin_graph_to_autoscale(resource_group_name, account_name,
+                                                               database_name, graph_name)
+    return client.begin_migrate_gremlin_graph_to_manual_throughput(resource_group_name, account_name,
+                                                                   database_name, graph_name)
 
 
 def cli_cosmosdb_table_throughput_update(client,
@@ -1211,7 +1245,8 @@ def cli_cosmosdb_table_throughput_update(client,
                                          max_throughput=None):
     """Update an Azure Cosmos DB table throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
-    return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_update_resource)
+    return client.begin_update_table_throughput(resource_group_name, account_name, table_name,
+                                                throughput_update_resource)
 
 
 def cli_cosmosdb_table_throughput_migrate(client,
@@ -1221,8 +1256,8 @@ def cli_cosmosdb_table_throughput_migrate(client,
                                           throughput_type):
     """Migrate an Azure Cosmos DB table throughput"""
     if throughput_type == "autoscale":
-        return client.migrate_table_to_autoscale(resource_group_name, account_name, table_name)
-    return client.migrate_table_to_manual_throughput(resource_group_name, account_name, table_name)
+        return client.begin_migrate_table_to_autoscale(resource_group_name, account_name, table_name)
+    return client.begin_migrate_table_to_manual_throughput(resource_group_name, account_name, table_name)
 
 
 def _get_throughput_settings_update_parameters(throughput=None, max_throughput=None):
@@ -1241,6 +1276,53 @@ def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
     """ Lists the virtual network accounts associated with a Cosmos DB account """
     cosmos_db_account = client.get(resource_group_name, account_name)
     return cosmos_db_account.virtual_network_rules
+
+
+def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
+    """ Show the identity associated with a Cosmos DB account """
+
+    cosmos_db_account = client.get(resource_group_name, account_name)
+    return cosmos_db_account.identity
+
+
+def cli_cosmosdb_identity_assign(client,
+                                 resource_group_name,
+                                 account_name):
+    """ Show the identity associated with a Cosmos DB account """
+
+    existing = client.get(resource_group_name, account_name)
+
+    if ResourceIdentityType.system_assigned.value in existing.identity.type:
+        return existing.identity
+
+    if existing.identity.type == ResourceIdentityType.user_assigned.value:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned_user_assigned.value)
+    else:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+    params = DatabaseAccountUpdateParameters(identity=identity)
+    async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
+    cosmos_db_account = async_cosmos_db_update.result()
+    return cosmos_db_account.identity
+
+
+def cli_cosmosdb_identity_remove(client,
+                                 resource_group_name,
+                                 account_name):
+    """ Remove the SystemAssigned identity associated with a Cosmos DB account """
+
+    existing = client.get(resource_group_name, account_name)
+
+    if ResourceIdentityType.system_assigned.value not in existing.identity.type:
+        return existing.identity
+
+    if ResourceIdentityType.user_assigned.value in existing.identity.type:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value)
+    else:
+        identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
+    params = DatabaseAccountUpdateParameters(identity=identity)
+    async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
+    cosmos_db_account = async_cosmos_db_update.result()
+    return cosmos_db_account.identity
 
 
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
@@ -1274,7 +1356,7 @@ def cli_cosmosdb_network_rule_add(cmd,
     for rule in existing.virtual_network_rules:
         virtual_network_rules.append(
             VirtualNetworkRule(id=rule.id,
-                               ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+                               ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))
         if rule.id == subnet:
             rule_already_exists = True
             logger.warning("The rule exists and will be overwritten")
@@ -1282,11 +1364,11 @@ def cli_cosmosdb_network_rule_add(cmd,
     if not rule_already_exists:
         virtual_network_rules.append(
             VirtualNetworkRule(id=subnet,
-                               ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
+                               ignore_missing_v_net_service_endpoint=ignore_missing_vnet_service_endpoint))
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
 
-    async_docdb_update = client.update(resource_group_name, account_name, params)
+    async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
@@ -1308,7 +1390,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
         if rule.id != subnet:
             virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
-                                   ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+                                   ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))
         else:
             rule_removed = True
     if not rule_removed:
@@ -1316,7 +1398,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
 
-    async_docdb_update = client.update(resource_group_name, account_name, params)
+    async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
@@ -1331,11 +1413,10 @@ def _update_private_endpoint_connection_status(client, resource_group_name, acco
     private_endpoint_connection.private_link_service_connection_state.status = new_status
     private_endpoint_connection.private_link_service_connection_state.description = description
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   account_name=account_name,
-                                   private_endpoint_connection_name=private_endpoint_connection_name,
-                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state,
-                                   parameters=private_endpoint_connection)
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         account_name=account_name,
+                                         private_endpoint_connection_name=private_endpoint_connection_name,
+                                         parameters=private_endpoint_connection)
 
 
 def approve_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,

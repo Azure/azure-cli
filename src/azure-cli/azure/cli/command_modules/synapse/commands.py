@@ -139,8 +139,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.synapse.spark.operations#SparkBatchOperations.{}',
         client_factory=None)
 
-    synapse_accesscontrol_sdk = CliCommandType(
-        operations_tmpl='azure.synapse.accesscontrol.operations#AccessControlClientOperationsMixin.{}',
+    synapse_role_assignment_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.accesscontrol.operations#RoleAssignmentsOperations.{}',
+        client_factory=None)
+
+    synapse_role_definitions_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.accesscontrol.operations#RoleDefinitionsOperations.{}',
         client_factory=None)
 
     synapse_linked_service_sdk = CliCommandType(
@@ -375,17 +379,21 @@ def load_command_table(self, _):
         g.custom_command('cancel', 'cancel_spark_session_statement', confirmation=True)
 
     # Data Plane Commands --Access control operations
-    with self.command_group('synapse role assignment', synapse_accesscontrol_sdk,
+    with self.command_group('synapse role assignment', synapse_role_assignment_sdk,
                             custom_command_type=get_custom_sdk('accesscontrol', None)) as g:
         g.custom_command('create', 'create_role_assignment')
         g.custom_command('list', 'list_role_assignments')
         g.custom_show_command('show', 'get_role_assignment_by_id')
         g.custom_command('delete', 'delete_role_assignment', confirmation=True)
 
-    with self.command_group('synapse role definition', synapse_accesscontrol_sdk,
+    with self.command_group('synapse role definition', synapse_role_definitions_sdk,
                             custom_command_type=get_custom_sdk('accesscontrol', None)) as g:
         g.custom_command('list', 'list_role_definitions')
         g.custom_show_command('show', 'get_role_definition')
+
+    with self.command_group('synapse role scope', synapse_role_definitions_sdk,
+                            custom_command_type=get_custom_sdk('accesscontrol', None)) as g:
+        g.custom_command('list', 'list_scopes')
 
     # Data Plane Commands --Artifacts Linked service operations
     with self.command_group('synapse linked-service', synapse_linked_service_sdk,

@@ -111,6 +111,7 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
         choices=['1', '2', '3']
     )
+    edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2020-08-01')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -463,6 +464,22 @@ def load_arguments(self, _):
         c.argument('trusted_client_certificates', options_list=['--trusted-client-certificates', '--trusted-client-cert'], nargs='+', help='Array of references to application gateway trusted client certificates.')
         c.argument('client_auth_configuration', options_list=['--client-auth-configuration', '--client-auth-config'], help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
 
+    with self.argument_context('network application-gateway show-backend-health') as c:
+        c.argument('expand', help='Expands BackendAddressPool and BackendHttpSettings referenced in backend health.')
+
+    with self.argument_context('network application-gateway show-backend-health', min_api='2019-04-01', is_preview=True, arg_group="Probe Operation") as c:
+        c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
+        c.argument('host', help='The name of the host to send the probe.')
+        c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
+        c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.',
+                   arg_type=get_three_state_flag())
+        c.argument('match_body', help='Body that must be contained in the health response.')
+        c.argument('match_status_codes', nargs='+',
+                   help='Space-separated list of allowed ranges of healthy status codes for the health response.')
+        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_settings', help='The name or ID of the HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
     # endregion
 
     # region WebApplicationFirewallPolicy
@@ -766,6 +783,10 @@ def load_arguments(self, _):
         c.argument('connection_name', options_list=['--name', '-n'], help='Name of the peering connection.', id_part='child_name_2')
         c.argument('peer_circuit', help='Name or ID of the peer ExpressRoute circuit.', validator=validate_er_peer_circuit)
 
+    with self.argument_context('network express-route peering connection list') as c:
+        c.argument('circuit_name', id_part=None)
+        c.argument('peering_name', id_part=None)
+
     with self.argument_context('network express-route peering peer-connection') as c:
         c.argument('circuit_name', circuit_name_type, id_part=None)
         c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part=None)
@@ -857,6 +878,7 @@ def load_arguments(self, _):
         c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network private-endpoint dns-zone-group') as c:
         c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
@@ -877,6 +899,7 @@ def load_arguments(self, _):
         c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('enable_proxy_protocol', help='Enable proxy protocol for private link service.', arg_type=get_three_state_flag(), min_api='2019-09-01')
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network private-link-service', arg_group='IP Configuration') as c:
         c.argument('private_ip_address', private_ip_address_type)
@@ -941,6 +964,7 @@ def load_arguments(self, _):
         c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network lb create', arg_group='Public IP') as c:
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
@@ -1127,6 +1151,7 @@ def load_arguments(self, _):
     with self.argument_context('network nic create') as c:
         c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
         c.argument('network_interface_name', nic_type, options_list=['--name', '-n'], id_part=None)
+        c.argument('edge_zone', edge_zone)
 
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -1687,6 +1712,7 @@ def load_arguments(self, _):
         c.argument('sku', min_api='2017-08-01', help='Name of a public IP address SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
         c.argument('tier', min_api='2020-07-01', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(PublicIPAddressSkuTier))
         c.ignore('dns_name_type')
+        c.argument('edge_zone', edge_zone)
 
     for item in ['create', 'update']:
         with self.argument_context('network public-ip {}'.format(item)) as c:
@@ -1707,6 +1733,7 @@ def load_arguments(self, _):
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
 
     with self.argument_context('network public-ip prefix create') as c:
+        c.argument('edge_zone', edge_zone)
         c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
     # endregion
 
@@ -1829,6 +1856,7 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('vnet_name', virtual_network_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network vnet create', arg_group='Subnet') as c:
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.',
@@ -1925,6 +1953,7 @@ def load_arguments(self, _):
         vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
         c.argument('virtual_network', options_list='--vnet', help=vnet_help)
         c.argument('vpn_gateway_generation', arg_type=get_enum_type(['Generation1', 'Generation2']), min_api='2019-07-01', help='The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
+        c.ignore('edge_zone')  # wait for service ready
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))

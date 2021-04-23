@@ -6,7 +6,7 @@
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
-                                                get_three_state_flag)
+                                                get_three_state_flag, edge_zone_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
@@ -270,6 +270,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
+        c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1170,10 +1171,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.argument('expand', default=None)
+        c.argument('x_ms_snapshot', options_list=['--snapshot'], is_preview=True,
+                   help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
-        c.ignore('x_ms_snapshot')  # Ignore first before it is ready
 
-    for item in ['create', 'update']:
+    with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.ignore('x_ms_snapshot')
+
+    for item in ['create', 'update', 'snapshot']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
             t_enabled_protocols, t_root_squash, t_access_tier = \
                 self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',

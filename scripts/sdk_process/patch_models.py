@@ -231,8 +231,10 @@ if __name__ == "__main__":
         'azure.mgmt.compute',
         'azure.mgmt.network',
         'azure.mgmt.monitor',
-        'azure-mgmt-loganalytics'
         'azure.mgmt.rdbms'
+        'azure.mgmt.loganalytics',
+        'azure.mgmt.web',
+        'azure.mgmt.cosmosdb'
     ]
     prefix = sys.argv[1] if len(sys.argv) >= 2 else "azure.mgmt"
     for autorest_package in find_autorest_generated_folder(prefix):
