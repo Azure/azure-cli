@@ -349,7 +349,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        arg_type=get_enum_type(t_key_source),
                        help='The default encryption key source',
                        validator=validate_encryption_source)
-            c.argument('key_vault_user_identity_id', min_api='2021-01-01',
+            c.argument('key_vault_user_identity_id', options_list=['--key-vault-user-identity-id', '-u'],
+                       min_api='2021-01-01',
                        help='Resource identifier of the UserAssigned identity to be associated with server-side '
                             'encryption on the storage account.')
 
