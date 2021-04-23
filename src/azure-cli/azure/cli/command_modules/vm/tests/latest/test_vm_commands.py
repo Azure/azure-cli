@@ -3824,6 +3824,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @unittest.skip('Service failed')
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
     @StorageAccountPreparer()
     def test_gallery_image_version_vhd(self, resource_group, storage_account, storage_account_info):
@@ -3840,8 +3841,8 @@ class VMGalleryImage(ScenarioTest):
             'stac': storage_account_os
         })
 
-        local_file_1 = self.create_temp_file(1024)
-        local_file_2 = self.create_temp_file(1024)
+        local_file_1 = self.create_temp_file(1024 * 1024)
+        local_file_2 = self.create_temp_file(1024 * 1024)
 
         self.cmd('storage container create -n container1 --account-name {sa} --account-key {account_key} --public-access container')
         self.cmd('storage blob upload -c container1 --account-name {} -f "{}" -n file1.vhd --type page'.format(storage_account, local_file_1))
