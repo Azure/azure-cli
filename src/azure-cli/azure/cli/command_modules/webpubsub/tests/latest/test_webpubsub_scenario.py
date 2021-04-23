@@ -8,12 +8,18 @@ import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from .recording_processors import KeyReplacer
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class WebpubsubScenarioTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super(WebpubsubScenarioTest, self).__init__(
+            method_name, recording_processors=[KeyReplacer()]
+        )
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_webpubsub(self, resource_group):

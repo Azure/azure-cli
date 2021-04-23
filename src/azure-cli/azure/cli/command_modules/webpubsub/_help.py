@@ -142,7 +142,7 @@ helps['webpubsub event-handler hub remove'] = """
     examples:
       - name: Remove all event handler settings in a hub
         text: >
-            az webpubsub event-handler hub remove -n MyWebPubSub -g MyResourceGroup --hub-name MyHub'
+            az webpubsub event-handler hub remove -n MyWebPubSub -g MyResourceGroup --hub-name MyHub
 """
 
 helps['webpubsub event-handler hub update'] = """
@@ -151,5 +151,5 @@ helps['webpubsub event-handler hub update'] = """
     examples:
       - name: Update two event handler settings in a hub
         text: >
-            az webpubsub event-handler hub update -n MyWebPubSub -g MyResourceGroup --hub-name MyHub --template url-template="http://host.com user-event-pattern="MyEvent" --template url-template="http://host2.com" system-event-pattern="connect"'
+            az webpubsub event-handler hub update -n MyWebPubSub -g MyResourceGroup --hub-name MyHub --template url-template='http://host.com user-event-pattern="MyEvent" --template url-template="http://host2.com" system-event-pattern="connect"'
 """
