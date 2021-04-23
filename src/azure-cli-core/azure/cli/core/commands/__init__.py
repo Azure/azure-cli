@@ -993,7 +993,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 logger.debug('Service returned 404 on the long-running delete or purge operation. CLI treats it as '
                              'delete or purge successfully but service should fix this behavior.')
                 return None
-            handle_long_running_operation_exception(client_exception)
+            if client_exception is ClientException:
+                handle_long_running_operation_exception(client_exception)
+            else:
+                raise client_exception
         finally:
             self.progress_bar.end()
             if poll_flag:
