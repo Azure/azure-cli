@@ -6,7 +6,6 @@
 from azure.cli.core.azclierror import (ValidationError, CLIInternalError, UnclassifiedUserFault)
 from knack.log import get_logger
 
-from ._client_factory import web_client_factory
 from ._constants import (GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_SCOPES)
 
 logger = get_logger(__name__)
@@ -16,6 +15,8 @@ logger = get_logger(__name__)
 Get Github personal access token following Github oauth for command line tools
 https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow
 '''
+
+
 def get_github_access_token(cmd, scope_list=None):
     if scope_list:
         for scope in scope_list:
@@ -45,10 +46,11 @@ def get_github_access_token(cmd, scope_list=None):
         interval = int(parsed_response['interval'][0])
         expires_in_seconds = int(parsed_response['expires_in'][0])
 
-        logger.warning('Please go to {} and enter the user code {} to activate and retrieve your github personal access token'.format(verification_uri, user_code))
+        logger.warning("Please go to '%s' and enter the user code '%s' to activate and retrieve your github personal access token",
+            verification_uri, user_code)
 
         timeout = time.time() + expires_in_seconds
-        logger.warning('Waiting up to {} minutes for activation'.format(str(expires_in_seconds//60)))
+        logger.warning("Waiting up to '%s' minutes for activation", str(expires_in_seconds // 60))
 
         confirmation_url = 'https://github.com/login/oauth/access_token'
         confirmation_url_data = {
@@ -70,12 +72,13 @@ def get_github_access_token(cmd, scope_list=None):
             if 'error' in parsed_confirmation_response and parsed_confirmation_response['error'][0]:
                 if parsed_confirmation_response['error'][0] == 'slow_down':
                     interval += 5  # if slow_down error is received, 5 seconds is added to minimum polling interval
-                elif not(parsed_confirmation_response['error'][0] == 'authorization_pending'):
+                elif parsed_confirmation_response['error'][0] != 'authorization_pending':
                     pending = False
 
             if 'access_token' in parsed_confirmation_response and parsed_confirmation_response['access_token'][0]:
                 return parsed_confirmation_response['access_token'][0]
     except Exception as e:
-        raise CLIInternalError('Error: {}. Please try again, or retrieve personal access token from the Github website'.format(e))
+        raise CLIInternalError(
+            'Error: {}. Please try again, or retrieve personal access token from the Github website'.format(e))
 
     raise UnclassifiedUserFault('Activation did not happen in time. Please try again')
