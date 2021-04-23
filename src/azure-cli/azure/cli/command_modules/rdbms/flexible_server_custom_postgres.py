@@ -11,16 +11,15 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ClientRequestError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG
+    DEFAULT_LOCATION_PG, run_subprocess, run_subprocess_get_output
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
-
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -470,6 +469,24 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location, user
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+
+
+def github_actions_setup(cmd, server_name, database_name, administrator_login, file_path, action_name, administrator_login_password=None):
+    
+    output = run_subprocess_get_output("gh")
+    if output.returncode:
+        raise ClientRequestError('Please install "Github CLI" to run this command.')
+
+    run_subprocess("gh auth login")
+
+
+def github_actions_run(cmd, action_name):
+    
+    output = run_subprocess_get_output("gh")
+    if output.returncode:
+        raise ClientRequestError('Please install "Github CLI" to run this command.')
+
+    run_subprocess("gh auth login")
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

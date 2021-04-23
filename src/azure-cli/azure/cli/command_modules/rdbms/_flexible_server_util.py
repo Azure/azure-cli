@@ -7,6 +7,7 @@
 import datetime as dt
 from datetime import datetime
 import random
+import subprocess
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
@@ -340,3 +341,14 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
     raise RequiredArgumentMissingError(
         'API version is required and could not be resolved for resource {}'
         .format(resource_type))
+
+
+def run_subprocess(command):
+    commands = command.split()
+    subprocess.run(commands, shell=True)
+
+def run_subprocess_get_output(command):
+    commands = command.split()
+    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
+    return process

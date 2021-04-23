@@ -137,3 +137,52 @@ def user_confirmation(message, yes=False):
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
+
+    if allow_push and not branch:
+        raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
+    if action_name is None:
+        action_name = server.name + '_' + database_name + "_deploy"
+    gitcli_check_and_login()
+    
+    server = client.get(resource_group_name, server_name)
+    fill_action_template(cmd,
+                         server=server,
+                         database_name=database_name,
+                         administrator_login=administrator_login,
+                         administrator_login_password=administrator_login_password,
+                         file_name=sql_file_path,
+                         repository=repository,
+                         action_name=action_name)
+    
+    
+    action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
+    logger.warning("Making git commit for file {}".format(action_path))
+    run_subprocess("git add {}".format(action_path))
+    run_subprocess("git commit -m \"Add github action file\"")
+
+    if allow_push:
+        logger.warning("Pushing the created action file to origin {} branch".format(branch))
+        run_subprocess("git push origin {}".format(branch))
+        github_actions_run(action_name, branch)
+    else:
+        logger.warning('You did not set --allow-push parameter. Please push the prepared file {} to your remote repo and run "deploy run" command to activate the workflow.'.format(action_path))
+
+
+def github_actions_run(action_name, branch):
+    
+    gitcli_check_and_login()
+    logger.warning("Created event for {}.yml in branch {}".format(action_name, branch))
+    run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
+
+
+def gitcli_check_and_login():
+    output = run_subprocess_get_output("gh")
+    if output.returncode:
+        raise ClientRequestError('Please install "Github CLI" to run this command.')
+
+    output = run_subprocess_get_output("gh auth status")
+    if output.returncode:
+        run_subprocess("gh auth login", stdout_show=True)

@@ -465,5 +465,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], help='Name of the replica server.')
 
+        with self.argument_context('{} deploy setup'.format(command_group)) as c:
+            c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+            c.argument('database_name', options_list=['--database-name', '-d'], help='the name of the database')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_arg_type,
+                       help='Administrator username for the server.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator.')
+            c.argument('file_path', options_list=['--file-path', '-f'], help='the name of file')
+            c.argument('action_name', options_list=['--action-name'], help='the')
+
+        with self.argument_context('{} deploy run'.format(command_group)) as c:
+            c.argument('action_name', options_list=['--action-name'], help='the')
+
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
