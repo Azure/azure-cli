@@ -5,6 +5,7 @@
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
@@ -289,3 +290,9 @@ def _valid_range(addr_range):
     if 0 <= addr_range <= 255:
         return True
     return False
+
+def validate_server_name(client, server_name, type):
+    result = client.execute(name_availability_request={'name': server_name, 'type': type})
+
+    if not result.name_available:
+        raise ValidationError("The name is already in use. Please provide a different name.")

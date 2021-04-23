@@ -13,13 +13,13 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
     DEFAULT_LOCATION_PG
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
-from .validators import pg_arguments_validator
+from .validators import pg_arguments_validator, validate_server_name
 
 
 logger = get_logger(__name__)
@@ -46,6 +46,7 @@ def flexible_server_create(cmd, client,
         location = DEFAULT_LOCATION_PG
     sku_info = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     storage_mb *= 1024
 
     db_context = DbContext(
@@ -135,6 +136,7 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
