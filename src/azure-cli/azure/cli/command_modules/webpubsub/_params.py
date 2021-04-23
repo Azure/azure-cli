@@ -27,9 +27,6 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('webpubsub_name', webpubsub_name_type, options_list=['--name', '-n'])
 
-    with self.argument_context('webpubsub list') as c:
-        c.argument('webpubsub_name', webpubsub_name_type, id_part=None)
-
     with self.argument_context('webpubsub create') as c:
         c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1, Free_F1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)

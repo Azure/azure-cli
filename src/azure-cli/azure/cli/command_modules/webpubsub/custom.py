@@ -46,7 +46,7 @@ def webpubsub_set(client, webpubsub_name, resource_group_name, parameters):
     return client.begin_update(resource_group_name, webpubsub_name, parameters)
 
 
-def update_webpubsub(instance, tags=None, sku=None, unit_count=1):
+def update_webpubsub(instance, tags=None, sku=None, unit_count=None):
     if sku is not None:
         instance.sku = ResourceSku(name=sku, capacity=unit_count)
 
