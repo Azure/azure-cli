@@ -95,24 +95,24 @@ def load_arguments(self, _):
         help='Name of the deleted Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None)
 
     hsm_name_type = CLIArgumentType(help='Name of the HSM.',
-                                    options_list=['--hsm-name'], id_part=None, is_preview=True)
+                                    options_list=['--hsm-name'], id_part=None)
     hsm_url_type = CLIArgumentType(help='Name of the HSM.', type=get_hsm_base_url_type(self.cli_ctx),
-                                   options_list=['--hsm-name'], id_part=None, is_preview=True)
+                                   options_list=['--hsm-name'], id_part=None)
 
     mgmt_plane_hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --name/-n are mutually '
                                                     'exclusive, please specify just one of them)',
-                                               options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                               options_list=['--hsm-name'], id_part=None,
                                                validator=validate_vault_name_and_hsm_name)
 
     data_plane_hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name are '
                                                     'mutually exclusive, please specify just one of them)',
                                                type=get_hsm_base_url_type(self.cli_ctx),
-                                               options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                               options_list=['--hsm-name'], id_part=None,
                                                validator=set_vault_base_url)
 
     deleted_hsm_name_type = CLIArgumentType(help='Name of the deleted HSM. (--hsm-name and --name/-n are '
                                                  'mutually exclusive, please specify just one of them)',
-                                            options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                            options_list=['--hsm-name'], id_part=None,
                                             validator=validate_vault_name_and_hsm_name)
 
     # region vault (management)
@@ -158,7 +158,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
-        c.argument('administrators', nargs='+', is_preview=True,
+        c.argument('administrators', nargs='+',
                    help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
                         'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'

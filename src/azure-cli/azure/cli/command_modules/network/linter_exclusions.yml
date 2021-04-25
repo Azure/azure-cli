@@ -89,6 +89,11 @@ network application-gateway root-cert:
 network application-gateway rule:
     rule_exclusions:
     - require_wait_command_if_no_wait
+network application-gateway show-backend-health:
+    parameters:
+        host_name_from_http_settings:
+            rule_exclusions:
+            - option_length_too_long
 network application-gateway ssl-cert:
     rule_exclusions:
     - require_wait_command_if_no_wait
