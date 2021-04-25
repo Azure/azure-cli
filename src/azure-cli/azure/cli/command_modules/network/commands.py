@@ -1334,10 +1334,23 @@ def load_command_table(self, _):
         g.command('list-bgp-peer-status', 'begin_get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
         g.command('list-advertised-routes', 'begin_get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
         g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
+        g.command('show-supported-devices', 'supported_vpn_devices', is_preview=True, min_api='2017-09-01')
+        g.custom_command('disconnect-vpn-connections', 'disconnect_vnet_gateway_vpn_connections', client_factory=cf_virtual_network_gateways, supports_no_wait=True, is_preview=True, min_api='2019-11-01')
+
+    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
+        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
+        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
         g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
+        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
+
+    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
+        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
+        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
+
+    # with self.command_group
 
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
@@ -1363,10 +1376,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get', transform=transform_vpn_connection)
-        g.command('list', 'list', transform=transform_vpn_connection_list)
+        g.custom_command('list', 'list_vpn_connections', transform=transform_vpn_connection_list)
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
+        g.command('list-ike-sas', 'begin_get_ike_sas', is_preview=True, min_api='2020-08-01')
+        g.custom_command('show-device-config-script', 'show_vpn_connection_device_config_script', client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2017-09-01')
 
-    with self.command_group('network vpn-connection shared-key', network_vpn_sdk) as g:
+    with self.command_group('network vpn-connection shared-key', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections) as g:
         g.show_command('show', 'get_shared_key')
         g.custom_command('reset', 'reset_shared_key')
         g.generic_update_command('update',
@@ -1374,10 +1389,15 @@ def load_command_table(self, _):
                                  custom_func_name='update_shared_key',
                                  setter_name='begin_set_shared_key')
 
-    with self.command_group('network vpn-connection ipsec-policy', network_vpn_sdk, min_api='2017-03-01') as g:
+    with self.command_group('network vpn-connection ipsec-policy', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, min_api='2017-03-01') as g:
         g.custom_command('add', 'add_vpn_conn_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
         g.custom_command('list', 'list_vpn_conn_ipsec_policies')
         g.custom_command('clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
+
+    with self.command_group('network vpn-connection packet-capture', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, is_preview=True, min_api='2019-07-01') as g:
+        g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
+        g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
+
     # endregion
 
     # region VirtualRouter
