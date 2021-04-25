@@ -208,13 +208,17 @@ def load_arguments_sb(self, _):
 
     # Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias exists') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
         c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo-Disaster Recovery Configuration Alias to check availability')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
     with self.argument_context('servicebus georecovery-alias') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
 
     with self.argument_context('servicebus georecovery-alias set') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
+        c.argument('alias', options_list=['--alias', '-a'], help='Name of the Geo-Disaster Recovery Configuration Alias')
         c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
@@ -237,12 +241,15 @@ def load_arguments_sb(self, _):
     # Standard to Premium Migration: Region
 
     with self.argument_context('servicebus migration start') as c:
+        c.ignore('config_name')
         c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
+        # c.argument('config_name', options_list=['--config-name'], id_part=None, help='Name of configuration. Should always be "$default"')
         c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
         c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
 
     for scope in ['show', 'complete', 'abort']:
         with self.argument_context('servicebus migration {}'.format(scope)) as c:
+            c.ignore('config_name')
             c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
 
 # Region Namespace NetworkRuleSet

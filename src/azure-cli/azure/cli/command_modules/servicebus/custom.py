@@ -66,9 +66,9 @@ def cli_namespace_list(client, resource_group_name=None):
     return client.list()
 
 
-def cli_namespace_exists(client, namespace_name):
+def cli_namespace_exists(client, name):
 
-    return client.check_name_availability(parameters={'name': namespace_name} )
+    return client.check_name_availability(parameters={'name': name})
 
 
 # Namespace Authorization rule:
@@ -87,6 +87,7 @@ def cli_namespaceautho_update(instance, rights):
     from azure.cli.command_modules.servicebus._utils import accessrights_converter
     instance.rights = accessrights_converter(rights)
     return instance
+
 
 def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type):
     return client.regenerate_keys(
@@ -184,6 +185,29 @@ def cli_sbqueue_update(instance, lock_duration=None,
     return instance
 
 
+# Queue Authorization rule:
+def cli_queueautho_create(client, resource_group_name, namespace_name, queue_name, name, rights=None):
+    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+    return client.create_or_update_authorization_rule(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        queue_name=queue_name,
+        authorization_rule_name=name,
+        parameters={'rights': accessrights_converter(rights)}
+    )
+
+
+def cli_queueauthokey_renew(client, resource_group_name, namespace_name, queue_name, name, key_type=None, key=None):
+    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+    return client.regenerate_keys(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        queue_name=queue_name,
+        authorization_rule_name=name,
+        parameters={'key_type': key_type, 'key': key}
+    )
+
+
 # Topic Region
 def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_name, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
@@ -248,6 +272,27 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
         instance.enable_express = enable_express
 
     return instance
+
+
+def cli_topicautho_create(client, resource_group_name, namespace_name, topic_name, name, rights=None):
+    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+    return client.create_or_update_authorization_rule(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        topic_name=topic_name,
+        authorization_rule_name=name,
+        parameters={'rights': accessrights_converter(rights)}
+    )
+
+def cli_topicauthokey_renew(client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
+    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+    return client.regenerate_keys(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        topic_name=topic_name,
+        authorization_rule_name=name,
+        parameters={'key_type': key_type, 'key': key}
+    )
 
 
 # Subscription Region
@@ -408,23 +453,50 @@ def cli_rules_update(instance,
     return instance
 
 
-def cli_migration_start(client, resource_group_name, namespace_name, target_namespace, post_migration_name):
-    import time
+def cli_georecovery_alias_create(client, resource_group_name, namespace_name, alias,
+                                 partner_namespace, alternate_name=None):
 
-    client.create_and_start_migration(resource_group_name, namespace_name, target_namespace, post_migration_name)
-    getresponse = client.get(resource_group_name, namespace_name)
+    parameters = {
+        'partner_namespace': partner_namespace,
+        'alternate_name': alternate_name
+    }
+    return client.create_or_update(resource_group_name=resource_group_name,namespace_name=namespace_name,
+                                   alias=alias, parameters=parameters)
+
+
+def cli_georecovery_alias_exists(client, resource_group_name, namespace_name, name):
+
+    return client.check_name_availability(resource_group_name=resource_group_name,
+                                          namespace_name=namespace_name,
+                                          parameters={'name': name})
+
+
+def cli_migration_start(client, resource_group_name, namespace_name,
+                        target_namespace, post_migration_name, config_name="$default"):
+    import time
+    parameters = {
+        'target_namespace': target_namespace,
+        'post_migration_name': post_migration_name
+    }
+    client.begin_create_and_start_migration(resource_group_name, namespace_name, config_name, parameters)
+    getresponse = client.get(resource_group_name, namespace_name, config_name)
 
     # pool till Provisioning state is succeeded
     while getresponse.provisioning_state != 'Succeeded':
         time.sleep(30)
-        getresponse = client.get(resource_group_name, namespace_name)
+        getresponse = client.get(resource_group_name, namespace_name, config_name)
 
     # poll on the 'pendingReplicationOperationsCount' to be 0 or none
     while getresponse.pending_replication_operations_count != 0 and getresponse.pending_replication_operations_count is not None:
         time.sleep(30)
-        getresponse = client.get(resource_group_name, namespace_name)
+        getresponse = client.get(resource_group_name, namespace_name, config_name)
 
-    return client.get(resource_group_name, namespace_name)
+    return client.get(resource_group_name, namespace_name, config_name)
+
+
+def cle_rules_show(client, resource_group_name, namespace_name, config_name="$default"):
+
+    return client.get(resource_group_name, namespace_name, config_name)
 
 
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
