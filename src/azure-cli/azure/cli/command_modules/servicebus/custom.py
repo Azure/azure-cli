@@ -275,6 +275,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     return instance
 
 
+# Topic Authorization rule
 def cli_topicautho_create(client, resource_group_name, namespace_name, topic_name, name, rights=None):
     from azure.cli.command_modules.servicebus._utils import accessrights_converter
     return client.create_or_update_authorization_rule(
@@ -455,6 +456,7 @@ def cli_rules_update(instance,
     return instance
 
 
+# DisasterRecoveryConfigs Region
 def cli_georecovery_alias_create(client, resource_group_name, namespace_name, alias,
                                  partner_namespace, alternate_name=None):
 
@@ -473,6 +475,7 @@ def cli_georecovery_alias_exists(client, resource_group_name, namespace_name, na
                                           parameters={'name': name})
 
 
+# MigrationConfigs Region
 def cli_migration_start(client, resource_group_name, namespace_name,
                         target_namespace, post_migration_name, config_name="$default"):
     import time

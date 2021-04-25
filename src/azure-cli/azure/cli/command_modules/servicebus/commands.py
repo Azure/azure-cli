@@ -67,7 +67,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
-        # g.command('keys renew', 'regenerate_keys')
         g.custom_command('keys renew', 'cli_keys_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
@@ -81,12 +80,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='cli_sbqueue_update')
 
     with self.command_group('servicebus queue authorization-rule', sb_queue_util, client_factory=queues_mgmt_client_factory) as g:
-        # g.command('create', 'create_or_update_authorization_rule')
         g.custom_command('create', 'cli_queueautho_create')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
-        # g.command('keys renew', 'regenerate_keys')
         g.custom_command('keys renew', 'cli_queueauthokey_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
@@ -100,12 +97,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='cli_sbtopic_update')
 
     with self.command_group('servicebus topic authorization-rule', sb_topic_util, client_factory=topics_mgmt_client_factory) as g:
-        # g.command('create', 'create_or_update_authorization_rule')
         g.custom_command('create', 'cli_topicautho_create')
         g.show_command('show', 'get_authorization_rule')
         g.command('list', 'list_authorization_rules')
         g.command('keys list', 'list_keys')
-        # g.command('keys renew', 'regenerate_keys')
         g.custom_command('keys renew', 'cli_topicauthokey_renew')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
@@ -128,7 +123,6 @@ def load_command_table(self, _):
 
 # DisasterRecoveryConfigs Region
     with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        # g.command('set', 'create_or_update')
         g.custom_command('set', 'cli_georecovery_alias_create')
         g.show_command('show', 'get')
         g.command('list', 'list')
