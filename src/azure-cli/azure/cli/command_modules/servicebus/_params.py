@@ -50,6 +50,7 @@ def load_arguments_sb(self, _):
 
     for scope in ['servicebus namespace authorization-rule create', 'servicebus namespace authorization-rule update', 'servicebus queue authorization-rule create', 'servicebus queue authorization-rule update', 'servicebus topic authorization-rule create', 'servicebus topic authorization-rule update']:
         with self.argument_context(scope) as c:
+            c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
             c.argument('rights', arg_type=rights_arg_type)
 
     with self.argument_context('servicebus namespace authorization-rule keys renew') as c:
