@@ -154,7 +154,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
                 context['subscriptionId'] = subscription_id
 
         parameters = self._normalize_parameters(self.parameters)
-        parameters = [item for item in parameters if item not in ['--debug', '--verbose', '--only-show-errors']]
+        parameters = [item for item in set(parameters) if item not in ['--debug', '--verbose', '--only-show-errors']]
         query = {
             "command": self.command,
             "parameters": ','.join(parameters)
