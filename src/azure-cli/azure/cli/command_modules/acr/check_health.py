@@ -388,8 +388,9 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
 
     dns_ok = True
     if not dns_mappings:
-        logger.warning('Registry "%s" doesn\'t have private endpoints in the vnet of "%s".',
-                       registry_name, vnet_of_private_endpoint)
+        err = ('Registry "%s" doesn\'t have private endpoints in the vnet of "%s".'
+               ' Please make sure you provided correct vnet')
+        logger.warning(err, registry_name, vnet_of_private_endpoint)
         return
 
     for fqdn in dns_mappings:
