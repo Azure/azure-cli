@@ -12,6 +12,8 @@ import tempfile
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
+from azure.core.exceptions import HttpResponseError
+from .recording_processors import StorageAccountSASReplacer
 
 from azure.cli.testsdk import (
     ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
@@ -3571,6 +3573,12 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway create -g {rg} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}')
         self.cmd('network local-gateway create -g {rg} -n {lgw1} --gateway-ip-address {lgw1ip} --local-address-prefixes {lgw1_prefix1} {lgw1_prefix2}')
         self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3')
+        self.cmd('network vpn-connection list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
+            self.check('length(@)', 1)
+        ])
 
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
@@ -3597,6 +3605,8 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
         self.cmd('network vnet-gateway ipsec-policy clear -g {rg} --gateway-name {gw}')
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway vpn-client show-health -g {rg} -n {gw}')
+        self.cmd('network vnet-gateway show-supported-devices -g {rg} -n {gw} -o tsv')
 
 
 class NetworkVnetGatewayMultiAuth(ScenarioTest):
@@ -3995,9 +4005,17 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disa
 
 class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
-    def test_network_active_active_vnet_connection(self, resource_group):
+    def __init__(self, method_name):
+        self.sas_replacer = StorageAccountSASReplacer()
+        super(NetworkActiveActiveVnetScenarioTest, self).__init__(method_name, recording_processors=[
+            self.sas_replacer
+        ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
+    @StorageAccountPreparer(name_prefix='clitestvpncnn')
+    def test_network_active_active_vnet_connection(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
         self.kwargs.update({
             'subnet': 'GatewaySubnet',
             'vnet1': 'vnet1',
@@ -4018,8 +4036,18 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'conn12': 'vnet1to2',
             'conn21': 'vnet2to1',
             'bgp_peer1': '10.52.255.253',
-            'bgp_peer2': '10.53.255.253'
+            'bgp_peer2': '10.53.255.253',
+            'storage_account': storage_account,
+            'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
+            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
+
+        self.cmd('storage container create --account-name {storage_account} --name {ctn}')
+        sas = self.cmd(
+            'storage blob generate-sas -n src --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
+        self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
+                                                                          self.kwargs['ctn'], sas)
+        self.sas_replacer.add_sas_token(sas)
 
         # Create one VNet with two public IPs
         self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet1_prefix} --subnet-name {subnet} --subnet-prefix {gw1_prefix}')
@@ -4041,9 +4069,21 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         # create and connect the VNet gateways
         self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
         self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
+        self.cmd('network vpn-connection list-ike-sas -g {rg} -n {conn12}')
+        output = self.cmd('network vpn-connection packet-capture start -g {rg} -n {conn12}').output.strip()
+        self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
+        # currently we cannot create traffic by cli command. So it will return an error when stop.
+        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+            self.cmd('network vpn-connection packet-capture stop -g {rg} -n {conn12} --sas-url {sas_url}')
 
 
 class NetworkVpnGatewayScenarioTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        self.sas_replacer = StorageAccountSASReplacer()
+        super(NetworkVpnGatewayScenarioTest, self).__init__(method_name, recording_processors=[
+            self.sas_replacer
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
     def test_network_vpn_gateway(self, resource_group):
@@ -4130,6 +4170,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway list-learned-routes -g {rg} -n {gw1}')
         self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
         self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
+        self.cmd('network vpn-connection list -g {rg} --vnet-gateway {gw1}', checks=[
+            self.check('length(@)', 1)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
     def test_network_vpn_gateway_aad(self, resource_group):
@@ -4177,29 +4220,106 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('aadAudience', None)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_disconnect_connects_')
+    def test_network_vpn_gateway_disconnect_connects(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'vnet2': 'myvnet2',
+            'gw1': 'gateway1',
+            'gw2': 'gateway2',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network public-ip create -n {ip2} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16')
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --public-ip-address {ip1} '
+                 '--vpn-gateway-generation Generation1 --address-prefixes 201.169.0.0/16 --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --public-ip-address {ip2} '
+                 '--vpn-gateway-generation Generation1 --no-wait')
+
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
+
+        self.kwargs.update({
+            'conn12': 'conn1to2',
+            'conn21': 'conn2to1',
+        })
+
+        self.cmd('network vpn-connection create -n {conn12} -g {rg} --shared-key 123 '
+                 '--vnet-gateway1 {gw1} --vnet-gateway2 {gw2}')
+        self.cmd('network vpn-connection create -n {conn21} -g {rg} --shared-key 123 '
+                 '--vnet-gateway2 {gw1} --vnet-gateway1 {gw2}')
+        self.cmd('network vnet-gateway disconnect-vpn-connections -g {rg} -n {gw1} --vpn-connections {conn12}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_package_capture', location='westus')
+    @StorageAccountPreparer(name_prefix='clitestvpngw')
+    def test_network_vpn_gateway_package_capture(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'gw1': 'gateway1',
+            'gw1_sku': 'Standard',
+            'ip1': 'pubip1',
+            'storage_account': storage_account,
+            'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
+            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
+        })
+
+        self.cmd('storage container create --account-name {storage_account} --name {ctn}')
+        sas = self.cmd(
+            'storage blob generate-sas -n src --account-name {storage_account} -c {ctn} --permissions acrwd --expiry {expiry} -otsv').output.strip()
+        self.kwargs['sas_url'] = 'https://{}.blob.azure.com/{}?{}'.format(self.kwargs['storage_account'],
+                                                                          self.kwargs['ctn'], sas)
+        self.sas_replacer.add_sas_token(sas)
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --public-ip-address {ip1} --sku {gw1_sku}')
+        output = self.cmd('network vnet-gateway packet-capture start -g {rg} -n {gw1}').output.strip()
+        self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
+        # currently we cannot create traffic by cli command. So it will return an error when stop.
+        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+            self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
+
 
 class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
-
         self.kwargs.update({
             'vnet': 'vnet1',
             'public_ip': 'pip1',
             'gateway_prefix': '100.1.1.0/24',
             'gateway': 'vgw1',
+            'gw_sku': 'Standard',
             'cert': 'cert1',
-            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+            'cert_path': os.path.join(TEST_DIR, 'test-vpn-client-package-root-cert.cer')
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
         self.cmd('network public-ip create -g {rg} -n {public_ip}')
-        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
         output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+        self.cmd('network vnet-gateway vpn-client ipsec-policy set -g {rg} -n {gateway} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
+        self.cmd('network vnet-gateway vpn-client ipsec-policy show -g {rg} -n {gateway}', checks=[
+            self.check('dhGroup', 'DHGroup24'),
+            self.check('ikeEncryption', 'AES256'),
+            self.check('ikeIntegrity', 'SHA384'),
+            self.check('ipsecEncryption', 'GCMAES256'),
+            self.check('ipsecIntegrity', 'GCMAES256'),
+            self.check('pfsGroup', 'PFS24'),
+            self.check('saDataSizeKilobytes', 2048),
+            self.check('saLifeTimeSeconds', 7200),
+        ])
 
 
 class NetworkTrafficManagerScenarioTest(ScenarioTest):
