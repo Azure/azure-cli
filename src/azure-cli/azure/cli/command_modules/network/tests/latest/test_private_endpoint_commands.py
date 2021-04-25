@@ -1808,8 +1808,8 @@ def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
              '--resource-name {resource} --type {type} -y')
 
 
+# Rely on other modules. The test may be broken when other modules bump sdk. At that time, run the failed test in live.
 class NetworkPrivateLinkScenarioTest(ScenarioTest):
-    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_automation", location="eastus2")
     def test_private_endpoint_connection_automation(self, resource_group):
         self.kwargs.update({
@@ -1823,7 +1823,6 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_eventhub", location="westus")
     def test_private_endpoint_connection_eventhub(self, resource_group):
         self.kwargs.update({
@@ -1836,7 +1835,6 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False)
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_disk_access", location="westus")
     def test_private_endpoint_connection_disk_access(self, resource_group):
         self.kwargs.update({
@@ -1849,7 +1847,6 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_health_care_apis", location="eastus")
     def test_private_endpoint_connection_health_care_apis(self, resource_group):
         self.kwargs.update({
@@ -1866,7 +1863,6 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, list_name=False)
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
     def test_private_endpoint_connection_synapse_workspace(self, resource_group):
         self.kwargs.update({
