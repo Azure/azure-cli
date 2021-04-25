@@ -12,24 +12,9 @@
 
 def term_show(client,
               publisher,
-              offer,
+              product,
               plan):
     return client.get(offer_type="virtualmachine",
                       publisher_id=publisher,
-                      offer_id=offer,
+                      offer_id=product,
                       plan_id=plan)
-
-
-def term_accept(client,
-                publisher,
-                offer,
-                plan):
-    parameters = {}
-    parameters['publisher'] = publisher
-    parameters['product'] = offer
-    parameters['plan'] = plan
-    return client.create(offer_type="virtualmachine",
-                         publisher_id=publisher,
-                         offer_id=offer,
-                         plan_id=plan,
-                         parameters=parameters)

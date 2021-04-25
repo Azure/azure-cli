@@ -18,7 +18,7 @@ def step_accept(test, checks=None):
     if checks is None:
         checks = []
     test.cmd('az term accept '
-             '--offer "vsec" '
+             '--product "vsec" '
              '--plan "management" '
              '--publisher "checkpoint"',
              checks=[
@@ -34,7 +34,7 @@ def step_show(test, checks=None):
     if checks is None:
         checks = []
     test.cmd('az term show '
-             '--offer "vsec" '
+             '--product "vsec" '
              '--plan "management" '
              '--publisher "checkpoint"',
              checks=[

@@ -23,7 +23,7 @@ helps['term show'] = """
     examples:
       - name: GetMarketplaceTerms
         text: |-
-               az term show --offer "offid" --plan "planid" --publisher "pubid"
+               az term show --product "offid" --plan "planid" --publisher "pubid"
 """
 
 helps['term accept'] = """
@@ -32,6 +32,5 @@ helps['term accept'] = """
     examples:
       - name: SetMarketplaceTerms
         text: |-
-               az term accept --offer "offid" --plan "planid" --offer "offid" --publisher "pubid" --plan "planid" \
---publisher "pubid"
+               az term accept --product "offid" --plan "planid" --publisher "pubid"
 """
