@@ -162,9 +162,38 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 
         return uuid.UUID(moniker)
 
-    def cmd(self, command, checks=None, expect_failure=False):
+    def cmd(self, command, checks=None, expect_failure=False, live_only=False):
+        """
+        :param command:
+        :param checks:
+        :param expect_failure:
+        :param live_only: When it is True, command will be only executed in live mode and will not be recorded.
+               It also avoids unnecessary checks of preparation commands in replay mode.
+               These checks significantly aggravate the cost of API version upgrade.
+               Preparation commands are used to do preparation work such as dependent resource creation so that
+               the command to be tested can run.
+               Preparation commands are not the targets to be tested.
+               They should have their own test cases in their own modules.
+        :return:
+        """
         command = self._apply_kwargs(command)
-        return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+        if live_only:
+            try:
+                if self.in_recording:
+                    return self._execute_no_recording(command, checks, expect_failure)
+            except AttributeError:
+                # A test might not have an in_recording attribute. Run live if it is an instance of LiveScenarioTest
+                if isinstance(self, LiveScenarioTest):
+                    return self._execute_no_recording(command, checks, expect_failure)
+        else:
+            return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+
+    def _execute_no_recording(self, command, checks, expect_failure):
+        old_value = self.disable_recording
+        self.disable_recording = True
+        execute_result = execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+        self.disable_recording = old_value
+        return execute_result
 
     def get_subscription_id(self):
         if self.in_recording or self.is_live:
