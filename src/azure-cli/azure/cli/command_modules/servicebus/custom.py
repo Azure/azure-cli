@@ -97,6 +97,7 @@ def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type):
         parameters={'key_type': key_type}
     )
 
+
 # Queue Region
 def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_name, lock_duration=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None, requires_session=None,
@@ -198,7 +199,7 @@ def cli_queueautho_create(client, resource_group_name, namespace_name, queue_nam
 
 
 def cli_queueauthokey_renew(client, resource_group_name, namespace_name, queue_name, name, key_type=None, key=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+
     return client.regenerate_keys(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -284,8 +285,9 @@ def cli_topicautho_create(client, resource_group_name, namespace_name, topic_nam
         parameters={'rights': accessrights_converter(rights)}
     )
 
+
 def cli_topicauthokey_renew(client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
+
     return client.regenerate_keys(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -458,9 +460,9 @@ def cli_georecovery_alias_create(client, resource_group_name, namespace_name, al
 
     parameters = {
         'partner_namespace': partner_namespace,
-        'alternate_name': alternate_name
+        'alternate_name': alternate_name,
     }
-    return client.create_or_update(resource_group_name=resource_group_name,namespace_name=namespace_name,
+    return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
                                    alias=alias, parameters=parameters)
 
 
@@ -494,9 +496,14 @@ def cli_migration_start(client, resource_group_name, namespace_name,
     return client.get(resource_group_name, namespace_name, config_name)
 
 
-def cle_rules_show(client, resource_group_name, namespace_name, config_name="$default"):
+def cli_migration_show(client, resource_group_name, namespace_name, config_name="$default"):
 
     return client.get(resource_group_name, namespace_name, config_name)
+
+
+def cli_migration_complete(client, resource_group_name, namespace_name, config_name="$default"):
+
+    return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")

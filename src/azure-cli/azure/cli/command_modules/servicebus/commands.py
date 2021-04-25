@@ -147,7 +147,7 @@ def load_command_table(self, _):
     with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory) as g:
         g.custom_command('start', 'cli_migration_start')
         g.custom_show_command('show', 'cli_migration_show')
-        g.command('complete', 'complete_migration')
+        g.custom_command('complete', 'cli_migration_complete')
         g.command('abort', 'revert')
 
 # NetwrokRuleSet Region
