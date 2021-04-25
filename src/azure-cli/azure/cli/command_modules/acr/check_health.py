@@ -337,35 +337,27 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
             _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
-def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals
+def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
     import socket
     from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     if registry_name is None:
-        logger.warning("Registry name must be provided to verify DNS routings of its private endpoints")
-        return
+        raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
 
     registry = None
 
     # retrieve registry
-    try:
-        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
-    except CLIError:
-        logger.warning('Registry resource of "%s" must be accessible to verify DNS routings of its private endpoints.',
-                       registry_name)
-        return
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
 
     if not registry.private_endpoint_connections:
-        logger.warning('Registry "%s" doesn\'t have private endpoints to verify DNS routings.', registry_name)
-        return
+        raise CLIError('Registry "{}" doesn\'t have private endpoints to verify DNS routings.'.format(registry_name))
 
     if is_valid_resource_id(vnet_of_private_endpoint):
         res = parse_resource_id(vnet_of_private_endpoint)
         if not res.get("type") or res.get("type").lower() != 'virtualnetworks' or not res.get('name'):
-            logger.warning('"%s" is not a valid resource id of a virtual network', vnet_of_private_endpoint)
-            return
+            raise CLIError('"{}" is not a valid resource id of a virtual network'.format(vnet_of_private_endpoint))
     else:
         res = parse_resource_id(registry.id)
         vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
@@ -386,17 +378,16 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
             nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
             for dns_config in nic.ip_configurations:
                 if dns_config.private_link_connection_properties.fqdns[0] in dns_mappings:
-                    err = ('Registry "%s" has more than one private endpoint in the vnet of "%s".'
+                    err = ('Registry "{}" has more than one private endpoint in the vnet of "{}".'
                            ' DNS routing will be unreliable')
-                    logger.warning(err, registry_name, vnet_of_private_endpoint)
+                    raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
                 dns_mappings[dns_config.private_link_connection_properties.fqdns[0]] = dns_config.private_ip_address
 
     dns_ok = True
     if not dns_mappings:
-        err = ('Registry "%s" doesn\'t have private endpoints in the vnet of "%s".'
+        err = ('Registry "{}" doesn\'t have private endpoints in the vnet of "{}".'
                ' Please make sure you provided correct vnet')
-        logger.warning(err, registry_name, vnet_of_private_endpoint)
-        return
+        raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
 
     for fqdn in dns_mappings:
         try:
@@ -411,6 +402,8 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
 
     if dns_ok:
         print_pass('DNS routing to private endpoint')
+    else:
+        raise CLIError('DNS routing verification failed')
 
 
 # General command
