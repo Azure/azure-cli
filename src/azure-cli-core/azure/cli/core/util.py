@@ -783,7 +783,7 @@ def find_child_collection(parent, *args, **kwargs):
     return collection
 
 
-def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout=1):
     import requests
     import timeit
     start = timeit.default_timer()
@@ -1222,8 +1222,12 @@ def scopes_to_resource(scopes):
     :rtype: str
     """
     scope = scopes[0]
-    if scope.endswith("/.default"):
-        scope = scope[:-len("/.default")]
+
+    suffixes = ['/.default', '/user_impersonation']
+
+    for s in suffixes:
+        if scope.endswith(s):
+            return scope[:-len(s)]
 
     return scope
 
@@ -1262,3 +1266,9 @@ def get_parent_proc_name():
         parent_proc_name = _get_parent_proc_name()
         setattr(get_parent_proc_name, "return_value", parent_proc_name)
     return getattr(get_parent_proc_name, "return_value")
+
+
+def is_modern_terminal():
+    """In addition to knack.util.is_modern_terminal, detect Cloud Shell."""
+    import knack.util
+    return knack.util.is_modern_terminal() or in_cloud_console()

@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-import datetime as dt
-from datetime import datetime
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -21,7 +19,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
 from .flexible_server_custom_common import user_confirmation
-from .flexible_server_virtual_network import create_vnet, prepare_vnet
+from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator
 
 logger = get_logger(__name__)
@@ -52,16 +50,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                        "and --public_access is invalid. Use either one of them.")
 
-    # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
-    # pylint: disable=too-many-boolean-expressions
-    if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
-        if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
-                ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
-                ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
-                 ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
-            raise CLIError("Incorrect usage : "
-                           "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
-
     server_result = firewall_id = subnet_id = None
 
     # Populate desired parameters
@@ -70,16 +58,17 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     server_name = server_name.lower()
 
     # Handle Vnet scenario
-    if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-        subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
-                                 location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-        delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
-    elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
-        subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                DELEGATION_SERVICE_NAME)
-        delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
+    if public_access is None:
+        subnet_id = prepare_private_network(cmd,
+                                            resource_group_name,
+                                            server_name,
+                                            vnet=vnet_resource_id,
+                                            subnet=subnet_arm_resource_id,
+                                            location=location,
+                                            delegation_service_name=DELEGATION_SERVICE_NAME,
+                                            vnet_address_pref=vnet_address_prefix,
+                                            subnet_address_pref=subnet_address_prefix)
+        delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
     else:
         delegated_subnet_arguments = None
 
@@ -143,12 +132,6 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
-
-    try:
-        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S.%f+00:00")
-    except ValueError:
-        restore_point_in_time = datetime.strptime(restore_point_in_time, "%Y-%m-%dT%H:%M:%S+00:00")
-    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
 
     parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,
