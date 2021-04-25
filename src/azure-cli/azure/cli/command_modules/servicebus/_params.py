@@ -54,7 +54,7 @@ def load_arguments_sb(self, _):
             c.argument('rights', arg_type=rights_arg_type)
 
     with self.argument_context('servicebus namespace authorization-rule keys renew') as c:
-        c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
+        c.argument('name', arg_type=name_type, help='Name of Namespace Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -99,6 +99,7 @@ def load_arguments_sb(self, _):
         c.argument('queue_name', id_part=None, options_list=['--queue-name'], help='Name of Queue')
 
     with self.argument_context('servicebus queue authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Queue Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -144,6 +145,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='name of Topic')
 
     with self.argument_context('servicebus topic authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Topic Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
