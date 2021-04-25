@@ -361,7 +361,12 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         logger.warning('Registry "%s" doesn\'t have private endpoints to verify DNS routings.', registry_name)
         return
 
-    if not is_valid_resource_id(vnet_of_private_endpoint):
+    if is_valid_resource_id(vnet_of_private_endpoint):
+        res = parse_resource_id(vnet_of_private_endpoint)
+        if not res.get("type") or res.get("type").lower() != 'virtualnetworks' or not res.get('name'):
+            logger.warning('"%s" is not a valid resource id of a virtual network', vnet_of_private_endpoint)
+            return
+    else:
         res = parse_resource_id(registry.id)
         vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
                                                namespace='Microsoft.Network', type='virtualNetworks',
