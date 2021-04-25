@@ -155,6 +155,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.pfx',
                        '**/*.txt',
                        '**/*.json',
+                       '**/*.ipynb',
                        '**/*.byok',
                        '**/*.js',
                        '**/*.md',
