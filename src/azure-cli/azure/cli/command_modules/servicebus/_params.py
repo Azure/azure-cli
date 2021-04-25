@@ -54,6 +54,7 @@ def load_arguments_sb(self, _):
             c.argument('rights', arg_type=rights_arg_type)
 
     with self.argument_context('servicebus namespace authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
