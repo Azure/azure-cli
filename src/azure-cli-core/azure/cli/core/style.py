@@ -11,14 +11,20 @@ Currently, only color is supported, underline/bold/italic may be supported in th
 Design spec:
 https://devdivdesignguide.azurewebsites.net/command-line-interface/color-guidelines-for-command-line-interface/
 
+Console Virtual Terminal Sequences:
+https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
+
 For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """
 
-import os
 import sys
 from enum import Enum
 
-from colorama import Fore
+from knack.log import get_logger
+from knack.util import is_modern_terminal
+
+
+logger = get_logger(__name__)
 
 
 class Style(str, Enum):
@@ -33,53 +39,84 @@ class Style(str, Enum):
     WARNING = "warning"
 
 
-# Theme that doesn't contain any style
-THEME_NONE = {}
+def _rgb_hex(rgb_hex: str):
+    """
+    Convert RGB hex value to Control Sequences.
+    """
+    template = '\x1b[38;2;{r};{g};{b}m'
+    if rgb_hex.startswith("#"):
+        rgb_hex = rgb_hex[1:]
 
-# Theme to be used on a dark-themed terminal
+    rgb = {}
+    for i, c in enumerate(('r', 'g', 'b')):
+        value_str = rgb_hex[i * 2: i * 2 + 2]
+        value_int = int(value_str, 16)
+        rgb[c] = value_int
+
+    return template.format(**rgb)
+
+
+DEFAULT = '\x1b[0m'  # Default
+
+# Theme that doesn't contain any style
+THEME_NONE = None
+
+# Theme to be used in a dark-themed terminal
 THEME_DARK = {
-    # Style to ANSI escape sequence mapping
-    # https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
-    Style.PRIMARY: Fore.RESET,
-    Style.SECONDARY: Fore.LIGHTBLACK_EX,  # may use WHITE, but will lose contrast to LIGHTWHITE_EX
-    Style.IMPORTANT: Fore.LIGHTMAGENTA_EX,
-    Style.ACTION: Fore.LIGHTBLUE_EX,
-    Style.HYPERLINK: Fore.LIGHTCYAN_EX,
-    # Message colors
-    Style.ERROR: Fore.LIGHTRED_EX,
-    Style.SUCCESS: Fore.LIGHTGREEN_EX,
-    Style.WARNING: Fore.LIGHTYELLOW_EX,
+    Style.PRIMARY: DEFAULT,
+    Style.SECONDARY: '\x1b[90m',  # Bright Foreground Black
+    Style.IMPORTANT: '\x1b[95m',  # Bright Foreground Magenta
+    Style.ACTION: '\x1b[94m',  # Bright Foreground Blue
+    Style.HYPERLINK: '\x1b[96m',  # Bright Foreground Cyan
+    Style.ERROR: '\x1b[91m',  # Bright Foreground Red
+    Style.SUCCESS: '\x1b[92m',  # Bright Foreground Green
+    Style.WARNING: '\x1b[93m'  # Bright Foreground Yellow
 }
 
-# Theme to be used on a light-themed terminal
+# Theme to be used in a light-themed terminal
 THEME_LIGHT = {
-    Style.PRIMARY: Fore.RESET,
-    Style.SECONDARY: Fore.LIGHTBLACK_EX,
-    Style.IMPORTANT: Fore.MAGENTA,
-    Style.ACTION: Fore.BLUE,
-    Style.HYPERLINK: Fore.CYAN,
-    Style.ERROR: Fore.RED,
-    Style.SUCCESS: Fore.GREEN,
-    Style.WARNING: Fore.YELLOW,
+    Style.PRIMARY: DEFAULT,
+    Style.SECONDARY: '\x1b[90m',  # Bright Foreground Black
+    Style.IMPORTANT: '\x1b[35m',  # Foreground Magenta
+    Style.ACTION: '\x1b[34m',  # Foreground Blue
+    Style.HYPERLINK: '\x1b[36m',  # Foreground Cyan
+    Style.ERROR: '\x1b[31m',  # Foreground Red
+    Style.SUCCESS: '\x1b[32m',  # Foreground Green
+    Style.WARNING: '\x1b[33m'  # Foreground Yellow
+}
+
+# Theme to be used in Cloud Shell
+# Text and background's Contrast Ratio should be above 4.5:1
+THEME_CLOUD_SHELL = {
+    Style.PRIMARY: _rgb_hex('#ffffff'),
+    Style.SECONDARY: _rgb_hex('#bcbcbc'),
+    Style.IMPORTANT: _rgb_hex('#f887ff'),
+    Style.ACTION: _rgb_hex('#6cb0ff'),
+    Style.HYPERLINK: _rgb_hex('#72d7d8'),
+    Style.ERROR: _rgb_hex('#f55d5c'),
+    Style.SUCCESS: _rgb_hex('#70d784'),
+    Style.WARNING: _rgb_hex('#fbd682'),
 }
 
 
 class Theme(str, Enum):
     DARK = 'dark'
     LIGHT = 'light'
+    CLOUD_SHELL = 'cloud-shell'
     NONE = 'none'
 
 
 THEME_DEFINITIONS = {
-    Theme.NONE: THEME_NONE,
     Theme.DARK: THEME_DARK,
-    Theme.LIGHT: THEME_LIGHT
+    Theme.LIGHT: THEME_LIGHT,
+    Theme.CLOUD_SHELL: THEME_CLOUD_SHELL,
+    Theme.NONE: THEME_NONE
 }
 
 # Blue and bright blue is not visible under the default theme of powershell.exe
 POWERSHELL_COLOR_REPLACEMENT = {
-    Fore.BLUE: Fore.RESET,
-    Fore.LIGHTBLUE_EX: Fore.RESET
+    '\x1b[34m': DEFAULT,  # Foreground Blue
+    '\x1b[94m': DEFAULT  # Bright Foreground Blue
 }
 
 
@@ -113,11 +150,7 @@ def format_styled_text(styled_text, theme=None):
 
     # Convert str to the theme dict
     if isinstance(theme, str):
-        try:
-            theme = THEME_DEFINITIONS[theme]
-        except KeyError:
-            from azure.cli.core.azclierror import CLIInternalError
-            raise CLIInternalError("Invalid theme. Supported themes: none, dark, light")
+        theme = get_theme_dict(theme)
 
     # Cache the value of is_legacy_powershell
     if not hasattr(format_styled_text, "_is_legacy_powershell"):
@@ -145,9 +178,7 @@ def format_styled_text(styled_text, theme=None):
 
         style, raw_text = text
 
-        if theme is THEME_NONE:
-            formatted_parts.append(raw_text)
-        else:
+        if theme:
             try:
                 escape_seq = theme[style]
             except KeyError:
@@ -157,10 +188,12 @@ def format_styled_text(styled_text, theme=None):
             if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
                 escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]
             formatted_parts.append(escape_seq + raw_text)
+        else:
+            formatted_parts.append(raw_text)
 
     # Reset control sequence
     if theme is not THEME_NONE:
-        formatted_parts.append(Fore.RESET)
+        formatted_parts.append(DEFAULT)
     return ''.join(formatted_parts)
 
 
@@ -199,25 +232,10 @@ def highlight_command(raw_command):
     return styled_command
 
 
-def _is_modern_terminal():
-    # Windows Terminal: https://github.com/microsoft/terminal/issues/1040
-    if 'WT_SESSION' in os.environ:
-        return True
-    # VS Code: https://github.com/microsoft/vscode/pull/30346
-    if os.environ.get('TERM_PROGRAM', '').lower() == 'vscode':
-        return True
-    return False
-
-
-def is_modern_terminal():
-    """Detect whether the current terminal is a modern terminal that supports Unicode and
-    Console Virtual Terminal Sequences.
-
-    Currently, these terminals can be detected:
-      - Windows Terminal
-      - VS Code terminal
-    """
-    # This function wraps _is_modern_terminal and use a function-level cache to save the result.
-    if not hasattr(is_modern_terminal, "return_value"):
-        setattr(is_modern_terminal, "return_value", _is_modern_terminal())
-    return getattr(is_modern_terminal, "return_value")
+def get_theme_dict(theme: str):
+    try:
+        return THEME_DEFINITIONS[theme]
+    except KeyError as ex:
+        available_themes = ', '.join([m.value for m in Theme.__members__.values()])  # pylint: disable=no-member
+        logger.warning("Invalid theme %s. Supported themes: %s", ex, available_themes)
+        return None
