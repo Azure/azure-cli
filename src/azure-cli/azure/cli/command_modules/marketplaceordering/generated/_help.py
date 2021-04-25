@@ -12,11 +12,6 @@
 from knack.help_files import helps
 
 
-helps['marketplaceordering'] = '''
-    type: group
-    short-summary: Manage Marketplace Ordering Agreements
-'''
-
 helps['term'] = """
     type: group
     short-summary: Manage marketplace agreement with marketplaceordering

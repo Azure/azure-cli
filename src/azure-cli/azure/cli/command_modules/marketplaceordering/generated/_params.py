@@ -14,13 +14,11 @@
 def load_arguments(self, _):
 
     with self.argument_context('term show') as c:
-        c.argument('publisher', type=str, help='Publisher identifier string of image being deployed.',
-                   id_part='child_name_1')
-        c.argument('offer', type=str, help='Offer identifier string of image being deployed.', id_part='child_name_2')
-        c.argument('plan', type=str, help='Plan identifier string of image being deployed.', id_part='child_name_3')
+        c.argument('publisher', type=str, help='Publisher identifier string of image being deployed.')
+        c.argument('offer', type=str, help='Offer identifier string of image being deployed.')
+        c.argument('plan', type=str, help='Plan identifier string of image being deployed.')
 
     with self.argument_context('term accept') as c:
-        c.argument('publisher', type=str, help='Publisher identifier string of image being deployed.',
-                   id_part='child_name_1')
-        c.argument('offer', type=str, help='Offer identifier string of image being deployed.', id_part='child_name_2')
-        c.argument('plan', type=str, help='Plan identifier string of image being deployed.', id_part='child_name_3')
+        c.argument('publisher', type=str, help='Publisher identifier string of image being deployed.')
+        c.argument('offer', type=str, help='Offer identifier string of image being deployed.')
+        c.argument('plan', type=str, help='Plan identifier string of image being deployed.')
