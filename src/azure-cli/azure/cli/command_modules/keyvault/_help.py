@@ -546,6 +546,13 @@ short-summary: Manage secrets.
 helps['keyvault secret set'] = """
 type: command
 short-summary: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+examples:
+  - name: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+    text: |
+        az keyvault secret set --name MySecretName --vault-name MyKeyVault --value MyVault
+  - name: Create a secret (if one doesn't exist) or update a secret in a KeyVault through a file.
+    text: |
+        az keyvault secret set --name MySecretName --vault-name MyKeyVault --file /path/to/file --encoding MyEncoding
 """
 
 helps['keyvault show'] = """

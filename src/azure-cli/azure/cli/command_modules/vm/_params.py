@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-lines
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
@@ -30,7 +30,7 @@ from azure.cli.command_modules.monitor.validators import validate_metric_dimensi
 from azure.cli.command_modules.monitor.actions import get_period_type
 
 
-# pylint: disable=too-many-statements, too-many-branches, too-many-locals
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
 def load_arguments(self, _):
     # Model imports
     StorageAccountTypes = self.get_models('StorageAccountTypes')
@@ -40,6 +40,7 @@ def load_arguments(self, _):
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
+    RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -96,6 +97,12 @@ def load_arguments(self, _):
         help='Specify the scale-in policy (space delimited) that decides which virtual machines are chosen for removal when a Virtual Machine Scale Set is scaled-in.'
     )
 
+    edge_zone_type = CLIArgumentType(
+        help='Name of edge zone extended location.',
+        min_api='2020-12-01',
+        is_preview=True
+    )
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -148,6 +155,9 @@ def load_arguments(self, _):
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/en-us/pricing/details/managed-disks/. Does not apply to Ultra disks.')
+        c.argument('edge_zone', edge_zone_type)
+        c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
     # endregion
 
     # region Snapshots
@@ -157,6 +167,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=snapshot_sku)
         c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
+        c.argument('edge_zone', edge_zone_type)
     # endregion
 
     # region Images
@@ -178,6 +189,7 @@ def load_arguments(self, _):
                    help="Storage caching type for the image's data disk.")
         c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
+        c.argument('edge_zone', edge_zone_type, )
     # endregion
 
     # region Image Templates
@@ -384,6 +396,17 @@ def load_arguments(self, _):
 
     with self.argument_context('vm diagnostics set') as c:
         c.argument('storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+
+    with self.argument_context('vm install-patches') as c:
+        c.argument('maximum_duration', type=str, help='Specify the maximum amount of time that the operation will run. It must be an ISO 8601-compliant duration string such as PT4H (4 hours)')
+        c.argument('reboot_setting', arg_type=get_enum_type(RebootSetting), help='Define when it is acceptable to reboot a VM during a software update operation.')
+        c.argument('classifications_to_include_win', nargs='+', arg_type=get_enum_type(VMGuestPatchClassificationWindows), help='Space-separated list of classifications to include for Windows VM.')
+        c.argument('classifications_to_include_linux', nargs='+', arg_type=get_enum_type(VMGuestPatchClassificationLinux), help='Space-separated list of classifications to include for Linux VM.')
+        c.argument('kb_numbers_to_include', nargs='+', help='Space-separated list of KBs to include in the patch operation. Applicable to Windows VM only')
+        c.argument('kb_numbers_to_exclude', nargs='+', help='Space-separated list of KBs to exclude in the patch operation. Applicable to Windows VM only')
+        c.argument('exclude_kbs_requiring_reboot', arg_type=get_three_state_flag(), help="Filter out KBs that don't have a reboot behavior of 'NeverReboots' when this is set. Applicable to Windows VM only")
+        c.argument('package_name_masks_to_include', nargs='+', help='Space-separated list of packages to include in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
+        c.argument('package_name_masks_to_exclude', nargs='+', help='Space-separated list of packages to exclude in the patch operation. Format: packageName_packageVersion. Applicable to Linux VM only')
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
@@ -610,6 +633,18 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('terminate_notification_time', min_api='2019-03-01',
                        help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
+            c.argument('max_batch_instance_percent', type=int, min_api='2020-12-01',
+                       help='The maximum percent of total virtual machine instances that will be upgraded simultaneously by the rolling upgrade in one batch. Default: 20%')
+            c.argument('max_unhealthy_instance_percent', type=int, min_api='2020-12-01',
+                       help='The maximum percentage of the total virtual machine instances in the scale set that can be simultaneously unhealthy. Default: 20%')
+            c.argument('max_unhealthy_upgraded_instance_percent', type=int, min_api='2020-12-01',
+                       help='The maximum percentage of upgraded virtual machine instances that can be found to be in an unhealthy state. Default: 20%')
+            c.argument('pause_time_between_batches', min_api='2020-12-01',
+                       help='The wait time between completing the update for all virtual machines in one batch and starting the next batch. Default: 0 seconds')
+            c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                       help='Set this Boolean property will allow VMSS to ignore AZ boundaries when constructing upgrade batches, and only consider Update Domain and maxBatchInstancePercent to determine the batch size')
+            c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                       help='Set this Boolean property will lead to all unhealthy instances in a scale set getting upgraded before any healthy instances')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
@@ -703,6 +738,7 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
+            c.argument('edge_zone', edge_zone_type)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -897,7 +933,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
-    with self.argument_context('sig image-version create') as c:
+    with self.argument_context('sig image-version create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
         c.argument('description', help='the description of the gallery image version')
@@ -912,6 +948,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
         c.argument('target_region_encryption', nargs='+',
                    help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for each region: `<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`. Use "null" as a placeholder.')
+        c.argument('os_vhd_uri', help='Source VHD URI of OS disk')
+        c.argument('os_vhd_storage_account', help='Name or ID of storage account of source VHD URI of OS disk')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
@@ -987,6 +1025,9 @@ def load_arguments(self, _):
                    help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
+        c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
+                   options_list=['--enable-auto-key-rotation', '--auto-rotation'],
+                   help='Enable automatic rotation of keys.')
     # endregion
 
     # region DiskAccess

@@ -19,7 +19,7 @@ from knack.util import CLIError
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl
+    is_windows, is_wsl, scopes_to_resource
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = get_logger(__name__)
@@ -113,6 +113,7 @@ def _load_tokens_from_file(file_path):
             raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                            "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                            "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+    logger.debug("'%s' is not a file or doesn't exist.", file_path)
     return []
 
 
@@ -171,6 +172,7 @@ class Profile:
                                     password,
                                     is_service_principal,
                                     tenant,
+                                    scopes=None,
                                     use_device_code=False,
                                     allow_no_subscriptions=False,
                                     subscription_finder=None,
@@ -178,6 +180,11 @@ class Profile:
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
         subscriptions = []
+
+        if scopes:
+            auth_resource = scopes_to_resource(scopes)
+        else:
+            auth_resource = self._ad_resource_uri
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx,
@@ -192,14 +199,14 @@ class Profile:
                 try:
                     authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
                     subscriptions = subscription_finder.find_through_authorization_code_flow(
-                        tenant, self._ad_resource_uri, authority_url)
+                        tenant, self._ad_resource_uri, authority_url, auth_resource=auth_resource)
                 except RuntimeError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
                 subscriptions = subscription_finder.find_through_interactive_flow(
-                    tenant, self._ad_resource_uri)
+                    tenant, self._ad_resource_uri, auth_resource=auth_resource)
         else:
             if is_service_principal:
                 if not tenant:
@@ -549,6 +556,7 @@ class Profile:
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
+        # Make sure external_tenants_info only contains real external tenant (no current tenant).
         external_tenants_info = []
         if aux_tenants:
             external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
@@ -558,6 +566,11 @@ class Profile:
                 sub = self.get_subscription(ext_sub)
                 if sub[_TENANT_ID] != account[_TENANT_ID]:
                     external_tenants_info.append(sub[_TENANT_ID])
+
+        if external_tenants_info and \
+                (in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID) or identity_type):
+            raise CLIError("Cross-tenant authentication is not supported by managed identity and Cloud Shell account. "
+                           "Please run `az login` with a user account or a service principal.")
 
         if identity_type is None:
             def _retrieve_token(sdk_resource=None):
@@ -608,43 +621,48 @@ class Profile:
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
         """
-        from msal import ClientApplication
-        import posixpath
         account = self.get_subscription()
-        username = account[_USER_ENTITY][_USER_NAME]
-        tenant = account[_TENANT_ID] or 'common'
-        _, refresh_token, _, _ = self.get_refresh_token()
-        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
-        app = ClientApplication(_CLIENT_ID, authority=authority)
-        result = app.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
-
-        if 'error' in result:
-            logger.warning(result['error_description'])
-
-            # Retry login with VM SSH as resource
-            token_entry = self._login_with_authorization_code_flow(
-                tenant, 'https://pas.windows.net/CheckMyAccess/Linux')
-            result = app.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
-
-            if 'error' in result:
-                from azure.cli.core.adal_authentication import aad_error_handler
-                aad_error_handler(result)
-        return username, result["access_token"]
-
-    def get_refresh_token(self, resource=None,
-                          subscription=None):
-        account = self.get_subscription(subscription)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
+        identity_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        tenant = account[_TENANT_ID]
 
-        if user_type == _USER:
+        import posixpath
+        authority = posixpath.join(self.cli_ctx.cloud.endpoints.active_directory, tenant)
+
+        if identity_type == _USER:
+            # Use ARM as resource to get the refresh token from ADAL token cache
+            resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
             _, _, token_entry = self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry.get(_REFRESH_TOKEN), token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
+            refresh_token = token_entry.get(_REFRESH_TOKEN)
 
-        sp_secret = self._creds_cache.retrieve_cred_for_service_principal(username_or_sp_id)
-        return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
+            from azure.cli.core.msal_authentication import UserCredential
+            cred = UserCredential(_CLIENT_ID, authority=authority)
+            result = cred.acquire_token_by_refresh_token(refresh_token, scopes, data=data)
+
+            # In case of being rejected by Conditional Access, launch browser automatically to retry
+            # with VM SSH as resource.
+            if 'error' in result:
+                logger.warning(result['error_description'])
+
+                token_entry = self._login_with_authorization_code_flow(tenant, scopes_to_resource(scopes))
+                result = cred.acquire_token_by_refresh_token(token_entry['refreshToken'], scopes, data=data)
+
+        elif identity_type == _SERVICE_PRINCIPAL:
+            from azure.cli.core.msal_authentication import ServicePrincipalCredential
+
+            sp_id = username_or_sp_id
+            sp_credential = self._creds_cache.retrieve_cred_for_service_principal(sp_id)
+            cred = ServicePrincipalCredential(sp_id, secret_or_certificate=sp_credential, authority=authority)
+            result = cred.get_token(scopes=scopes, data=data)
+        else:
+            raise CLIError("Identity type {} is currently unsupported".format(identity_type))
+
+        if 'error' in result:
+            from azure.cli.core.adal_authentication import aad_error_handler
+            aad_error_handler(result)
+
+        return username_or_sp_id, result["access_token"]
 
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
         logger.debug("Profile.get_raw_token invoked with resource=%r, subscription=%r, tenant=%r",
@@ -882,9 +900,9 @@ class SubscriptionFinder:
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+    def find_through_authorization_code_flow(self, tenant, resource, authority_url, auth_resource=None):
         # launch browser and get the code
-        results = _get_authorization_code(resource, authority_url)
+        results = _get_authorization_code(auth_resource or resource, authority_url)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
@@ -901,9 +919,9 @@ class SubscriptionFinder:
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_interactive_flow(self, tenant, resource):
+    def find_through_interactive_flow(self, tenant, resource, auth_resource=None):
         context = self._create_auth_context(tenant)
-        code = context.acquire_user_code(resource, _CLIENT_ID)
+        code = context.acquire_user_code(auth_resource or resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]

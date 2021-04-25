@@ -1629,6 +1629,8 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('provisionAfterExtensions[1]', '{script-ext}'),
         ])
 
+        self.cmd('vmss extension upgrade -g {rg} -n {vmss}')
+
         # delete all the extensions
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
@@ -2253,6 +2255,28 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_policy_setting')
+    def test_vmss_create_with_policy_setting(self, resource_group):
+
+        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S'
+        self.kwargs.update({
+            'vmss': 'vrfvmss',
+            'maxBIP': maxBIP,
+            'maxUIP': maxUIP,
+            'maxUUIP': maxUUIP,
+            'PTB': PTB
+        })
+
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -g {rg} -n {vmss} --instance-count 1 --generate-ssh-keys --admin-username myadmin --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxBatchInstancePercent', maxBIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
+            self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
 
@@ -2485,6 +2509,29 @@ class VMSSUpdateTests(ScenarioTest):
 
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_policy_')
+    def test_vmss_update_policy(self, resource_group):
+
+        maxBIP, maxUIP, maxUUIP, PTB = 40, 40, 40, 'PT1S'
+        self.kwargs.update({
+            'vmss': 'winvmss',
+            'maxBIP': maxBIP,
+            'maxUIP': maxUIP,
+            'maxUUIP': maxUUIP,
+            'PTB': PTB,
+            'prioritizeUI': True,
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1 --generate-ssh-keys')
+        # test rolling upgrade policy
+        self.cmd('vmss update -g {rg} -n {vmss} --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true', checks=[
+            self.check('upgradePolicy.rollingUpgradePolicy.maxBatchInstancePercent', maxBIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.maxUnhealthyInstancePercent', maxUUIP),
+            self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
+            self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_')
     def test_vmss_update_image(self):
@@ -3776,6 +3823,25 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
+    def test_gallery_image_version_vhd(self, resource_group):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+        })
+
+        self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key')
+        vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+        storage_account = vhd_uri.split('.')[0].split('/')[-1]
+        self.kwargs.update({
+            'vhd': vhd_uri,
+            'stac': storage_account
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 --gallery-image-version 1.0.0 --os-vhd-uri {vhd} --os-vhd-storage-account {stac} --replica-count 1', checks=[
+            self.check('storageProfile.osDiskImage.source.uri', vhd_uri)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
         self.kwargs.update({
@@ -4374,8 +4440,9 @@ class DiskEncryptionSetTest(ScenarioTest):
             'kid2': kid2
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1}')
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1} --enable-auto-key-rotation true')
         des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
+        self.assertEqual(des_show_output['rotationToLatestKeyVersionEnabled'], True)
         des_sp_id = des_show_output['identity']['principalId']
         des_id = des_show_output['id']
         self.kwargs.update({
@@ -4389,9 +4456,10 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
         time.sleep(15)
 
-        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2}', checks=[
+        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2} --enable-auto-key-rotation false', checks=[
             self.check('activeKey.keyUrl', '{kid2}'),
             self.check('activeKey.sourceVault.id', '{vault2_id}'),
+            self.check('rotationToLatestKeyVersionEnabled', False)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_disk_update_', location='westcentralus')
@@ -4571,24 +4639,21 @@ class DiskAccessTest(ScenarioTest):
         ])
 
         self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
-        disk_access_output = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
+        self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
             self.check('name', '{diskaccess}'),
             self.check('location', '{loc}'),
             self.check('tags.tag1', 'val1')
-        ]).get_output_in_json()
-        disk_access_id = disk_access_output['id']
+        ])
 
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('disk show -g {rg} -n {disk}', checks=[
             self.check('name', '{disk}'),
-            self.check('diskAccessId', disk_access_id, False),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
         self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
             self.check('name', '{snapshot}'),
-            self.check('diskAccessId', disk_access_id, False),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
@@ -5072,11 +5137,26 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('sshkey show -g {rg} -n k3')
 
 
+class VMInstallPatchesScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
+    def test_vm_install_patches(self, resource_group):
+        # Create new one
+        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+        self.cmd('vm create -g {rg} -n vm2 --image UbuntuLTS --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-linux Critical Security', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
     def test_vm_trusted_launch(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.UefiSettings.secureBootEnabled', True),
@@ -5086,7 +5166,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
     def test_vm_trusted_launch_update(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
@@ -5094,14 +5174,83 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.UefiSettings.vTpmEnabled', True)
         ])
 
+    # @unittest.skip('Service does not work')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_trusted_launch_', location='southcentralus')
+    def test_disk_trusted_launch(self):
+        self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+
+class DiskHibernationScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_hibernation_')
+    def test_disk_hibernation(self):
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --support-hibernation true', checks=[
+            self.check('supportsHibernation', True)
+        ])
+
 
 class VMCreateCountScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_', location='eastus')
     def test_vm_create_count(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image centos --count 3 --nsg-rule None --generate-ssh-keys')
-        self.cmd('vm show -g {rg} -n vm0')
-        self.cmd('vm show -g {rg} -n vm1')
-        self.cmd('vm show -g {rg} -n vm2')
+        self.cmd('az network vnet create -g {rg} -n vnet --address-prefix 10.0.0.0/16')
+        self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet1 --address-prefixes 10.0.0.0/24')
+        self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet2 --address-prefixes 10.0.1.0/24')
+        self.cmd('vm create -g {rg} -n vma --image ubuntults --count 3 --vnet-name vnet --subnet subnet1 --nsg-rule None --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n vmb --image ubuntults --count 3 --vnet-name vnet --subnet subnet2 --nsg-rule None --generate-ssh-keys')
+        self.cmd('vm list -g {rg}', checks=[
+            self.check('length(@)', 6)
+        ])
+
+
+class ExtendedLocation(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extended_location_')
+    def test_vm_extended_location(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm --image ubuntults --nsg-rule None --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vm show -g {rg} -n vm', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extended_location_')
+    def test_vmss_extended_location(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vmss --image ubuntults --generate-ssh-keys --edge-zone microsoftlosangeles1')
+        self.cmd('vmss show -g {rg} -n vmss', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_other_extended_location_')
+    def test_other_extended_location(self, resource_group):
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --edge-zone microsoftlosangeles1', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+        self.cmd('snapshot create -g {rg} -n s1 --size-gb 10 --edge-zone microsoftlosangeles1 --sku Premium_LRS', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+        self.cmd('image create -g {rg} -n image --os-type linux --source d1 --edge-zone microsoftlosangeles1', checks=[
+            self.check('extendedLocation.name', 'microsoftlosangeles1'),
+            self.check('extendedLocation.type', 'EdgeZone')
+        ])
+
+
+class DiskZRSScenarioTest(ScenarioTest):
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='eastus2euap')
+    def test_disk_zrs(self, resource_group):
+        # az feature register --namespace Microsoft.Compute -n SharedDisksForStandardSSD
+        # az provider register -n Microsoft.Compute
+        self.cmd('disk create -g {rg} -n d1 --size-gb 1024 --sku StandardSSD_ZRS --max-shares 3', checks=[
+            self.check('sku.name', 'StandardSSD_ZRS')
+        ])
+        self.cmd('disk update -g {rg} -n d1 --sku Premium_ZRS', checks=[
+            self.check('sku.name', 'Premium_ZRS')
+        ])
+        self.cmd('vm create -g {rg} -n d1 --image ubuntults --zone 1 --attach-data-disks d1 --generate-ssh-keys --nsg-rule None')
+        # ZRS disks cannot be pinned with a zone
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
 
 
 if __name__ == '__main__':

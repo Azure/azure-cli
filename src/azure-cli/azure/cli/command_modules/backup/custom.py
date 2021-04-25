@@ -95,11 +95,10 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location):
+def create_vault(client, vault_name, resource_group_name, location, tags=None):
     vault_sku = Sku(name=SkuName.standard)
     vault_properties = VaultProperties()
-
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
 
@@ -279,6 +278,11 @@ def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = _get_policy_from_json(client, policy)
     policy_object.name = name
     policy_object.properties.backup_management_type = "AzureIaasVM"
+
+    additional_properties = policy_object.properties.additional_properties
+    if 'instantRpDetails' in additional_properties:
+        policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
+
     return client.create_or_update(vault_name, resource_group_name, name, policy_object)
 
 

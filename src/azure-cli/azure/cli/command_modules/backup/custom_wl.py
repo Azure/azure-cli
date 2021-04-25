@@ -290,7 +290,8 @@ def show_protectable_instance(items, server_name, protectable_item_type):
 
 
 def list_protectable_items(client, resource_group_name, vault_name, workload_type,
-                           backup_management_type="AzureWorkload", container_uri=None, protectable_item_type=None):
+                           backup_management_type="AzureWorkload", container_uri=None, protectable_item_type=None,
+                           server_name=None):
 
     workload_type = _check_map(workload_type, workload_type_map)
     if protectable_item_type is not None:
@@ -308,6 +309,10 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
         # Protectable Item Type filter
         paged_items = [item for item in paged_items if
                        item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    if server_name is not None:
+        # Server Name filter
+        paged_items = [item for item in paged_items if
+                       item.properties.server_name.lower() == server_name.lower()]
     if container_uri:
         return [item for item in paged_items if
                 cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]

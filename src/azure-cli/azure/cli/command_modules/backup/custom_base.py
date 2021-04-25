@@ -193,7 +193,8 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 
 
 def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
-                           backup_management_type="AzureWorkload", container_name=None, protectable_item_type=None):
+                           backup_management_type="AzureWorkload", container_name=None, protectable_item_type=None,
+                           server_name=None):
 
     if backup_management_type != "AzureWorkload":
         raise ValidationError("""
@@ -215,7 +216,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                 """)
             container_uri = container.name
     return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type,
-                                            backup_management_type, container_uri, protectable_item_type)
+                                            backup_management_type, container_uri, protectable_item_type, server_name)
 
 
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
