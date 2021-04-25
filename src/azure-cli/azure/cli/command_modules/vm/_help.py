@@ -679,6 +679,9 @@ examples:
   - name: Add a new image version using disks with target regions and customer managed keys for encryption. You specify which disks in the image version to encrypt. Disks encrypted in one region must be encrypted in another region with a different disk encryption set.
     text: >
         az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard eastus --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk --data-snapshot-luns 0
+  - name: Add a new image version from a VHD of an OS disk.
+    text: >
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-vhd-uri <vhd-uri> --os-vhd-storage-account account
 """
 
 helps['sig image-version update'] = """

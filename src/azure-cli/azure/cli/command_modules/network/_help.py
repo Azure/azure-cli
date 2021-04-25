@@ -869,6 +869,9 @@ short-summary: Get information on the backend health of an application gateway.
 examples:
   - name: Show backend health of an application gateway.
     text: az network application-gateway show-backend-health -g MyResourceGroup -n MyAppGateway
+  - name: Show backend health of an application gateway for given combination of backend pool and http setting.
+    text: |-
+        az network application-gateway show-backend-health -g MyResourceGroup -n MyAppGateway --host-name-from-http-settings --path /test --timeout 100 --http-settings appGatewayBackendHttpSettings --address-pool appGatewayBackendPool
 """
 
 helps['network application-gateway ssl-cert'] = """
@@ -3691,6 +3694,14 @@ examples:
     text: az network lb list -g MyResourceGroup
 """
 
+helps['network lb list-nic'] = """
+type: command
+short-summary: List associated load balancer network interfaces.
+examples:
+  - name: List associated load balancer network interfaces.
+    text: az network lb list-nic -g MyResourceGroup --name MyLb
+"""
+
 helps['network lb outbound-rule'] = """
 type: group
 short-summary: Manage outbound rules of a load balancer.
@@ -5501,6 +5512,14 @@ examples:
     text: az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
 """
 
+helps['network vnet-gateway disconnect-vpn-connections'] = """
+type: command
+short-summary: Disconnect vpn connections of virtual network gateway.
+examples:
+  - name: Disconnect vpn connections of virtual network gateway.
+    text: az network vnet-gateway disconnect-vpn-connections -g MyResourceGroup -n MyVnetGateway --vpn-connections MyConnetion1ByName MyConnection2ByID
+"""
+
 helps['network vnet-gateway ipsec-policy'] = """
 type: group
 short-summary: Manage virtual network gateway IPSec policies.
@@ -5564,6 +5583,14 @@ short-summary: This operation retrieves a list of routes the virtual network gat
 examples:
   - name: Retrieve a list of learned routes.
     text: az network vnet-gateway list-learned-routes -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway show-supported-devices'] = """
+type: command
+short-summary: Get a xml format representation for supported vpn devices.
+examples:
+  - name: Get a xml format representation for supported vpn devices.
+    text: az network vnet-gateway show-supported-devices -g MyResourceGroup -n MyVnetGateway
 """
 
 helps['network vnet-gateway reset'] = """
@@ -5651,6 +5678,27 @@ examples:
     crafted: true
 """
 
+helps['network vnet-gateway packet-capture'] = """
+type: group
+short-summary: Manage packet capture on a virtual network gateway.
+"""
+
+helps['network vnet-gateway packet-capture start'] = """
+type: command
+short-summary: Start packet capture on a virtual network gateway.
+examples:
+  - name: Start packet capture on a virtual network gateway.
+    text: az network vnet-gateway packet-capture start -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway packet-capture stop'] = """
+type: command
+short-summary: Stop packet capture on a virtual network gateway.
+examples:
+  - name: Stop packet capture on a virtual network gateway.
+    text: az network vnet-gateway packet-capture stop -g MyResourceGroup -n MyVnetGateway --sas-url https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
+"""
+
 helps['network vnet-gateway vpn-client'] = """
 type: group
 short-summary: Download a VPN client configuration required to connect to Azure via point-to-site.
@@ -5678,6 +5726,38 @@ long-summary: The profile needs to be generated first using vpn-client generate 
 examples:
   - name: Get the pre-generated point-to-site VPN client of the virtual network gateway.
     text: az network vnet-gateway vpn-client show-url -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway vpn-client show-health'] = """
+type: command
+short-summary: Get the VPN client connection health detail per P2S client connection of the virtual network gateway.
+examples:
+  - name: Get the VPN client connection health detail per P2S client connection of the virtual network gateway.
+    text: az network vnet-gateway vpn-client show-health -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy'] = """
+type: group
+short-summary: Manage the VPN client connection ipsec-policy for P2S client connection of the virtual network gateway.
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy show'] = """
+type: command
+short-summary: Get the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+examples:
+  - name: Get the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+    text: az network vnet-gateway vpn-client ipsec-policy show -g MyResourceGroup -n MyVnetGateway
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy set'] = """
+type: command
+short-summary: Set the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+examples:
+  - name: Set the VPN client connection ipsec policy per P2S client connection of the virtual network gateway.
+    text: |-
+        az network vnet-gateway vpn-client ipsec-policy set -g MyResourceGroup -n MyVnetGateway \
+        --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \
+        --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vnet-gateway wait'] = """
@@ -5813,10 +5893,20 @@ examples:
 
 helps['network vpn-connection list'] = """
 type: command
-short-summary: List all VPN connections in a resource group.
+short-summary: List all VPN connections.
 examples:
   - name: List all VPN connections in a resource group.
     text: az network vpn-connection list -g MyResourceGroup
+  - name: List all VPN connections in a virtual network gateway.
+    text: az network vpn-connection list -g MyResourceGroup --vnet-gateway MyVnetGateway
+"""
+
+helps['network vpn-connection list-ike-sas'] = """
+type: command
+short-summary: List IKE Security Associations for a VPN connection.
+examples:
+  - name: List IKE Security Associations for a VPN connection.
+    text: az network vpn-connection list-ike-sas -g MyResourceGroup -n MyConnection
 """
 
 helps['network vpn-connection shared-key'] = """
@@ -5878,6 +5968,35 @@ examples:
     text: |
         az network vpn-connection update --name MyConnection --resource-group MyResourceGroup --use-policy-based-traffic-selectors true
     crafted: true
+"""
+
+helps['network vpn-connection show-device-config-script'] = """
+type: command
+short-summary: Get a XML format representation for VPN connection device configuration script.
+examples:
+  - name: Get a XML format representation for VPN connection device configuration script.
+    text: az network vpn-connection show-device-config-script -g MyResourceGroup -n MyConnection --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"
+"""
+
+helps['network vpn-connection packet-capture'] = """
+type: group
+short-summary: Manage packet capture on a VPN connection.
+"""
+
+helps['network vpn-connection packet-capture start'] = """
+type: command
+short-summary: Start packet capture on a VPN connection.
+examples:
+  - name: Start packet capture on a VPN connection.
+    text: az network vpn-connection packet-capture start -g MyResourceGroup -n MyConnection
+"""
+
+helps['network vpn-connection packet-capture stop'] = """
+type: command
+short-summary: Stop packet capture on a VPN connection.
+examples:
+  - name: Stop packet capture on a VPN connection.
+    text: az network vpn-connection packet-capture stop -g MyResourceGroup -n MyConnection --sas-url https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
 """
 
 helps['network vrouter'] = """
@@ -5984,6 +6103,11 @@ type: command
 short-summary: Delete a route server under a resource group.
 """
 
+helps['network routeserver wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the route server is met.
+"""
+
 helps['network routeserver peering'] = """
 type: group
 short-summary: Manage the route server peering.
@@ -6022,6 +6146,11 @@ short-summary: List all routes the route server bgp connection has learned.
 helps['network routeserver peering list-advertised-routes'] = """
 type: command
 short-summary: List all routes the route server bgp connection is advertising to the specified peer.
+"""
+
+helps['network routeserver peering wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the route server peering is met.
 """
 
 helps['network watcher'] = """

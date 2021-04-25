@@ -345,7 +345,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
                                  subnet_id, private_ip_address, private_ip_allocation,
-                                 sku, frontend_ip_zone, private_ip_address_version, tier=None):
+                                 sku, frontend_ip_zone, private_ip_address_version, tier=None,
+                                 edge_zone=None, edge_zone_type=None):
     frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation, frontend_ip_zone, private_ip_address_version)
 
@@ -370,10 +371,13 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
         lb['sku'] = {'name': sku}
     if tier and cmd.supported_api_version(min_api='2020-07-01'):
         lb['sku'].update({'tier': tier})
+    if edge_zone and edge_zone_type:
+        lb['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
     return lb
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, tier=None):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, tier=None,
+                             edge_zone=None, edge_zone_type=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -396,6 +400,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip['sku'].update({'tier': tier})
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         public_ip['zones'] = zone
+    if edge_zone and edge_zone_type:
+        public_ip['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
     return public_ip
 
 
