@@ -18,6 +18,10 @@ def term_accept(client,
                              publisher_id=publisher,
                              offer_id=product,
                              plan_id=plan)
+    if offerDetail is None:
+        from azure.cli.core.azclierror import ValidationError
+        raise ValidationError(
+            'cannot find offer with publisher {}, product {} and plan {}.'.format(publisher, product, plan))
     parameters = {}
     parameters['publisher'] = publisher
     parameters['product'] = product
