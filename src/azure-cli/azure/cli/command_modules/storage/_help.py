@@ -283,6 +283,10 @@ examples:
 helps['storage account management-policy update'] = """
 type: command
 short-summary: Update the data policy rules associated with the specified storage account.
+examples:
+    - name: Update the data policy rules associated with the specified storage account.
+      text: |
+        az storage account management-policy update --account-name myaccount --resource-group myresourcegroup --set policy.rules[0].name=newname
 """
 
 helps['storage account management-policy show'] = """
