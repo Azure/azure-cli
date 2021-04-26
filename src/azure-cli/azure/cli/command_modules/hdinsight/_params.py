@@ -93,8 +93,14 @@ def load_arguments(self, _):
                    help='SSH public key for the cluster nodes.')
 
         # Node
-        c.argument('headnode_size', arg_type=node_size_type)
-        c.argument('workernode_size', arg_type=node_size_type)
+        c.argument('headnode_size', arg_type=node_size_type,
+                   help='Incoming BREAKING CHANGE: The default value "large" will be removed in next CLI version.'
+                        'The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
+        c.argument('workernode_size', arg_type=node_size_type,
+                   help='Incoming BREAKING CHANGE: The default value "large" will be removed in next CLI version.'
+                        'The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
         c.argument('workernode_data_disk_storage_account_type', arg_group='Node',
