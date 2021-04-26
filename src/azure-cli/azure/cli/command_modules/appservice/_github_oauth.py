@@ -46,8 +46,9 @@ def get_github_access_token(cmd, scope_list=None):
         interval = int(parsed_response['interval'][0])
         expires_in_seconds = int(parsed_response['expires_in'][0])
 
-        logger.warning("Please go to '%s' and enter the user code '%s' to activate and retrieve your github personal access token",
-            verification_uri, user_code)
+        navigate_to_msg = 'Please navigate to {0} and enter the user code {1} to activate and ' \
+                          'retrieve your github personal access token'.format(verification_uri, user_code)
+        logger.warning(navigate_to_msg)
 
         timeout = time.time() + expires_in_seconds
         logger.warning("Waiting up to '%s' minutes for activation", str(expires_in_seconds // 60))
