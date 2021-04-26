@@ -7,11 +7,13 @@
 import os
 import unittest
 import time
+import json
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError)
+
 
 logger = get_logger(__name__)
 # pylint: disable=line-too-long
@@ -374,7 +376,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutZone_ZoneExistsIfNoneMatchFailure_ExpectError(self, resource_group):
         self._Create_PrivateZone()
-        with self.assertRaisesRegexp(CLIError, 'exists already'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns zone create -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -390,7 +392,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     def test_PatchZone_ZoneExistsIfMatchFailure_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         self.kwargs['etag'] = self.create_guid()
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'etag mismatch'):
+        with self.assertRaisesRegexp(HttpResponseError, 'etag mismatch'):
             self.cmd('az network private-dns zone update -g {rg} -n {zone} --if-match {etag}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -509,7 +511,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutLink_LinkExistsIfNoneMatchFailure_ExpectError(self, resource_group):
         self._Create_VirtualNetworkLink()
-        with self.assertRaisesRegexp(CLIError, 'exists already'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns link vnet create -g {rg} -n {link} -z {zone} -v {vnet} -e {registrationEnabled}')
 
     @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
@@ -529,7 +531,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         self._Create_VirtualNetworkLink()
         self.kwargs['etag'] = self.create_guid()
         cmd = "az network private-dns link vnet update -g {rg} -n {link} -z {zone} --if-match '{etag}'"
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'etag mismatch'):
+        with self.assertRaisesRegexp(HttpResponseError, 'etag mismatch'):
             self.cmd(cmd)
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -690,7 +692,7 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
     def test_PutRecordSet_IfNoneMatchFailure_ExpectError(self, resource_group):
         zone = self._Create_PrivateZone()
         self._Create_RecordSet('a', zone['name'])
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'Precondition Failed'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns record-set {recordType} create -g {rg} -n {recordset} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -704,7 +706,7 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         zone = self._Create_PrivateZone()
         recordset = self._Create_RecordSet('a', zone['name'])
         etag = self.create_guid()
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'Precondition Failed'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self._Update_RecordSet(recordset['name'], 'a', zone['name'], etag)
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
