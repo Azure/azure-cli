@@ -289,8 +289,8 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
 
-    if hsm_name:
-        raise InvalidArgumentValueError('Operation "purge" has not been supported for HSM.')
+    if hsm_name and 'keyvault recover' in cmd.name:
+        raise InvalidArgumentValueError('Operation "recover" has not been supported for HSM.')
 
     if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')
@@ -312,7 +312,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
         if vault_name:
             id_comps = parse_resource_id(resource.properties.vault_id)
         else:
-            id_comps = parse_resource_id(resource.properties.id)
+            id_comps = parse_resource_id(resource.id)
 
     # otherwise, iterate through deleted vaults to find one with a matching name
     else:
@@ -320,17 +320,18 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
             if vault_name:
                 id_comps = parse_resource_id(v.properties.vault_id)
             else:
-                id_comps = parse_resource_id(v.properties.id)
+                id_comps = parse_resource_id(v.id)
             if id_comps['name'].lower() == resource_name.lower():
                 resource = v
-                ns.location = resource.properties.location
+                ns.location = resource.properties.location if vault_name \
+                    else resource.additional_properties.get('location')
                 break
 
     # if the vault was not found, throw an error
     if not resource:
         raise CLIError('No deleted Vault or HSM was found with name ' + resource_name)
 
-    if 'keyvault purge' not in cmd.name:
+    if 'keyvault purge' not in cmd.name and 'keyvault show-deleted' not in cmd.name:
         setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
 
         # resource_group_name must match the resource group of the deleted vault
