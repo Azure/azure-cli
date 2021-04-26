@@ -191,7 +191,7 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
 
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
-                       app_location='.', api_location='.', app_artifact_location='.github/workflows',
+                       app_location='.', api_location='.', output_location='.github/workflows',
                        tags=None, no_wait=False, sku='Free'):
     if not token:
         _raise_missing_token_suggestion()
@@ -202,7 +202,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
     build = StaticSiteBuildProperties(
         app_location=app_location,
         api_location=api_location,
-        app_artifact_location=app_artifact_location)
+        app_artifact_location=output_location)
 
     sku_def = SkuDescription(name=normalize_sku_for_staticapp(sku), tier=normalize_sku_for_staticapp(sku))
 

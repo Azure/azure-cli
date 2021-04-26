@@ -88,13 +88,13 @@ class TestStaticAppCommands(unittest.TestCase):
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         app_location = './src'
         api_location = './api/'
-        app_artifact_location = '/.git/'
+        output_location = '/.git/'
         tags = {'key1': 'value1'}
 
         create_staticsites(
             self.mock_cmd, self.rg1, self.name1, self.location1,
             self.source1, self.branch1, self.token1,
-            app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location,
+            app_location=app_location, api_location=api_location, output_location=output_location,
             tags=tags)
 
         self.staticapp_client.create_or_update_static_site.assert_called_once()
@@ -108,7 +108,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
         self.assertEqual(app_location, arg_list["static_site_envelope"].build_properties.app_location)
         self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
-        self.assertEqual(app_artifact_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
+        self.assertEqual(output_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
 
     def test_create_staticapp_with_standard_sku(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
@@ -125,14 +125,14 @@ class TestStaticAppCommands(unittest.TestCase):
     def test_create_staticapp_missing_token(self):
         app_location = './src'
         api_location = './api/'
-        app_artifact_location = '/.git/'
+        output_location = '/.git/'
         tags = {'key1': 'value1'}
 
         with self.assertRaises(CLIError):
             create_staticsites(
                 self.mock_cmd, self.rg1, self.name1, self.location1,
                 self.source1, self.branch1,
-                app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location,
+                app_location=app_location, api_location=api_location, output_location=output_location,
                 tags=tags)
 
     def test_update_staticapp(self):

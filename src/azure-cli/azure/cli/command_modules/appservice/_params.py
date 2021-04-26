@@ -1024,7 +1024,7 @@ def load_arguments(self, _):
                         "while '/app' represents a directory called 'app'")
         c.argument('api_location', options_list=['--api-location'],
                    help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.")
-        c.argument('app_artifact_location', options_list=['--app-artifact-location'],
+        c.argument('output_location', options_list=['--output-location'],
                    help="The path of your build output relative to your apps location. For example, setting a value "
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
                         "be served.")
