@@ -2315,8 +2315,7 @@ helps['staticwebapp update'] = """
     short-summary: Update a static app. Return the app updated.
     examples:
     - name: Update static app in a subscription.
-      text: az staticwebapp update -n MyStaticAppName -g MyExistingRg
-       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+      text: az staticwebapp update -n MyStaticAppName -g MyExistingRg -b master
 """
 
 helps['staticwebapp disconnect'] = """

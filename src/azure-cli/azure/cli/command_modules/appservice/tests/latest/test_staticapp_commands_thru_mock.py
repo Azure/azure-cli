@@ -105,7 +105,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(self.source1, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
         self.assertEqual(tags, arg_list["static_site_envelope"].tags)
-        self.assertEqual('FREE', arg_list["static_site_envelope"].sku.name)
+        self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
         self.assertEqual(app_location, arg_list["static_site_envelope"].build_properties.app_location)
         self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
         self.assertEqual(app_artifact_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
@@ -120,7 +120,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         self.staticapp_client.create_or_update_static_site.assert_called_once()
         arg_list = self.staticapp_client.create_or_update_static_site.call_args.kwargs
-        self.assertEqual('STANDARD', arg_list["static_site_envelope"].sku.name)
+        self.assertEqual('Standard', arg_list["static_site_envelope"].sku.name)
 
     def test_create_staticapp_missing_token(self):
         app_location = './src'
@@ -159,7 +159,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(self.source2, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch2, arg_list["static_site_envelope"].branch)
         self.assertEqual(tags, arg_list["static_site_envelope"].tags)
-        self.assertEqual('STANDARD', arg_list["static_site_envelope"].sku.name)
+        self.assertEqual('Standard', arg_list["static_site_envelope"].sku.name)
         self.assertEqual(app_location, arg_list["static_site_envelope"].build_properties.app_location)
         self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
         self.assertEqual(app_artifact_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
@@ -169,7 +169,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
 
-        update_staticsite(self.mock_cmd, self.name1, token=self.token1, resource_group_name=self.rg1)
+        update_staticsite(self.mock_cmd, self.name1, resource_group_name=self.rg1)
 
         self.staticapp_client.update_static_site.assert_called_once()
         arg_list = self.staticapp_client.update_static_site.call_args.kwargs
@@ -179,7 +179,10 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(self.source1, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
         self.assertEqual(self.app1.tags, arg_list["static_site_envelope"].tags)
-        self.assertEqual('FREE', arg_list["static_site_envelope"].sku.name)
+        self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
+        self.assertEqual(None, arg_list["static_site_envelope"].build_properties.app_location)
+        self.assertEqual(None, arg_list["static_site_envelope"].build_properties.api_location)
+        self.assertEqual(None, arg_list["static_site_envelope"].build_properties.app_artifact_location)
 
     def test_update_staticapp_not_exist(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
@@ -555,7 +558,7 @@ def _set_up_fake_apps(self):
 
 def _contruct_static_site_object(rg, app_name, location, source, branch):
     from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
-    app = StaticSiteARMResource(location=location, repository_url=source, branch=branch, sku=SkuDescription(name='FREE', tier='FREE'))
+    app = StaticSiteARMResource(location=location, repository_url=source, branch=branch, sku=SkuDescription(name='Free', tier='Free'))
     app.name = app_name
     app.id = \
         "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/staticSites/{}".format(rg, app_name)

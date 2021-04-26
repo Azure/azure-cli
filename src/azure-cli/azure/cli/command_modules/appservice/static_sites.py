@@ -8,7 +8,7 @@ from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
 from knack.log import get_logger
 
-from .utils import get_sku_name
+from .utils import normalize_sku_for_staticapp
 
 logger = get_logger(__name__)
 
@@ -204,7 +204,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
         api_location=api_location,
         app_artifact_location=app_artifact_location)
 
-    sku_def = SkuDescription(name=get_sku_name(sku), tier=get_sku_name(sku))
+    sku_def = SkuDescription(name=normalize_sku_for_staticapp(sku), tier=normalize_sku_for_staticapp(sku))
 
     staticsite_deployment_properties = StaticSiteARMResource(
         location=location,
@@ -225,9 +225,6 @@ def update_staticsite(cmd, name, resource_group_name=None, location=None,
                        source=None, branch=None, token=None,
                        app_location=None, api_location=None, app_artifact_location=None,
                        tags=None, sku=None, no_wait=False):
-    if not token:
-        _raise_missing_token_suggestion()
-
     existing_staticsite = show_staticsite(cmd, name, resource_group_name)
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
@@ -236,13 +233,13 @@ def update_staticsite(cmd, name, resource_group_name=None, location=None,
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
 
     if existing_staticsite.build_properties is not None:
-        app_location=app_location or existing_staticsite.build_properties.app_location,
-        api_location=api_location or existing_staticsite.build_properties.api_location,
+        app_location=app_location or existing_staticsite.build_properties.app_location
+        api_location=api_location or existing_staticsite.build_properties.api_location
         app_artifact_location=app_artifact_location or existing_staticsite.build_properties.app_artifact_location 
 
     sku_def = None
     if sku is not None:
-        sku_def = SkuDescription(name=get_sku_name(sku), tier=get_sku_name(sku))
+        sku_def = SkuDescription(name=normalize_sku_for_staticapp(sku), tier=normalize_sku_for_staticapp(sku))
 
     staticsite_deployment_properties = StaticSiteARMResource(
         location=location or existing_staticsite.location,
