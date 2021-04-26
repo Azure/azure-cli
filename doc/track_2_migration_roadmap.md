@@ -33,9 +33,9 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | CosmosDB   | Yes |**Completed** | 04/30/2021 |Yong|GA (6.0.0) | Preview (2.0.0rc1) |  Medium (Once two months) |Module|
 | CDN   | Yes |**Completed** | 04/30/2021 |Yong|GA (10.0.0) | GA (6.0.0) | Low (Once half year) | Module |
 | NetAppFiles |  Yes |**Completed** | 04/30/2021 |Yong|GA (1.0.0) | Preview (0.15.0) | Medium (Once two months) | Module|
-| Resource   | Yes |**In progress** | 04/30/2021 |Yong |GA (15.0.0) | GA (12.0.0) | Medium (Once two months) | Module |
+| Resource   | Yes |**Completed** | 04/30/2021 |Yong |GA (15.0.0) | GA (12.0.0) | Medium (Once two months) | Module |
 | DNS |  Yes |**Completed** | 04/30/2021 |Yong|Preview (8.0.0b1) | GA (3.0.0) | Medium (Once two months) | Module|
-| PrivateDNS | Yes | **In progress** | 04/30/2021 |Yong|Preview (1.0.0b1) | Preview (0.1.0) |N/A | Module |
+| PrivateDNS | Yes | **Completed** | 04/30/2021 |Yong|Preview (1.0.0b1) | Preview (0.1.0) |N/A | Module |
 | Application-Insights   |Yes | **Completed** | 04/30/2021 |Yong|GA (1.0.0) | Vendored_Preview (0.2.0) | N/A | Extension |
 | Firewall   |Yes| **Completed** | 04/30/2021 |Yong| Network: GA (17.0.0) | Network: Vendored_GA (13.0.0) | N/A | Extension |
 | Front-door   | Yes | **Completed** | 04/30/2021 |Yong|Preview (1.0.0b1) | Vendored_Preview (0.3.1) | N/A | Extension |
