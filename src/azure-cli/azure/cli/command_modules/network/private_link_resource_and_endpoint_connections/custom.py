@@ -31,10 +31,14 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
-    _register_one_provider('Microsoft.Compute/diskAccesses', '2020-05-01', False, support_connection_operation=False)
+    _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
     _register_one_provider('Microsoft.DigitalTwins/digitalTwinsInstances', '2020-12-01', True)
     _register_one_provider('Microsoft.Search/searchServices', '2020-08-01', True)
+    _register_one_provider("Microsoft.Automation/automationAccounts", "2020-01-13-preview", True)
+    _register_one_provider("Microsoft.EventHub/namespaces", "2018-01-01-preview", True)
+    _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
+    _register_one_provider("Microsoft.Synapse/workspaces", "2019-06-01-preview", True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
