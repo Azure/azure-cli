@@ -2314,8 +2314,8 @@ helps['staticwebapp update'] = """
     type: command
     short-summary: Update a static app. Return the app updated.
     examples:
-    - name: Update static app in a subscription.
-      text: az staticwebapp update -n MyStaticAppName -g MyExistingRg -b master
+    - name: Update static app to standard sku.
+      text: az staticwebapp update -n MyStaticAppName --sku Standard
 """
 
 helps['staticwebapp disconnect'] = """

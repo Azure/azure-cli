@@ -139,50 +139,37 @@ class TestStaticAppCommands(unittest.TestCase):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
-        app_location = './src'
-        api_location = './api/'
-        app_artifact_location = '/.git/'
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
         tags = {'key1': 'value1'}
-        sku = 'standard'
+        sku = 'Standard'
 
-        update_staticsite(
-            self.mock_cmd, self.name1, self.rg2, self.location2,
-            self.source2, self.branch2, self.token2,
-            app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location,
-            tags=tags, sku=sku)
+        update_staticsite(self.mock_cmd, self.name1, self.source2, self.branch2, self.token2, tags=tags, sku=sku)
 
         self.staticapp_client.update_static_site.assert_called_once()
         arg_list = self.staticapp_client.update_static_site.call_args.kwargs
         self.assertEqual(self.name1, arg_list["name"])
-        self.assertEqual(self.rg2, arg_list["resource_group_name"])
-        self.assertEqual(self.location2, arg_list["static_site_envelope"].location)
         self.assertEqual(self.source2, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch2, arg_list["static_site_envelope"].branch)
+        self.assertEqual(self.token2, arg_list["static_site_envelope"].repository_token)
         self.assertEqual(tags, arg_list["static_site_envelope"].tags)
-        self.assertEqual('Standard', arg_list["static_site_envelope"].sku.name)
-        self.assertEqual(app_location, arg_list["static_site_envelope"].build_properties.app_location)
-        self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
-        self.assertEqual(app_artifact_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
+        self.assertEqual(sku, arg_list["static_site_envelope"].sku.name)
 
     def test_update_staticapp_with_no_values_passed_in(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
 
-        update_staticsite(self.mock_cmd, self.name1, resource_group_name=self.rg1)
+        update_staticsite(self.mock_cmd, self.name1)
 
         self.staticapp_client.update_static_site.assert_called_once()
         arg_list = self.staticapp_client.update_static_site.call_args.kwargs
         self.assertEqual(self.name1, arg_list["name"])
-        self.assertEqual(self.rg1, arg_list["resource_group_name"])
-        self.assertEqual(self.location1, arg_list["static_site_envelope"].location)
         self.assertEqual(self.source1, arg_list["static_site_envelope"].repository_url)
         self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
+        self.assertEqual(self.token1, arg_list["static_site_envelope"].repository_token)
         self.assertEqual(self.app1.tags, arg_list["static_site_envelope"].tags)
         self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
-        self.assertEqual(None, arg_list["static_site_envelope"].build_properties.app_location)
-        self.assertEqual(None, arg_list["static_site_envelope"].build_properties.api_location)
-        self.assertEqual(None, arg_list["static_site_envelope"].build_properties.app_artifact_location)
 
     def test_update_staticapp_not_exist(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
@@ -541,7 +528,7 @@ def _set_up_fake_apps(self):
     self.hostname1 = 'www.app1.com'
     self.app1 = _contruct_static_site_object(
         self.rg1, self.name1, self.location1,
-        self.source1, self.branch1)
+        self.source1, self.branch1, self.token1)
 
     self.rg2 = 'rg2'
     self.name2 = 'name2'
@@ -553,12 +540,17 @@ def _set_up_fake_apps(self):
     self.hostname1 = 'www.app2.com'
     self.app2 = _contruct_static_site_object(
         self.rg2, self.name2, self.location2,
-        self.source2, self.branch2)
+        self.source2, self.branch2, self.token2)
 
 
-def _contruct_static_site_object(rg, app_name, location, source, branch):
+def _contruct_static_site_object(rg, app_name, location, source, branch, token):
     from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
-    app = StaticSiteARMResource(location=location, repository_url=source, branch=branch, sku=SkuDescription(name='Free', tier='Free'))
+    app = StaticSiteARMResource(
+        location=location, 
+        repository_url=source, 
+        branch=branch, 
+        repository_token=token,
+        sku=SkuDescription(name='Free', tier='Free'))
     app.name = app_name
     app.id = \
         "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/staticSites/{}".format(rg, app_name)
