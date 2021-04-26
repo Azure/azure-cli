@@ -546,9 +546,9 @@ def _set_up_fake_apps(self):
 def _contruct_static_site_object(rg, app_name, location, source, branch, token):
     from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
     app = StaticSiteARMResource(
-        location=location, 
-        repository_url=source, 
-        branch=branch, 
+        location=location,
+        repository_url=source,
+        branch=branch,
         repository_token=token,
         sku=SkuDescription(name='Free', tier='Free'))
     app.name = app_name

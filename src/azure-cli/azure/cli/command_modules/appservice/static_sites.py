@@ -227,8 +227,7 @@ def update_staticsite(cmd, name, source=None, branch=None, token=None,
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
 
-    StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
-        'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
+    StaticSiteARMResource, SkuDescription = cmd.get_models('StaticSiteARMResource', 'SkuDescription')
 
     sku_def = None
     if sku is not None:

@@ -1032,6 +1032,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=static_web_app_sku_arg_type)
 
+
 def _get_functionapp_runtime_versions():
     # set up functionapp create help menu
     KEYS = FUNCTIONS_STACKS_API_KEYS()
