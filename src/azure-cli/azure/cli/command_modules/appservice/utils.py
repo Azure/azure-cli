@@ -54,9 +54,9 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
 
 
 def normalize_sku_for_staticapp(sku):
-    if sku.lower() == 'free' or sku.lower() == 'f1':
+    if sku.lower() == 'free':
         return 'Free'
-    if sku.lower() == 'standard' or sku.lower() == 's1':
+    if sku.lower() == 'standard':
         return 'Standard'
     raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 

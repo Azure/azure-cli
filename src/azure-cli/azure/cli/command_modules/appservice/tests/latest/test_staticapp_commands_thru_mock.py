@@ -116,7 +116,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         create_staticsites(
             self.mock_cmd, self.rg1, self.name1, self.location1,
-            self.source1, self.branch1, self.token1, sku='s1')
+            self.source1, self.branch1, self.token1, sku='standard')
 
         self.staticapp_client.create_or_update_static_site.assert_called_once()
         arg_list = self.staticapp_client.create_or_update_static_site.call_args.kwargs
@@ -143,7 +143,7 @@ class TestStaticAppCommands(unittest.TestCase):
         api_location = './api/'
         app_artifact_location = '/.git/'
         tags = {'key1': 'value1'}
-        sku = 's1'
+        sku = 'standard'
 
         update_staticsite(
             self.mock_cmd, self.name1, self.rg2, self.location2,

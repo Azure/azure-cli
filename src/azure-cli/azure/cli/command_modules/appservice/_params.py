@@ -68,8 +68,8 @@ def load_arguments(self, _):
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
     static_web_app_sku_arg_type = CLIArgumentType(
-        help='The pricing tiers for Static Web Spp, e.g., F1(Free), S1(Standard)',
-        arg_type=get_enum_type(['F1', 'Free', 'S1', 'Standard'])
+        help='The pricing tiers for Static Web Spp, including: Free, Standard.',
+        arg_type=get_enum_type(['Free', 'Standard'])
     )
 
     functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
