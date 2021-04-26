@@ -55,7 +55,8 @@ short-summary: Place the CLI in a waiting state until an operation is complete.
 
 helps['hdinsight create'] = """
 type: command
-short-summary: Create a new cluster.
+short-summary: 'Create a new cluster. Incoming BREAKING CHANGE: The default value "large" of parameters
+`--workernode-size` and `--headnode-size` will be removed in the next CLI version.'
 examples:
   - name: Create a cluster with an existing storage account.
     text: |-
