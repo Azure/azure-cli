@@ -1150,14 +1150,13 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_notebook(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
             'name': 'notebook',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
-            'rg': 'rg',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
 
