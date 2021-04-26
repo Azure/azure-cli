@@ -1173,12 +1173,12 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
-                              checks=[
-                                  self.check('name', self.kwargs['spark-pool']),
-                                  self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-                                  self.check('provisioningState', 'Succeeded')
-                              ]).get_output_in_json()
+                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
+                 checks=[
+                     self.check('name', self.kwargs['spark-pool']),
+                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                     self.check('provisioningState', 'Succeeded')
+                 ]).get_output_in_json()
 
         # create notebook
         self.cmd(
