@@ -221,31 +221,27 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        static_site_envelope=staticsite_deployment_properties)
 
 
-def update_staticsites(cmd, name, resource_group_name=None, location=None,
+def update_staticsite(cmd, name, resource_group_name=None, location=None,
                        source=None, branch=None, token=None,
                        app_location=None, api_location=None, app_artifact_location=None,
                        tags=None, sku=None, no_wait=False):
     if not token:
         _raise_missing_token_suggestion()
-    
-    if not resource_group_name:
-        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
     existing_staticsite = show_staticsite(cmd, name, resource_group_name)
-
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
 
-    build = StaticSiteBuildProperties(
+    if existing_staticsite.build_properties is not None:
         app_location=app_location or existing_staticsite.build_properties.app_location,
         api_location=api_location or existing_staticsite.build_properties.api_location,
-        app_artifact_location=app_artifact_location or existing_staticsite.build_properties.app_artifact_location)
+        app_artifact_location=app_artifact_location or existing_staticsite.build_properties.app_artifact_location 
 
     sku_def = None
-    if not sku:
+    if sku is not None:
         sku_def = SkuDescription(name=get_sku_name(sku), tier=get_sku_name(sku))
 
     staticsite_deployment_properties = StaticSiteARMResource(
@@ -254,8 +250,8 @@ def update_staticsites(cmd, name, resource_group_name=None, location=None,
         repository_url=source or existing_staticsite.repository_url,
         branch=branch or existing_staticsite.branch,
         repository_token=token or existing_staticsite.repository_token,
-        build_properties=build,
-        sku=sku_def or existing_staticsite)
+        build_properties=StaticSiteBuildProperties(app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location),
+        sku=sku_def or existing_staticsite.sku)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.update_static_site,

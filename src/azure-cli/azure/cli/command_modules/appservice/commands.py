@@ -432,7 +432,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
-        g.custom_command('update', 'update_staticsites', supports_no_wait=True)
+        g.custom_command('update', 'update_staticsite', supports_no_wait=True)
 
     with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsite_environments')
