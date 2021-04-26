@@ -337,8 +337,78 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
             _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
+def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
+    import socket
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    if registry_name is None:
+        raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
+
+    registry = None
+
+    # retrieve registry
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
+
+    if not registry.private_endpoint_connections:
+        raise CLIError('Registry "{}" doesn\'t have private endpoints to verify DNS routings.'.format(registry_name))
+
+    if is_valid_resource_id(vnet_of_private_endpoint):
+        res = parse_resource_id(vnet_of_private_endpoint)
+        if not res.get("type") or res.get("type").lower() != 'virtualnetworks' or not res.get('name'):
+            raise CLIError('"{}" is not a valid resource id of a virtual network'.format(vnet_of_private_endpoint))
+    else:
+        res = parse_resource_id(registry.id)
+        vnet_of_private_endpoint = resource_id(name=vnet_of_private_endpoint, resource_group=res['resource_group'],
+                                               namespace='Microsoft.Network', type='virtualNetworks',
+                                               subscription=res['subscription'])
+
+    # retrieve FQDNs for registry and its data endpoint
+    pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
+    dns_mappings = {}
+    for pe_id in pe_ids:
+        res = parse_resource_id(pe_id)
+        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK,
+                                                 subscription_id=res['subscription'])
+        pe = network_client.private_endpoints.get(res['resource_group'], res['name'])
+        if pe.subnet.id.lower().startswith(vnet_of_private_endpoint.lower()):
+            nic_id = pe.network_interfaces[0].id
+            nic_res = parse_resource_id(nic_id)
+            nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
+            for dns_config in nic.ip_configurations:
+                if dns_config.private_link_connection_properties.fqdns[0] in dns_mappings:
+                    err = ('Registry "{}" has more than one private endpoint in the vnet of "{}".'
+                           ' DNS routing will be unreliable')
+                    raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
+                dns_mappings[dns_config.private_link_connection_properties.fqdns[0]] = dns_config.private_ip_address
+
+    dns_ok = True
+    if not dns_mappings:
+        err = ('Registry "{}" doesn\'t have private endpoints in the vnet of "{}".'
+               ' Please make sure you provided correct vnet')
+        raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
+
+    for fqdn in dns_mappings:
+        try:
+            result = socket.gethostbyname(fqdn)
+            if result != dns_mappings[fqdn]:
+                err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
+                logger.warning(err, registry_name, dns_mappings[fqdn], result)
+                dns_ok = False
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning('Error resolving DNS for %s. Ex: %s', fqdn, e)
+            dns_ok = False
+
+    if dns_ok:
+        print_pass('DNS routing to private endpoint')
+    else:
+        raise CLIError('DNS routing verification failed')
+
+
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
+                     vnet=None,
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
@@ -351,6 +421,9 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_cli_version()
 
     _check_registry_health(cmd, registry_name, ignore_errors)
+
+    if vnet:
+        _check_private_endpoint(cmd, registry_name, vnet)
 
     if not in_cloud_console:
         _get_helm_version(ignore_errors)
