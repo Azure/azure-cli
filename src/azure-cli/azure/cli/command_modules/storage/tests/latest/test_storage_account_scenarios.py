@@ -451,13 +451,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 3),
                          JMESPathCheck('sasPolicy.sasExpirationPeriod', '1.23:59:59')])
 
-        self.cmd('az storage account update -n {} -g {} --key-exp-days 1'.format(name, resource_group),
-                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 1),
+        self.cmd('az storage account update -n {} -g {} --key-exp-days 100000'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
                          JMESPathCheck('sasPolicy.sasExpirationPeriod', '1.23:59:59')])
 
-        self.cmd('az storage account update -n {} -g {} --sas-exp 3.01:02:03'.format(name, resource_group),
-                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 1),
-                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '3.01:02:03')])
+        self.cmd('az storage account update -n {} -g {} --sas-exp 100000.00:00:00'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '100000.00:00:00')])
 
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
