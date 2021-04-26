@@ -1561,7 +1561,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                           manual_integration=None, git_token=None, slot=None, cd_app_type=None,
                           app_working_dir=None, nodejs_task_runner=None, python_framework=None,
                           python_version=None, cd_account_create=None, cd_project_url=None, test=None,
-                          slot_swap=None, private_repo_username=None, private_repo_password=None):
+                          slot_swap=None, private_repo_username=None, private_repo_password=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
     location = _get_location_from_webapp(client, resource_group_name, name)
 
@@ -1602,7 +1602,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 
     source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
+                                       is_mercurial=(repository_type != 'git'), is_git_hub_action=bool(github_action))
 
     # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
     for i in range(5):
