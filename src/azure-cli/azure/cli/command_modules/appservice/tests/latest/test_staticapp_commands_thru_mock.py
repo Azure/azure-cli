@@ -136,8 +136,8 @@ class TestStaticAppCommands(unittest.TestCase):
                 tags=tags)
 
     def test_update_staticapp(self):
-        from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
-        self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
+        self.mock_cmd.get_models.return_value = StaticSiteARMResource, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
         self.staticapp_client.list.return_value = [self.app1, self.app2]
         tags = {'key1': 'value1'}
@@ -155,8 +155,8 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(sku, arg_list["static_site_envelope"].sku.name)
 
     def test_update_staticapp_with_no_values_passed_in(self):
-        from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
-        self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
+        self.mock_cmd.get_models.return_value = StaticSiteARMResource, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
@@ -172,8 +172,8 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
 
     def test_update_staticapp_not_exist(self):
-        from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
-        self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
+        self.mock_cmd.get_models.return_value = StaticSiteARMResource, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
