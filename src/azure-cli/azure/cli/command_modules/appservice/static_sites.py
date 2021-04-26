@@ -222,9 +222,9 @@ def create_staticsites(cmd, resource_group_name, name, location,
 
 
 def update_staticsite(cmd, name, resource_group_name=None, location=None,
-                       source=None, branch=None, token=None,
-                       app_location=None, api_location=None, app_artifact_location=None,
-                       tags=None, sku=None, no_wait=False):
+                      source=None, branch=None, token=None,
+                      app_location=None, api_location=None, app_artifact_location=None,
+                      tags=None, sku=None, no_wait=False):
     existing_staticsite = show_staticsite(cmd, name, resource_group_name)
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
@@ -233,9 +233,14 @@ def update_staticsite(cmd, name, resource_group_name=None, location=None,
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
 
     if existing_staticsite.build_properties is not None:
-        app_location=app_location or existing_staticsite.build_properties.app_location
-        api_location=api_location or existing_staticsite.build_properties.api_location
-        app_artifact_location=app_artifact_location or existing_staticsite.build_properties.app_artifact_location 
+        app_location = app_location or existing_staticsite.build_properties.app_location
+        api_location = api_location or existing_staticsite.build_properties.api_location
+        app_artifact_location = app_artifact_location or existing_staticsite.build_properties.app_artifact_location
+
+    build = StaticSiteBuildProperties(
+        app_location=app_location,
+        api_location=api_location,
+        app_artifact_location=app_artifact_location)
 
     sku_def = None
     if sku is not None:
@@ -247,7 +252,7 @@ def update_staticsite(cmd, name, resource_group_name=None, location=None,
         repository_url=source or existing_staticsite.repository_url,
         branch=branch or existing_staticsite.branch,
         repository_token=token or existing_staticsite.repository_token,
-        build_properties=StaticSiteBuildProperties(app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location),
+        build_properties=build,
         sku=sku_def or existing_staticsite.sku)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)

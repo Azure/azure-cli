@@ -189,10 +189,10 @@ class TestStaticAppCommands(unittest.TestCase):
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.staticapp_client.get_static_site.return_value = self.app1
         self.staticapp_client.list.return_value = [self.app1, self.app2]
-        
+
         with self.assertRaises(CLIError):
             update_staticsite(self.mock_cmd, self.name1_not_exist)
- 
+
     def test_disconnect_staticapp_with_resourcegroup(self):
         disconnect_staticsite(self.mock_cmd, self.name1, self.rg1)
 
