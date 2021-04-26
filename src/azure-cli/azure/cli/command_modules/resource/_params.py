@@ -88,7 +88,7 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
-    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], is_preview=True, min_api='2021-03-01', completer=FilesCompleter(), type=file_type,
+    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], is_preview=True, completer=FilesCompleter(), type=file_type,
                                                    help="a path to a uiFormDefinition file in the file system")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''

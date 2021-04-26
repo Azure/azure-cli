@@ -893,7 +893,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         template_link = TemplateLink(id=template_spec, mode="Incremental")
-        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['main_template']
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])
@@ -1876,9 +1876,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
         if not exists:
             try:  # Check if parent template spec already exists.
-                exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+                existing_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
                 if tags is None:  # New version should inherit tags from parent if none are provided.
-                    tags = getattr(exisiting_parent, 'tags')
+                    tags = getattr(existing_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 tags = tags or {}
                 TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1886,7 +1886,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_version = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        template_spec_version = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}
@@ -1934,7 +1934,7 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
             input_ui_form_definition = getattr(existing_template, 'formUiDefinition')
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
