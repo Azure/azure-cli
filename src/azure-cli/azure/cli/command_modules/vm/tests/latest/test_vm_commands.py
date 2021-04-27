@@ -5156,7 +5156,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
     def test_vm_trusted_launch(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.UefiSettings.secureBootEnabled', True),
@@ -5166,12 +5166,27 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
     def test_vm_trusted_launch_update(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.UefiSettings.secureBootEnabled', True),
             self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+        ])
+
+    # @unittest.skip('Service does not work')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_trusted_launch_', location='southcentralus')
+    def test_disk_trusted_launch(self):
+        self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+
+class DiskHibernationScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_hibernation_')
+    def test_disk_hibernation(self):
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --support-hibernation true', checks=[
+            self.check('supportsHibernation', True)
         ])
 
 
