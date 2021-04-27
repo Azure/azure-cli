@@ -112,11 +112,11 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
                 if os.path.samefile(prev_added_artifact, abs_local_path):
                     continue
             _pack_artifacts(cmd, abs_local_path, context)
-            TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                                   'TemplateSpecTemplateArtifact', mod='models')
+            LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
+                                                   'LinkedTemplateArtifact', mod='models')
             template_content = read_file_content(abs_local_path)
             template_json = json.loads(json.dumps(process_template(template_content)))
-            artifact = TemplateSpecTemplateArtifact(path=as_relative_path, template=template_json)
+            artifact = LinkedTemplateArtifact(path=as_relative_path, template=template_json)
             context.Artifact.append(artifact)
     finally:
         context.CurrentDirectory = original_directory
@@ -135,9 +135,9 @@ def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
         results.append(deployment_resource_obj)
         if(includeNested and 'properties' in deployment_resource_obj):
             deployment_resource_props_obj = deployment_resource_obj['properties']
-            if 'template' in deployment_resource_props_obj:
+            if 'main_template' in deployment_resource_props_obj:
                 results.extend(_get_deployment_resource_objects(cmd,
-                                                                deployment_resource_props_obj['template'],
+                                                                deployment_resource_props_obj['main_template'],
                                                                 includeNested=True))
     return results
 
@@ -197,7 +197,7 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
                                   _normalize_directory_seperators_for_local_file_system(getattr(artifact, 'path')))
         abs_local_path = os.path.abspath(local_path)
         if os.path.commonpath([target_dir]) != os.path.commonpath([target_dir, abs_local_path]):
-            raise CLIError('Unable to unpack artifact ' + getattr(artifact, 'path') + 'because it would create a file' +
+            raise CLIError('Unable to unpack linked template ' + getattr(artifact, 'path') + 'because it would create a file' +
                            'outside of the target directory hierarchy of' + target_dir)
 
     # Now that the artifact paths checkout...let's begin by writing our main template
@@ -208,15 +208,15 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
     with open(root_template_file_path, 'w') as root_file:
         json.dump(getattr(packaged_template, 'RootTemplate'), root_file, indent=2)
 
-    TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                           'TemplateSpecTemplateArtifact', mod='models')
+    LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
+                                           'LinkedTemplateArtifact', mod='models')
     for artifact in getattr(packaged_template, 'Artifacts'):
-        if not isinstance(artifact, TemplateSpecTemplateArtifact):
-            raise CLIError('Unknown artifact type encountered...')
+        if not isinstance(artifact, LinkedTemplateArtifact):
+            raise CLIError('Unknown linked template type encountered...')
         artifact_path = _normalize_directory_seperators_for_local_file_system(getattr(artifact, 'path'))
         abs_local_path = os.path.abspath(os.path.join(target_dir, artifact_path))
         if not os.path.exists(os.path.dirname(abs_local_path)):
             os.makedirs(os.path.dirname(abs_local_path))
         with open(abs_local_path, 'w') as artifact_file:
-            json.dump(getattr(artifact, 'template'), artifact_file, indent=2)
+            json.dump(getattr(artifact, 'main_template'), artifact_file, indent=2)
     return target_dir
