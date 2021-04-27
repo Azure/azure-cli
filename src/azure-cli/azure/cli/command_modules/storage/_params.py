@@ -174,6 +174,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
 
+    sas_expiration_period_type = CLIArgumentType(
+        options_list=['--sas-expiration-period', '--sas-exp'], min_api='2021-02-01',
+        help='Expiration period of the SAS Policy assigned to the storage account, DD.HH:MM:SS.'
+    )
+
+    key_expiration_period_in_days_type = CLIArgumentType(
+        options_list=['--key-expiration-period-in-days', '--key-exp-days'], min_api='2021-02-01', type=int,
+        help='Expiration period in days of the Key Policy assigned to the storage account'
+    )
+
     t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
 
@@ -276,6 +286,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('user_identity_id', arg_group='Identity',
                    help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
                    'permitted here.')
+        c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -335,6 +347,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('user_identity_id', arg_group='Identity',
                    help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
                    'permitted here.')
+        c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
