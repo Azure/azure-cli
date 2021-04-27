@@ -896,7 +896,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         resource = show_resource(cmd=cmd, resource_ids=[template_spec])
         try:
             template_obj = resource.properties['mainTemplate']
-        except:
+        except Exception:  # pylint: disable=broad-except
             template_obj = resource.properties['template']
     else:
         template_content = (

@@ -113,7 +113,7 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
                     continue
             _pack_artifacts(cmd, abs_local_path, context)
             LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                                   'LinkedTemplateArtifact', mod='models')
+                                             'LinkedTemplateArtifact', mod='models')
             template_content = read_file_content(abs_local_path)
             template_json = json.loads(json.dumps(process_template(template_content)))
             artifact = LinkedTemplateArtifact(path=as_relative_path, template=template_json)
@@ -197,8 +197,8 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
                                   _normalize_directory_seperators_for_local_file_system(getattr(artifact, 'path')))
         abs_local_path = os.path.abspath(local_path)
         if os.path.commonpath([target_dir]) != os.path.commonpath([target_dir, abs_local_path]):
-            raise CLIError('Unable to unpack linked template ' + getattr(artifact, 'path') + 'because it would create a file' +
-                           'outside of the target directory hierarchy of' + target_dir)
+            raise CLIError('Unable to unpack linked template ' + getattr(artifact, 'path') +
+                           'because it would create a file outside of the target directory hierarchy of' + target_dir)
 
     # Now that the artifact paths checkout...let's begin by writing our main template
     # file and then processing each artifact:
@@ -209,7 +209,7 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
         json.dump(getattr(packaged_template, 'RootTemplate'), root_file, indent=2)
 
     LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                           'LinkedTemplateArtifact', mod='models')
+                                     'LinkedTemplateArtifact', mod='models')
     for artifact in getattr(packaged_template, 'Artifacts'):
         if not isinstance(artifact, LinkedTemplateArtifact):
             raise CLIError('Unknown linked template type encountered...')
