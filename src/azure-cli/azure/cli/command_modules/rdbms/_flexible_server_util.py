@@ -380,17 +380,13 @@ def register_secrets(cmd, server, database_name, administrator_login, administra
     app.pop('displayName')
     app.pop('name')
 
-    app_json = json.dumps(app)
-    app = {"clientId": "52ceada6-9651-4497-b463-82546a0e625f",
-            "clientSecret": "MyiV5uPZQlTPFZ5ORUgQEGdDws_8aF-yB6",
-            "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-            "subscriptionId": "7fec3109-5b78-4a24-b834-5d47d63e2596"}
     app_key_val = []
     for key, val in app.items():
         app_key_val.append('"{}": "{}"'.format(key, val))
-    print(app_key_val)
+
     app_json = ',\n  '.join(app_key_val)
     app_json = '{\n  ' + app_json + '\n}'
+    print(app_json)
     credential_file = "./temp_app_credential.txt"
     with open(credential_file, "w") as f:
         f.write(app_json)
@@ -409,14 +405,13 @@ def fill_action_template(cmd, server, database_name, administrator_login, admini
 
     process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
     secrets = process.stdout.read().strip().decode('UTF-8')
-    print(secrets)
-    # if AZURE_CREDENTIALS not in secrets and AZURE_POSTGRESQL_CONNECTION_STRING not in secrets:
-    register_secrets(cmd,
-                    server=server,
-                    database_name=database_name,
-                    administrator_login=administrator_login,
-                    administrator_login_password=administrator_login_password,
-                    repository=repository)
+    if AZURE_CREDENTIALS not in secrets and AZURE_POSTGRESQL_CONNECTION_STRING not in secrets:
+        register_secrets(cmd,
+                        server=server,
+                        database_name=database_name,
+                        administrator_login=administrator_login,
+                        administrator_login_password=administrator_login_password,
+                        repository=repository)
 
     condition = "on: [push, workflow_dispatch]\n"
     yml_content = {

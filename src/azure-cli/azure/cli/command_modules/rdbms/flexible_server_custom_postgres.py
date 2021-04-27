@@ -492,14 +492,18 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
                          action_name=action_name)
     
     
-    # action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
-    # run_subprocess("git add {}".format(action_path))
-    # run_subprocess("git commit -m \"Add github action file\"")
+    action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
+    logger.warning("Making git commit for file {}".format(action_path))
+    run_subprocess("git add {}".format(action_path))
+    run_subprocess("git commit -m \"Add github action file\"")
 
     if allow_push:
-        # logger.warning("Pushing the created action file to origin {} branch".format(branch))
-        # run_subprocess("git push origin {}".format(branch))
+        logger.warning("Pushing the created action file to origin {} branch".format(branch))
+        run_subprocess("git push origin {}".format(branch))
         github_actions_run(action_name, branch)
+    else:
+        logger.warning('You did not set --allow-push parameter. Please push the prepared file {} to your remote repo and run "deploy run" command to activate the workflow.'.format(action_path))
+
 
 def github_actions_run(action_name, branch):
     
