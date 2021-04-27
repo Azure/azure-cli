@@ -81,8 +81,8 @@ finally:
                 version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
                 if datetime.datetime.now() > version_update_time + datetime.timedelta(days=11):
                     get_cached_latest_versions()
-                from distutils.version import LooseVersion
-                if LooseVersion(VERSIONS['versions']['core']['local']) < LooseVersion(VERSIONS['versions']['core']['pypi']):  # pylint: disable=line-too-long
+                from packaging.version import parse
+                if parse(VERSIONS['versions']['core']['local']) < parse(VERSIONS['versions']['core']['pypi']):  # pylint: disable=line-too-long
                     import subprocess
                     import platform
                     from azure.cli.core.azclierror import UnclassifiedUserFault  # pylint: disable=ungrouped-imports
