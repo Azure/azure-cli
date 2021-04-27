@@ -115,8 +115,8 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
         user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
                                                                                               resource_group_name), yes=yes)
-        try:
-            result = client.begin_delete(resource_group_name, server_name, database_name)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
+    try:
+        result = client.begin_delete(resource_group_name, server_name, database_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
     return result
