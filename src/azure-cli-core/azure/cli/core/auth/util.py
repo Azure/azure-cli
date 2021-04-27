@@ -78,12 +78,6 @@ def scopes_to_resource(scopes):
     return scope
 
 
-def sdk_access_token_to_adal_token_entry(token):
-    import datetime
-    return {'accessToken': token.token,
-            'expiresOn': datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")}
-
-
 def check_result(result, **kwargs):
     from azure.cli.core.azclierror import AuthenticationError
 

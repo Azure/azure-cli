@@ -62,7 +62,7 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
 
 
 def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None,
-                     decode=False):
+                     decode=False, epoch_expires_on=False):
     """
     get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
@@ -73,7 +73,7 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
-                                                        tenant=tenant)
+                                                        tenant=tenant, epoch_expires_on=epoch_expires_on)
 
     # Debug switch for showing the decoded access token
     if decode:

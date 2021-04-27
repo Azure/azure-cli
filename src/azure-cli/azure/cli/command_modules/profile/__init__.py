@@ -105,6 +105,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('tenant', options_list=['--tenant', '-t'], help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
             c.argument('decode', help='Show the decoded access token.', arg_type=get_three_state_flag(),
                        deprecate_info=c.deprecate(target='--decode', hide=True))
+            c.argument('epoch_expires_on', help='Show expiresOn in epoch int.', arg_type=get_three_state_flag(),
+                       deprecate_info=c.deprecate(target='--epoch-expires-on', hide=True))
 
         with self.argument_context('account clear') as c:
             c.argument('clear_credential', clear_credential_type)

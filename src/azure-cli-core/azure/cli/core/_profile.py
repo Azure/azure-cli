@@ -688,7 +688,7 @@ class Profile:
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
+    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None, epoch_expires_on=True):
         # Convert resource to scopes
         if resource and not scopes:
             scopes = resource_to_scopes(resource)
@@ -703,10 +703,22 @@ class Profile:
         account = self.get_subscription(subscription)
         cred = self._create_identity_credential(account, tenant)
 
-        from azure.cli.core.auth import sdk_access_token_to_adal_token_entry
         token = cred.get_token(*scopes)
+
+        if epoch_expires_on:
+            expires_on = token.expires_on
+        else:
+            import datetime
+            expires_on = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+
+        token_entry = {
+            'accessToken': token.token,
+            'expiresOn': expires_on
+        }
+
         # (tokenType, accessToken, tokenEntry)
-        cred = 'Bearer', token.token, sdk_access_token_to_adal_token_entry(token)
+        cred = 'Bearer', token.token, token_entry
+        # (cred, subscription, tenant)
         return (cred,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
