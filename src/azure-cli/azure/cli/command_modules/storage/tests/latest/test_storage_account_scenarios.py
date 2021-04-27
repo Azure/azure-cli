@@ -435,6 +435,30 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {} --allow-shared-key-access true'.format(name),
                  checks=[JMESPathCheck('allowSharedKeyAccess', True)])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-02-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    def test_storage_account_with_key_and_sas_policy(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {}'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy', None),
+                         JMESPathCheck('sasPolicy', None)])
+
+        self.cmd('az storage account create -n {} -g {} --key-exp-days 3'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 3),
+                         JMESPathCheck('sasPolicy', None)])
+
+        self.cmd('az storage account create -n {} -g {} --sas-exp 1.23:59:59'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 3),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '1.23:59:59')])
+
+        self.cmd('az storage account update -n {} -g {} --key-exp-days 100000'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '1.23:59:59')])
+
+        self.cmd('az storage account update -n {} -g {} --sas-exp 100000.00:00:00'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '100000.00:00:00')])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
