@@ -68,7 +68,7 @@ def load_arguments(self, _):
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
     static_web_app_sku_arg_type = CLIArgumentType(
-        help='The pricing tiers for Static Web Spp, including: Free, Standard.',
+        help='The pricing tiers for Static Web App, including: Free, Standard.',
         arg_type=get_enum_type(['Free', 'Standard'])
     )
 
