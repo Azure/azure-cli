@@ -68,7 +68,7 @@ def load_arguments(self, _):
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
     static_web_app_sku_arg_type = CLIArgumentType(
-        help='The pricing tiers for Static Web App, including: Free, Standard.',
+        help='The pricing tiers for Static Web App',
         arg_type=get_enum_type(['Free', 'Standard'])
     )
 
@@ -1024,6 +1024,11 @@ def load_arguments(self, _):
                         "while '/app' represents a directory called 'app'")
         c.argument('api_location', options_list=['--api-location'],
                    help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.")
+        c.argument('app_artifact_location', options_list=['--app-artifact-location'],
+                   help="The path of your build output relative to your apps location. For example, setting a value "
+                        "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
+                        "be served.",
+                   deprecate_info=c.deprecate(expiration='2.22.1'))
         c.argument('output_location', options_list=['--output-location'],
                    help="The path of your build output relative to your apps location. For example, setting a value "
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "

@@ -2293,6 +2293,14 @@ helps['staticwebapp list'] = """
       text: az staticwebapp list
 """
 
+helps['staticwebapp browse'] = """
+    type: command
+    short-summary: Show details of a static app.
+    examples:
+    - name: Show static app in a subscription.
+      text: az staticwebapp browse -n MyStaticAppName
+"""
+
 helps['staticwebapp show'] = """
     type: command
     short-summary: Show details of a static app.
