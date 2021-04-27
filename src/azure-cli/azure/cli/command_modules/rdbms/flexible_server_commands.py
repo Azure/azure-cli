@@ -222,8 +222,9 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
 
-    with self.command_group('postgres deploy',
+    with self.command_group('postgres deploy', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_servers,
                             is_preview=True) as g:
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')

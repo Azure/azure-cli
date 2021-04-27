@@ -4,23 +4,33 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+import json
+import os
+import sys
+import yaml
 import datetime as dt
 from datetime import datetime
 import random
 import subprocess
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
 from azure.mgmt.resource.resources.models import ResourceGroup
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
+
 logger = get_logger(__name__)
 
 DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
 DEFAULT_LOCATION_MySQL = 'westus2'
+AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
+AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'
+GITHUB_ACTION_PATH = '/.github/workflows/'
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -343,12 +353,104 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
         .format(resource_type))
 
 
-def run_subprocess(command):
-    commands = command.split()
-    subprocess.run(commands, shell=True)
+def run_subprocess(command, stdout_show=None):
+    if stdout_show:
+        process = subprocess.Popen(command, shell=True)
+    else:
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
+    if process.returncode:
+        print(process.stderr.read().strip().decode('UTF-8'))
+
 
 def run_subprocess_get_output(command):
     commands = command.split()
     process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.wait()
     return process
+
+
+def register_secrets(cmd, server, database_name, administrator_login, administrator_login_password, repository):
+    resource_group = parse_resource_id(server.id)["resource_group"]
+    scope = "/subscriptions/{}/resourceGroups/{}".format(get_subscription_id(cmd.cli_ctx), resource_group)
+
+    app = create_service_principal_for_rbac(cmd, name=server.name, role='contributor', scopes=[scope])
+    app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
+    app['subscriptionId'] = get_subscription_id(cmd.cli_ctx)
+    app.pop('displayName')
+    app.pop('name')
+
+    app_json = json.dumps(app)
+    app = {"clientId": "52ceada6-9651-4497-b463-82546a0e625f",
+            "clientSecret": "MyiV5uPZQlTPFZ5ORUgQEGdDws_8aF-yB6",
+            "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "subscriptionId": "7fec3109-5b78-4a24-b834-5d47d63e2596"}
+    app_key_val = []
+    for key, val in app.items():
+        app_key_val.append('"{}": "{}"'.format(key, val))
+    print(app_key_val)
+    app_json = ',\n  '.join(app_key_val)
+    app_json = '{\n  ' + app_json + '\n}'
+    credential_file = "./temp_app_credential.txt"
+    with open(credential_file, "w") as f:
+        f.write(app_json)
+    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
+    os.remove(credential_file)
+
+    connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(AZURE_POSTGRESQL_CONNECTION_STRING, repository, connection_string))
+
+
+def fill_action_template(cmd, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
+
+    action_dir = get_git_root_dir() + GITHUB_ACTION_PATH
+    if not os.path.exists(action_dir):
+        os.makedirs(action_dir)
+
+    process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
+    secrets = process.stdout.read().strip().decode('UTF-8')
+    print(secrets)
+    # if AZURE_CREDENTIALS not in secrets and AZURE_POSTGRESQL_CONNECTION_STRING not in secrets:
+    register_secrets(cmd,
+                    server=server,
+                    database_name=database_name,
+                    administrator_login=administrator_login,
+                    administrator_login_password=administrator_login_password,
+                    repository=repository)
+
+    condition = "on: [push, workflow_dispatch]\n"
+    yml_content = {
+        'jobs': {
+            'build':{ 
+                'runs-on': 'ubuntu-latest',
+                'steps':[
+                    {
+                        'uses': 'actions/checkout@v2.3.2'
+                    },
+                    {
+                        'uses': 'azure/login@v1',
+                        'with': {
+                            'creds': '${{secrets.AZURE_CREDENTIALS}}'
+                        }
+                    },
+                    {
+                        'uses': 'azure/postgresql@v1',
+                        'with': {
+                            'connection-string': '${{secrets.AZURE_POSTGRESQL_CONNECTION_STRING}}',
+                            'server-name': server.fully_qualified_domain_name,
+                            'plsql-file': file_name,
+                        }
+                    }
+                ],
+            }
+        }
+    }
+
+    with open(action_dir + action_name + '.yml', 'w') as yml_file:
+        yml_file.write(condition)
+        yaml.dump(yml_content, yml_file)
+
+
+def get_git_root_dir():
+    process = run_subprocess_get_output("git rev-parse --show-toplevel")
+    return process.stdout.read().strip().decode('UTF-8')

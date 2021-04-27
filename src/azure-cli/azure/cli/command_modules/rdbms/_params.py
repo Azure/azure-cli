@@ -466,16 +466,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', options_list=['--name', '-n'], help='Name of the replica server.')
 
         with self.argument_context('{} deploy setup'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-            c.argument('database_name', options_list=['--database-name', '-d'], help='the name of the database')
+            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of the database')
             c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_arg_type,
                        help='Administrator username for the server.')
-            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator.')
-            c.argument('file_path', options_list=['--file-path', '-f'], help='the name of file')
-            c.argument('action_name', options_list=['--action-name'], help='the')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], arg_group='Authentication', help='The password of the administrator.')
+            c.argument('sql_file_path', options_list=['--sql-file'], help='The path of the sql file. The sql file should be already in the repository')
+            c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
+            c.argument('repository', options_list=['--repo'], help='The name of your github username and repository e.g., Azure/azure-cli ')
+            c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
+            c.argument('allow_push', default=False, options_list=['--allow-push'], arg_type=get_three_state_flag(), help='Push the action yml file to the remote repository. The changes will be pushed to origin repository, speicified branch or current branch if not specified.')
 
         with self.argument_context('{} deploy run'.format(command_group)) as c:
-            c.argument('action_name', options_list=['--action-name'], help='the')
+            c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
+            c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

@@ -17,9 +17,11 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG, run_subprocess, run_subprocess_get_output
+    DEFAULT_LOCATION_PG, run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
+    GITHUB_ACTION_PATH
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
+
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -471,22 +473,49 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location, user
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
 
-def github_actions_setup(cmd, server_name, database_name, administrator_login, file_path, action_name, administrator_login_password=None):
+def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
+
+    if allow_push and not branch:
+        raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
+    if action_name is None:
+        action_name = server.name + '_' + database_name + "_deploy"
+    gitcli_check_and_login()
     
+    server = client.get(resource_group_name, server_name)
+    fill_action_template(cmd,
+                         server=server,
+                         database_name=database_name,
+                         administrator_login=administrator_login,
+                         administrator_login_password=administrator_login_password,
+                         file_name=sql_file_path,
+                         repository=repository,
+                         action_name=action_name)
+    
+    
+    # action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
+    # run_subprocess("git add {}".format(action_path))
+    # run_subprocess("git commit -m \"Add github action file\"")
+
+    if allow_push:
+        # logger.warning("Pushing the created action file to origin {} branch".format(branch))
+        # run_subprocess("git push origin {}".format(branch))
+        github_actions_run(action_name, branch)
+
+def github_actions_run(action_name, branch):
+    
+    gitcli_check_and_login()
+    logger.warning("Created event for {}.yml in branch {}".format(action_name, branch))
+    run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
+
+
+def gitcli_check_and_login():
     output = run_subprocess_get_output("gh")
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
-    run_subprocess("gh auth login")
-
-
-def github_actions_run(cmd, action_name):
-    
-    output = run_subprocess_get_output("gh")
+    output = run_subprocess_get_output("gh auth status")
     if output.returncode:
-        raise ClientRequestError('Please install "Github CLI" to run this command.')
-
-    run_subprocess("gh auth login")
+        run_subprocess("gh auth login", stdout_show=True)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
