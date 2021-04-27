@@ -9,3 +9,10 @@
 # --------------------------------------------------------------------------
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
+from knack.help_files import helps  # pylint: disable=unused-import
+
+from .generated._help import helps
+try:
+    from .manual._help import helps  # pylint: disable=reimported
+except ImportError:
+    pass
