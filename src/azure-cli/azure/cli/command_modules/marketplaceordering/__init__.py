@@ -9,6 +9,7 @@
 # --------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+import azure.cli.command_modules.marketplaceordering._help  # pylint: disable=unused-import
 
 
 class MarketplaceOrderingAgreementsCommandsLoader(AzCommandsLoader):
