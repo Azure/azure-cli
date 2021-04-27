@@ -7,14 +7,11 @@ import json
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            Notebook, NotebookResource)
+                                            NotebookResource)
 from azure.cli.core.util import sdk_no_wait, CLIError
-from .sparkpool import get_spark_pool
-from .workspace import get_resource_group_by_workspace_name
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
-                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
-                               cf_synapse_client_workspace_factory)
+                               cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
