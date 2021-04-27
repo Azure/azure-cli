@@ -637,9 +637,9 @@ class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
         self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
-        from pkg_resources import parse_version
+        from packaging.version import parse
         should_suppress = ext.name == self.suppress_extension_name and ext.version and \
-            parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
+            parse(ext.version) <= parse(self.suppress_up_to_version)
         if should_suppress:
             reason = self.reason or "Use --debug for more information."
             logger.warning("Extension %s (%s) has been suppressed. %s",
