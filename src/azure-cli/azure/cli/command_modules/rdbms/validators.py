@@ -291,8 +291,9 @@ def _valid_range(addr_range):
         return True
     return False
 
-def validate_server_name(client, server_name, type):
-    result = client.execute(name_availability_request={'name': server_name, 'type': type})
+
+def validate_server_name(client, server_name, type_):
+    result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
     if not result.name_available:
         raise ValidationError("The name is already in use. Please provide a different name.")
