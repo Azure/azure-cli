@@ -633,7 +633,7 @@ examples:
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with both a git commit and pull request trigger enabled. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry  -f Dockerfile \\
-            --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git \\
+            --no-push true --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git \\
             --pull-request-trigger-enabled true --git-access-token 000000000000000000000000000000000
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture with only base image trigger enabled.
     text: |

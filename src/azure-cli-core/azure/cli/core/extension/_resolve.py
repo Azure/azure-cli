@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from pkg_resources import parse_version
+from packaging.version import parse
 
 from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
 from azure.cli.core.extension._index import get_index_extensions
@@ -43,10 +43,10 @@ def _is_compatible_with_cli_version(item):
 def _is_greater_than_cur_version(cur_version):
     if not cur_version:
         return None
-    cur_version_parsed = parse_version(cur_version)
+    cur_version_parsed = parse(cur_version)
 
     def filter_func(item):
-        item_version = parse_version(item['metadata']['version'])
+        item_version = parse(item['metadata']['version'])
         if item_version > cur_version_parsed:
             return True
         logger.debug("Skipping '%s' as %s not greater than current version %s", item['filename'],
@@ -76,7 +76,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     if not candidates:
         raise NoExtensionCandidatesError("No suitable extensions found.")
 
-    candidates_sorted = sorted(candidates, key=lambda c: parse_version(c['metadata']['version']), reverse=True)
+    candidates_sorted = sorted(candidates, key=lambda c: parse(c['metadata']['version']), reverse=True)
     logger.debug("Candidates %s", [c['filename'] for c in candidates_sorted])
 
     if target_version:
