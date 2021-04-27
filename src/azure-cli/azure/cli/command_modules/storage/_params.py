@@ -24,7 +24,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches
     from argcomplete.completers import FilesCompleter
     from six import u as unicode_string
 
@@ -174,6 +174,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
 
+    sas_expiration_period_type = CLIArgumentType(
+        options_list=['--sas-expiration-period', '--sas-exp'], min_api='2021-02-01',
+        help='Expiration period of the SAS Policy assigned to the storage account, DD.HH:MM:SS.'
+    )
+
+    key_expiration_period_in_days_type = CLIArgumentType(
+        options_list=['--key-expiration-period-in-days', '--key-exp-days'], min_api='2021-02-01', type=int,
+        help='Expiration period in days of the Key Policy assigned to the storage account'
+    )
+
     t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
 
@@ -211,7 +221,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_account_type, t_sku_name, t_kind, t_tls_version = \
             self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
                             resource_type=ResourceType.MGMT_STORAGE)
-
+        t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
@@ -271,6 +281,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
+        c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
+                   help='The identity type.')
+        c.argument('user_identity_id', arg_group='Identity',
+                   help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
+                   'permitted here.')
+        c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -291,6 +308,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
+        t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('sku', arg_type=get_enum_type(t_sku_name),
                    help='Note that the SKU name cannot be updated to Standard_ZRS, Premium_LRS or Premium_ZRS, '
@@ -324,18 +342,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
+        c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
+                   help='The identity type.')
+        c.argument('user_identity_id', arg_group='Identity',
+                   help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
+                   'permitted here.')
+        c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
 
-    with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
-        t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
-        c.argument('encryption_key_name', help='The name of the KeyVault key.', )
-        c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
-        c.argument('encryption_key_version',
-                   help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
-                   'Please use "" to opt in key auto-rotation again.')
-        c.argument('encryption_key_source',
-                   arg_type=get_enum_type(t_key_source),
-                   help='The default encryption key source',
-                   validator=validate_encryption_source)
+    for scope in ['storage account create', 'storage account update']:
+        with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
+                                   resource_type=ResourceType.MGMT_STORAGE) as c:
+            t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('encryption_key_name', help='The name of the KeyVault key.', )
+            c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
+            c.argument('encryption_key_version',
+                       help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
+                       'Please use "" to opt in key auto-rotation again.')
+            c.argument('encryption_key_source',
+                       arg_type=get_enum_type(t_key_source),
+                       help='The default encryption key source',
+                       validator=validate_encryption_source)
+            c.argument('key_vault_user_identity_id', options_list=['--key-vault-user-identity-id', '-u'],
+                       min_api='2021-01-01',
+                       help='Resource identifier of the UserAssigned identity to be associated with server-side '
+                            'encryption on the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
