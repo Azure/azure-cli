@@ -98,7 +98,7 @@ def load_arguments(self, _):
     )
 
     edge_zone_type = CLIArgumentType(
-        help='Name of edge zone extended location.',
+        help='The name of edge zone.',
         min_api='2020-12-01',
         is_preview=True
     )
