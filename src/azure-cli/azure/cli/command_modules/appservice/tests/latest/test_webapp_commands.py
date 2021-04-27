@@ -618,7 +618,7 @@ class WebappConfigureTest(ScenarioTest):
         self.assertEqual(output[0], {
             'name': 's',
             'value': 'value',
-            'slotSetting': False
+            'slotSetting': True
         })
         self.assertEqual(output[1], {
             'name': 's2',
