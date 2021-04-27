@@ -136,6 +136,7 @@ DEPENDENCIES = [
     'javaproperties==0.5.1',
     'jsmin~=2.2.2',
     'jsondiff==1.2.0',
+    'packaging~=20.9',
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',

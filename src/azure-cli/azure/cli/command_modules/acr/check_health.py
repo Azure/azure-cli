@@ -130,7 +130,7 @@ def _get_cli_version():
 # Get helm versions
 def _get_helm_version(ignore_errors):
     from ._errors import HELM_VERSION_ERROR
-    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+    from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
 
     # Helm command check
     helm_command, error = get_helm_command(is_diagnostics_context=True)
@@ -157,7 +157,7 @@ def _get_helm_version(ignore_errors):
     logger.warning("Helm version: %s", output)
 
     # Display an error message if the current helm version < min required version
-    if match_obj and LooseVersion(output) < LooseVersion(MIN_HELM_VERSION):
+    if match_obj and parse(output) < parse(MIN_HELM_VERSION):
         obsolete_ver_error = HELM_VERSION_ERROR.set_error_message(
             "Current Helm client version is not recommended. Please upgrade your Helm client to at least version {}."
             .format(MIN_HELM_VERSION))
@@ -167,7 +167,7 @@ def _get_helm_version(ignore_errors):
 def _get_notary_version(ignore_errors):
     from ._errors import NOTARY_VERSION_ERROR
     from .notary import get_notary_command
-    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+    from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
 
     # Notary command check
     notary_command, error = get_notary_command(is_diagnostics_context=True)
@@ -194,9 +194,9 @@ def _get_notary_version(ignore_errors):
     logger.warning("Notary version: %s", output)
 
     # Display error if the current version does not match the recommended version
-    if match_obj and LooseVersion(output) != LooseVersion(RECOMMENDED_NOTARY_VERSION):
+    if match_obj and parse(output) != parse(RECOMMENDED_NOTARY_VERSION):
         version_msg = "upgrade"
-        if LooseVersion(output) > LooseVersion(RECOMMENDED_NOTARY_VERSION):
+        if parse(output) > parse(RECOMMENDED_NOTARY_VERSION):
             version_msg = "downgrade"
         obsolete_ver_error = NOTARY_VERSION_ERROR.set_error_message(
             "Current notary version is not recommended. Please {} your notary client to version {}."
