@@ -427,7 +427,6 @@ def load_command_table(self, _):
 
     with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsites')
-        g.custom_command('browse', 'show_staticsite', deprecate_info=g.deprecate(redirect='staticwebapp show', expiration='2.22.1'))
         g.custom_show_command('show', 'show_staticsite')
         g.custom_command('create', 'create_staticsites', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
