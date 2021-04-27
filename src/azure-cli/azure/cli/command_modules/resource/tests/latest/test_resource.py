@@ -792,7 +792,7 @@ class TemplateSpecsTest(ScenarioTest):
                 shutil.copy(os.path.join(curr_dir, f), path)
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --ui-form-definition "{uf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
-            self.check('artifacts.length([])', 3),
+            self.check('linked_templates'.length([])', 3),
             self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
             self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
             self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json'),
@@ -856,7 +856,7 @@ class TemplateSpecsTest(ScenarioTest):
 
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --ui-form-definition "{uf1}" --yes', checks=[
             self.check('description', self.kwargs['version_description'].replace('"', '')),
-            self.check('artifacts.length([])', 3),
+            self.check('linked_templates.length([])', 3),
             self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
             self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
             self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json'),
