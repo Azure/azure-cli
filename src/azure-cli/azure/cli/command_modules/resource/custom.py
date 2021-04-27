@@ -893,10 +893,11 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         template_link = TemplateLink(id=template_spec, mode="Incremental")
-        if cmd.supported_api_version(min_api='2021-03-01'):
-            template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['main_template']
-        else:
-            template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
+        resource = show_resource(cmd=cmd, resource_ids=[template_spec])
+        try:
+            template_obj = resource.properties['mainTemplate']
+        except:
+            template_obj = resource.properties['template']
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])

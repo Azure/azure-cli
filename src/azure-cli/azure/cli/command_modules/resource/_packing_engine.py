@@ -69,7 +69,7 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
     :type template_abs_file_path : str
     :param context : The packing context of the current packing operation
     :type content : PackingContext
-    :param artifactableTemplateObj : The packagable template object
+    :param artifactableTemplateObj : The packageable template object
     :type artifactableTemplateObj : JSON
     """
     original_directory = getattr(context, 'CurrentDirectory')
@@ -135,9 +135,9 @@ def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
         results.append(deployment_resource_obj)
         if(includeNested and 'properties' in deployment_resource_obj):
             deployment_resource_props_obj = deployment_resource_obj['properties']
-            if 'main_template' in deployment_resource_props_obj:
+            if 'mainTemplate' in deployment_resource_props_obj:
                 results.extend(_get_deployment_resource_objects(cmd,
-                                                                deployment_resource_props_obj['main_template'],
+                                                                deployment_resource_props_obj['mainTemplate'],
                                                                 includeNested=True))
     return results
 
@@ -218,5 +218,5 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
         if not os.path.exists(os.path.dirname(abs_local_path)):
             os.makedirs(os.path.dirname(abs_local_path))
         with open(abs_local_path, 'w') as artifact_file:
-            json.dump(getattr(artifact, 'main_template'), artifact_file, indent=2)
+            json.dump(getattr(artifact, 'mainTemplate'), artifact_file, indent=2)
     return target_dir
