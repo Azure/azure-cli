@@ -559,6 +559,12 @@ parameters:
             * Has a special character (Regex match [\\W_])
           - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
       Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Update current cluster to use managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity to manage cluster resource group.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -586,6 +592,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
   - name: Update Windows password of a kubernetes cluster
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --windows-admin-password "Repl@cePassw0rd12345678"
+  - name: Update the cluster to use system assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Update the cluster to use user assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
 """
 
 helps['aks delete'] = """
