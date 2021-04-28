@@ -289,6 +289,7 @@ class EventGridTests(ScenarioTest):
     def test_create_topic(self, resource_group):
         endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
         endpoint_baseurl = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid'
+        extended_location_name = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourcegroups/devexprg/providers/Microsoft.ExtendedLocation/CustomLocations/somelocation'
 
         topic_name = self.create_random_name(prefix='cli', length=40)
         topic_name2 = self.create_random_name(prefix='cli', length=40)
@@ -304,7 +305,8 @@ class EventGridTests(ScenarioTest):
             'location': 'centraluseuap',
             'event_subscription_name': event_subscription_name,
             'endpoint_url': endpoint_url,
-            'endpoint_baseurl': endpoint_baseurl
+            'endpoint_baseurl': endpoint_baseurl,
+            'extended_location_name': extended_location_name,
         })
 
         scope = self.cmd('az eventgrid topic create --name {topic_name} --resource-group {rg} --location {location}', checks=[
@@ -341,6 +343,10 @@ class EventGridTests(ScenarioTest):
         # Input mappings must be provided when input schema is customeventschema
         with self.assertRaises(CLIError):
             self.cmd('az eventgrid topic create --name {topic_name2} --resource-group {rg} --location {location} --input-schema customeventschema')
+
+        # Cannot specify extended location for topics with kind=azure
+        with self.assertRaises(CLIError):
+            self.cmd('az eventgrid topic create --name {topic_name2} --resource-group {rg} --location {location} --kind azure --extended-location-name {extended_location_name} --extended-location-type customLocation')
 
         self.cmd('az eventgrid topic create --name {topic_name2} --resource-group {rg} --location {location} --input-schema CloudEventSchemaV1_0', checks=[
             self.check('type', 'Microsoft.EventGrid/topics'),
@@ -565,6 +571,42 @@ class EventGridTests(ScenarioTest):
         self.cmd('az eventgrid system-topic event-subscription delete -g devexprg --name {event_subscription_name} --system-topic-name {system_topic_name} -y')
 
         self.cmd('az eventgrid system-topic delete -n {system_topic_name} -g devexprg -y')
+
+    @ResourceGroupPreparer()
+    def test_system_topic_identity(self, resource_group):
+        scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
+        storage_system_topic_name_regional = self.create_random_name(prefix='cli', length=40)
+        policy_system_topic_name_global = 'policy-system-topic-name-global'
+
+        storage_account = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/devexprg/providers/Microsoft.Storage/storageAccounts/clistgaccount'
+
+        self.kwargs.update({
+            'storage_system_topic_name_regional': storage_system_topic_name_regional,
+            'policy_system_topic_name_global': policy_system_topic_name_global,
+            'scope': scope,
+            'location': 'centraluseuap',
+            'storage_account': storage_account,
+            'subscription_id': '5b4b650e-28b9-4790-b3ab-ddbd88d727c4',
+            'regional_resource_group': 'devexprg'
+        })
+
+        # global system-topic does not support identity. so this test verifies that we are able to create system-topics in global location
+        self.cmd('az eventgrid system-topic create --name {policy_system_topic_name_global} --resource-group {rg} --location global --topic-type Microsoft.PolicyInsights.PolicyStates --source /subscriptions/{subscription_id}', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+        self.cmd('az eventgrid system-topic delete --name {policy_system_topic_name_global} --resource-group {rg} --yes')
+
+        # regional system-topic does support identity. so this test verifies that we are able to create system-topics in regional location with identity
+        self.cmd('az eventgrid system-topic create --name {storage_system_topic_name_regional} --resource-group {regional_resource_group} --location {location} --topic-type Microsoft.Storage.StorageAccounts --source {storage_account} --identity noidentity', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # regional system-topic does support identity. so this test verifies that we are able to create system-topics in regional location with identity
+        self.cmd('az eventgrid system-topic update --name {storage_system_topic_name_regional} --resource-group {regional_resource_group} --identity systemassigned', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('az eventgrid system-topic delete --name {storage_system_topic_name_regional} --resource-group {regional_resource_group} --yes')
 
     @ResourceGroupPreparer()
     @unittest.skip('Will be re-enabled once global operations are enabled for 2020-01-01-preview API version')
@@ -1041,6 +1083,12 @@ class EventGridTests(ScenarioTest):
             # Multiple values provided for a single value filter
             self.cmd('az eventgrid event-subscription create --source-resource-id {scope} --name {event_subscription_name} --endpoint {endpoint_url} --advanced-filter data.key2 NumberLessThan 2 3')
 
+        with self.assertRaises(CLIError):
+            self.cmd('az eventgrid event-subscription create --source-resource-id {scope} --name {event_subscription_name} --endpoint {endpoint_url} --advanced-filter data.key2 IsNotNull 1')
+
+        with self.assertRaises(CLIError):
+            self.cmd('az eventgrid event-subscription create --source-resource-id {scope} --name {event_subscription_name} --endpoint {endpoint_url} --advanced-filter data.key2 IsNullOrUndefined 1')
+
         # One advanced filter for NumberIn operator
         self.cmd('az eventgrid event-subscription create --source-resource-id {scope}  --name {event_subscription_name} --endpoint \"{endpoint_url}\" --advanced-filter data.key2 NumberIn 2 3 4 100 200', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
@@ -1059,6 +1107,38 @@ class EventGridTests(ScenarioTest):
 
         # Two advanced filters for NumberIn, StringIn operators
         self.cmd('az eventgrid event-subscription update --source-resource-id {scope} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --advanced-filter data.key1 NumberIn 21 13 400 101 --advanced-filter data.key2 StringIn 122 3 214 1100 2', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
+        ])
+
+        # IsNullOrUndefined, IsNotNull operators
+        self.cmd('az eventgrid event-subscription update --source-resource-id {scope} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --advanced-filter data.key1 IsNullOrUndefined --advanced-filter data.key2 IsNotNull', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
+        ])
+
+        # NumberInRange, NumberNotInRange operators
+        self.cmd('az eventgrid event-subscription update --source-resource-id {scope} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --advanced-filter data.key1 NumberInRange 1,10 --advanced-filter data.key2 NumberNotInRange 10,12 50,55', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
+        ])
+
+        # StringNotBeginsWith, StringNotContains, StringNotEndsWith operators
+        self.cmd('az eventgrid event-subscription update --source-resource-id {scope} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --advanced-filter data.key1 StringNotBeginsWith Red Blue Green --advanced-filter data.key2 StringNotEndsWith Red Blue Green --advanced-filter data.key2 StringNotContains Red Blue Green', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
+        ])
+
+        # Enable array filtering on the input
+        self.cmd('az eventgrid event-subscription update --source-resource-id {scope} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --enable-advanced-filtering-on-arrays true', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
             self.check('provisioningState', 'Succeeded'),
             self.check('name', self.kwargs['event_subscription_name']),
