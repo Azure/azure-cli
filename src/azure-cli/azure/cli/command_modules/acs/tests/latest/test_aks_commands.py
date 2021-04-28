@@ -4258,7 +4258,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys --enable-addons monitoring' \
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys --enable-addons monitoring ' \
                      '--service-principal={service_principal} --client-secret={client_secret} '
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
