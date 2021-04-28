@@ -595,7 +595,7 @@ def cli_system_topic_create_or_update(
         tags=None,
         identity=None):
 
-    identity_info = _get_identity_info(identity)
+    identity_info = _get_identity_info_only_if_not_none(identity)
 
     system_topic_info = SystemTopic(
         location=location,
