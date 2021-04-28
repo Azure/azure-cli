@@ -2679,21 +2679,21 @@ def aks_update(cmd, client, resource_group_name, name,
             instance.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + 'Linux'].enabled
 
     return _put_managed_cluster_ensuring_permission(
-            cmd,
-            client,
-            subscription_id,
-            resource_group_name,
-            name,
-            instance,
-            monitoring_addon_enabled,
-            ingress_appgw_addon_enabled,
-            virtual_node_addon_enabled,
-            False,
-            instance.agent_pool_profiles[0].vnet_subnet_id,
-            _is_msi_cluster(instance),
-            attach_acr,
-            None,
-            no_wait)
+        cmd,
+        client,
+        subscription_id,
+        resource_group_name,
+        name,
+        instance,
+        monitoring_addon_enabled,
+        ingress_appgw_addon_enabled,
+        virtual_node_addon_enabled,
+        False,
+        instance.agent_pool_profiles[0].vnet_subnet_id,
+        _is_msi_cluster(instance),
+        attach_acr,
+        None,
+        no_wait)
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
