@@ -29,31 +29,31 @@ def print_all_configs():
             print(f"\t {key}: {config[section][key]['description']}")
 
 
-def list_available(cmd, user_entry=None):
+def list_available(cmd, key=None):
     selection_is_valid = False
     has_shown_configs = False
 
-    if not user_entry:
+    if not key:
         print_all_configs()
         has_shown_configs = True
-        user_entry = prompt('\nEnter one of the above configuration keys (i.e. disable_confirmation_prompt)'
-                            'to see its current, default, and available values.\nUse the form of <section>.<key> '
-                            ' e.g. cloud.name. Leave blank to exit: ')
+        key = prompt('\nEnter one of the above configuration keys (i.e. disable_confirmation_prompt)'
+                     'to see its current, default, and available values.\nUse the form of <section>.<key> '
+                     ' e.g. cloud.name. Leave blank to exit: ')
 
     # prompt user for input until valid
     while not selection_is_valid:
-        if not user_entry:
+        if not key:
             # exit if empty string is entered
             raise CLIError('Operation cancelled.')
 
-        user_entry_arr = user_entry.strip().split('.')
+        key_arr = key.strip().split('.')
 
-        if len(user_entry_arr) != 2:
-            user_entry = prompt(f'\nInvalid entry <{user_entry}>. \nEnter in the form of '
-                                '<section>.<key> e.g. cloud.name. Leave blank to exit: ')
+        if len(key_arr) != 2:
+            key = prompt(f'\nInvalid entry <{key}>. \nEnter in the form of '
+                         '<section>.<key> e.g. cloud.name. Leave blank to exit: ')
         else:
-            selected_section = user_entry_arr[0]
-            selected_key = user_entry_arr[1]
+            selected_section = key_arr[0]
+            selected_key = key_arr[1]
             if selected_section in config and selected_key in config[selected_section]:
                 selection_is_valid = True
             else:
@@ -62,9 +62,9 @@ def list_available(cmd, user_entry=None):
                     print_all_configs()
                     has_shown_configs = True
 
-                user_entry = prompt(f'\nConfig default not found: {selected_section}.{selected_key}. '
-                                    '\nEnter in the form of <section>.<key> e.g. cloud.name. '
-                                    'Leave blank to exit:  ')
+                key = prompt(f'\nConfig default not found: {selected_section}.{selected_key}. '
+                             '\nEnter in the form of <section>.<key> e.g. cloud.name. '
+                             'Leave blank to exit:  ')
 
     config_value = config[selected_section][selected_key]
     current_value = {}

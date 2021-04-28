@@ -99,7 +99,7 @@ class ConfigTest(ScenarioTest):
                     "Default": config[section][key]['default'],
                     "Allowed": allowed_values,
                 }
-                output = self.cmd('config list-available ' + section + '.' + key).get_output_in_json()
+                output = self.cmd('config list-available --key ' + section + '.' + key).get_output_in_json()
                 self.assertDictEqual(output, expected)
 
         os.chdir(original_path)

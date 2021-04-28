@@ -54,7 +54,7 @@ examples:
   - name: Show all sections and configurations, select from them.
     text: az config list-available
   - name: Get the current, default, and available values of key `cloud.name`.
-    text: az config list-available cloud.name
+    text: az config list-available --key cloud.name
 """
 
 helps['config unset'] = """
