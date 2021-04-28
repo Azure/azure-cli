@@ -8,9 +8,10 @@ import unittest
 from unittest.mock import MagicMock
 
 from azure.cli.testsdk import ScenarioTest, LocalContextScenarioTest
+from azure.cli.config_defaults import config
+
 from knack.util import CLIError
 
-from azure.cli.config_defaults import config
 
 class ConfigTest(ScenarioTest):
 
@@ -81,12 +82,12 @@ class ConfigTest(ScenarioTest):
                 config_value = config[section][key]
 
                 if config_value["allowed"]:
-                    allowed_values = [elem['value'] for elem in config_value['allowed']] 
+                    allowed_values = [elem['value'] for elem in config_value['allowed']]
                 else:
                     # for options that are limited by type i.e. string/integer
                     allowed_values = config_value['type']
                 try:
-                    current_value = self.cmd('config get ' + section + '.' +  key).get_output_in_json()
+                    current_value = self.cmd('config get ' + section + '.' + key).get_output_in_json()
                 except CLIError:
                     # value not set in config, treat it as default
                     current_value['value'] = config_value['default']

@@ -20,12 +20,14 @@ def _normalize_config_value(value):
         value = '' if value in ["''", '""'] else value
     return value
 
+
 def print_all_configs():
     print(f"\nDefault configuration sections: {[key for key in config]}\n")
     for section in config:
         print(f"\n{section}: ")
         for key in config[section].keys():
             print(f"\t {key}: {config[section][key]['description']}")
+
 
 def list_available(cmd, user_entry=None):
     selection_is_valid = False
@@ -34,9 +36,9 @@ def list_available(cmd, user_entry=None):
     if not user_entry:
         print_all_configs()
         has_shown_configs = True
-        user_entry = prompt('\nEnter one of the above configuration keys (i.e. disable_confirmation_prompt)' \
-                        'to see its current, default, and available values.\nUse the form of <section>.<key> ' \
-                        ' e.g. cloud.name. Leave blank to exit: ')
+        user_entry = prompt('\nEnter one of the above configuration keys (i.e. disable_confirmation_prompt)'
+                            'to see its current, default, and available values.\nUse the form of <section>.<key> '
+                            ' e.g. cloud.name. Leave blank to exit: ')
 
     # prompt user for input until valid
     while not selection_is_valid:
@@ -47,8 +49,8 @@ def list_available(cmd, user_entry=None):
         user_entry_arr = user_entry.strip().split('.')
 
         if len(user_entry_arr) != 2:
-            user_entry = prompt(f'\nInvalid entry <{user_entry}>. \nEnter in the form of ' \
-                                    '<section>.<key> e.g. cloud.name. Leave blank to exit: ')
+            user_entry = prompt(f'\nInvalid entry <{user_entry}>. \nEnter in the form of '
+                                '<section>.<key> e.g. cloud.name. Leave blank to exit: ')
         else:
             selected_section = user_entry_arr[0]
             selected_key = user_entry_arr[1]
@@ -60,10 +62,9 @@ def list_available(cmd, user_entry=None):
                     print_all_configs()
                     has_shown_configs = True
 
-                user_entry = prompt(f'\nConfig default not found: {selected_section}.{selected_key}. ' \
-                                    '\nEnter in the form of <section>.<key> e.g. cloud.name. ' \
+                user_entry = prompt(f'\nConfig default not found: {selected_section}.{selected_key}. '
+                                    '\nEnter in the form of <section>.<key> e.g. cloud.name. '
                                     'Leave blank to exit:  ')
-
 
     config_value = config[selected_section][selected_key]
     current_value = {}
@@ -74,7 +75,7 @@ def list_available(cmd, user_entry=None):
         current_value['value'] = config_value['default']
 
     if config_value["allowed"]:
-        allowed_values = [elem['value'] for elem in config_value['allowed']] 
+        allowed_values = [elem['value'] for elem in config_value['allowed']]
     else:
         # for options that are limited by type i.e. string/integer
         allowed_values = config_value['type']
@@ -85,7 +86,7 @@ def list_available(cmd, user_entry=None):
         "Default": config_value['default'],
         "Allowed": allowed_values,
         "Section": selected_section
-        }
+    }
 
 
 def config_set(cmd, key_value=None, local=False):
