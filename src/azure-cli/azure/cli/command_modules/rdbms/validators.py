@@ -146,9 +146,10 @@ def _mysql_storage_validator(storage_mb, sku_info, tier, instance):
                 raise CLIError('Updating storage cannot be smaller than the '
                                'original storage size {} GiB.'.format(original_size))
         storage_sizes = get_mysql_storage_size(sku_info, tier)
-        if not storage_sizes[0] <= int(storage_mb) <= storage_sizes[1]:
+        min_mysql_storage = 20
+        if not max(min_mysql_storage, storage_sizes[0]) <= int(storage_mb) <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
-                           .format(storage_sizes[0], storage_sizes[1]))
+                           .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
 
 
 def _mysql_tier_validator(tier, sku_info):

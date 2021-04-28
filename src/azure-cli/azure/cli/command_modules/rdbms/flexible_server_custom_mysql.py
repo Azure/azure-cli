@@ -40,7 +40,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         location = DEFAULT_LOCATION_MySQL
     sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
-    validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     db_context = DbContext(
         azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
@@ -57,6 +56,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'mysql')
     server_name = server_name.lower()
+    validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     # Handle Vnet scenario
     if public_access is None:

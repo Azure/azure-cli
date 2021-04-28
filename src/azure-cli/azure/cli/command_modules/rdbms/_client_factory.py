@@ -262,6 +262,10 @@ def cf_postgres_private_link_resources_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).private_link_resources
 
 
+def cf_postgres_private_dns_zone_suffix_operations(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).get_private_dns_zone_suffix
+
+
 def cf_mysql_server_keys_operations(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).server_keys
 

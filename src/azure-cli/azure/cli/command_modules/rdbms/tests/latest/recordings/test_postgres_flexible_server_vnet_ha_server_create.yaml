@@ -1053,6 +1053,58 @@ interactions:
       code: 200
       message: OK
 - request:
+    body: '"PostgreSQL"'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '12'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --private-dns-zone
+      User-Agent:
+      - AZURECLI/2.22.1 (MSI) azsdk-python-mgmt-rdbms/1.0.0b1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForPostgreSql/getPrivateDnsZoneSuffix?api-version=2021-03-31-privatepreview
+  response:
+    body:
+      string: '"private.postgres.database.azure.com"'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '37'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 00:37:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
     body: null
     headers:
       Accept:

@@ -46,7 +46,6 @@ def flexible_server_create(cmd, client,
         location = DEFAULT_LOCATION_PG
     sku_info = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
-    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     storage_mb *= 1024
 
     db_context = DbContext(
@@ -64,6 +63,7 @@ def flexible_server_create(cmd, client,
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
     server_name = server_name.lower()
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     # Handle Vnet scenario
     if public_access is None:
@@ -78,7 +78,7 @@ def flexible_server_create(cmd, client,
                                             subnet_address_pref=subnet_address_prefix)
         delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
         private_dns_zone_id = prepare_private_dns_zone(cmd,
-                                                       'postgres',
+                                                       'PostgreSQL',
                                                        resource_group_name,
                                                        server_name,
                                                        private_dns_zone=private_dns_zone_arguments,
