@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from azure.cli.testsdk import ScenarioTest, LocalContextScenarioTest
-from azure.cli.config_defaults import config
+from azure.cli.core.config_defaults import config
 
 from knack.util import CLIError
 

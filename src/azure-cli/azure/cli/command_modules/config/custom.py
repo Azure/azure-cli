@@ -8,7 +8,7 @@ from knack.prompting import prompt
 from knack.util import CLIError
 
 from azure.cli.core.util import ScopedConfig
-from azure.cli.config_defaults import config
+from azure.cli.core.config_defaults import config
 
 import azure.cli.core.telemetry as telemetry
 
