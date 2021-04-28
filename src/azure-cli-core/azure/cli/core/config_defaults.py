@@ -199,7 +199,7 @@ config = {
     },
     "extension": {
         "use_dynamic_install": {
-            "default" : "no",
+            "default": "no",
             "allowed": [
                 {
                     "value": "no",
