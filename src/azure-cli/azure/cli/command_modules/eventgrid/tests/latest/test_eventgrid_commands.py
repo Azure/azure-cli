@@ -611,12 +611,12 @@ class EventGridTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
     @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
     def test_event_subscription_delivery_attributes(self, resource_group, resource_group_location, storage_account):
-        
+
         scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
         endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
         self.kwargs.update({
-            'event_subscription_name' : event_subscription_name,
+            'event_subscription_name': event_subscription_name,
             'endpoint_url': endpoint_url,
             'location': resource_group_location,
             'scope': scope
@@ -669,7 +669,6 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
-
 
     @ResourceGroupPreparer()
     @unittest.skip('Will be re-enabled once global operations are enabled for 2020-01-01-preview API version')
@@ -746,7 +745,7 @@ class EventGridTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
     def test_create_event_subscriptions_to_resource(self, resource_group, resource_group_location, storage_account):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
-        endpoint_url = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation?code=9a/jLJ6sXbLM76UyIVaZ3uXLURynV/HV0f0MFtLmAIwh/n51d0bnKg=='
+        endpoint_url = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation?code=<HIDDEN>'
         endpoint_baseurl = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation'
 
         self.kwargs.update({
