@@ -876,12 +876,9 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         recordset3 = self._Create_RecordSet('a', zone['name'])
         recordset4 = self._Create_RecordSet('a', zone['name'])
         createdRecordsets = [recordset1, recordset2, recordset3, recordset4]
-        returnedRecordsets = self.cmd('az network private-dns record-set a list -g {rg} -z {zone}', checks=[
-            self.check('length(@)', 4)
+        self.cmd('az network private-dns record-set a list -g {rg} -z {zone}', checks=[
+            self.check('length(@)', len(createdRecordsets))
         ]).get_output_in_json()
-        # self.assertTrue(all(recordset in createdRecordsets for recordset in returnedRecordsets))
-        # list formats don't exactly match, so comparing the number of created and returned records
-        self.assertEqual(len(createdRecordsets), len(returnedRecordsets))
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_ListRecordSetsAcrossType_DefaultRecordSetPresent_ExpectDefaultRecordSetRetrieved(self, resource_group):
@@ -904,12 +901,9 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         recordset7 = self._Create_RecordSet('ptr', zone['name'])
         soaRecordset = self.cmd('az network private-dns record-set soa show -g {rg} -z {zone}').get_output_in_json()
         createdRecordsets = [recordset1, recordset2, recordset3, recordset4, recordset5, recordset6, recordset7, soaRecordset]
-        returnedRecordsets = self.cmd('az network private-dns record-set list -g {rg} -z {zone}', checks=[
-            self.check('length(@)', 8)
+        self.cmd('az network private-dns record-set list -g {rg} -z {zone}', checks=[
+            self.check('length(@)', len(createdRecordsets))
         ]).get_output_in_json()
-        # self.assertTrue(all(recordset in createdRecordsets for recordset in returnedRecordsets))
-        # list formats don't exactly match, so comparing the number of created and returned records
-        self.assertEqual(len(createdRecordsets), len(returnedRecordsets))
 
 
 # Running only live test because of this isue: Confusing error message if play count mismatches - https://github.com/kevin1024/vcrpy/issues/516
