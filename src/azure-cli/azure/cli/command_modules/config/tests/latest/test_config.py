@@ -80,7 +80,7 @@ class ConfigTest(ScenarioTest):
         for section in config:
             for key in config[section]:
                 config_value = config[section][key]
-
+                current_value = {}
                 if config_value["allowed"]:
                     allowed_values = [elem['value'] for elem in config_value['allowed']]
                 else:

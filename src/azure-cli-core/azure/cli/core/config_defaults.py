@@ -58,12 +58,12 @@ config = {
             "default": "false",
             "allowed": [
                 {
-                    "value": "true", 
-                    "description":"Allow anonymous data collection."
+                    "value": "true",
+                    "description": "Allow anonymous data collection."
                 },
                 {
                     "value": "false", 
-                    "description":"Do not allow anonymous data collection."
+                    "description": "Do not allow anonymous data collection."
                 }
             ],
             "type": "boolean",
@@ -104,15 +104,15 @@ config = {
             "allowed": [
                 {
                     "value": "dark",
-                    "description":""
+                    "description": ""
                 },
                 {
                     "value": "light",
-                    "description":""
+                    "description": ""
                 },
                 {
                     "value": "none",
-                    "description":""
+                    "description": ""
                 }
             ],
             "type": "string",
@@ -222,11 +222,11 @@ config = {
             "allowed": [
                 {
                     "value": "true",
-                    "description":"Continue after extension is installed."
+                    "description": "Continue after extension is installed."
                 },
                 {
                     "value": "false",
-                    "description":"Do not continue after extension is instealled."
+                    "description": "Do not continue after extension is instealled."
                 }
             ],
             "type": "boolean",
@@ -239,11 +239,11 @@ config = {
             "allowed": [
                 {
                     "value": "true",
-                    "description":"Turn logging off"
+                    "description": "Turn logging off"
                 },
                 {
                     "value": "false",
-                    "description":"Turn logging off."
+                    "description": "Turn logging off."
                 }
             ],
             "type": "boolean",
