@@ -43,6 +43,6 @@ def load_arguments(self, _):
         c.argument('recursive', help='Indicate this is recursive delete of parameter persistence. Only available when --all is specified.', action='store_true')
 
     with self.argument_context('config list-available') as c:
-        c.positional('config_value', nargs='?', help='Show default, current, and acceptable options for configuration. '
+        c.positional('user_entry', nargs='?', help='Show default, current, and acceptable options for configuration. '
                                                     'Enter in form of `<section>.<key>`.'
                                                     'If not present, user will be asked to select from list of configuration options')

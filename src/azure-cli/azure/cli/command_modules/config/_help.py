@@ -47,6 +47,16 @@ examples:
     text: az config get core.no_color
 """
 
+helps['config list-available'] = """
+type: command
+short-summary: Get current, default, and available configuration values.
+examples:
+  - name: Show all sections and configurations, select from them.
+    text: az config list-available
+  - name: Get the current, default, and available values of key `cloud.name`.
+    text: az config list-available cloud.name
+"""
+
 helps['config unset'] = """
 type: command
 short-summary: Unset a configuration.

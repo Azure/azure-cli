@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 from azure.cli.testsdk import ScenarioTest, LocalContextScenarioTest
 from knack.util import CLIError
 
+from azure.cli.config_defaults import config
 
 class ConfigTest(ScenarioTest):
 
@@ -73,6 +74,32 @@ class ConfigTest(ScenarioTest):
             self.cmd('config unset test_section1.test_option1' + args['flag'])
             # Test unsetting multiple options
             self.cmd('config unset test_section2.test_option21 test_section2.test_option22' + args['flag'])
+
+        # 4 list-available
+        for section in config:
+            for key in config[section]:
+                config_value = config[section][key]
+
+                if config_value["allowed"]:
+                    allowed_values = [elem['value'] for elem in config_value['allowed']] 
+                else:
+                    # for options that are limited by type i.e. string/integer
+                    allowed_values = config_value['type']
+                try:
+                    current_value = self.cmd('config get ' + section + '.' +  key).get_output_in_json()
+                except CLIError:
+                    # value not set in config, treat it as default
+                    current_value['value'] = config_value['default']
+
+                expected = {
+                    "Key": key,
+                    "Section": section,
+                    "Current": current_value['value'],
+                    "Default": config[section][key]['default'],
+                    "Allowed": allowed_values,
+                }
+                output = self.cmd('config list-available ' + section + '.' + key).get_output_in_json()
+                self.assertDictEqual(output, expected)
 
         os.chdir(original_path)
 

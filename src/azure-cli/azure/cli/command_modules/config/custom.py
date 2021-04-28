@@ -27,48 +27,51 @@ def print_all_configs():
         for key in config[section].keys():
             print(f"\t {key}: {config[section][key]['description']}")
 
-def list_available(cmd, config_value=None):
+def list_available(cmd, user_entry=None):
     selection_is_valid = False
     has_shown_configs = False
 
-    if config_value:
-        user_entry = config_value.strip().split('.')
-    else:
-        # read config options into choice list for user prompt
+    if not user_entry:
         print_all_configs()
         has_shown_configs = True
         user_entry = prompt('\nEnter one of the above configuration keys (i.e. disable_confirmation_prompt)' \
                         'to see its current, default, and available values.\nUse the form of <section>.<key> ' \
-                        ' e.g. cloud.name. Leave blank to exit: ').strip().split('.')
+                        ' e.g. cloud.name. Leave blank to exit: ')
 
-    selected_section = user_entry[0]
-    selected_key = user_entry[1]
-
+    # prompt user for input until valid
     while not selection_is_valid:
-        # prompt user for input until valid
-        if selected_key:
+        if not user_entry:
+            # exit if empty string is entered
+            raise CLIError('Operation cancelled.')
+
+        user_entry_arr = user_entry.strip().split('.')
+
+        if len(user_entry_arr) != 2:
+            user_entry = prompt(f'\nInvalid entry <{user_entry}>. \nEnter in the form of ' \
+                                    '<section>.<key> e.g. cloud.name. Leave blank to exit: ')
+        else:
+            selected_section = user_entry_arr[0]
+            selected_key = user_entry_arr[1]
             if selected_section in config and selected_key in config[selected_section]:
                 selection_is_valid = True
-                config_value = config[selected_section][selected_key]
-                current_value = {}
-                try:
-                    current_value = config_get(cmd, f"{selected_section}.{selected_key}")
-                except CLIError:
-                    # value not set in config, treat it as default
-                    current_value['value'] = config_value['default']
             else:
                 # if we haven't already show all of the configs, do so now
                 if not has_shown_configs:
                     print_all_configs()
                     has_shown_configs = True
 
-                user_response = prompt(f'\nInvalid key: {selected_section}.{selected_key}. \nEnter in the form of ' \
-                                    '<section>.<key> e.g. cloud.name. Leave blank to exit:  ').strip().split('.')
-                selected_section = user_response[0]
-                selected_key = user_response[1]
-        else:
-            # exit if empty string is entered
-            raise CLIError('Operation cancelled.')
+                user_entry = prompt(f'\nConfig default not found: {selected_section}.{selected_key}. ' \
+                                    '\nEnter in the form of <section>.<key> e.g. cloud.name. ' \
+                                    'Leave blank to exit:  ')
+
+
+    config_value = config[selected_section][selected_key]
+    current_value = {}
+    try:
+        current_value = config_get(cmd, f"{selected_section}.{selected_key}")
+    except CLIError:
+        # value not set in config, treat it as default
+        current_value['value'] = config_value['default']
 
     if config_value["allowed"]:
         allowed_values = [elem['value'] for elem in config_value['allowed']] 
@@ -77,7 +80,7 @@ def list_available(cmd, config_value=None):
         allowed_values = config_value['type']
 
     return {
-        "key": selected_key,
+        "Key": selected_key,
         "Current": current_value['value'],
         "Default": config_value['default'],
         "Allowed": allowed_values,
