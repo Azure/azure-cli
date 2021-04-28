@@ -125,7 +125,9 @@ def load_arguments(self, _):
                    help='The secret name of the KeyVault certificate')
         c.argument('user_cert_secret_version',
                    arg_group='Bring Your Own Certificate',
-                   help='The secret version of the KeyVault certificate')
+                   help='The secret version of the KeyVault certificate, If not specified, the "Latest" version will '
+                        'always been used and the deployed certificate will be automatically rotated to the latest '
+                        'version when a newer version of the certificate is available.')
 
     # Origin #
     with self.argument_context('cdn origin') as c:
@@ -503,7 +505,7 @@ def configure_rule_parameters(c):
     c.argument('rule_name', help='Name of the rule.')
     c.argument('order', type=int,
                help='The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. '
-               'A rule with a lesser order will be applied before a rule with a greater order. '
+               'A rule with a lower order will be applied before one with a higher order. '
                'Rule with order 0 is a special rule. '
                'It does not require any condition and actions listed in it will always be applied.')
     c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition.',

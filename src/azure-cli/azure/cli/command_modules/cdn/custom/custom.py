@@ -68,15 +68,13 @@ def _convert_to_unified_delivery_rules(policy):
     for existing_rule in policy.rules:
         if existing_rule.conditions:
             for con in existing_rule.conditions:
-                if con.parameters.odata_type == UrlPathMatchConditionParameters.odata_type and \
-                   con.parameters.operator is None and con.parameters.match_values is None:
-                    con.parameters.operator = con.parameters.additional_properties["matchType"]
-                    con.parameters.match_values = con.parameters.additional_properties["path"].split(',')
-
-                if con.parameters.odata_type == UrlFileExtensionMatchConditionParameters.odata_type and \
-                   con.parameters.operator is None and con.parameters.match_values is None:
-                    con.parameters.operator = "Any"
-                    con.parameters.match_values = con.parameters.additional_properties["extensions"]
+                if con.parameters.operator is None and con.parameters.match_values is None:
+                    if con.parameters.odata_type == UrlPathMatchConditionParameters.odata_type:
+                        con.parameters.operator = con.parameters.additional_properties["matchType"]
+                        con.parameters.match_values = con.parameters.additional_properties["path"].split(',')
+                    if con.parameters.odata_type == UrlFileExtensionMatchConditionParameters.odata_type:
+                        con.parameters.operator = "Any"
+                        con.parameters.match_values = con.parameters.additional_properties["extensions"]
 
 
 # region Custom Commands
@@ -467,6 +465,8 @@ def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_n
                 pop_index = idx
                 break
 
+        # To guarantee the consecutive rule order, we need to make sure the rule with order larger than the deleted one
+        # to decrease its order by one. Rule with order 0 is special and no rule order adjustment is required.
         if pop_index != -1:
             pop_order = policy.rules[pop_index].order
             policy.rules.pop(pop_index)
