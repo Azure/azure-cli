@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.22.0"
+__version__ = "2.22.1"
 
 import os
 import sys
@@ -64,7 +64,6 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
-        from azure.cli.core.style import format_styled_text
         from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
@@ -96,11 +95,7 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        if self.enable_color:
-            theme = self.config.get('core', 'theme', fallback='dark')
-        else:
-            theme = 'none'
-        format_styled_text.theme = theme
+        self._configure_style()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -181,6 +176,26 @@ class AzCli(CLI):
                 args_str.append('{}: {}'.format(name, value))
             logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
                            'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
+
+    def _configure_style(self):
+        from azure.cli.core.util import in_cloud_console
+        from azure.cli.core.style import format_styled_text, get_theme_dict, Style
+
+        # Configure Style
+        if self.enable_color:
+            theme = self.config.get('core', 'theme',
+                                    fallback="cloud-shell" if in_cloud_console() else "dark")
+
+            theme_dict = get_theme_dict(theme)
+
+            if theme_dict:
+                # If theme is used, also apply it to knack's logger
+                from knack.util import color_map
+                color_map['error'] = theme_dict[Style.ERROR]
+                color_map['warning'] = theme_dict[Style.WARNING]
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -622,9 +637,9 @@ class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
         self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
-        from pkg_resources import parse_version
+        from packaging.version import parse
         should_suppress = ext.name == self.suppress_extension_name and ext.version and \
-            parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
+            parse(ext.version) <= parse(self.suppress_up_to_version)
         if should_suppress:
             reason = self.reason or "Use --debug for more information."
             logger.warning("Extension %s (%s) has been suppressed. %s",
@@ -770,6 +785,8 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
+    # Please use add_cli_command instead of _cli_command.
+    # Currently "keyvault" and "batch" modules are still rely on this function, so it cannot be removed now.
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
         from knack.deprecation import Deprecated
@@ -827,6 +844,31 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
             self.command_table[name] = self.command_cls(self, name,
                                                         handler or default_command_handler,
+                                                        **kwargs)
+
+    def add_cli_command(self, name, command_operation, **kwargs):
+        """Register a command in command_table with command operation provided"""
+        from knack.deprecation import Deprecated
+        from .commands.command_operation import BaseCommandOperation
+        if not issubclass(type(command_operation), BaseCommandOperation):
+            raise TypeError("CommandOperation must be an instance of subclass of BaseCommandOperation."
+                            " Got instance of '{}'".format(type(command_operation)))
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
+
+        name = ' '.join(name.split())
+
+        if self.supported_api_version(resource_type=kwargs.get('resource_type'),
+                                      min_api=kwargs.get('min_api'),
+                                      max_api=kwargs.get('max_api'),
+                                      operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
+            self.command_table[name] = self.command_cls(loader=self,
+                                                        name=name,
+                                                        handler=command_operation.handler,
+                                                        arguments_loader=command_operation.arguments_loader,
+                                                        description_loader=command_operation.description_loader,
+                                                        command_operation=command_operation,
                                                         **kwargs)
 
     def get_op_handler(self, operation, operation_group=None):

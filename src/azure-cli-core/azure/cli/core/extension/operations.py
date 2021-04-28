@@ -15,7 +15,7 @@ import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
 from urllib.parse import urlparse
 
-from pkg_resources import parse_version
+from packaging.version import parse
 
 from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module
@@ -320,7 +320,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                 logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
                 if version and version == ext.get_version():
                     return
-                logger.warning("It will be overriden with version {}.".format(version) if version else "It will be updated if available.")
+                logger.warning("It will be overridden with version {}.".format(version) if version else "It will be updated if available.")
                 update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
@@ -439,12 +439,12 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
         if not items:
             continue
 
-        latest = max(items, key=lambda c: parse_version(c['metadata']['version']))
+        latest = max(items, key=lambda c: parse(c['metadata']['version']))
         installed = False
         if name in installed_extension_names:
             installed = True
             ext_version = get_extension(name).version
-            if ext_version and parse_version(latest['metadata']['version']) > parse_version(ext_version):
+            if ext_version and parse(latest['metadata']['version']) > parse(ext_version):
                 installed = str(True) + ' (upgrade available)'
         results.append({
             'name': name,
@@ -473,13 +473,13 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
     results = []
     latest_compatible_version = None
 
-    for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
+    for ext in sorted(exts, key=lambda c: parse(c['metadata']['version']), reverse=True):
         compatible = ext_compat_with_cli(ext['metadata'])[0]
         ext_version = ext['metadata']['version']
         if latest_compatible_version is None and compatible:
             latest_compatible_version = ext_version
         installed = ext_version == installed_ext.version if installed_ext else False
-        if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
+        if installed and parse(latest_compatible_version) > parse(installed_ext.version):
             installed = str(True) + ' (upgrade available)'
         version = ext['metadata']['version']
         if latest_compatible_version == ext_version:

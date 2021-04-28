@@ -25,6 +25,7 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, C
 from knack.log import get_logger
 from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
+VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
 VERSION_2020_04_01 = "2020-04-01"
 
@@ -91,7 +92,7 @@ def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=Fa
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
 
-    return sdk_no_wait(no_wait, ase_client.delete,
+    return sdk_no_wait(no_wait, ase_client.begin_delete,
                        resource_group_name=resource_group_name, name=name)
 
 
@@ -112,7 +113,7 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
     if front_end_scale_factor:
         ase_def.front_end_scale_factor = front_end_scale_factor
 
-    return sdk_no_wait(no_wait, ase_client.create_or_update, resource_group_name=resource_group_name,
+    return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
                        name=name, hosting_environment_envelope=ase_def)
 
 
@@ -170,8 +171,12 @@ def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_nam
                                      inbound_vnet_id=inbound_vnet_id, inbound_ip_address=inbound_ip_address)
 
 
-def _get_ase_client_factory(cli_ctx):
+def _get_ase_client_factory(cli_ctx, api_version=None):
     client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).app_service_environments
+    if api_version:
+        client.api_version = api_version
+    else:
+        client.api_version = VERSION_2019_08_01
     return client
 
 
@@ -180,7 +185,7 @@ def _get_resource_client_factory(cli_ctx, api_version=None):
     if api_version:
         client.api_version = api_version
     else:
-        api_version = VERSION_2019_10_01
+        client.api_version = VERSION_2019_10_01
     return client
 
 
@@ -189,7 +194,7 @@ def _get_network_client_factory(cli_ctx, api_version=None):
     if api_version:
         client.api_version = api_version
     else:
-        api_version = VERSION_2020_04_01
+        client.api_version = VERSION_2020_04_01
     return client
 
 

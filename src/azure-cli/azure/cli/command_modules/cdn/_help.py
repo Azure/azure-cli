@@ -229,6 +229,11 @@ short-summary: Manage delivery rules for an endpoint.
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: >
+        Name of the rule, only required for Microsoft SKU.
 examples:
   - name: Create a global rule to disable caching.
     text: >
@@ -248,6 +253,9 @@ examples:
   - name: Remove the global rule.
     text: >
         az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global
+  - name: Remove the rule with the order 4.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --order 4
 """
 
 helps['cdn endpoint rule show'] = """
