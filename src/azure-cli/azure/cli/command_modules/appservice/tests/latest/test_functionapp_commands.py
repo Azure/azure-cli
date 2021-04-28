@@ -263,6 +263,56 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
+    def test_functionapp_on_linux_app_service_powershell(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+            # this weird field means it is a linux
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 3'
+                 .format(resource_group, functionapp, plan, storage_account),
+                 checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
+
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_app_service_powershell_with_runtime_version(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+            # this weird field means it is a linux
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.0 --functions-version 3'
+                 .format(resource_group, functionapp, plan, storage_account),
+                 checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
+
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_dotnet_isolated(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
@@ -340,7 +390,8 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net'),
+                     JMESPathCheck('clientCertMode', 'Required')])
 
         self.cmd('functionapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].kind', 'functionapp'),
@@ -350,8 +401,8 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
         ])
-        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name),
-                 checks=[self.check('clientAffinityEnabled', True)]
+        self.cmd('functionapp update -g {} -n {} --set clientCertMode=Optional'.format(resource_group, functionapp_name),
+                 checks=[self.check('clientCertMode', 'Optional')]
                  )
 
         self.cmd(
@@ -409,6 +460,26 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
+
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux_powershell(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 3'
+                 .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
 
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1198,7 +1269,7 @@ class FunctionAppFunctionTests(LiveScenarioTest):
         self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
 
         self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
-            JMESPathCheck('config', {})])
+            JMESPathCheck('config.bindings[0].type', 'httpTrigger')])
 
 
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705

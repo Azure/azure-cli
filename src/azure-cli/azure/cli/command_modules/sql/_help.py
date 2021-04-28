@@ -752,7 +752,7 @@ examples:
   - name: Create managed instance with specified parameters and backup storage redundancy specified
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5 --backup-storage-redundancy Local
   - name: Create a managed instance with maintenance configuration
-    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -m /subscriptions/{SubID}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_{Region}_{MaintenanceConfigName}
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -m SQL_{Region}_{MaintenanceConfigName}
 """
 
 helps['sql mi delete'] = """
@@ -845,9 +845,9 @@ examples:
     text: az sql mi update --name myinstance --public-data-endpoint-enabled true --resource-group mygroup --subscription MySubscription
     crafted: true
   - name: Update a managed instance with maintenance configuration
-    text: az sql mi update -g mygroup  -n myinstance -m /subscriptions/{SubID}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_{Region}_{MaintenanceConfigName}
+    text: az sql mi update -g mygroup -n myinstance -m SQL_{Region}_{MaintenanceConfigName}
   - name: Remove maintenance configuration from managed instance
-    text: az sql mi update -g mygroup  -n myinstance -m /subscriptions/{SubID}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default
+    text: az sql mi update -g mygroup -n myinstance -m SQL_Default
 """
 
 helps['sql midb'] = """

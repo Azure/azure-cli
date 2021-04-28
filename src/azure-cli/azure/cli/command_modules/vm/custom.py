@@ -26,6 +26,7 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import CLIInternalError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.azclierror import ValidationError
@@ -115,10 +116,10 @@ def _get_access_extension_upgrade_info(extensions, name):
 
     if extensions:
         extension = next((e for e in extensions if e.name == name), None)
-        from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
-        if extension and LooseVersion(extension.type_handler_version) < LooseVersion(version):
+        from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
+        if extension and parse(extension.type_handler_version) < parse(version):
             auto_upgrade = True
-        elif extension and LooseVersion(extension.type_handler_version) > LooseVersion(version):
+        elif extension and parse(extension.type_handler_version) > parse(version):
             version = extension.type_handler_version
 
     return publisher, version, auto_upgrade
@@ -293,7 +294,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=None, edge_zone=None):
+                        tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -375,7 +376,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
     if hyper_v_generation:
-        disk.hyper_vgeneration = hyper_v_generation
+        disk.hyper_v_generation = hyper_v_generation
 
     if zone:
         disk.zones = zone
@@ -397,8 +398,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.tier = tier
     if enable_bursting is not None:
         disk.bursting_enabled = enable_bursting
-    if edge_zone:
+    if edge_zone is not None:
         disk.extended_location = edge_zone
+    if security_type is not None:
+        disk.security_profile = {'securityType': security_type}
+    if support_hibernation is not None:
+        disk.supports_hibernation = support_hibernation
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -584,7 +589,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                         sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental,
                         encryption=encryption)
     if hyper_v_generation:
-        snapshot.hyper_vgeneration = hyper_v_generation
+        snapshot.hyper_v_generation = hyper_v_generation
     if network_access_policy is not None:
         snapshot.network_access_policy = network_access_policy
     if disk_access is not None:
@@ -678,6 +683,10 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
             vm.identity.user_assigned_identities = {}
+            if not cmd.supported_api_version(min_api='2018-06-01', resource_type=ResourceType.MGMT_COMPUTE):
+                raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
+                                       "You can set the cloud's profile to latest with 'az cloud set --profile latest"
+                                       " --name <cloud name>'")
             for identity in external_identities:
                 vm.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
@@ -3274,7 +3283,7 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.start_extension_upgrade,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.begin_start_extension_upgrade,
                        resource_group_name, vm_scale_set_name)
 # endregion
 

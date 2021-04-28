@@ -144,6 +144,10 @@ examples:
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureCloud
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -154,6 +158,8 @@ examples:
     text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
   - name: Remove Access Restriction named internal_agents from the scm site.
     text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+  - name: Remove Access Restriction with service tag AzureFrontDoor.Backend from the main site.
+    text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --service-tag AzureFrontDoor.Backend
 """
 
 helps['functionapp config access-restriction set'] = """
@@ -1015,6 +1021,10 @@ examples:
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureCloud
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
 """
 
 helps['webapp config access-restriction remove'] = """
@@ -1025,6 +1035,8 @@ examples:
     text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
   - name: Remove Access Restriction named internal_agents from the scm site.
     text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+  - name: Remove Access Restriction with service tag AzureFrontDoor.Backend from the main site.
+    text: az webapp config access-restriction remove -g ResourceGroup -n AppName --service-tag AzureFrontDoor.Backend
 """
 
 helps['webapp config access-restriction set'] = """
@@ -2281,12 +2293,12 @@ helps['staticwebapp list'] = """
       text: az staticwebapp list
 """
 
-helps['staticwebapp browse'] = """
+helps['staticwebapp show'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
     - name: Show static app in a subscription.
-      text: az staticwebapp browse -n MyStaticAppName
+      text: az staticwebapp show -n MyStaticAppName
 """
 
 helps['staticwebapp create'] = """
@@ -2296,6 +2308,14 @@ helps['staticwebapp create'] = """
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
        -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+"""
+
+helps['staticwebapp update'] = """
+    type: command
+    short-summary: Update a static app. Return the app updated.
+    examples:
+    - name: Update static app to standard sku.
+      text: az staticwebapp update -n MyStaticAppName --sku Standard
 """
 
 helps['staticwebapp disconnect'] = """

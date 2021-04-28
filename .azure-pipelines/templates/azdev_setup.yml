@@ -13,7 +13,7 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
       python -m pip install -U pip
-      pip install azdev==0.1.30
+      pip install azdev==0.1.31
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
@@ -21,7 +21,7 @@ steps:
       else
         azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH --debug
       fi
-    displayName: 'Azdev Setup'
+    displayName: 'azdev setup'
     env:
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}
       CLI_EXT_REPO_PATH: ${{ parameters.CLIExtensionRepoPath }}
