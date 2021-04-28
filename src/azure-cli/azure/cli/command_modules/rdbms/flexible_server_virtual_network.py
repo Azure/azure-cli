@@ -63,7 +63,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
                                                            location, server_name, vnet_address_pref, subnet_address_pref)
 
         else:
-            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs.")
+            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use exising subnet, please provide subnet Id (not vnet Id).")
 
     elif subnet is None and vnet is None:
         subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, 'Vnet' + server_name[6:], 'Subnet' + server_name[6:],
