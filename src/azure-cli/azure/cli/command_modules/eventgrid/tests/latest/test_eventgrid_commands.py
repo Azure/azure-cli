@@ -608,6 +608,69 @@ class EventGridTests(ScenarioTest):
 
         self.cmd('az eventgrid system-topic delete --name {storage_system_topic_name_regional} --resource-group {regional_resource_group} --yes')
 
+    @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    def test_event_subscription_delivery_attributes(self, resource_group, resource_group_location, storage_account):
+        
+        scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
+        event_subscription_name = self.create_random_name(prefix='cli', length=40)
+        endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
+        self.kwargs.update({
+            'event_subscription_name' : event_subscription_name,
+            'endpoint_url': endpoint_url,
+            'location': resource_group_location,
+            'scope': scope
+        })
+
+        self.kwargs['source_resource_id'] = self.cmd('storage account create --resource-group {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
+        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+
+        self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --delivery-attribute-mapping somestaticname1 static somestaticvalue1  --delivery-attribute-mapping somestaticname2 static somestaticvalue2 true --delivery-attribute-mapping somestaticname3 static somestaticvalue3 false --delivery-attribute-mapping somedynamicattribname1 dynamic data.key1', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+        ])
+
+        self.cmd('az eventgrid event-subscription update --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint \"{endpoint_url}\" --delivery-attribute-mapping somestaticname1 static somestaticvalue1 --delivery-attribute-mapping somestaticname2 static somestaticvalue2 true --delivery-attribute-mapping somedynamicattribname2 dynamic data.key2', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+        ])
+
+        self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
+
+    @ResourceGroupPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
+    def test_event_subscription_with_storagequeuemessage_ttl(self, resource_group):
+        scope = self.cmd('az group show -n {} -o json'.format(resource_group)).get_output_in_json()['id']
+        event_subscription_name = self.create_random_name(prefix='cli', length=40)
+        storagequeue_endpoint_id = '/subscriptions/5b4b650e-28b9-4790-b3ab-ddbd88d727c4/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg/queueServices/default/queues/stogqueuedestination'
+
+        self.kwargs.update({
+            'event_subscription_name': event_subscription_name,
+            'storagequeue_endpoint_id': storagequeue_endpoint_id,
+            'location': 'centraluseuap',
+            'scope': scope,
+        })
+
+        self.kwargs['source_resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
+        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
+
+        # Create a storage queue destination with storagequeuemessage ttl set to 2 mins
+        self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type stoRAgequeue --endpoint {storagequeue_endpoint_id} --event-delivery-schema cloudeventschemav1_0 --storage-queue-msg-ttl 120', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # Update the event subscription to storagequeuemessage ttl set to 5 mins
+        self.cmd('az eventgrid event-subscription create --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint-type stoRAgequeue --endpoint {storagequeue_endpoint_id} --storage-queue-msg-ttl 300', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('az eventgrid event-subscription delete --source-resource-id {source_resource_id} --name {event_subscription_name}')
+
+
     @ResourceGroupPreparer()
     @unittest.skip('Will be re-enabled once global operations are enabled for 2020-01-01-preview API version')
     def test_create_event_subscriptions_to_arm_resource_group(self, resource_group):
@@ -683,7 +746,7 @@ class EventGridTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='clieventgrid', location='centraluseuap')
     def test_create_event_subscriptions_to_resource(self, resource_group, resource_group_location, storage_account):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
-        endpoint_url = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation?code=<HIDDEN>'
+        endpoint_url = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation?code=9a/jLJ6sXbLM76UyIVaZ3uXLURynV/HV0f0MFtLmAIwh/n51d0bnKg=='
         endpoint_baseurl = 'https://eventgridclitestapp.azurewebsites.net/api/SubscriptionValidation'
 
         self.kwargs.update({
