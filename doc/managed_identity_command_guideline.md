@@ -4,7 +4,7 @@ This document provides a common design of the CLI command interface for supporti
 ## Command interface
 
 ### Enable managed identity during resource creation
-Use `--mi-system-assigned` to enable system assigned identity and `--mi-user-assigned` with space separated resource ids to add user assigned identities.
+Use `--mi-system-assigned` to enable system-assigned identity and `--mi-user-assigned` with space separated resource IDs to add user-assigned identities.
 
 ```
 # <resource> can be acr, webapp, vm or any other resources that support managed identity
