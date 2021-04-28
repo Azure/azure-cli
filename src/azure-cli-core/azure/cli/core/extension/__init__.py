@@ -280,20 +280,20 @@ EXTENSION_TYPES = [WheelExtension, DevExtension]
 
 def ext_compat_with_cli(azext_metadata):
     from azure.cli.core import __version__ as core_version
-    from pkg_resources import parse_version
+    from packaging.version import parse
     is_compatible, min_required, max_required = (True, None, None)
     if azext_metadata:
         min_required = azext_metadata.get(EXT_METADATA_MINCLICOREVERSION)
         max_required = azext_metadata.get(EXT_METADATA_MAXCLICOREVERSION)
-        parsed_cli_version = parse_version(core_version)
-        if min_required and parsed_cli_version < parse_version(min_required):
+        parsed_cli_version = parse(core_version)
+        if min_required and parsed_cli_version < parse(min_required):
             is_compatible = False
-        elif max_required and parsed_cli_version > parse_version(max_required):
+        elif max_required and parsed_cli_version > parse(max_required):
             is_compatible = False
 
     try:
         min_ext_required = EXTENSION_VERSION_REQUIREMENTS.get(azext_metadata.get('name')).get(MIN_EXT_VERSION)
-        if parse_version(azext_metadata.get('version')) < parse_version(min_ext_required):
+        if parse(azext_metadata.get('version')) < parse(min_ext_required):
             is_compatible = False
     except AttributeError:
         min_ext_required = None

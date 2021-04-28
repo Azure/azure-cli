@@ -176,63 +176,58 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  '--description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Succeeded')
+                     self.check('provisioningState', 'Updating')
                  ])
 
 
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
-    @record_only()
+
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
-            'hsm_name': ACTIVE_HSM_NAME,
-            'hsm_url': ACTIVE_HSM_URL,
-            'rg': 'bim-rg',
-            'loc': 'eastus2',
-            'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa'
+            'hsm_name': 'clitest-mhsm',
+            'hsm_url': 'https://clitest-mhsm.managedhsm.azure.net/',
+            'rg': 'clitest-mhsm-rg',
+            'loc': 'westeurope',
+            'init_admin': 'f3ea48f6-a16e-4b37-8260-f69cf2200525'
         })
 
-        self.cmd('keyvault show --hsm-name {hsm_name}',
-                 checks=[
-                     self.check('location', '{loc}'),
-                     self.check('name', '{hsm_name}'),
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('sku.name', 'Standard_B1'),
-                     self.check('length(properties.initialAdminObjectIds)', 1),
-                     self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-                     self.exists('properties.hsmUri')
-                 ])
-        self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}',
-                 checks=[
-                     self.check('location', '{loc}'),
-                     self.check('name', '{hsm_name}'),
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('sku.name', 'Standard_B1'),
-                     self.check('length(properties.initialAdminObjectIds)', 1),
-                     self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-                     self.exists('properties.hsmUri')
-                 ])
-        self.cmd('keyvault list --resource-type hsm',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('[0].location', '{loc}'),
-                     self.check('[0].name', '{hsm_name}'),
-                     self.check('[0].resourceGroup', '{rg}'),
-                     self.check('[0].sku.name', 'Standard_B1'),
-                     self.check('length([0].properties.initialAdminObjectIds)', 1),
-                     self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
-                     self.exists('[0].properties.hsmUri')
-                 ])
-        self.cmd('keyvault list --resource-type hsm -g {rg}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('[0].location', '{loc}'),
-                     self.check('[0].name', '{hsm_name}'),
-                     self.check('[0].resourceGroup', '{rg}'),
-                     self.check('[0].sku.name', 'Standard_B1'),
-                     self.check('length([0].properties.initialAdminObjectIds)', 1),
-                     self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
-                     self.exists('[0].properties.hsmUri')
-                 ])
+        show_checks = [
+            self.check('location', '{loc}'),
+            self.check('name', '{hsm_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('sku.name', 'Standard_B1'),
+            self.check('length(properties.initialAdminObjectIds)', 1),
+            self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
+            self.exists('properties.hsmUri')
+        ]
+
+        list_checks = [
+            self.check('length(@)', 1),
+            self.check('[0].location', '{loc}'),
+            self.check('[0].name', '{hsm_name}'),
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].sku.name', 'Standard_B1'),
+            self.check('length([0].properties.initialAdminObjectIds)', 1),
+            self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
+            self.exists('[0].properties.hsmUri')
+        ]
+
+        self.cmd('group create -g {rg} -l {loc}'),
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin}')
+
+        self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
+        self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
+
+        self.cmd('keyvault list --resource-type hsm', checks=list_checks)
+        self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
+
+        self.cmd('keyvault delete --hsm-name {hsm_name}')
+        self.cmd('keyvault show-deleted --hsm-name {hsm_name}', checks=show_checks)
+        self.cmd('keyvault show-deleted --hsm-name {hsm_name} -l {loc}', checks=show_checks)
+        self.cmd('keyvault list-deleted --resource-type hsm', checks=list_checks)
+
+        self.cmd('keyvault purge --hsm-name {hsm_name}')
+        self.cmd('group delete -n {rg} --yes')
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
@@ -307,6 +302,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test keyvault delete
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
+        self.cmd('keyvault show-deleted -n {kv}', checks=self.check('type', 'Microsoft.KeyVault/deletedVaults'))
         self.cmd('keyvault purge -n {kv}')
         # ' will be parsed by shlex, so need escaping
         self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
@@ -882,9 +878,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs['key_file'] = os.path.join(tempfile.mkdtemp(), 'backup.key')
         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file "{key_file}"')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault key purge --vault-name {kv} -n {key}')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault key delete --vault-name {kv} -n {key2}')
         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
         self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
@@ -1523,9 +1519,9 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = os.path.join(tempfile.mkdtemp(), 'backup.secret')
         self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file "{bak_file}"')
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}', checks=self.check('name', '{sec}'))
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault secret purge --vault-name {kv} -n {sec}')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec2}', checks=self.check('name', '{sec2}'))
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
@@ -1861,7 +1857,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = bak_file
         self.cmd('keyvault certificate backup --vault-name {kv} -n cert1 --file {bak_file}')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert1')
         time.sleep(10)
 

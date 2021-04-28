@@ -65,7 +65,7 @@ def _get_all_extensions(cmd_chain, ext_set=None):
     return ext_set
 
 
-def _search_in_extension_commands(cli_ctx, command_str):
+def _search_in_extension_commands(cli_ctx, command_str, allow_prefix_match=False):
     """Search the command in an extension commands dict which mimics a prefix tree.
     If the value of the dict item is a string, then the key represents the end of a complete command
     and the value is the name of the extension that the command belongs to.
@@ -95,6 +95,8 @@ def _search_in_extension_commands(cli_ctx, command_str):
         except KeyError:
             return None
     # command_str is prefix of one or more complete commands.
+    if not allow_prefix_match:
+        return None
     all_exts = _get_all_extensions(cmd_chain)
     return list(all_exts) if all_exts else None
 
@@ -137,7 +139,8 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
     from azure.cli.core.azclierror import NoTTYError
     exit_code = 2
     command_str = roughly_parse_command(args[1:])
-    ext_name = _search_in_extension_commands(cli_ctx, command_str)
+    allow_prefix_match = args[-1] == '-h' or args[-1] == '--help'
+    ext_name = _search_in_extension_commands(cli_ctx, command_str, allow_prefix_match=allow_prefix_match)
     # ext_name is a list if the input command matches the prefix of one or more extension commands,
     # for instance: `az blueprint` when running `az blueprint -h`
     # ext_name is a str if the input command matches a complete command of an extension,

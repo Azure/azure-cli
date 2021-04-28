@@ -202,10 +202,11 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
         examples = []
         for example in help_file.examples:
-            examples.append({
-                'command': strip_command(example.command),
-                'description': example.name
-            })
+            if example.command and example.name:
+                examples.append({
+                    'command': strip_command(example.command),
+                    'description': example.name
+                })
 
         return examples
 
