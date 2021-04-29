@@ -47,10 +47,10 @@ Release History
 * `az vmss extension upgrade`: Fix bug (#17711)
 * Add error message for `vm identity assign` (#17685)
 * Zone-redundant storage (ZRS) managed disks (#17754)
-* `disk create`: Trusted launch (#17775)
-* `disk create`: Hibernation (#17775)
+* `az disk create`: Trusted launch (#17775)
+* `az disk create`: Hibernation (#17775)
 * Fix a compatibility issue of old API version (#17906)
-* `sig image version create`: Support data disk VHDs (#17706)
+* `az sig image version create`: Support data disk VHDs (#17706)
 
 **Feedback**
 
