@@ -78,7 +78,7 @@ config = {
                     "description": "Only print errors to sterr. Supress warnings from preview, deprecated and experiental commands"
                 },
                 {
-                    "value": "false (or equivalent: false, no, off"),
+                    "value": "false (or equivalent: false, no, off)",
                     "description": "Do not supress output."
                 }
             ],
@@ -93,7 +93,7 @@ config = {
                     "description": "Disable color in output."
                 },
                 {
-                    "value": "false (or equivalent: false, no, off"),
+                    "value": "false (or equivalent: false, no, off)",
                     "description": "Allow color in output."
                 }
             ],
