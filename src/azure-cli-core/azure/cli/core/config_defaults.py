@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 config = {
     "core": {
         "output": {
@@ -35,7 +36,7 @@ config = {
                     "value": "none",
                     "description": "No output, except for errors and warnings."
                 }
-            ], 
+            ],
             "type": "string",
             "description": "The default output format."
         },
@@ -62,7 +63,7 @@ config = {
                     "description": "Allow anonymous data collection."
                 },
                 {
-                    "value": "false", 
+                    "value": "false",
                     "description": "Do not allow anonymous data collection."
                 }
             ],
