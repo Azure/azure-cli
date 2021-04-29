@@ -250,6 +250,9 @@ def load_arguments(self, _):
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('disable_ahub', options_list=['--disable-ahub'])
         c.argument('windows_admin_password', options_list=['--windows-admin-password'])
+        c.argument('enable_managed_identity', action='store_true')
+        c.argument('assign_identity', type=str, validator=validate_assign_identity)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
