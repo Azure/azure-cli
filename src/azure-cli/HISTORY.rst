@@ -43,7 +43,7 @@ Release History
 
 * Extended location for Compute RP (#17522)
 * `az sig image-version create`: Support creating from a VHD (#16371)
-* vm create --count mode, support vnet and subnet configuration (#17660)
+* `az vm create --count`: Support vnet and subnet configuration (#17660)
 * `az vmss extension upgrade`: Fix bug (#17711)
 * Add error message for `vm identity assign` (#17685)
 * Zone-redundant storage (ZRS) managed disks (#17754)
