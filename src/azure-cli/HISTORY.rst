@@ -20,7 +20,9 @@ Release History
 **App Service**
 
 * [BREAKING CHANGE] Update websites SDK to the latest version (azure-mgmt-web==2.0.0) & Adopt track2 SDK (#17146)
-* [BREAKING CHANGE] Add support for az staticwebapp show; az staticwebapp create; az staticwebapp update (#17870)
+* [BREAKING CHANGE] Rename `az staticwebapp browse` to `az staticwebapp show`
+* Add option of sku for `az staticwebapp create --sku` (#17870)
+* Add command `az staticwebapp update`
 * `az webapp/functionapp config access-restriction add/remove`: Support for Service Tag, Http headers and multi-source rules. (#17687)
 
 **ARM**
