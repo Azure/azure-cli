@@ -27,7 +27,6 @@ from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
-VERSION_2020_04_01 = "2020-04-01"
 
 logger = get_logger(__name__)
 
@@ -190,11 +189,12 @@ def _get_resource_client_factory(cli_ctx, api_version=None):
 
 
 def _get_network_client_factory(cli_ctx, api_version=None):
+    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
     client = get_mgmt_service_client(cli_ctx, NetworkManagementClient)
     if api_version:
         client.api_version = api_version
     else:
-        client.api_version = VERSION_2020_04_01
+        client.api_version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['appservice_network']
     return client
 
 
