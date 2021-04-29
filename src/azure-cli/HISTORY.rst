@@ -138,7 +138,7 @@ Release History
 
 **Synapse**
 
-* `az synapse notebook create `: Create a notebook (#17867)
+* `az synapse notebook create`: Create a notebook (#17867)
 
 2.22.1
 ++++++
