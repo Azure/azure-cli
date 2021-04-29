@@ -131,7 +131,7 @@ Release History
 
 **Storage**
 
-* Fix issue #16272 and #16853: Refine error message (#17630)
+* Fix #16272 & #16853: Refine error message (#17630)
 * `az storage account create`: Add edge zone support (#17528)
 * Support user assigned identity for storage account (#16613)
 * `az storage account create/update`: Support sas&key policy (#17815)
