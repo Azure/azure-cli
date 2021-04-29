@@ -44,11 +44,11 @@ config = {
             "default": "false",
             "allowed": [
                 {
-                    "value": "true",
+                    "value": "true (or equivalent: true, yes, on)",
                     "description": "Commands will not wait for user confirmation."
                 },
                 {
-                    "value": "false",
+                    "value": "false (or equivalent: false, no, off)",
                     "description": "Commands will wait for user confirmation."
                 }
             ],
@@ -56,14 +56,14 @@ config = {
             "description": "Turn confirmation prompts on/off"
         },
         "collect_telemetry": {
-            "default": "false",
+            "default": "true",
             "allowed": [
                 {
-                    "value": "true",
+                    "value": "true (or equivalent: true, yes, on)",
                     "description": "Allow anonymous data collection."
                 },
                 {
-                    "value": "false",
+                    "value": "false (or equivalent: false, no, off)",
                     "description": "Do not allow anonymous data collection."
                 }
             ],
@@ -74,11 +74,11 @@ config = {
             "default": "false",
             "allowed": [
                 {
-                    "value": "true",
+                    "value": "true (or equivalent: true, yes, on)",
                     "description": "Only print errors to sterr. Supress warnings from preview, deprecated and experiental commands"
                 },
                 {
-                    "value": "false",
+                    "value": "false (or equivalent: false, no, off"),
                     "description": "Do not supress output."
                 }
             ],
@@ -89,11 +89,11 @@ config = {
             "default": "false",
             "allowed": [
                 {
-                    "value": "true",
+                    "value": "true (or equivalent: true, yes, on)",
                     "description": "Disable color in output."
                 },
                 {
-                    "value": "false",
+                    "value": "false (or equivalent: false, no, off"),
                     "description": "Allow color in output."
                 }
             ],
@@ -200,7 +200,7 @@ config = {
     },
     "extension": {
         "use_dynamic_install": {
-            "default": "no",
+            "default": "yes_prompt",
             "allowed": [
                 {
                     "value": "no",
@@ -219,14 +219,14 @@ config = {
             "description": "Default install behavior when extension is required to run command and is not installed."
         },
         "run_after_dynamic_install": {
-            "default": "false",
+            "default": "true",
             "allowed": [
                 {
-                    "value": "true",
+                    "value": "true (or equivalent: true, yes, on)",
                     "description": "Continue after extension is installed."
                 },
                 {
-                    "value": "false",
+                    "value": "false (or equivalent: false, no, off)",
                     "description": "Do not continue after extension is instealled."
                 }
             ],
@@ -239,11 +239,11 @@ config = {
             "default": "false",
             "allowed": [
                 {
-                    "value": "true",
+                    "value": "true (or equivalent: true, yes, on)",
                     "description": "Turn logging off"
                 },
                 {
-                    "value": "false",
+                    "value": "false (or equivalent: false, no, off)",
                     "description": "Turn logging off."
                 }
             ],
