@@ -8,14 +8,14 @@ Release History
 
 **ACR**
 
-* check-health: add support to verify dns routings to private endpoints (#17746)
+* az acr check-health: Add support to verify dns routings to private endpoints (#17746)
 * Fix #17618: Update credential add/update handling for tasks created using --auth-mode (#17715)
 
 **AKS**
 
-* `az aks update`: add --windows-admin-password to support updating Windows password (#17684)
-* Support updating from SPN cluster to MSI cluster. (#17902)
-* `az aks create`: add enable-encryption-at-host parameter (#17813)
+* `az aks update`: Add `--windows-admin-password` to support updating Windows password (#17684)
+* `az aks update`: Support updating from SPN cluster to MSI cluster. (#17902)
+* `az aks create`: Add `--enable-encryption-at-host` parameter (#17813)
 
 **App Service**
 
@@ -31,7 +31,7 @@ Release History
 **Backup**
 
 * `az backup vault create`: Add tags as an optional argument (#17735)
-* Made AFS Configure Backup flow Idempotent (#17839)
+* Make AFS configure backup flow idempotent (#17839)
 
 **CDN**
 
@@ -56,8 +56,8 @@ Release History
 
 **FunctionApp**
 
-* Fixed issue with zip deploy where local time was provided but UTC was expected (#17722)
-* Updated stacks api json to add PowerShell on Linux in Functions (#17678)
+* Fix issue with zip deploy where local time was provided but UTC was expected (#17722)
+* Update stacks api json to add PowerShell on Linux in Functions (#17678)
 
 **HDInsight**
 
@@ -67,7 +67,7 @@ Release History
 
 * [BREAKING CHANGE] Support soft-delete feature for managed-HSM. `keyvault delete --hsm-name` will perform soft delete on a MHSM. (#17834)
 
-**MarketplaceOrdering**
+**Marketplace Ordering**
 
 * New command group `az term` to accept/show terms (#17686)
 
@@ -77,7 +77,7 @@ Release History
 
 **Monitor**
 
-* Add new command `az monitor metrics list-namespaces` (#17472)
+* New command `az monitor metrics list-namespaces` (#17472)
 
 **Network**
 
