@@ -20,7 +20,6 @@ from .custom import get_site_configs
 
 logger = get_logger(__name__)
 
-NETWORK_API_VERSION = '2019-02-01'
 ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdid', 'x-fd-healthprobe']
 
 
@@ -164,6 +163,7 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
+    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
     subnet_id_parts = parse_resource_id(subnet_id)
     subnet_subscription_id = subnet_id_parts['subscription']
     subnet_resource_group = subnet_id_parts['resource_group']
@@ -175,7 +175,8 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
 
-    vnet_client = network_client_factory(cli_ctx, api_version=NETWORK_API_VERSION)
+    vnet_client = network_client_factory(cli_ctx, api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
+                                         ['appservice_ensure_subnet'])
     subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
     subnet_obj.service_endpoints = subnet_obj.service_endpoints or []
     service_endpoint_exists = False
