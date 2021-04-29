@@ -1899,6 +1899,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
                enable_sgxquotehelper=False,
+               enable_encryption_at_host=False,
                no_wait=False,
                yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1930,6 +1931,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
+        enable_encryption_at_host=enable_encryption_at_host,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -2219,60 +2221,23 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            need_pull_for_result = (monitoring or
-                                    (enable_managed_identity and attach_acr) or
-                                    ingress_appgw_addon_enabled or
-                                    enable_virtual_node or
-                                    need_post_creation_vnet_permission_granting)
-            if need_pull_for_result:
-                # adding a wait here since we rely on the result for role assignment
-                result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
-                    resource_group_name=resource_group_name,
-                    resource_name=name,
-                    parameters=mc))
-            else:
-                result = sdk_no_wait(no_wait,
-                                     client.create_or_update,
-                                     resource_group_name=resource_group_name,
-                                     resource_name=name,
-                                     parameters=mc,
-                                     custom_headers=custom_headers)
-            if monitoring:
-                cloud_name = cmd.cli_ctx.cloud.name
-                # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
-                # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
-                if cloud_name.lower() == 'azurecloud':
-                    from msrestazure.tools import resource_id
-                    cluster_resource_id = resource_id(
-                        subscription=subscription_id,
-                        resource_group=resource_group_name,
-                        namespace='Microsoft.ContainerService', type='managedClusters',
-                        name=name
-                    )
-                    _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
-            if enable_managed_identity and attach_acr:
-                if result.identity_profile is None or result.identity_profile["kubeletidentity"] is None:
-                    logger.warning('Your cluster is successfully created, but we failed to attach acr to it, '
-                                   'you can manually grant permission to the identity named <ClUSTER_NAME>-agentpool '
-                                   'in MC_ resource group to give it permission to pull from ACR.')
-                else:
-                    kubelet_identity_client_id = result.identity_profile["kubeletidentity"].client_id
-                    _ensure_aks_acr(cmd.cli_ctx,
-                                    client_id=kubelet_identity_client_id,
-                                    acr_name_or_id=attach_acr,
-                                    subscription_id=subscription_id)
-            if ingress_appgw_addon_enabled:
-                _add_ingress_appgw_addon_role_assignment(result, cmd)
-            if enable_virtual_node:
-                _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id)
-            if need_post_creation_vnet_permission_granting:
-                if not _create_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                               result.identity.principal_id, scope=vnet_subnet_id,
-                                               resolve_assignee=False):
-                    logger.warning('Could not create a role assignment for subnet. '
-                                   'Are you an Owner on this subscription?')
-
-            return result
+            created_cluster = _put_managed_cluster_ensuring_permission(
+                cmd,
+                client,
+                subscription_id,
+                resource_group_name,
+                name,
+                mc,
+                monitoring,
+                ingress_appgw_addon_enabled,
+                enable_virtual_node,
+                need_post_creation_vnet_permission_granting,
+                vnet_subnet_id,
+                enable_managed_identity,
+                attach_acr,
+                custom_headers,
+                no_wait)
+            return created_cluster
         except CloudError as ex:
             retry_exception = ex
             if 'not found in Active Directory tenant' in ex.message:
@@ -2486,6 +2451,9 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_ahub=False,
                disable_ahub=False,
                windows_admin_password=None,
+               enable_managed_identity=False,
+               assign_identity=None,
+               yes=False,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2506,7 +2474,9 @@ def aks_update(cmd, client, resource_group_name, name,
             not update_aad_profile and
             not enable_ahub and
             not disable_ahub and
-            not windows_admin_password):
+            not windows_admin_password and
+            not enable_managed_identity and
+            not assign_identity):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2525,7 +2495,12 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--aad-admin-group-object-ids" or '
                        '"--enable-ahub" or '
                        '"--disable-ahub" or '
-                       '"--windows-admin-password"')
+                       '"--windows-admin-password" or '
+                       '"--enable-managed-identity" or '
+                       '"--assign-identity"')
+
+    if not enable_managed_identity and assign_identity:
+        raise CLIError('--assign-identity can only be specified when --enable-managed-identity is specified')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2655,7 +2630,72 @@ def aks_update(cmd, client, resource_group_name, name,
     if windows_admin_password:
         instance.windows_profile.admin_password = windows_admin_password
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    current_identity_type = "spn"
+    if instance.identity is not None:
+        current_identity_type = instance.identity.type.casefold()
+
+    goal_identity_type = current_identity_type
+    if enable_managed_identity:
+        if not assign_identity:
+            goal_identity_type = "systemassigned"
+        else:
+            goal_identity_type = "userassigned"
+
+    if current_identity_type != goal_identity_type:
+        msg = ""
+        if current_identity_type == "spn":
+            msg = ('Your cluster is using service principal, and you are going to update '
+                   'the cluster to use {} managed identity.\n After updating, your '
+                   'cluster\'s control plane and addon pods will switch to use managed '
+                   'identity, but kubelet will KEEP USING SERVICE PRINCIPAL '
+                   'until you upgrade your agentpool.\n '
+                   'Are you sure you want to perform this operation?').format(goal_identity_type)
+        else:
+            msg = ('Your cluster is already using {} managed identity, and you are going to '
+                   'update the cluster to use {} managed identity. \nAre you sure you want to '
+                   'perform this operation?').format(current_identity_type, goal_identity_type)
+        if not yes and not prompt_y_n(msg, default="n"):
+            return None
+        if goal_identity_type == "systemassigned":
+            instance.identity = ManagedClusterIdentity(
+                type="SystemAssigned"
+            )
+        elif goal_identity_type == "userassigned":
+            user_assigned_identity = {
+                assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
+            }
+            instance.identity = ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities=user_assigned_identity
+            )
+
+    monitoring_addon_enabled = False
+    ingress_appgw_addon_enabled = False
+    virtual_node_addon_enabled = False
+    if instance.addon_profiles is not None:
+        monitoring_addon_enabled = CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
+            instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+        ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles and \
+            instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
+        virtual_node_addon_enabled = CONST_VIRTUAL_NODE_ADDON_NAME + 'Linux' in instance.addon_profiles and \
+            instance.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + 'Linux'].enabled
+
+    return _put_managed_cluster_ensuring_permission(
+        cmd,
+        client,
+        subscription_id,
+        resource_group_name,
+        name,
+        instance,
+        monitoring_addon_enabled,
+        ingress_appgw_addon_enabled,
+        virtual_node_addon_enabled,
+        False,
+        instance.agent_pool_profiles[0].vnet_subnet_id,
+        _is_msi_cluster(instance),
+        attach_acr,
+        None,
+        no_wait)
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
@@ -3408,6 +3448,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       labels=None,
                       max_surge=None,
                       mode="User",
+                      enable_encryption_at_host=False,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -3453,6 +3494,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
         upgrade_settings=upgradeSettings,
+        enable_encryption_at_host=enable_encryption_at_host,
         mode=mode
     )
 
@@ -4113,3 +4155,80 @@ def _is_msi_cluster(managed_cluster):
     return (managed_cluster and managed_cluster.identity and
             (managed_cluster.identity.type.casefold() == "systemassigned" or
              managed_cluster.identity.type.casefold() == "userassigned"))
+
+
+def _put_managed_cluster_ensuring_permission(
+        cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+        client,
+        subscription_id,
+        resource_group_name,
+        name,
+        managed_cluster,
+        monitoring_addon_enabled,
+        ingress_appgw_addon_enabled,
+        virtual_node_addon_enabled,
+        need_grant_vnet_permission_to_cluster_identity,
+        vnet_subnet_id,
+        enable_managed_identity,
+        attach_acr,
+        headers,
+        no_wait
+):
+    # some addons require post cluster creation role assigment
+    need_post_creation_role_assignment = (monitoring_addon_enabled or
+                                          ingress_appgw_addon_enabled or
+                                          (enable_managed_identity and attach_acr) or
+                                          virtual_node_addon_enabled or
+                                          need_grant_vnet_permission_to_cluster_identity)
+    if need_post_creation_role_assignment:
+        # adding a wait here since we rely on the result for role assignment
+        cluster = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
+            resource_group_name=resource_group_name,
+            resource_name=name,
+            parameters=managed_cluster,
+            custom_headers=headers))
+        cloud_name = cmd.cli_ctx.cloud.name
+        # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
+        # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
+        if monitoring_addon_enabled and cloud_name.lower() == 'azurecloud':
+            from msrestazure.tools import resource_id
+            cluster_resource_id = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group_name,
+                namespace='Microsoft.ContainerService', type='managedClusters',
+                name=name
+            )
+            _add_monitoring_role_assignment(cluster, cluster_resource_id, cmd)
+        if ingress_appgw_addon_enabled:
+            _add_ingress_appgw_addon_role_assignment(cluster, cmd)
+        if virtual_node_addon_enabled:
+            _add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
+        if need_grant_vnet_permission_to_cluster_identity:
+            if not _create_role_assignment(cmd.cli_ctx, 'Network Contributor',
+                                           cluster.identity.principal_id, scope=vnet_subnet_id,
+                                           resolve_assignee=False):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
+
+        if enable_managed_identity and attach_acr:
+            # Attach ACR to cluster enabled managed identity
+            if cluster.identity_profile is None or \
+               cluster.identity_profile["kubeletidentity"] is None:
+                logger.warning('Your cluster is successfully created, but we failed to attach '
+                               'acr to it, you can manually grant permission to the identity '
+                               'named <ClUSTER_NAME>-agentpool in MC_ resource group to give '
+                               'it permission to pull from ACR.')
+            else:
+                kubelet_identity_client_id = cluster.identity_profile["kubeletidentity"].client_id
+                _ensure_aks_acr(cmd.cli_ctx,
+                                client_id=kubelet_identity_client_id,
+                                acr_name_or_id=attach_acr,
+                                subscription_id=subscription_id)
+    else:
+        cluster = sdk_no_wait(no_wait, client.create_or_update,
+                              resource_group_name=resource_group_name,
+                              resource_name=name,
+                              parameters=managed_cluster,
+                              custom_headers=headers)
+
+    return cluster
