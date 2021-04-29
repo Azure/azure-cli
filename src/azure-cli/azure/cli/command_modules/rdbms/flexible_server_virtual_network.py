@@ -11,7 +11,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
-from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_private_dns_zone_suffix_operations
+from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import get_id_components, check_existence
 
 logger = get_logger(__name__)
@@ -173,7 +173,7 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
 
 def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
     from azure.mgmt.privatedns.models import SubResource
-    dns_suffix_client = cf_postgres_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
+    dns_suffix_client = cf_postgres_flexible_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
 
     private_dns_zone_suffix = dns_suffix_client.execute(database_engine)
     vnet_sub, vnet_rg, vnet_name, _ = get_id_components(subnet_id)

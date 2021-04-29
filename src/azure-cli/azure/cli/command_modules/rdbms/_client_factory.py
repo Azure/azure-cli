@@ -262,10 +262,6 @@ def cf_postgres_private_link_resources_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).private_link_resources
 
 
-def cf_postgres_private_dns_zone_suffix_operations(cli_ctx, _):
-    return get_postgresql_management_client(cli_ctx).get_private_dns_zone_suffix
-
-
 def cf_mysql_server_keys_operations(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).server_keys
 
@@ -357,6 +353,10 @@ def cf_postgres_check_resource_availability(cli_ctx, _):
 
 def cf_postgres_flexible_db(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).databases
+
+
+def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
 
 
 def resource_client_factory(cli_ctx, subscription_id=None):
