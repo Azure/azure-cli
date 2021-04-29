@@ -814,3 +814,38 @@ def update_or_rule(client, resource_group_name, account_name, policy_id, rule_id
 
     return get_or_rule(client, resource_group_name=resource_group_name, account_name=account_name,
                        policy_id=policy_id, rule_id=rule_id)
+
+
+def create_blob_inventory_policy(cmd, client, resource_group_name, account_name, policy):
+    if os.path.exists(policy):
+        policy = get_file_json(policy)
+    else:
+        policy = shell_safe_json_parse(policy)
+
+    BlobInventoryPolicy, InventoryRuleType, BlobInventoryPolicyName = \
+        cmd.get_models('BlobInventoryPolicy', 'InventoryRuleType', 'BlobInventoryPolicyName')
+    properties = BlobInventoryPolicy()
+    if 'type' not in policy:
+        policy['type'] = InventoryRuleType.INVENTORY
+    properties.policy = policy
+
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=properties)
+
+
+def delete_blob_inventory_policy(cmd, client, resource_group_name, account_name):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.delete(resource_group_name=resource_group_name, account_name=account_name,
+                         blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT)
+
+
+def get_blob_inventory_policy(cmd, client, resource_group_name, account_name):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                      blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT)
+
+
+def update_blob_inventory_policy(cmd, client, resource_group_name, account_name, parameters=None):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)
