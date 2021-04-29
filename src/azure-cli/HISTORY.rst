@@ -44,7 +44,6 @@ Release History
 * vm create --count mode, support vnet and subnet configuration (#17660)
 * `az vmss extension upgrade` failed (#17711)
 * Add error message for `vm identity assign` (#17685)
-* `az vmss extension upgrade`  test case (#17724)
 * Zone-redundant storage (ZRS) managed disks (#17754)
 * `disk create`: Trusted launch (#17775)
 * `disk create`: Hibernation (#17775)
