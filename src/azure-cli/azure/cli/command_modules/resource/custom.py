@@ -346,20 +346,24 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    if template_uri:
-        smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                      aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
+    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                  aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
-        deployment_client = smc.deployments  # This solves the multi-api for you`
-    else:
-        smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                      aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants,
-                                      per_call_policies=JsonCTemplatePolicy())
+    deployment_client = smc.deployments  # This solves the multi-api for you
 
-        deployment_client = smc.deployments  # This solves the multi-api for you`
+    if not template_uri:
         # pylint: disable=protected-access
         deployment_client._serialize = JSONSerializer(
             deployment_client._serialize.dependencies
+        )
+
+        # Plug this as default HTTP pipeline
+        from azure.core.pipeline import Pipeline
+        smc._client._pipeline._impl_policies.append(JsonCTemplatePolicy())
+        # Because JsonCTemplatePolicy needs to be wrapped as _SansIOHTTPPolicyRunner, so a new Pipeline is built
+        smc._client._pipeline = Pipeline(
+            policies=smc._client._pipeline._impl_policies,
+            transport=smc._client._pipeline._transport
         )
 
     from azure.core.exceptions import HttpResponseError
@@ -929,19 +933,27 @@ def _prepare_deployment_what_if_properties(cmd, deployment_scope, template_file,
 # pylint: disable=protected-access
 def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenants=None, plug_pipeline=True):
 
-    if not plug_pipeline:
-        smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                      aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
-        return smc.deployments
-
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                  aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants,
-                                  per_call_policies=JsonCTemplatePolicy())
+                                  aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
+
+    if not plug_pipeline:
+        return deployment_client
+
     deployment_client._serialize = JSONSerializer(
         deployment_client._serialize.dependencies
     )
+
+    # Plug this as default HTTP pipeline
+    from azure.core.pipeline import Pipeline
+    smc._client._pipeline._impl_policies.append(JsonCTemplatePolicy())
+    # Because JsonCTemplatePolicy needs to be wrapped as _SansIOHTTPPolicyRunner, so a new Pipeline is built
+    smc._client._pipeline = Pipeline(
+        policies=smc._client._pipeline._impl_policies,
+        transport=smc._client._pipeline._transport
+    )
+
     return deployment_client
 
 
