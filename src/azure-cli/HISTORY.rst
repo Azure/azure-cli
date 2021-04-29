@@ -117,7 +117,7 @@ Release History
 
 **Role**
 
-* `az role assignment create/update`: auto complete `assignee_principal_type` (#17669)
+* `az role assignment create/update`: Auto complete `assignee_principal_type` (#17669)
 
 **SQL**
 
