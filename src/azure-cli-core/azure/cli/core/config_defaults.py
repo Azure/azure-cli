@@ -54,7 +54,7 @@ config = {
             ],
             "type": "boolean",
             "description": "Turn confirmation prompts on/off"
-        }, 
+        },
         "collect_telemetry": {
             "default": "false",
             "allowed": [
