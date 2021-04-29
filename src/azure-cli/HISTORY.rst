@@ -3,6 +3,142 @@
 Release History
 ===============
 
+2.23.0
+++++++
+
+**ACR**
+
+* check-health: add support to verify dns routings to private endpoints (#17746)
+* Fix #17618: Update credential add/update handling for tasks created using --auth-mode (#17715)
+
+**AKS**
+
+* `az aks update`: add --windows-admin-password to support updating Windows password (#17684)
+* Support updating from SPN cluster to MSI cluster. (#17902)
+* `az aks create`: add enable-encryption-at-host parameter (#17813)
+
+**App Service**
+
+* [BREAKING CHANGE] Update websites SDK to the latest version (azure-mgmt-web==2.0.0) & Adopt track2 SDK (#17146)
+* [BREAKING CHANGE] Add support for az staticwebapp show; az staticwebapp create; az staticwebapp update (#17870)
+* `az webapp/functionapp config access-restriction add/remove`: Support for Service Tag, Http headers and multi-source rules. (#17687)
+
+**ARM**
+
+* `az bicep`: Replace datetime APIs that are not available in Python 3.6 (#17675)
+* `az deployment group create`: Fix the compatibility issue of api-version for parameter `--template-specs` (#17896)
+
+**Backup**
+
+* `az backup vault create`: Add tags as an optional argument (#17735)
+* Made AFS Configure Backup flow Idempotent (#17839)
+
+**CDN**
+
+* `az cdn endpoint rule add`: Fix delivery rule creation for non-Microsoft SKU (#17822)
+
+**Compute**
+
+* Extended location for Compute RP (#17522)
+* sig image-version create: Support creating from a VHD (#16371)
+* Vm create --count mode, support vnet and subnet configuration (#17660)
+* `az vmss extension upgrade` failed (#17711)
+* Add error message for `vm identity assign` (#17685)
+* `az vmss extension upgrade`  test case (#17724)
+* Zone-redundant storage (ZRS) managed disks (#17754)
+* disk create: Trusted launch (#17775)
+* disk create: Hibernation (#17775)
+* Fix a compatibility issue of old API version (#17906)
+* sig image version create: Support data disk VHDs (#17706)
+
+**Feedback**
+
+* Do not minify feedback issue body (#17353)
+
+**FunctionApp**
+
+* Fixed issue with zip deploy where local time was provided but UTC was expected (#17722)
+* Updated stacks api json to add PowerShell on Linux in Functions (#17678)
+
+**HDInsight**
+
+* Add Incoming BREAKING CHANGE for removing default value of `--workernode-size` and  `--headnode-size` (#17862)
+
+**Key Vault**
+
+* [BREAKING CHANGE] Support soft-delete feature for managed-HSM. `keyvault delete --hsm-name` will perform soft delete on a MHSM. (#17834)
+
+**MarketplaceOrdering**
+
+* New command group `az term` to accept/show terms (#17686)
+
+**Misc.**
+
+* Define theme for Cloud Shell (#17283)
+
+**Monitor**
+
+* Add new command `az monitor metrics list-namespaces` (#17472)
+
+**Network**
+
+* [BREAKING CHANGE] az network dns record-set a show: Property `arecords` in output will be changed to `aRecords`. (#17787)
+* New command `az network express-route list-route-tables-summary`. (#17450)
+* New command `az network express-route peering get-stats`. (#17450)
+* New command `az network express-route peering connection list`. (#17450)
+* `az network lb create`: Add new parameter `--edge-zone` (#17623)
+* `az network nic create`: Add new parameter `--edge-zone` (#17623)
+* `az network private-endpoint create`: Add new parameter `--edge-zone` (#17623)
+* `az network private-link-service create`: Add new parameter `--edge-zone` (#17623)
+* `az network public-ip create`: Add new parameter `--edge-zone` (#17623)
+* `az network public-ip prefix create`: Add new parameter `--edge-zone` (#17623)
+* `az network vnet create`: Add new parameter `--edge-zone` (#17623)
+* New Command `az network lb list-nic` (#17729)
+* `az network application-gateway show-backend-health`: support probe operation arguments. (#17753)
+* `az network vpn-connection list`: support parameter `--vnet-gateway`. (#17664)
+* New command `az network vnet-gateway disconnect-vpn-connections`. (#17664)
+* New command `az network vnet-gateway vpn-client show-health`. (#17664)
+* New command `az network vnet-gateway vpn-client ipsec-policy show`. (#17664)
+* New command `az network vnet-gateway vpn-client ipsec-policy set`. (#17664)
+* New command `az network vnet-gateway packet-capture start`. (#17664)
+* New command `az network vnet-gateway packet-capture stop`. (#17664)
+* New command `az network vnet-gateway show-supported-devices`. (#17664)
+* New command `az network vpn-connection list-ike-sas`. (#17664)
+* New command `az network vpn-connection packet-capture start`. (#17664)
+* New command `az network vpn-connection packet-capture stop`. (#17664)
+* New command `az network vpn-connection show-device-config-script`. (#17664)
+* `az network private-link-resource list`: support more providers for `--type` (#17731)
+
+**Packaging**
+
+* Bump python to `3.8.9` in docker image (#17840)
+* Bump bundled python to `3.8.9` in MSI. (#17816)
+
+**Role**
+
+* `az role assignment create/update`: auto complete `assignee_principal_type` (#17669)
+
+**SQL**
+
+* `az sql db create`: Add --ha-replicas argument (#17636)
+* `az sql db replica create`: Add --ha-replicas argument (#17636)
+* Allow short mw policy names for mi (#17703)
+
+**SQL VM**
+
+* Make SqlServerLicenseType as optional (#17766)
+
+**Storage**
+
+* Fix issue #16272 and #16853: Refine error message (#17630)
+* `az storage account create`: Add edge zone support (#17528)
+* Support user assigned identity for storage account (#16613)
+* `az storage account create/update`: Support sas&key policy (#17815)
+
+**Synapse**
+
+* `az synapse notebook create `: Create a notebook (#17867)
+
 2.22.1
 ++++++
 

@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* AzCommandGroup refactor (#17387)
+* Linter rule for service_name.json (#17428)
+
 2.22.1
 ++++++
 * Minor fixes
