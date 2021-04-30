@@ -54,3 +54,36 @@ def sshkey_create(client,
         logger.warning('Public key is saved to "%s".', public_key_file)
     return client.get(resource_group_name=resource_group_name,
                       ssh_public_key_name=ssh_public_key_name)
+
+
+def sig_group_list(client,
+                   location,
+                   shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_share_image_definition_list(client,
+                                    location,
+                                    gallery_unique_name,
+                                    shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       shared_to=shared_to)
+
+
+def sig_share_image_version_list(client,
+                                 location,
+                                 gallery_unique_name,
+                                 gallery_image_name,
+                                 shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name,
+                       shared_to=shared_to)
