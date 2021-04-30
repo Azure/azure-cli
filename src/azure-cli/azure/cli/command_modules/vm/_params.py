@@ -932,6 +932,9 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
+        c.argument('permissions', arg_type=get_enum_type(['Private', 'Groups']), arg_group='Sharing Profile',
+                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
+
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:

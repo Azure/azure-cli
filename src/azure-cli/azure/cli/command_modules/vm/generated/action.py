@@ -7,4 +7,49 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+
+
 # pylint: disable=protected-access
+
+# pylint: disable=no-self-use
+
+
+import argparse
+from collections import defaultdict
+from knack.util import CLIError
+
+
+class AddGroups(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AddGroups, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+
+            kl = k.lower()
+
+            v = properties[k]
+
+            if kl == 'type':
+
+                d['type'] = v[0]
+
+            elif kl == 'ids':
+
+                d['ids'] = v
+
+            else:
+                raise CLIError(
+                    'Unsupported Key {} is provided for parameter groups. All possible keys are: type, ids'.format(k)
+                )
+
+        return d

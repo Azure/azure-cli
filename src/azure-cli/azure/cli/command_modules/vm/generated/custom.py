@@ -57,3 +57,69 @@ def sshkey_delete(client,
                   ssh_public_key_name):
     return client.delete(resource_group_name=resource_group_name,
                          ssh_public_key_name=ssh_public_key_name)
+
+
+def sig_share_update(client,
+                     resource_group_name,
+                     gallery_name,
+                     operation_type,
+                     groups=None):
+    sharing_update = {}
+    sharing_update['operation_type'] = operation_type
+    sharing_update['groups'] = groups
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def vm_shared_gallery_list(client,
+                           location,
+                           shared_to=None):
+    if shared_to is None:
+        shared_to = "tenant"
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_share_image_definition_list(client,
+                                    location,
+                                    gallery_unique_name,
+                                    shared_to=None):
+    if shared_to is None:
+        shared_to = "tenant"
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       shared_to=shared_to)
+
+
+def sig_share_image_definition_show(client,
+                                    location,
+                                    gallery_unique_name,
+                                    gallery_image_name):
+    return client.get(location=location,
+                      gallery_unique_name=gallery_unique_name,
+                      gallery_image_name=gallery_image_name)
+
+
+def sig_share_image_version_list(client,
+                                 location,
+                                 gallery_unique_name,
+                                 gallery_image_name,
+                                 shared_to=None):
+    if shared_to is None:
+        shared_to = "tenant"
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name,
+                       shared_to=shared_to)
+
+
+def sig_share_image_version_show(client,
+                                 location,
+                                 gallery_unique_name,
+                                 gallery_image_name,
+                                 gallery_image_version_name):
+    return client.get(location=location,
+                      gallery_unique_name=gallery_unique_name,
+                      gallery_image_name=gallery_image_name,
+                      gallery_image_version_name=gallery_image_version_name)

@@ -3315,6 +3315,20 @@ def list_image_galleries(cmd, resource_group_name=None):
     return client.galleries.list()
 
 
+# from azure.mgmt.compute.models import Gallery, SharingProfile
+def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
+    if permissions:
+        if gallery.sharing_profile is None:
+            SharingProfile = cmd.get_models('SharingProfile')
+            gallery.sharing_profile = SharingProfile(permissions=permissions)
+        else:
+            gallery.sharing_profile.permissions = permissions
+
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
+
+
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
                          location=None, no_wait=False, tags=None):
     Gallery = cmd.get_models('Gallery')
