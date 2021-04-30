@@ -304,7 +304,7 @@ class AzCliCommand(CLICommand):
                 local_context = self.cli_ctx.local_context
                 value = local_context.get(self.name, lca.name)
                 if value:
-                    logger.debug("local context '%s' for arg %s", value, arg.name)
+                    logger.debug("parameter persistence '%s' for arg %s", value, arg.name)
                     overrides.settings['default'] = DefaultStr(value)
                     overrides.settings['required'] = False
                     overrides.settings['default_value_source'] = 'Local Context'
@@ -596,13 +596,13 @@ class AzCliCommandInvoker(CommandInvoker):
                     value = getattr(parsed_args, name)
                     local_context_args.append((options[0], value))
             if local_context_args:
-                logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
-                               'run `az local-context off` to turn it off.',
+                logger.warning('Parameter persistence is turned on. Its information is saved in working directory %s. '
+                               'You can run `az config param-persist off` to turn it off.',
                                self.cli_ctx.local_context.effective_working_directory())
                 args_str = []
                 for name, value in local_context_args:
                     args_str.append('{}: {}'.format(name, value))
-                logger.warning('Command argument values from local context: %s', ', '.join(args_str))
+                logger.warning('Command argument values from parameter persistence: %s', ', '.join(args_str))
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
