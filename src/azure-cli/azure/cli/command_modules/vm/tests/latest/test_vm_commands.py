@@ -3751,6 +3751,22 @@ class VMGenericUpdate(ScenarioTest):
 
 class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
+    def test_shared_gallery(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': 'gallery',
+            'image': 'image',
+            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+                 checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
+        self.cmd('sig share update --gallery-name {gallery} -g {rg} --groups type="Subscriptions" ids="{sharedSubId}" --operation-type Add')
+        self.cmd('sig group-list')
+        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {galleryUniqName}')
+
+    @ResourceGroupPreparer(location='eastus2')
     def test_gallery_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
