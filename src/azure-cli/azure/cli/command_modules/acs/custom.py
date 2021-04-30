@@ -1544,6 +1544,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                 {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
                 {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
             ],
+            "nodeSelector": {"kubernetes.io/os": "linux"},
         }
     }
 
