@@ -227,14 +227,19 @@ jobs:
           $InstallArgs += $reinstall_option
         }
         Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        Get-Content .\install_logs.txt
+        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
         $installed_version=az version --query '\"azure-cli\"' -o tsv
         if ($installed_version -ne $to_be_installed_version){
           echo "The MSI failed to install."
           Exit 1
         }
+        echo 'Install time(seconds):' $install_time
         az --version
+        # Test bundled pip with extension installation
+        az extension add -n rdbms-connect
         az self-test
+
+        Get-Content .\install_logs.txt
 
 - job: BuildDockerImage
   displayName: Build Docker Image

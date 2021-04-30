@@ -98,7 +98,7 @@ def load_arguments(self, _):
     )
 
     edge_zone_type = CLIArgumentType(
-        help='Name of edge zone extended location.',
+        help='The name of edge zone.',
         min_api='2020-12-01',
         is_preview=True
     )
@@ -156,6 +156,8 @@ def load_arguments(self, _):
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/en-us/pricing/details/managed-disks/. Does not apply to Ultra disks.')
         c.argument('edge_zone', edge_zone_type)
+        c.argument('security_type', choices=['TrustedLaunch'], help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
     # endregion
 
     # region Snapshots
@@ -948,6 +950,9 @@ def load_arguments(self, _):
                    help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for each region: `<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`. Use "null" as a placeholder.')
         c.argument('os_vhd_uri', help='Source VHD URI of OS disk')
         c.argument('os_vhd_storage_account', help='Name or ID of storage account of source VHD URI of OS disk')
+        c.argument('data_vhds_uris', nargs='+', help='Source VHD URIs (space-delimited) of data disks')
+        c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
+        c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
