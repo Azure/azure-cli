@@ -593,7 +593,10 @@ def acr_task_credential_add(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
-    existingCreds = {} if not existingCreds else existingCreds.custom_registries
+    if not existingCreds or not existingCreds.custom_registries:
+        existingCreds = {}
+    else:
+        existingCreds = existingCreds.custom_registries
 
     if login_server in existingCreds:
         raise CLIError("Login server '{}' already exists. You cannot add it again.".format(login_server))
@@ -629,7 +632,10 @@ def acr_task_credential_update(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
-    existingCreds = {} if not existingCreds else existingCreds.custom_registries
+    if not existingCreds or not existingCreds.custom_registries:
+        existingCreds = {}
+    else:
+        existingCreds = existingCreds.custom_registries
 
     if login_server not in existingCreds:
         raise CLIError("Login server '{}' not found.".format(login_server))

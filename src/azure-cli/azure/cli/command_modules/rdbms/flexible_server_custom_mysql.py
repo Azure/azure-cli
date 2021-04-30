@@ -14,12 +14,12 @@ from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
-    cf_mysql_flexible_db
+    cf_mysql_flexible_db, cf_mysql_check_resource_availability
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
 from .flexible_server_virtual_network import prepare_private_network
-from .validators import mysql_arguments_validator
+from .validators import mysql_arguments_validator, validate_server_name
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -55,6 +55,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'mysql')
     server_name = server_name.lower()
+    validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     # Handle Vnet scenario
     if public_access is None:
@@ -120,6 +121,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
+    validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -369,6 +371,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, replica_name, server_name, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
+    validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), replica_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     # set source server id
     if not is_valid_resource_id(server_name):

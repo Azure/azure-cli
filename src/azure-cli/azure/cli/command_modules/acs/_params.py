@@ -220,6 +220,7 @@ def load_arguments(self, _):
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('node_osdisk_diskencryptionset_id', type=str, options_list=['--node-osdisk-diskencryptionset-id', '-d'])
         c.argument('aci_subnet_name')
+        c.argument('enable_encryption_at_host', options_list=['--enable-encryption-at-host'], action='store_true')
         c.argument('appgw_name', options_list=['--appgw-name'], arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', options_list=['--appgw-subnet-cidr'], arg_group='Application Gateway')
         c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
@@ -249,6 +250,10 @@ def load_arguments(self, _):
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('windows_admin_password', options_list=['--windows-admin-password'])
+        c.argument('enable_managed_identity', action='store_true')
+        c.argument('assign_identity', type=str, validator=validate_assign_identity)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -322,6 +327,7 @@ def load_arguments(self, _):
             c.argument('ppg', type=str, validator=validate_ppg)
             c.argument('max_surge', type=str, validator=validate_max_surge)
             c.argument('node_os_disk_type', arg_type=get_enum_type([CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
+            c.argument('enable_encryption_at_host', options_list=['--enable-encryption-at-host'], action='store_true')
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:

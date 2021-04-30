@@ -16,7 +16,7 @@ import colorama  # pylint: disable=import-error
 from azure.cli.core import telemetry as telemetry_core
 from azure.cli.core import __version__ as core_version
 from azure.cli.core.commands.constants import SURVEY_PROMPT
-from pkg_resources import parse_version
+from packaging.version import parse
 from knack.log import get_logger
 logger = get_logger(__name__)
 
@@ -94,7 +94,7 @@ def should_enable_styling():
 
 
 def call_aladdin_service(query):
-    version = str(parse_version(core_version))
+    version = str(parse(core_version))
     correlation_id = telemetry_core._session.correlation_id   # pylint: disable=protected-access
     subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
 
