@@ -646,15 +646,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
         c.register_sas_arguments()
-        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '
                                          'using this shared access signature.')
-        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed '
                                                'using this shared access signature.')
-        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
                                             'using this shared access signature.')
-        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed '
                                             'using this shared access signature.')
-        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed '
                                         'using this shared access signature.')
         c.argument('full_uri', action='store_true',
                    help='Indicates that this command return the full blob URI and the shared access signature token.')
