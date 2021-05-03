@@ -4,14 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-import json
-import os
-import sys
-import yaml
 import datetime as dt
 from datetime import datetime
+import os
 import random
 import subprocess
+import yaml
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -336,7 +334,7 @@ def run_subprocess_get_output(command):
     return process
 
 
-def register_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository):
+def register_credential_secrets(cmd, server, repository):
     resource_group = parse_resource_id(server.id)["resource_group"]
     scope = "/subscriptions/{}/resourceGroups/{}".format(get_subscription_id(cmd.cli_ctx), resource_group)
 
@@ -358,6 +356,8 @@ def register_secrets(cmd, database_engine, server, database_name, administrator_
     run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
     os.remove(credential_file)
 
+
+def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository):
     if database_engine == 'postgresql':
         connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
         run_subprocess('gh secret set {} --repo {} -b"{}"'.format(AZURE_POSTGRESQL_CONNECTION_STRING, repository, connection_string))
@@ -377,21 +377,26 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
     connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
     file_format = 'plsql-file' if database_engine == 'postgresql' else 'sql-file'
 
-    if AZURE_CREDENTIALS not in secrets and connection_string not in secrets:
-        register_secrets(cmd,
-                         database_engine=database_engine,
-                         server=server,
-                         database_name=database_name,
-                         administrator_login=administrator_login,
-                         administrator_login_password=administrator_login_password,
-                         repository=repository)
+    if AZURE_CREDENTIALS not in secrets:
+        register_credential_secrets(cmd,
+                                    server=server,
+                                    repository=repository)
 
-    condition = "on: [push, workflow_dispatch]\n"
+    if connection_string not in secrets:
+        register_connection_secrets(cmd,
+                                    database_engine=database_engine,
+                                    server=server,
+                                    database_name=database_name,
+                                    administrator_login=administrator_login,
+                                    administrator_login_password=administrator_login_password,
+                                    repository=repository)
+
+    condition = "on: [workflow_dispatch]\n"
     yml_content = {
         'jobs': {
-            'build':{ 
+            'build': {
                 'runs-on': 'ubuntu-latest',
-                'steps':[
+                'steps': [
                     {
                         'uses': 'actions/checkout@v2.3.2'
                     },

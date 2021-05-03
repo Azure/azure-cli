@@ -4,12 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
+from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     GITHUB_ACTION_PATH
-from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 
 logger = get_logger(__name__)
 
@@ -42,7 +43,6 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
 
     if firewall_rule_name is None:
-        from datetime import datetime
         now = datetime.now()
         firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
                                                                           now.second)
@@ -178,6 +178,7 @@ def user_confirmation(message, yes=False):
 
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
 
+    server = client.get(resource_group_name, server_name)
     if allow_push and not branch:
         raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
     if action_name is None:
@@ -189,7 +190,9 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
     else:
         database_engine = 'postgresql'
 
-    server = client.get(resource_group_name, server_name)
+    if server.public_network_access == 'Disabled':
+        raise ClientRequestError("This command only works with public access enabled server.")
+
     fill_action_template(cmd,
                          database_engine=database_engine,
                          server=server,
@@ -199,25 +202,24 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
                          file_name=sql_file_path,
                          repository=repository,
                          action_name=action_name)
-    
-    
+
     action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
-    logger.warning("Making git commit for file {}".format(action_path))
-    # run_subprocess("git add {}".format(action_path))
-    # run_subprocess("git commit -m \"Add github action file\"")
+    logger.warning("Making git commit for file %s", action_path)
+    run_subprocess("git add {}".format(action_path))
+    run_subprocess("git commit -m \"Add github action file\"")
 
     if allow_push:
-        logger.warning("Pushing the created action file to origin {} branch".format(branch))
+        logger.warning("Pushing the created action file to origin %s branch", branch)
         run_subprocess("git push origin {}".format(branch))
         github_actions_run(action_name, branch)
     else:
-        logger.warning('You did not set --allow-push parameter. Please push the prepared file {} to your remote repo and run "deploy run" command to activate the workflow.'.format(action_path))
+        logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
 
 def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
-    logger.warning("Created event for {}.yml in branch {}".format(action_name, branch))
+    logger.warning("Created event for %s.yml in branch %s", action_name, branch)
     run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
 
 
