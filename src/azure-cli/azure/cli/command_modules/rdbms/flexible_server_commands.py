@@ -152,8 +152,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
-    with self.command_group('postgres deploy', postgres_flexible_servers_sdk,
-                            custom_command_type=flexible_servers_custom_postgres,
+    with self.command_group('postgres flexible-server deploy', postgres_flexible_servers_sdk,
+                            custom_command_type=flexible_server_custom_common,
                             client_factory=cf_postgres_flexible_servers,
                             is_preview=True) as g:
         g.custom_command('setup', 'github_actions_setup')
@@ -229,8 +229,8 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
 
-    with self.command_group('mysql deploy', mysql_flexible_servers_sdk,
-                            custom_command_type=flexible_servers_custom_common,
+    with self.command_group('mysql flexible-server deploy', mysql_flexible_servers_sdk,
+                            custom_command_type=flexible_server_custom_common,
                             client_factory=cf_mysql_flexible_servers,
                             is_preview=True) as g:
         g.custom_command('setup', 'github_actions_setup')

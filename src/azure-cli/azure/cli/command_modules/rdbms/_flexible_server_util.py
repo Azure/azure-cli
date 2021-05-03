@@ -22,7 +22,6 @@ from azure.mgmt.resource.resources.models import ResourceGroup
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
-from .flexible_server_custom_common import firewall_rule_create_func
 
 logger = get_logger(__name__)
 
@@ -30,6 +29,7 @@ DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
 DEFAULT_LOCATION_MySQL = 'westus2'
 AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
 AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'
+AZURE_MYSQL_CONNECTION_STRING = 'AZURE_MYSQL_CONNECTION_STRING'
 GITHUB_ACTION_PATH = '/.github/workflows/'
 
 
@@ -88,40 +88,6 @@ def generate_password(administrator_login_password):
             replaced_char = random.choice(string.ascii_letters)
             administrator_login_password = administrator_login_password.replace("-", replaced_char)
     return administrator_login_password
-
-
-def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
-    # allow access to azure ip addresses
-    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
-    now = datetime.now()
-    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                 now.second)
-    if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
-        logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
-                       'Azure resources...')
-        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
-                                                                                                   now.day, now.hour,
-                                                                                                   now.minute,
-                                                                                                   now.second)
-    elif start_ip == end_ip:
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
-    else:
-        if start_ip == '0.0.0.0' and end_ip == '255.255.255.255':
-            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                now.second)
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
-                       end_ip)
-    firewall_client = cf_firewall(cmd.cli_ctx, None)
-
-    # Commenting out until firewall_id is properly returned from RP
-    # return resolve_poller(
-    #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
-    #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
-
-    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
-                                         start_ip_address=start_ip, end_ip_address=end_ip)
-
-    return firewall.result().name
 
 
 # pylint: disable=inconsistent-return-statements
@@ -360,7 +326,7 @@ def run_subprocess(command, stdout_show=None):
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.wait()
     if process.returncode:
-        print(process.stderr.read().strip().decode('UTF-8'))
+        logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
 def run_subprocess_get_output(command):
@@ -370,7 +336,7 @@ def run_subprocess_get_output(command):
     return process
 
 
-def register_secrets(cmd, server, database_name, administrator_login, administrator_login_password, repository):
+def register_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository):
     resource_group = parse_resource_id(server.id)["resource_group"]
     scope = "/subscriptions/{}/resourceGroups/{}".format(get_subscription_id(cmd.cli_ctx), resource_group)
 
@@ -386,18 +352,21 @@ def register_secrets(cmd, server, database_name, administrator_login, administra
 
     app_json = ',\n  '.join(app_key_val)
     app_json = '{\n  ' + app_json + '\n}'
-    print(app_json)
     credential_file = "./temp_app_credential.txt"
     with open(credential_file, "w") as f:
         f.write(app_json)
     run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
     os.remove(credential_file)
 
-    connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(AZURE_POSTGRESQL_CONNECTION_STRING, repository, connection_string))
+    if database_engine == 'postgresql':
+        connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(AZURE_POSTGRESQL_CONNECTION_STRING, repository, connection_string))
+    elif database_engine == 'mysql':
+        connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(AZURE_MYSQL_CONNECTION_STRING, repository, connection_string))
 
 
-def fill_action_template(cmd, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
+def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
 
     action_dir = get_git_root_dir() + GITHUB_ACTION_PATH
     if not os.path.exists(action_dir):
@@ -405,13 +374,17 @@ def fill_action_template(cmd, server, database_name, administrator_login, admini
 
     process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
     secrets = process.stdout.read().strip().decode('UTF-8')
-    if AZURE_CREDENTIALS not in secrets and AZURE_POSTGRESQL_CONNECTION_STRING not in secrets:
+    connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
+    file_format = 'plsql-file' if database_engine == 'postgresql' else 'sql-file'
+
+    if AZURE_CREDENTIALS not in secrets and connection_string not in secrets:
         register_secrets(cmd,
-                        server=server,
-                        database_name=database_name,
-                        administrator_login=administrator_login,
-                        administrator_login_password=administrator_login_password,
-                        repository=repository)
+                         database_engine=database_engine,
+                         server=server,
+                         database_name=database_name,
+                         administrator_login=administrator_login,
+                         administrator_login_password=administrator_login_password,
+                         repository=repository)
 
     condition = "on: [push, workflow_dispatch]\n"
     yml_content = {
@@ -429,11 +402,11 @@ def fill_action_template(cmd, server, database_name, administrator_login, admini
                         }
                     },
                     {
-                        'uses': 'azure/postgresql@v1',
+                        'uses': 'azure/{}@v1'.format(database_engine),
                         'with': {
-                            'connection-string': '${{secrets.AZURE_POSTGRESQL_CONNECTION_STRING}}',
+                            'connection-string': '${{secrets.' + connection_string + '}}',
                             'server-name': server.fully_qualified_domain_name,
-                            'plsql-file': file_name,
+                            file_format: file_name,
                         }
                     }
                 ],
