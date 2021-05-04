@@ -319,6 +319,11 @@ examples:
     text: az mysql flexible-server show-connection-string -s testServer -u username -p password -d databasename
 """
 
+helps['mysql flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for MySQL server
+"""
+
 helps['mysql flexible-server deploy setup'] = """
 type: command
 short-summary: Create github action workflow file for MySQL server. 

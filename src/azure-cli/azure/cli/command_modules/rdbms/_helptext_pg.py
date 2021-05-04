@@ -300,6 +300,11 @@ examples:
     text: az postgres flexible-server show-connection-string -s testServer -u username -p password -d databasename
 """
 
+helps['postgres flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for PostgreSQL server
+"""
+
 helps['postgres flexible-server deploy setup'] = """
 type: command
 short-summary: Create github action workflow file for PostgreSQL server. 
