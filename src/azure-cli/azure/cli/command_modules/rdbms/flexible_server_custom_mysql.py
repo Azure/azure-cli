@@ -8,7 +8,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
@@ -45,6 +45,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         logging_name='MySQL', command_group='mysql', server_client=client)
 
+    if high_availability is not None and high_availability.lower() == 'enabled':
+        if tier == 'Burstable':
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
+
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
@@ -79,7 +83,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            iops_input=iops,
                            tier=tier,
                            sku_name=sku_name)
-    print(iops)
 
     storage_mb *= 1024  # storage input comes in GiB value
     administrator_login_password = generate_password(administrator_login_password)
@@ -196,7 +199,6 @@ def flexible_server_update_custom_func(cmd, instance,
     if sku_name:
         instance.sku.name = sku_name
 
-    # IOPS
     if not iops:
         iops = instance.storage_profile.storage_iops
     instance.storage_profile.storage_iops = _determine_iops(storage_gb=instance.storage_profile.storage_mb//1024,
@@ -204,7 +206,6 @@ def flexible_server_update_custom_func(cmd, instance,
                                                             iops_input=iops,
                                                             tier=instance.sku.tier,
                                                             sku_name=instance.sku.name)
-    print(instance.storage_profile.storage_iops)
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention

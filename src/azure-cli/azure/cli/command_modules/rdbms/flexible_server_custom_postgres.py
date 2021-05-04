@@ -51,6 +51,10 @@ def flexible_server_create(cmd, client,
     db_context = DbContext(
         azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
+    
+    if high_availability is not None and high_availability.lower() == 'enabled':
+        if tier == 'Burstable':
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
 
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
