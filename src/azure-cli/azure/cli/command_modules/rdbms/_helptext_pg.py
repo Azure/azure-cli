@@ -315,5 +315,5 @@ type: command
 short-summary: Run an existing workflow in your github repository
 examples:
   - name: Run an existing workflow in your github repository
-    text: az postgres deploy run --action-name testAction --branch userBranch
+    text: az postgres flexible-server deploy run --action-name testAction --branch userBranch
 """
