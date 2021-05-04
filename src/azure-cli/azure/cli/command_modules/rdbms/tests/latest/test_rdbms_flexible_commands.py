@@ -281,49 +281,59 @@ class FlexibleServerIopsMgmtScenarioTest(RdbmsScenarioTest):
             self.cmd('local-context off')
 
         # IOPS passed is beyond limit of max allowed by SKU and free storage
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 350 --storage-size 200 --tier Burstable --sku-name Standard_B1s'
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 350 --storage-size 200 --tier Burstable --sku-name Standard_B1ms'
                  .format(database_engine, resource_group, server_1, self.location))
 
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_1),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
 
         # IOPS passed is within limit of max allowed by SKU but smaller than default
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1s'
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1ms'
                  .format(database_engine, resource_group, server_2, self.location))
 
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_2),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 100)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 390)])
 
         # IOPS passed is within limit of max allowed by SKU and bigger than default
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 110 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 600 --storage-size 50 --tier Burstable --sku-name Standard_B1ms'
                  .format(database_engine, resource_group, server_3, self.location))
 
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_3),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 120)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 600)])
 
     def _test_flexible_server_iops_scale_up(self, database_engine, resource_group, server_1, server_2, server_3):
 
         # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 400'
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D8s_v3 --iops 400'
                  .format(database_engine, resource_group, server_1),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 600)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 900)])
 
         # SKU upgraded and IOPS value set bigger than max iops for the sku
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 700'
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D4s_v3 --iops 7000'
                  .format(database_engine, resource_group, server_2),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 6400)])
 
         # SKU upgraded and IOPS value set lower than max iops for the sku but bigger than free iops
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --storage-size 300 --iops 500'
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D8s_v3 --storage-size 200 --iops 1000'
                  .format(database_engine, resource_group, server_3),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 1000)])
 
     def _test_flexible_server_iops_scale_down(self, database_engine, resource_group, server_1, server_2, server_3):
 
-        # SKU downgraded and IOPS not specified
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1s'
+        # SKU downgraded and free iops is bigger than 
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --storage-size 300'
                  .format(database_engine, resource_group, server_1),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 1200)])
+
+        # SKU downgraded and IOPS not specified but bigger than new tier's max IOPS
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3'
+                 .format(database_engine, resource_group, server_2),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 3200)])
+        
+        # SKU downgraded and IOPS specified no exception case. 
+        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --iops 1100'
+                 .format(database_engine, resource_group, server_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 1100)])
 
 
 class FlexibleServerHighAvailabilityMgmt(RdbmsScenarioTest):
