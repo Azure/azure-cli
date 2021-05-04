@@ -59,7 +59,7 @@ def table_transform_output_list_skus(result):
                     new_entry['Tier'] = tier_name
                     new_entry['vCore'] = key['vCores']
                     new_entry['Memory'] = str(int(key['supportedMemoryPerVcoreMb']) * int(key['vCores']) // 1024) + " GiB"
-                    new_entry['Max Disk IOPS'] = key['supportedIOPS']
+                    new_entry['Max Disk IOPS'] = key['supportedIops']
                     table_result.append(new_entry)
             except:
                 raise CLIError("There is no sku available for this location.")
