@@ -1360,7 +1360,7 @@ def load_arguments(self, _):
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server update') as c:
