@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -27,8 +28,9 @@ DEFAULT_DB_NAME = 'flexibleserverdb'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 MINIMUM_IOPS = 300
 
+
 # region create without args
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                            location=None, storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
@@ -86,15 +88,15 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
     storage_mb *= 1024  # storage input comes in GiB value
     administrator_login_password = generate_password(administrator_login_password)
-    
+
     # Create mysql server
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
     server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
-                                    backup_retention,
-                                    sku_name, tier, storage_mb, administrator_login,
-                                    administrator_login_password,
-                                    version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                    high_availability, zone, iops)
+                                   backup_retention,
+                                   sku_name, tier, storage_mb, administrator_login,
+                                   administrator_login_password,
+                                   version, tags, delegated_subnet_arguments, assign_identity, public_access,
+                                   high_availability, zone, iops)
 
     # Adding firewall rule
     if public_access is not None and str(public_access).lower() != 'none':
@@ -181,8 +183,6 @@ def flexible_server_update_custom_func(cmd, instance,
     sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, instance=instance)
 
-    from importlib import import_module
-
     server_module_path = instance.__module__
     module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
@@ -201,7 +201,7 @@ def flexible_server_update_custom_func(cmd, instance,
 
     if not iops:
         iops = instance.storage_profile.storage_iops
-    instance.storage_profile.storage_iops = _determine_iops(storage_gb=instance.storage_profile.storage_mb//1024,
+    instance.storage_profile.storage_iops = _determine_iops(storage_gb=instance.storage_profile.storage_mb // 1024,
                                                             iops_info=iops_info,
                                                             iops_input=iops,
                                                             tier=instance.sku.tier,
@@ -350,7 +350,6 @@ def flexible_replica_stop(client, resource_group_name, server_name):
     if server_object.replication_role is not None and server_object.replication_role.lower() != "replica":
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
-    from importlib import import_module
     server_module_path = server_object.__module__
     module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
@@ -548,6 +547,8 @@ def _determine_iops(storage_gb, iops_info, iops_input, tier, sku_name):
 def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
     free_iops = MINIMUM_IOPS + (storage_in_mb // 1024) * 3
     max_supported_iops = iops_info[tier][sku_name]  # free iops cannot exceed maximum supported iops for the sku
+    logger.warning(iops_info[tier])
+    logger.warning(iops_info[tier][sku_name])
     return min(free_iops, max_supported_iops)
 
 
