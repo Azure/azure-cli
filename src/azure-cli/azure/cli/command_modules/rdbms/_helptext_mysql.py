@@ -326,9 +326,9 @@ short-summary: Enable and run github action workflow for MySQL server
 
 helps['mysql flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for MySQL server. 
+short-summary: Create github action workflow file for MySQL server.
 examples:
-  - name: Create github action workflow file for MySQL server. 
+  - name: Create github action workflow file for MySQL server.
     text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
   - name: Create github action workflow file for MySQL server and push it to the remote repository
     text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
