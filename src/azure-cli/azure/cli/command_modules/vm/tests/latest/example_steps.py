@@ -12,13 +12,23 @@
 from .. import try_manual
 
 
+# EXAMPLE: /Galleries/get/Get a gallery.
+@try_manual
+def step_group_list(test, checks=None):
+    if checks is None:
+        checks = []
+    test.cmd('az sig group-list '
+             '--location "myLocation"',
+             checks=checks)
+
+
 # EXAMPLE: /GallerySharingProfile/post/Add sharing id to the sharing profile of a gallery.
 @try_manual
 def step_share_update(test, checks=None):
     if checks is None:
         checks = []
     test.cmd('az sig share update '
-             '--gallery-name "myGalleryName" '
+             '--gallery-name "{myGallery}" '
              '--resource-group "{rg}" '
              '--groups type="Subscriptions" ids="34a4ab42-0d72-47d9-bd1a-aed207386dac" ids="380fd389-260b-41aa-bad9-0a8'
              '3108c370b" '
@@ -33,19 +43,9 @@ def step_share_update2(test, checks=None):
     if checks is None:
         checks = []
     test.cmd('az sig share update '
-             '--gallery-name "myGalleryName" '
+             '--gallery-name "{myGallery}" '
              '--resource-group "{rg}" '
              '--operation-type "Reset"',
-             checks=checks)
-
-
-# EXAMPLE: /SharedGalleries/get/Get a gallery.
-@try_manual
-def step_shared_gallery_list(test, checks=None):
-    if checks is None:
-        checks = []
-    test.cmd('az vm shared-gallery list '
-             '--location "myLocation"',
              checks=checks)
 
 
@@ -66,7 +66,7 @@ def step_share_image_version_list(test, checks=None):
     if checks is None:
         checks = []
     test.cmd('az sig share image-version list '
-             '--gallery-image-name "myGalleryImageName" '
+             '--gallery-image-definition "myGalleryImageName" '
              '--gallery-unique-name "galleryUniqueName" '
              '--location "myLocation"',
              checks=checks)

@@ -11,6 +11,7 @@
 import os
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk import ResourceGroupPreparer
+from .example_steps import step_group_list
 from .example_steps import step_share_update
 from .example_steps import step_share_update2
 from .example_steps import step_shared_gallery_list
@@ -44,6 +45,7 @@ def cleanup_scenario(test):
 @try_manual
 def call_scenario(test):
     setup_scenario(test)
+    step_group_list(test, checks=[])
     step_share_update(test, checks=[])
     step_share_update2(test, checks=[])
     step_shared_gallery_list(test, checks=[])
@@ -71,6 +73,7 @@ class VmScenarioTest(ScenarioTest):
         super(VmScenarioTest, self).__init__(*args, **kwargs)
         self.kwargs.update({
             'mySshPublicKey': 'mySshPublicKeyName',
+            'myGallery': 'myGalleryName',
         })
 
     @ResourceGroupPreparer(name_prefix='clitestvm_myResourceGroup'[:7], key='rg', parameter_name='rg')

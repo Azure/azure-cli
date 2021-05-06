@@ -10,12 +10,17 @@
 |CLI Command Group|Group Swagger name|Commands|
 |---------|------------|--------|
 |az sshkey|SshPublicKeys|[commands](#CommandsInSshPublicKeys)|
+|az sig|Galleries|[commands](#CommandsInGalleries)|
 |az sig share|GallerySharingProfile|[commands](#CommandsInGallerySharingProfile)|
-|az vm shared-gallery|SharedGalleries|[commands](#CommandsInSharedGalleries)|
 |az sig share image-definition|SharedGalleryImages|[commands](#CommandsInSharedGalleryImages)|
 |az sig share image-version|SharedGalleryImageVersions|[commands](#CommandsInSharedGalleryImageVersions)|
 
 ## COMMANDS
+### <a name="CommandsInGalleries">Commands in `az sig` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az sig group-list](#GalleriesList)|List|[Parameters](#ParametersGalleriesList)|[Example](#ExamplesGalleriesList)|
+
 ### <a name="CommandsInGallerySharingProfile">Commands in `az sig share` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
@@ -43,13 +48,21 @@
 |[az sshkey update](#SshPublicKeysUpdate)|Update|[Parameters](#ParametersSshPublicKeysUpdate)|Not Found|
 |[az sshkey delete](#SshPublicKeysDelete)|Delete|[Parameters](#ParametersSshPublicKeysDelete)|Not Found|
 
-### <a name="CommandsInSharedGalleries">Commands in `az vm shared-gallery` group</a>
-|CLI Command|Operation Swagger name|Parameters|Examples|
-|---------|------------|--------|-----------|
-|[az vm shared-gallery list](#SharedGalleriesList)|List|[Parameters](#ParametersSharedGalleriesList)|[Example](#ExamplesSharedGalleriesList)|
-
 
 ## COMMAND DETAILS
+
+### group `az sig`
+#### <a name="GalleriesList">Command `az sig group-list`</a>
+
+##### <a name="ExamplesGalleriesList">Example</a>
+```
+az sig group-list --location "myLocation"
+```
+##### <a name="ParametersGalleriesList">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--location**|string|Resource location.|location|location|
+|**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
 
 ### group `az sig share`
 #### <a name="GallerySharingProfileUpdate">Command `az sig share update`</a>
@@ -90,8 +103,8 @@ az sig share image-definition list --gallery-unique-name "galleryUniqueName" --l
 
 ##### <a name="ExamplesSharedGalleryImagesGet">Example</a>
 ```
-az sig share image-definition show --gallery-image-name "myGalleryImageName" --gallery-unique-name "galleryUniqueName" \
---location "myLocation"
+az sig share image-definition show --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+"galleryUniqueName" --location "myLocation"
 ```
 ##### <a name="ParametersSharedGalleryImagesGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -105,8 +118,8 @@ az sig share image-definition show --gallery-image-name "myGalleryImageName" --g
 
 ##### <a name="ExamplesSharedGalleryImageVersionsList">Example</a>
 ```
-az sig share image-version list --gallery-image-name "myGalleryImageName" --gallery-unique-name "galleryUniqueName" \
---location "myLocation"
+az sig share image-version list --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+"galleryUniqueName" --location "myLocation"
 ```
 ##### <a name="ParametersSharedGalleryImageVersionsList">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
@@ -120,7 +133,7 @@ az sig share image-version list --gallery-image-name "myGalleryImageName" --gall
 
 ##### <a name="ExamplesSharedGalleryImageVersionsGet">Example</a>
 ```
-az sig share image-version show --gallery-image-name "myGalleryImageName" --gallery-image-version-name \
+az sig share image-version show --gallery-image-definition "myGalleryImageName" --gallery-image-version \
 "myGalleryImageVersionName" --gallery-unique-name "galleryUniqueName" --location "myLocation"
 ```
 ##### <a name="ParametersSharedGalleryImageVersionsGet">Parameters</a> 
@@ -189,16 +202,3 @@ az sshkey create --location "westus" --public-key "{ssh-rsa public key}" --resou
 |------|----|-----------|----------|------------|
 |**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
 |**--ssh-public-key-name**|string|The name of the SSH public key.|ssh_public_key_name|sshPublicKeyName|
-
-### group `az vm shared-gallery`
-#### <a name="SharedGalleriesList">Command `az vm shared-gallery list`</a>
-
-##### <a name="ExamplesSharedGalleriesList">Example</a>
-```
-az vm shared-gallery list --location "myLocation"
-```
-##### <a name="ParametersSharedGalleriesList">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--location**|string|Resource location.|location|location|
-|**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
