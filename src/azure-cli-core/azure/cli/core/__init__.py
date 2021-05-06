@@ -174,7 +174,7 @@ class AzCli(CLI):
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Your preference of %s now saved to parameter persistence. To learn more, type in `az '
+            logger.warning('Your preference of %s now saved as persistent parameter. To learn more, type in `az '
                            'config param-persist --help`',
                            ', '.join(args_str) + (' is' if len(args_str) == 1 else ' are'))
 

@@ -602,7 +602,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 args_str = []
                 for name, value in local_context_args:
                     args_str.append('{}: {}'.format(name, value))
-                logger.warning('Command argument values from parameter persistence: %s', ', '.join(args_str))
+                logger.warning('Command argument values from persistent parameters: %s', ', '.join(args_str))
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
