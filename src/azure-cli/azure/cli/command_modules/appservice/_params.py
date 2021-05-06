@@ -18,7 +18,8 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 from ._completers import get_hostname_completion_list
 from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_service_tag)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -65,6 +66,11 @@ def load_arguments(self, _):
     isolated_sku_arg_type = CLIArgumentType(
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
+
+    static_web_app_sku_arg_type = CLIArgumentType(
+        help='The pricing tiers for Static Web App',
+        arg_type=get_enum_type(['Free', 'Standard'])
+    )
 
     functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
@@ -173,14 +179,14 @@ def load_arguments(self, _):
         c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
         c.argument('skip_custom_domain_verification',
                    help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
         c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -189,7 +195,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None)
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
-        c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
+        c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
+                   deprecate_info=c.deprecate(expiration='2.24.0'))
 
     with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
@@ -862,7 +869,10 @@ def load_arguments(self, _):
             c.argument('description', help='Description of the access restriction rule')
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
-            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
+            c.argument('ip_address', help="IP address or CIDR range (optional comma separated list of up to 8 ranges)",
+                       validator=validate_ip_address)
+            c.argument('service_tag', help="Service Tag (optional comma separated list of up to 8 tags)",
+                       validator=validate_service_tag)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('ignore_missing_vnet_service_endpoint',
@@ -873,11 +883,15 @@ def load_arguments(self, _):
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
+            c.argument('http_headers', nargs='+', help="space-separated http headers in a format of `<name>=<value>`")
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
-            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
+            c.argument('ip_address', help="IP address or CIDR range (optional comma separated list of up to 8 ranges)",
+                       validator=validate_ip_address)
+            c.argument('service_tag', help="Service Tag (optional comma separated list of up to 8 tags)",
+                       validator=validate_service_tag)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',
@@ -1004,6 +1018,7 @@ def load_arguments(self, _):
     with self.argument_context('staticwebapp create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)
+        c.argument('sku', arg_type=static_web_app_sku_arg_type)
         c.argument('app_location', options_list=['--app-location'],
                    help="Location of your application code. For example, '/' represents the root of your app, "
                         "while '/app' represents a directory called 'app'")
@@ -1012,7 +1027,15 @@ def load_arguments(self, _):
         c.argument('app_artifact_location', options_list=['--app-artifact-location'],
                    help="The path of your build output relative to your apps location. For example, setting a value "
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
+                        "be served.",
+                   deprecate_info=c.deprecate(expiration='2.22.1'))
+        c.argument('output_location', options_list=['--output-location'],
+                   help="The path of your build output relative to your apps location. For example, setting a value "
+                        "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
                         "be served.")
+    with self.argument_context('staticwebapp update') as c:
+        c.argument('tags', arg_type=tags_type)
+        c.argument('sku', arg_type=static_web_app_sku_arg_type)
 
 
 def _get_functionapp_runtime_versions():

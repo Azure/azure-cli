@@ -233,10 +233,28 @@ parameters:
     short-summary: User account to create on node VMs for SSH access.
   - name: --windows-admin-username
     type: string
-    short-summary: Username to create on Windows node VMs.
+    short-summary: User account to create on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-username:
+          - restriction: Cannot end in "."
+          - Disallowed values: "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5".
+          - Minimum-length: 1 character
+          - Max-length: 20 characters
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
   - name: --windows-admin-password
     type: string
-    short-summary: Password to create on Windows node VMs.
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-ahub
     type: bool
     short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
@@ -419,6 +437,9 @@ parameters:
   - name: --enable-sgxquotehelper
     type: bool
     short-summary: Enable SGX quote helper for confcom addon.
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -456,6 +477,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
   - name: Create a kubernetes cluster with ephemeral OS enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a kubernetes cluster with EncryptionAtHost enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
 """
 
 helps['aks update'] = """
@@ -527,6 +550,26 @@ parameters:
   - name: --disable-ahub
     type: bool
     short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --windows-admin-password
+    type: string
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Update current cluster to use managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity to manage cluster resource group.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -552,6 +595,12 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
   - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
+  - name: Update Windows password of a kubernetes cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --windows-admin-password "Repl@cePassw0rd12345678"
+  - name: Update the cluster to use system assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Update the cluster to use user assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
 """
 
 helps['aks delete'] = """
@@ -752,9 +801,14 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a nodepool with EncryptionAtHost enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
 """
 
 helps['aks nodepool delete'] = """

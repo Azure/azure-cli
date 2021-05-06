@@ -302,10 +302,10 @@ def get_id_components(rid):
     parsed_rid = parse_resource_id(rid)
     subscription = parsed_rid['subscription']
     resource_group = parsed_rid['resource_group']
-    vnet_name = parsed_rid['name']
-    subnet_name = parsed_rid['child_name_1'] if 'child_name_1' in parsed_rid else None
+    name = parsed_rid['name']
+    child_name = parsed_rid['child_name_1'] if 'child_name_1' in parsed_rid else None
 
-    return subscription, resource_group, vnet_name, subnet_name
+    return subscription, resource_group, name, child_name
 
 
 def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,

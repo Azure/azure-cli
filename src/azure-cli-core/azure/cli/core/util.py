@@ -352,10 +352,10 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
         print(val, file=output)
 
     def _get_version_string(name, version_dict):
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         local = version_dict['local']
         pypi = version_dict.get('pypi', None)
-        if pypi and LooseVersion(pypi) > LooseVersion(local):
+        if pypi and parse(pypi) > parse(local):
             return name.ljust(25) + local.rjust(15) + ' *'
         return name.ljust(25) + local.rjust(15)
 
@@ -1180,11 +1180,11 @@ def handle_version_update():
     """
     try:
         from azure.cli.core._session import VERSIONS
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         from azure.cli.core import __version__
         if not VERSIONS['versions']:
             get_cached_latest_versions()
-        elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
+        elif parse(VERSIONS['versions']['core']['local']) != parse(__version__):
             logger.debug("Azure CLI has been updated.")
             logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
             VERSIONS['versions'] = {}
@@ -1229,3 +1229,9 @@ def get_parent_proc_name():
         parent_proc_name = _get_parent_proc_name()
         setattr(get_parent_proc_name, "return_value", parent_proc_name)
     return getattr(get_parent_proc_name, "return_value")
+
+
+def is_modern_terminal():
+    """In addition to knack.util.is_modern_terminal, detect Cloud Shell."""
+    import knack.util
+    return knack.util.is_modern_terminal() or in_cloud_console()

@@ -135,17 +135,17 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2021-01-01',
+        ResourceType.MGMT_STORAGE: '2021-02-01',
         ResourceType.MGMT_NETWORK: '2020-11-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-12-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2020-05-01',
+            'snapshots': '2020-12-01',
             'galleries': '2019-12-01',
             'gallery_images': '2020-09-30',
-            'gallery_image_versions': '2019-12-01',
+            'gallery_image_versions': '2020-09-30',
             'virtual_machine_scale_sets': '2020-12-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
@@ -157,7 +157,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2019-06-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2020-04-01-preview',
+        ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
@@ -207,7 +207,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2019-08-01',
+        ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
@@ -332,6 +332,19 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',
         ResourceType.DATA_STORAGE_FILESHARE: '2015-04-05',
         ResourceType.DATA_STORAGE_QUEUE: '2015-04-05'
+    }
+}
+
+
+# We should avoid using ad hoc API versions,
+# use the version in a profile as much as possible.
+AD_HOC_API_VERSIONS = {
+    ResourceType.MGMT_NETWORK: {
+        'vm_default_target_network': '2018-01-01',
+        'nw_connection_monitor': '2019-06-01',
+        'container_network': '2018-08-01',
+        'appservice_network': '2020-04-01',
+        'appservice_ensure_subnet': '2019-02-01'
     }
 }
 

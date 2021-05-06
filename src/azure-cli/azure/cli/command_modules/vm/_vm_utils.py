@@ -28,10 +28,10 @@ def get_target_network_api(cli_ctx):
         necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
         (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType
+    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
     version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     if cli_ctx.cloud.profile == 'latest':
-        version = '2018-01-01'
+        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
     return version
 
 
@@ -106,7 +106,7 @@ def create_keyvault_data_plane_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return 'Bearer', Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0].get_token(), None
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
 
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)

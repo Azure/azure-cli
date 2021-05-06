@@ -283,6 +283,10 @@ examples:
 helps['storage account management-policy update'] = """
 type: command
 short-summary: Update the data policy rules associated with the specified storage account.
+examples:
+    - name: Update the data policy rules associated with the specified storage account.
+      text: |
+        az storage account management-policy update --account-name myaccount --resource-group myresourcegroup --set policy.rules[0].name=newname
 """
 
 helps['storage account management-policy show'] = """
@@ -2254,6 +2258,7 @@ examples:
 helps['storage share-rm delete'] = """
 type: command
 short-summary: Delete the specified Azure file share or share snapshot.
+long-summary: 'Incoming BREAKING CHANGE: Snapshot will not be deleted by default and we will add a new parameter to use if you want to include sanpshots for delete operation.'
 examples:
   - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare

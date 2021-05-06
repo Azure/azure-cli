@@ -3,10 +3,20 @@
 Release History
 ===============
 
-2.22.0.1
+2.23.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* Refactor AzCommandGroup (#17387)
+* Add a linter rule for `service_name.json` (#17428)
+
+2.22.1
+++++++
+* Minor fixes
 
 2.22.0
 ++++++

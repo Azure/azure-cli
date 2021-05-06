@@ -13,13 +13,13 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
     DEFAULT_LOCATION_PG
-from .flexible_server_virtual_network import prepare_private_network
-from .validators import pg_arguments_validator
+from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
+from .validators import pg_arguments_validator, validate_server_name
 
 
 logger = get_logger(__name__)
@@ -39,7 +39,8 @@ def flexible_server_create(cmd, client,
                            tags=None, public_access=None, database_name=None,
                            assign_identity=False, subnet_arm_resource_id=None,
                            high_availability=None, zone=None, vnet_resource_id=None,
-                           vnet_address_prefix=None, subnet_address_prefix=None):
+                           vnet_address_prefix=None, subnet_address_prefix=None,
+                           private_dns_zone_arguments=None):
     # validator
     if location is None:
         location = DEFAULT_LOCATION_PG
@@ -62,6 +63,7 @@ def flexible_server_create(cmd, client,
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
     server_name = server_name.lower()
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     # Handle Vnet scenario
     if public_access is None:
@@ -75,8 +77,17 @@ def flexible_server_create(cmd, client,
                                             vnet_address_pref=vnet_address_prefix,
                                             subnet_address_pref=subnet_address_prefix)
         delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
+        private_dns_zone_id = prepare_private_dns_zone(cmd,
+                                                       'PostgreSQL',
+                                                       resource_group_name,
+                                                       server_name,
+                                                       private_dns_zone=private_dns_zone_arguments,
+                                                       subnet_id=subnet_id,
+                                                       location=location)
+        private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
     else:
         delegated_subnet_arguments = None
+        private_dns_zone_arguments = None
 
     administrator_login_password = generate_password(administrator_login_password)
     if server_result is None:
@@ -87,7 +98,7 @@ def flexible_server_create(cmd, client,
                                        sku_name, tier, storage_mb, administrator_login,
                                        administrator_login_password,
                                        version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
-                                       high_availability, zone)
+                                       high_availability, zone, private_dns_zone_arguments)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -125,6 +136,7 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -153,6 +165,7 @@ def flexible_server_restore(cmd, client,
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
+        parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -292,7 +305,7 @@ def flexible_list_skus(cmd, client, location):
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
-                   assign_identity, delegated_subnet_arguments, ha_enabled, availability_zone):
+                   assign_identity, delegated_subnet_arguments, ha_enabled, availability_zone, private_dns_zone_arguments):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -315,7 +328,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         availability_zone=availability_zone,
         location=location,
         create_mode="Default",  # can also be create
-        tags=tags)
+        tags=tags,
+        private_dns_zone_arguments=private_dns_zone_arguments)
 
     if assign_identity:
         parameters.identity = postgresql_flexibleservers.models.Identity()

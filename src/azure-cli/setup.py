@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.22.0.1"
+VERSION = "2.23.0.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc17',
-    'azure-mgmt-cosmosdb~=3.1.0',
+    'azure-mgmt-cosmosdb~=6.2.0',
     'azure-mgmt-containerservice~=11.1.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -83,7 +83,7 @@ DEPENDENCIES = [
     'azure-mgmt-datamigration~=4.1.0',
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
-    'azure-mgmt-dns~=2.1',
+    'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==3.0.0rc9',
     'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-hdinsight~=2.2.0',
@@ -91,7 +91,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=4.1.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-iothub~=0.12.0',
-    'azure-mgmt-keyvault==8.0.0',
+    'azure-mgmt-keyvault==9.0.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=8.0.0',
     'azure-mgmt-managedservices~=1.0',
@@ -105,7 +105,7 @@ DEPENDENCIES = [
     'azure-mgmt-network~=18.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=8.1.0b2',
+    'azure-mgmt-rdbms~=8.1.0b4',
     'azure-mgmt-recoveryservicesbackup~=0.11.0',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-redhatopenshift==0.1.0',
@@ -122,19 +122,20 @@ DEPENDENCIES = [
     'azure-mgmt-signalr~=0.4.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
-    'azure-mgmt-storage~=17.0.0',
+    'azure-mgmt-storage~=17.1.0',
     'azure-mgmt-synapse~=0.6.0',
     'azure-mgmt-trafficmanager~=0.51.0',
-    'azure-mgmt-web~=0.48.0',
+    'azure-mgmt-web~=2.0.0',
     'azure-multiapi-storage~=0.6.2',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.3.0',
+    'azure-synapse-artifacts~=0.6.0',
     'azure-synapse-spark~=0.2.0',
     'fabric~=2.4',
     'javaproperties==0.5.1',
     'jsmin~=2.2.2',
     'jsondiff==1.2.0',
+    'packaging~=20.9',
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',

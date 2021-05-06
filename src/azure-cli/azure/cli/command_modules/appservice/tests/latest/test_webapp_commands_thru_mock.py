@@ -236,7 +236,8 @@ class TestWebappMocked(unittest.TestCase):
         # action
         result = list_publish_profiles(mock.MagicMock(), 'myRG', 'myweb', 'slot1')
         # assert
-        site_op_mock.assert_called_with(mock.ANY, 'myRG', 'myweb', 'list_publishing_profile_xml_with_secrets', 'slot1')
+        site_op_mock.assert_called_with(mock.ANY, 'myRG', 'myweb', 'list_publishing_profile_xml_with_secrets', 'slot1',
+                                        {'format': 'WebDeploy'})
         self.assertTrue(result[0]['publishUrl'].startswith('ftp://123'))
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
@@ -309,7 +310,7 @@ class TestWebappMocked(unittest.TestCase):
             self.fail('test exception was not thrown')
         except ErrorToExitInfiniteLoop:
             # assert
-            site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+            site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_list_publishing_credentials', None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_restore_deleted_webapp(self, site_op_mock):
@@ -386,7 +387,7 @@ class TestWebappMocked(unittest.TestCase):
         download_historical_logs(cmd_mock, 'rg', 'web1')
 
         # assert
-        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_list_publishing_credentials', None)
         get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
 
     def test_valid_linux_create_options(self):

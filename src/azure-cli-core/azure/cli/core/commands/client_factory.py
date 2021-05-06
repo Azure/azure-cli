@@ -123,13 +123,6 @@ def _prepare_client_kwargs_track2(cli_ctx):
     # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
-    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
-    client_kwargs['logging_enable'] = True
-
-    # Disable ARMHttpLoggingPolicy which logs only allowed headers
-    # from azure.core.pipeline.policies import SansIOHTTPPolicy
-    # client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
-
     # Prepare User-Agent header, used by UserAgentPolicy
     client_kwargs['user_agent'] = get_az_user_agent()
 
@@ -156,6 +149,16 @@ def _prepare_client_kwargs_track2(cli_ctx):
     # Prepare x-ms-client-request-id header, used by RequestIdPolicy
     if 'x-ms-client-request-id' in cli_ctx.data['headers']:
         client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+
+    # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
+    #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
+    from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
+    client_kwargs['logging_policy'] = SafeNetworkTraceLoggingPolicy()
+
+    # Disable ARMHttpLoggingPolicy.
+    #   ARMHttpLoggingPolicy: Only log allowed information.
+    from azure.core.pipeline.policies import SansIOHTTPPolicy
+    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
 
     return client_kwargs
 
@@ -225,17 +228,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred=cred))
-
-        # Track 2 currently lacks the ability to take external credentials.
-        #   https://github.com/Azure/azure-sdk-for-python/issues/8313
-        # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
-        #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
-        if getattr(cred, "_external_tenant_token_retriever", None):
-            *_, external_tenant_tokens = cred.get_all_tokens(*resource_to_scopes(resource))
-            # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
-            client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
-                ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
+        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred))
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)

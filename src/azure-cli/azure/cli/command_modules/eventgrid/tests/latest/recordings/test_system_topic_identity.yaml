@@ -1,0 +1,594 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -o
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-04-28T20:55:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global", "properties": {"source": "/subscriptions/00000000-0000-0000-0000-000000000000",
+      "topicType": "Microsoft.PolicyInsights.PolicyStates"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '157'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --resource-group --location --topic-type --source
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/systemTopics/policy-system-topic-name-global?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","source":"/subscriptions/00000000-0000-0000-0000-000000000000","topicType":"Microsoft.PolicyInsights.PolicyStates","metricResourceId":"16c59d39-51cb-4ac3-83c4-e3711ca023a4"},"systemData":null,"location":"global","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/systemTopics/policy-system-topic-name-global","name":"policy-system-topic-name-global","type":"Microsoft.EventGrid/systemTopics"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '579'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --resource-group --yes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/systemTopics/policy-system-topic-name-global?api-version=2020-10-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationsStatus/A149E54F-7A59-410E-946F-4CC78CC43C3A?api-version=2020-10-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 28 Apr 2021 20:55:27 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationResults/A149E54F-7A59-410E-946F-4CC78CC43C3A?api-version=2020-10-15-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --yes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationsStatus/A149E54F-7A59-410E-946F-4CC78CC43C3A?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationsStatus/A149E54F-7A59-410E-946F-4CC78CC43C3A?api-version=2020-10-15-preview","name":"a149e54f-7a59-410e-946f-4cc78cc43c3a","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '270'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centraluseuap", "properties": {"source": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.Storage/storageAccounts/clistgaccount",
+      "topicType": "Microsoft.Storage.StorageAccounts"}, "identity": {"type": "None"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '272'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --resource-group --location --topic-type --source --identity
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Creating","source":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.Storage/storageAccounts/clistgaccount","topicType":"Microsoft.Storage.StorageAccounts","metricResourceId":"dca9b4f7-046b-4004-bb09-745b446d62f9"},"systemData":null,"identity":{"type":"None","principalId":null,"tenantId":null,"userAssignedIdentities":null},"location":"centraluseuap","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002","name":"cli000002","type":"Microsoft.EventGrid/systemTopics"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/4D043DF7-4C21-4EC6-B167-D2DEEB862B5D?api-version=2020-10-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '706'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --location --topic-type --source --identity
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/4D043DF7-4C21-4EC6-B167-D2DEEB862B5D?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/4D043DF7-4C21-4EC6-B167-D2DEEB862B5D?api-version=2020-10-15-preview","name":"4d043df7-4c21-4ec6-b167-d2deeb862b5d","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --location --topic-type --source --identity
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","source":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.Storage/storageAccounts/clistgaccount","topicType":"Microsoft.Storage.StorageAccounts","metricResourceId":"dca9b4f7-046b-4004-bb09-745b446d62f9"},"systemData":null,"identity":{"type":"None","principalId":null,"tenantId":null,"userAssignedIdentities":null},"location":"centraluseuap","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002","name":"cli000002","type":"Microsoft.EventGrid/systemTopics"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '707'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --resource-group --identity
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Updating","source":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.Storage/storageAccounts/clistgaccount","topicType":"Microsoft.Storage.StorageAccounts","metricResourceId":"dca9b4f7-046b-4004-bb09-745b446d62f9"},"systemData":null,"identity":{"type":"SystemAssigned","principalId":"c8105e98-4068-43a3-a8f2-8de91fcac0d0","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":null},"location":"centraluseuap","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002","name":"cli000002","type":"Microsoft.EventGrid/systemTopics"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/81C32398-A51C-43B7-BB38-10183716B7E1?api-version=2020-10-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '784'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:55:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --identity
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/81C32398-A51C-43B7-BB38-10183716B7E1?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/81C32398-A51C-43B7-BB38-10183716B7E1?api-version=2020-10-15-preview","name":"81c32398-a51c-43b7-bb38-10183716b7e1","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:56:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --identity
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","source":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.Storage/storageAccounts/clistgaccount","topicType":"Microsoft.Storage.StorageAccounts","metricResourceId":"dca9b4f7-046b-4004-bb09-745b446d62f9"},"systemData":null,"identity":{"type":"SystemAssigned","principalId":"c8105e98-4068-43a3-a8f2-8de91fcac0d0","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":null},"location":"centraluseuap","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002","name":"cli000002","type":"Microsoft.EventGrid/systemTopics"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '785'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:56:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --resource-group --yes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/devexprg/providers/Microsoft.EventGrid/systemTopics/cli000002?api-version=2020-10-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/4810DF0F-0028-4341-B0E4-85466E9E0CAC?api-version=2020-10-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 28 Apr 2021 20:56:07 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationResults/4810DF0F-0028-4341-B0E4-85466E9E0CAC?api-version=2020-10-15-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid system-topic delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --yes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventgrid/3.0.0rc9 Azure-SDK-For-Python AZURECLI/2.22.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/4810DF0F-0028-4341-B0E4-85466E9E0CAC?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/4810DF0F-0028-4341-B0E4-85466E9E0CAC?api-version=2020-10-15-preview","name":"4810df0f-0028-4341-b0e4-85466e9e0cac","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Apr 2021 20:56:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

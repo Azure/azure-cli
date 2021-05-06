@@ -189,7 +189,7 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-  
+
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
@@ -201,7 +201,7 @@ jobs:
     inputs:
       targetType: inline
       script: |
-        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {  
+        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
           # Start another Powershell process as Admin and execute this script again
           $arguments = "& '" +$myinvocation.mycommand.definition + "'"
           Start-Process powershell -Verb runAs -ArgumentList $arguments
@@ -223,18 +223,23 @@ jobs:
         $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
         if ($pre_installed_version -eq $to_be_installed_version){
           # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
-          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus" 
+          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
           $InstallArgs += $reinstall_option
         }
         Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        Get-Content .\install_logs.txt
+        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
         $installed_version=az version --query '\"azure-cli\"' -o tsv
         if ($installed_version -ne $to_be_installed_version){
           echo "The MSI failed to install."
           Exit 1
         }
+        echo 'Install time(seconds):' $install_time
         az --version
+        # Test bundled pip with extension installation
+        az extension add -n rdbms-connect
         az self-test
+
+        Get-Content .\install_logs.txt
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -372,31 +377,39 @@ jobs:
 
     displayName: 'Test pip Install'
 
-- job: UnitTest
-  displayName: Unit Test for Core and Telemetry
+- job: TestCore
+  displayName: Unit Test for Core
   timeoutInMinutes: 10
-
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
-        tox_env: 'py36'
       Python38:
         python.version: '3.8'
-        tox_env: 'py38'
   steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python $(python.version)'
-      inputs:
-        versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip tox
-      displayName: 'Install pip and tox'
-    - bash: ./scripts/ci/unittest.sh
-      displayName: 'Run Unit Test'
-      env:
-        TOXENV: $(tox_env)
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-core'
+
+- job: TestTelemetry
+  displayName: Unit Test for Telemetry
+  timeoutInMinutes: 10
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-telemetry'
 
 - job: IntegrationTestAgainstProfiles
   displayName: Integration Test against Profiles
@@ -858,6 +871,7 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
+      python scripts/ci/service_name.py
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
