@@ -30,18 +30,10 @@ def load_command_table(self, _):
     with self.command_group('sig', vm_gallery, client_factory=cf_gallery, is_experimental=True) as g:
         g.custom_command('group-list', 'sig_group_list', client_factory=cf_shared_gallery)
 
-    with self.command_group(
-        'sig share image-definition',
-        vm_shared_gallery_image,
-        client_factory=cf_shared_gallery_image,
-        is_experimental=True,
-    ) as g:
+    with self.command_group('sig share image-definition', vm_shared_gallery_image,
+                            client_factory=cf_shared_gallery_image, is_experimental=True) as g:
         g.custom_command('list', 'sig_share_image_definition_list')
 
-    with self.command_group(
-        'sig share image-version',
-        vm_shared_gallery_image_version,
-        client_factory=cf_shared_gallery_image_version,
-        is_experimental=True,
-    ) as g:
+    with self.command_group('sig share image-version', vm_shared_gallery_image_version,
+                            client_factory=cf_shared_gallery_image_version, is_experimental=True) as g:
         g.custom_command('list', 'sig_share_image_version_list')

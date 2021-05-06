@@ -12,6 +12,11 @@
 from knack.help_files import helps
 
 
+helps['vm'] = '''
+    type: group
+    short-summary: Manage Compute
+'''
+
 helps['sshkey'] = """
     type: group
     short-summary: Manage ssh public key with vm
@@ -53,6 +58,20 @@ helps['sshkey delete'] = """
     short-summary: "Delete an SSH public key."
 """
 
+helps['sig'] = """
+    type: group
+    short-summary: Manage gallery with vm
+"""
+
+helps['sig group-list'] = """
+    type: command
+    short-summary: "List shared galleries by subscription id or tenant id."
+    examples:
+      - name: Get a gallery.
+        text: |-
+               az sig group-list --location "myLocation"
+"""
+
 helps['sig share'] = """
     type: group
     short-summary: Manage gallery sharing profile with vm
@@ -84,20 +103,6 @@ type="AADTenants" ids="c24c76aa-8897-4027-9b03-8f7928b54ff6" --operation-type "A
 "Reset"
 """
 
-helps['vm shared-gallery'] = """
-    type: group
-    short-summary: Manage shared gallery with vm
-"""
-
-helps['vm shared-gallery list'] = """
-    type: command
-    short-summary: "List shared galleries by subscription id or tenant id."
-    examples:
-      - name: Get a gallery.
-        text: |-
-               az vm shared-gallery list --location "myLocation"
-"""
-
 helps['sig share image-definition'] = """
     type: group
     short-summary: Manage shared gallery image with vm
@@ -118,8 +123,8 @@ helps['sig share image-definition show'] = """
     examples:
       - name: Get a gallery.
         text: |-
-               az sig share image-definition show --gallery-image-name "myGalleryImageName" --gallery-unique-name \
-"galleryUniqueName" --location "myLocation"
+               az sig share image-definition show --gallery-image-definition "myGalleryImageName" \
+--gallery-unique-name "galleryUniqueName" --location "myLocation"
 """
 
 helps['sig share image-version'] = """
@@ -133,7 +138,7 @@ helps['sig share image-version list'] = """
     examples:
       - name: Get a gallery.
         text: |-
-               az sig share image-version list --gallery-image-name "myGalleryImageName" --gallery-unique-name \
+               az sig share image-version list --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
 "galleryUniqueName" --location "myLocation"
 """
 
@@ -143,6 +148,6 @@ helps['sig share image-version show'] = """
     examples:
       - name: Get a gallery.
         text: |-
-               az sig share image-version show --gallery-image-name "myGalleryImageName" --gallery-image-version-name \
+               az sig share image-version show --gallery-image-definition "myGalleryImageName" --gallery-image-version \
 "myGalleryImageVersionName" --gallery-unique-name "galleryUniqueName" --location "myLocation"
 """

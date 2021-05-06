@@ -83,21 +83,3 @@ type="AADTenants" ids="c24c76aa-8897-4027-9b03-8f7928b54ff6" --operation-type "A
 "Reset"
 """
 
-helps['sig share image-definition list'] = """
-    type: command
-    short-summary: "List shared gallery images by subscription id or tenant id."
-    examples:
-      - name: Get a gallery.
-        text: |-
-               az sig share image-definition list --gallery-unique-name "galleryUniqueName" --location "myLocation"
-"""
-
-helps['sig share image-version list'] = """
-    type: command
-    short-summary: "List shared gallery image versions by subscription id or tenant id."
-    examples:
-      - name: Get a gallery.
-        text: |-
-               az sig share image-version list --gallery-image-name "myGalleryImageName" --gallery-unique-name \
-"galleryUniqueName" --location "myLocation"
-"""
