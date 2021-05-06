@@ -3730,18 +3730,16 @@ class VMGalleryImage(ScenarioTest):
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
-            'gallery': 'gallery',
-            'image': 'image',
-            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac',
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
             'version': '1.1.2',
             'captured': 'managedImage1',
-            'image_id': 'TBD',
+            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac',
         })
-        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
-        res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
-                       checks=self.check('name', self.kwargs['image'])).get_output_in_json()
-        self.kwargs['image_id'] = res['id']
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
@@ -3749,13 +3747,14 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
-                 checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
 
+        # Test shared gallery
         self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
-        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+        res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.permissions', 'Groups')
-        ])
+        ]).get_output_in_json()
+        self.kwargs['unique_name'] = res['identifier']['uniqueName']
 
         self.cmd('sig share update --gallery-name {gallery} -g {rg} --operation-type Reset')
         self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
@@ -3769,12 +3768,14 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.groups[0].type', 'Subscriptions')
         ])
 
+        # Check result by shared user
         self.cmd('sig group-list')
-        self.cmd('sig share image-definition list --gallery-unique-name {galleryUniqName}')
-        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {galleryUniqName}')
-        self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {galleryUniqName}')
+        self.cmd('sig share image-definition list --gallery-unique-name {unique_name}')
+        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name}')
+        self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name}')
 
-    @ResourceGroupPreparer(location='eastus2euap')
+
+    @ResourceGroupPreparer(location='eastus2')
     def test_gallery_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
@@ -3790,7 +3791,6 @@ class VMGalleryImage(ScenarioTest):
             'vault': self.create_random_name(prefix='vault-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
-            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac',
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
@@ -3824,35 +3824,10 @@ class VMGalleryImage(ScenarioTest):
                      self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
                      self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
                      self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
-                     self.check('publishingProfile.targetRegions[1].name', 'East US 2 Euap'),
+                     self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
                      self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
                      self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
                  ])
-
-        # Test shared gallery
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
-        res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.permissions', 'Groups')
-        ]).get_output_in_json()
-        self.kwargs['unique_name'] = res['identifier']['uniqueName']
-
-        self.cmd('sig share update --gallery-name {gallery} -g {rg} --operation-type Reset')
-        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.permissions', 'Private')
-        ])
-
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
-        self.cmd('sig share update --gallery-name {gallery} -g {rg} --groups type="Subscriptions" ids="{sharedSubId}" --operation-type Add')
-        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['sharedSubId']),
-            self.check('sharingProfile.groups[0].type', 'Subscriptions')
-        ])
-
-        # Check result by shared user
-        self.cmd('sig group-list')
-        self.cmd('sig share image-definition list --gallery-unique-name {unique_name}')
-        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name}')
-        self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name}')
 
         # Create disk encryption set
         vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
@@ -3882,7 +3857,7 @@ class VMGalleryImage(ScenarioTest):
 
         # Test --target-region-encryption
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --managed-image {captured} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'East US 2 Euap'),
+            self.check('publishingProfile.targetRegions[0].name', 'East US 2'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
