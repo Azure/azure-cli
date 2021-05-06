@@ -59,6 +59,15 @@ def sshkey_delete(client,
                          ssh_public_key_name=ssh_public_key_name)
 
 
+def sig_group_list(client,
+                   location,
+                   shared_to=None):
+    if shared_to is None:
+        shared_to = "tenant"
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
 def sig_share_update(client,
                      resource_group_name,
                      gallery_name,
@@ -70,15 +79,6 @@ def sig_share_update(client,
     return client.begin_update(resource_group_name=resource_group_name,
                                gallery_name=gallery_name,
                                sharing_update=sharing_update)
-
-
-def vm_shared_gallery_list(client,
-                           location,
-                           shared_to=None):
-    if shared_to is None:
-        shared_to = "tenant"
-    return client.list(location=location,
-                       shared_to=shared_to)
 
 
 def sig_share_image_definition_list(client,
