@@ -120,6 +120,37 @@ def validate_import_feature(feature):
 
 # File <-> List of KeyValue object
 
+def __read_with_appropriate_encoding(file_path, format_):
+    config_data = {}
+    try:
+        with io.open(file_path, 'r', encoding='utf-8') as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+
+            elif format_ == 'yaml':
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+
+            elif format_ == 'properties':
+                config_data = javaproperties.load(config_file)
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+
+    except ValueError:
+        # Try detecting the encoding instead of using the default utf-8 encoding
+        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+
+            elif format_ == 'yaml':
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+
+            elif format_ == 'properties':
+                config_data = javaproperties.load(config_file)
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+
+    return config_data
+
 
 def __read_kv_from_file(file_path,
                         format_,
@@ -129,34 +160,19 @@ def __read_kv_from_file(file_path,
                         content_type=None):
     config_data = {}
     try:
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
-            if format_ == 'json':
-                config_data = json.load(config_file)
-                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
-                    # delete all feature management sections in any name format.
-                    # If users have not skipped features, and there are multiple
-                    # feature sections, we will error out while reading features.
-                    if feature_management_keyword in config_data:
-                        del config_data[feature_management_keyword]
-
-            elif format_ == 'yaml':
-                for yaml_data in list(yaml.safe_load_all(config_file)):
-                    config_data.update(yaml_data)
-                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
-                    # delete all feature management sections in any name format.
-                    # If users have not skipped features, and there are multiple
-                    # feature sections, we will error out while reading features.
-                    if feature_management_keyword in config_data:
-                        del config_data[feature_management_keyword]
-
-            elif format_ == 'properties':
-                config_data = javaproperties.load(config_file)
-                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
-
+        config_data = __read_with_appropriate_encoding(file_path, format_)
+        if format_ in ('json', 'yaml'):
+            for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
+                # delete all feature management sections in any name format.
+                # If users have not skipped features, and there are multiple
+                # feature sections, we will error out while reading features.
+                if feature_management_keyword in config_data:
+                    del config_data[feature_management_keyword]
     except ValueError:
         raise CLIError('The input is not a well formatted %s file.' % (format_))
     except OSError:
         raise CLIError('File is not available.')
+
     flattened_data = {}
     if format_ == 'json' and content_type and __is_json_content_type(content_type):
         for key in config_data:
@@ -202,17 +218,10 @@ def __read_features_from_file(file_path, format_):
         return features_dict
 
     try:
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
-            if format_ == 'json':
-                config_data = json.load(config_file)
-
-            elif format_ == 'yaml':
-                for yaml_data in list(yaml.safe_load_all(config_file)):
-                    config_data.update(yaml_data)
-
+        config_data = __read_with_appropriate_encoding(file_path, format_)
         found_feature_section = False
         for index, feature_management_keyword in enumerate(FEATURE_MANAGEMENT_KEYWORDS):
-            # find the first occurence of feature management section in file.
+            # find the first occurrence of feature management section in file.
             # Enforce the same naming convention for 'EnabledFor' keyword
             # If there are multiple feature sections, we will error out here.
             if feature_management_keyword in config_data:
