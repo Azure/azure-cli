@@ -3875,7 +3875,7 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
@@ -3883,7 +3883,8 @@ class VMGalleryImage(ScenarioTest):
             'image': 'image1',
             'version': '1.1.2',
             'captured': 'managedImage1',
-            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac',
+            'location': resource_group_location,
+            'sharedSubId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
@@ -3918,10 +3919,10 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         # Check result by shared user
-        self.cmd('sig group-list')
-        self.cmd('sig share image-definition list --gallery-unique-name {unique_name}')
-        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name}')
-        self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name}')
+        self.cmd('sig group-list --location {location}')
+        self.cmd('sig share image-definition list --gallery-unique-name {unique_name} --location {location}')
+        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
+        self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
 
 
     @ResourceGroupPreparer(location='eastus2')
