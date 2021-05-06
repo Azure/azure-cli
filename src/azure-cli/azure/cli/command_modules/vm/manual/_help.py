@@ -82,4 +82,3 @@ type="AADTenants" ids="c24c76aa-8897-4027-9b03-8f7928b54ff6" --operation-type "A
                az sig share update --gallery-name "myGalleryName" --resource-group "myResourceGroup" --operation-type \
 "Reset"
 """
-

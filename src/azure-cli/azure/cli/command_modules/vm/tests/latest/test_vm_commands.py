@@ -3924,7 +3924,6 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
         self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
 
-
     @ResourceGroupPreparer(location='eastus2')
     def test_gallery_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
