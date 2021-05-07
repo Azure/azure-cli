@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,too-many-nested-blocks
+# pylint: disable=line-too-long,too-many-nested-blocks,too-many-lines
 
 import io
 import json
@@ -122,8 +122,11 @@ def validate_import_feature(feature):
 
 def __read_with_appropriate_encoding(file_path, format_):
     config_data = {}
+    default_encoding = 'utf-8'
+    detected_encoding = __check_file_encoding(file_path)
+
     try:
-        with io.open(file_path, 'r', encoding='utf-8') as config_file:
+        with io.open(file_path, 'r', encoding=default_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
 
@@ -135,9 +138,11 @@ def __read_with_appropriate_encoding(file_path, format_):
                 config_data = javaproperties.load(config_file)
                 logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
 
-    except ValueError:
-        # Try detecting the encoding instead of using the default utf-8 encoding
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        if detected_encoding == default_encoding:
+            raise
+
+        with io.open(file_path, 'r', encoding=detected_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
 
@@ -168,8 +173,10 @@ def __read_kv_from_file(file_path,
                 # feature sections, we will error out while reading features.
                 if feature_management_keyword in config_data:
                     del config_data[feature_management_keyword]
-    except ValueError:
-        raise CLIError('The input is not a well formatted %s file.' % (format_))
+    except ValueError as ex:
+        raise CLIError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
+    except yaml.YAMLError as ex:
+        raise CLIError('The input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
         raise CLIError('File is not available.')
 
@@ -232,9 +239,11 @@ def __read_features_from_file(file_path, format_):
                 else:
                     raise CLIError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
 
-    except ValueError:
+    except ValueError as ex:
         raise CLIError(
-            'The feature management section of input is not a well formatted %s file.' % (format_))
+            'The feature management section of input is not a well formatted %s file.\nException: %s' % (format_, ex))
+    except yaml.YAMLError as ex:
+        raise CLIError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
         raise CLIError('File is not available.')
 
