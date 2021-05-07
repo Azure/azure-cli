@@ -337,32 +337,32 @@ class MySqlFlexibleServerHighAvailabilityMgmt(FlexibleServerHighAvailabilityMgmt
         self._test_flexible_server_high_availability_create('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(5)
+    @pytest.mark.order(3)
     def test_mysql_flexible_server_high_availability_update_scale_up(self):
         self._test_flexible_server_high_availability_update_scale_up('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(6)
+    @pytest.mark.order(4)
     def test_mysql_flexible_server_high_availability_update_parameter(self):
         self._test_flexible_server_high_availability_update_parameter('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(7)
+    @pytest.mark.order(5)
     def test_mysql_flexible_server_high_availability_restart(self):
         self._test_flexible_server_high_availability_restart('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(8)
+    @pytest.mark.order(6)
     def test_mysql_flexible_server_high_availability_stop(self):
         self._test_flexible_server_high_availability_stop('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(9)
+    @pytest.mark.order(7)
     def test_mysql_flexible_server_high_availability_start(self):
         self._test_flexible_server_high_availability_start('mysql', self.resource_group, self.server)
 
     @AllowLargeResponse()
-    @pytest.mark.order(10)
+    @pytest.mark.order(8)
     def test_mysql_flexible_server_high_availability_delete(self):
         self._test_flexible_server_high_availability_delete(self.resource_group)
 
