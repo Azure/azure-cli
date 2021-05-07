@@ -24,6 +24,7 @@
 ### <a name="CommandsInGallerySharingProfile">Commands in `az sig share` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
+|[az sig share show](#GallerySharingProfileGet)|Get|[Parameters](#ParametersGallerySharingProfileGet)|[Example](#ExamplesGallerySharingProfileGet)|
 |[az sig share update](#GallerySharingProfileUpdate)|Update|[Parameters](#ParametersGallerySharingProfileUpdate)|[Example](#ExamplesGallerySharingProfileUpdate)|
 
 ### <a name="CommandsInSharedGalleryImages">Commands in `az sig share image-definition` group</a>
@@ -65,6 +66,18 @@ az sig group-list --location "myLocation"
 |**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
 
 ### group `az sig share`
+#### <a name="GallerySharingProfileGet">Command `az sig share show`</a>
+
+##### <a name="ExamplesGallerySharingProfileGet">Example</a>
+```
+az sig share show --gallery-unique-name "galleryUniqueName" --location "myLocation"
+```
+##### <a name="ParametersGallerySharingProfileGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--location**|string|Resource location.|location|location|
+|**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
+
 #### <a name="GallerySharingProfileUpdate">Command `az sig share update`</a>
 
 ##### <a name="ExamplesGallerySharingProfileUpdate">Example</a>
