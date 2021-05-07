@@ -130,7 +130,6 @@ def _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_s
 def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group, vnet_name, subnet_name, location, server_name, subnet_address_pref):
     Delegation, Subnet, ServiceEndpoint = cmd.get_models('Delegation', 'Subnet', 'ServiceEndpointPropertiesFormat', resource_type=ResourceType.MGMT_NETWORK)
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
-    service_endpoint = ServiceEndpoint(service='Microsoft.Storage')
 
     # subnet exist
     if not check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
@@ -138,8 +137,7 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
             name=subnet_name,
             location=location,
             address_prefix=subnet_address_pref,
-            delegations=[delegation],
-            service_endpoints=[service_endpoint])
+            delegations=[delegation])
 
         vnet = nw_client.virtual_networks.get(resource_group, vnet_name)
         vnet_subnet_prefixes = [subnet.address_prefix for subnet in vnet.subnets]
@@ -164,7 +162,6 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(
                         delegation_service_name))
 
-        subnet.service_endpoints = [service_endpoint]
         subnet.delegations = [delegation]
         subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet).result()
 
