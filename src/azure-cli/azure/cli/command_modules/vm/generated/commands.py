@@ -70,7 +70,9 @@ def load_command_table(self, _):
     with self.command_group(
         'sig share', vm_gallery_sharing_profile, client_factory=cf_gallery_sharing_profile, is_experimental=True
     ) as g:
-        g.custom_command('update', 'sig_share_update')
+        g.custom_show_command('show', 'sig_share_show', client_factory=cf_shared_gallery)
+        g.custom_command('update', 'sig_share_update', supports_no_wait=True)
+        g.custom_wait_command('wait', 'sig_share_show')
 
     with self.command_group(
         'sig share image-definition',

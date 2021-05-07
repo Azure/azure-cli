@@ -22,6 +22,17 @@ def step_group_list(test, checks=None):
              checks=checks)
 
 
+# EXAMPLE: /GallerySharingProfile/get/Get a gallery.
+@try_manual
+def step_share_show(test, checks=None):
+    if checks is None:
+        checks = []
+    test.cmd('az sig share show '
+             '--gallery-unique-name "galleryUniqueName" '
+             '--location "myLocation"',
+             checks=checks)
+
+
 # EXAMPLE: /GallerySharingProfile/post/Add sharing id to the sharing profile of a gallery.
 @try_manual
 def step_share_update(test, checks=None):

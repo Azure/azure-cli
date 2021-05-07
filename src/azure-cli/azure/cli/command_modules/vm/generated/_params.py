@@ -62,6 +62,11 @@ def load_arguments(self, _):
         c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant']), help='The query '
                    'parameter to decide what shared galleries to fetch when doing listing operations.')
 
+    with self.argument_context('sig share show') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+
     with self.argument_context('sig share update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
