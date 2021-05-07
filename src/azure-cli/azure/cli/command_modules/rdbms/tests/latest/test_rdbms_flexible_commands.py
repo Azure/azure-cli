@@ -937,8 +937,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         vnet_name = 'clitestvnet7'
         subnet_name = 'clitestsubnet7'
-        address_prefix = '10.0.0.0/16'
-        subnet_prefix_1 = '10.0.0.0/24'
+        address_prefix = '172.0.0.0/16'
+        subnet_prefix_1 = '172.0.0.0/24'
         vnet_name_2 = 'clitestvnet8'
         subnet_name_2 = 'clitestsubnet8'
 
