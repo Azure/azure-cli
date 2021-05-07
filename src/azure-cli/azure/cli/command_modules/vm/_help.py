@@ -1445,6 +1445,9 @@ short-summary: Display information about extensions attached to a VM.
 examples:
   - name: Use VM name and extension name to show the extensions attached to a VM.
     text: az vm extension show -g MyResourceGroup --vm-name MyVm -n extension_name
+  - name: Use VM extension id to show the extensions attached to a VM.
+    text: az vm extension show --ids \\
+                /subscriptions/*/resourceGroups/*/providers/*/virtualMachines/my-vm/extensions/my-extension
 """
 
 helps['vm extension wait'] = """
