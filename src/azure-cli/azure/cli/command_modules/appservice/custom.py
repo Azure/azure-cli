@@ -2342,7 +2342,8 @@ def _get_log(url, user_name, password, log_file=None):
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'
                 logger.warning(chunk.decode(encoding='utf-8', errors='replace')
                                .encode(std_encoding, errors='replace')
-                               .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
+                               .decode(std_encoding, errors='replace')
+                               .rstrip('\n\r'))  # each line of log has CRLF.
     r.release_conn()
 
 
