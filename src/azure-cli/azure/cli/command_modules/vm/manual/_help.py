@@ -58,6 +58,11 @@ helps['sshkey delete'] = """
     short-summary: "Delete an SSH public key."
 """
 
+helps['sig share wait'] = """
+type: command
+short-summary: wait for shared gallery get related operation
+"""
+
 helps['sig share update'] = """
     type: command
     short-summary: "Update sharing profile of a gallery."

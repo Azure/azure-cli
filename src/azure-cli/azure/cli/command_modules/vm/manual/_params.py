@@ -27,6 +27,10 @@ def load_arguments(self, _):
         c.argument('operation_type', arg_type=get_enum_type(['Add', 'Remove', 'Reset']),
                    help='This property allows you to specify the operation type of gallery sharing update.')
 
+    with self.argument_context('sig share wait') as c:
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+
     with self.argument_context('sig group-list') as c:
         c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant', 'subscription']),
                    help='The query parameter to decide what shared galleries to fetch when doing listing operations.',
