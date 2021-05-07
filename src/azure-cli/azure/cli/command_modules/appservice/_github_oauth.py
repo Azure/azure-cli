@@ -17,7 +17,7 @@ https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow
 '''
 
 
-def get_github_access_token(cmd, scope_list=None):  # pylint:disable=unused-import
+def get_github_access_token(cmd, scope_list=None):  # pylint: disable=unused-argument
     if scope_list:
         for scope in scope_list:
             if scope not in GITHUB_OAUTH_SCOPES:
