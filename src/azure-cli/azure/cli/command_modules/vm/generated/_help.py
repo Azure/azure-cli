@@ -77,6 +77,15 @@ helps['sig share'] = """
     short-summary: Manage gallery sharing profile with vm
 """
 
+helps['sig share show'] = """
+    type: command
+    short-summary: "Get a shared gallery by subscription id or tenant id."
+    examples:
+      - name: Get a gallery.
+        text: |-
+               az sig share show --gallery-unique-name "galleryUniqueName" --location "myLocation"
+"""
+
 helps['sig share update'] = """
     type: command
     short-summary: "Update sharing profile of a gallery."

@@ -68,6 +68,13 @@ def sig_group_list(client,
                        shared_to=shared_to)
 
 
+def sig_share_show(client,
+                   location,
+                   gallery_unique_name):
+    return client.get(location=location,
+                      gallery_unique_name=gallery_unique_name)
+
+
 def sig_share_update(client,
                      resource_group_name,
                      gallery_name,
