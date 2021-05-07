@@ -3661,6 +3661,21 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
                  checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
 
+class NetworkVirtualNetwork(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_virtual_flowtimeout')
+    def test_network_virtual_flowtimeout(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet': 'vnet1',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name default --flowtimeout 10',
+                 checks=self.check('newVNet.flowTimeoutInMinutes', 10))
+
+
+
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
