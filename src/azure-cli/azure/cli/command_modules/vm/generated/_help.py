@@ -60,7 +60,7 @@ helps['sshkey delete'] = """
 
 helps['sig'] = """
     type: group
-    short-summary: Manage gallery with vm
+    short-summary: Manage shared image gallery.
 """
 
 helps['sig group-list'] = """
