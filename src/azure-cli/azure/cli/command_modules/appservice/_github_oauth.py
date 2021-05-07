@@ -17,7 +17,7 @@ https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow
 '''
 
 
-def get_github_access_token(cmd, scope_list=None):
+def get_github_access_token(cmd, scope_list=None):  # pylint:disable=unused-import
     if scope_list:
         for scope in scope_list:
             if scope not in GITHUB_OAUTH_SCOPES:
@@ -30,11 +30,9 @@ def get_github_access_token(cmd, scope_list=None):
         'client_id': GITHUB_OAUTH_CLIENT_ID
     }
 
-    import base64
-    import json
     import requests
     import time
-    from urllib.parse import urlparse, parse_qs
+    from urllib.parse import parse_qs
 
     try:
         response = requests.post(authorize_url, data=authorize_url_data)
