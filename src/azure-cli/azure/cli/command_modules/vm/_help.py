@@ -1133,6 +1133,9 @@ examples:
     text: >
         az vm delete --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
+  - name: Delete VMs in a resource group with a tag.
+    text: >
+        az vm delete --tag MyEnv=Test
 """
 
 helps['vm diagnostics'] = """

@@ -1329,6 +1329,24 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
         else get_vm(cmd, resource_group_name, vm_name)
 
 
+def delete_vm(cmd, vm_name=None, resource_group_name=None, tags=None):
+    from msrestazure.tools import parse_resource_id
+    vm_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
+    if tags is not None:
+        vms = list_vm(cmd, None, True)
+        for vm in vms:
+            # TODO compliance btw python3 and python2 ?
+            if len(tags) == len(set(tags.items()) & set(vm.tags.items())):
+                resource = parse_resource_id(vm.id)
+                vm_client.begin_delete(resource.get('resource_group', None), vm.name)
+    else:
+        from msrest.exceptions import ValidationError
+        try:
+            vm_client.begin_delete(resource_group_name, vm_name)
+        except ValidationError as e:
+            raise ValidationError("required", "(--resource-group | --ids)", None)
+
+
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
