@@ -5269,6 +5269,9 @@ short-summary: Delete a virtual network.
 examples:
   - name: Delete a virtual network.
     text: az network vnet delete -g MyResourceGroup -n myVNet
+
+  - name: Delete all virtual networks by tag.
+    text: az network vnet delete --tag MyEn=Test
 """
 
 helps['network vnet list'] = """

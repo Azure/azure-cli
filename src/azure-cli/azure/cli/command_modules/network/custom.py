@@ -122,6 +122,22 @@ def list_application_gateways(cmd, resource_group_name=None):
 def list_network_watchers(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_watchers', resource_group_name)
 
+
+def delete_vnet(cmd, virtual_network_name=None, resource_group_name=None, tags=None):
+    from msrestazure.tools import parse_resource_id
+    vnet_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).virtual_networks
+    if tags is not None:
+        for vnet in list_vnet(cmd, None):
+            # TODO compliance vtw python3 and python2 ?
+            if len(tags) == len(set(tags.items()) & set(vnet.tags.items())):
+                resource = parse_resource_id(vnet.id)
+                vnet_client.begin_delete(resource.get('resource_group', None), resource.get('name', None))
+    else:
+        from msrest.exceptions import ValidationError
+        try:
+            vnet_client.begin_delete(resource_group_name, virtual_network_name)
+        except ValidationError:
+            raise ValidationError("required", "(--resource-group | --ids)", None)
 # endregion
 
 

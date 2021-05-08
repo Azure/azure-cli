@@ -1296,7 +1296,7 @@ def load_command_table(self, _):
 
     # region VirtualNetworks
     with self.command_group('network vnet', network_vnet_sdk) as g:
-        g.command('delete', 'begin_delete')
+        g.custom_command('delete', 'delete_vnet')
         g.custom_command('list', 'list_vnet', table_transformer=transform_vnet_table_output)
         g.show_command('show', 'get')
         g.command('check-ip-address', 'check_ip_address_availability', min_api='2016-09-01')
