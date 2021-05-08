@@ -880,7 +880,7 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
 
 def _permissions_distinct(permissions):
     if permissions:
-        return [_ for _ in {p for p in permissions}]
+        return list(set(permissions))
     return permissions
 
 

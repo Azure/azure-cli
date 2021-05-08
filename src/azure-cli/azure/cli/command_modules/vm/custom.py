@@ -3449,7 +3449,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
                 raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
             if not data_snapshot_luns:
-                data_snapshot_luns = [i for i in range(len(data_snapshots))]
+                data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
@@ -3477,7 +3477,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 # Generate LUNs
                 if data_vhds_luns is None:
                     # 0, 1, 2, ...
-                    data_vhds_luns = [i for i in range(len(data_vhds_uris))]
+                    data_vhds_luns = list(range(len(data_vhds_uris)))
                 # Check length
                 len_data_vhds_uris = len(data_vhds_uris)
                 len_data_vhds_luns = len(data_vhds_luns)
