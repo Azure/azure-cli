@@ -648,8 +648,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_sas_arguments()
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '
                                          'using this shared access signature.')
-        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed '
-                                               'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
+                                               'accessed using this shared access signature.')
         c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
                                             'using this shared access signature.')
         c.argument('content_language', help='Response header value for Content-Language when resource is accessed '
@@ -1147,8 +1147,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_container_permissions))
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '
                                          'using this shared access signature.')
-        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed '
-                                               'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
+                                               'accessed using this shared access signature.')
         c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
                                             'using this shared access signature.')
         c.argument('content_language', help='Response header value for Content-Language when resource is accessed '
