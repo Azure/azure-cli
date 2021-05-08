@@ -470,6 +470,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
         elif res['type'].lower() == 'galleries':
+            # Fetch OS type
             try:
                 image_info = compute_client.gallery_images.get(
                     resource_group_name=res['resource_group'],
@@ -478,9 +479,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 namespace.os_type = image_info.os_type
             except Exception:  # pylint: disable=broad-except
                 logger.warning('Failed to get shared gallery image definition.')
-                if not namespace.os_type:
-                    logger.warning('OS type is not specified. Assume it is Linux.')
-                    namespace.os_type = 'Linux'
+
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
                 image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
