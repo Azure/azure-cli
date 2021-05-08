@@ -1671,7 +1671,6 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
         from msrestazure.tools import parse_resource_id
         # TODO : maybe add a check Resource class in order to access to id (isinstanceof(Resource)) ?
         resources = [parse_resource_id(resource.id) for resource in resources]
-        logger.info(f"resources {resources}")
         parsed_ids = [_create_parsed_id(cmd.cli_ctx,
                                         resource.get('resource_group', None),
                                         resource.get('namespace', None),
