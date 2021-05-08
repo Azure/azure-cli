@@ -1660,22 +1660,36 @@ def show_resource(cmd, resource_ids=None, resource_group_name=None,
 # pylint: disable=unused-argument
 def delete_resource(cmd, resource_ids=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                    resource_name=None, api_version=None, latest_include_preview=False):
+                    resource_name=None, api_version=None, latest_include_preview=False, tag=None):
     """
     Deletes the given resource(s).
     This function allows deletion of ids with dependencies on one another.
     This is done with multiple passes through the given ids.
     """
-    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
-                                                                              resource_group_name,
-                                                                              resource_provider_namespace,
-                                                                              parent_resource_path,
-                                                                              resource_type,
-                                                                              resource_name)]
+    if tag is not None:
+        resources = list_resources(cmd, resource_group_name, resource_provider_namespace, resource_type, resource_name, tag, None)
+        from msrestazure.tools import parse_resource_id
+        # TODO : maybe add a check Resource class in order to access to id (isinstanceof(Resource)) ?
+        resources = [parse_resource_id(resource.id) for resource in resources]
+        logger.info(f"resources {resources}")
+        parsed_ids = [_create_parsed_id(cmd.cli_ctx,
+                                        resource.get('resource_group', None),
+                                        resource.get('namespace', None),
+                                        resource.get('resource_parent', None),
+                                        resource.get('resource_type', None),
+                                        resource.get('resource_name', None)) for resource in resources]
+    else:
+        parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                                  resource_group_name,
+                                                                                  resource_provider_namespace,
+                                                                                  parent_resource_path,
+                                                                                  resource_type,
+                                                                                  resource_name)]
     to_be_deleted = [(_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview), id_dict)
                      for id_dict in parsed_ids]
 
     results = []
+
     from msrestazure.azure_exceptions import CloudError
     while to_be_deleted:
         logger.debug("Start new loop to delete resources.")
