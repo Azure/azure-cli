@@ -3964,6 +3964,27 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
+    @unittest.skip('skip')
+    @ResourceGroupPreparer(name_prefix='cli_test_sig_image_version_vm_create_no_definition_')
+    def test_sig_image_version_vm_create_no_definition(self):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gallery_', 40),
+        })
+        self.cmd('vm create -g {rg} -n vm --image ubuntults --generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm run-command invoke -g {rg} -n vm --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n vm')
+        self.cmd('vm generalize -g {rg} -n vm')
+        self.cmd('image create -g {rg} -n captured --source vm')
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1')
+        # How to remove read permission of the image definition?
+        image_version = self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image --gallery-image-version 1.0.0 --managed-image captured --replica-count 1').get_output_in_json()['id']
+        self.kwargs.update({
+            'image_version': image_version
+        })
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition image')
+        self.cmd('vm create -g {rg} -n vm2 --image {image_version} --generate-ssh-key --nsg-rule NONE')
 
 # endregion
 
