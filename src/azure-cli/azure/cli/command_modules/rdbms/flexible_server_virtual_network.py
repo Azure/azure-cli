@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument, line-too-long
+# pylint: disable=unused-argument, line-too-long, import-outside-toplevel
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -19,7 +19,7 @@ DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
 DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, import-outside-toplevel
 def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref):
 
     nw_client = network_client_factory(cmd.cli_ctx)
@@ -63,7 +63,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
                                                            location, server_name, vnet_address_pref, subnet_address_pref)
 
         else:
-            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use exising subnet, please provide the subnet Id (not vnet Id).")
+            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use an existing subnet, please provide the subnet Id only (not vnet Id).")
 
     elif subnet is None and vnet is None:
         subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, 'Vnet' + server_name[6:], 'Subnet' + server_name[6:],
@@ -71,7 +71,6 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
     else:
         return None
 
-    print(subnet_result)
     return subnet_result.id
 
 
@@ -131,8 +130,6 @@ def _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_s
 def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group, vnet_name, subnet_name, location, server_name, subnet_address_pref):
     Delegation, Subnet = cmd.get_models('Delegation', 'Subnet', resource_type=ResourceType.MGMT_NETWORK)
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
-    print(resource_group, vnet_name, subnet_name)
-    print(check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'))
 
     # subnet not exist
     if not check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):

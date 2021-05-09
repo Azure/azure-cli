@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-
 import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
 
 
+# pylint: disable=import-outside-toplevel
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -19,7 +19,7 @@ class RdbmsCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
 
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
-        super(RdbmsCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_RDBMS,
             custom_command_type=rdbms_custom,
