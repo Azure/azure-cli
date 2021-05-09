@@ -13,6 +13,9 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import get_id_components, check_existence
+from azure.mgmt.privatedns.models import SubResource
+from azure.mgmt.privatedns.models import PrivateZone
+from azure.mgmt.privatedns.models import VirtualNetworkLink
 
 logger = get_logger(__name__)
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
@@ -169,7 +172,6 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
 
 
 def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
-    from azure.mgmt.privatedns.models import SubResource
     dns_suffix_client = cf_postgres_flexible_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
 
     private_dns_zone_suffix = dns_suffix_client.execute(database_engine)
@@ -185,11 +187,14 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
                           name=vnet_name)
     nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
     vnet = nw_client.virtual_networks.get(vnet_rg, vnet_name)
-    from azure.mgmt.privatedns.models import VirtualNetworkLink
+
 
     if private_dns_zone is None:
-        private_dns_zone = server_name + '.' + private_dns_zone_suffix
-
+        if 'private' in private_dns_zone_suffix:
+            private_dns_zone = server_name + '.' + private_dns_zone_suffix
+        else:
+            private_dns_zone = server_name + '.private.' + private_dns_zone_suffix
+    #  resource ID input => check subscription and change client
     elif not _check_if_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
         subscription, resource_group, private_dns_zone, _ = get_id_components(private_dns_zone)
         if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
@@ -201,36 +206,40 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
             private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription)
             private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription)
         _resource_group_verify_and_create(resource_client, resource_group, location)
-
+    #  check Invalid resource ID or Name format
     elif _check_if_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
             or not _check_if_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
-        raise ValidationError("Check if the private dns zone name or id is in correct format.")
-
+        raise ValidationError("Check if the private dns zone name or Id is in correct format.")
+    #  Invalid resource name suffix check
     elif _check_if_resource_name(private_dns_zone) and private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
-        raise ValidationError('The suffix for the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+        raise ValidationError('The suffix for the private DNS zone should be in "{}" format'.format(private_dns_zone_suffix))
 
     link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
     link.registration_enabled = True
 
-    if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
-        logger.warning('Creating a private dns zone %s..', private_dns_zone)
-        from azure.mgmt.privatedns.models import PrivateZone
-        private_zone = private_dns_client.create_or_update(resource_group_name=resource_group,
+    if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones') and \
+        not check_existence(resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
+        logger.warning('Creating a private dns zone %s in resource group %s..', private_dns_zone, vnet_rg)
+        private_zone = private_dns_client.create_or_update(resource_group_name=vnet_rg,
                                                            private_zone_name=private_dns_zone,
                                                            parameters=PrivateZone(location='global'),
                                                            if_none_match='*').result()
 
-        private_dns_link_client.create_or_update(resource_group_name=resource_group,
+        private_dns_link_client.create_or_update(resource_group_name=vnet_rg,
                                                  private_zone_name=private_dns_zone,
                                                  virtual_network_link_name=vnet_name + '-link',
                                                  parameters=link, if_none_match='*').result()
     else:
         logger.warning('Using the existing private dns zone %s', private_dns_zone)
-        private_zone = private_dns_client.get(resource_group_name=resource_group,
-                                              private_zone_name=private_dns_zone)
-        # private dns zone link list
+        dns_resource_group = None
+        if check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
+            dns_resource_group = resource_group
+        elif check_existence(resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
+            dns_resource_group = vnet_rg
 
-        virtual_links = private_dns_link_client.list(resource_group_name=resource_group,
+        private_zone = private_dns_client.get(resource_group_name=dns_resource_group,
+                                              private_zone_name=private_dns_zone)
+        virtual_links = private_dns_link_client.list(resource_group_name=dns_resource_group,
                                                      private_zone_name=private_dns_zone)
 
         link_exist_flag = False
@@ -240,7 +249,7 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
                 break
 
         if not link_exist_flag:
-            private_dns_link_client.create_or_update(resource_group_name=resource_group,
+            private_dns_link_client.create_or_update(resource_group_name=dns_resource_group,
                                                      private_zone_name=private_dns_zone,
                                                      virtual_network_link_name=vnet_name + '-link',
                                                      parameters=link, if_none_match='*').result()
