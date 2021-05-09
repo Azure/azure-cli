@@ -84,52 +84,52 @@ def flexible_server_create(cmd, client,
                                                        private_dns_zone=private_dns_zone_arguments,
                                                        subnet_id=subnet_id,
                                                        location=location)
-        private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
-    else:
-        delegated_subnet_arguments = None
-        private_dns_zone_arguments = None
+    #     private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
+    # else:
+    #     delegated_subnet_arguments = None
+    #     private_dns_zone_arguments = None
 
-    administrator_login_password = generate_password(administrator_login_password)
-    if server_result is None:
-        # Create postgresql
-        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
-        server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
-                                       backup_retention,
-                                       sku_name, tier, storage_mb, administrator_login,
-                                       administrator_login_password,
-                                       version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
-                                       high_availability, zone, private_dns_zone_arguments)
+    # administrator_login_password = generate_password(administrator_login_password)
+    # if server_result is None:
+    #     # Create postgresql
+    #     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
+    #     server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
+    #                                    backup_retention,
+    #                                    sku_name, tier, storage_mb, administrator_login,
+    #                                    administrator_login_password,
+    #                                    version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
+    #                                    high_availability, zone, private_dns_zone_arguments)
 
-        # Adding firewall rule
-        if public_access is not None and str(public_access).lower() != 'none':
-            if str(public_access).lower() == 'all':
-                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-            else:
-                start_ip, end_ip = parse_public_access_input(public_access)
-            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+    #     # Adding firewall rule
+    #     if public_access is not None and str(public_access).lower() != 'none':
+    #         if str(public_access).lower() == 'all':
+    #             start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+    #         else:
+    #             start_ip, end_ip = parse_public_access_input(public_access)
+    #         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-        # Create mysql database if it does not exist
-        if database_name is None:
-            database_name = DEFAULT_DB_NAME
-        _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+    #     # Create mysql database if it does not exist
+    #     if database_name is None:
+    #         database_name = DEFAULT_DB_NAME
+    #     _create_database(db_context, cmd, resource_group_name, server_name, database_name)
 
-    user = server_result.administrator_login
-    server_id = server_result.id
-    loc = server_result.location
-    version = server_result.version
-    sku = server_result.sku.name
-    host = server_result.fully_qualified_domain_name
+    # user = server_result.administrator_login
+    # server_id = server_result.id
+    # loc = server_result.location
+    # version = server_result.version
+    # sku = server_result.sku.name
+    # host = server_result.fully_qualified_domain_name
 
-    logger.warning('Make a note of your password. If you forget, you would have to'
-                   'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                   server_name, resource_group_name)
+    # logger.warning('Make a note of your password. If you forget, you would have to'
+    #                'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+    #                server_name, resource_group_name)
 
-    _update_local_contexts(cmd, server_name, resource_group_name, location, user)
+    # _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
-    return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
-                          subnet_id)
+    # return _form_response(user, sku, loc, server_id, host, version,
+    #                       administrator_login_password if administrator_login_password is not None else '*****',
+    #                       _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
+    #                       subnet_id)
 
 
 def flexible_server_restore(cmd, client,
