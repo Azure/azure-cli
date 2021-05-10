@@ -33,33 +33,6 @@ def step_share_show(test, checks=None):
              checks=checks)
 
 
-# EXAMPLE: /GallerySharingProfile/post/Add sharing id to the sharing profile of a gallery.
-@try_manual
-def step_share_update(test, checks=None):
-    if checks is None:
-        checks = []
-    test.cmd('az sig share update '
-             '--gallery-name "{myGallery}" '
-             '--resource-group "{rg}" '
-             '--groups type="Subscriptions" ids="34a4ab42-0d72-47d9-bd1a-aed207386dac" ids="380fd389-260b-41aa-bad9-0a8'
-             '3108c370b" '
-             '--groups type="AADTenants" ids="c24c76aa-8897-4027-9b03-8f7928b54ff6" '
-             '--operation-type "Add"',
-             checks=checks)
-
-
-# EXAMPLE: /GallerySharingProfile/post/reset sharing profile of a gallery.
-@try_manual
-def step_share_update2(test, checks=None):
-    if checks is None:
-        checks = []
-    test.cmd('az sig share update '
-             '--gallery-name "{myGallery}" '
-             '--resource-group "{rg}" '
-             '--operation-type "Reset"',
-             checks=checks)
-
-
 # EXAMPLE: /SharedGalleryImages/get/Get a gallery.
 @try_manual
 def step_share_image_definition_list(test, checks=None):
