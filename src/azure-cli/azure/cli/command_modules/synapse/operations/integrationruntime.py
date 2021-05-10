@@ -35,8 +35,8 @@ def regenerate(cmd, client, resource_group_name, workspace_name, integration_run
 
 
 def update(cmd, client, resource_group_name, workspace_name, integration_runtime_name, auto_update, update_delay_offset, no_wait=False):
-    updateIntegrationRuntimeRequest = UpdateIntegrationRuntimeRequest(
+    update_integration_runtime_request = UpdateIntegrationRuntimeRequest(
         auto_update=auto_update,
         update_delay_offset=update_delay_offset
     )
-    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name, updateIntegrationRuntimeRequest)
+    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name, update_integration_runtime_request)

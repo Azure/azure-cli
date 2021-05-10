@@ -9,6 +9,7 @@ from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIden
     ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity, IpFirewallRuleInfo
 from azure.mgmt.cdn.models import CheckNameAvailabilityInput
 
+
 # Synapse workspace
 def list_workspaces(cmd, client, resource_group_name=None):
     return client.list_by_resource_group(
