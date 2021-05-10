@@ -3759,7 +3759,9 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'location': resource_group_location,
-            'sharedSubId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590', #share the gallery to tester's subscription, so the tester can get shared galleries
+            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
@@ -3775,22 +3777,27 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
 
         # Test shared gallery
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
+        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
         res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.permissions', 'Groups')
         ]).get_output_in_json()
+
         self.kwargs['unique_name'] = res['identifier']['uniqueName']
 
-        self.cmd('sig share update --gallery-name {gallery} -g {rg} --operation-type Reset')
+        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
+        self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} {sharedSubId} --tenant-ids {tenantId}')
         self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.permissions', 'Private')
+            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
+            self.check('sharingProfile.groups[0].ids[1]', self.kwargs['sharedSubId']),
+            self.check('sharingProfile.groups[0].type', 'Subscriptions'),
+            self.check('sharingProfile.groups[1].ids[0]', self.kwargs['tenantId']),
+            self.check('sharingProfile.groups[1].type', 'AADTenants')
         ])
 
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
-        self.cmd('sig share update --gallery-name {gallery} -g {rg} --groups type="Subscriptions" ids="{sharedSubId}" --operation-type Add')
+        self.cmd('sig share remove --gallery-name {gallery} -g {rg} --subscription-ids {sharedSubId} --tenant-ids {tenantId}')
         self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['sharedSubId']),
-            self.check('sharingProfile.groups[0].type', 'Subscriptions')
+            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
+            self.check('length(sharingProfile.groups)', 1),
         ])
 
         # Check result by shared user
@@ -3798,6 +3805,12 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig share image-definition list --gallery-unique-name {unique_name} --location {location}')
         self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
         self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
 
     @ResourceGroupPreparer(location='eastus2')
     def test_gallery_e2e(self, resource_group, resource_group_location):
