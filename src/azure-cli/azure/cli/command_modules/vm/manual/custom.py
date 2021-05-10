@@ -9,8 +9,7 @@
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-import time
-from pathlib import Path
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -22,6 +21,8 @@ def sshkey_create(client,
                   location,
                   tags=None,
                   public_key=None):
+    import time
+    from pathlib import Path
     parameters = {
         'location': location,
         'tags': tags,
@@ -40,9 +41,9 @@ def sshkey_create(client,
         public_key_file = private_key_file + '.pub'
         with open(private_key_file, 'w', newline='\n') as f:
             f.write(private_key)
-        logger.warning('Private key is saved to {}.'.format(private_key_file))
+        logger.warning('Private key is saved to %s.', private_key_file)
         with open(public_key_file, 'w', newline='\n') as f:
             f.write(public_key)
-        logger.warning('Public key is saved to {}.'.format(public_key_file))
+        logger.warning('Public key is saved to %s.', public_key_file)
     return client.get(resource_group_name=resource_group_name,
                       ssh_public_key_name=ssh_public_key_name)
