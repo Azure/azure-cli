@@ -25,7 +25,6 @@
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
 |[az sig share show](#GallerySharingProfileGet)|Get|[Parameters](#ParametersGallerySharingProfileGet)|[Example](#ExamplesGallerySharingProfileGet)|
-|[az sig share update](#GallerySharingProfileUpdate)|Update|[Parameters](#ParametersGallerySharingProfileUpdate)|[Example](#ExamplesGallerySharingProfileUpdate)|
 
 ### <a name="CommandsInSharedGalleryImages">Commands in `az sig share image-definition` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -77,26 +76,6 @@ az sig share show --gallery-unique-name "galleryUniqueName" --location "myLocati
 |------|----|-----------|----------|------------|
 |**--location**|string|Resource location.|location|location|
 |**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
-
-#### <a name="GallerySharingProfileUpdate">Command `az sig share update`</a>
-
-##### <a name="ExamplesGallerySharingProfileUpdate">Example</a>
-```
-az sig share update --gallery-name "myGalleryName" --resource-group "myResourceGroup" --groups type="Subscriptions" \
-ids="34a4ab42-0d72-47d9-bd1a-aed207386dac" ids="380fd389-260b-41aa-bad9-0a83108c370b" --groups type="AADTenants" \
-ids="c24c76aa-8897-4027-9b03-8f7928b54ff6" --operation-type "Add"
-```
-##### <a name="ExamplesGallerySharingProfileUpdate">Example</a>
-```
-az sig share update --gallery-name "myGalleryName" --resource-group "myResourceGroup" --operation-type "Reset"
-```
-##### <a name="ParametersGallerySharingProfileUpdate">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--resource-group-name**|string|The name of the resource group.|resource_group_name|resourceGroupName|
-|**--gallery-name**|string|The name of the Shared Image Gallery.|gallery_name|galleryName|
-|**--operation-type**|choice|This property allows you to specify the operation type of gallery sharing update. <br><br> Possible values are: <br><br> **Add** <br><br> **Remove** <br><br> **Reset**|operation_type|operationType|
-|**--groups**|array|A list of sharing profile groups.|groups|groups|
 
 ### group `az sig share image-definition`
 #### <a name="SharedGalleryImagesList">Command `az sig share image-definition list`</a>

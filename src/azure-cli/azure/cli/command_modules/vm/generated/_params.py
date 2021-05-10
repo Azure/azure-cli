@@ -17,7 +17,6 @@ from azure.cli.core.commands.parameters import (
     get_location_type
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from .._actions import AddGroups
 
 
 def load_arguments(self, _):
@@ -66,14 +65,6 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
-
-    with self.argument_context('sig share update') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
-        c.argument('operation_type', arg_type=get_enum_type(['Add', 'Remove', 'Reset']), help='This property allows '
-                   'you to specify the operation type of gallery sharing update. <br><br> Possible values are: '
-                   '<br><br> **Add** <br><br> **Remove** <br><br> **Reset**')
-        c.argument('groups', action=AddGroups, nargs='+', help='A list of sharing profile groups.')
 
     with self.argument_context('sig share image-definition list') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))

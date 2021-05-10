@@ -75,19 +75,6 @@ def sig_share_show(client,
                       gallery_unique_name=gallery_unique_name)
 
 
-def sig_share_update(client,
-                     resource_group_name,
-                     gallery_name,
-                     operation_type,
-                     groups=None):
-    sharing_update = {}
-    sharing_update['operation_type'] = operation_type
-    sharing_update['groups'] = groups
-    return client.begin_update(resource_group_name=resource_group_name,
-                               gallery_name=gallery_name,
-                               sharing_update=sharing_update)
-
-
 def sig_share_image_definition_list(client,
                                     location,
                                     gallery_unique_name,
