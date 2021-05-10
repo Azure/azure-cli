@@ -3759,7 +3759,7 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'location': resource_group_location,
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590', #share the gallery to tester's subscription, so the tester can get shared galleries
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
             'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
             'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
         })
