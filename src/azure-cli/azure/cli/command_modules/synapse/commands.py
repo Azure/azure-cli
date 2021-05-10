@@ -213,8 +213,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_sql_pool', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('update', 'update_sql_pool')
-        g.command('pause', 'pause')
-        g.command('resume', 'resume')
+        g.command('pause', 'begin_pause')
+        g.command('resume', 'begin_resume')
         g.custom_command('restore', 'restore_sql_pool')
         g.custom_command('show-connection-string', 'sql_pool_show_connection_string')
         g.wait_command('wait')
@@ -309,11 +309,11 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.command('update', 'update')
+        g.custom_command('update', 'update')
         g.command('upgrade', 'upgrade')
         g.command('list-auth-key', 'list', command_type=synapse_integrationruntimeauthkeys_sdk,
                   client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
-        g.command('regenerate-auth-key', 'regenerate', command_type=synapse_integrationruntimeauthkeys_sdk,
+        g.custom_command('regenerate-auth-key', 'regenerate', command_type=synapse_integrationruntimeauthkeys_sdk,
                   client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
         g.command('get-monitoring-data', 'list', command_type=synapse_integrationruntimemonitoringdata_sdk,
                   client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory)

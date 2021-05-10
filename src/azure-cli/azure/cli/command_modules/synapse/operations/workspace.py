@@ -6,8 +6,8 @@
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
     DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings, \
-    ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity
-
+    ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity, IpFirewallRuleInfo
+from azure.mgmt.cdn.models import CheckNameAvailabilityInput
 
 # Synapse workspace
 def list_workspaces(cmd, client, resource_group_name=None):
@@ -82,13 +82,15 @@ def get_resource_group_by_workspace_name(cmd, client, workspace_name):
 
 
 def custom_check_name_availability(cmd, client, name):
-    return client.check_name_availability(name, "Microsoft.Synapse/workspaces")
+    check_name_availability_input = CheckNameAvailabilityInput(name=name, type="Microsoft.Synapse/workspaces")
+    return client.check_name_availability(check_name_availability_input)
 
 
 def create_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_name, start_ip_address, end_ip_address,
                          no_wait=False):
+    ip_firewall_rule_info = IpFirewallRuleInfo(name=rule_name, start_ip_address=start_ip_address, end_ip_address=end_ip_address)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, rule_name,
-                       ip_firewall_rule_info ='', start_ip_address=start_ip_address, end_ip_address=end_ip_address)
+                       ip_firewall_rule_info)
 
 
 def update_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_name, start_ip_address=None,
@@ -98,8 +100,10 @@ def update_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_
 
     start_ip_address = start_ip_address or firewall.start_ip_address
     end_ip_address = end_ip_address or firewall.end_ip_address
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, rule_name,
-                       start_ip_address=start_ip_address, end_ip_address=end_ip_address)
+    ip_firewall_rule_info = IpFirewallRuleInfo(name=rule_name, start_ip_address=start_ip_address,
+                                            end_ip_address=end_ip_address)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, rule_name,
+                       ip_firewall_rule_info)
 
 
 def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
