@@ -58,32 +58,33 @@ helps['sshkey delete'] = """
     short-summary: "Delete an SSH public key."
 """
 
-helps['sig share wait'] = """
-type: command
-short-summary: wait for shared gallery get related operation
-"""
-
-helps['sig share update'] = """
+helps['sig share add'] = """
     type: command
     short-summary: "Update sharing profile of a gallery."
-    parameters:
-      - name: --groups
-        short-summary: "A list of sharing profile groups."
-        long-summary: |
-            Usage: --groups type=XX ids=XX
-
-            type: This property allows you to specify the type of sharing group.
-            ids: A list of subscription/tenant ids the gallery is aimed to be shared to.
-
-            Multiple actions can be specified by using more than one --groups argument.
     examples:
       - name: Add sharing id to the sharing profile of a gallery.
         text: |-
-               az sig share update --gallery-name "myGalleryName" --resource-group "myResourceGroup" --groups \
-type="Subscriptions" ids="34a4ab42-0d72-47d9-bd1a-aed207386dac" ids="380fd389-260b-41aa-bad9-0a83108c370b" --groups \
-type="AADTenants" ids="c24c76aa-8897-4027-9b03-8f7928b54ff6" --operation-type "Add"
+               az sig share add --gallery-name "myGalleryName" --resource-group "myResourceGroup" \
+--subscription-ids "34a4ab42-0d72-47d9-bd1a-aed207386dac" "380fd389-260b-41aa-bad9-0a83108c370b" \
+--tenant-ids "c24c76aa-8897-4027-9b03-8f7928b54ff6"
+"""
+
+helps['sig share remove'] = """
+    type: command
+    short-summary: "Remove sharing profile of a gallery."
+    examples:
+      - name: Add sharing id to the sharing profile of a gallery.
+        text: |-
+               az sig share remove --gallery-name "myGalleryName" --resource-group "myResourceGroup" \
+--subscription-ids "34a4ab42-0d72-47d9-bd1a-aed207386dac" "380fd389-260b-41aa-bad9-0a83108c370b" \
+--tenant-ids "c24c76aa-8897-4027-9b03-8f7928b54ff6"
+"""
+
+helps['sig share reset'] = """
+    type: command
+    short-summary: "Reset sharing profile of a gallery."
+    examples:
       - name: reset sharing profile of a gallery.
         text: |-
-               az sig share update --gallery-name "myGalleryName" --resource-group "myResourceGroup" --operation-type \
-"Reset"
+               az sig share reset --gallery-name "myGalleryName" --resource-group "myResourceGroup"
 """

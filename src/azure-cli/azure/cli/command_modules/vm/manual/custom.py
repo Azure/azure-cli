@@ -9,6 +9,8 @@
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
+from azure.cli.core.azclierror import ValidationError
+
 
 def sshkey_create(client,
                   resource_group_name,
@@ -38,6 +40,31 @@ def sig_group_list(client,
         shared_to = None
     return client.list(location=location,
                        shared_to=shared_to)
+
+
+def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
+                     op_type=None):
+    SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
+        'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes')
+    if subscription_ids is None and tenant_ids is None:
+        raise ValidationError('At least one of subscription ids or tenant ids must be provided')
+    groups = []
+    if subscription_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
+    if tenant_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.AAD_TENANTS, ids=tenant_ids))
+    sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_share_reset(cmd, client, resource_group_name, gallery_name):
+    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes')
+    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
 
 
 def sig_share_image_definition_list(client,
