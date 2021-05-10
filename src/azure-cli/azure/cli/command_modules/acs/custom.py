@@ -1978,7 +1978,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_sgxquotehelper=False,
                enable_encryption_at_host=False,
                no_wait=False,
-               yes=False):
+               yes=False,
+               enable_azure_rbac=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if dns_name_prefix and fqdn_subdomain:
@@ -2209,11 +2210,16 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                            '"--aad-client-app-id/--aad-server-app-id/--aad-server-app-secret"')
         aad_profile = ManagedClusterAADProfile(
             managed=True,
+            enable_azure_rbac=enable_azure_rbac,
             admin_group_object_ids=_parse_comma_separated_list(
                 aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
     else:
+        if enable_azure_rbac is True:
+            raise CLIError(
+                '"--enable-azure-rbac" can only be used together with "--enable-aad"')
+
         if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
             if aad_tenant_id is None:
                 profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -2560,7 +2566,9 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_managed_identity=False,
                assign_identity=None,
                yes=False,
-               no_wait=False):
+               no_wait=False,
+               enable_azure_rbac=False,
+               disable_azure_rbac=False):
     update_autoscaler = enable_cluster_autoscaler + \
         disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2569,7 +2577,8 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
     update_aad_profile = not (
-        aad_tenant_id is None and aad_admin_group_object_ids is None)
+        aad_tenant_id is None and aad_admin_group_object_ids is None and
+        not enable_azure_rbac and not disable_azure_rbac)
     # pylint: disable=too-many-boolean-expressions
     if (update_autoscaler != 1 and cluster_autoscaler_profile is None and
             not update_lb_profile and
@@ -2605,7 +2614,9 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--disable-ahub" or '
                        '"--windows-admin-password" or '
                        '"--enable-managed-identity" or '
-                       '"--assign-identity"')
+                       '"--assign-identity" or '
+                       '"--enable-azure-rbac" or '
+                       '"--disable-azure-rbac"')
 
     if not enable_managed_identity and assign_identity:
         raise CLIError(
@@ -2725,13 +2736,20 @@ def aks_update(cmd, client, resource_group_name, name,
         )
     if update_aad_profile:
         if instance.aad_profile is None or not instance.aad_profile.managed:
-            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids"'
+            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/--enable-azure-rbac/--disable-azure-rbac"'
                            ' if managed AAD is not enabled')
         if aad_tenant_id is not None:
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
             instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(
                 aad_admin_group_object_ids)
+        if enable_azure_rbac and disable_azure_rbac:
+            raise CLIError(
+                'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time')
+        if enable_azure_rbac:
+            instance.aad_profile.enable_azure_rbac = True
+        if disable_azure_rbac:
+            instance.aad_profile.enable_azure_rbac = False
 
     if enable_ahub and disable_ahub:
         raise CLIError(
