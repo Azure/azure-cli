@@ -215,6 +215,12 @@ def load_arguments(self, _):
         c.argument('resource_type', help='When --resource-type is not present the command will list all deleted Vaults '
                                          'and HSMs. Possible values for --resource-type are vault and hsm.')
 
+    with self.argument_context('keyvault show-deleted') as c:
+        c.argument('vault_name', deleted_vault_name_type, options_list=['--name', '-n'],
+                   validator=validate_deleted_vault_or_hsm_name)
+        c.argument('hsm_name', deleted_hsm_name_type)
+        c.argument('location', help='Location of the deleted Vault or HSM', required=False)
+
     with self.argument_context('keyvault delete-policy') as c:
         c.argument('object_id', validator=validate_principal)
 
