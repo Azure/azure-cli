@@ -64,7 +64,10 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.key = key
 
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
-        self.dev_setting_location = os.environ.get(dev_setting_location, location)
+        # use environment variable to modify the default value of location
+        self.dev_setting_location = os.environ.get(dev_setting_location, None)
+        if self.dev_setting_location is not None and self.dev_setting_location != "":
+            self.location = self.dev_setting_location
 
     def create_resource(self, name, **kwargs):
         if self.dev_setting_name:
