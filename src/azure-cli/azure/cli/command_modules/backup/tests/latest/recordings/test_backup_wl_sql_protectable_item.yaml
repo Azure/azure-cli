@@ -7,42 +7,208 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup container register
+      - backup container list
       Connection:
       - keep-alive
       ParameterSetName:
-      - -v -g --backup-management-type --workload-type --resource-id
+      - -v -g --backup-management-type
       User-Agent:
       - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.0
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''pstestwlRG1bca8'' could not be found."}}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '1073'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Fri, 23 Apr 2021 07:30:05 GMT
+      - Mon, 10 May 2021 09:11:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -v -g --query --backup-management-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bbksql%3Bsqlvm?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1061'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 May 2021 09:11:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --workload-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectableItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":8,"subprotectableitemcount":8,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","name":"sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb_restored_5_10_2021_1527","protectionState":"NotProtected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1596'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 May 2021 09:11:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protectable-item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vault-name --name --workload-type --protectable-item-type --server-name
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectableItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":8,"subprotectableitemcount":8,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","name":"sqldatabase;mssqlserver;msdb_restored_5_10_2021_1527","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb_restored_5_10_2021_1527","protectionState":"NotProtected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1596'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 May 2021 09:11:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

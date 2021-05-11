@@ -7,31 +7,246 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup container register
+      - backup container list
       Connection:
       - keep-alive
       ParameterSetName:
-      - -v -g --backup-management-type --workload-type --resource-id
+      - -v -g --backup-management-type
       User-Agent:
       - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.0
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectableContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''pstestwlRG1bca8'' could not be found."}}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;bksql;sqlvm","name":"VMAppContainer;Compute;bksql;sqlvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.Compute/virtualMachines/sqlvm","lastUpdatedTime":"2021-04-29T10:02:02.4682499Z","extendedInfo":{"hostServerName":"sqlvm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":9,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"sqlvm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '1073'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Fri, 23 Apr 2021 07:30:04 GMT
+      - Tue, 11 May 2021 06:49:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection auto-enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-name --protectable-item-type --server-name --workload-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2021-04-29T18:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2021-04-29T18:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":8}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1058'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 May 2021 06:49:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection auto-enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-name --protectable-item-type --server-name --workload-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupProtectableItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"sqlvm","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":9,"subprotectableitemcount":9,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '796'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 May 2021 06:49:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"backupManagementType": "AzureWorkload", "itemId": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;bksql;sqlvm/protectableItems/sqlinstance;mssqlserver",
+      "policyId": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup",
+      "protectionIntentItemType": "RecoveryServiceVaultItem"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection auto-enable-for-azurewl
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '541'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -v -g -p --protectable-item-name --protectable-item-type --server-name --workload-type
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/backupProtectionIntent/a2a505c4-9436-448d-a816-5954464a5034?api-version=2017-07-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/backupProtectionIntent/a2a505c4-9436-448d-a816-5954464a5034","name":"a2a505c4-9436-448d-a816-5954464a5034","type":"Microsoft.RecoveryServices/vaults/backupProtectionIntent","properties":{"protectionIntentItemType":"RecoveryServiceVaultItem","backupManagementType":"AzureWorkload","sourceResourceId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/Compute;bksql;sqlvm","itemId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/protectionContainers/Compute;bksql;sqlvm/protectableItems/MSSQLSERVER","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupPolicies/HourlyLogBackup","protectionState":"NotProtected"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1072'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 May 2021 06:49:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection auto-disable-for-azurewl
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -v -g --item-name
+      User-Agent:
+      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bksql/providers/Microsoft.RecoveryServices/vaults/sqlvault/backupFabrics/Azure/backupProtectionIntent/6f9a263c-84e6-47da-9d74-3fcd3c299d07?api-version=2017-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Tue, 11 May 2021 06:49:16 GMT
       expires:
       - '-1'
       pragma:
@@ -40,9 +255,11 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 204
+      message: No Content
 version: 1
