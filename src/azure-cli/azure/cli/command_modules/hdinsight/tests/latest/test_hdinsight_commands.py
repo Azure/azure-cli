@@ -7,6 +7,7 @@
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure_devtools.scenario_tests import record_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -172,6 +173,7 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_relay_and_privatelink(self, storage_account_info):
@@ -390,6 +392,7 @@ class HDInsightClusterTests(ScenarioTest):
                                       self.check("[1].status", 'Succeeded')
                                   ])
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_virtual_machine(self, storage_account_info):
