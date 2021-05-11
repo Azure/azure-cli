@@ -7,6 +7,8 @@
 import datetime as dt
 from datetime import datetime
 import random
+import secrets
+import string
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
@@ -67,8 +69,6 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
 
 
 def generate_password(administrator_login_password):
-    import secrets
-    import string
     if administrator_login_password is None:
         passwordlength = 16
         administrator_login_password = secrets.token_urlsafe(passwordlength)
