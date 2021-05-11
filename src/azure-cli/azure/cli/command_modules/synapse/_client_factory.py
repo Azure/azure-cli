@@ -206,3 +206,7 @@ def cf_synapse_data_flow(cli_ctx, workspace_name):
 
 def cf_synapse_notebook(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).notebook
+
+
+def cf_synapse_spark_pool(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).big_data_pools
