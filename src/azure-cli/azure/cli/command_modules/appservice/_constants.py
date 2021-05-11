@@ -37,6 +37,12 @@ FUNCTIONS_NO_V2_REGIONS = {
     "USSec West",
     "USSec East"
 }
+GITHUB_OAUTH_CLIENT_ID = "8d8e1f6000648c575489"
+GITHUB_OAUTH_SCOPES = [
+    "admin:repo_hook",
+    "repo",
+    "workflow"
+]
 
 
 class FUNCTIONS_STACKS_API_KEYS():

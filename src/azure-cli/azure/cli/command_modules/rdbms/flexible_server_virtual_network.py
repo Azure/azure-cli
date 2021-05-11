@@ -11,6 +11,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
+from azure.mgmt.privatedns.models import VirtualNetworkLink
+from azure.mgmt.privatedns.models import PrivateZone
+from azure.mgmt.privatedns.models import SubResource
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import get_id_components, check_existence
 
@@ -172,7 +175,6 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
 
 
 def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
-    from azure.mgmt.privatedns.models import SubResource
     dns_suffix_client = cf_postgres_flexible_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
 
     private_dns_zone_suffix = dns_suffix_client.execute(database_engine)
@@ -188,7 +190,6 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
                           name=vnet_name)
     nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
     vnet = nw_client.virtual_networks.get(vnet_rg, vnet_name)
-    from azure.mgmt.privatedns.models import VirtualNetworkLink
 
     if private_dns_zone is None:
         private_dns_zone = server_name + '.' + private_dns_zone_suffix
@@ -217,7 +218,6 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
 
     if not check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
         logger.warning('Creating a private dns zone %s..', private_dns_zone)
-        from azure.mgmt.privatedns.models import PrivateZone
         private_zone = private_dns_client.create_or_update(resource_group_name=resource_group,
                                                            private_zone_name=private_dns_zone,
                                                            parameters=PrivateZone(location='global'),
