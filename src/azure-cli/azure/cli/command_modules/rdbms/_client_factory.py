@@ -6,7 +6,7 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
-# CLIENT FACTORIES
+# pylint: disable=import-outside-toplevel
 
 RM_URI_OVERRIDE = 'AZURE_CLI_RDBMS_RM_URI'
 SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
