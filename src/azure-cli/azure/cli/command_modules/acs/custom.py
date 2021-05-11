@@ -2736,7 +2736,8 @@ def aks_update(cmd, client, resource_group_name, name,
         )
     if update_aad_profile:
         if instance.aad_profile is None or not instance.aad_profile.managed:
-            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/--enable-azure-rbac/--disable-azure-rbac"'
+            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/"'
+                           '"--enable-azure-rbac/--disable-azure-rbac"'
                            ' if managed AAD is not enabled')
         if aad_tenant_id is not None:
             instance.aad_profile.tenant_id = aad_tenant_id
