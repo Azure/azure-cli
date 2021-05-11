@@ -36,24 +36,20 @@ def load_command_table(self, _):
     with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
         g.custom_command('create', 'sshkey_create')
 
-    with self.command_group('sig', vm_gallery, client_factory=cf_gallery,
-                            is_experimental=True) as g:
+    with self.command_group('sig', vm_gallery, client_factory=cf_gallery) as g:
         g.custom_command('group-list', 'sig_group_list', operation_group='shared_galleries',
                          client_factory=cf_shared_gallery)
 
     with self.command_group('sig share', vm_gallery_sharing_profile, operation_group='shared_galleries',
-                            client_factory=cf_gallery_sharing_profile,
-                            is_experimental=True, min_api='2020-09-30') as g:
+                            client_factory=cf_gallery_sharing_profile, min_api='2020-09-30') as g:
         g.custom_command('add', 'sig_share_update', supports_no_wait=True)
         g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
 
     with self.command_group('sig share image-definition', vm_shared_gallery_image, min_api='2020-09-30',
-                            operation_group='shared_galleries', client_factory=cf_shared_gallery_image,
-                            is_experimental=True) as g:
+                            operation_group='shared_galleries', client_factory=cf_shared_gallery_image) as g:
         g.custom_command('list', 'sig_share_image_definition_list')
 
     with self.command_group('sig share image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
-                            operation_group='shared_galleries', client_factory=cf_shared_gallery_image_version,
-                            is_experimental=True) as g:
+                            operation_group='shared_galleries', client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list', 'sig_share_image_version_list')
