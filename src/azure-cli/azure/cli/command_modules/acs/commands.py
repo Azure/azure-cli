@@ -30,7 +30,7 @@ def load_command_table(self, _):
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2021_02_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2021_03_01.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )
@@ -66,7 +66,8 @@ def load_command_table(self, _):
     # ACS Mesos DC/OS commands
     with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'dcos_browse')
-        g.custom_command('install-cli', 'dcos_install_cli', client_factory=None)
+        g.custom_command('install-cli', 'dcos_install_cli',
+                         client_factory=None)
 
     # ACS Kubernetes commands
     with self.command_group('acs kubernetes', container_services_sdk, client_factory=cf_container_services) as g:
@@ -80,19 +81,27 @@ def load_command_table(self, _):
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.custom_command('update', 'aks_update', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('update-credentials', 'aks_update_credentials', supports_no_wait=True)
-        g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
-        g.custom_command('enable-addons', 'aks_enable_addons', supports_no_wait=True)
+        g.custom_command('update-credentials',
+                         'aks_update_credentials', supports_no_wait=True)
+        g.custom_command('disable-addons', 'aks_disable_addons',
+                         supports_no_wait=True)
+        g.custom_command('enable-addons', 'aks_enable_addons',
+                         supports_no_wait=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
         g.custom_command('check-acr', 'aks_check_acr')
-        g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_upgrades_table_format)
+        g.command('get-upgrades', 'get_upgrade_profile',
+                  table_transformer=aks_upgrades_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
-        g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
-        g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces', deprecate_info=g.deprecate())
+        g.custom_command('list', 'aks_list',
+                         table_transformer=aks_list_table_format)
+        g.custom_command('remove-dev-spaces',
+                         'aks_remove_dev_spaces', deprecate_info=g.deprecate())
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
-        g.custom_show_command('show', 'aks_show', table_transformer=aks_show_table_format)
+        g.custom_show_command('show', 'aks_show',
+                              table_transformer=aks_show_table_format)
         g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True)
-        g.custom_command('use-dev-spaces', 'aks_use_dev_spaces', deprecate_info=g.deprecate())
+        g.custom_command('use-dev-spaces', 'aks_use_dev_spaces',
+                         deprecate_info=g.deprecate())
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
@@ -101,17 +110,23 @@ def load_command_table(self, _):
         g.command('start', 'start', supports_no_wait=True)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
-        g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)
+        g.custom_command('get-versions', 'aks_get_versions',
+                         table_transformer=aks_versions_table_format)
 
     # AKS agent pool commands
     with self.command_group('aks nodepool', agent_pools_sdk, client_factory=cf_agent_pools) as g:
-        g.custom_command('list', 'aks_agentpool_list', table_transformer=aks_agentpool_list_table_format)
-        g.custom_show_command('show', 'aks_agentpool_show', table_transformer=aks_agentpool_show_table_format)
+        g.custom_command('list', 'aks_agentpool_list',
+                         table_transformer=aks_agentpool_list_table_format)
+        g.custom_show_command('show', 'aks_agentpool_show',
+                              table_transformer=aks_agentpool_show_table_format)
         g.custom_command('add', 'aks_agentpool_add', supports_no_wait=True)
         g.custom_command('scale', 'aks_agentpool_scale', supports_no_wait=True)
-        g.custom_command('upgrade', 'aks_agentpool_upgrade', supports_no_wait=True)
-        g.custom_command('update', 'aks_agentpool_update', supports_no_wait=True)
-        g.custom_command('delete', 'aks_agentpool_delete', supports_no_wait=True)
+        g.custom_command('upgrade', 'aks_agentpool_upgrade',
+                         supports_no_wait=True)
+        g.custom_command('update', 'aks_agentpool_update',
+                         supports_no_wait=True)
+        g.custom_command('delete', 'aks_agentpool_delete',
+                         supports_no_wait=True)
         g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
 
     # OSA commands
@@ -122,11 +137,14 @@ def load_command_table(self, _):
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)
         g.custom_show_command('show', 'openshift_show')
-        g.custom_command('list', 'osa_list', table_transformer=osa_list_table_format)
+        g.custom_command('list', 'osa_list',
+                         table_transformer=osa_list_table_format)
         g.wait_command('wait')
 
     # OSA monitor subgroup
     with self.command_group('openshift monitor', openshift_managed_clusters_sdk,
                             client_factory=cf_openshift_managed_clusters) as g:
-        g.custom_command('enable', 'openshift_monitor_enable', supports_no_wait=True)
-        g.custom_command('disable', 'openshift_monitor_disable', supports_no_wait=True)
+        g.custom_command('enable', 'openshift_monitor_enable',
+                         supports_no_wait=True)
+        g.custom_command('disable', 'openshift_monitor_disable',
+                         supports_no_wait=True)
