@@ -3246,16 +3246,12 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     else:
         resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
 
-    default_workspace_params = {
-        'location': workspace_region,
-        'properties': {
-            'sku': {
-                'name': 'standalone'
-            }
-        }
-    }
-    async_poller = resources.create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
-                                                    default_workspace_params)
+    from azure.cli.core.profiles import ResourceType
+    GenericResource = cmd.get_models('GenericResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    generic_resource = GenericResource(location=workspace_region, properties={'sku': {'name': 'standalone'}})
+
+    async_poller = resources.begin_create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
+                                                          generic_resource)
 
     ws_resource_id = ''
     while True:
