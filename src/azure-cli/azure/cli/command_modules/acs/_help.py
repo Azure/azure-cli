@@ -442,7 +442,7 @@ parameters:
     short-summary: Enable EncryptionAtHost, default value is false.
   - name: --enable-azure-rbac
     type: bool
-    short-summary: Whether to enable Azure RBAC for Kubernetes authorization.
+    short-summary: Enable Azure role assignments to control authorization checks on cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -577,10 +577,10 @@ parameters:
     short-summary: Specify an existing user assigned identity to manage cluster resource group.
   - name: --enable-azure-rbac
     type: bool
-    short-summary: Whether to enable Azure RBAC for Kubernetes authorization.
+    short-summary: Enable Azure role assignments to control authorization checks on cluster.
   - name: --disable-azure-rbac
     type: bool
-    short-summary: Whether to disable Azure RBAC for Kubernetes authorization.
+    short-summary: Disable Azure role assignments to control authorization checks on cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -612,9 +612,9 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
   - name: Update the cluster to use user assigned managed identity in control plane.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
-  - name: Update a managed AAD kubernetes cluster to use Azure RBAC
+  - name: Update a managed AAD AKS cluster to use Azure RBAC
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
-  - name: Disable Azure RBAC in a managed AAD kubernetes cluster
+  - name: Disable Azure RBAC in a managed AAD AKS cluster
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
 """
 

@@ -2217,7 +2217,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
     else:
         if enable_azure_rbac is True:
-            raise CLIError(
+            raise ArgumentUsageError(
                 '"--enable-azure-rbac" can only be used together with "--enable-aad"')
 
         if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
@@ -2745,7 +2745,7 @@ def aks_update(cmd, client, resource_group_name, name,
             instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(
                 aad_admin_group_object_ids)
         if enable_azure_rbac and disable_azure_rbac:
-            raise CLIError(
+            raise MutuallyExclusiveArgumentError(
                 'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time')
         if enable_azure_rbac:
             instance.aad_profile.enable_azure_rbac = True
