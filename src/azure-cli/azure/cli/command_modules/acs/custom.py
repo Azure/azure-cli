@@ -2965,12 +2965,12 @@ def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
 def _print_command_result(cli_ctx, commandResult):
     # cli_ctx.data['safe_params'] contains list of parameter name user typed in, without value.
     # cli core also use this calculate ParameterSetName header for all http request from cli.
-    if cli_ctx.data['safe_params'] is None or
-          "-o" in cli_ctx.data['safe_params'] or
-          "--output" in cli_ctx.data['safe_params']:
+    if (cli_ctx.data['safe_params'] is None or
+        "-o" in cli_ctx.data['safe_params'] or
+            "--output" in cli_ctx.data['safe_params']):
         # user specified output format, honor their choice, return object to render pipeline
         return commandResult
-    
+
     # user didn't specified any format, we can customize the print for best experience
     if commandResult.provisioning_state == "Succeeded":
         # succeed, print exitcode, and logs
