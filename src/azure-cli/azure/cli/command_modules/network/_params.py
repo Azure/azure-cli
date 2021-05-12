@@ -46,7 +46,7 @@ from azure.cli.command_modules.network._completers import (
     get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
-    SslProfilesCreate)
+    SslProfilesCreate, NatRuleCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -64,7 +64,7 @@ def load_arguments(self, _):
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
      ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
-     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType) = self.get_models(
+     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, VpnNatRuleType, VpnNatRuleMode) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction', 'VpnAuthenticationType',
@@ -75,7 +75,7 @@ def load_arguments(self, _):
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
          'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
-         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType')
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType', 'VpnNatRuleType', 'VpnNatRuleMode')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -1944,6 +1944,9 @@ def load_arguments(self, _):
     with self.argument_context('network vnet-gateway', arg_group='Root Cert Authentication', min_api='2020-11-01') as c:
         c.argument('root_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter())
         c.argument('root_cert_name', help='Root certificate name')
+        
+    with self.argument_context('network vnet-gateway', arg_group='Nat Rule', min_api='2021-02-01') as c:
+        c.argument('nat_rule', nargs='+', action=NatRuleCreate)
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('gateway_type', vnet_gateway_type, default=None)
@@ -1992,6 +1995,14 @@ def load_arguments(self, _):
         c.argument('vpn_connection_ids', options_list=['--vpn-connections'], nargs='+',
                    help='List of Name or ID of VPN connections.',
                    validator=validate_vpn_connection_name_or_id)
+
+    with self.argument_context('network vnet-gateway nat-rule', min_api='2021-02-01') as c:
+        c.argument('name', help='The name of the resource that is unique within a resource group. This name can be used to access the resource.')
+        c.argument('rule_type', options_list='--type', help='The type of NAT rule for VPN NAT.', arg_type=get_enum_type(VpnNatRuleType))
+        c.argument('mode', help='The Source NAT direction of a VPN NAT.', arg_type=get_enum_type(VpnNatRuleMode))
+        c.argument('internal_mappings', nargs='+', help='The private IP address internal mapping for NAT.')
+        c.argument('external_mappings', nargs='+', help='The private IP address external mapping for NAT.')
+        c.argument('ip_config_id', help='The IP Configuration ID this NAT rule applies to.')
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -2002,6 +2013,8 @@ def load_arguments(self, _):
         c.argument('routing_weight', type=int, help='Connection routing weight')
         c.argument('use_policy_based_traffic_selectors', min_api='2017-03-01', help='Enable policy-based traffic selectors.', arg_type=get_three_state_flag())
         c.argument('express_route_gateway_bypass', min_api='2018-07-01', arg_type=get_three_state_flag(), help='Bypass ExpressRoute gateway for data forwarding.')
+        c.argument('ingress_nat_rule', nargs='+', help='List of ingress NatRules.', min_api='2021-02-01', is_preview=True)
+        c.argument('egress_nat_rule', nargs='+', help='List of egress NatRules.', min_api='2021-02-01', is_preview=True)
 
     with self.argument_context('network vpn-connection list') as c:
         c.argument('virtual_network_gateway_name', options_list=['--vnet-gateway'], help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'))

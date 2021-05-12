@@ -5477,6 +5477,20 @@ long-summary: >
 helps['network vnet-gateway create'] = """
 type: command
 short-summary: Create a virtual network gateway.
+parameters:
+  - name: --nat-rule
+    short-summary: VirtualNetworkGatewayNatRule Resource.
+    long-summary: |
+        Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.0.0.0,10.0.0.0 external-mappings=10.0.0,10.0.0 ip-config-id=...
+
+        name: Required.The name of the resource that is unique within a resource group. This name can be used to access the resource.
+        internal-mappings: Required.The private IP address internal mapping for NAT.
+        external-mappings: Required.The private IP address external mapping for NAT.
+        type: The type of NAT rule for VPN NAT.
+        mode: The Source NAT direction of a VPN NAT.
+        ip-config-id: The IP Configuration ID this NAT rule applies to.
+
+        Multiple nat rules can be specified by using more than one `--nat-rule` argument.
 examples:
   - name: Create a basic virtual network gateway for site-to-site connectivity.
     text: |
@@ -5805,6 +5819,37 @@ short-summary: Remove AAD(Azure Active Directory) authentication from a virtual 
 examples:
   - name: Remove AAD information
     text: az network vnet-gateway aad remove --resource-group MyResourceGroup --gateway-name MyVnetGateway
+"""
+
+helps['network vnet-gateway nat-rule'] = """
+type: group
+short-summary: Manage nat rule in a virtual network gateway
+"""
+
+helps['network vnet-gateway nat-rule add'] = """
+type: command
+short-summary: Add nat rule in a virtual network gateway
+examples:
+  - name: Add nat rule
+    text: az network vnet-gateway nat-rule add --resource-group MyResourceGroup --gateway-name MyVnetGateway --name Nat \
+    --internal-mappings 10.4.0.0/24 --external-mappings 192.168.21.0/24
+"""
+
+helps['network vnet-gateway nat-rule list'] = """
+type: command
+short-summary: List nat rule for a virtual network gateway
+examples:
+  - name: List nat rule
+    text: az network vnet-gateway nat-rule list --resource-group MyResourceGroup --gateway-name MyVnetGateway
+"""
+
+helps['network vnet-gateway nat-rule remove'] = """
+type: command
+short-summary: Remove nat rule from a virtual network gateway
+examples:
+  - name: Remove nat rule
+    text: az network vnet-gateway nat-rule remove --resource-group MyResourceGroup --gateway-name MyVnetGateway \
+    --name Nat
 """
 
 helps['network vpn-connection'] = """
