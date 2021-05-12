@@ -127,21 +127,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
 
-        config_store_name = self.create_random_name(prefix='PubNetworkFalse', length=24)
-
-        self.kwargs.update({
-            'config_store_name': config_store_name,
-            'enable_public_network': 'false'
-        })
-
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', sku),
-                         self.check('publicNetworkAccess', 'Disabled')])
-
         config_store_name = self.create_random_name(prefix='PubNetworkNull', length=24)
 
         self.kwargs.update({
@@ -164,15 +149,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
-
-        # Disable public network access with update command
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network {enable_public_network}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', sku),
-                         self.check('publicNetworkAccess', 'Disabled')])
 
 
 class AppConfigCredentialScenarioTest(ScenarioTest):

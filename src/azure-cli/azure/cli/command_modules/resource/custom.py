@@ -893,11 +893,11 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         template_link = TemplateLink(id=template_spec, mode="Incremental")
-        resource = show_resource(cmd=cmd, resource_ids=[template_spec])
-        try:
-            template_obj = resource.properties['mainTemplate']
-        except Exception:  # pylint: disable=broad-except
-            template_obj = resource.properties['template']
+        # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
+        # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
+        # template_spec are consistent in the same profile:
+        api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['template']
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])

@@ -4214,3 +4214,62 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @RoleBasedServicePrincipalPreparer()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    def test_aks_update_to_msi_cluster(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} '
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to MSI cluster
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-managed-identity --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', 'SystemAssigned')
+        ])
+        
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @RoleBasedServicePrincipalPreparer()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    def test_aks_update_to_msi_cluster_with_addons(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys --enable-addons monitoring ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} '
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to MSI cluster
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-managed-identity --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', 'SystemAssigned')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
