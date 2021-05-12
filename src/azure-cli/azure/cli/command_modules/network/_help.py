@@ -5481,7 +5481,7 @@ parameters:
   - name: --nat-rule
     short-summary: VirtualNetworkGatewayNatRule Resource.
     long-summary: |
-        Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.0.0.0,10.0.0.0 external-mappings=10.0.0,10.0.0 ip-config-id=...
+        Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24
 
         name: Required.The name of the resource that is unique within a resource group. This name can be used to access the resource.
         internal-mappings: Required.The private IP address internal mapping for NAT.
