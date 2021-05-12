@@ -442,7 +442,7 @@ parameters:
     short-summary: Enable EncryptionAtHost, default value is false.
   - name: --enable-azure-rbac
     type: bool
-    short-summary: Enable Azure role assignments to control authorization checks on cluster.
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -577,10 +577,10 @@ parameters:
     short-summary: Specify an existing user assigned identity to manage cluster resource group.
   - name: --enable-azure-rbac
     type: bool
-    short-summary: Enable Azure role assignments to control authorization checks on cluster.
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
   - name: --disable-azure-rbac
     type: bool
-    short-summary: Disable Azure role assignments to control authorization checks on cluster.
+    short-summary: Disable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
