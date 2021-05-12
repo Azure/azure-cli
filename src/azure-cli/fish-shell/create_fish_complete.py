@@ -7,24 +7,25 @@
 import subprocess
 import re
 
-# Sanatize input
+
 def fix_strings(text: str):
-    return text.replace("*", "").replace("'","").replace('"',"")
+    return text.replace("*", "").replace("'", "").replace('"', "")
+
 
 # Write to local az.fish
 with open("az.fish", "w") as f:
     subcommands = [['az']]
 
     # Match on lines that we care about (lines that are tabbed and :)
-    command_lines_re = re.compile('^\s{4}(?!az)\w+(\w|-)+.*')
+    command_lines_re = re.compile(r'^\s{4}(?!az)\w+(\w|-)+.*')
     # Match linescontaing a flag
-    flag_lines_re = re.compile('^\s{4}--(\w|-)+.*')
+    flag_lines_re = re.compile(r'^\s{4}--(\w|-)+.*')
     # Parse out commands (eg az --help will parse out account, acr, etc)
-    command_re = re.compile('\w+(\w|-)+(?=\s+:)')
+    command_re = re.compile(r'\w+(\w|-)+(?=\s+:)')
     # Parse out command flags (eg --help)
-    flag_re = re.compile('--(\w|-)+(?=\s+:)')
+    flag_re = re.compile(r'--(\w|-)+(?=\s+:)')
     # Parse out descriptions (anything after :)
-    description_re = re.compile('(?<=:\s).*$')
+    description_re = re.compile(r'(?<=:\s).*$')
 
     output = []
 
@@ -48,10 +49,9 @@ end
         # Grab last item in queue (DFS)
         command = subcommands.pop()
         # Query back help page
-        response = subprocess.run( command + ['--help'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        response = subprocess.run(command + ['--help'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
         lines = response.split('\n')
-
 
         condition = ""
         root_cmds = []
@@ -67,11 +67,11 @@ end
             flag_match = flag_lines_re.match(line)
 
             # this contains a subcommand, parse out command and description
-            if command_match != None:
+            if command_match is not None:
                 sub_cmd = command_re.search(line)
-                desc    = description_re.search(line)
+                desc = description_re.search(line)
 
-                if sub_cmd != None and desc != None:
+                if sub_cmd is not None and desc is not None:
                     matched_sub_cmd = sub_cmd.group()
                     if is_az:
                         root_cmds.append(matched_sub_cmd)
@@ -82,11 +82,11 @@ end
                     f.write(f'complete -c az -d "{desc_text}" {condition} -f -a "{matched_sub_cmd}"\n')
 
             # This contains a flag
-            if flag_match != None:
-                flag    = flag_re.search(line)
-                desc    = description_re.search(line)
+            if flag_match is None:
+                flag = flag_re.search(line)
+                desc = description_re.search(line)
 
-                if flag != None and desc != None:
+                if flag is not None and desc is not None:
                     matched_flag = flag.group()
                     matched_flag = matched_flag[2:]
                     desc_text = fix_strings(desc.group())
