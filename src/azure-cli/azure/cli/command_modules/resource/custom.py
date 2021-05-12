@@ -1627,7 +1627,6 @@ def _single_or_collection(obj, default=None):
     return obj
 
 
-# pylint: unused-argument
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None, include_response_body=False, latest_include_preview=False):
@@ -1697,7 +1696,6 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
     return _single_or_collection(results)
 
 
-# pylint: unused-argument
 def update_resource(cmd, parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
@@ -1714,7 +1712,6 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
                  is_incremental=None, latest_include_preview=False):
@@ -1732,7 +1729,6 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
             tags, is_incremental)) for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
