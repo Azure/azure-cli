@@ -153,7 +153,7 @@ helps['servicebus namespace authorization-rule create'] = """
 type: command
 short-summary: Create Authorization Rule for the given Service Bus Namespace
 examples:
-  - name: Create Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamepsace' in resourcegroup
+  - name: Create Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamespace' in resourcegroup
     text: az servicebus namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
 """
 
@@ -209,7 +209,7 @@ helps['servicebus namespace authorization-rule update'] = """
 type: command
 short-summary: Updates Authorization Rule for the given Service Bus Namespace
 examples:
-  - name: Updates Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamepsace' in resourcegroup
+  - name: Updates Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamespace' in resourcegroup
     text: az servicebus namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
 """
 
@@ -388,7 +388,7 @@ examples:
 
 helps['servicebus queue list'] = """
 type: command
-short-summary: List the Queue by Service Bus Namepsace
+short-summary: List the Queue by Service Bus Namespace
 examples:
   - name: Get the Queues by Service Bus Namespace.
     text: az servicebus queue list --resource-group myresourcegroup --namespace-name mynamespace
@@ -499,7 +499,7 @@ examples:
 
 helps['servicebus topic list'] = """
 type: command
-short-summary: List the Topic by Service Bus Namepsace
+short-summary: List the Topic by Service Bus Namespace
 examples:
   - name: Get the Topics by Namespace.
     text: az servicebus topic list --resource-group myresourcegroup --namespace-name mynamespace

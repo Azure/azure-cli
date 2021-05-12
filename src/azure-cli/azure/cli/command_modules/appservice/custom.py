@@ -252,22 +252,23 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
     # pylint: disable=too-many-nested-blocks
-    for src, dest in [(settings, result), (slot_settings, slot_result)]:
+    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
                     for t in temp:
-                        if t.get('slotSetting', True):
-                            slot_result[t['name']] = t['value']
-                            # Mark each setting as the slot setting
-                        else:
-                            result[t['name']] = t['value']
+                        if 'slotSetting' in t.keys():
+                            slot_result[t['name']] = t['slotSetting']
+                        if setting_type == "SlotSettings":
+                            slot_result[t['name']] = True
+                        result[t['name']] = t['value']
                 else:
                     dest.update(temp)
             except CLIError:
                 setting_name, value = s.split('=', 1)
                 dest[setting_name] = value
+                result.update(dest)
 
     result.update(slot_result)
     for setting_name, value in result.items():
@@ -280,10 +281,14 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     app_settings_slot_cfg_names = []
     if slot_result:
-        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
-        slot_cfg_names.app_setting_names += new_slot_setting_names
+        # Slot settings logic to add a new setting(s) or remove an existing setting(s)
+        for slot_setting_name, value in slot_result.items():
+            if value and slot_setting_name not in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.append(slot_setting_name)
+            elif not value and slot_setting_name in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
@@ -1561,7 +1566,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                           manual_integration=None, git_token=None, slot=None, cd_app_type=None,
                           app_working_dir=None, nodejs_task_runner=None, python_framework=None,
                           python_version=None, cd_account_create=None, cd_project_url=None, test=None,
-                          slot_swap=None, private_repo_username=None, private_repo_password=None):
+                          slot_swap=None, private_repo_username=None, private_repo_password=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
     location = _get_location_from_webapp(client, resource_group_name, name)
 
@@ -1602,7 +1607,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 
     source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
+                                       is_mercurial=(repository_type != 'git'), is_git_hub_action=bool(github_action))
 
     # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
     for i in range(5):
@@ -2342,7 +2347,8 @@ def _get_log(url, user_name, password, log_file=None):
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'
                 logger.warning(chunk.decode(encoding='utf-8', errors='replace')
                                .encode(std_encoding, errors='replace')
-                               .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
+                               .decode(std_encoding, errors='replace')
+                               .rstrip('\n\r'))  # each line of log has CRLF.
     r.release_conn()
 
 

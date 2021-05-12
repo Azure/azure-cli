@@ -6,13 +6,16 @@
 # pylint: disable=unused-argument, line-too-long
 from datetime import datetime
 from knack.log import get_logger
+from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     GITHUB_ACTION_PATH
 
+
 logger = get_logger(__name__)
+# pylint: disable=raise-missing-from
 
 
 # Common functions used by other providers
@@ -166,7 +169,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
 def user_confirmation(message, yes=False):
     if yes:
         return True
-    from knack.prompting import prompt_y_n, NoTTYException
+
     try:
         if not prompt_y_n(message):
             raise CLIError('Operation cancelled.')
