@@ -249,11 +249,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('client_cert_common_name', options_list=['--client-cert-common-name', '--cert-common-name'], help='Client certificate common name.')
         c.argument('client_cert_issuer_thumbprint', options_list=['--client-cert-issuer-thumbprint', '--cert-issuer-thumbprint', '--cert-issuer-tp'], nargs='+', help='Space-separated list of issuer thumbprints.')
         c.argument('upgrade_mode', arg_type=get_enum_type(ClusterUpgradeMode), options_list=['--cluster-upgrade-mode', '--upgrade-mode'],
-                   help='The upgrade mode of the cluster when new Service Fabric runtime version is available ')
+                   help='The upgrade mode of the cluster when new Service Fabric runtime version is available '
                    'Automatic: The cluster will be automatically upgraded to the latest Service Fabric runtime version, upgrade_cadence will determine when the upgrade starts after the new version becomes available.'
                    'Manual: The cluster will not be automatically upgraded to the latest Service Fabric runtime version. The cluster is upgraded by setting the code_version property in the cluster resource.')
         c.argument('upgrade_cadence', arg_type=get_enum_type(ClusterUpgradeCadence), options_list=['--cluster-upgrade-cadence', '--upgrade-cadence'],
-                   help='The upgrade mode of the cluster when new Service Fabric runtime version is available ')
+                   help='The upgrade mode of the cluster when new Service Fabric runtime version is available '
                    'Wave0: Cluster upgrade starts immediately after a new version is rolled out. Recommended for Test/Dev clusters.'
                    'Wave1: Cluster upgrade starts 7 days after a new version is rolled out. Recommended for Pre-prod clusters.'
                    'Wave2: Cluster upgrade starts 14 days after a new version is rolled out. Recommended for Production clusters.')
@@ -299,7 +299,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
         c.argument('disk_size', help='Disk size for each vm in the node type in GBs.', default=100)
         c.argument('data_disk_type', arg_type=get_enum_type(DiskType), 
-                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types. Default StandardSSD_LRS')
+                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
                    'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.'
                    'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.'
                    'Premium_LRS: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.')

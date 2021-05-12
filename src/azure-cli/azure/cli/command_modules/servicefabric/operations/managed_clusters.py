@@ -7,13 +7,12 @@
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.core.exceptions import HttpResponseError
 from azure.cli.command_modules.servicefabric._sf_utils import (
     _get_resource_group_by_name,
-    _create_resource_group_name,
-    _log_error_exception
+    _create_resource_group_name
 )
 from azure.mgmt.servicefabricmanagedclusters.models import (
-    ErrorModelException,
     ManagedCluster,
     Sku,
     ClientCertificate
@@ -99,8 +98,8 @@ def create_cluster(cmd,
         poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, new_cluster)
         cluster = LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -126,8 +125,8 @@ def update_cluster(cmd,
 
         poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -156,8 +155,8 @@ def add_client_cert(cmd,
 
         poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -183,8 +182,8 @@ def delete_client_cert(cmd,
                 poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -197,8 +196,8 @@ def list_clusters(client,
 
         logger.info("Getting managed clusters by resource group '%s'", resource_group_name)
         return client.managed_clusters.list_by_resource_group(resource_group_name)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 

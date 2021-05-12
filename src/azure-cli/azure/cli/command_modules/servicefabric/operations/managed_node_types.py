@@ -6,9 +6,8 @@
 # pylint: disable=line-too-long,too-many-lines
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.command_modules.servicefabric._sf_utils import (_log_error_exception)
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.servicefabricmanagedclusters.models import (
-    ErrorModelException,
     NodeType,
     EndpointRangeDescription,
     VMSSExtension,
@@ -89,8 +88,8 @@ def create_node_type(cmd,
         poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, new_node_type)
         node_type = LongRunningOperation(cmd.cli_ctx)(poller)
         return node_type
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -128,8 +127,8 @@ def update_node_type(cmd,
 
         poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -144,8 +143,8 @@ def reimage_node(cmd,
         nodes = [node_name] if isinstance(node_name, str) else node_name
         poller = client.node_types.reimage(resource_group_name, cluster_name, node_type_name, nodes=nodes, force=force)
         LongRunningOperation(cmd.cli_ctx, start_msg='Reimaging nodes', finish_msg='Nodes reimaged')(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -160,8 +159,8 @@ def restart_node(cmd,
         nodes = [node_name] if isinstance(node_name, str) else node_name
         poller = client.node_types.restart(resource_group_name, cluster_name, node_type_name, nodes=nodes, force=force)
         LongRunningOperation(cmd.cli_ctx, start_msg='Restarting nodes', finish_msg='Nodes restarted')(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -176,8 +175,8 @@ def delete_node(cmd,
         nodes = [node_name] if isinstance(node_name, str) else node_name
         poller = client.node_types.delete_node(resource_group_name, cluster_name, node_type_name, nodes=nodes, force=force)
         LongRunningOperation(cmd.cli_ctx, start_msg='Deleting nodes', finish_msg='Nodes deleted')(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -215,8 +214,8 @@ def add_vm_extension(cmd,
 
         poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -237,8 +236,8 @@ def delete_vm_extension(cmd,
 
         poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -275,6 +274,6 @@ def add_vm_secret(cmd,
 
         poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise

@@ -52,18 +52,24 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'vm_password': self.create_random_name('Pass@', 9)
         })
 
-        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard',
+        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',
                  checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes')])
+                         self.check('clusterState', 'WaitingForNodes'),
+                         self.check('clusterUpgradeMode', 'Automatic'),
+                         self.check('clusterUpgradeCadence', 'Wave1')])
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('dataDiskType', 'Premium_LRS'),
+                         self.check('isStateless ', False)])
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 1)])
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 6',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 6 --is-stateless',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('dataDiskType', 'StandardSSD_LRS'),
+                         self.check('isStateless ', True)])
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 2)])

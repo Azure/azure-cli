@@ -37,17 +37,6 @@ def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
     return rg
 
 
-def _log_error_exception(ex: ErrorModelException):
-    logger.error("ErrorModelException: %s", ex)
-    if ex.response.content:
-        response_content = json.loads(ex.response.content)
-        if response_content:
-            if 'exception' in response_content:
-                logger.error("Exception: %s", response_content['exception'])
-            else:
-                logger.error("Exception response content: %s", ex.response.content)
-
-
 def _get_managed_cluster_location(cli_ctx, resource_group_name, cluster_name):
     client = servicefabric_managed_client_factory(cli_ctx).managed_clusters
     cluster = client.get(resource_group_name, cluster_name)
