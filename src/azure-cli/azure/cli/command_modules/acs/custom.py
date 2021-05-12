@@ -2852,16 +2852,16 @@ def aks_upgrade(cmd,
                 node_image_only=False,
                 no_wait=False,
                 yes=False):
-    msg='Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
+    msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
         return None
 
-    instance=client.get(resource_group_name, name)
+    instance = client.get(resource_group_name, name)
 
-    vmas_cluster=False
+    vmas_cluster = False
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.type.lower() == "availabilityset":
-            vmas_cluster=True
+            vmas_cluster = True
             break
 
     if kubernetes_version != '' and node_image_only:
@@ -2869,7 +2869,7 @@ def aks_upgrade(cmd,
                        'If you only want to upgrade the node version please use the "--node-image-only" option only.')
 
     if node_image_only:
-        msg="This node image upgrade operation will run across every node pool in the cluster" \
+        msg = "This node image upgrade operation will run across every node pool in the cluster" \
               "and might take a while, do you wish to continue?"
         if not yes and not prompt_y_n(msg, default="n"):
             return None
@@ -2880,10 +2880,10 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets cluster.')
-            agent_pool_client=cf_agent_pools(cmd.cli_ctx)
+            agent_pool_client = cf_agent_pools(cmd.cli_ctx)
             _upgrade_single_nodepool_image_version(True, agent_pool_client,
                                                    resource_group_name, name, agent_pool_profile.name)
-        mc=client.get(resource_group_name, name)
+        mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
 
     if instance.kubernetes_version == kubernetes_version:
@@ -2895,37 +2895,37 @@ def aks_upgrade(cmd,
             logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
                            "attempt resolution of failed cluster state.", instance.kubernetes_version)
 
-    upgrade_all=False
-    instance.kubernetes_version=kubernetes_version
+    upgrade_all = False
+    instance.kubernetes_version = kubernetes_version
 
     # for legacy clusters, we always upgrade node pools with CCP.
     if instance.max_agent_pools < 8 or vmas_cluster:
         if control_plane_only:
-            msg=("Legacy clusters do not support control plane only upgrade. All node pools will be "
+            msg = ("Legacy clusters do not support control plane only upgrade. All node pools will be "
                    "upgraded to {} as well. Continue?").format(instance.kubernetes_version)
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
-        upgrade_all=True
+        upgrade_all = True
     else:
         if not control_plane_only:
-            msg=("Since control-plane-only argument is not specified, this will upgrade the control plane "
+            msg = ("Since control-plane-only argument is not specified, this will upgrade the control plane "
                    "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
-            upgrade_all=True
+            upgrade_all = True
         else:
-            msg=("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
+            msg = ("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
                    "Node pool will not change. Continue?").format(instance.kubernetes_version)
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
 
     if upgrade_all:
         for agent_profile in instance.agent_pool_profiles:
-            agent_profile.orchestrator_version=kubernetes_version
+            agent_profile.orchestrator_version = kubernetes_version
 
     # null out the SP and AAD profile because otherwise validation complains
-    instance.service_principal_profile=None
-    instance.aad_profile=None
+    instance.service_principal_profile = None
+    instance.aad_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2937,18 +2937,18 @@ def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name,
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
     colorama.init()
 
-    mc=client.get(resource_group_name, name)
+    mc = client.get(resource_group_name, name)
 
     if not command_string:
         raise CLIError('Command cannot be empty.')
 
-    request_payload=RunCommandRequest(command=command_string)
-    request_payload.context=_get_command_context(command_files)
+    request_payload = RunCommandRequest(command=command_string)
+    request_payload.context = _get_command_context(command_files)
     if mc.aad_profile is not None and mc.aad_profile.managed:
-        request_payload.cluster_token=_get_dataplane_aad_token(
+        request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
-    commandResultFuture=client.run_command(
+    commandResultFuture = client.run_command(
         resource_group_name, name, request_payload, long_running_operation_timeout=5, retry_total=0)
 
     return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
@@ -2958,7 +2958,7 @@ def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     if not command_id:
         raise CLIError('CommandID cannot be empty.')
 
-    commandResult=client.get_command_result(
+    commandResult = client.get_command_result(
         resource_group_name, name, command_id)
     return _print_command_result(cmd.cli_ctx, commandResult)
 
@@ -2992,17 +2992,17 @@ def _get_command_context(command_files):
     if not command_files:
         return ""
 
-    filesToAttach={}
+    filesToAttach = {}
     # . means to attach current folder, cannot combine more files. (at least for now)
     if len(command_files) == 1 and command_files[0] == ".":
         # current folder
-        cwd=os.getcwd()
+        cwd = os.getcwd()
         for filefolder, _, files in os.walk(cwd):
             for file in files:
                 # retain folder structure
-                rel=os.path.relpath(filefolder, cwd)
+                rel = os.path.relpath(filefolder, cwd)
                 filesToAttach[os.path.join(
-                    filefolder, file)]=os.path.join(rel, file)
+                    filefolder, file)] = os.path.join(rel, file)
     else:
         for file in command_files:
             if file == ".":
@@ -3010,7 +3010,7 @@ def _get_command_context(command_files):
                     ". is used to attach current folder, not expecting other attachements.")
             if os.path.isfile(file):
                 # for individual attached file, flatten them to same folder
-                filesToAttach[file]=os.path.basename(file)
+                filesToAttach[file] = os.path.basename(file)
             else:
                 raise CLIError(f"{file} is not valid file, or not accessable.")
 
@@ -3018,8 +3018,8 @@ def _get_command_context(command_files):
         logger.debug("no files to attach!")
         return ""
 
-    zipStream=io.BytesIO()
-    zipFile=zipfile.ZipFile(zipStream, "w")
+    zipStream = io.BytesIO()
+    zipFile = zipfile.ZipFile(zipStream, "w")
     for _, (osfile, zipEntry) in enumerate(filesToAttach.items()):
         zipFile.write(osfile, zipEntry)
     # zipFile.printdir() // use this to debug
@@ -3043,8 +3043,8 @@ def _get_dataplane_aad_token(cli_ctx, serverAppId):
         raise CLIError(err)
 
 
-DEV_SPACES_EXTENSION_NAME='dev-spaces'
-DEV_SPACES_EXTENSION_MODULE='azext_dev_spaces.custom'
+DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
+DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
 def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None,
@@ -3070,7 +3070,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     """
 
     if _get_or_add_extension(cmd, DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE, update):
-        azext_custom=_get_azext_module(
+        azext_custom = _get_azext_module(
             DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
             azext_custom.ads_use_dev_spaces(
@@ -3096,7 +3096,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
     """
 
     if _get_or_add_extension(cmd, DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE):
-        azext_custom=_get_azext_module(
+        azext_custom = _get_azext_module(
             DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
             azext_custom.ads_remove_dev_spaces(
@@ -3120,17 +3120,17 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    enable_sgxquotehelper=False,
                    no_wait=False):
     # parse the comma-separated addons argument
-    addon_args=addons.split(',')
+    addon_args = addons.split(',')
 
-    addon_profiles=instance.addon_profiles or {}
+    addon_profiles = instance.addon_profiles or {}
 
-    os_type='Linux'
+    os_type = 'Linux'
 
     # for each addons argument
     for addon_arg in addon_args:
         if addon_arg not in ADDONS:
             raise CLIError("Invalid addon name: {}.".format(addon_arg))
-        addon=ADDONS[addon_arg]
+        addon = ADDONS[addon_arg]
         if addon == CONST_VIRTUAL_NODE_ADDON_NAME:
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
@@ -3138,11 +3138,11 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
         # honor addon names defined in Azure CLI
         for key in list(addon_profiles):
             if key.lower() == addon.lower() and key != addon:
-                addon_profiles[addon]=addon_profiles.pop(key)
+                addon_profiles[addon] = addon_profiles.pop(key)
 
         if enable:
             # add new addons or update existing ones and enable them
-            addon_profile=addon_profiles.get(
+            addon_profile = addon_profiles.get(
                 addon, ManagedClusterAddonProfile(enabled=False))
             # special config handling for certain addons
             if addon == CONST_MONITORING_ADDON_NAME:
@@ -3151,16 +3151,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                                    'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
                                    'before enabling it again.')
                 if not workspace_resource_id:
-                    workspace_resource_id=_ensure_default_log_analytics_workspace_for_monitoring(
+                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
                         cmd,
                         subscription_id,
                         resource_group_name)
-                workspace_resource_id=workspace_resource_id.strip()
+                workspace_resource_id = workspace_resource_id.strip()
                 if not workspace_resource_id.startswith('/'):
-                    workspace_resource_id='/' + workspace_resource_id
+                    workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
-                    workspace_resource_id=workspace_resource_id.rstrip('/')
-                addon_profile.config={
+                    workspace_resource_id = workspace_resource_id.rstrip('/')
+                addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
@@ -3171,7 +3171,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                 if not subnet_name:
                     raise CLIError(
                         'The aci-connector addon requires setting a subnet name.')
-                addon_profile.config={
+                addon_profile.config = {
                     CONST_VIRTUAL_NODE_SUBNET_NAME: subnet_name}
             elif addon == CONST_INGRESS_APPGW_ADDON_NAME:
                 if addon_profile.enabled:
@@ -3179,45 +3179,45 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                                    'To change ingress-appgw configuration, run '
                                    f'"az aks disable-addons -a ingress-appgw -n {name} -g {resource_group_name}" '
                                    'before enabling it again.')
-                addon_profile=ManagedClusterAddonProfile(
+                addon_profile = ManagedClusterAddonProfile(
                     enabled=True, config={})
                 if appgw_name is not None:
-                    addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME]=appgw_name
+                    addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
                 if appgw_subnet_cidr is not None:
-                    addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR]=appgw_subnet_cidr
+                    addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
                 if appgw_id is not None:
-                    addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID]=appgw_id
+                    addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
                 if appgw_subnet_id is not None:
-                    addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID]=appgw_subnet_id
+                    addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
                 if appgw_watch_namespace is not None:
-                    addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE]=appgw_watch_namespace
+                    addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
             elif addon == CONST_CONFCOM_ADDON_NAME:
                 if addon_profile.enabled:
                     raise ValidationError('The confcom addon is already enabled for this managed cluster.',
                                           recommendation='To change confcom configuration, run '
                                           f'"az aks disable-addons -a confcom -n {name} -g {resource_group_name}" '
                                           'before enabling it again.')
-                addon_profile=ManagedClusterAddonProfile(
+                addon_profile = ManagedClusterAddonProfile(
                     enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
                 if enable_sgxquotehelper:
-                    addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED]="true"
-            addon_profiles[addon]=addon_profile
+                    addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+            addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
                 if addon == CONST_KUBE_DASHBOARD_ADDON_NAME:
-                    addon_profiles[addon]=ManagedClusterAddonProfile(
+                    addon_profiles[addon] = ManagedClusterAddonProfile(
                         enabled=False)
                 else:
                     raise CLIError(
                         "The addon {} is not installed.".format(addon))
-            addon_profiles[addon].config=None
-        addon_profiles[addon].enabled=enable
+            addon_profiles[addon].config = None
+        addon_profiles[addon].enabled = enable
 
-    instance.addon_profiles=addon_profiles
+    instance.addon_profiles = addon_profiles
 
     # null out the SP and AAD profile because otherwise validation complains
-    instance.service_principal_profile=None
-    instance.aad_profile=None
+    instance.service_principal_profile = None
+    instance.aad_profile = None
 
     return instance
 
@@ -3229,7 +3229,7 @@ def _get_azext_module(extension_name, module_name):
         add_extension_to_path(extension_name)
         # Import the extension module
         from importlib import import_module
-        azext_custom=import_module(module_name)
+        azext_custom = import_module(module_name)
         return azext_custom
     except ImportError as ie:
         raise CLIError(ie)
@@ -3246,29 +3246,29 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
                         appgw_watch_namespace=None,
                         enable_sgxquotehelper=False):
     if not addon_profiles:
-        addon_profiles={}
-    addons=addons_str.split(',') if addons_str else []
+        addon_profiles = {}
+    addons = addons_str.split(',') if addons_str else []
     if 'http_application_routing' in addons:
-        addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]=ManagedClusterAddonProfile(
+        addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(
             enabled=True)
         addons.remove('http_application_routing')
     if 'kube-dashboard' in addons:
-        addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]=ManagedClusterAddonProfile(
+        addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(
             enabled=True)
         addons.remove('kube-dashboard')
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
         if not workspace_resource_id:
             # use default workspace if exists else create default workspace
-            workspace_resource_id=_ensure_default_log_analytics_workspace_for_monitoring(
+            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
                 cmd, subscription_id, resource_group_name)
 
-        workspace_resource_id=workspace_resource_id.strip()
+        workspace_resource_id = workspace_resource_id.strip()
         if not workspace_resource_id.startswith('/'):
-            workspace_resource_id='/' + workspace_resource_id
+            workspace_resource_id = '/' + workspace_resource_id
         if workspace_resource_id.endswith('/'):
-            workspace_resource_id=workspace_resource_id.rstrip('/')
-        addon_profiles[CONST_MONITORING_ADDON_NAME]=ManagedClusterAddonProfile(
+            workspace_resource_id = workspace_resource_id.rstrip('/')
+        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
             enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
         addons.remove('monitoring')
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
@@ -3276,7 +3276,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
         raise CLIError(
             '"--workspace-resource-id" requires "--enable-addons monitoring".')
     if 'azure-policy' in addons:
-        addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]=ManagedClusterAddonProfile(
+        addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(
             enabled=True)
         addons.remove('azure-policy')
     if 'virtual-node' in addons:
@@ -3284,32 +3284,32 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             raise CLIError(
                 '"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
         # TODO: how about aciConnectorwindows, what is its addon name?
-        os_type='Linux'
-        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type]=ManagedClusterAddonProfile(
+        os_type = 'Linux'
+        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
             enabled=True,
             config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
         )
         addons.remove('virtual-node')
     if 'ingress-appgw' in addons:
-        addon_profile=ManagedClusterAddonProfile(enabled=True, config={})
+        addon_profile = ManagedClusterAddonProfile(enabled=True, config={})
         if appgw_name is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME]=appgw_name
+            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME] = appgw_name
         if appgw_subnet_cidr is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR]=appgw_subnet_cidr
+            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_CIDR] = appgw_subnet_cidr
         if appgw_id is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID]=appgw_id
+            addon_profile.config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID] = appgw_id
         if appgw_subnet_id is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID]=appgw_subnet_id
+            addon_profile.config[CONST_INGRESS_APPGW_SUBNET_ID] = appgw_subnet_id
         if appgw_watch_namespace is not None:
-            addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE]=appgw_watch_namespace
-        addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME]=addon_profile
+            addon_profile.config[CONST_INGRESS_APPGW_WATCH_NAMESPACE] = appgw_watch_namespace
+        addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME] = addon_profile
         addons.remove('ingress-appgw')
     if 'confcom' in addons:
-        addon_profile=ManagedClusterAddonProfile(
+        addon_profile = ManagedClusterAddonProfile(
             enabled=True, config={CONST_ACC_SGX_QUOTE_HELPER_ENABLED: "false"})
         if enable_sgxquotehelper:
-            addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED]="true"
-        addon_profiles[CONST_CONFCOM_ADDON_NAME]=addon_profile
+            addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
+        addon_profiles[CONST_CONFCOM_ADDON_NAME] = addon_profile
         addons.remove('confcom')
     # error out if any (unrecognized) addons remain
     if addons:
@@ -3362,7 +3362,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # mapping for azure public cloud
     # log analytics workspaces cannot be created in WCUS region due to capacity limits
     # so mapped to EUS per discussion with log analytics team
-    AzureCloudLocationToOmsRegionCodeMap={
+    AzureCloudLocationToOmsRegionCodeMap = {
         "australiasoutheast": "ASE",
         "australiaeast": "EAU",
         "australiacentral": "CAU",
@@ -3397,7 +3397,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "switzerlandwest": "CHW",
         "uaecentral": "AUH"
     }
-    AzureCloudRegionToOmsRegionMap={
+    AzureCloudRegionToOmsRegionMap = {
         "australiacentral": "australiacentral",
         "australiacentral2": "australiacentral",
         "australiaeast": "australiaeast",
@@ -3444,13 +3444,13 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # mapping for azure china cloud
     # currently log analytics supported only China East 2 region
-    AzureChinaLocationToOmsRegionCodeMap={
+    AzureChinaLocationToOmsRegionCodeMap = {
         "chinaeast": "EAST2",
         "chinaeast2": "EAST2",
         "chinanorth": "EAST2",
         "chinanorth2": "EAST2"
     }
-    AzureChinaRegionToOmsRegionMap={
+    AzureChinaRegionToOmsRegionMap = {
         "chinaeast": "chinaeast2",
         "chinaeast2": "chinaeast2",
         "chinanorth": "chinaeast2",
@@ -3458,21 +3458,21 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     }
 
     # mapping for azure us governmner cloud
-    AzureFairfaxLocationToOmsRegionCodeMap={
+    AzureFairfaxLocationToOmsRegionCodeMap = {
         "usgovvirginia": "USGV",
         "usgovarizona": "PHX"
     }
-    AzureFairfaxRegionToOmsRegionMap={
+    AzureFairfaxRegionToOmsRegionMap = {
         "usgovvirginia": "usgovvirginia",
         "usgovtexas": "usgovvirginia",
         "usgovarizona": "usgovarizona"
     }
 
-    rg_location=_get_rg_location(cmd.cli_ctx, resource_group_name)
-    cloud_name=cmd.cli_ctx.cloud.name
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    cloud_name = cmd.cli_ctx.cloud.name
 
-    workspace_region="eastus"
-    workspace_region_code="EUS"
+    workspace_region = "eastus"
+    workspace_region_code = "EUS"
 
     # sanity check that locations and clouds match.
     if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
@@ -3491,37 +3491,37 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
                        .format(rg_location))
 
     if cloud_name.lower() == 'azurecloud':
-        workspace_region=AzureCloudRegionToOmsRegionMap.get(
+        workspace_region = AzureCloudRegionToOmsRegionMap.get(
             rg_location, "eastus")
-        workspace_region_code=AzureCloudLocationToOmsRegionCodeMap.get(
+        workspace_region_code = AzureCloudLocationToOmsRegionCodeMap.get(
             workspace_region, "EUS")
     elif cloud_name.lower() == 'azurechinacloud':
-        workspace_region=AzureChinaRegionToOmsRegionMap.get(
+        workspace_region = AzureChinaRegionToOmsRegionMap.get(
             rg_location, "chinaeast2")
-        workspace_region_code=AzureChinaLocationToOmsRegionCodeMap.get(
+        workspace_region_code = AzureChinaLocationToOmsRegionCodeMap.get(
             workspace_region, "EAST2")
     elif cloud_name.lower() == 'azureusgovernment':
-        workspace_region=AzureFairfaxRegionToOmsRegionMap.get(
+        workspace_region = AzureFairfaxRegionToOmsRegionMap.get(
             rg_location, "usgovvirginia")
-        workspace_region_code=AzureFairfaxLocationToOmsRegionCodeMap.get(
+        workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
             workspace_region, "USGV")
     else:
-        workspace_region=rg_location
-        workspace_region_code=rg_location.upper()
+        workspace_region = rg_location
+        workspace_region_code = rg_location.upper()
 
-    default_workspace_resource_group='DefaultResourceGroup-' + workspace_region_code
-    default_workspace_name='DefaultWorkspace-{0}-{1}'.format(
+    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
+    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(
         subscription_id, workspace_region_code)
-    default_workspace_resource_id='/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
+    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
         '/workspaces/{2}'.format(subscription_id,
                                  default_workspace_resource_group, default_workspace_name)
-    resource_groups=cf_resource_groups(cmd.cli_ctx, subscription_id)
-    resources=cf_resources(cmd.cli_ctx, subscription_id)
+    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
 
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
         try:
-            resource=resources.get_by_id(
+            resource = resources.get_by_id(
                 default_workspace_resource_id, '2015-11-01-preview')
             return resource.id
         except CloudError as ex:
@@ -3532,19 +3532,19 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
                                          'location': workspace_region})
 
     from azure.cli.core.profiles import ResourceType
-    GenericResource=cmd.get_models(
+    GenericResource = cmd.get_models(
         'GenericResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    generic_resource=GenericResource(location=workspace_region, properties={
-                                       'sku': {'name': 'standalone'}})
+    generic_resource = GenericResource(location=workspace_region, properties={
+        'sku': {'name': 'standalone'}})
 
-    async_poller=resources.begin_create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
+    async_poller = resources.begin_create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
                                                           generic_resource)
 
-    ws_resource_id=''
+    ws_resource_id = ''
     while True:
-        result=async_poller.result(15)
+        result = async_poller.result(15)
         if async_poller.done():
-            ws_resource_id=result.id
+            ws_resource_id = result.id
             break
 
     return ws_resource_id
@@ -3555,44 +3555,44 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     for key in list(addon.config):
         if (key.lower() == CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID.lower() and
                 key != CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID):
-            addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]=addon.config.pop(
+            addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID] = addon.config.pop(
                 key)
 
-    workspace_resource_id=addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]
+    workspace_resource_id = addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]
 
-    workspace_resource_id=workspace_resource_id.strip()
+    workspace_resource_id = workspace_resource_id.strip()
 
     if not workspace_resource_id.startswith('/'):
-        workspace_resource_id='/' + workspace_resource_id
+        workspace_resource_id = '/' + workspace_resource_id
 
     if workspace_resource_id.endswith('/'):
-        workspace_resource_id=workspace_resource_id.rstrip('/')
+        workspace_resource_id = workspace_resource_id.rstrip('/')
 
     # extract subscription ID and resource group from workspace_resource_id URL
     try:
-        subscription_id=workspace_resource_id.split('/')[2]
-        resource_group=workspace_resource_id.split('/')[4]
+        subscription_id = workspace_resource_id.split('/')[2]
+        resource_group = workspace_resource_id.split('/')[4]
     except IndexError:
         raise CLIError(
             'Could not locate resource group in workspace-resource-id URL.')
 
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
-    resources=cf_resources(cmd.cli_ctx, subscription_id)
+    resources = cf_resources(cmd.cli_ctx, subscription_id)
     try:
-        resource=resources.get_by_id(
+        resource = resources.get_by_id(
             workspace_resource_id, '2015-11-01-preview')
-        location=resource.location
+        location = resource.location
     except CloudError as ex:
         raise ex
 
-    unix_time_in_millis=int(
+    unix_time_in_millis = int(
         (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
 
-    solution_deployment_name='ContainerInsights-{}'.format(
+    solution_deployment_name = 'ContainerInsights-{}'.format(
         unix_time_in_millis)
 
     # pylint: disable=line-too-long
-    template={
+    template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
         "parameters": {
@@ -3653,7 +3653,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
         ]
     }
 
-    params={
+    params = {
         "workspaceResourceId": {
             "value": workspace_resource_id
         },
@@ -3665,7 +3665,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
         }
     }
 
-    deployment_name='aks-monitoring-{}'.format(unix_time_in_millis)
+    deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
@@ -3680,10 +3680,10 @@ def _ensure_aks_acr(cli_ctx,
     # Check if the ACR exists by resource ID.
     if is_valid_resource_id(acr_name_or_id):
         try:
-            parsed_registry=parse_resource_id(acr_name_or_id)
-            acr_client=cf_container_registry_service(
+            parsed_registry = parse_resource_id(acr_name_or_id)
+            acr_client = cf_container_registry_service(
                 cli_ctx, subscription_id=parsed_registry['subscription'])
-            registry=acr_client.registries.get(
+            registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])
         except CloudError as ex:
             raise CLIError(ex.message)
@@ -3692,10 +3692,10 @@ def _ensure_aks_acr(cli_ctx,
         return
 
     # Check if the ACR exists by name accross all resource groups.
-    registry_name=acr_name_or_id
-    registry_resource='Microsoft.ContainerRegistry/registries'
+    registry_name = acr_name_or_id
+    registry_resource = 'Microsoft.ContainerRegistry/registries'
     try:
-        registry=get_resource_by_name(
+        registry = get_resource_by_name(
             cli_ctx, registry_name, registry_resource)
     except CloudError as ex:
         if 'was not found' in ex.message:
@@ -3707,7 +3707,7 @@ def _ensure_aks_acr(cli_ctx,
 
 
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
-    instance=client.get(resource_group_name, cluster_name, nodepool_name)
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
 
 
@@ -3741,19 +3741,19 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       mode="User",
                       enable_encryption_at_host=False,
                       no_wait=False):
-    instances=client.list(resource_group_name, cluster_name)
+    instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
         if agentpool_profile.name == nodepool_name:
             raise CLIError("Node pool {} already exists, please try a different name, "
                            "use 'aks nodepool list' to get current list of node pool".format(nodepool_name))
 
-    upgradeSettings=AgentPoolUpgradeSettings()
-    taints_array=[]
+    upgradeSettings = AgentPoolUpgradeSettings()
+    taints_array = []
 
     if node_taints is not None:
         for taint in node_taints.split(','):
             try:
-                taint=taint.strip()
+                taint = taint.strip()
                 taints_array.append(taint)
             except ValueError:
                 raise CLIError(
@@ -3761,14 +3761,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     if node_vm_size is None:
         if os_type.lower() == "windows":
-            node_vm_size="Standard_D2s_v3"
+            node_vm_size = "Standard_D2s_v3"
         else:
-            node_vm_size="Standard_DS2_v2"
+            node_vm_size = "Standard_DS2_v2"
 
     if max_surge:
-        upgradeSettings.max_surge=max_surge
+        upgradeSettings.max_surge = max_surge
 
-    agent_pool=AgentPool(
+    agent_pool = AgentPool(
         name=nodepool_name,
         tags=tags,
         node_labels=labels,
@@ -3791,19 +3791,19 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
-        agent_pool.scale_set_eviction_policy=eviction_policy
+        agent_pool.scale_set_eviction_policy = eviction_policy
         if isnan(spot_max_price):
-            spot_max_price=-1
-        agent_pool.spot_max_price=spot_max_price
+            spot_max_price = -1
+        agent_pool.spot_max_price = spot_max_price
 
     _check_cluster_autoscaler_flag(
         enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool)
 
     if node_osdisk_size:
-        agent_pool.os_disk_size_gb=int(node_osdisk_size)
+        agent_pool.os_disk_size_gb = int(node_osdisk_size)
 
     if node_osdisk_type:
-        agent_pool.os_disk_type=node_osdisk_type
+        agent_pool.os_disk_type = node_osdisk_type
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool)
 
@@ -3812,14 +3812,14 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
                         nodepool_name,
                         node_count=3,
                         no_wait=False):
-    instance=client.get(resource_group_name, cluster_name, nodepool_name)
-    new_node_count=int(node_count)
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    new_node_count = int(node_count)
     if instance.enable_auto_scaling:
         raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
     if new_node_count == instance.count:
         raise CLIError(
             "The new node count is the same as the current node count.")
-    instance.count=new_node_count  # pylint: disable=no-member
+    instance.count = new_node_count  # pylint: disable=no-member
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
 
@@ -3840,14 +3840,14 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       cluster_name,
                                                       nodepool_name)
 
-    instance=client.get(resource_group_name, cluster_name, nodepool_name)
-    instance.orchestrator_version=kubernetes_version
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    instance.orchestrator_version = kubernetes_version
 
     if not instance.upgrade_settings:
-        instance.upgrade_settings=AgentPoolUpgradeSettings()
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
 
     if max_surge:
-        instance.upgrade_settings.max_surge=max_surge
+        instance.upgrade_settings.max_surge = max_surge
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
@@ -3862,7 +3862,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          mode=None,
                          no_wait=False):
 
-    update_autoscaler=enable_cluster_autoscaler + \
+    update_autoscaler = enable_cluster_autoscaler + \
         disable_cluster_autoscaler + update_cluster_autoscaler
 
     if update_autoscaler > 1:
@@ -3876,7 +3876,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--update-cluster-autoscaler" or '
                        '"--tags" or "--mode" or "--max-surge"')
 
-    instance=client.get(resource_group_name, cluster_name, nodepool_name)
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
     _validate_autoscaler_update_counts(min_count, max_count, enable_cluster_autoscaler or
                                        update_cluster_autoscaler)
@@ -3887,37 +3887,37 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                            'Please run "az aks nodepool update --update-cluster-autoscaler" '
                            'if you want to update min-count or max-count.')
             return None
-        instance.min_count=int(min_count)
-        instance.max_count=int(max_count)
-        instance.enable_auto_scaling=True
+        instance.min_count = int(min_count)
+        instance.max_count = int(max_count)
+        instance.enable_auto_scaling = True
 
     if update_cluster_autoscaler:
         if not instance.enable_auto_scaling:
             raise CLIError('Autoscaler is not enabled for this node pool.\n'
                            'Run "az aks nodepool update --enable-cluster-autoscaler" '
                            'to enable cluster with min-count and max-count.')
-        instance.min_count=int(min_count)
-        instance.max_count=int(max_count)
+        instance.min_count = int(min_count)
+        instance.max_count = int(max_count)
 
     if not instance.upgrade_settings:
-        instance.upgrade_settings=AgentPoolUpgradeSettings()
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
 
     if max_surge:
-        instance.upgrade_settings.max_surge=max_surge
+        instance.upgrade_settings.max_surge = max_surge
 
     if disable_cluster_autoscaler:
         if not instance.enable_auto_scaling:
             logger.warning(
                 'Autoscaler is already disabled for this node pool.')
             return None
-        instance.enable_auto_scaling=False
-        instance.min_count=None
-        instance.max_count=None
+        instance.enable_auto_scaling = False
+        instance.min_count = None
+        instance.max_count = None
 
-    instance.tags=tags
+    instance.tags = tags
 
     if mode is not None:
-        instance.mode=mode
+        instance.mode = mode
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
@@ -3925,11 +3925,11 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
                          no_wait=False):
-    agentpool_exists=False
-    instances=client.list(resource_group_name, cluster_name)
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
         if agentpool_profile.name.lower() == nodepool_name.lower():
-            agentpool_exists=True
+            agentpool_exists = True
             break
 
     if not agentpool_exists:
@@ -3973,22 +3973,22 @@ def _ensure_aks_service_principal(cli_ctx,
                                   fqdn_subdomain=None,
                                   location=None,
                                   name=None):
-    aad_session_key=None
+    aad_session_key = None
     # TODO: This really needs to be unit tested.
-    rbac_client=get_graph_rbac_management_client(cli_ctx)
+    rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
         # --service-principal not specified, make one.
         if not client_secret:
-            client_secret=_create_client_secret()
-        salt=binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         if dns_name_prefix:
-            url='https://{}.{}.{}.cloudapp.azure.com'.format(
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(
                 salt, dns_name_prefix, location)
         else:
-            url='https://{}.{}.{}.cloudapp.azure.com'.format(
+            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(
                 salt, fqdn_subdomain, location)
 
-        service_principal, aad_session_key=_build_service_principal(
+        service_principal, aad_session_key = _build_service_principal(
             rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
@@ -4014,30 +4014,30 @@ def _ensure_osa_aad(cli_ctx,
                     identifier=None,
                     name=None, create=False,
                     customer_admin_group_id=None):
-    rbac_client=get_graph_rbac_management_client(cli_ctx)
+    rbac_client = get_graph_rbac_management_client(cli_ctx)
     if create:
         # This reply_url is temporary set since Azure need one to create the AAD.
-        app_id_name='https://{}'.format(name)
+        app_id_name = 'https://{}'.format(name)
         if not aad_client_app_secret:
-            aad_client_app_secret=_create_client_secret()
+            aad_client_app_secret = _create_client_secret()
 
         # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
-        resource_access=ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
+        resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
                                          additional_properties=None, type="Scope")
         # Read directory permissions on Windows Azure Active Directory API
-        directory_access=ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
+        directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
                                           additional_properties=None, type="Role")
 
-        required_osa_aad_access=RequiredResourceAccess(resource_access=[resource_access, directory_access],
+        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
                                                          additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
 
-        list_aad_filtered=list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
+        list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
                                                                .format(app_id_name)))
         if list_aad_filtered:
-            aad_client_app_id=list_aad_filtered[0].app_id
+            aad_client_app_id = list_aad_filtered[0].app_id
             # Updating reply_url with the correct FQDN information returned by the RP
-            reply_url='https://{}/oauth2callback/Azure%20AD'.format(
+            reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(
                 identifier)
             update_application(client=rbac_client.applications,
                                object_id=list_aad_filtered[0].object_id,
@@ -4049,19 +4049,19 @@ def _ensure_osa_aad(cli_ctx,
                                required_resource_accesses=[required_osa_aad_access])
             logger.info('Updated AAD: %s', aad_client_app_id)
         else:
-            result, _aad_session_key=create_application(client=rbac_client.applications,
+            result, _aad_session_key = create_application(client=rbac_client.applications,
                                                           display_name=name,
                                                           identifier_uris=[
                                                               app_id_name],
                                                           homepage=app_id_name,
                                                           password=aad_client_app_secret,
                                                           required_resource_accesses=[required_osa_aad_access])
-            aad_client_app_id=result.app_id
+            aad_client_app_id = result.app_id
             logger.info('Created an AAD: %s', aad_client_app_id)
         # Get the TenantID
         if aad_tenant_id is None:
-            profile=Profile(cli_ctx=cli_ctx)
-            _, _, aad_tenant_id=profile.get_login_credentials()
+            profile = Profile(cli_ctx=cli_ctx)
+            _, _, aad_tenant_id = profile.get_login_credentials()
     return OpenShiftManagedClusterAADIdentityProvider(
         client_id=aad_client_app_id,
         secret=aad_client_app_secret,
@@ -4078,16 +4078,16 @@ def _ensure_service_principal(cli_ctx,
                               location=None,
                               name=None):
     # TODO: This really needs to be unit tested.
-    rbac_client=get_graph_rbac_management_client(cli_ctx)
+    rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
         # --service-principal not specified, make one.
         if not client_secret:
-            client_secret=_create_client_secret()
-        salt=binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-        url='https://{}.{}.{}.cloudapp.azure.com'.format(
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(
             salt, dns_name_prefix, location)
 
-        service_principal, _aad_session_key=_build_service_principal(
+        service_principal, _aad_session_key = _build_service_principal(
             rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
@@ -4111,16 +4111,16 @@ def _ensure_service_principal(cli_ctx,
 
 def _create_client_secret():
     # Add a special character to satisfy AAD SP secret requirements
-    special_char='$'
-    client_secret=binascii.b2a_hex(
+    special_char = '$'
+    client_secret = binascii.b2a_hex(
         os.urandom(10)).decode('utf-8') + special_char
     return client_secret
 
 
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
-    groups=cf_resource_groups(ctx, subscription_id=subscription_id)
+    groups = cf_resource_groups(ctx, subscription_id=subscription_id)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rg=groups.get(resource_group_name)
+    rg = groups.get(resource_group_name)
     return rg.location
 
 
@@ -4139,9 +4139,9 @@ def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
         if int(node_count) < int(min_count) or int(node_count) > int(max_count):
             raise CLIError(
                 'node-count is not in the range of min-count and max-count')
-        agent_pool_profile.min_count=int(min_count)
-        agent_pool_profile.max_count=int(max_count)
-        agent_pool_profile.enable_auto_scaling=True
+        agent_pool_profile.min_count = int(min_count)
+        agent_pool_profile.max_count = int(max_count)
+        agent_pool_profile.enable_auto_scaling = True
     else:
         if min_count is not None or max_count is not None:
             raise CLIError(
@@ -4172,7 +4172,7 @@ def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_na
         return
 
     # ensure that at least an empty ~/.kube/config exists
-    directory=os.path.dirname(path)
+    directory = os.path.dirname(path)
     if directory and not os.path.exists(directory):
         try:
             os.makedirs(directory)
@@ -4184,8 +4184,8 @@ def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_na
             pass
 
     # merge the new kubeconfig into the existing one
-    fd, temp_path=tempfile.mkstemp()
-    additional_file=os.fdopen(fd, 'w+t')
+    fd, temp_path = tempfile.mkstemp()
+    additional_file = os.fdopen(fd, 'w+t')
     try:
         additional_file.write(kubeconfig)
         additional_file.flush()
@@ -4207,9 +4207,9 @@ def _remove_nulls(managed_clusters):
     This works around a quirk of the SDK for python behavior. These fields are not sent
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
-    attrs=['tags']
-    ap_attrs=['os_disk_size_gb', 'vnet_subnet_id']
-    sp_attrs=['secret']
+    attrs = ['tags']
+    ap_attrs = ['os_disk_size_gb', 'vnet_subnet_id']
+    sp_attrs = ['secret']
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
@@ -4233,9 +4233,9 @@ def _remove_osa_nulls(managed_clusters):
     This works around a quirk of the SDK for python behavior. These fields are not sent
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
-    attrs=['tags', 'plan', 'type', 'id']
-    ap_master_attrs=['name', 'os_type']
-    net_attrs=['peer_vnet_id']
+    attrs = ['tags', 'plan', 'type', 'id']
+    ap_master_attrs = ['name', 'os_type']
+    net_attrs = ['peer_vnet_id']
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
@@ -4253,7 +4253,7 @@ def _validate_aci_location(norm_location):
     """
     Validate the Azure Container Instance location
     """
-    aci_locations=[
+    aci_locations = [
         "australiaeast",
         "canadacentral",
         "centralindia",
@@ -4282,18 +4282,18 @@ def _validate_aci_location(norm_location):
 
 def osa_list(cmd, client, resource_group_name=None):
     if resource_group_name:
-        managed_clusters=client.list_by_resource_group(resource_group_name)
+        managed_clusters = client.list_by_resource_group(resource_group_name)
     else:
-        managed_clusters=client.list()
+        managed_clusters = client.list()
     return _remove_osa_nulls(list(managed_clusters))
 
 
 def _format_workspace_id(workspace_id):
-    workspace_id=workspace_id.strip()
+    workspace_id = workspace_id.strip()
     if not workspace_id.startswith('/'):
-        workspace_id='/' + workspace_id
+        workspace_id = '/' + workspace_id
     if workspace_id.endswith('/'):
-        workspace_id=workspace_id.rstrip('/')
+        workspace_id = workspace_id.rstrip('/')
     return workspace_id
 
 
@@ -4314,9 +4314,9 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     if location is None:
-        location=_get_rg_location(cmd.cli_ctx, resource_group_name)
-    agent_pool_profiles=[]
-    agent_node_pool_profile=OpenShiftManagedClusterAgentPoolProfile(
+        location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    agent_pool_profiles = []
+    agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='compute',  # Must be 12 chars or less before ACS RP adds to it
         count=int(compute_count),
         vm_size=compute_vm_size,
@@ -4325,7 +4325,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         subnet_cidr=subnet_prefix
     )
 
-    agent_infra_pool_profile=OpenShiftManagedClusterAgentPoolProfile(
+    agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='infra',  # Must be 12 chars or less before ACS RP adds to it
         count=int(3),
         vm_size="Standard_D4s_v3",
@@ -4337,16 +4337,16 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     agent_pool_profiles.append(agent_node_pool_profile)
     agent_pool_profiles.append(agent_infra_pool_profile)
 
-    agent_master_pool_profile=OpenShiftManagedClusterAgentPoolProfile(
+    agent_master_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='master',  # Must be 12 chars or less before ACS RP adds to it
         count=int(3),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
         subnet_cidr=subnet_prefix
     )
-    identity_providers=[]
+    identity_providers = []
 
-    create_aad=False
+    create_aad = False
 
     # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
     try:
@@ -4354,9 +4354,9 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     except CloudError:
         # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
         if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
-            create_aad=True
+            create_aad = True
 
-    osa_aad_identity=_ensure_osa_aad(cmd.cli_ctx,
+    osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
                                        aad_tenant_id=aad_tenant_id, identifier=None,
@@ -4368,30 +4368,30 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
             provider=osa_aad_identity
         )
     )
-    auth_profile=OpenShiftManagedClusterAuthProfile(
+    auth_profile = OpenShiftManagedClusterAuthProfile(
         identity_providers=identity_providers)
 
-    default_router_profile=OpenShiftRouterProfile(name='default')
+    default_router_profile = OpenShiftRouterProfile(name='default')
 
     if vnet_peer is not None:
         from msrestazure.tools import is_valid_resource_id, resource_id
         if not is_valid_resource_id(vnet_peer):
-            vnet_peer=resource_id(
+            vnet_peer = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=resource_group_name,
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
     if workspace_id is not None:
-        workspace_id=_format_workspace_id(workspace_id)
-        monitor_profile=OpenShiftManagedClusterMonitorProfile(
+        workspace_id = _format_workspace_id(workspace_id)
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(
             enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     else:
-        monitor_profile=None
+        monitor_profile = None
 
-    network_profile=NetworkProfile(
+    network_profile = NetworkProfile(
         vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
-    osamc=OpenShiftManagedCluster(
+    osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
         open_shift_version="v3.11",
         network_profile=network_profile,
@@ -4403,10 +4403,10 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     try:
         # long_running_operation_timeout=300
-        result=sdk_no_wait(no_wait, client.create_or_update,
+        result = sdk_no_wait(no_wait, client.create_or_update,
                              resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
-        result=LongRunningOperation(cmd.cli_ctx)(result)
-        instance=client.get(resource_group_name, name)
+        result = LongRunningOperation(cmd.cli_ctx)(result)
+        instance = client.get(resource_group_name, name)
         _ensure_osa_aad(cmd.cli_ctx,
                         aad_client_app_id=osa_aad_identity.client_id,
                         aad_client_app_secret=osa_aad_identity.secret,
@@ -4425,27 +4425,27 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 def openshift_show(cmd, client, resource_group_name, name):
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
-    mc=client.get(resource_group_name, name)
+    mc = client.get(resource_group_name, name)
     return _remove_osa_nulls([mc])[0]
 
 
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
-    instance=client.get(resource_group_name, name)
+    instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    idx=0
+    idx = 0
     for i in range(len(instance.agent_pool_profiles)):
         if instance.agent_pool_profiles[i].name.lower() == "compute":
-            idx=i
+            idx = i
             break
 
-    instance.agent_pool_profiles[idx].count=int(
+    instance.agent_pool_profiles[idx].count = int(
         compute_count)  # pylint: disable=no-member
 
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
-    instance.master_pool_profile.name="master"
-    instance.auth_profile=None
+    instance.master_pool_profile.name = "master"
+    instance.auth_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -4453,11 +4453,11 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
-    instance=client.get(resource_group_name, name)
-    workspace_id=_format_workspace_id(workspace_id)
-    monitor_profile=OpenShiftManagedClusterMonitorProfile(
+    instance = client.get(resource_group_name, name)
+    workspace_id = _format_workspace_id(workspace_id)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(
         enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
-    instance.monitor_profile=monitor_profile
+    instance.monitor_profile = monitor_profile
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -4465,10 +4465,10 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
     logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
-    instance=client.get(resource_group_name, name)
-    monitor_profile=OpenShiftManagedClusterMonitorProfile(
+    instance = client.get(resource_group_name, name)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(
         enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
-    instance.monitor_profile=monitor_profile
+    instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
@@ -4496,24 +4496,24 @@ def _put_managed_cluster_ensuring_permission(
         no_wait
 ):
     # some addons require post cluster creation role assigment
-    need_post_creation_role_assignment=(monitoring_addon_enabled or
+    need_post_creation_role_assignment = (monitoring_addon_enabled or
                                           ingress_appgw_addon_enabled or
                                           (enable_managed_identity and attach_acr) or
                                           virtual_node_addon_enabled or
                                           need_grant_vnet_permission_to_cluster_identity)
     if need_post_creation_role_assignment:
         # adding a wait here since we rely on the result for role assignment
-        cluster=LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
+        cluster = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
             custom_headers=headers))
-        cloud_name=cmd.cli_ctx.cloud.name
+        cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
         if monitoring_addon_enabled and cloud_name.lower() == 'azurecloud':
             from msrestazure.tools import resource_id
-            cluster_resource_id=resource_id(
+            cluster_resource_id = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
                 namespace='Microsoft.ContainerService', type='managedClusters',
@@ -4540,13 +4540,13 @@ def _put_managed_cluster_ensuring_permission(
                                'named <ClUSTER_NAME>-agentpool in MC_ resource group to give '
                                'it permission to pull from ACR.')
             else:
-                kubelet_identity_client_id=cluster.identity_profile["kubeletidentity"].client_id
+                kubelet_identity_client_id = cluster.identity_profile["kubeletidentity"].client_id
                 _ensure_aks_acr(cmd.cli_ctx,
                                 client_id=kubelet_identity_client_id,
                                 acr_name_or_id=attach_acr,
                                 subscription_id=subscription_id)
     else:
-        cluster=sdk_no_wait(no_wait, client.create_or_update,
+        cluster = sdk_no_wait(no_wait, client.create_or_update,
                               resource_group_name=resource_group_name,
                               resource_name=name,
                               parameters=managed_cluster,
