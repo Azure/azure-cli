@@ -98,7 +98,6 @@ def update_app(cmd,
                force_restart=False,
                recreate_application=False,
                upgrade_replica_set_check_timeout=None,
-               instance_close_delay_duration=None,
                failure_action=None,
                upgrade_mode=None,
                health_check_retry_timeout=None,
@@ -130,7 +129,6 @@ def update_app(cmd,
                                                          force_restart,
                                                          recreate_application,
                                                          upgrade_replica_set_check_timeout,
-                                                         instance_close_delay_duration,
                                                          failure_action,
                                                          upgrade_mode,
                                                          health_check_retry_timeout,
@@ -263,12 +261,10 @@ def create_service(cmd,
                    state,
                    default_move_cost=None,
                    placement_constraints=None,
-                   service_dns_name=None,
                    service_package_activation_mode=None,
                    target_replica_set_size=None,
                    min_replica_set_size=None,
                    has_persisted_state=None,
-                   drop_source_replica_on_move=None,
                    service_placement_time_limit=None,
                    stand_by_replica_keep_duration=None,
                    quorum_loss_wait_duration=None,
@@ -276,7 +272,6 @@ def create_service(cmd,
                    instance_count=None,
                    min_instance_count=None,
                    min_instance_percentage=None,
-                   instance_close_delay_duration=None,
                    partition_scheme='singleton',
                    partition_count=None,
                    low_key=None,
@@ -302,8 +297,7 @@ def create_service(cmd,
             )
             serviceResource.properties = _set_stateless_service_properties(properties,
                                                                            min_instance_count,
-                                                                           min_instance_percentage,
-                                                                           instance_close_delay_duration)
+                                                                           min_instance_percentage)
 
         elif state.lower() == ServiceKind.STATEFUL.lower():
             properties = StatefulServiceProperties(
@@ -315,7 +309,6 @@ def create_service(cmd,
             )
             serviceResource.properties = _set_stateful_service_properties(properties,
                                                                           has_persisted_state,
-                                                                          drop_source_replica_on_move,
                                                                           service_placement_time_limit,
                                                                           stand_by_replica_keep_duration,
                                                                           quorum_loss_wait_duration,
@@ -330,8 +323,6 @@ def create_service(cmd,
             serviceResource.properties.default_move_cost = default_move_cost
         if placement_constraints is not None:
             serviceResource.properties.placement_constraints = placement_constraints
-        if service_dns_name is not None:
-            serviceResource.properties.service_dns_name = service_dns_name
         if service_package_activation_mode is not None:
             serviceResource.properties.service_package_activation_mode = service_package_activation_mode
 
@@ -352,7 +343,6 @@ def update_service(cmd,
                    placement_constraints=None,
                    target_replica_set_size=None,
                    min_replica_set_size=None,
-                   drop_source_replica_on_move=None,
                    service_placement_time_limit=None,
                    stand_by_replica_keep_duration=None,
                    quorum_loss_wait_duration=None,
@@ -360,7 +350,6 @@ def update_service(cmd,
                    instance_count=None,
                    min_instance_count=None,
                    min_instance_percentage=None,
-                   instance_close_delay_duration=None,
                    tags=None):
     try:
         currentService = client.services.get(resource_group_name, cluster_name, application_name, service_name)
@@ -376,8 +365,7 @@ def update_service(cmd,
                 currentService.properties.instance_count = instance_count
             currentService.properties = _set_stateless_service_properties(currentService.properties,
                                                                           min_instance_count,
-                                                                          min_instance_percentage,
-                                                                          instance_close_delay_duration)
+                                                                          min_instance_percentage)
         elif state.lower() == ServiceKind.STATEFUL.lower():
             if min_replica_set_size is not None:
                 currentService.properties.min_replica_set_size = min_replica_set_size
@@ -385,7 +373,6 @@ def update_service(cmd,
                 currentService.properties.target_replica_set_size = target_replica_set_size
             currentService.properties = _set_stateful_service_properties(currentService.properties,
                                                                          None,
-                                                                         drop_source_replica_on_move,
                                                                          service_placement_time_limit,
                                                                          stand_by_replica_keep_duration,
                                                                          quorum_loss_wait_duration,
@@ -582,7 +569,6 @@ def _set_upgrade_policy(current_upgrade_policy,
                         force_restart,
                         recreate_application,
                         upgrade_replica_set_check_timeout,
-                        instance_close_delay_duration,
                         failure_action,
                         upgrade_mode,
                         health_check_retry_timeout,
@@ -607,8 +593,6 @@ def _set_upgrade_policy(current_upgrade_policy,
         current_upgrade_policy.upgrade_mode = upgrade_mode
     if upgrade_replica_set_check_timeout is not None:
         current_upgrade_policy.upgrade_replica_set_check_timeout = upgrade_replica_set_check_timeout
-    if instance_close_delay_duration is not None:
-        current_upgrade_policy.instance_close_delay_duration = instance_close_delay_duration
 
     # RollingUpgradeMonitoringPolicy
     if current_upgrade_policy.rolling_upgrade_monitoring_policy is None:
@@ -687,20 +671,17 @@ def _set_partition_description(partition_scheme, partition_names, partition_coun
     return partition_description
 
 
-def _set_stateless_service_properties(properties, min_instance_count, min_instance_percentage, instance_close_delay_duration):
+def _set_stateless_service_properties(properties, min_instance_count, min_instance_percentage):
     # Optional
     if min_instance_count is not None:
         properties.min_instance_count = min_instance_count
     if min_instance_percentage is not None:
         properties.min_instance_percentage = min_instance_percentage
-    if instance_close_delay_duration is not None:
-        properties.instance_close_delay_duration = instance_close_delay_duration
     return properties
 
 
 def _set_stateful_service_properties(properties,
                                      has_persisted_state,
-                                     drop_source_replica_on_move,
                                      service_placement_time_limit,
                                      stand_by_replica_keep_duration,
                                      quorum_loss_wait_duration,
@@ -708,8 +689,6 @@ def _set_stateful_service_properties(properties,
     # Optional
     if has_persisted_state is not None:
         properties.has_persisted_state = has_persisted_state
-    if drop_source_replica_on_move is not None:
-        properties.drop_source_replica_on_move = drop_source_replica_on_move
     if service_placement_time_limit is not None:
         properties.service_placement_time_limit = service_placement_time_limit
     if stand_by_replica_keep_duration is not None:

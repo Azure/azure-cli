@@ -150,7 +150,7 @@ def load_command_table(self, _):
         client_factory=servicefabric_managed_client_factory_all
     )
 
-    with self.command_group('sf managed-cluster', managed_cluster_mgmt, is_preview=True,
+    with self.command_group('sf managed-cluster', managed_cluster_mgmt, is_preview=False,
                             custom_command_type=managed_cluster_custom_type) as g:
         g.custom_command('list', 'list_clusters')
         g.command('delete', 'delete')
@@ -163,7 +163,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_client_cert')
         g.custom_command('delete', 'delete_client_cert')
 
-    with self.command_group('sf managed-node-type', node_type_mgmt, is_preview=True,
+    with self.command_group('sf managed-node-type', node_type_mgmt, is_preview=False,
                             custom_command_type=managed_node_type_custom_type) as g:
         g.command('list', 'list_by_managed_clusters')
         g.command('delete', 'delete')

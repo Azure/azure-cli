@@ -36,7 +36,7 @@ helps['sf application update'] = """
 type: command
 short-summary: Update a Azure Service Fabric application. This allows updating the application parameters and/or upgrade the application type version which will trigger an application upgrade.
 examples:
-  - name: Update application parameters and upgreade policy values and app type version to v2.
+  - name: Update application parameters and upgrade policy values and app type version to v2.
     text: >
         az sf application update -g testRG -c testCluster --application-name testApp --application-type-version v2 \\
           --application-parameters key0=value0 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 \\
@@ -803,7 +803,7 @@ examples:
   - name: Update managed stateless service.
     text: >
         az sf managed-service update -g testRG -c testCluster --application-name testApp --service-name testService --min-instance-count 2 \\
-          --min-instance-percentage 20 --instance-close-delay-duration '00:11:00'
+          --min-instance-percentage 20'
   - name: Update managed stateful service.
     text: >
         az sf managed-service update -g testRG -c testCluster --application-name testApp --service-name testService2 --service-placement-time-limit '00:11:00' \\

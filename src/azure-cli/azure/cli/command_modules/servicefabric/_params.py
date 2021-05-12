@@ -350,8 +350,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Determines whether the application should be recreated on update. If value=true, the rest of the upgrade policy parameters are not allowed.')
         c.argument('upgrade_replica_set_check_timeout', options_list=['--upgrade-replica-set-check-timeout', '--replica-check-timeout', '--rep-check-timeout'],
                    help='Specify the maximum time, in seconds, that Service Fabric waits for a service to reconfigure into a safe state, if not already in a safe state, before Service Fabric proceeds with the upgrade.')
-        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
-                   help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade, only for those instances which have a non-zero delay duration configured in the service description.')
         c.argument('failure_action', arg_type=get_enum_type(FailureAction),
                    help='Specify the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
         c.argument('upgrade_mode', arg_type=get_enum_type(RollingUpgradeMode),
@@ -403,8 +401,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the default cost for a move. Higher costs make it less likely that the Cluster Resource Manager will move the replica when trying to balance the cluster.')
         c.argument('placement_constraints',
                    help='Specify the placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: \"NodeColor == blue)\".')
-        c.argument('service_dns_name', options_list=['--service-dns-name', '--dns-name'],
-                   help='Specify the DNS name of the service. It requires the DNS system service to be enabled in Service Fabric cluster.')
         c.argument('service_package_activation_mode', options_list=['--service-package-activation-mode', '--package-activation-mode', '--activation-mode'],
                    help='Specify the activation mode of the service package.')
         c.argument('state', arg_type=get_enum_type(ServiceKind), help='Specify if the service is stateless or stateful.')
@@ -413,8 +409,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('target_replica_set_size', options_list=['--target-replica-set-size', '--target-replica'], help='Specify the target replica set size for the stateful service.')
         c.argument('has_persisted_state', arg_type=get_three_state_flag(),
                    help='Determines whether this is a persistent service which stores states on the local disk. If it is then the value of this property is true, if not it is false.')
-        c.argument('drop_source_replica_on_move', options_list=['--drop-source-replica-on-move', '--drop-source'],
-                   help='Determines whether to drop source Secondary replica even if the target replica has not finished build. If desired behavior is to drop it as soon as possible the value of this property is true, if not it is false.')
         c.argument('service_placement_time_limit', options_list=['--service-placement-time-limit', '--plcmt-time-limit'],
                    help='Specify the duration for which replicas can stay InBuild before reporting that build is stuck, represented in ISO 8601 format "hh:mm:ss".')
         c.argument('stand_by_replica_keep_duration', options_list=['--stand-by-replica-keep-duration', '--stand-by-keep-duration', '--keep-duration'],
@@ -428,8 +422,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('min_instance_count', help='Specify the minimum number of instances that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstanceCount computation -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service.')
         c.argument('min_instance_percentage', options_list=['--min-instance-percentage', '--min-inst-pct'],
                    help='Specify the minimum percentage of InstanceCount that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstancePercentage computation, -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service. Allowed values are from 0 to 100.')
-        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
-                   help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade and disabling node. The endpoint exposed on this instance is removed prior to starting the delay, which prevents new connections to this instance.')
         # Partition arguments
         c.argument('partition_scheme', arg_type=get_enum_type(PartitionScheme),
                    help='Specify what partition scheme to use. '
@@ -452,8 +444,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Stateful arguments
         c.argument('min_replica_set_size', options_list=['--min-replica-set-size', '--min-replica'], help='Specify the min replica set size for the stateful service.')
         c.argument('target_replica_set_size', options_list=['--target-replica-set-size', '--target-replica'], help='Specify the target replica set size for the stateful service.')
-        c.argument('drop_source_replica_on_move', options_list=['--drop-source-replica-on-move', '--drop-source'],
-                   help='Determines whether to drop source Secondary replica even if the target replica has not finished build. If desired behavior is to drop it as soon as possible the value of this property is true, if not it is false.')
         c.argument('service_placement_time_limit', options_list=['--service-placement-time-limit', '--plcmt-time-limit'],
                    help='Specify the duration for which replicas can stay InBuild before reporting that build is stuck, represented in ISO 8601 format "hh:mm:ss".')
         c.argument('stand_by_replica_keep_duration', options_list=['--stand-by-replica-keep-duration', '--stand-by-keep-duration', '--keep-duration'],
@@ -467,8 +457,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('min_instance_count', help='Specify the minimum number of instances that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstanceCount computation -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service.')
         c.argument('min_instance_percentage', options_list=['--min-instance-percentage', '--min-inst-pct'],
                    help='Specify the minimum percentage of InstanceCount that must be up to meet the EnsureAvailability safety check during operations like upgrade or deactivate node. The actual number that is used is max( MinInstanceCount, ceil( MinInstancePercentage/100.0 * InstanceCount) ). Note, if InstanceCount is set to -1, during MinInstancePercentage computation, -1 is first converted into the number of nodes on which the instances are allowed to be placed according to the placement constraints on the service. Allowed values are from 0 to 100.')
-        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
-                   help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade and disabling node. The endpoint exposed on this instance is removed prior to starting the delay, which prevents new connections to this instance.')
 
     with self.argument_context('sf managed-service correlation-scheme create', validator=validate_create_managed_service_correlation) as c:
         c.argument('correlated_service_name', options_list=['--correlated-service-name', '--correlated-name'],
