@@ -51,8 +51,7 @@ def _create_share_rm(cmd, client, resource_group_name, account_name, share_name,
     if access_tier is not None:
         file_share.access_tier = access_tier
     if snapshot:
-        PutSharesExpand = cmd.get_models('PutSharesExpand', resource_type=ResourceType.MGMT_STORAGE)
-        expand = PutSharesExpand.SNAPSHOTS
+        expand = 'snapshots'
 
     return client.create(resource_group_name=resource_group_name, account_name=account_name, share_name=share_name,
                          file_share=file_share, expand=expand)
@@ -64,10 +63,9 @@ def get_stats(client, resource_group_name, account_name, share_name):
 
 
 def list_share_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
-    ListSharesExpand = cmd.get_models('ListSharesExpand')
     if include_deleted:
         return client.list(resource_group_name=resource_group_name, account_name=account_name,
-                           expand=ListSharesExpand.DELETED)
+                           expand='deleted')
 
     return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=None)
 
