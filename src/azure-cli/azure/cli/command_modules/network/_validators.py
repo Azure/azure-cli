@@ -117,6 +117,20 @@ def _validate_vpn_gateway_generation(namespace):
         raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
 
+def validate_vpn_connection_name_or_id(cmd, namespace):
+    if namespace.vpn_connection_ids:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        for index, vpn_connection_id in enumerate(namespace.vpn_connection_ids):
+            if not is_valid_resource_id(vpn_connection_id):
+                namespace.vpn_connection_ids[index] = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='connections',
+                    name=vpn_connection_id
+                )
+
+
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
         from msrestazure.tools import is_valid_resource_id, resource_id

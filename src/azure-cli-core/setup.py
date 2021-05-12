@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.22.1"
+VERSION = "2.23.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -50,7 +50,7 @@ DEPENDENCIES = [
     'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
-    'knack~=0.8.1',
+    'knack~=0.8.2',
     'msal>=1.10.0,<2.0.0',
     # Dependencies of the vendored subscription SDK
     # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86

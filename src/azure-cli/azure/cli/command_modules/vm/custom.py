@@ -116,10 +116,10 @@ def _get_access_extension_upgrade_info(extensions, name):
 
     if extensions:
         extension = next((e for e in extensions if e.name == name), None)
-        from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
-        if extension and LooseVersion(extension.type_handler_version) < LooseVersion(version):
+        from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
+        if extension and parse(extension.type_handler_version) < parse(version):
             auto_upgrade = True
-        elif extension and LooseVersion(extension.type_handler_version) > LooseVersion(version):
+        elif extension and parse(extension.type_handler_version) > parse(version):
             version = extension.type_handler_version
 
     return publisher, version, auto_upgrade
@@ -294,7 +294,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=None, edge_zone=None):
+                        tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -376,7 +376,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
     if hyper_v_generation:
-        disk.hyper_vgeneration = hyper_v_generation
+        disk.hyper_v_generation = hyper_v_generation
 
     if zone:
         disk.zones = zone
@@ -398,8 +398,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.tier = tier
     if enable_bursting is not None:
         disk.bursting_enabled = enable_bursting
-    if edge_zone:
+    if edge_zone is not None:
         disk.extended_location = edge_zone
+    if security_type is not None:
+        disk.security_profile = {'securityType': security_type}
+    if support_hibernation is not None:
+        disk.supports_hibernation = support_hibernation
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -585,7 +589,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                         sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental,
                         encryption=encryption)
     if hyper_v_generation:
-        snapshot.hyper_vgeneration = hyper_v_generation
+        snapshot.hyper_v_generation = hyper_v_generation
     if network_access_policy is not None:
         snapshot.network_access_policy = network_access_policy
     if disk_access is not None:
@@ -974,32 +978,24 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                      aux_subscriptions=aux_subscriptions).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
 
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-        # creates the VM deployment
-        if no_wait:
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
-        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, deployment))
-    else:
-        if validate:
-            return client.validate(resource_group_name, deployment_name, properties)
+        return client.validate(resource_group_name, deployment_name, deployment)
 
-        # creates the VM deployment
-        if no_wait:
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
-        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+    # creates the VM deployment
+    if no_wait:
+        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
+    LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
 
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
@@ -1453,27 +1449,20 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+    if validate:
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-        if no_wait:
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
-        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                      resource_group_name, deployment_name, deployment))
-    else:
-        if validate:
-            return client.validate(resource_group_name, deployment_name, properties)
+        return client.validate(resource_group_name, deployment_name, deployment)
 
-        if no_wait:
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
-        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                      resource_group_name, deployment_name, properties))
+    if no_wait:
+        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.begin_create_or_update,
+                                                  resource_group_name, deployment_name, deployment))
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
@@ -2741,24 +2730,18 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         log_pprint_template(template)
         log_pprint_template(parameters)
 
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+    if validate:
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-        # creates the VMSS deployment
-        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
-    else:
-        if validate:
-            return client.validate(resource_group_name, deployment_name, properties)
+        return client.validate(resource_group_name, deployment_name, deployment)
 
-        # creates the VMSS deployment
-        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
+    # creates the VMSS deployment
+    deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+        sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment))
 
     if orchestration_mode.lower() == uniform_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
@@ -3396,7 +3379,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
-                         target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None):
+                         target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
+                         data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None):
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -3451,8 +3435,9 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                                              lun=data_snapshot_luns[i]))
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
+            # OS disk
             if os_vhd_uri and os_vhd_storage_account is None or os_vhd_uri is None and os_vhd_storage_account:
-                raise ValidationError('--vhd and --vhd-storage-account should be used together.')
+                raise ValidationError('--os-vhd-uri and --os-vhd-storage-account should be used together.')
             if os_vhd_uri and os_vhd_storage_account:
                 if not is_valid_resource_id(os_vhd_storage_account):
                     os_vhd_storage_account = resource_id(
@@ -3460,6 +3445,35 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
                 os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(
                     id=os_vhd_storage_account, uri=os_vhd_uri))
+
+            # Data disks
+            if data_vhds_uris and data_vhds_storage_accounts is None or \
+                    data_vhds_uris is None and data_vhds_storage_accounts:
+                raise ValidationError('--data-vhds-uris and --data-vhds-storage-accounts should be used together.')
+            if data_vhds_luns and data_vhds_uris is None:
+                raise ValidationError('--data-vhds-luns must be used together with --data-vhds-uris')
+            if data_vhds_uris:
+                # Generate LUNs
+                if data_vhds_luns is None:
+                    # 0, 1, 2, ...
+                    data_vhds_luns = [i for i in range(len(data_vhds_uris))]
+                # Check length
+                len_data_vhds_uris = len(data_vhds_uris)
+                len_data_vhds_luns = len(data_vhds_luns)
+                len_data_vhds_storage_accounts = len(data_vhds_storage_accounts)
+                if len_data_vhds_uris != len_data_vhds_luns or len_data_vhds_uris != len_data_vhds_storage_accounts:
+                    raise ValidationError('Length of --data-vhds-uris, --data-vhds-luns, --data-vhds-storage-accounts '
+                                          'must be same.')
+                # Generate full storage account ID
+                for i, storage_account in enumerate(data_vhds_storage_accounts):
+                    if not is_valid_resource_id(storage_account):
+                        data_vhds_storage_accounts[i] = resource_id(
+                            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                            namespace='Microsoft.Storage', type='storageAccounts', name=storage_account)
+                data_disk_images = []
+                for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
+                    data_disk_images.append(GalleryDataDiskImage(
+                        source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)

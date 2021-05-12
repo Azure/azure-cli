@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.22.1"
+VERSION = "2.23.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -106,15 +106,15 @@ DEPENDENCIES = [
     'azure-mgmt-network~=18.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=8.1.0b2',
+    'azure-mgmt-rdbms~=8.1.0b4',
     'azure-mgmt-recoveryservicesbackup~=0.11.0',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
+    'azure-mgmt-resource==16.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
-    'azure-mgmt-resource==12.1.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
@@ -130,12 +130,14 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.6.2',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.3.0',
+    'azure-synapse-artifacts~=0.6.0',
     'azure-synapse-spark~=0.2.0',
     'fabric~=2.4',
     'javaproperties==0.5.1',
     'jsmin~=2.2.2',
     'jsondiff==1.2.0',
+    'packaging~=20.9',
+    'PyGithub==1.38',
     'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
