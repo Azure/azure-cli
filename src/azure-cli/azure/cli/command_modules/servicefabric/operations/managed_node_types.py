@@ -7,13 +7,16 @@
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.command_modules.servicefabric._sf_utils import (_log_error_exception)
-from azure.mgmt.servicefabric.models import (ErrorModelException,
-                                             NodeType,
-                                             EndpointRangeDescription,
-                                             VMSSExtension,
-                                             VaultSecretGroup,
-                                             VaultCertificate,
-                                             SubResource)
+from azure.mgmt.servicefabricmanagedclusters.models import (
+    ErrorModelException,
+    NodeType,
+    EndpointRangeDescription,
+    VMSSExtension,
+    VaultSecretGroup,
+    VaultCertificate,
+    SubResource
+)
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -27,6 +30,7 @@ def create_node_type(cmd,
                      instance_count,
                      primary=False,
                      disk_size=None,
+                     data_disk_type=None,
                      application_start_port=None,
                      application_end_port=None,
                      ephemeral_start_port=None,
@@ -37,7 +41,8 @@ def create_node_type(cmd,
                      vm_image_sku=None,
                      vm_image_version=None,
                      capacity=None,
-                     placement_property=None):
+                     placement_property=None,
+                     is_stateless=False):
 
     #  set defult parameters
     if disk_size is None:
@@ -62,13 +67,15 @@ def create_node_type(cmd,
         new_node_type = NodeType(is_primary=primary,
                                  vm_instance_count=int(instance_count),
                                  data_disk_size_gb=disk_size,
+                                 data_disk_type=data_disk_type,
                                  vm_size=vm_size,
                                  vm_image_publisher=vm_image_publisher,
                                  vm_image_offer=vm_image_offer,
                                  vm_image_sku=vm_image_sku,
                                  vm_image_version=vm_image_version,
                                  capacities=capacity,
-                                 placement_properties=placement_property)
+                                 placement_properties=placement_property,
+                                 is_stateless=is_stateless)
 
         if application_start_port and application_end_port:
             new_node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,

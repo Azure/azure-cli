@@ -12,7 +12,7 @@ from azure.cli.command_modules.servicefabric._sf_utils import (
     _create_resource_group_name,
     _log_error_exception
 )
-from azure.mgmt.servicefabric.models import (
+from azure.mgmt.servicefabricmanagedclusters.models import (
     ErrorModelException,
     ManagedCluster,
     Sku,
@@ -41,6 +41,9 @@ def create_cluster(cmd,
                    client_cert_thumbprint=None,
                    client_cert_common_name=None,
                    client_cert_issuer_thumbprint=None,
+                   upgrade_mode=None,
+                   upgrade_cadence=None,
+                   code_version=None,
                    tags=None):
     try:
 
@@ -87,6 +90,9 @@ def create_cluster(cmd,
                                      client_connection_port=client_connection_port,
                                      http_gateway_connection_port=gateway_connection_port,
                                      clients=client_certs,
+                                     cluster_upgrade_mode=upgrade_mode,
+                                     cluster_upgrade_cadence=upgrade_cadence,
+                                     cluster_code_version=code_version,
                                      tags=tags)
 
         logger.info("Creating managed cluster '%s'", cluster_name)
