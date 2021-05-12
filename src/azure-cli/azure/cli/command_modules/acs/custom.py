@@ -2754,72 +2754,74 @@ def aks_update(cmd, client, resource_group_name, name,
         if aad_admin_group_object_ids is not None:
             instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(
                 aad_admin_group_object_ids)
-
         if enable_azure_rbac and disable_azure_rbac:
             raise MutuallyExclusiveArgumentError(
-            instance.aad_profile.enable_azure_rbac=True
+                'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time')
+        if enable_azure_rbac:
+            instance.aad_profile.enable_azure_rbac = True
         if disable_azure_rbac:
-            instance.aad_profile.enable_azure_rbac=False
+            instance.aad_profile.enable_azure_rbac = False
 
     if enable_ahub and disable_ahub:
         raise CLIError(
+            'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time')
 
     if enable_ahub:
-        instance.windows_profile.license_type='Windows_Server'
+        instance.windows_profile.license_type = 'Windows_Server'
     if disable_ahub:
-        instance.windows_profile.license_type='None'
+        instance.windows_profile.license_type = 'None'
 
     if windows_admin_password:
-        instance.windows_profile.admin_password=windows_admin_password
+        instance.windows_profile.admin_password = windows_admin_password
 
-    current_identity_type="spn"
+    current_identity_type = "spn"
     if instance.identity is not None:
-        current_identity_type=instance.identity.type.casefold()
+        current_identity_type = instance.identity.type.casefold()
 
-    goal_identity_type=current_identity_type
+    goal_identity_type = current_identity_type
     if enable_managed_identity:
         if not assign_identity:
-            goal_identity_type="systemassigned"
+            goal_identity_type = "systemassigned"
         else:
-            goal_identity_type="userassigned"
+            goal_identity_type = "userassigned"
 
     if current_identity_type != goal_identity_type:
-        msg=""
+        msg = ""
         if current_identity_type == "spn":
-            msg=('Your cluster is using service principal, and you are going to update '
+            msg = ('Your cluster is using service principal, and you are going to update '
                    'the cluster to use {} managed identity.\n After updating, your '
                    'cluster\'s control plane and addon pods will switch to use managed '
                    'identity, but kubelet will KEEP USING SERVICE PRINCIPAL '
                    'until you upgrade your agentpool.\n '
                    'Are you sure you want to perform this operation?').format(goal_identity_type)
         else:
-            msg=('Your cluster is already using {} managed identity, and you are going to '
+            msg = ('Your cluster is already using {} managed identity, and you are going to '
                    'update the cluster to use {} managed identity. \nAre you sure you want to '
                    'perform this operation?').format(current_identity_type, goal_identity_type)
         if not yes and not prompt_y_n(msg, default="n"):
             return None
         if goal_identity_type == "systemassigned":
-            instance.identity=ManagedClusterIdentity(
+            instance.identity = ManagedClusterIdentity(
                 type="SystemAssigned"
             )
         elif goal_identity_type == "userassigned":
-            user_assigned_identity={
+            user_assigned_identity = {
                 assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
             }
-            instance.identity=ManagedClusterIdentity(
+            instance.identity = ManagedClusterIdentity(
                 type="UserAssigned",
                 user_assigned_identities=user_assigned_identity
             )
 
-    monitoring_addon_enabled=False
-    ingress_appgw_addon_enabled=False
-    virtual_node_addon_enabled=False
+    monitoring_addon_enabled = False
+    ingress_appgw_addon_enabled = False
+    virtual_node_addon_enabled = False
     if instance.addon_profiles is not None:
-        monitoring_addon_enabled=CONST_MONITORING_ADDON_NAME in instance.addon_profiles and
+        monitoring_addon_enabled = CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
             instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
-        ingress_appgw_addon_enabled=CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles and
+        ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles and \
             instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
-        virtual_node_addon_enabled=CONST_VIRTUAL_NODE_ADDON_NAME + 'Linux' in instance.addon_profiles and
+        virtual_node_addon_enabled = CONST_VIRTUAL_NODE_ADDON_NAME + 'Linux' in instance.addon_profiles and \
             instance.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME +
                                     'Linux'].enabled
 
