@@ -37,8 +37,6 @@ $download_link = "https://azcliprod.blob.core.windows.net/msi/azure-cli-$version
 
 Write-Host "Downlaod link:" $download_link 
 
-# Detect if azure-cli is already installed
-
 $InstallArgs = @(
 "/i"
 "$download_link"
