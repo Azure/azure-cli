@@ -2208,6 +2208,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
             raise CLIError('"--enable-aad" cannot be used together with '
                            '"--aad-client-app-id/--aad-server-app-id/--aad-server-app-secret"')
+        if disable_rbac and enable_azure_rbac:
+            raise ArgumentUsageError(
+                '"--enable-azure-rbac" can not be used together with "--disable-rbac"')
         aad_profile = ManagedClusterAADProfile(
             managed=True,
             enable_azure_rbac=enable_azure_rbac,

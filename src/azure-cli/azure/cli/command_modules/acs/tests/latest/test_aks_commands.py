@@ -1858,6 +1858,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
+            self.check('aadProfile.enableAzureRbac', False),
             self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
         ])
 

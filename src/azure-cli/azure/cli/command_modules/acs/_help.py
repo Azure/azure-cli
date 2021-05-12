@@ -612,6 +612,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
   - name: Update the cluster to use user assigned managed identity in control plane.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Update a non managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
   - name: Update a managed AAD AKS cluster to use Azure RBAC
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
   - name: Disable Azure RBAC in a managed AAD AKS cluster
