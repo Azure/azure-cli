@@ -68,12 +68,6 @@ def load_command_table(self, _):
         g.custom_command('node remove', 'remove_cluster_node')
         g.custom_command('upgrade-type set', 'update_cluster_upgrade_type')
 
-    with self.command_group('sf cluster certificate', cluster_mgmt_util,
-                            client_factory=servicefabric_clusters_client_factory,
-                            deprecate_info=self.deprecate(hide=True)) as g:
-        g.custom_command('add', 'add_cluster_cert')
-        g.custom_command('remove', 'remove_cluster_cert')
-
     with self.command_group('sf application certificate') as g:
         g.custom_command('add', 'add_app_cert')
 

@@ -94,9 +94,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('admin_client_thumbprints', options_list=['--admin-client-thumbprints', '--admin-client-tps'], nargs='+', help='Space-separated list of client certificate thumbprint that only has admin permission, ')
         c.argument('certificate_issuer_thumbprint', options_list=['--certificate-issuer-thumbprint', '--cert-issuer-tp'], help='client certificate issuer thumbprint.')
 
-    with self.argument_context('sf cluster certificate') as c:
-        c.argument('thumbprint', help='The cluster certificate thumbprint to be removed')
-
     with self.argument_context('sf cluster client-certificate') as c:
         c.argument('is_admin', help='Client authentication type.')
         c.argument('certificate_issuer_thumbprint', options_list=['--certificate-issuer-thumbprint', '--cert-issuer-tp'], help='client certificate issuer thumbprint.')
