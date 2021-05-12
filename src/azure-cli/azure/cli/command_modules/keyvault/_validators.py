@@ -289,8 +289,8 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
 
-    if hsm_name and 'keyvault recover' in cmd.name:
-        raise InvalidArgumentValueError('Operation "recover" has not been supported for HSM.')
+    # if hsm_name and 'keyvault recover' in cmd.name:
+    #     raise InvalidArgumentValueError('Operation "recover" has not been supported for HSM.')
 
     if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')
