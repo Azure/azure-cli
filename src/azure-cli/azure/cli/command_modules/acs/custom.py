@@ -1032,23 +1032,21 @@ def _invoke_deployment(cmd, resource_group_name, deployment_name, template, para
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                   subscription_id=subscription_id).deployments
+
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            validation_poller = smc.validate(resource_group_name, deployment_name, deployment)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            validation_poller = smc.begin_validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, deployment)
 
-    if validate:
-        return smc.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
+        return smc.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, smc.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,
@@ -1544,6 +1542,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                 {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
                 {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
             ],
+            "nodeSelector": {"kubernetes.io/os": "linux"},
         }
     }
 
@@ -3247,16 +3246,12 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     else:
         resource_groups.create_or_update(default_workspace_resource_group, {'location': workspace_region})
 
-    default_workspace_params = {
-        'location': workspace_region,
-        'properties': {
-            'sku': {
-                'name': 'standalone'
-            }
-        }
-    }
-    async_poller = resources.create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
-                                                    default_workspace_params)
+    from azure.cli.core.profiles import ResourceType
+    GenericResource = cmd.get_models('GenericResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    generic_resource = GenericResource(location=workspace_region, properties={'sku': {'name': 'standalone'}})
+
+    async_poller = resources.begin_create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
+                                                          generic_resource)
 
     ws_resource_id = ''
     while True:

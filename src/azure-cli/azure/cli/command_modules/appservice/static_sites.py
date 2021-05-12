@@ -265,8 +265,8 @@ def _parse_pair(pair, delimiter):
     if delimiter not in pair:
         CLIError("invalid format of pair {0}".format(pair))
 
-    pair_split = pair.split(delimiter)
-    return pair_split[0], pair_split[1]
+    index = pair.index(delimiter)
+    return pair[:index], pair[1 + index:]
 
 
 def _raise_missing_token_suggestion():

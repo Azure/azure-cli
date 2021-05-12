@@ -82,7 +82,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
                                                                      subnet_id=subnet_id, kind='ASEv3')
     logger.info('Create App Service Environment...')
     deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
-    return sdk_no_wait(no_wait, deployment_client.create_or_update,
+    return sdk_no_wait(no_wait, deployment_client.begin_create_or_update,
                        resource_group_name, deployment_name, ase_deployment_properties)
 
 
