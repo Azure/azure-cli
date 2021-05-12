@@ -45,6 +45,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -105,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-netapp~=2.0.0',
     'azure-mgmt-network~=18.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
-    'azure-mgmt-privatedns~=0.1.0',
+    'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=8.1.0b4',
     'azure-mgmt-recoveryservicesbackup~=0.11.0',
     'azure-mgmt-recoveryservices~=0.4.0',

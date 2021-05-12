@@ -7,11 +7,13 @@
 import os
 import unittest
 import time
+import json
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError)
+
 
 logger = get_logger(__name__)
 # pylint: disable=line-too-long
@@ -374,7 +376,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutZone_ZoneExistsIfNoneMatchFailure_ExpectError(self, resource_group):
         self._Create_PrivateZone()
-        with self.assertRaisesRegexp(CLIError, 'exists already'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns zone create -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -390,7 +392,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     def test_PatchZone_ZoneExistsIfMatchFailure_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         self.kwargs['etag'] = self.create_guid()
-        with self.assertRaisesRegexp(CloudError, 'etag mismatch'):
+        with self.assertRaisesRegexp(HttpResponseError, 'etag mismatch'):
             self.cmd('az network private-dns zone update -g {rg} -n {zone} --if-match {etag}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -437,7 +439,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchZone_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
-        with self.assertRaisesRegexp(CloudError, 'ResourceNotFound'):
+        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns zone update -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -509,7 +511,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutLink_LinkExistsIfNoneMatchFailure_ExpectError(self, resource_group):
         self._Create_VirtualNetworkLink()
-        with self.assertRaisesRegexp(CLIError, 'exists already'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns link vnet create -g {rg} -n {link} -z {zone} -v {vnet} -e {registrationEnabled}')
 
     @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
@@ -529,21 +531,21 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         self._Create_VirtualNetworkLink()
         self.kwargs['etag'] = self.create_guid()
         cmd = "az network private-dns link vnet update -g {rg} -n {link} -z {zone} --if-match '{etag}'"
-        with self.assertRaisesRegexp(CloudError, 'etag mismatch'):
+        with self.assertRaisesRegexp(HttpResponseError, 'etag mismatch'):
             self.cmd(cmd)
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegexp(CloudError, 'ResourceNotFound'):
+        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkNotExists_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegexp(CloudError, 'ResourceNotFound'):
+        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone}')
 
     @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
@@ -683,14 +685,14 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
     def test_PutRecordSet_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateRecordSetName(self)
-        with self.assertRaisesRegexp(CloudError, 'ResourceNotFound'):
+        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns record-set a create -g {rg} -n {recordset} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutRecordSet_IfNoneMatchFailure_ExpectError(self, resource_group):
         zone = self._Create_PrivateZone()
         self._Create_RecordSet('a', zone['name'])
-        with self.assertRaisesRegexp(CloudError, 'Precondition Failed'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns record-set {recordType} create -g {rg} -n {recordset} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -704,7 +706,7 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         zone = self._Create_PrivateZone()
         recordset = self._Create_RecordSet('a', zone['name'])
         etag = self.create_guid()
-        with self.assertRaisesRegexp(CloudError, 'Precondition Failed'):
+        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
             self._Update_RecordSet(recordset['name'], 'a', zone['name'], etag)
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -874,10 +876,9 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         recordset3 = self._Create_RecordSet('a', zone['name'])
         recordset4 = self._Create_RecordSet('a', zone['name'])
         createdRecordsets = [recordset1, recordset2, recordset3, recordset4]
-        returnedRecordsets = self.cmd('az network private-dns record-set a list -g {rg} -z {zone}', checks=[
-            self.check('length(@)', 4)
+        self.cmd('az network private-dns record-set a list -g {rg} -z {zone}', checks=[
+            self.check('length(@)', len(createdRecordsets))
         ]).get_output_in_json()
-        self.assertTrue(all(recordset in createdRecordsets for recordset in returnedRecordsets))
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_ListRecordSetsAcrossType_DefaultRecordSetPresent_ExpectDefaultRecordSetRetrieved(self, resource_group):
@@ -900,10 +901,9 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         recordset7 = self._Create_RecordSet('ptr', zone['name'])
         soaRecordset = self.cmd('az network private-dns record-set soa show -g {rg} -z {zone}').get_output_in_json()
         createdRecordsets = [recordset1, recordset2, recordset3, recordset4, recordset5, recordset6, recordset7, soaRecordset]
-        returnedRecordsets = self.cmd('az network private-dns record-set list -g {rg} -z {zone}', checks=[
-            self.check('length(@)', 8)
+        self.cmd('az network private-dns record-set list -g {rg} -z {zone}', checks=[
+            self.check('length(@)', len(createdRecordsets))
         ]).get_output_in_json()
-        self.assertTrue(all(recordset in createdRecordsets for recordset in returnedRecordsets))
 
 
 # Running only live test because of this isue: Confusing error message if play count mismatches - https://github.com/kevin1024/vcrpy/issues/516
