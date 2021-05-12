@@ -322,7 +322,6 @@ def _unzip(src, dest):
     logger.debug('Extracting %s to %s.', src, dest)
     system = platform.system()
     if system in ('Linux', 'Darwin', 'Windows'):
-        import zipfile
         with zipfile.ZipFile(src, 'r') as zipObj:
             zipObj.extractall(dest)
     else:
@@ -2966,26 +2965,28 @@ def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
 def _print_command_result(cli_ctx, commandResult):
     # cli_ctx.data['safe_params'] contains list of parameter name user typed in, without value.
     # cli core also use this calculate ParameterSetName header for all http request from cli.
-    if cli_ctx.data['safe_params'] is None or "-o" in cli_ctx.data['safe_params'] or "--output" in cli_ctx.data['safe_params']:
+    if cli_ctx.data['safe_params'] is None or
+          "-o" in cli_ctx.data['safe_params'] or
+          "--output" in cli_ctx.data['safe_params']:
         # user specified output format, honor their choice, return object to render pipeline
         return commandResult
-    else:
-        # user didn't specified any format, we can customize the print for best experience
-        if commandResult.provisioning_state == "Succeeded":
-            # succeed, print exitcode, and logs
-            print(f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, finished at {commandResult.finished_at}, with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
-            print(commandResult.logs)
-            return
+    
+    # user didn't specified any format, we can customize the print for best experience
+    if commandResult.provisioning_state == "Succeeded":
+        # succeed, print exitcode, and logs
+        print(f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, finished at {commandResult.finished_at}, with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
+        print(commandResult.logs)
+        return
 
-        if commandResult.provisioning_state == "Failed":
-            # failed, print reason in error
-            print(
-                f"{colorama.Fore.RED}command failed with reason: {commandResult.reason}{colorama.Style.RESET_ALL}")
-            return
+    if commandResult.provisioning_state == "Failed":
+        # failed, print reason in error
+        print(
+            f"{colorama.Fore.RED}command failed with reason: {commandResult.reason}{colorama.Style.RESET_ALL}")
+        return
 
-        # *-ing state
-        print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
-        return None
+    # *-ing state
+    print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    return None
 
 
 def _get_command_context(command_files):
