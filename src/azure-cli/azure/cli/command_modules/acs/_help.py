@@ -1069,7 +1069,7 @@ helps['aks command invoke'] = """
           short-summary: Command or shell script you want to run.
         - name: --file -f
           type: string
-          short-summary: files will be used by the command, use '.' to attach the current folder.
+          short-summary: Files to be used by the command, use '.' to attach the current folder.
 """
 
 helps['aks command result'] = """
