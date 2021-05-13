@@ -117,6 +117,20 @@ def _validate_vpn_gateway_generation(namespace):
         raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
 
+def validate_vpn_connection_name_or_id(cmd, namespace):
+    if namespace.vpn_connection_ids:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        for index, vpn_connection_id in enumerate(namespace.vpn_connection_ids):
+            if not is_valid_resource_id(vpn_connection_id):
+                namespace.vpn_connection_ids[index] = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='connections',
+                    name=vpn_connection_id
+                )
+
+
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -1109,6 +1123,12 @@ def process_vnet_create_namespace(cmd, namespace):
         namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
+def _validate_cert(namespace, param_name):
+    attr = getattr(namespace, param_name)
+    if attr and os.path.isfile(attr):
+        setattr(namespace, param_name, read_base_64_file(attr))
+
+
 def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
@@ -1131,12 +1151,17 @@ def process_vnet_gateway_create_namespace(cmd, namespace):
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
 
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        _validate_cert(namespace, 'root_cert_data')
+
 
 def process_vnet_gateway_update_namespace(cmd, namespace):
     ns = namespace
     get_virtual_network_validator()(cmd, ns)
     get_public_ip_validator()(cmd, ns)
     validate_tags(ns)
+    if cmd.supported_api_version(min_api='2020-11-01'):
+        _validate_cert(namespace, 'root_cert_data')
     public_ip_count = len(ns.public_ip_address or [])
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '

@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import base64
 import datetime
 import json
@@ -156,10 +154,12 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     if condition_version and not condition:
         raise CLIError('usage error: When --condition-version is set, --condition must be set as well.')
 
+    object_id, principal_type = _resolve_assignee_object(cmd.cli_ctx, assignee, assignee_object_id,
+                                                         assignee_principal_type)
+
     try:
-        return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
-                                       resolve_assignee=(not assignee_object_id),
-                                       assignee_principal_type=assignee_principal_type, description=description,
+        return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
+                                       assignee_principal_type=principal_type, description=description,
                                        condition=condition, condition_version=condition_version)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
@@ -282,6 +282,9 @@ def update_role_assignment(cmd, role_assignment):
     if (assignment.condition_version and original_assignment.condition_version and
             original_assignment.condition_version.startswith('2.') and assignment.condition_version.startswith('1.')):
         raise CLIError("Condition version cannot be downgraded to '1.X'.")
+
+    if not assignment.principal_type:
+        assignment.principal_type = original_assignment.principal_type
 
     return assignments_client.create(scope, name, parameters=assignment)
 
@@ -590,7 +593,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
 
     result = client.applications.list(filter=(' and '.join(sub_filters)))
     if sub_filters or include_all:
-        return result
+        return list(result)
 
     result = list(itertools.islice(result, 101))
     if len(result) == 101:
@@ -1417,7 +1420,6 @@ def create_service_principal_for_rbac(
         existing_sps = list(graph_client.service_principals.list(filter=query_exp))
         if existing_sps:
             app_display_name = existing_sps[0].display_name
-            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
@@ -1457,10 +1459,14 @@ def create_service_principal_for_rbac(
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
+                err_msg = str(ex)
                 if retry_time < _RETRY_TIMES and (
-                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                        ' does not reference ' in err_msg or
+                        ' does not exist ' in err_msg or
+                        'service principal being created must in the local tenant' in err_msg):
+                    logger.warning("Creating service principal failed with error '%s'. Retrying: %s/%s",
+                                   err_msg, retry_time + 1, _RETRY_TIMES)
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",
@@ -1478,7 +1484,8 @@ def create_service_principal_for_rbac(
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
-                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
+                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
+                                            assignee_principal_type='ServicePrincipal')
                     break
                 except Exception as ex:
                     if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
@@ -1536,7 +1543,7 @@ def _get_keyvault_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
 
     return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
@@ -1777,6 +1784,45 @@ def _encode_custom_key_description(key_description):
     # utf16 is used by AAD portal. Do not change it to other random encoding
     # unless you know what you are doing.
     return key_description.encode('utf-16')
+
+
+def _resolve_assignee_object(cli_ctx, assignee, assignee_object_id, assignee_principal_type):
+    client = _graph_client_factory(cli_ctx)
+    result = None
+
+    # resolve assignee (same as _resolve_object_id)
+    if assignee:
+        if assignee.find('@') >= 0:  # looks like a user principal name
+            result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+        if not result:
+            result = list(client.service_principals.list(
+                filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+        if not result and is_guid(assignee):  # assume an object id, let us verify it
+            result = _get_object_stubs(client, [assignee])
+
+        # 2+ matches should never happen, so we only check 'no match' here
+        if not result:
+            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
+                           "If the assignee is an appId, make sure the corresponding service principal is created "
+                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
+
+        return result[0].object_id, result[0].object_type
+
+    # try to resolve assignee object id
+    try:
+        result = _get_object_stubs(client, [assignee_object_id])
+        if result:
+            return result[0].object_id, result[0].object_type
+    except CloudError:
+        pass
+
+    # If failed to verify assignee object id, DO NOT raise exception
+    # since --assignee-object-id is exposed to bypass Graph API
+    if not assignee_principal_type:
+        logger.warning('Failed to query --assignee-principal-type for %s by invoking Graph API.\n'
+                       'RBAC server might reject creating role assignment without --assignee-principal-type '
+                       'in the future. Better to specify --assignee-principal-type manually.', assignee_object_id)
+    return assignee_object_id, assignee_principal_type
 
 
 def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):

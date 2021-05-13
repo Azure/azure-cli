@@ -4,15 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from __future__ import print_function
-
-__version__ = "2.21.0"
+__version__ = "2.23.0"
 
 import os
 import sys
 import timeit
-
-import six
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -68,7 +64,6 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
-        from azure.cli.core.style import format_styled_text
         from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
@@ -100,11 +95,7 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        if self.enable_color:
-            theme = self.config.get('core', 'theme', fallback='dark')
-        else:
-            theme = 'none'
-        format_styled_text.theme = theme
+        self._configure_style()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -115,12 +106,12 @@ class AzCli(CLI):
         import uuid
         self.data['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
 
-    def get_progress_controller(self, det=False):
+    def get_progress_controller(self, det=False, spinner=None):
         import azure.cli.core.commands.progress as progress
         if not self.progress_controller:
             self.progress_controller = progress.ProgressHook()
 
-        self.progress_controller.init_progress(progress.get_progress_view(det))
+        self.progress_controller.init_progress(progress.get_progress_view(det, spinner=spinner))
         return self.progress_controller
 
     def get_cli_version(self):
@@ -177,14 +168,35 @@ class AzCli(CLI):
 
         # print warning if there are values saved to local context
         if local_context_args:
-            logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
-                           'run `az local-context off` to turn it off.',
+            logger.warning('Parameter persistence is turned on. Its information is saved in working directory %s. '
+                           'You can run `az config param-persist off` to turn it off.',
                            self.local_context.effective_working_directory())
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
-                           'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
+            logger.warning('Your preference of %s now saved as persistent parameter. To learn more, type in `az '
+                           'config param-persist --help`',
+                           ', '.join(args_str) + (' is' if len(args_str) == 1 else ' are'))
+
+    def _configure_style(self):
+        from azure.cli.core.util import in_cloud_console
+        from azure.cli.core.style import format_styled_text, get_theme_dict, Style
+
+        # Configure Style
+        if self.enable_color:
+            theme = self.config.get('core', 'theme',
+                                    fallback="cloud-shell" if in_cloud_console() else "dark")
+
+            theme_dict = get_theme_dict(theme)
+
+            if theme_dict:
+                # If theme is used, also apply it to knack's logger
+                from knack.util import color_map
+                color_map['error'] = theme_dict[Style.ERROR]
+                color_map['warning'] = theme_dict[Style.WARNING]
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -626,9 +638,9 @@ class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
         self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
-        from pkg_resources import parse_version
+        from packaging.version import parse
         should_suppress = ext.name == self.suppress_extension_name and ext.version and \
-            parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
+            parse(ext.version) <= parse(self.suppress_up_to_version)
         if should_suppress:
             reason = self.reason or "Use --debug for more information."
             logger.warning("Extension %s (%s) has been suppressed. %s",
@@ -774,13 +786,15 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
+    # Please use add_cli_command instead of _cli_command.
+    # Currently "keyvault" and "batch" modules are still rely on this function, so it cannot be removed now.
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
         from knack.deprecation import Deprecated
 
         kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
-        if operation and not isinstance(operation, six.string_types):
+        if operation and not isinstance(operation, str):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
         if handler and not callable(handler):
             raise TypeError("Handler must be a callable. Got '{}'".format(operation))
@@ -833,6 +847,31 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                         handler or default_command_handler,
                                                         **kwargs)
 
+    def add_cli_command(self, name, command_operation, **kwargs):
+        """Register a command in command_table with command operation provided"""
+        from knack.deprecation import Deprecated
+        from .commands.command_operation import BaseCommandOperation
+        if not issubclass(type(command_operation), BaseCommandOperation):
+            raise TypeError("CommandOperation must be an instance of subclass of BaseCommandOperation."
+                            " Got instance of '{}'".format(type(command_operation)))
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
+
+        name = ' '.join(name.split())
+
+        if self.supported_api_version(resource_type=kwargs.get('resource_type'),
+                                      min_api=kwargs.get('min_api'),
+                                      max_api=kwargs.get('max_api'),
+                                      operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
+            self.command_table[name] = self.command_cls(loader=self,
+                                                        name=name,
+                                                        handler=command_operation.handler,
+                                                        arguments_loader=command_operation.arguments_loader,
+                                                        description_loader=command_operation.description_loader,
+                                                        command_operation=command_operation,
+                                                        **kwargs)
+
     def get_op_handler(self, operation, operation_group=None):
         """ Import and load the operation handler """
         # Patch the unversioned sdk path to include the appropriate API version for the
@@ -856,7 +895,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 op = getattr(op, part)
             if isinstance(op, types.FunctionType):
                 return op
-            return six.get_method_function(op)
+            return op.__func__
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(operation))
 

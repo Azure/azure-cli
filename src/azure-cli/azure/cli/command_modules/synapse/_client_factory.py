@@ -123,7 +123,7 @@ def cf_synapse_spark_session(cli_ctx, workspace_name, sparkpool_name):
     return synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name).spark_session
 
 
-def cf_synapse_client_accesscontrol_factory(cli_ctx, workspace_name):
+def synapse_accesscontrol_factory(cli_ctx, workspace_name):
     from azure.synapse.accesscontrol import AccessControlClient
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -137,6 +137,14 @@ def cf_synapse_client_accesscontrol_factory(cli_ctx, workspace_name):
         credential=cred,
         endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
     )
+
+
+def cf_synapse_role_assignments(cli_ctx, workspace_name):
+    return synapse_accesscontrol_factory(cli_ctx, workspace_name).role_assignments
+
+
+def cf_synapse_role_definitions(cli_ctx, workspace_name):
+    return synapse_accesscontrol_factory(cli_ctx, workspace_name).role_definitions
 
 
 def cf_graph_client_factory(cli_ctx, **_):
@@ -198,3 +206,7 @@ def cf_synapse_data_flow(cli_ctx, workspace_name):
 
 def cf_synapse_notebook(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).notebook
+
+
+def cf_synapse_spark_pool(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).big_data_pools

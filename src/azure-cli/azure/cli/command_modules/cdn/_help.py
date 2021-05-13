@@ -85,6 +85,16 @@ type: group
 short-summary: View all available CDN edge nodes.
 """
 
+helps['cdn name-exists'] = """
+type: command
+short-summary: Check the availability of a resource name.
+               This is needed for resources where name is globally unique, such as a CDN endpoint.
+examples:
+  - name: Check whether the resource name contoso is available or not.
+    text: >
+        az cdn name-exists --name contoso
+"""
+
 helps['cdn endpoint'] = """
 type: group
 short-summary: Manage CDN endpoints.
@@ -134,6 +144,11 @@ examples:
 helps['cdn endpoint load'] = """
 type: command
 short-summary: Pre-load content for a CDN endpoint.
+parameters:
+  - name: --content-paths
+    type: string
+    short-summary: The path to the content to be loaded. Path should be a relative
+                   file URL of the origin.
 examples:
   - name: Pre-load Javascript and CSS content for an endpoint.
     text: >
@@ -144,11 +159,29 @@ examples:
 helps['cdn endpoint purge'] = """
 type: command
 short-summary: Purge pre-loaded content for a CDN endpoint.
+parameters:
+  - name: --content-paths
+    type: string
+    short-summary: The path to the content to be purged. Can describe a file path or a
+                   wildcard directory.
 examples:
   - name: Purge pre-loaded Javascript and CSS content.
     text: >
         az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths
         '/scripts/app.js' '/styles/*'
+"""
+
+helps['cdn endpoint validate-custom-domain'] = """
+type: command
+short-summary: Validates the custom domain mapping to ensure it maps to the correct CDN endpoint in DNS.
+parameters:
+  - name: --host-name
+    type: string
+    short-summary: The host name of the custom domain. Must be a domain name.
+examples:
+  - name: Validate domain www.contoso.com to see whether it maps to the correct CDN endpoint in DNS.
+    text: >
+        az cdn endpoint validate-custom-domain -g group -n endpoint --profile-name profile-name --host-name www.contoso.com
 """
 
 helps['cdn endpoint start'] = """
@@ -196,6 +229,11 @@ short-summary: Manage delivery rules for an endpoint.
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: >
+        Name of the rule, only required for Microsoft SKU.
 examples:
   - name: Create a global rule to disable caching.
     text: >
@@ -215,6 +253,9 @@ examples:
   - name: Remove the global rule.
     text: >
         az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global
+  - name: Remove the rule with the order 4.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --order 4
 """
 
 helps['cdn endpoint rule show'] = """
@@ -1253,6 +1294,15 @@ examples:
   - name: List all the endpoints within the specified profile.
     text: >
         az afd endpoint list -g group --profile-name profile
+"""
+
+helps['afd endpoint purge'] = """
+type: command
+short-summary: Removes cached contents from Azure Front Door.
+examples:
+  - name: Remove all cached cotents under directory "/script" for domain www.contoso.com
+    text: >
+        az afd endpoint purge -g group --profile-name profile --domains www.contoso.com --content-paths '/scripts/*'
 """
 
 helps['afd route'] = """

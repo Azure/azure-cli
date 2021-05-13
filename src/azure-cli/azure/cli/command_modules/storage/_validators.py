@@ -14,7 +14,8 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
                                                                file_data_service_factory,
-                                                               storage_client_factory)
+                                                               storage_client_factory,
+                                                               cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -176,14 +177,18 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There are no credentials provided in your command and environment, we will query for the '
-                       'account key inside your storage account. \nPlease provide --connection-string, '
-                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
-                       'have required RBAC roles in your command. For more information about RBAC roles '
-                       'in storage, visit '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting the corresponding environment variables can avoid inputting credentials in '
-                       'your command. Please use --help to get more information.')
+        message = """
+There are no credentials provided in your command and environment, we will query for account key for your storage account.
+It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
+"""
+        if 'auth_mode' in cmd.arguments:
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.
+"""
+        logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
+                       'credentials in your command. Please use --help to get more information about environment '
+                       'variable usage.', message)
         try:
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
         except Exception as ex:  # pylint: disable=broad-except
@@ -1576,6 +1581,61 @@ def validate_azcopy_credential(cmd, namespace):
         namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
                                             account_key=namespace.account_key, sas_token=namespace.sas_token,
                                             service=service, resource_types='sco', permissions='rl')
+
+
+def is_directory(props):
+    return 'hdi_isfolder' in props.metadata.keys() and props.metadata['hdi_isfolder'] == 'true'
+
+
+def validate_fs_directory_upload_destination_url(cmd, namespace):
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token,
+              'file_system_name': namespace.destination_fs}
+    client = cf_adls_file_system(cmd.cli_ctx, kwargs)
+    url = client.url
+    if namespace.destination_path:
+        from azure.core.exceptions import AzureError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        file_client = client.get_file_client(file_path=namespace.destination_path)
+        try:
+            props = file_client.get_file_properties()
+            if not is_directory(props):
+                raise InvalidArgumentValueError('usage error: You are specifying --destination-path with a file name, '
+                                                'not directory name. Please change to a valid directory name. '
+                                                'If you want to upload to a file, please use '
+                                                '`az storage fs file upload` command.')
+        except AzureError:
+            pass
+        url = file_client.url
+
+    if _is_valid_uri(url):
+        namespace.destination = url
+    else:
+        namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                 service='blob', resource_types='co', permissions='rwdlac')
+    del namespace.destination_fs
+    del namespace.destination_path
+
+
+def validate_fs_directory_download_source_url(cmd, namespace):
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token,
+              'file_system_name': namespace.source_fs}
+    client = cf_adls_file_system(cmd.cli_ctx, kwargs)
+    url = client.url
+    if namespace.source_path:
+        file_client = client.get_file_client(file_path=namespace.source_path)
+        url = file_client.url
+    namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
+                                        account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                        service='blob', resource_types='co', permissions='rl')
+    del namespace.source_fs
+    del namespace.source_path
 
 
 def validate_text_configuration(cmd, ns):

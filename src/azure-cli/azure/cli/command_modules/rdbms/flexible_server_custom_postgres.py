@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-import datetime as dt
+from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -12,16 +12,15 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG, change_str_to_datetime
-from .flexible_server_virtual_network import create_vnet, prepare_vnet
-from .validators import pg_arguments_validator
-
+    DEFAULT_LOCATION_PG
+from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
+from .validators import pg_arguments_validator, validate_server_name
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -31,6 +30,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 # region create without args
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=raise-missing-from
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
@@ -40,7 +40,8 @@ def flexible_server_create(cmd, client,
                            tags=None, public_access=None, database_name=None,
                            assign_identity=False, subnet_arm_resource_id=None,
                            high_availability=None, zone=None, vnet_resource_id=None,
-                           vnet_address_prefix=None, subnet_address_prefix=None):
+                           vnet_address_prefix=None, subnet_address_prefix=None,
+                           private_dns_zone_arguments=None):
     # validator
     if location is None:
         location = DEFAULT_LOCATION_PG
@@ -52,20 +53,14 @@ def flexible_server_create(cmd, client,
         azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
+    if high_availability is not None and high_availability.lower() == 'enabled':
+        if tier == 'Burstable':
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
+
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                        "and --public_access is invalid. Use either one of them.")
-
-    # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
-    # pylint: disable=too-many-boolean-expressions
-    if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
-        if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
-                ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
-                ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
-                 ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
-            raise CLIError("Incorrect usage : "
-                           "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
 
     server_result = firewall_id = subnet_id = None
 
@@ -73,19 +68,31 @@ def flexible_server_create(cmd, client,
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
     server_name = server_name.lower()
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     # Handle Vnet scenario
-    if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-        subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
-    elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
-        subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                DELEGATION_SERVICE_NAME)
-        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
+    if public_access is None:
+        subnet_id = prepare_private_network(cmd,
+                                            resource_group_name,
+                                            server_name,
+                                            vnet=vnet_resource_id,
+                                            subnet=subnet_arm_resource_id,
+                                            location=location,
+                                            delegation_service_name=DELEGATION_SERVICE_NAME,
+                                            vnet_address_pref=vnet_address_prefix,
+                                            subnet_address_pref=subnet_address_prefix)
+        delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
+        private_dns_zone_id = prepare_private_dns_zone(cmd,
+                                                       'PostgreSQL',
+                                                       resource_group_name,
+                                                       server_name,
+                                                       private_dns_zone=private_dns_zone_arguments,
+                                                       subnet_id=subnet_id,
+                                                       location=location)
+        private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
     else:
         delegated_subnet_arguments = None
+        private_dns_zone_arguments = None
 
     administrator_login_password = generate_password(administrator_login_password)
     if server_result is None:
@@ -96,7 +103,7 @@ def flexible_server_create(cmd, client,
                                        sku_name, tier, storage_mb, administrator_login,
                                        administrator_login_password,
                                        version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
-                                       high_availability, zone)
+                                       high_availability, zone, private_dns_zone_arguments)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -134,6 +141,7 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
+    validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -147,9 +155,6 @@ def flexible_server_restore(cmd, client,
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
-
-    restore_point_in_time = change_str_to_datetime(restore_point_in_time)
-    restore_point_in_time = restore_point_in_time.replace(tzinfo=dt.timezone.utc)
 
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
@@ -165,6 +170,7 @@ def flexible_server_restore(cmd, client,
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
+        parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -187,8 +193,6 @@ def flexible_server_update_custom_func(cmd, instance,
     location = ''.join(instance.location.lower().split())
     sku_info = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
-
-    from importlib import import_module
 
     server_module_path = instance.__module__
     module = import_module(server_module_path)
@@ -304,7 +308,7 @@ def flexible_list_skus(cmd, client, location):
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
-                   assign_identity, delegated_subnet_arguments, ha_enabled, availability_zone):
+                   assign_identity, delegated_subnet_arguments, ha_enabled, availability_zone, private_dns_zone_arguments):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -327,7 +331,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         availability_zone=availability_zone,
         location=location,
         create_mode="Default",  # can also be create
-        tags=tags)
+        tags=tags,
+        private_dns_zone_arguments=private_dns_zone_arguments)
 
     if assign_identity:
         parameters.identity = postgresql_flexibleservers.models.Identity()
@@ -361,7 +366,7 @@ def database_create_func(client, resource_group_name=None, server_name=None, dat
         charset = 'utf8'
         collation = 'en_US.utf8'
         logger.warning("Creating database with utf8 charset and en_US.utf8 collation")
-    elif charset or collation:
+    elif (not charset and collation) or (charset and not collation):
         raise RequiredArgumentMissingError("charset and collation have to be input together.")
 
     parameters = {

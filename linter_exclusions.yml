@@ -259,6 +259,9 @@ aks create:
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
+    enable_encryption_at_host:
+      rule_exclusions:
+      - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
@@ -275,6 +278,9 @@ aks nodepool add:
       rule_exclusions:
       - option_length_too_long
     node_public_ip_prefix_id:
+      rule_exclusions:
+      - option_length_too_long
+    enable_encryption_at_host:
       rule_exclusions:
       - option_length_too_long
 aks update:
@@ -298,6 +304,9 @@ aks update:
       rule_exclusions:
       - option_length_too_long
     load_balancer_outbound_ports:
+      rule_exclusions:
+      - option_length_too_long
+    enable_managed_identity:
       rule_exclusions:
       - option_length_too_long
 aks update-credentials:
@@ -1621,6 +1630,9 @@ eventgrid event-subscription create:
     preferred_batch_size_in_kilobytes:
       rule_exclusions:
       - option_length_too_long
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid event-subscription show:
   parameters:
     include_full_endpoint_url:
@@ -1640,6 +1652,9 @@ eventgrid event-subscription update:
     endpoint_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid partner namespace create:
   parameters:
     partner_registration_id:
@@ -1650,12 +1665,13 @@ eventgrid partner namespace event-channel create:
     activation_expiration_date:
       rule_exclusions:
       - option_length_too_long
-    desination_topic_name:
+    destination_topic_name:
       rule_exclusions:
       - option_length_too_long
     destination_resource_group_name:
       rule_exclusions:
       - option_length_too_long
+      - parameter_should_not_end_in_resource_group
     destination_subscription_id:
       rule_exclusions:
       - option_length_too_long
@@ -1721,6 +1737,9 @@ eventgrid partner topic event-subscription create:
     preferred_batch_size_in_kilobytes:
       rule_exclusions:
       - option_length_too_long
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid partner topic event-subscription show:
   parameters:
     include_full_endpoint_url:
@@ -1731,6 +1750,9 @@ eventgrid partner topic event-subscription update:
     endpoint_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid system-topic event-subscription create:
   parameters:
     azure_active_directory_application_id_or_uri:
@@ -1751,6 +1773,9 @@ eventgrid system-topic event-subscription create:
     preferred_batch_size_in_kilobytes:
       rule_exclusions:
       - option_length_too_long
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid system-topic event-subscription show:
   parameters:
     include_full_endpoint_url:
@@ -1761,6 +1786,9 @@ eventgrid system-topic event-subscription update:
     endpoint_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid topic create:
   parameters:
     input_mapping_default_values:

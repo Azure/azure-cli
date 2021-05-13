@@ -12,7 +12,7 @@ from knack.arguments import CLIArgumentType
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.parameters import \
     (get_resource_name_completion_list, file_type, get_three_state_flag,
-     get_enum_type)
+     get_enum_type, tags_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.command_modules.backup._validators import \
     (datetime_type)
@@ -35,8 +35,8 @@ resource_id_help = """ID of the Azure Resource containing items to be protected 
 policy_help = """JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object."""
 target_server_type_help = """Specify the type of the server which should be discovered."""
 protectable_item_name_type_help = """Specify the resource name to be protected by Azure Backup service."""
-backup_type_help = """'Full, Differential, Log, Copy-only-full' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
-retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). If not specified, 30 days will be taken as default value. For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy."""
+backup_type_help = """'Full, Differential, Log, CopyOnlyFull' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
+retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). For SQL workload, retain-until can only be specified for backup-type 'CopyOnlyFull'. For HANA workload, user can't specify the value for retain-until. If not specified, 30 days will be taken as default value or as decided by service."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
@@ -74,6 +74,9 @@ def load_arguments(self, _):
     with self.argument_context('backup vault') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('location', validator=get_default_location_from_resource_group)
+
+    with self.argument_context('backup vault create') as c:
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
@@ -253,7 +256,9 @@ def load_arguments(self, _):
         c.argument('protectable_item_type', protectable_item_type)
 
     with self.argument_context('backup protectable-item list') as c:
+        c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
         c.argument('protectable_item_type', protectable_item_type)
+        c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
 
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.

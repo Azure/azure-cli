@@ -37,6 +37,7 @@ from azure.cli.command_modules.network._validators import (
     validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
+    validate_vpn_connection_name_or_id,
     process_vnet_name_or_id, validate_trusted_client_cert)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -55,7 +56,7 @@ def load_arguments(self, _):
 
     (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
-     Direction,
+     Direction, VpnAuthenticationType,
      ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRoutePortsEncapsulation,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
@@ -66,7 +67,7 @@ def load_arguments(self, _):
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
-         'Direction',
+         'Direction', 'VpnAuthenticationType',
          'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'ExpressRoutePortsEncapsulation',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
@@ -111,6 +112,7 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
         choices=['1', '2', '3']
     )
+    edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2020-08-01')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -463,6 +465,22 @@ def load_arguments(self, _):
         c.argument('trusted_client_certificates', options_list=['--trusted-client-certificates', '--trusted-client-cert'], nargs='+', help='Array of references to application gateway trusted client certificates.')
         c.argument('client_auth_configuration', options_list=['--client-auth-configuration', '--client-auth-config'], help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
 
+    with self.argument_context('network application-gateway show-backend-health') as c:
+        c.argument('expand', help='Expands BackendAddressPool and BackendHttpSettings referenced in backend health.')
+
+    with self.argument_context('network application-gateway show-backend-health', min_api='2019-04-01', is_preview=True, arg_group="Probe Operation") as c:
+        c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
+        c.argument('host', help='The name of the host to send the probe.')
+        c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
+        c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.',
+                   arg_type=get_three_state_flag())
+        c.argument('match_body', help='Body that must be contained in the health response.')
+        c.argument('match_status_codes', nargs='+',
+                   help='Space-separated list of allowed ranges of healthy status codes for the health response.')
+        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_settings', help='The name or ID of the HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
     # endregion
 
     # region WebApplicationFirewallPolicy
@@ -766,6 +784,10 @@ def load_arguments(self, _):
         c.argument('connection_name', options_list=['--name', '-n'], help='Name of the peering connection.', id_part='child_name_2')
         c.argument('peer_circuit', help='Name or ID of the peer ExpressRoute circuit.', validator=validate_er_peer_circuit)
 
+    with self.argument_context('network express-route peering connection list') as c:
+        c.argument('circuit_name', id_part=None)
+        c.argument('peering_name', id_part=None)
+
     with self.argument_context('network express-route peering peer-connection') as c:
         c.argument('circuit_name', circuit_name_type, id_part=None)
         c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part=None)
@@ -857,6 +879,7 @@ def load_arguments(self, _):
         c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network private-endpoint dns-zone-group') as c:
         c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
@@ -877,6 +900,7 @@ def load_arguments(self, _):
         c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('enable_proxy_protocol', help='Enable proxy protocol for private link service.', arg_type=get_three_state_flag(), min_api='2019-09-01')
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network private-link-service', arg_group='IP Configuration') as c:
         c.argument('private_ip_address', private_ip_address_type)
@@ -941,6 +965,7 @@ def load_arguments(self, _):
         c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network lb create', arg_group='Public IP') as c:
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
@@ -1127,6 +1152,7 @@ def load_arguments(self, _):
     with self.argument_context('network nic create') as c:
         c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
         c.argument('network_interface_name', nic_type, options_list=['--name', '-n'], id_part=None)
+        c.argument('edge_zone', edge_zone)
 
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -1687,6 +1713,7 @@ def load_arguments(self, _):
         c.argument('sku', min_api='2017-08-01', help='Name of a public IP address SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
         c.argument('tier', min_api='2020-07-01', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(PublicIPAddressSkuTier))
         c.ignore('dns_name_type')
+        c.argument('edge_zone', edge_zone)
 
     for item in ['create', 'update']:
         with self.argument_context('network public-ip {}'.format(item)) as c:
@@ -1694,8 +1721,7 @@ def load_arguments(self, _):
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
 
     with self.argument_context('network public-ip update') as c:
-        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName),
-                   deprecate_info=c.deprecate(hide=True),)
+        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
@@ -1708,6 +1734,7 @@ def load_arguments(self, _):
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
 
     with self.argument_context('network public-ip prefix create') as c:
+        c.argument('edge_zone', edge_zone)
         c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
     # endregion
 
@@ -1830,6 +1857,7 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('vnet_name', virtual_network_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
+        c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network vnet create', arg_group='Subnet') as c:
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.',
@@ -1906,6 +1934,16 @@ def load_arguments(self, _):
         c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
         c.argument('client_protocol', min_api='2017-06-01', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', arg_type=get_enum_type(VpnClientProtocol))
         c.argument('custom_routes', min_api='2019-02-01', help='Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.', nargs='+', arg_group='VPN Client')
+        c.argument('vpn_auth_type', min_api='2020-11-01', nargs='+', help='VPN authentication types enabled for the virtual network gateway.', arg_type=get_enum_type(VpnAuthenticationType))
+
+    with self.argument_context('network vnet-gateway', arg_group='AAD Authentication', min_api='2020-11-01') as c:
+        c.argument('aad_tenant', help='The AAD Tenant URI of the VirtualNetworkGateway.')
+        c.argument('aad_audience', help='The AADAudience ID of the VirtualNetworkGateway.')
+        c.argument('aad_issuer', help='The AAD Issuer URI of the VirtualNetworkGateway.')
+
+    with self.argument_context('network vnet-gateway', arg_group='Root Cert Authentication', min_api='2020-11-01') as c:
+        c.argument('root_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter())
+        c.argument('root_cert_name', help='Root certificate name')
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('gateway_type', vnet_gateway_type, default=None)
@@ -1916,6 +1954,7 @@ def load_arguments(self, _):
         vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
         c.argument('virtual_network', options_list='--vnet', help=vnet_help)
         c.argument('vpn_gateway_generation', arg_type=get_enum_type(['Generation1', 'Generation2']), min_api='2019-07-01', help='The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
+        c.ignore('edge_zone')  # wait for service ready
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))
@@ -1935,12 +1974,24 @@ def load_arguments(self, _):
     with self.argument_context('network vnet-gateway revoked-cert create') as c:
         c.argument('thumbprint', help='Certificate thumbprint.')
 
+    with self.argument_context('network vnet-gateway packet-capture start') as c:
+        c.argument('filter_data', options_list=['--filter'], help='Data filter.')
+
+    with self.argument_context('network vnet-gateway packet-capture stop') as c:
+        c.argument('sas_url', options_list=['--sas-url'],
+                   help='The SAS url to be used for packet capture.')
+
     with self.argument_context('network vnet-gateway vpn-client') as c:
         c.argument('processor_architecture', help='Processor architecture of the target system.', arg_type=get_enum_type(ProcessorArchitecture))
         c.argument('authentication_method', help='Method used to authenticate with the generated client.', arg_type=get_enum_type(AuthenticationMethod))
         c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
         c.argument('client_root_certificates', nargs='+', help='Space-separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
         c.argument('use_legacy', min_api='2017-06-01', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
+
+    with self.argument_context('network vnet-gateway disconnect-vpn-connections') as c:
+        c.argument('vpn_connection_ids', options_list=['--vpn-connections'], nargs='+',
+                   help='List of Name or ID of VPN connections.',
+                   validator=validate_vpn_connection_name_or_id)
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -1951,6 +2002,9 @@ def load_arguments(self, _):
         c.argument('routing_weight', type=int, help='Connection routing weight')
         c.argument('use_policy_based_traffic_selectors', min_api='2017-03-01', help='Enable policy-based traffic selectors.', arg_type=get_three_state_flag())
         c.argument('express_route_gateway_bypass', min_api='2018-07-01', arg_type=get_three_state_flag(), help='Bypass ExpressRoute gateway for data forwarding.')
+
+    with self.argument_context('network vpn-connection list') as c:
+        c.argument('virtual_network_gateway_name', options_list=['--vnet-gateway'], help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'))
 
     with self.argument_context('network vpn-connection create') as c:
         c.argument('connection_name', options_list=['--name', '-n'], metavar='NAME', help='Connection name.')
@@ -1966,6 +2020,18 @@ def load_arguments(self, _):
         c.argument('virtual_network_gateway_connection_name', options_list='--connection-name', metavar='NAME', id_part='name')
         c.argument('key_length', type=int, help='The virtual network connection reset shared key length, should between 1 and 128.')
         c.argument('value', help='The virtual network connection shared key value.')
+
+    with self.argument_context('network vpn-connection show-device-config-script') as c:
+        c.argument('vendor', help='The vendor for the VPN device.')
+        c.argument('device_family', help='The device family for the vpn device.')
+        c.argument('firmware_version', help='The firmware version for the vpn device.')
+
+    with self.argument_context('network vpn-connection packet-capture start') as c:
+        c.argument('filter_data', options_list=['--filter'], help='Data filter.')
+
+    with self.argument_context('network vpn-connection packet-capture stop') as c:
+        c.argument('sas_url', options_list=['--sas-url'],
+                   help='The SAS url to be used for packet capture on VPN connection.')
 
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
@@ -2007,21 +2073,25 @@ def load_arguments(self, _):
     with self.argument_context('network routeserver peering list') as c:
         c.argument('virtual_hub_name', id_part=None)
 
-    param_map = {
-        'dh_group': 'DhGroup',
-        'ike_encryption': 'IkeEncryption',
-        'ike_integrity': 'IkeIntegrity',
-        'ipsec_encryption': 'IpsecEncryption',
-        'ipsec_integrity': 'IpsecIntegrity',
-        'pfs_group': 'PfsGroup'
-    }
-    for scope in ['vpn-connection', 'vnet-gateway']:
-        with self.argument_context('network {} ipsec-policy'.format(scope)) as c:
-            for dest, model_name in param_map.items():
-                model = self.get_models(model_name)
-                c.argument(dest, arg_type=get_enum_type(model))
-            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
-            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+    for scope in ['vpn-connection', 'vnet-gateway', 'vnet-gateway vpn-client']:
+        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='Security Association') as c:
+            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int, help='The payload size in KB for P2S client.')
+            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int, help='The lifetime in seconds for P2S client.')
+        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 1') as c:
+            c.argument('dh_group', arg_type=get_enum_type(self.get_models('DhGroup')),
+                       help='The DH Groups used for initial SA.')
+            c.argument('ipsec_encryption', arg_type=get_enum_type(self.get_models('IpsecEncryption')),
+                       help='The IPSec encryption algorithm.')
+            c.argument('ipsec_integrity', arg_type=get_enum_type(self.get_models('IpsecIntegrity')),
+                       help='The IPSec integrity algorithm.')
+        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 2') as c:
+            c.argument('pfs_group', arg_type=get_enum_type(self.get_models('PfsGroup')),
+                       help='The Pfs Groups used for new child SA.')
+            c.argument('ike_encryption', arg_type=get_enum_type(self.get_models('IkeEncryption')),
+                       help='The IKE encryption algorithm.')
+            c.argument('ike_integrity', arg_type=get_enum_type(self.get_models('IkeIntegrity')),
+                       help='The IKE integrity algorithm.')
+
     # endregion
 
     # region Remove --ids from listsaz

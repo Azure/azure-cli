@@ -1841,6 +1841,44 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
     @RoleBasedServicePrincipalPreparer()
+    def test_managed_aad_enable_azure_rbac(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.enableAzureRbac', False),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-rbac -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.enableAzureRbac', True)
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--disable-azure-rbac -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.enableAzureRbac', False)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_create_aadv1_and_update_with_managed_aad(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -4104,3 +4142,172 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         identity_name = self.create_random_name('cli', 16)
         identity = self.cmd('az identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_fqdn_subdomain(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        identity_name = self.create_random_name('cliakstest', 16)
+        subdomain_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'identity_name': identity_name,
+            'subdomain_name': subdomain_name,
+        })
+
+        # create private dns zone
+        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.westus2.azmk8s.io"'
+        zone = self.cmd(create_private_dns_zone, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+        zone_id = zone["id"]
+        assert zone_id is not None
+        self.kwargs.update({
+            'zone_id': zone_id,
+        })
+
+        # create identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name}'
+        identity = self.cmd(create_identity, checks=[
+            self.check('name', identity_name)
+        ]).get_output_in_json()
+        identity_id = identity["principalId"]
+        identity_resource_id = identity["id"]
+        assert identity_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_resource_id': identity_resource_id,
+        })
+
+        # assign
+        import mock
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            assignment = self.cmd('role assignment create --assignee-object-id={identity_id} --role "Private DNS Zone Contributor" --scope={zone_id} --assignee-principal-type ServicePrincipal').get_output_in_json()
+        assert assignment["roleDefinitionId"] is not None
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--node-count=1 --generate-ssh-keys --fqdn-subdomain={subdomain_name} ' \
+                     '--load-balancer-sku=standard --enable-private-cluster --private-dns-zone={zone_id} --enable-managed-identity --assign-identity {identity_resource_id}'
+        self.cmd(create_cmd, checks=[
+            self.exists('privateFqdn'),
+            self.exists('fqdnSubdomain'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('apiServerAccessProfile.privateDnsZone', zone_id),
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_update_with_windows_password(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'location': resource_group_location,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': self.create_random_name('p@0A', 14),
+            'nodepool2_name': 'npwin',
+            'new_windows_admin_password': self.create_random_name('n!C3', 14),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --generate-ssh-keys ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('windowsProfile.adminUsername', 'azureuser1')
+        ])
+
+        # nodepool add
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --os-type Windows --node-count=1', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # update Windows password
+        self.cmd('aks update --resource-group={resource_group} --name={name} --windows-admin-password {new_windows_admin_password}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # #nodepool delete
+        self.cmd(
+            'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait', checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @RoleBasedServicePrincipalPreparer()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    def test_aks_update_to_msi_cluster(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} '
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to MSI cluster
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-managed-identity --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', 'SystemAssigned')
+        ])
+        
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @RoleBasedServicePrincipalPreparer()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    def test_aks_update_to_msi_cluster_with_addons(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --generate-ssh-keys --enable-addons monitoring ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} '
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to MSI cluster
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-managed-identity --yes', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', 'SystemAssigned')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

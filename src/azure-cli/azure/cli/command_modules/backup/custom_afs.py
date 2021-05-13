@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom_help as helper
 # pylint: disable=import-error
 # pylint: disable=unused-argument
@@ -17,7 +17,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
-    resources_cf
+    resources_cf, backup_protected_items_cf
 from azure.cli.core.azclierror import InvalidArgumentValueError
 
 fabric_name = "Azure"
@@ -65,11 +65,21 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
                                                        storage_account.name, param, raw=True)
         helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
+    protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
+                                                     storage_account)
+
+    if protectable_item is None:
+        items_client = backup_protected_items_cf(cmd.cli_ctx)
+        item = common.show_item(cmd, items_client, resource_group_name, vault_name, storage_account_name,
+                                afs_name, "AzureStorage")
+        if item is None:
+            raise CLIError(
+                "Could not find a fileshare with name " + afs_name +
+                " to protect or a protected fileshare of name " + afs_name)
+        return item
     policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     helper.validate_policy(policy)
 
-    protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
-                                                     storage_account)
     helper.validate_azurefileshare_item(protectable_item)
 
     container_uri = helper.get_protection_container_uri_from_id(protectable_item.id)
@@ -86,8 +96,10 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
+
     if retain_until is None:
-        retain_until = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
     trigger_backup_request = _get_backup_request(retain_until)

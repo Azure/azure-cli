@@ -1343,25 +1343,19 @@ def _deploy_arm_template_core(cmd,
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
     client = resource_client_factory(cmd.cli_ctx)
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate_only:
-            deploy_poll = sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
-                                      deployment)
-        else:
-            deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
-                                      deployment_name, deployment)
-        return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate_only:
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
-                           properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_validate, resource_group_name, deployment_name,
+                                      deployment)
+            return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
-    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name, deployment_name,
-                              properties)
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, deployment)
+
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_create_or_update, resource_group_name, deployment_name,
+                              deployment)
     return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
 
@@ -1671,7 +1665,7 @@ def _get_keyVault_not_arm_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
     return client

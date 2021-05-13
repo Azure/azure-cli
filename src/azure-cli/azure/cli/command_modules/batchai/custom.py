@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
-from __future__ import print_function
-
 import collections
 import copy
 import datetime
@@ -145,8 +143,7 @@ def _ensure_subnet_is_valid(client, subnet, nfs_resource_group, nfs_workspace, n
 
 
 def _get_storage_management_client(cli_ctx):
-    from azure.mgmt.storage import StorageManagementClient
-    return get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
 def _get_storage_account_key(cli_ctx, account_name, account_key):

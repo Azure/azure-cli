@@ -117,10 +117,11 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
                                          ignore_network_security_group=True, ignore_route_table=True,
                                          location='westeurope')
 
-        # Assert create_or_update is called with correct rg and deployment name
-        resource_client_mock.deployments.create_or_update.assert_called_once()
-        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
-        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
+        # Assert begin_create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.begin_create_or_update.assert_called_once()
+        call_args = resource_client_mock.deployments.begin_create_or_update.call_args
+        self.assertEqual(call_args[0][0], rg_name)
+        self.assertEqual(call_args[0][1], deployment_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
@@ -151,8 +152,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         assert_host_env.worker_pools = []
         assert_host_env.internal_load_balancing_mode = None
         assert_host_env.front_end_scale_factor = 10
-        ase_client.create_or_update.assert_called_once_with(resource_group_name=rg_name, name=ase_name,
-                                                            hosting_environment_envelope=assert_host_env)
+        ase_client.begin_create_or_update.assert_called_once_with(resource_group_name=rg_name, name=ase_name,
+                                                                  hosting_environment_envelope=assert_host_env)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
@@ -178,7 +179,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         assert_host_env = HostingEnvironmentProfile(id='id1')
         assert_host_env.name = ase_name
         assert_host_env.resource_group = rg_name
-        ase_client.delete.assert_called_once_with(name=ase_name, resource_group_name=rg_name)
+        ase_client.begin_delete.assert_called_once_with(name=ase_name, resource_group_name=rg_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
@@ -211,10 +212,11 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
                                          subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
                                          location='westeurope')
 
-        # Assert create_or_update is called with correct rg and deployment name
-        resource_client_mock.deployments.create_or_update.assert_called_once()
-        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
-        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
+        # Assert begin_create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.begin_create_or_update.assert_called_once()
+        call_args = resource_client_mock.deployments.begin_create_or_update.call_args
+        self.assertEqual(call_args[0][0], rg_name)
+        self.assertEqual(call_args[0][1], deployment_name)
 
 
 if __name__ == '__main__':

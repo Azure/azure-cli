@@ -6,7 +6,7 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
-# CLIENT FACTORIES
+# pylint: disable=import-outside-toplevel
 
 RM_URI_OVERRIDE = 'AZURE_CLI_RDBMS_RM_URI'
 SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
@@ -355,9 +355,24 @@ def cf_postgres_flexible_db(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).databases
 
 
-def resource_client_factory(cli_ctx, **_):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
 
 
-def network_client_factory(cli_ctx):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+def resource_client_factory(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
+
+
+def network_client_factory(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, subscription_id=subscription_id)
+
+
+def private_dns_client_factory(cli_ctx, subscription_id=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient, subscription_id=subscription_id).private_zones
+
+
+def private_dns_link_client_factory(cli_ctx, subscription_id=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient,
+                                   subscription_id=subscription_id).virtual_network_links

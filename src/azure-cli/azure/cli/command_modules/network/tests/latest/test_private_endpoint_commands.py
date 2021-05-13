@@ -845,15 +845,6 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
-    @AllowLargeResponse()
-    def setUp(self):
-        super(NetworkPrivateLinkEventGridScenarioTest, self).setUp()
-        self.cmd('extension add -n eventgrid')
-
-    def tearDown(self):
-        # self.cmd('extension remove -n eventgrid')
-        super(NetworkPrivateLinkEventGridScenarioTest, self).tearDown()
-
     @ResourceGroupPreparer(name_prefix='cli_test_event_grid_plr')
     def test_private_link_resource_event_grid(self, resource_group):
         self.kwargs.update({
@@ -1632,6 +1623,261 @@ class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
 
         # Test delete
         self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
+
+
+class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(
+        name_prefix="test_search_service_private_endpoint_", location="eastus"
+    )
+    def test_private_endpoint_connection_search(
+        self, resource_group, resource_group_location
+    ):
+        from azure.mgmt.core.tools import resource_id
+
+        resource_name = self.create_random_name("cli-test-azs-", 24)
+        templateFile = os.path.join(
+            TEST_DIR,
+            "private_endpoint_arm_templates",
+            "search_resource_template.json",
+        )
+        namespace = "Microsoft.Search"
+        instance_type = "searchServices"
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=instance_type,
+            name=resource_name,
+        )
+        self.kwargs.update(
+            {
+                "deployment_name": self.create_random_name("cli-test-azs-plr-", 24),
+                "azs_rg": resource_group,
+                "azs_name": resource_name,
+                "azs_loc": resource_group_location,
+                "azs_template": templateFile,
+                "vnet": self.create_random_name("cli-vnet-", 24),
+                "subnet": self.create_random_name("cli-subnet-", 24),
+                "pe": self.create_random_name("cli-pe-", 24),
+                "pe_connection": self.create_random_name("cli-pec-", 24),
+                "target_resource_id": target_resource_id,
+                "azs_type": "{}/{}".format(namespace, instance_type),
+            }
+        )
+
+        # Create search resource
+        self.cmd(
+            'az deployment group create --name {deployment_name} -g {azs_rg} --template-file "{azs_template}" --parameters name={azs_name} --parameters location={azs_loc}'
+        )
+
+        # List private link resources
+        target_private_link_resource = self.cmd(
+            "az network private-link-resource list --name {azs_name} --resource-group {azs_rg} --type {azs_type}",
+            checks=self.check("@[0].properties.groupId", "searchService"),
+        ).get_output_in_json()
+        self.kwargs.update(
+            {"group_id": target_private_link_resource[0]["properties"]["groupId"]}
+        )
+
+        # Create VNET
+        self.cmd(
+            "az network vnet create -n {vnet} -g {azs_rg} --subnet-name {subnet}",
+            checks=self.check("length(newVNet.subnets)", 1),
+        )
+        self.cmd(
+            "az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {azs_rg} "
+            "--disable-private-endpoint-network-policies true",
+            checks=self.check("privateEndpointNetworkPolicies", "Disabled"),
+        )
+
+        # Create a private endpoint connection (force manual approval)
+        pe = self.cmd(
+            "az network private-endpoint create -g {azs_rg} -n {pe} --vnet-name {vnet} --subnet {subnet} "
+            "--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} "
+            "--group-id {group_id} --manual-request"
+        ).get_output_in_json()
+        self.kwargs["pe_id"] = pe["id"]
+        self.kwargs["pe_name"] = self.kwargs["pe_id"].split("/")[-1]
+
+        # Show the connection on search instance
+        list_private_endpoint_conn = self.cmd(
+            "az network private-endpoint-connection list --name {azs_name} --resource-group {azs_rg} --type {azs_type}"
+        ).get_output_in_json()
+        self.kwargs.update({"pec_id": list_private_endpoint_conn[0]["id"]})
+
+        self.kwargs.update({"pec_name": self.kwargs["pec_id"].split("/")[-1]})
+        self.cmd(
+            "az network private-endpoint-connection show --id {pec_id}",
+            checks=self.check("id", "{pec_id}"),
+        )
+        self.cmd(
+            "az network private-endpoint-connection show --resource-name {azs_name} --name {pec_name} --resource-group {azs_rg} --type {azs_type}",
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        )
+
+        # Test approval states
+        # Approved
+        self.kwargs.update(
+            {"approval_desc": "Approved.", "rejection_desc": "Rejected."}
+        )
+        self.cmd(
+            "az network private-endpoint-connection approve --resource-name {azs_name} --resource-group {azs_rg} --name {pec_name} --type {azs_type} "
+            '--description "{approval_desc}"',
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Approved"
+                )
+            ],
+        )
+
+        # Rejected
+        self.cmd(
+            "az network private-endpoint-connection reject --id {pec_id} "
+            '--description "{rejection_desc}"',
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Rejected"
+                )
+            ],
+        )
+
+        # Approval will fail after rejection
+        with self.assertRaises(CLIError):
+            self.cmd(
+                "az network private-endpoint-connection approve --resource-name {azs_name} --resource-group {azs_rg} --name {pec_name} --type {azs_type} "
+                '--description "{approval_desc}"'
+            )
+
+        self.cmd(
+            "az network private-endpoint-connection list --name {azs_name} --resource-group {azs_rg} --type {azs_type}",
+            checks=[self.check("length(@)", 1)],
+        )
+
+        # Test delete
+        self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
+
+
+def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
+    self.kwargs.update({
+        'resource': self.create_random_name('cli-test-resource-', 24),
+        'vnet': self.create_random_name('cli-vnet-', 24),
+        'subnet': self.create_random_name('cli-subnet-', 24),
+        'pe': self.create_random_name('cli-pe-', 24),
+        'pe_connection': self.create_random_name('cli-pec-', 24),
+    })
+
+    # create resource
+    self.kwargs['extra_create'] = self.kwargs.get('extra_create', '')
+    self.kwargs['show_name'] = self.kwargs.get('show_name', '-n')
+    self.kwargs['create_name'] = self.kwargs.get('create_name', '-n')
+    self.cmd('{cmd} create -g {rg} {create_name} {resource} {extra_create}')
+    result = self.cmd('{cmd} show -g {rg} {show_name} {resource}').get_output_in_json()
+    self.kwargs['id'] = result['id']
+
+    # test private-link-resource
+    result = self.cmd('network private-link-resource list --name {resource} -g {rg} --type {type}',
+                      checks=self.check('length(@)', '{list_num}')).get_output_in_json()
+    self.kwargs['group_id'] = result[0]['properties']['groupId'] if group_id else result[0]['groupId']
+
+    # create private-endpoint
+    self.cmd('network vnet create -n {vnet} -g {rg} --subnet-name {subnet}')
+    self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+             '--disable-private-endpoint-network-policies true')
+
+    self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+             '--connection-name {pe_connection}  --private-connection-resource-id {id} --group-id {group_id}',
+             checks=self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Approved'))
+
+    # test private-endpoint-connection
+    result = self.cmd('network private-endpoint-connection list --name {resource} -g {rg} --type {type}',
+                      checks=self.check('length(@)', 1)).get_output_in_json()
+    self.kwargs['name'] = result[0]['name'] if list_name else result[0]['id'].split('/')[-1]
+    # For some services: A state change from Approved to Approved is not valid
+    if approve:
+        self.cmd('network private-endpoint-connection approve --name {name} -g {rg} '
+                 '--resource-name {resource} --type {type}')
+
+    self.cmd('network private-endpoint-connection show --name {name} -g {rg} --resource-name {resource} --type {type}',
+             checks=self.check('properties.privateLinkServiceConnectionState.status', 'Approved'))
+
+    self.cmd('network private-endpoint-connection reject --name {name} -g {rg} '
+             '--resource-name {resource} --type {type}',
+             checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
+
+    self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
+             '--resource-name {resource} --type {type} -y')
+
+
+# Rely on other modules. The test may be broken when other modules bump sdk. At that time, run the failed test in live.
+class NetworkPrivateLinkScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_automation", location="eastus2")
+    def test_private_endpoint_connection_automation(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'automation account',
+            'list_num': 2,
+            'type': 'Microsoft.Automation/automationAccounts',
+        })
+        self.cmd('extension add -n automation')
+
+        _test_private_endpoint(self)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_eventhub", location="westus")
+    def test_private_endpoint_connection_eventhub(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'eventhubs namespace',
+            'list_num': 1,
+            'type': 'Microsoft.EventHub/namespaces',
+        })
+
+        _test_private_endpoint(self, approve=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_disk_access", location="westus")
+    def test_private_endpoint_connection_disk_access(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'disk-access',
+            'list_num': 1,
+            'type': 'Microsoft.Compute/diskAccesses',
+        })
+
+        _test_private_endpoint(self)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_health_care_apis", location="eastus")
+    @AllowLargeResponse()
+    def test_private_endpoint_connection_health_care_apis(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'healthcareapis service',
+            'list_num': 1,
+            'type': 'Microsoft.HealthcareApis/services',
+            'extra_create': '-l eastus --kind fhir --identity-type SystemAssigned ',
+            'show_name': '--resource-name',
+            'create_name': '--resource-name'
+        })
+        self.cmd('extension add -n healthcareapis')
+
+        _test_private_endpoint(self, list_name=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
+    def test_private_endpoint_connection_synapse_workspace(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'synapse workspace',
+            'list_num': 3,
+            'type': 'Microsoft.Synapse/workspaces',
+            'extra_create': '--storage-account saxyz --file-system file-000 -p 123-xyz-456 -u synapse1230',
+        })
+
+        self.cmd('storage account create -n saxyz -g {rg}')
+
+        _test_private_endpoint(self, group_id=False)
 
 
 if __name__ == '__main__':

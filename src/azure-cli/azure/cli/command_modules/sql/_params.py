@@ -260,9 +260,9 @@ read_scale_param_type = CLIArgumentType(
     arg_type=get_enum_type(['Enabled', 'Disabled']))
 
 read_replicas_param_type = CLIArgumentType(
-    options_list=['--read-replicas'],
+    options_list=['--read-replicas', '--ha-replicas'],
     type=int,
-    help='The number of readonly replicas to provision for the database. '
+    help='The number of high availability replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
 blob_storage_target_state_param_type = CLIArgumentType(
@@ -1325,7 +1325,7 @@ def load_arguments(self, _):
 
         c.argument('assign_identity',
                    options_list=['--assign_identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('minimal_tls_version',
@@ -1360,7 +1360,7 @@ def load_arguments(self, _):
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server update') as c:
