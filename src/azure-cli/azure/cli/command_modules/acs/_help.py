@@ -1074,7 +1074,7 @@ helps['aks command invoke'] = """
 
 helps['aks command result'] = """
     type: command
-    short-summary: fetch result from previously triggered 'aks command invoke'.
+    short-summary: Fetch result from previously triggered 'aks command invoke'.
     parameters:
         - name: --command-id -i
           type: string
