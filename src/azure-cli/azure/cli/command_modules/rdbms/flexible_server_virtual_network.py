@@ -11,11 +11,12 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
+from azure.mgmt.privatedns.models import VirtualNetworkLink
+from azure.mgmt.privatedns.models import PrivateZone
+from azure.mgmt.privatedns.models import SubResource
+from azure.mgmt.privatedns.models import VirtualNetworkLink
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import get_id_components, check_existence
-from azure.mgmt.privatedns.models import SubResource
-from azure.mgmt.privatedns.models import PrivateZone
-from azure.mgmt.privatedns.models import VirtualNetworkLink
 
 logger = get_logger(__name__)
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'

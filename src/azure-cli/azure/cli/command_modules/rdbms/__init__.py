@@ -4,6 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core import ModExtensionSuppress
+from azure.cli.core.commands import CliCommandType
+from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
+from azure.cli.command_modules.rdbms.commands import load_command_table
+from azure.cli.command_modules.rdbms.flexible_server_commands import load_flexibleserver_command_table
+from azure.cli.command_modules.rdbms._params import load_arguments
 import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
@@ -13,10 +20,6 @@ import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core import ModExtensionSuppress
-        from azure.cli.core.commands import CliCommandType
-        from azure.cli.core.profiles import ResourceType
-        from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
 
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
         super().__init__(
@@ -32,14 +35,12 @@ class RdbmsCommandsLoader(AzCommandsLoader):
                 recommend_remove=True))
 
     def load_command_table(self, args):
-        from azure.cli.command_modules.rdbms.commands import load_command_table
-        from azure.cli.command_modules.rdbms.flexible_server_commands import load_flexibleserver_command_table
+
         load_command_table(self, args)
         load_flexibleserver_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from azure.cli.command_modules.rdbms._params import load_arguments
         load_arguments(self, command)
 
 

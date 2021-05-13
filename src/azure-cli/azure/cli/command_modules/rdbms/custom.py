@@ -3,12 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument, line-too-long, import-outside-toplevel
-
+# pylint: disable=unused-argument, line-too-long
+from datetime import datetime, timedelta
+from importlib import import_module
+import re
+from dateutil.tz import tzutc   # pylint: disable=import-error
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from knack.util import todict
+from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
 from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
@@ -355,7 +361,6 @@ def _replica_stop(client, resource_group_name, server_name):
     if server_object.replication_role.lower() != "replica":
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
-    from importlib import import_module
     server_module_path = server_object.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
@@ -376,7 +381,6 @@ def _server_update_custom_func(instance,
                                assign_identity=False,
                                public_network_access=None,
                                minimal_tls_version=None):
-    from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
@@ -561,7 +565,6 @@ def _download_log_files(
         resource_group_name,
         server_name,
         file_name):
-    from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
 
     # list all files
     files = client.list_by_server(resource_group_name, server_name)
@@ -573,9 +576,6 @@ def _download_log_files(
 
 def _list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
                                 file_last_written=None, max_file_size=None):
-    import re
-    from datetime import datetime, timedelta
-    from dateutil.tz import tzutc   # pylint: disable=import-error
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)
@@ -688,7 +688,6 @@ def _get_server_key_name_from_uri(uri):
     The SQL server key API requires that the server key has a specific name
     based on the vault, key and key version.
     '''
-    import re
 
     match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
 
@@ -723,8 +722,6 @@ def _get_tenant_id():
     '''
     Gets tenantId from current subscription.
     '''
-    from azure.cli.core._profile import Profile
-
     profile = Profile()
     sub = profile.get_subscription()
     return sub['tenantId']
@@ -761,7 +758,6 @@ def create_database(cmd, resource_group_name, server_name, database_name, engine
 
 
 def form_response(server_result, password, host, connection_string, database_name=None, firewall_id=None):
-    from knack.util import todict
     result = todict(server_result)
     result['connectionString'] = connection_string
     result['password'] = password

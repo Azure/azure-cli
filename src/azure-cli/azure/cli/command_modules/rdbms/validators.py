@@ -5,16 +5,18 @@
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.azclierror import ValidationError
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
+from azure.cli.core.profiles import ResourceType
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_postgres_versions,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers)
 
-
+# pylint: disable=raise-missing-from
 logger = get_logger(__name__)
 
 
@@ -26,8 +28,6 @@ def _get_resource_group_from_server_name(cli_ctx, server_name):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.cli.core.profiles import ResourceType
-    from msrestazure.tools import parse_resource_id
 
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RDBMS).servers
     for server in client.list():
@@ -83,8 +83,6 @@ def retention_validator(ns):
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.virtual_network_subnet_id
     subnet_is_id = is_valid_resource_id(subnet)

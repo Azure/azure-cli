@@ -3,12 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
-
+# pylint: disable=unused-argument, line-too-long
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt_y_n, NoTTYException
 
 logger = get_logger(__name__)
+# pylint: disable=raise-missing-from
 
 
 # Common functions used by other providers
@@ -39,7 +41,6 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
 
     if firewall_rule_name is None:
-        from datetime import datetime
         now = datetime.now()
         firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
                                                                           now.second)
@@ -129,7 +130,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
 def user_confirmation(message, yes=False):
     if yes:
         return True
-    from knack.prompting import prompt_y_n, NoTTYException
+
     try:
         if not prompt_y_n(message):
             raise CLIError('Operation cancelled.')
