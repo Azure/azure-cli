@@ -11,8 +11,16 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
+from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
+
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
 
     def _get_test_data_file(self, filename):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)

@@ -442,7 +442,7 @@ def _split_key_value_pair(expression):
                 # keys done the rest is value
                 value = chars
                 break
-            elif c == '[':
+            if c == '[':
                 brackets = True
                 key += c
             elif c == ']' and brackets:
@@ -728,13 +728,12 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                 if 'role assignment already exists' in ex.message:
                     logger.info('Role assignment already exists')
                     break
-                elif retry_time < retry_times and ' does not exist in the directory ' in ex.message:
+                if retry_time < retry_times and ' does not exist in the directory ' in ex.message:
                     time.sleep(5)
                     logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                    retry_times)
                     continue
-                else:
-                    raise
+                raise
     return resource
 
 
