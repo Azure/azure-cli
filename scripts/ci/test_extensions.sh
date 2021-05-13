@@ -20,13 +20,13 @@ exit_code=0
 
 # azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
 # azure-iot: https://github.com/Azure/azure-cli/pull/17456
-block_list='azure-cli-ml azure-iot'
+ignore_list='azure-cli-ml azure-iot fzf'
 
 for ext in $output; do
     echo
-    # Use regex to detect if $ext is in $block_list
-    if [[ $block_list =~ $ext ]]; then
-        echo "Skip extension: $ext"
+    # Use regex to detect if $ext is in $ignore_list
+    if [[ $ignore_list =~ $ext ]]; then
+        echo "Ignore extension: $ext"
         continue
     fi
 
