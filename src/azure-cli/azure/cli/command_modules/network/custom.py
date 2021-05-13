@@ -4048,6 +4048,37 @@ def set_lb_rule(
         instance.probe = get_property(parent.probes, probe_name)
 
     return parent
+
+
+def add_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                 backend_address_pool_name, port=None, protocol=None, identifier=None, traffic_type=None):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
+    tunnel_interface = GatewayLoadBalancerTunnelInterface(port=port, identifier=identifier, protocol=protocol,type=traffic_type)
+    if not address_pool.tunnel_interfaces:
+        address_pool.tunnel_interfaces = []
+    address_pool.tunnel_interfaces.append(tunnel_interface)
+    return client.begin_create_or_update(resource_group_name, load_balancer_name,
+                                         backend_address_pool_name, address_pool)
+
+
+def remove_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                    backend_address_pool_name, index):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    if index >= len(address_pool.tunnel_interfaces):
+        raise UnrecognizedArgumentError(f'{index} is out of scope, please input proper index')
+    address_pool.tunnel_interfaces.pop(index)
+    return client.begin_create_or_update(resource_group_name, load_balancer_name,
+                                         backend_address_pool_name, address_pool)
+
+
+def list_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                  backend_address_pool_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    return address_pool.tunnel_interfaces
 # endregion
 
 

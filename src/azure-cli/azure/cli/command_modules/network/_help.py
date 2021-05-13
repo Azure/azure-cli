@@ -3184,6 +3184,35 @@ examples:
     text: az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
 """
 
+helps['network lb address-pool tunnel-interface'] = """
+type: group
+short-summary: Manage tunnel interfaces of a load balancer.
+"""
+
+helps['network lb address-pool tunnel-interface add'] = """
+type: command
+short-summary: Add one tunnel interface into the load balance tunnel interface pool.
+examples:
+  - name: Add one tunnel interface into the load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface add -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool 
+"""
+
+helps['network lb address-pool tunnel-interface remove'] = """
+type: command
+short-summary: Remove one tunnel interface from the load balance tunnel interface pool.
+examples:
+  - name: Remove one tunnel interface from the load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface remove -g MyResourceGroup --lb-name MyLb
+"""
+
+helps['network lb address-pool tunnel-interface list'] = """
+type: command
+short-summary: List all tunnel interfacees of the load balance tunnel interface pool.
+examples:
+  - name: List all tunnel interfacees of the load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface list -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool
+"""
+
 helps['network cross-region-lb frontend-ip'] = """
 type: group
 short-summary: Manage frontend IP addresses of a cross-region load balancer.
