@@ -13,10 +13,7 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2019-06-01-preview
   response:
@@ -32,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:37 GMT
+      - Thu, 29 Apr 2021 08:58:58 GMT
       expires:
       - '-1'
       pragma:
@@ -60,10 +57,7 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002?api-version=2019-06-01-preview
   response:
@@ -79,7 +73,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:38 GMT
+      - Thu, 29 Apr 2021 08:58:59 GMT
       expires:
       - '-1'
       pragma:
@@ -107,34 +101,31 @@ interactions:
       Content-Length:
       - '34'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002?api-version=2019-06-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
-        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-04-28T03:06:39.8321263Z\",\r\n    \"lastModifiedBy\":
-        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-04-28T03:06:39.8321263Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-29T08:59:03.2087126Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-29T08:59:03.2087126Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-deploy-what-if-sub-deploy000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '734'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:40 GMT
+      - Thu, 29 Apr 2021 08:59:04 GMT
       expires:
       - '-1'
       pragma:
@@ -151,16 +142,15 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"location": "westus", "properties": {"artifacts": [], "template": {"$schema":
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    body: '{"location": "westus", "tags": {}, "properties": {"artifacts": [], "template":
+      {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"denyLocation": {"type": "string",
       "defaultValue": "northeurope"}}, "variables": {"policyDefinitionName": "policy-for-what-if-test"},
       "resources": [{"name": "[variables(''policyDefinitionName'')]", "type": "Microsoft.Authorization/policyDefinitions",
       "apiVersion": "2018-05-01", "properties": {"policyType": "Custom", "policyRule":
       {"if": {"field": "location", "equals": "[parameters(''denyLocation'')]"}, "then":
       {"effect": "deny"}}}}], "outputs": {"policyDefinitionId": {"type": "string",
-      "value": "[resourceId(''Microsoft.Authorization/policyDefinitions'', variables(''policyDefinitionName''))]"}}}},
-      "tags": {}}'
+      "value": "[resourceId(''Microsoft.Authorization/policyDefinitions'', variables(''policyDefinitionName''))]"}}}}}'
     headers:
       Accept:
       - application/json
@@ -173,23 +163,20 @@ interactions:
       Content-Length:
       - '813'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
-        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-04-28T03:06:41.2121361Z\",\r\n    \"lastModifiedBy\":
-        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-04-28T03:06:41.2121361Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-29T08:59:07.7296418Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-29T08:59:07.7296418Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"denyLocation\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"northeurope\"\r\n
@@ -212,11 +199,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1864'
+      - '1862'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:41 GMT
+      - Thu, 29 Apr 2021 08:59:08 GMT
       expires:
       - '-1'
       pragma:
@@ -246,19 +233,16 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2021-03-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
-        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-04-28T03:06:41.2121361Z\",\r\n    \"lastModifiedBy\":
-        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-04-28T03:06:41.2121361Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-29T08:59:07.7296418Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-29T08:59:07.7296418Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"denyLocation\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"northeurope\"\r\n
@@ -281,11 +265,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1864'
+      - '1862'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:41 GMT
+      - Thu, 29 Apr 2021 08:59:09 GMT
       expires:
       - '-1'
       pragma:
@@ -318,19 +302,16 @@ interactions:
       Content-Length:
       - '367'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-04-28T03:06:43.4019194Z","duration":"PT0S","correlationId":"191ced81-cf36-4bd3-8a5d-abc85931a2e4","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-04-29T08:59:11.7149196Z","duration":"PT0S","correlationId":"9d3c6a68-017f-4d86-b18c-c64013667d28","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -339,7 +320,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:43 GMT
+      - Thu, 29 Apr 2021 08:59:11 GMT
       expires:
       - '-1'
       pragma:
@@ -372,22 +353,19 @@ interactions:
       Content-Length:
       - '367'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-04-28T03:06:45.0945647Z","duration":"PT1.1417431S","correlationId":"1d178255-abdb-420a-bd0b-b19880b6e33d","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-04-29T08:59:15.8146028Z","duration":"PT3.2474745S","correlationId":"cb0a3d25-44e1-4029-b24c-41a84f5fc5f1","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1/operationStatuses/08585820276815247848?api-version=2020-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1/operationStatuses/08585819201329105057?api-version=2020-10-01
       cache-control:
       - no-cache
       content-length:
@@ -395,7 +373,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:06:45 GMT
+      - Thu, 29 Apr 2021 08:59:16 GMT
       expires:
       - '-1'
       pragma:
@@ -417,7 +395,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -427,10 +405,9 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585820276815247848?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585819201329105057?api-version=2020-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -442,7 +419,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:07:15 GMT
+      - Thu, 29 Apr 2021 08:59:46 GMT
       expires:
       - '-1'
       pragma:
@@ -460,7 +437,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -470,13 +447,12 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-04-28T03:06:48.5987647Z","duration":"PT4.6459431S","correlationId":"1d178255-abdb-420a-bd0b-b19880b6e33d","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"outputs":{"policyDefinitionId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-04-29T08:59:19.6646712Z","duration":"PT7.0975429S","correlationId":"cb0a3d25-44e1-4029-b24c-41a84f5fc5f1","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"outputs":{"policyDefinitionId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -485,7 +461,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:07:16 GMT
+      - Thu, 29 Apr 2021 08:59:47 GMT
       expires:
       - '-1'
       pragma:
@@ -513,19 +489,16 @@ interactions:
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2021-03-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
-        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-04-28T03:06:41.2121361Z\",\r\n    \"lastModifiedBy\":
-        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-04-28T03:06:41.2121361Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-29T08:59:07.7296418Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-29T08:59:07.7296418Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"denyLocation\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"northeurope\"\r\n
@@ -548,11 +521,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1864'
+      - '1862'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:07:16 GMT
+      - Thu, 29 Apr 2021 08:59:48 GMT
       expires:
       - '-1'
       pragma:
@@ -586,14 +559,11 @@ interactions:
       Content-Length:
       - '466'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2020-10-01
   response:
@@ -605,11 +575,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 28 Apr 2021 03:07:18 GMT
+      - Thu, 29 Apr 2021 08:59:51 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtMjdEMDY4NzM6MkQ5NDZBOjJENEREQjoyRDlCQTU6MkRCRkI4NEE0OTJDQTEiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtMkNGNkU4RDY6MkQwRERGOjJENEVCNDoyRDgxQTY6MkQ5NzU5MTgyQzUzMzMiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-10-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -625,7 +595,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -635,13 +605,12 @@ interactions:
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.22.1
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtMjdEMDY4NzM6MkQ5NDZBOjJENEREQjoyRDlCQTU6MkRCRkI4NEE0OTJDQTEiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtMkNGNkU4RDY6MkQwRERGOjJENEVCNDoyRDgxQTY6MkQ5NzU5MTgyQzUzMzMiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-10-01
   response:
     body:
-      string: '{"status":"Succeeded","properties":{"correlationId":"27d06873-946a-4ddb-9ba5-bfb84a492ca1","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
+      string: '{"status":"Succeeded","properties":{"correlationId":"2cf6e8d6-0ddf-4eb4-81a6-9759182c5333","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
     headers:
       cache-control:
       - no-cache
@@ -650,7 +619,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Apr 2021 03:07:33 GMT
+      - Thu, 29 Apr 2021 09:00:06 GMT
       expires:
       - '-1'
       pragma:

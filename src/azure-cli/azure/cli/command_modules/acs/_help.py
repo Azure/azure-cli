@@ -1055,6 +1055,32 @@ helps['aks rotate-certs'] = """
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
 """
 
+helps['aks command'] = """
+    type: group
+    short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
+"""
+
+helps['aks command invoke'] = """
+    type: command
+    short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
+    parameters:
+        - name: --command -c
+          type: string
+          short-summary: Command or shell script you want to run.
+        - name: --file -f
+          type: string
+          short-summary: Files to be used by the command, use '.' to attach the current folder.
+"""
+
+helps['aks command result'] = """
+    type: command
+    short-summary: Fetch result from previously triggered 'aks command invoke'.
+    parameters:
+        - name: --command-id -i
+          type: string
+          short-summary: commandId returned from 'aks command invoke'.
+"""
+
 helps['openshift'] = """
 type: group
 short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.

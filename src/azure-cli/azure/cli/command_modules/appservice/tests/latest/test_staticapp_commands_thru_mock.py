@@ -302,7 +302,7 @@ class TestStaticAppCommands(unittest.TestCase):
         set_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings1_input, self.rg1)
 
         self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, kind=None, properties=app_settings1_dict)
+            self.rg1, self.name1, app_settings=app_settings1_dict)
 
     def test_set_staticsite_function_app_settings_without_resourcegroup(self):
         app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
@@ -312,7 +312,7 @@ class TestStaticAppCommands(unittest.TestCase):
         set_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings1_input)
 
         self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, kind=None, properties=app_settings1_dict)
+            self.rg1, self.name1, app_settings=app_settings1_dict)
 
     def test_delete_staticsite_function_app_settings_with_resourcegroup(self):
         # setup
@@ -330,7 +330,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         # validate
         self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, kind=None, properties=updated_app_settings)
+            self.rg1, self.name1, app_settings=updated_app_settings)
 
     def test_delete_staticsite_function_app_settings_without_resourcegroup(self):
         # setup
@@ -349,7 +349,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         # validate
         self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, kind=None, properties=updated_app_settings)
+            self.rg1, self.name1, app_settings=updated_app_settings)
 
     def test_list_staticsite_users_with_resourcegroup(self):
         authentication_provider = 'GitHub'
