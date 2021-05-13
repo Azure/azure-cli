@@ -2939,7 +2939,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
     mc = client.get(resource_group_name, name)
 
     if not command_string:
-        raise CLIError('Command cannot be empty.')
+        raise ValidationError('Command cannot be empty.')
 
     request_payload = RunCommandRequest(command=command_string)
     request_payload.context = _get_command_context(command_files)
@@ -3014,13 +3014,14 @@ def _get_command_context(command_files):
     else:
         for file in command_files:
             if file == ".":
-                raise CLIError(
+                raise ValidationError(
                     ". is used to attach current folder, not expecting other attachements.")
             if os.path.isfile(file):
                 # for individual attached file, flatten them to same folder
                 filesToAttach[file] = os.path.basename(file)
             else:
-                raise CLIError(f"{file} is not valid file, or not accessable.")
+                raise ValidationError(
+                    f"{file} is not valid file, or not accessable.")
 
     if len(filesToAttach) < 1:
         logger.debug("no files to attach!")
