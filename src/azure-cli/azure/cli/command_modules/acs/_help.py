@@ -1062,7 +1062,7 @@ helps['aks command'] = """
 
 helps['aks command invoke'] = """
     type: command
-    short-summary: run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
+    short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
     parameters:
         - name: --command -c
           type: string
