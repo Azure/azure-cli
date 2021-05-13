@@ -13,25 +13,261 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy?api-version=2020-10-01
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''akneema'' could not be found."}}'
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy","name":"hana-policy-ccy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '99'
+      - '1992'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Fri, 23 Apr 2021 07:30:04 GMT
+      - Wed, 13 Jan 2021 09:19:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"protectedItemsCount": 0, "backupManagementType": "AzureWorkload",
+      "workLoadType": "SAPHanaDatabase", "settings": {"timeZone": "UTC", "issqlcompression":
+      false, "isCompression": false}, "subProtectionPolicy": [{"policyType": "Full",
+      "schedulePolicy": {"schedulePolicyType": "SimpleSchedulePolicy", "scheduleRunFrequency":
+      "Weekly", "scheduleRunDays": ["Tuesday"], "scheduleRunTimes": ["2020-11-08T03:00:00.000Z"],
+      "scheduleWeeklyFrequency": 0}, "retentionPolicy": {"retentionPolicyType": "LongTermRetentionPolicy",
+      "weeklySchedule": {"daysOfTheWeek": ["Tuesday"], "retentionTimes": ["2020-11-08T03:00:00.000Z"],
+      "retentionDuration": {"count": 104, "durationType": "Weeks"}}, "monthlySchedule":
+      {"retentionScheduleFormatType": "Weekly", "retentionScheduleWeekly": {"daysOfTheWeek":
+      ["Tuesday"], "weeksOfTheMonth": ["First"]}, "retentionTimes": ["2020-11-08T03:00:00.000Z"],
+      "retentionDuration": {"count": 60, "durationType": "Months"}}, "yearlySchedule":
+      {"retentionScheduleFormatType": "Weekly", "monthsOfYear": ["January"], "retentionScheduleWeekly":
+      {"daysOfTheWeek": ["Tuesday"], "weeksOfTheMonth": ["First"]}, "retentionTimes":
+      ["2020-11-08T03:00:00.000Z"], "retentionDuration": {"count": 10, "durationType":
+      "Years"}}}}, {"policyType": "Differential", "schedulePolicy": {"schedulePolicyType":
+      "SimpleSchedulePolicy", "scheduleRunFrequency": "Weekly", "scheduleRunDays":
+      ["Monday"], "scheduleRunTimes": ["2020-11-30T12:00:00.000Z"], "scheduleWeeklyFrequency":
+      0}, "retentionPolicy": {"retentionPolicyType": "SimpleRetentionPolicy", "retentionDuration":
+      {"count": 30, "durationType": "Days"}}}, {"policyType": "Log", "schedulePolicy":
+      {"schedulePolicyType": "LogSchedulePolicy", "scheduleFrequencyInMins": 120},
+      "retentionPolicy": {"retentionPolicyType": "SimpleRetentionPolicy", "retentionDuration":
+      {"count": 15, "durationType": "Days"}}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1862'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -v --policy --backup-management-type --workload-type --name
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/clitest-policy000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2010'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 09:19:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies?api-version=2020-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2020-11-07T03:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2020-11-07T03:30:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2020-11-07T03:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2020-11-07T03:30:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy","name":"hana-policy-ccy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-test","name":"hana-policy-test","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-09T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Monday"],"retentionTimes":["2020-11-09T12:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Monday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-09T12:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Monday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-09T12:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Incremental","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Thursday"],"scheduleRunTimes":["2020-11-09T10:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7797'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 09:19:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/clitest-policy000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2010'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 09:19:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -v -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/clitest-policy000001?api-version=2020-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 13 Jan 2021 09:19:18 GMT
       expires:
       - '-1'
       pragma:
@@ -40,9 +276,64 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies?api-version=2020-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2020-11-07T03:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2020-11-07T03:30:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2020-11-07T03:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2020-11-07T03:30:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy","name":"hana-policy-ccy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-test","name":"hana-policy-test","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-09T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Monday"],"retentionTimes":["2020-11-09T12:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Monday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-09T12:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Monday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-09T12:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Incremental","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Thursday"],"scheduleRunTimes":["2020-11-09T10:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5786'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 09:19:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

@@ -13,36 +13,361 @@ interactions:
       ParameterSetName:
       - -v -g --backup-management-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''akneema'' could not be found."}}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;akneema;akneema-hana-ccy","name":"VMAppContainer;Compute;akneema;akneema-hana-ccy","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","lastUpdatedTime":"2021-01-13T11:21:01.1273867Z","extendedInfo":{"hostServerName":"hxehost","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"akneema-hana-ccy","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '99'
+      - '1140'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Fri, 23 Apr 2021 07:30:04 GMT
+      - Wed, 13 Jan 2021 11:35:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type --query
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1187187888","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1376'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:35:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type --query
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2020-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '578'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:35:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1187187888","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1376'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:35:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '578'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:35:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1187187888","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1376'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:35:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/recoveryPoints?api-version=2020-10-01&$filter=restorePointQueryType%20eq%20%27Log%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSAPHanaPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '578'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:35:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

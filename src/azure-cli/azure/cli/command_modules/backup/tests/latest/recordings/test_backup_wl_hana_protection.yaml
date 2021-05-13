@@ -13,36 +13,5331 @@ interactions:
       ParameterSetName:
       - -v -g --backup-management-type
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.22.0
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''akneema'' could not be found."}}'
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;akneema;akneema-hana-ccy","name":"VMAppContainer;Compute;akneema;akneema-hana-ccy","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","lastUpdatedTime":"2021-01-13T11:21:01.1273867Z","extendedInfo":{"hostServerName":"hxehost","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"akneema-hana-ccy","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '99'
+      - '1140'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Fri, 23 Apr 2021 07:30:05 GMT
+      - Wed, 13 Jan 2021 11:51:28 GMT
       expires:
       - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupProtectableItems?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SAPHanaDatabase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;akneema;akneema-hana-ccy/protectableItems/saphanasystem;hxe","name":"saphanasystem;hxe","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"HXE","serverName":"hxehost","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":2,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaSystem","friendlyName":"HXE","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;akneema;akneema-hana-ccy/protectableItems/saphanadatabase;hxe;hxe","name":"saphanadatabase;hxe;hxe","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"HXE","serverName":"hxehost","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaDatabase","friendlyName":"HXE","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;akneema;akneema-hana-ccy/protectableItems/saphanadatabase;hxe;systemdb","name":"saphanadatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"HXE","serverName":"hxehost","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaDatabase","friendlyName":"SYSTEMDB","protectionState":"NotProtected"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;akneema;akneema-hana-ccy/protectableItems/saphanadbinstance;hxe;saphanadbinstance","name":"saphanadbinstance;hxe;saphanadbinstance","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"hxehost","serverName":"hxehost","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":2,"subprotectableitemcount":0,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SAPHana","protectableItemType":"SAPHanaDBInstance","friendlyName":"HXE","protectionState":"NotProtected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3143'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '143'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy","name":"hana-policy-ccy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Tuesday"],"scheduleRunTimes":["2020-11-08T03:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","weeklySchedule":{"daysOfTheWeek":["Tuesday"],"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Tuesday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-11-08T03:00:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Differential","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Weekly","scheduleRunDays":["Monday"],"scheduleRunTimes":["2020-11-30T12:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1992'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"backupManagementType": "AzureWorkload", "workloadType":
+      "SAPHanaDatabase", "policyId": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy",
+      "protectedItemType": "AzureVmWorkloadSAPHanaDatabase"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '330'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;akneema;akneema-hana-ccy/protectedItems/saphanadatabase;hxe;systemdb/operationsStatus/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 13 Jan 2021 11:51:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;akneema;akneema-hana-ccy/protectedItems/saphanadatabase;hxe;systemdb/operationResults/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '98'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '97'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '96'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '95'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '94'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '93'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '92'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '91'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '90'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '89'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '88'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '87'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '86'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '85'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '84'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '83'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '82'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:51:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '81'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '80'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '79'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '78'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '77'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '76'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '75'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '74'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '73'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '72'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '71'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '70'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '69'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '68'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '67'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '66'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '65'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '64'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '63'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '62'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '61'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '60'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '59'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '58'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '57'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '56'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '55'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '54'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '53'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '52'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '51'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '50'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"InProgress","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/081ce733-14c6-4662-986e-d563c6aa319d?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"081ce733-14c6-4662-986e-d563c6aa319d","name":"081ce733-14c6-4662-986e-d563c6aa319d","status":"Succeeded","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"2021-01-13T11:51:34.8743927Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"c31a072f-f38f-46c2-b13a-f6386cd6d270"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '48'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection enable-for-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -p --protectable-item-type --protectable-item-name --server-name --workload-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/c31a072f-f38f-46c2-b13a-f6386cd6d270?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/c31a072f-f38f-46c2-b13a-f6386cd6d270","name":"c31a072f-f38f-46c2-b13a-f6386cd6d270","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT1M13.3956425S","extendedInfo":{"tasksList":[],"propertyBag":{"Policy
+        Name":"hana-policy-ccy"}},"isUserTriggered":true,"entityFriendlyName":"systemdb","backupManagementType":"AzureWorkload","operation":"ConfigureBackup","status":"Completed","startTime":"2021-01-13T11:51:34.8743927Z","endTime":"2021-01-13T11:52:48.2700352Z","activityId":"ac1df4b7-5595-11eb-b26f-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -v -g --backup-management-type --query
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;akneema;akneema-hana-ccy","name":"VMAppContainer;Compute;akneema;akneema-hana-ccy","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","lastUpdatedTime":"2021-01-13T11:21:01.1273867Z","extendedInfo":{"hostServerName":"hxehost","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPHana","itemCount":2,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"akneema-hana-ccy","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1128'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-type --enable-compression
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupErrorDetail":{"code":"Success","message":""},"protectedItemDataSourceId":"1499167091","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1376'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"objectType": "AzureWorkloadBackupRequest", "backupType":
+      "Full", "enableCompression": false, "recoveryPointExpiryTimeInUTC": "2021-02-12T11:52:53.996129Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '173'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -v -g -i -c --backup-type --enable-compression
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb/backup?api-version=2020-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/operationsStatus/f4bd50b3-8dcd-42b5-a810-4bf8d29d97b3?api-version=2020-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 13 Jan 2021 11:52:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/operationResults/f4bd50b3-8dcd-42b5-a810-4bf8d29d97b3?api-version=2020-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-type --enable-compression
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/f4bd50b3-8dcd-42b5-a810-4bf8d29d97b3?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"f4bd50b3-8dcd-42b5-a810-4bf8d29d97b3","name":"f4bd50b3-8dcd-42b5-a810-4bf8d29d97b3","status":"Succeeded","startTime":"2021-01-13T11:52:55.6081444Z","endTime":"2021-01-13T11:52:55.6081444Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '145'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-type --enable-compression
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT2.5490784S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '769'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT4.3415545S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '769'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:52:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT4.8940317S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '769'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:53:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT35.4051803S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '770'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:53:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '147'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT1M5.8827565S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '771'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:54:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '146'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT1M36.3930013S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '772'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:54:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '145'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT2M6.8864053S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '771'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:55:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '144'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT2M37.3635489S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '772'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:55:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '143'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT3M7.8321831S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '771'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:56:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '142'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT3M38.336221S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB
+        [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup (Full)","status":"InProgress","startTime":"2021-01-13T11:52:55.6081444Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '771'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:56:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '141'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","name":"975a8b5c-a404-4ebe-a2a5-bb7a4a6d9447","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT4M3.7026512S","actionsInfo":[1],"extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","status":"Completed"}],"propertyBag":{"Data Transferred (in
+        MB)":"1185.5547"}},"isUserTriggered":true,"entityFriendlyName":"SYSTEMDB [hxehost]","backupManagementType":"AzureWorkload","operation":"Backup
+        (Full)","status":"Completed","startTime":"2021-01-13T11:52:55.6081444Z","endTime":"2021-01-13T11:56:59.3107956Z","activityId":"de39aa3c-5595-11eb-9a48-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '848'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '140'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n --backup-management-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-01-13T11:52:55.6081444Z","protectedItemDataSourceId":"1499167091","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-13T11:49:32.801Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy","lastRecoveryPoint":"2021-01-13T11:49:32.801Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1610'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2021-01-13T11:52:55.6081444Z","protectedItemDataSourceId":"1499167091","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-13T11:49:32.801Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupPolicies/hana-policy-ccy","lastRecoveryPoint":"2021-01-13T11:49:32.801Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1610'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"policyId": "", "protectedItemType": "AzureVmWorkloadSAPHanaDatabase",
+      "protectionState": "ProtectionStopped"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '127'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/SAPHanaDatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/operationsStatus/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 13 Jan 2021 11:57:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb/operationResults/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '144'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '143'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '142'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '141'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '140'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '139'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '138'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '137'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '136'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '135'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '134'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '133'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '132'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:57:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '131'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '130'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '129'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '128'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '127'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '126'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '125'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '124'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '123'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"InProgress","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '122'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupOperations/1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","name":"1cda7266-8e5b-4e96-9b3b-0a1f9dae8a4c","status":"Succeeded","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"2021-01-13T11:57:38.3567186Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"04a11392-f068-4c6e-9958-060cd089a602"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '121'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection disable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -v -g -i -c --backup-management-type -y
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/04a11392-f068-4c6e-9958-060cd089a602?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupJobs/04a11392-f068-4c6e-9958-060cd089a602","name":"04a11392-f068-4c6e-9958-060cd089a602","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SAPHanaDatabase","duration":"PT34.6481167S","extendedInfo":{"tasksList":[],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"systemdb","backupManagementType":"AzureWorkload","operation":"DisableBackup","status":"Completed","startTime":"2021-01-13T11:57:38.3567186Z","endTime":"2021-01-13T11:58:13.0048353Z","activityId":"867148c5-5596-11eb-a860-c8f750f92764"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '725'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n --backup-management-type
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bakneema%3Bakneema-hana-ccy/protectedItems/saphanadatabase%3Bhxe%3Bsystemdb?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.RecoveryServices/vaults/akneema-vault-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;akneema;akneema-hana-ccy/protectedItems/SAPHanaDatabase;hxe;systemdb","name":"SAPHanaDatabase;hxe;systemdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{"BackupOperationStatusKPI":{"resourceHealthStatus":"Healthy","resourceHealthDetails":[{"code":0,"title":"Success","message":"","recommendations":[]}]}},"friendlyName":"systemdb","serverName":"hxehost","parentName":"HXE","parentType":"AzureVmWorkloadSAPHanaSystem","protectionStatus":"Healthy","protectionState":"ProtectionStopped","lastBackupStatus":"Healthy","lastBackupTime":"2021-01-13T11:52:55.6081444Z","protectedItemDataSourceId":"1499167091","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2021-01-13T11:49:32.801Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPHanaDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPHanaDatabase","containerName":"VMAppContainer;compute;akneema;akneema-hana-ccy","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy","lastRecoveryPoint":"2021-01-13T11:49:32.801Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1437'
+      content-type:
+      - application/json
+      date:
+      - Wed, 13 Jan 2021 11:58:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1
