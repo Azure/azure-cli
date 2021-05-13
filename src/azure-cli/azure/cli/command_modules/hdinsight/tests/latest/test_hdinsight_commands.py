@@ -173,7 +173,7 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
-    @record_only()
+    # @record_only()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_relay_and_privatelink(self, storage_account_info):
@@ -392,29 +392,29 @@ class HDInsightClusterTests(ScenarioTest):
                                       self.check("[1].status", 'Succeeded')
                                   ])
 
-    @record_only()
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
-    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
-    def test_hdinsight_virtual_machine(self, storage_account_info):
-        self._create_hdinsight_cluster(
-            HDInsightClusterTests._wasb_arguments(storage_account_info)
-        )
-
-        # list hosts of the cluster
-        host_list = self.cmd('az hdinsight host list --resource-group {rg} --cluster-name {cluster}', checks=[
-            self.check('type(@)', 'array'),
-            self.exists('[0].name')
-        ]).get_output_in_json()
-
-        target_host = host_list[0]['name']
-        for host in host_list:
-            if host['name'].startswith('wn'):
-                target_host = host['name']
-                break
-        self.kwargs['target_host'] = target_host
-        # restart host of the cluster
-        self.cmd(
-            'az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --host-names {target_host} --yes')
+    # @record_only()
+    # @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    # @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    # def test_hdinsight_virtual_machine(self, storage_account_info):
+    #     self._create_hdinsight_cluster(
+    #         HDInsightClusterTests._wasb_arguments(storage_account_info)
+    #     )
+    #
+    #     # list hosts of the cluster
+    #     host_list = self.cmd('az hdinsight host list --resource-group {rg} --cluster-name {cluster}', checks=[
+    #         self.check('type(@)', 'array'),
+    #         self.exists('[0].name')
+    #     ]).get_output_in_json()
+    #
+    #     target_host = host_list[0]['name']
+    #     for host in host_list:
+    #         if host['name'].startswith('wn'):
+    #             target_host = host['name']
+    #             break
+    #     self.kwargs['target_host'] = target_host
+    #     # restart host of the cluster
+    #     self.cmd(
+    #         'az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --host-names {target_host} --yes')
 
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
