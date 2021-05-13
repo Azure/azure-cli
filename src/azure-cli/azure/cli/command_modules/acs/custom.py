@@ -2974,7 +2974,9 @@ def _print_command_result(cli_ctx, commandResult):
     # user didn't specified any format, we can customize the print for best experience
     if commandResult.provisioning_state == "Succeeded":
         # succeed, print exitcode, and logs
-        print(f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, finished at {commandResult.finished_at}, with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, finished at {commandResult.finished_at}{colorama.Style.RESET_ALL}")
+        print(
+            f"{colorama.Fore.GREEN}with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
         print(commandResult.logs)
         return
 
