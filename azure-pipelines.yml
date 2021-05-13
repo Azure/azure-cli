@@ -18,7 +18,7 @@ jobs:
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
@@ -36,7 +36,7 @@ jobs:
   condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - bash: |
         echo "Reject pull request directly to master branch"
@@ -67,7 +67,7 @@ jobs:
 
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Extract Version'
@@ -86,7 +86,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
 
   steps:
   - task: UsePythonVersion@0
@@ -122,7 +122,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3'
     inputs:
-      versionSpec: 3.8
+      versionSpec: 3.9
 
   - task: BatchScript@1
     inputs:
@@ -134,12 +134,12 @@ jobs:
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
+    displayName: 'Use Python 3.9'
     inputs:
-      versionSpec: 3.7
+      versionSpec: 3.9
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -247,7 +247,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Bash Script'
@@ -268,7 +268,7 @@ jobs:
   dependsOn: BuildDockerImage
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -303,12 +303,12 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
+    displayName: 'Use Python 3.9'
     inputs:
-      versionSpec: 3.7
+      versionSpec: 3.9
 
 
   - script: |
@@ -333,7 +333,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -375,19 +375,26 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
+       echo "== Testing pip install on Python 3.9 =="
+       docker run \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+
     displayName: 'Test pip Install'
 
 - job: TestCore
   displayName: Unit Test for Core
   timeoutInMinutes: 10
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -398,13 +405,15 @@ jobs:
   displayName: Unit Test for Telemetry
   timeoutInMinutes: 10
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -418,13 +427,15 @@ jobs:
   timeoutInMinutes: 20
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -439,13 +450,15 @@ jobs:
   displayName: Automation Test (Profile Latest)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -456,13 +469,15 @@ jobs:
   displayName: Automation Test (Profile 2020-09-01)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -473,13 +488,15 @@ jobs:
   displayName: Automation Test (Profile 2019-03-01)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -490,13 +507,15 @@ jobs:
   displayName: Automation Test (Profile 2018-03-01)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -509,11 +528,11 @@ jobs:
   timeoutInMinutes: 20
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -530,7 +549,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -646,7 +665,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
@@ -667,7 +686,7 @@ jobs:
   dependsOn: BuildYumPackage
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -703,7 +722,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Xenial:
@@ -767,7 +786,7 @@ jobs:
         deb_system: debian
         distro: buster
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -799,12 +818,12 @@ jobs:
   displayName: "Check CLI Style"
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
+    displayName: 'Use Python 3.9'
     inputs:
-      versionSpec: 3.7
+      versionSpec: 3.9
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -815,12 +834,12 @@ jobs:
   displayName: "Check License, History, and DocMap"
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python 3.9'
     inputs:
-      versionSpec: 3.6
+      versionSpec: 3.9
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -837,8 +856,10 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -861,12 +882,12 @@ jobs:
   displayName: "Check CLI Linter"
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python 3.9'
     inputs:
-      versionSpec: 3.6
+      versionSpec: 3.9
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -881,12 +902,12 @@ jobs:
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.6'
+      displayName: 'Use Python 3.9'
       inputs:
-        versionSpec: 3.6
+        versionSpec: 3.9
     - bash: pip install --upgrade pip wheel
       displayName: "Install pip and wheel"
     - bash: ./scripts/ci/test_ref_doc.sh
