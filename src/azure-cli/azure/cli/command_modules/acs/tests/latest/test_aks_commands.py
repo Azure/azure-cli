@@ -1960,44 +1960,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
     @RoleBasedServicePrincipalPreparer()
-    def test_managed_aad_enable_azure_rbac(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
-        })
-
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 -o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('aadProfile.managed', True),
-            self.check('aadProfile.enableAzureRbac', False),
-            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
-        ])
-
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--enable-azure-rbac -o json'
-        self.cmd(update_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('aadProfile.enableAzureRbac', True)
-        ])
-
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--disable-azure-rbac -o json'
-        self.cmd(update_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('aadProfile.enableAzureRbac', False)
-        ])
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_create_aadv1_and_update_with_managed_aad(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
