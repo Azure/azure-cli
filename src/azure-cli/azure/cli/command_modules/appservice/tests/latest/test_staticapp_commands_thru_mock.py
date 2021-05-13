@@ -296,8 +296,8 @@ class TestStaticAppCommands(unittest.TestCase):
             self.rg1, self.name1)
 
     def test_set_staticsite_function_app_settings_with_resourcegroup(self):
-        app_settings1_input = ['key1=val1', 'key2=val2']
-        app_settings1_dict = {'key1': 'val1', 'key2': 'val2'}
+        app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
+        app_settings1_dict = {'key1': 'val1', 'key2': 'val2==', 'key3': 'val3='}
 
         set_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings1_input, self.rg1)
 
@@ -305,8 +305,8 @@ class TestStaticAppCommands(unittest.TestCase):
             self.rg1, self.name1, kind=None, properties=app_settings1_dict)
 
     def test_set_staticsite_function_app_settings_without_resourcegroup(self):
-        app_settings1_input = ['key1=val1', 'key2=val2']
-        app_settings1_dict = {'key1': 'val1', 'key2': 'val2'}
+        app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
+        app_settings1_dict = {'key1': 'val1', 'key2': 'val2==', 'key3': 'val3='}
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
         set_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings1_input)

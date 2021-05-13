@@ -824,14 +824,11 @@ class TemplateSpecsTest(ScenarioTest):
             'uf1': os.path.join(curr_dir, 'sample_form_ui_definition_mg.json').replace('\\', '\\\\'),
         })
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --ui-form-definition "{uf}"', checks=[
-            self.check('name', '1.0'),
-            self.check('description', None),
-            self.check('display_name', None),
-            self.check('linkedTemplates', None),
-            self.check('uiFormDefinition.view.properties.title', 'titleFooSub')
-        ]).get_output_in_json()
-
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
+                          self.check('name', '1.0'),
+                          self.check('description', None),
+                          self.check('display_name', None),
+                          self.check('artifacts', None)]).get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
@@ -1816,7 +1813,7 @@ class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
         self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("length(changes)", 3),
-            self.check("changes[0].changeType", "Create"),
+            self.check("changes[0].changeType", "Modify"),
             self.check("changes[1].changeType", "Create"),
             self.check("changes[2].changeType", "Create"),
         ])
@@ -2539,7 +2536,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(IncorrectUsageError):
+            with self.assertRaises(SystemExit):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
@@ -2763,7 +2760,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'waiver'),
+                self.check('exemptionCategory', 'Waiver'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{metadata}')
             ]).get_output_in_json()
@@ -2779,7 +2776,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -2790,7 +2787,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -2815,7 +2812,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'waiver'),
+                self.check('exemptionCategory', 'Waiver'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{metadata}')
             ]).get_output_in_json()
@@ -2831,7 +2828,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -2842,7 +2839,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -3480,6 +3477,8 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
 
 
 class BicepScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     def test_bicep_list_versions(self):
         self.cmd('az bicep list-versions', checks=[
             self.greater_than('length(@)', 0)
