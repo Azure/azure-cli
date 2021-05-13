@@ -39,7 +39,8 @@ def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
                        resource_group_name=resource_group_name, name=name)
 
 
-def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_name=None, no_wait=False):
+def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_name=None, login_with_github=False,
+                         no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -47,7 +48,7 @@ def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_n
     location = _get_staticsite_location(client, name, resource_group_name)
 
     return create_staticsites(cmd, resource_group_name, name, location,
-                              source, branch, token, no_wait=no_wait)
+                              source, branch, token, login_with_github=login_with_github, no_wait=no_wait)
 
 
 def list_staticsite_environments(cmd, name, resource_group_name=None):
@@ -192,9 +193,13 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', output_location='.github/workflows',
-                       tags=None, no_wait=False, sku='Free'):
-    if not token:
+                       tags=None, no_wait=False, sku='Free', login_with_github=False):
+    if not token and not login_with_github:
         _raise_missing_token_suggestion()
+    elif not token:
+        from ._github_oauth import get_github_access_token
+        scopes = ["admin:repo_hook", "repo", "workflow"]
+        token = get_github_access_token(cmd, scopes)
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
@@ -273,7 +278,8 @@ def _raise_missing_token_suggestion():
     pat_documentation = "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"
     raise CLIError("GitHub access token is required to authenticate to your repositories. "
                    "If you need to create a Github Personal Access Token, "
-                   "please follow the steps found at the following link:\n{0}".format(pat_documentation))
+                   "please run with the '--login-with-github' flag or follow "
+                   "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
 def _get_staticsite_location(client, static_site_name, resource_group_name):
