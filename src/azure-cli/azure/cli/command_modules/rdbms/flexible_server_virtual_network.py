@@ -257,7 +257,11 @@ def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, 
                 break
 
         if not link_exist_flag:
+<<<<<<< HEAD
             private_dns_link_client.begin_create_or_update(resource_group_name=dns_rg,
+=======
+            private_dns_link_client.begin_create_or_update(resource_group_name=resource_group,
+>>>>>>> 3f230e856a407043102e99b82d4d22f679111a3c
                                                            private_zone_name=private_dns_zone,
                                                            virtual_network_link_name=vnet_name + '-link',
                                                            parameters=link, if_none_match='*').result()
