@@ -2943,6 +2943,10 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
     request_payload = RunCommandRequest(command=command_string)
     request_payload.context = _get_command_context(command_files)
+
+    # if this cluster have Azure AD enabled, we should pass user token.
+    # so the command execution also using current user identity.
+    # here we aquire token for AKS managed server AppID (same id for all cloud)
     if mc.aad_profile is not None and mc.aad_profile.managed:
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
@@ -2955,7 +2959,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     if not command_id:
-        raise CLIError('CommandID cannot be empty.')
+        raise ValidationError('CommandID cannot be empty.')
 
     commandResult = client.get_command_result(
         resource_group_name, name, command_id)
