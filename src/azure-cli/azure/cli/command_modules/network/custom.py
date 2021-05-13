@@ -3492,7 +3492,7 @@ def create_lb_frontend_ip_configuration(
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None,
-        subnet=None, virtual_network_name=None, public_ip_prefix=None):
+        subnet=None, virtual_network_name=None, public_ip_prefix=None, gateway_load_balancer=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
@@ -3517,6 +3517,8 @@ def set_lb_frontend_ip_configuration(
 
     if public_ip_prefix:
         instance.public_ip_prefix = SubResource(id=public_ip_prefix)
+    if gateway_load_balancer:
+        instance.gateway_load_balancer = SubResource(id=gateway_load_balancer)
 
     return parent
 

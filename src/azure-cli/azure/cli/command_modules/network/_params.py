@@ -1026,6 +1026,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network lb frontend-ip update') as c:
         c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use ""(\'""\' in PowerShell) to remove the static address and use a dynamic address instead.')
+        c.argument('gateway_load_balancer', options_list='--gateway-lb', help='The reference to gateway load balancer frontend IP', min_api='2021-02-01', is_preview=True)
 
     with self.argument_context('network lb probe') as c:
         c.argument('interval', help='Probing time interval in seconds.')
