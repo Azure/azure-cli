@@ -1066,7 +1066,7 @@ helps['aks command invoke'] = """
     parameters:
         - name: --command -c
           type: string
-          short-summary: command or shell script you want run.
+          short-summary: Command or shell script you want to run.
         - name: --file -f
           type: string
           short-summary: files will be used by the command, use '.' to attach the current folder.
