@@ -58,7 +58,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
-                           sas_expiration_period=None, key_expiration_period_in_days=None):
+                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           allow_cross_tenant_replication=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -194,6 +195,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         SasPolicy = cmd.get_models('SasPolicy')
         params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
 
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -271,7 +275,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
-                           sas_expiration_period=None, key_expiration_period_in_days=None):
+                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           allow_cross_tenant_replication=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -443,6 +448,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if sas_expiration_period:
         SasPolicy = cmd.get_models('SasPolicy')
         params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
 
     return params
 

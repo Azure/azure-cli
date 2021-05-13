@@ -1914,3 +1914,27 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account or-policy delete -g {rg} -n {dest_sc} --policy-id {policy_id}')
         self.cmd('storage account or-policy list -g {rg} -n {dest_sc}') \
             .assert_with_checks(JMESPathCheck('length(@)', 0))
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
+    def test_storage_account_allow_cross_tenant_replication(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'src_sc': self.create_random_name(prefix='clicor', length=24),
+        })
+
+        self.cmd('storage account create -n {src_sc} -g {rg} ', checks=[
+            JMESPathCheck('allowCrossTenantReplication', None)])
+
+        self.cmd('storage account update -n {src_sc} -g {rg} -r false', checks=[
+            JMESPathCheck('allowCrossTenantReplication', False)])
+
+        self.cmd('storage account update -n {src_sc} -g {rg} -r true', checks=[
+            JMESPathCheck('allowCrossTenantReplication', True)])
+
+        self.cmd('storage account create -n {src_sc} -g {rg} -r false', checks=[
+            JMESPathCheck('allowCrossTenantReplication', False)])
+
+        self.cmd('storage account create -n {src_sc} -g {rg} -r true', checks=[
+            JMESPathCheck('allowCrossTenantReplication', True)])

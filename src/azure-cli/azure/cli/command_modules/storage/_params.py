@@ -187,6 +187,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
 
+    allow_cross_tenant_replication_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'], min_api='2021-04-01',
+        help='Allow or disallow cross AAD tenant object replication. The default interpretation is true for this '
+        'property.')
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -288,6 +293,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
+        c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -349,6 +355,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
+        c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
