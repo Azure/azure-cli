@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.mgmt.web.models import NameIdentifier
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait, random_string
 from knack.util import CLIError
@@ -47,7 +48,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
         raise CLIError("Unable to get IP address")
 
     web_client = web_client_factory(cmd.cli_ctx)
-    hostname_availability = web_client.domains.check_availability(name=hostname)
+    hostname_availability = web_client.domains.check_availability(NameIdentifier(name=hostname))
 
     if dryrun:
         logger.warning("Custom domain will be purchased with the below configuration. Re-run command "
@@ -95,7 +96,9 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                        "with a new hostname.".format(hostname))
 
     tld = '.'.join(hostname.split('.')[1:])
-    agreements = web_client.top_level_domains.list_agreements(name=tld, include_privacy=privacy)
+    from azure.mgmt.web.models import TopLevelDomainAgreementOption
+    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=True, for_transfer=True)
+    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
     agreement_keys = [agreement.agreement_key for agreement in agreements]
 
     dns_zone_id = "[resourceId('Microsoft.Network/dnszones', '{}')]".format(hostname)
@@ -145,15 +148,16 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
 
 
 def show_domain_purchase_terms(cmd, hostname):
+    from azure.mgmt.web.models import TopLevelDomainAgreementOption
+    domain_identifier = NameIdentifier(name=hostname)
     web_client = web_client_factory(cmd.cli_ctx)
-    hostname_availability = None
-    try:
-        hostname_availability = web_client.domains.check_availability(name=hostname)
-    except Exception:  # pylint: disable=broad-except
-        raise CLIError("Invalid hostname: '{}'. Please enter a valid hostname".format(hostname))
+    hostname_availability = web_client.domains.check_availability(domain_identifier)
+    if not hostname_availability.available:  # api returns false
+        raise CLIError(" hostname: '{}' in not available. Please enter a valid hostname.".format(hostname))
 
     tld = '.'.join(hostname.split('.')[1:])
-    agreements = web_client.top_level_domains.list_agreements(name=tld, include_privacy=True)
+    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=True, for_transfer=True)
+    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
 
     terms = {
         "hostname": hostname,

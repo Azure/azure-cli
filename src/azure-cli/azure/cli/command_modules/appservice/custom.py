@@ -1520,7 +1520,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, slot_def, slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
@@ -1758,8 +1758,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backup_status_secrets',
-                                   slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
