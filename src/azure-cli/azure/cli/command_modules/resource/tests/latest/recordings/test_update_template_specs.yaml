@@ -13,10 +13,7 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
   response:
@@ -32,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 13 Nov 2020 04:12:29 GMT
+      - Thu, 22 Apr 2021 14:46:44 GMT
       expires:
       - '-1'
       pragma:
@@ -60,10 +57,7 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
   response:
@@ -79,7 +73,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 13 Nov 2020 04:12:29 GMT
+      - Thu, 22 Apr 2021 14:46:45 GMT
       expires:
       - '-1'
       pragma:
@@ -94,7 +88,7 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "westus", "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -105,229 +99,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '34'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:35.1253162Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:35.1253162Z\"\r\n
-        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-update-template-spec000002\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '717'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 13 Nov 2020 04:12:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"location": "westus", "properties": {"artifacts": [], "template": {"$schema":
-      "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "contentVersion": "1.0.0.0", "parameters": {"location": {"type": "string", "defaultValue":
-      "[resourceGroup().location]", "metadata": {"description": "Location for the
-      network security group."}}, "name": {"type": "string", "metadata": {"description":
-      "Name of the network security group."}}}, "variables": {}, "resources": [{"type":
-      "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
-      "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
-      {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
-      "value": "[reference(parameters(''name''))]"}}}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ts create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '781'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n -v -l -f
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
-  response:
-    body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:38.4303047Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:38.4303047Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
-        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
-        \         \"metadata\": {\r\n            \"description\": \"Location for the
-        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
-        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
-        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
-        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
-        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
-        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
-        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
-        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
-        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
-        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0\",\r\n
-        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
-        \"1.0\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1815'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 13 Nov 2020 04:12:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ts update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -s --display-name --description --yes
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
-  response:
-    body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:35.1253162Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:38.4303047Z\"\r\n
-        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002\",\r\n
-        \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-update-template-spec000002\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '717'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 13 Nov 2020 04:12:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "properties": {"description": "AzCLI test root template
-      spec", "displayName": "create-spec000003"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ts update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '125'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -s --display-name --description --yes
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
-  response:
-    body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:35.1253162Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:41.1772545Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"displayName\": \"create-spec000003\",\r\n
-        \   \"description\": \"AzCLI test root template spec\"\r\n  },\r\n  \"id\":
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:49.5269194Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:49.5269194Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-update-template-spec000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '817'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 13 Nov 2020 04:12:40 GMT
+      - Thu, 22 Apr 2021 14:46:51 GMT
       expires:
       - '-1'
       pragma:
@@ -339,37 +137,47 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1197'
     status:
       code: 201
       message: Created
 - request:
-    body: null
+    body: '{"location": "westus", "tags": {}, "properties": {"artifacts": [], "template":
+      {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"location": {"type": "string", "defaultValue":
+      "[resourceGroup().location]", "metadata": {"description": "Location for the
+      network security group."}}, "name": {"type": "string", "metadata": {"description":
+      "Name of the network security group."}}}, "variables": {}, "resources": [{"type":
+      "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
+      "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
+      {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
+      "value": "[reference(parameters(''name''))]"}}}}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - ts update
+      - ts create
       Connection:
       - keep-alive
+      Content-Length:
+      - '793'
+      Content-Type:
+      - application/json
       ParameterSetName:
-      - -s --version-description --yes
+      - -g -n -v -l -f
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
-    method: GET
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+    method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:38.4303047Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:38.4303047Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:54.1482897Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:54.1482897Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
@@ -391,94 +199,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1815'
+      - '1808'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 13 Nov 2020 04:12:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "properties": {"description": "AzCLI test version
-      of root template spec", "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "contentVersion": "1.0.0.0", "parameters": {"location": {"type": "string", "defaultValue":
-      "[resourceGroup().location]", "metadata": {"description": "Location for the
-      network security group."}}, "name": {"type": "string", "metadata": {"description":
-      "Name of the network security group."}}}, "variables": {}, "resources": [{"type":
-      "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
-      "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
-      {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
-      "value": "[reference(parameters(''name''))]"}}}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ts update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '823'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -s --version-description --yes
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
-  response:
-    body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:38.4303047Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:42.7144863Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"description\": \"AzCLI test version of
-        root template spec\",\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
-        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
-        \         \"metadata\": {\r\n            \"description\": \"Location for the
-        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
-        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
-        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
-        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
-        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
-        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
-        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
-        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
-        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
-        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0\",\r\n
-        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
-        \"1.0\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1857'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 13 Nov 2020 04:12:42 GMT
+      - Thu, 22 Apr 2021 14:46:54 GMT
       expires:
       - '-1'
       pragma:
@@ -506,22 +231,127 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -v -f --yes
+      - -s --display-name --description --yes
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:49.5269194Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:54.1482897Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-update-template-spec000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '732'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 22 Apr 2021 14:46:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"description": "AzCLI
+      test root template spec", "displayName": "create-spec000003"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '137'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -s --display-name --description --yes
+      User-Agent:
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:49.5269194Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:56.7142443Z\"\r\n  },\r\n  \"properties\": {\r\n    \"displayName\":
+        \"create-spec000003\",\r\n    \"description\": \"AzCLI test root template
+        spec\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-update-template-spec000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 22 Apr 2021 14:46:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -s --version-description --yes
+      User-Agent:
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:38.4303047Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:42.7144863Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"description\": \"AzCLI test version of
-        root template spec\",\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:54.1482897Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:54.1482897Z\"\r\n  },\r\n  \"properties\": {\r\n    \"template\":
+        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
         \         \"metadata\": {\r\n            \"description\": \"Location for the
@@ -542,11 +372,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1857'
+      - '1808'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 13 Nov 2020 04:12:43 GMT
+      - Thu, 22 Apr 2021 14:46:58 GMT
       expires:
       - '-1'
       pragma:
@@ -565,8 +395,156 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"artifacts": [{"path": "artifacts\\createResourceGroup.json",
-      "kind": "template", "template": {"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    body: '{"location": "westus", "tags": {}, "properties": {"description": "AzCLI
+      test version of root template spec", "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"location": {"type": "string", "defaultValue":
+      "[resourceGroup().location]", "metadata": {"description": "Location for the
+      network security group."}}, "name": {"type": "string", "metadata": {"description":
+      "Name of the network security group."}}}, "variables": {}, "resources": [{"type":
+      "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
+      "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
+      {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
+      "value": "[reference(parameters(''name''))]"}}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '835'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -s --version-description --yes
+      User-Agent:
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:54.1482897Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:58.737853Z\"\r\n  },\r\n  \"properties\": {\r\n    \"description\":
+        \"AzCLI test version of root template spec\",\r\n    \"template\": {\r\n      \"$schema\":
+        \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"Location for the
+        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
+        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
+        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
+        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
+        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
+        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
+        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
+        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1871'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 22 Apr 2021 14:46:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -v -f --yes
+      User-Agent:
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:54.1482897Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:46:58.737853Z\"\r\n  },\r\n  \"properties\": {\r\n    \"description\":
+        \"AzCLI test version of root template spec\",\r\n    \"template\": {\r\n      \"$schema\":
+        \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"Location for the
+        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
+        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
+        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
+        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
+        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
+        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
+        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
+        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1871'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 22 Apr 2021 14:46:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"artifacts": [{"path":
+      "artifacts\\createResourceGroup.json", "kind": "template", "template": {"$schema":
+      "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"rgName": {"type": "string"}, "rgLocation":
       {"type": "string"}}, "variables": {}, "resources": [{"type": "Microsoft.Resources/resourceGroups",
       "apiVersion": "2019-10-01", "name": "[parameters(''rgName'')]", "location":
@@ -629,26 +607,23 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4596'
+      - '4608'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -v -f --yes
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"zhoxing@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-11-13T04:12:38.4303047Z\",\r\n    \"lastModifiedBy\": \"zhoxing@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-11-13T04:12:44.2273052Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [\r\n      {\r\n        \"template\":
-        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"zhoxing@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2021-04-22T14:46:54.1482897Z\",\r\n    \"lastModifiedBy\":
+        \"zhoxing@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2021-04-22T14:47:00.4368123Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [\r\n      {\r\n        \"template\": {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
         \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
         \           \"rgName\": {\r\n              \"type\": \"string\"\r\n            },\r\n
         \           \"rgLocation\": {\r\n              \"type\": \"string\"\r\n            }\r\n
@@ -768,11 +743,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '9424'
+      - '9439'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 13 Nov 2020 04:12:44 GMT
+      - Thu, 22 Apr 2021 14:47:00 GMT
       expires:
       - '-1'
       pragma:
@@ -784,7 +759,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -804,10 +779,7 @@ interactions:
       ParameterSetName:
       - --template-spec --yes
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.22.1 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.8.1 (Windows-10-10.0.19041-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-spec000002?api-version=2019-06-01-preview
   response:
@@ -819,7 +791,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 13 Nov 2020 04:12:48 GMT
+      - Thu, 22 Apr 2021 14:47:04 GMT
       expires:
       - '-1'
       pragma:
@@ -831,7 +803,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 200
       message: OK

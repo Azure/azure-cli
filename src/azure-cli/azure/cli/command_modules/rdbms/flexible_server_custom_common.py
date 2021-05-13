@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt_y_n, NoTTYException
 
 logger = get_logger(__name__)
+# pylint: disable=raise-missing-from
 
 
 # Common functions used by other providers
@@ -39,7 +41,6 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
 
     if firewall_rule_name is None:
-        from datetime import datetime
         now = datetime.now()
         firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
                                                                           now.second)
@@ -110,9 +111,9 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
         raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
-                       "If your local context is turned ON, make sure these three parameters exist in local context "
-                       "using \'az local-context show\' If your local context is turned ON, but they are missing or "
-                       "If your local context is turned OFF, consider passing them explicitly.")
+                       "If your parameter persistence is turned ON, make sure these three parameters exist in "
+                       "persistent parameters using \'az config param-persist show\'. "
+                       "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
         confirm = user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
@@ -129,7 +130,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
 def user_confirmation(message, yes=False):
     if yes:
         return True
-    from knack.prompting import prompt_y_n, NoTTYException
+
     try:
         if not prompt_y_n(message):
             raise CLIError('Operation cancelled.')
