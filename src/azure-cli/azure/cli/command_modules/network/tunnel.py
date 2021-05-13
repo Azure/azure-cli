@@ -84,7 +84,7 @@ class TunnelServer:
         content = {
             'resourceId': self.remote_host,
             'protocol': 'tcptunnel',
-            'hostport': self.remote_port,
+            'workloadHostPort': self.remote_port,
             'aztoken': auth_token,
             'token': self.last_token,
         }
