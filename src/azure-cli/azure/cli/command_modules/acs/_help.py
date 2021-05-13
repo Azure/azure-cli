@@ -1057,7 +1057,7 @@ helps['aks rotate-certs'] = """
 
 helps['aks command'] = """
     type: group
-    short-summary: see detail usage in 'az aks command invoke', 'az aks command result'.
+    short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
 """
 
 helps['aks command invoke'] = """
