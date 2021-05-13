@@ -2821,6 +2821,18 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
 
+    @ResourceGroupPreparer(name_prefix='test_network_lb_rules_backend_address_pool', location='eastus2')
+    def test_network_lb_rules_backend_address_pool(self, resource_group):
+
+        self.kwargs['lb'] = 'lb1'
+        self.cmd('network lb create -g {rg} -n {lb}')
+
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-port 60 --backend-port 60 --protocol tcp')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 bap2 --backend-port 40 --protocol tcp')
+
+
 class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='local_gateway_scenario')

@@ -927,7 +927,7 @@ def load_arguments(self, _):
 
     # region LoadBalancers
     with self.argument_context('network lb rule create') as c:
-        c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('backend_address_pool_name', nargs='+', help='List of the backend address pool name. {}'.format(default_existing))
         c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
     for item in ['rule', 'pool']:

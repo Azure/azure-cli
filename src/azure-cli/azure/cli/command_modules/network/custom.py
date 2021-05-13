@@ -3998,7 +3998,7 @@ def create_lb_rule(
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     if not backend_address_pool_name:
-        backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
+        backend_address_pool_name = [_get_default_name(lb, 'backend_address_pools', '--backend-pool-name')]
     new_rule = LoadBalancingRule(
         name=item_name,
         protocol=protocol,
@@ -4007,13 +4007,16 @@ def create_lb_rule(
         frontend_ip_configuration=get_property(lb.frontend_ip_configurations,
                                                frontend_ip_name),
         backend_address_pool=get_property(lb.backend_address_pools,
-                                          backend_address_pool_name),
+                                          backend_address_pool_name[0]),
         probe=get_property(lb.probes, probe_name) if probe_name else None,
         load_distribution=load_distribution,
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
+    if cmd.supported_api_version(min_api='2021-02-01') and len(backend_address_pool_name) > 1:
+        new_rule.backend_address_pool = None
+        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, name) for name in backend_address_pool_name]
     upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
     return get_property(poller.result().load_balancing_rules, item_name)
