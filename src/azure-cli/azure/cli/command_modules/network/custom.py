@@ -3492,7 +3492,7 @@ def create_lb_frontend_ip_configuration(
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None,
-        subnet=None, virtual_network_name=None, public_ip_prefix=None, gateway_load_balancer=None):
+        subnet=None, virtual_network_name=None, public_ip_prefix=None, gateway_lb=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
@@ -3517,8 +3517,8 @@ def set_lb_frontend_ip_configuration(
 
     if public_ip_prefix:
         instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    if gateway_load_balancer:
-        instance.gateway_load_balancer = SubResource(id=gateway_load_balancer)
+    if gateway_lb is not None:
+        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
 
     return parent
 
@@ -4273,7 +4273,7 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
                       private_ip_address=None,
                       private_ip_address_version=None, make_primary=False,
                       application_security_groups=None,
-                      app_gateway_backend_address_pools=None):
+                      app_gateway_backend_address_pools=None, gateway_lb=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
 
     if make_primary:
@@ -4324,7 +4324,8 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
     elif app_gateway_backend_address_pools:
         instance.application_gateway_backend_address_pools = \
             [SubResource(id=x) for x in app_gateway_backend_address_pools]
-
+    if gateway_lb is not None:
+        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
     return parent
 
 
