@@ -1688,7 +1688,7 @@ examples:
         az storage file upload-batch --destination myshare --source . --account-name myaccount --account-key 00000000
   - name: Upload files from a local directory to an Azure Storage File Share with url in a batch operation. 
     text: |
-        az storage file upload-batch --destination https://myaccount.file.core.windows.net/myshare" --source . --account-key 00000000
+        az storage file upload-batch --destination https://myaccount.file.core.windows.net/myshare --source . --account-key 00000000
 """
 
 helps['storage file url'] = """
