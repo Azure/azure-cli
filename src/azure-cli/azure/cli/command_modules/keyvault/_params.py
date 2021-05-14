@@ -14,6 +14,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
 from azure.cli.core.util import get_json_object
+from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._completers import (
@@ -26,7 +27,7 @@ from azure.cli.command_modules.keyvault._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
-    validate_vault_name_and_hsm_name, set_vault_base_url,
+    validate_vault_name_and_hsm_name, set_vault_base_url, process_release_policy,
     process_hsm_name, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
@@ -355,6 +356,15 @@ def load_arguments(self, _):
                            type=datetime_type)
                 c.argument('not_before', default=None, type=datetime_type,
                            help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+                c.argument('exportable', arg_type=get_three_state_flag(),
+                           is_preview=True,
+                           help='Set "exportable" field in KeyAttributes. To create key with release policy, "exportable" attribute must be true.')
+
+            c.argument('release_policy', options_list=['--policy'],
+                       help='JSON encoded policy definition. '
+                            'Use @{file} to load from a file(e.g. @my_policy.json).',
+                       type=shell_safe_json_parse, is_preview=True,
+                       validator=process_release_policy)
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -374,6 +384,7 @@ def load_arguments(self, _):
         c.argument('pem_password', help='Password of PEM file.')
         c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), validator=validate_key_import_source)
         c.argument('byok_string', type=file_type, help='BYOK string containing the key to be imported. Must not be password protected.', validator=validate_key_import_source)
+        c.argument('byok_kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), help='The key type of BYOK file or string.')
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),

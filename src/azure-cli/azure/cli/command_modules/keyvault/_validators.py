@@ -145,6 +145,25 @@ def process_hsm_name(ns):
         ns.hsm_name = ns.identifier
 
 
+def process_release_policy(ns):
+    if ns.release_policy:
+        import json
+
+        # for custom function: key create/import
+        if hasattr(ns, 'exportable'):
+            ns.exportable = True
+            ns.release_policy = json.dumps(ns.release_policy).encode('utf-8')
+
+        # for sdk function: key set-attributes
+        if hasattr(ns, 'key_attributes'):
+            from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_keys_t1.models import KeyReleasePolicy
+            ns.key_attributes.exportable = True
+            ns.release_policy = KeyReleasePolicy(
+                data=json.dumps(ns.release_policy).encode('utf-8'),
+                content_type='application/json; charset=utf-8; version=1.0'
+            )
+
+
 def validate_vault_name_and_hsm_name(ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)

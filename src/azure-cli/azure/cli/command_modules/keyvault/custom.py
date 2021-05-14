@@ -1083,9 +1083,31 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 def create_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+               not_before=None, tags=None, kty=None, curve=None, release_policy=None, exportable=None):
+    if is_azure_stack_profile(cmd):
+        resource_type = ResourceType.DATA_KEYVAULT
+    else:
+        resource_type = ResourceType.DATA_PRIVATE_KEYVAULT_KEYS
+
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=resource_type)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    if not is_azure_stack_profile(cmd) and exportable is not None:
+        key_attrs.exportable = exportable
+
+    if is_azure_stack_profile(cmd):
+        return client.create_key(vault_base_url=vault_base_url,
+                                 key_name=key_name,
+                                 kty=kty,
+                                 key_size=key_size,
+                                 key_ops=key_ops,
+                                 key_attributes=key_attrs,
+                                 tags=tags,
+                                 curve=curve)
+
+    key_rp = None
+    if release_policy:
+        KeyReleasePolicy = cmd.get_models('KeyReleasePolicy', resource_type=resource_type)
+        key_rp = KeyReleasePolicy(data=release_policy, content_type='application/json; charset=utf-8; version=1.0')
 
     return client.create_key(vault_base_url=vault_base_url,
                              key_name=key_name,
@@ -1094,7 +1116,8 @@ def create_key(cmd, client, key_name=None, vault_base_url=None,
                              key_ops=key_ops,
                              key_attributes=key_attrs,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             release_policy=key_rp)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1204,13 +1227,19 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', curve=None):
+               byok_string=None, kty='RSA', curve=None, release_policy=None, exportable=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
+    if is_azure_stack_profile(cmd):
+        resource_type = ResourceType.DATA_KEYVAULT
+    else:
+        resource_type = ResourceType.DATA_PRIVATE_KEYVAULT_KEYS
 
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=resource_type)
+    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=resource_type)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    if not is_azure_stack_profile(cmd) and exportable is not None:
+        key_attrs.exportable = exportable
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1251,7 +1280,15 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    if is_azure_stack_profile(cmd):
+        return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+
+    key_rp = None
+    if release_policy:
+        KeyReleasePolicy = cmd.get_models('KeyReleasePolicy', resource_type=resource_type)
+        key_rp = KeyReleasePolicy(data=release_policy, content_type='application/json; charset=utf-8; version=1.0')
+    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags,
+                             release_policy=key_rp)
 
 
 def _bytes_to_int(b):
@@ -1384,13 +1421,12 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
 
 def get_policy_template():
     policy = {
-        'version': '0.2',
+        'version': '1.0.0',
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
                 'claim': '<claim name>',
-                'condition': 'equals',
-                'value': '<value to match>'
+                'equals': '<value to match>'
             }]
         }]
     }

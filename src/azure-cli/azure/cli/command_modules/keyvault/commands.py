@@ -42,10 +42,11 @@ def load_command_table(self, _):
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
+        private_date_keys_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT_KEYS)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
     else:
-        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
+        mgmt_hsms_entity = private_data_entity = private_date_keys_entity = data_backup_entity = data_access_control_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -140,6 +141,24 @@ def load_command_table(self, _):
             g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault key', private_date_keys_entity.command_type) as g:
+            g.keyvault_custom('create', 'create_key',
+                              doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
+            g.keyvault_command('set-attributes', 'update_key')
+            g.keyvault_command('show', 'get_key')
+            g.keyvault_custom('import', 'import_key')
+            g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
+            
+    else:
+        with self.command_group('keyvault key', data_entity.command_type) as g:
+            g.keyvault_custom('create', 'create_key',
+                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
+            g.keyvault_command('set-attributes', 'update_key')
+            g.keyvault_command('show', 'get_key')
+            g.keyvault_custom('import', 'import_key')
+            g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
+
     with self.command_group('keyvault key', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
@@ -154,10 +173,6 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                extract_subresource_name(id_parameter='kid')))
-        g.keyvault_custom('create', 'create_key',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
-        g.keyvault_command('set-attributes', 'update_key')
-        g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
         g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
@@ -166,9 +181,7 @@ def load_command_table(self, _):
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
-        g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
-        g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 

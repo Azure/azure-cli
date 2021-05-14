@@ -34,6 +34,9 @@ KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.DATA_PRIVATE_KEYVAULT:
         'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
         'key_vault_client#{class_name}{obj_name}',
+    ResourceType.DATA_PRIVATE_KEYVAULT_KEYS:
+        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_keys_t1{api_version}.'
+        'key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
@@ -82,6 +85,8 @@ def get_client_factory(resource_type, client_name=''):
         return keyvault_data_plane_factory
     if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT:
         return keyvault_private_data_plane_factory_v7_2_preview
+    if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT_KEYS:
+        return keyvault_private_data_plane_keys_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
@@ -166,6 +171,42 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     from azure.cli.core.util import should_disable_connection_verify
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
+
+    def get_token(server, resource, scope):  # pylint: disable=unused-argument
+        import adal
+        try:
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
+        except adal.AdalError as err:
+            # pylint: disable=no-member
+            if (hasattr(err, 'error_response') and
+                    ('error_description' in err.error_response) and
+                    ('AADSTS70008:' in err.error_response['error_description'])):
+                raise CLIError(
+                    "Credentials have expired due to inactivity. Please run 'az login'")
+            raise CLIError(err)
+
+    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+
+    # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
+    # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library
+    # pylint: disable=protected-access
+    if hasattr(client, '_client') and hasattr(client._client, 'config'):
+        verify = not should_disable_connection_verify()
+        client._client.config.connection.verify = verify
+    else:
+        from knack.log import get_logger
+        logger = get_logger(__name__)
+        logger.info('Could not find the configuration object to turn off the verification if needed')
+
+    return client
+
+
+def keyvault_private_data_plane_keys_client(cli_ctx, _):
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_keys_t1 import (
+        KeyVaultAuthentication, KeyVaultClient)
+    from azure.cli.core.util import should_disable_connection_verify
+
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT_KEYS))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
