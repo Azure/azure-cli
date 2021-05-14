@@ -265,7 +265,8 @@ def acr_repository_update(cmd,
                           delete_enabled=None,
                           list_enabled=None,
                           read_enabled=None,
-                          write_enabled=None):
+                          write_enabled=None,
+                          teleport_enabled=None):
     json_payload = {}
 
     if delete_enabled is not None:
@@ -283,6 +284,10 @@ def acr_repository_update(cmd,
     if write_enabled is not None:
         json_payload.update({
             'writeEnabled': write_enabled
+        })
+    if teleport_enabled is not None:
+        json_payload.update({
+            'teleportEnabled': teleport_enabled
         })
 
     permission = RepoAccessTokenPermission.META_WRITE_META_READ.value if json_payload \

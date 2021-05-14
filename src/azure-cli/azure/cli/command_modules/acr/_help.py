@@ -487,6 +487,10 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world:latest --write-enabled false
   - name: Update the attributes of the image referenced by digest 'hello-world@sha256:abc123' to disable write operation.
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
+  - name: Update the attributes of the Repository to disable Teleport feature.
+    text: az acr repository update -n MyRegistry --teleport-enabled false
+  - name: Update the attributes to enable Teleport feature on all new images in the Repository, which improves container startup performance.
+    text: az acr repository update -n MyRegistry --teleport-enabled true
 """
 
 helps['acr run'] = """
