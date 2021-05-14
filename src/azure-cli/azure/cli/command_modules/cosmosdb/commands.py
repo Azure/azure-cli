@@ -284,3 +284,21 @@ def load_command_table(self, _):
         g.cosmosdb_custom('create', 'cli_cosmosdb_collection_create', table_transformer=collection_output)
         g.cosmosdb_custom('delete', 'cli_cosmosdb_collection_delete', confirmation=True)
         g.cosmosdb_custom('update', 'cli_cosmosdb_collection_update')
+
+    # SQL role definition operations
+    with self.command_group('cosmosdb sql role definition', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_role_definition_create')
+        g.custom_command('update', 'cli_cosmosdb_sql_role_definition_update')
+        g.custom_command('exists', 'cli_cosmosdb_sql_role_definition_exists')
+        g.command('list', 'list_sql_role_definitions')
+        g.show_command('show', 'get_sql_role_definition')
+        g.command('delete', 'begin_delete_sql_role_definition', confirmation=True)
+
+    # SQL role assignment operations
+    with self.command_group('cosmosdb sql role assignment', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_role_assignment_create')
+        g.custom_command('update', 'cli_cosmosdb_sql_role_assignment_update')
+        g.custom_command('exists', 'cli_cosmosdb_sql_role_assignment_exists')
+        g.command('list', 'list_sql_role_assignments')
+        g.show_command('show', 'get_sql_role_assignment')
+        g.command('delete', 'begin_delete_sql_role_assignment', confirmation=True)

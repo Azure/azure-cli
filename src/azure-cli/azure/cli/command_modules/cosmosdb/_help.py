@@ -887,3 +887,145 @@ examples:
   - name: Creates a new Azure Cosmos DB database account with two regions. UK South is zone redundant.
     text: az cosmosdb update -n myaccount -g mygroup --locations regionName=eastus failoverPriority=0 isZoneRedundant=False --locations regionName=uksouth failoverPriority=1 isZoneRedundant=True --enable-multiple-write-locations --network-acl-bypass AzureServices --network-acl-bypass-resource-ids /subscriptions/subId/resourceGroups/rgName/providers/Microsoft.Synapse/workspaces/wsName
 """
+
+helps['cosmosdb sql role'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL role resources.
+"""
+
+helps['cosmosdb sql role definition'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL role definitions.
+"""
+
+helps['cosmosdb sql role definition create'] = """
+type: command
+short-summary: Create a SQL role definition under an Azure Cosmos DB account.
+examples:
+  - name: Create a SQL role definition under an Azure Cosmos DB account using a JSON string.
+    text: |
+      az cosmosdb sql role definition create --account-name MyAccount --resource-group MyResourceGroup --body '{
+        "Id": "be79875a-2cc4-40d5-8958-566017875b39",
+        "RoleName": "My Read Only Role",
+        "Type": "CustomRole",
+        "AssignableScopes": ["/dbs/mydb/colls/mycontainer"],
+        "Permissions": [{
+          "DataActions": [
+            "Microsoft.DocumentDB/databaseAccounts/readMetadata",
+            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read",
+            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery",
+            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/readChangeFeed"
+          ]
+        }]
+      }'
+  - name: Create a SQL role definition under an Azure Cosmos DB account using a JSON file.
+    text: az cosmosdb sql role definition create --account-name MyAccount --resource-group MyResourceGroup --body @role-definition.json
+"""
+
+helps['cosmosdb sql role definition delete'] = """
+type: command
+short-summary: Delete a SQL role definition under an Azure Cosmos DB account.
+examples:
+  - name: Create a SQL role definition under an Azure Cosmos DB account.
+    text: az cosmosdb sql role definition delete --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb sql role definition exists'] = """
+type: command
+short-summary: Check if an Azure Cosmos DB role definition exists.
+examples:
+  - name: Check if an Azure Cosmos DB role definition exists.
+    text: az cosmosdb sql role definition exists --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb sql role definition list'] = """
+type: command
+short-summary: List all SQL role definitions under an Azure Cosmos DB account.
+examples:
+  - name: List all SQL role definitions under an Azure Cosmos DB account.
+    text: az cosmosdb sql role definition list --account-name MyAccount --resource-group MyResourceGroup
+"""
+
+helps['cosmosdb sql role definition show'] = """
+type: command
+short-summary: Show the properties of a SQL role definition under an Azure Cosmos DB account.
+examples:
+  - name: Show the properties of a SQL role definition under an Azure Cosmos DB account.
+    text: az cosmosdb sql role definition show --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb sql role definition update'] = """
+type: command
+short-summary: Update a SQL role definition under an Azure Cosmos DB account.
+examples:
+  - name: Update a SQL role definition under an Azure Cosmos DB account.
+    text: az cosmosdb sql role definition update --account-name MyAccount --resource-group MyResourceGroup --body @role-definition.json
+"""
+
+helps['cosmosdb sql role assignment'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL role assignments.
+"""
+
+helps['cosmosdb sql role assignment create'] = """
+type: command
+short-summary: Create a SQL role assignment under an Azure Cosmos DB account.
+examples:
+  - name: Create a SQL role assignment under an Azure Cosmos DB account using Role Definition Name.
+    text: |
+      az cosmosdb sql role assignment create --account-name MyAccount --resource-group MyResourceGroup \\
+        --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8 \\
+        --role-definition-name "My Read Only Role" \\
+        --scope "/dbs/mydb/colls/mycontainer" \\
+        --principal-id 6328f5f7-dbf7-4244-bba8-fbb9d8066506
+  - name: Create a SQL role assignment under an Azure Cosmos DB account using Role Definition ID.
+    text: |
+      az cosmosdb sql role assignment create --account-name MyAccount --resource-group MyResourceGroup \\
+        --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8 \\
+        --role-definition-id be79875a-2cc4-40d5-8958-566017875b39 \\
+        --scope "/dbs/mydb/colls/mycontainer" \\
+        --principal-id 6328f5f7-dbf7-4244-bba8-fbb9d8066506
+"""
+
+helps['cosmosdb sql role assignment delete'] = """
+type: command
+short-summary: Delete a SQL role assignment under an Azure Cosmos DB account.
+examples:
+  - name: Delete a SQL role assignment under an Azure Cosmos DB account.
+    text: az cosmosdb sql role assignment delete --account-name MyAccount --resource-group MyResourceGroup --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8
+"""
+
+helps['cosmosdb sql role assignment exists'] = """
+type: command
+short-summary: Check if an Azure Cosmos DB role assignment exists.
+examples:
+  - name: Check if an Azure Cosmos DB role assignment exists.
+    text: az cosmosdb sql role assignment exists --account-name MyAccount --resource-group MyResourceGroup --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8
+"""
+
+helps['cosmosdb sql role assignment list'] = """
+type: command
+short-summary: List all SQL role assignments under an Azure Cosmos DB account.
+examples:
+  - name: List all SQL role assignments under an Azure Cosmos DB account.
+    text: az cosmosdb sql role assignment list --account-name MyAccount --resource-group MyResourceGroup
+"""
+
+helps['cosmosdb sql role assignment show'] = """
+type: command
+short-summary: Show the properties of a SQL role assignment under an Azure Cosmos DB account.
+examples:
+  - name: Show the properties of a SQL role assignment under an Azure Cosmos DB account.
+    text: az cosmosdb sql role assignment show --account-name MyAccount --resource-group MyResourceGroup --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8
+"""
+
+helps['cosmosdb sql role assignment update'] = """
+type: command
+short-summary: Update a SQL role assignment under an Azure Cosmos DB account.
+examples:
+  - name: Update a SQL role assignment under an Azure Cosmos DB account.
+    text: |
+      az cosmosdb sql role assignment update --account-name MyAccount --resource-group MyResourceGroup \\
+        --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8 \\
+        --role-definition-id updated-role-definition-id
+"""
