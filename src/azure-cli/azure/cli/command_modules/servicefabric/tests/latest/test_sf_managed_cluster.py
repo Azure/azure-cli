@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+import time
+
 from azure.cli.command_modules.servicefabric.tests.latest.test_util import (
     _create_keyvault,
     _add_selfsigned_cert_to_keyvault
 )
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
-from azure.mgmt.servicefabric.models import ErrorModelException
+from azure.core.exceptions import HttpResponseError
 
 
 class ServiceFabricManagedClustersTests(ScenarioTest):
@@ -31,7 +33,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                  checks=[self.check('provisioningState', 'Succeeded')])
 
         # 'InvalidParameter - Cluster must have at least one active primary node type'
-        with self.assertRaisesRegexp(ErrorModelException, 'Cluster must have at least one active primary node type'):
+        with self.assertRaisesRegexp(HttpResponseError, 'Cluster must have at least one active primary node type'):
             self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n pnt')
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
@@ -66,15 +68,27 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 1)])
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 6 --is-stateless',
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 6 --is-stateless --multiple-placement-groups',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('dataDiskType', 'StandardSSD_LRS'),
-                         self.check('isStateless ', True)])
+                         self.check('isStateless ', True),
+                         self.check('multiplePlacementGroups ', True)])
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 2)])
 
-        self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n snt --node-name snt_0 snt_1')
+
+        # first operation with retry in case nodes take some time to be ready
+        timeout = time.time() + 300
+        while True:
+            try:
+                self.cmd('az sf managed-node-type node restart -g {rg} -c {cluster_name} -n snt --node-name snt_0 snt_1')
+                break
+            except HttpResponseError:
+                if time.time() > timeout:
+                    raise
+                if self.in_recording or self.is_live:
+                    time.sleep(60)
 
         self.cmd('az sf managed-node-type node delete -g {rg} -c {cluster_name} -n snt --node-name snt_1')
 

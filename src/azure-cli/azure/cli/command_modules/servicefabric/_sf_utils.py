@@ -5,7 +5,6 @@
 
 import json
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.mgmt.servicefabric.models import (ErrorModelException)
 from knack.log import get_logger
 from knack.util import CLIError
 from ._client_factory import (resource_client_factory, servicefabric_managed_client_factory)

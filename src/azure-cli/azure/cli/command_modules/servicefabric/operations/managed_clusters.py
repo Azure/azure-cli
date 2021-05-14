@@ -95,7 +95,7 @@ def create_cluster(cmd,
                                      tags=tags)
 
         logger.info("Creating managed cluster '%s'", cluster_name)
-        poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, new_cluster)
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, new_cluster)
         cluster = LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
     except HttpResponseError as ex:
@@ -123,7 +123,7 @@ def update_cluster(cmd,
         if tags is not None:
             cluster.tags = tags
 
-        poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
@@ -153,7 +153,7 @@ def add_client_cert(cmd,
         else:
             CLIError("Thumbprint and Common name are empty")
 
-        poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
@@ -179,7 +179,7 @@ def delete_client_cert(cmd,
                 cluster.clients = [cert for cert in cluster.clients if cert.common_name.lower() not in common_name]
 
             if initial_size > len(cluster.clients):
-                poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+                poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
     except HttpResponseError as ex:

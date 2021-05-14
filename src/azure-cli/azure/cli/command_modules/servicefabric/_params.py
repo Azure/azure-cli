@@ -297,8 +297,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
         c.argument('instance_count', help='essage = "The number of nodes in the node type.')
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
-        c.argument('disk_size', help='Disk size for each vm in the node type in GBs.', default=100)
-        c.argument('data_disk_type', arg_type=get_enum_type(DiskType), 
+        c.argument('disk_size', options_list=['--disk-size', '--data-disk-size'], help='Disk size for each vm in the node type in GBs.', default=100)
+        c.argument('disk_type', arg_type=get_enum_type(DiskType), options_list=['--disk-type', '--data-disk-type'],
                    help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
                    'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.'
                    'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.'
@@ -314,7 +314,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vm_image_version', help='The version of the Azure Virtual Machines Marketplace image. ', default='latest')
         c.argument('capacity', arg_type=capacity)
         c.argument('placement_property', arg_type=placement_property)
-        c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default='latest')
+        c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
+        c.argument('multiple_placement_groups', arg_type=get_three_state_flag(), help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')
