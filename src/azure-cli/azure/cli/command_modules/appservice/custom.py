@@ -756,7 +756,7 @@ def _build_identities_info(identities):
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -801,7 +801,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
