@@ -119,7 +119,7 @@ def list_cluster(client, resource_group_name=None):
 def new_cluster(cmd,
                 client,
                 resource_group_name,
-                location,
+                location=None,
                 certificate_subject_name=None,
                 parameter_file=None,
                 template_file=None,
@@ -170,6 +170,9 @@ def new_cluster(cmd,
     rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
     if rg is None:
         _create_resource_group_name(cli_ctx, resource_group_name, location)
+
+    if location is None:
+        location = rg.location
 
     if vault_name is None:
         vault_name = resource_group_name

@@ -803,7 +803,7 @@ examples:
   - name: Update managed stateless service.
     text: >
         az sf managed-service update -g testRG -c testCluster --application-name testApp --service-name testService --min-instance-count 2 \\
-          --min-instance-percentage 20'
+          --min-instance-percentage 20
   - name: Update managed stateful service.
     text: >
         az sf managed-service update -g testRG -c testCluster --application-name testApp --service-name testService2 --service-placement-time-limit '00:11:00' \\
