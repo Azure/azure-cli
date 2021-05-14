@@ -3,13 +3,6 @@
 Release History
 ===============
 
-2.24.0
-++++++
-
-**Cosmos DB**
-
-* Create and manage Role Definitions and Role Assignments for enforcing data plane RBAC on Cosmos DB SQL accounts
-
 2.23.0
 ++++++
 
