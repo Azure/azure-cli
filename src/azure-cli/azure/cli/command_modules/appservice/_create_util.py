@@ -155,7 +155,7 @@ def get_lang_from_content(src_path, html=False):
                          fnmatch.fnmatch(file, "*shtml.")):
                 static_html_file = os.path.join(src_path, file)
                 break
-            elif fnmatch.fnmatch(file, "*.csproj"):
+            if fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
                 break
 
