@@ -1938,3 +1938,29 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account create -n {src_sc} -g {rg} -r true', checks=[
             JMESPathCheck('allowCrossTenantReplication', True)])
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2euap', kind='StorageV2')
+    def test_storage_account_cross_tenant_or_policy(self, resource_group, destination_account):
+
+        dest_account_info = self.get_account_info(resource_group, destination_account)
+        dest_container = self.create_container(dest_account_info)
+        self.kwargs.update({
+            'rg': resource_group,
+            'dest_sc': destination_account,
+            'scont': 'scont',
+            'dcont': dest_container,
+        })
+
+        self.cmd('storage account blob-service-properties update -n {dest_sc} -g {rg} --enable-versioning', checks=[
+                 JMESPathCheck('isVersioningEnabled', True)])
+
+        # Create ORS policy on destination account with cross tenant account as source account
+        result = self.cmd('storage account or-policy create -n {dest_sc} '
+                          '-s /subscriptions/1c638cf4-608f-4ee6-b680-c329e824c3a8/resourcegroups/clitest/providers/Microsoft.Storage/storageAccounts/clitestcor '
+                          '--dcont {dcont} --scont {scont} -t "2020-02-19T16:05:00Z"').get_output_in_json()
+        self.assertIn('policyId', result)
+        self.assertIn('ruleId', result['rules'][0])
+        self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
