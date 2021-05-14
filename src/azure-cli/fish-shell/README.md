@@ -1,6 +1,6 @@
 # Fish Shell Completions
 
-![fish shell](../../doc/assets/az-cli-fish.gif)
+![fish shell](../../../doc/assets/az-cli-fish.gif)
 
 Source current completions to your fish.config:
 ```sh

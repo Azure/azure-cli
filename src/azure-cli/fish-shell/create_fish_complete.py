@@ -28,18 +28,31 @@ with open("az.fish", "w") as f:
     description_re = re.compile(r'(?<=:\s).*$')
 
     output = []
+    did_write = False
 
     # Create a function to match on a specific command
     f.write('''
+function __get_cmd
+    for x in $argv
+        if string match -v -q -- '-*' $x
+            echo $x
+        else
+            break
+        end
+    end
+end
+
 function __is_az_subcommand
     set -l cmd (commandline -poc)
-    set args (string join ' ' $argv)
-    set sub (string join ' ' $cmd[2..])
+    set -l cmds (__get_cmd $cmd[2..])
+    set -l args (string join -- ' ' $argv)
+    set -l sub (string join -- ' ' $cmds)
     if [ "$sub" = "$args" ]
         return 0
     end
     return 1
 end
+
 ''')
 
     is_az = True
@@ -54,13 +67,17 @@ end
         lines = response.split('\n')
 
         condition = ""
-        root_cmds = []
-
         # if its a root command
         if is_az:
             condition = '-n "__fish_az_no_subcommand"'
         else:
             condition = '-A -n "__is_az_subcommand \'' + " ".join(command[1:]) + '\'"'
+
+        root_cmds = []
+        did_write = False
+        print(command)
+
+        f.write(f'# {command}\n')
 
         for line in lines:
             command_match = command_lines_re.match(line)
@@ -80,9 +97,10 @@ end
                     desc_text = fix_strings(desc.group())
                     # Write complete command to file
                     f.write(f'complete -c az -d "{desc_text}" {condition} -f -a "{matched_sub_cmd}"\n')
+                    did_write = True
 
             # This contains a flag
-            if flag_match is None:
+            if flag_match is not None:
                 flag = flag_re.search(line)
                 desc = description_re.search(line)
 
@@ -92,6 +110,7 @@ end
                     desc_text = fix_strings(desc.group())
                     # Write complete with long flag option
                     f.write(f'complete -c az -d "{desc_text}" {condition} -f -l "{matched_flag}"\n')
+                    did_write = True
 
         if is_az:
             # Function to test if root command
@@ -108,5 +127,8 @@ function __fish_az_no_subcommand
 end
 ''')
 
-        # toggle off after parsing root commands
+            # toggle off after parsing root commands
         is_az = False
+
+        if did_write:
+            f.write('\n')
