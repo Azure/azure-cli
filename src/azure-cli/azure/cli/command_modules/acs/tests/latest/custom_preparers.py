@@ -35,6 +35,8 @@ class AKSCustomResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueRepl
         self.dev_setting_location = os.environ.get(dev_setting_location, None)
         if self.dev_setting_location:
             self.location = self.dev_setting_location
+        else:
+            self.dev_setting_location = location
 
     def create_resource(self, name, **kwargs):
         if self.dev_setting_name:
