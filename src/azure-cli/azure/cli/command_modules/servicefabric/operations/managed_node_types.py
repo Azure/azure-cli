@@ -22,6 +22,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
+# pylint:disable=too-many-locals,
 def create_node_type(cmd,
                      client,
                      resource_group_name,
@@ -160,7 +161,6 @@ def restart_node(cmd,
                  node_name,
                  force=False):
     try:
-        
         nodes = [node_name] if isinstance(node_name, str) else node_name
         action_parameters = NodeTypeActionParameters(nodes=nodes, force=force)
         poller = client.node_types.begin_restart(resource_group_name, cluster_name, node_type_name, parameters=action_parameters)

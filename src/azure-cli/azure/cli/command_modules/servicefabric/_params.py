@@ -69,7 +69,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_output_folder', options_list=['--certificate-output-folder', '--cert-out-folder'], help='The folder of the new certificate file to be created.')
         c.argument('certificate_password', help='The password of the certificate file.')
         c.argument('certificate_subject_name', options_list=['--certificate-subject-name', '--cert-subject-name'], help='The subject name of the certificate to be created.')
-        c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name, if not given it will be cluster resource group name')
+        c.argument('vault_resource_group_name', options_list=['--vault-rg'], help='Key vault resource group name, if not given it will be cluster resource group name')
         c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
         c.argument('vm_sku', help='VM Sku')
@@ -315,7 +315,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('capacity', arg_type=capacity)
         c.argument('placement_property', arg_type=placement_property)
         c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
-        c.argument('multiple_placement_groups', arg_type=get_three_state_flag(), help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
+        c.argument('multiple_placement_groups', options_list=['--multiple-placement-groups', '--multi-place-groups'], arg_type=get_three_state_flag(), 
+                   help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')

@@ -25,6 +25,7 @@ from .._client_factory import (resource_client_factory)
 logger = get_logger(__name__)
 
 
+# pylint:disable=too-many-locals
 def create_cluster(cmd,
                    client,
                    resource_group_name,

@@ -75,11 +75,14 @@ def servicefabric_managed_client_factory(cli_ctx, **_):
 def servicefabric_managed_client_factory_all(cli_ctx, kwargs):
     return servicefabric_managed_client_factory(cli_ctx, **kwargs)
 
+
 def servicefabric_managed_cluster_client_factory(cli_ctx, kwargs):
     return servicefabric_managed_client_factory(cli_ctx, **kwargs).managed_clusters
 
+
 def servicefabric_managed_node_type_client_factory(cli_ctx, kwargs):
     return servicefabric_managed_client_factory(cli_ctx, **kwargs).node_types
+
 
 def servicefabric_managed_application_type_client_factory(cli_ctx, kwargs):
     return servicefabric_managed_client_factory(cli_ctx, **kwargs).application_types

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
