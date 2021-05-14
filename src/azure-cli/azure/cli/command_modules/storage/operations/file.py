@@ -62,12 +62,16 @@ def get_stats(client, resource_group_name, account_name, share_name):
                       expand='stats')
 
 
-def list_share_rm(client, resource_group_name, account_name, include_deleted=None):
+def list_share_rm(client, resource_group_name, account_name, include_deleted=None, include_snapshot=None):
+    expand = None
+    expand_item = []
     if include_deleted:
-        return client.list(resource_group_name=resource_group_name, account_name=account_name,
-                           expand='deleted')
-
-    return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=None)
+        expand_item .append('deleted')
+    if include_snapshot:
+        expand_item .append('snapshots')
+    if expand:
+        expand = '.'.join(expand_item)
+    return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=expand)
 
 
 def restore_share_rm(cmd, client, resource_group_name, account_name, share_name, deleted_version, restored_name=None):
