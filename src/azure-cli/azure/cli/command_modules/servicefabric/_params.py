@@ -372,6 +372,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Determines whether the application should be recreated on update. If value=true, the rest of the upgrade policy parameters are not allowed.')
         c.argument('upgrade_replica_set_check_timeout', options_list=['--upgrade-replica-set-check-timeout', '--replica-check-timeout', '--rep-check-timeout'],
                    help='Specify the maximum time, in seconds, that Service Fabric waits for a service to reconfigure into a safe state, if not already in a safe state, before Service Fabric proceeds with the upgrade.')
+        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
+                   help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade, only for those instances which have a non-zero delay duration configured in the service description.')
         c.argument('failure_action', arg_type=get_enum_type(FailureAction),
                    help='Specify the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
         c.argument('upgrade_mode', arg_type=get_enum_type(RollingUpgradeMode),
