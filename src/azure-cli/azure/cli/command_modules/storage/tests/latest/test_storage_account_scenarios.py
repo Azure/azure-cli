@@ -1800,7 +1800,8 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='source_account', location='eastus2', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='destination_account', location='eastus2', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='new_account', location='eastus2', kind='StorageV2')
-    def test_storage_account_or_policy(self, resource_group, source_account, destination_account, new_account):
+    def test_storage_account_or_policy(self, resource_group, source_account, destination_account,
+                                       new_account):
         src_account_info = self.get_account_info(resource_group, source_account)
         src_container = self.create_container(src_account_info)
         dest_account_info = self.get_account_info(resource_group, destination_account)
@@ -1808,8 +1809,11 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'src_sc': source_account,
+            'src_sc_id': self.get_account_id(resource_group, source_account),
             'dest_sc': destination_account,
+            'dest_sc_id': self.get_account_id(resource_group, destination_account),
             'new_sc': new_account,
+            'new_sc_id': self.get_account_id(resource_group, new_account),
             'scont': src_container,
             'dcont': dest_container,
         })
@@ -1840,8 +1844,8 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         # Get policy properties from destination account
         self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \
             .assert_with_checks(JMESPathCheck('type', "Microsoft.Storage/storageAccounts/objectReplicationPolicies")) \
-            .assert_with_checks(JMESPathCheck('sourceAccount', source_account)) \
-            .assert_with_checks(JMESPathCheck('destinationAccount', destination_account)) \
+            .assert_with_checks(JMESPathCheck('sourceAccount', self.kwargs['src_sc_id'])) \
+            .assert_with_checks(JMESPathCheck('destinationAccount', self.kwargs['dest_sc_id'])) \
             .assert_with_checks(JMESPathCheck('rules[0].sourceContainer', src_container)) \
             .assert_with_checks(JMESPathCheck('rules[0].destinationContainer', dest_container))
 
@@ -1856,7 +1860,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('destinationContainer', dest_container))
 
         result = self.cmd('storage account or-policy rule add -g {} -n {} --policy-id {} -d {} -s {} -t "2020-02-19T16:05:00Z"'.format(
-            resource_group, destination_account, self.kwargs["policy_id"], dest_container1, src_container1)).get_output_in_json()
+            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], dest_container1, src_container1)).get_output_in_json()
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
 
         self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}')\
@@ -1864,20 +1868,20 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
         # Update rules
         self.cmd('storage account or-policy rule update -g {} -n {} --policy-id {} --rule-id {} --prefix-match blobA blobB -t "2020-02-20T16:05:00Z"'.format(
-            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId'])) \
+            resource_group, self.kwargs["dest_sc"], result['policyId'], result['rules'][1]['ruleId'])) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[0]', 'blobA')) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[1]', 'blobB')) \
             .assert_with_checks(JMESPathCheck('filters.minCreationTime', '2020-02-20T16:05:00Z'))
 
         self.cmd('storage account or-policy rule show -g {} -n {} --policy-id {} --rule-id {}'.format(
-            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId'])) \
+            resource_group, self.kwargs["dest_sc"], result['policyId'], result['rules'][1]['ruleId'])) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[0]', 'blobA')) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[1]', 'blobB')) \
             .assert_with_checks(JMESPathCheck('filters.minCreationTime', '2020-02-20T16:05:00Z'))
 
         # Remove rules
         self.cmd('storage account or-policy rule remove -g {} -n {} --policy-id {} --rule-id {}'.format(
-            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId']))
+            resource_group, self.kwargs["dest_sc"], result['policyId'], result['rules'][1]['ruleId']))
         self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}') \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
@@ -1893,18 +1897,18 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
                 .get_output_in_json()
             json.dump(policy, f)
         self.kwargs['policy'] = policy_file
-        self.cmd('storage account or-policy create -g {rg} -n {src_sc} -p @"{policy}"')\
-            .assert_with_checks(JMESPathCheck('type', "Microsoft.Storage/storageAccounts/objectReplicationPolicies")) \
-            .assert_with_checks(JMESPathCheck('sourceAccount', source_account)) \
-            .assert_with_checks(JMESPathCheck('destinationAccount', destination_account)) \
-            .assert_with_checks(JMESPathCheck('rules[0].sourceContainer', src_container)) \
-            .assert_with_checks(JMESPathCheck('rules[0].destinationContainer', dest_container)) \
-            .assert_with_checks(JMESPathCheck('rules[0].filters.minCreationTime', '2020-02-19T16:05:00Z'))
+        result = self.cmd('storage account or-policy create -g {rg} -n {src_sc} -p @"{policy}"').get_output_in_json()
+        self.assertEqual(result['type'], "Microsoft.Storage/storageAccounts/objectReplicationPolicies")
+        self.assertIn(self.kwargs['src_sc'], result['sourceAccount'])
+        self.assertIn(self.kwargs['dest_sc'], result['destinationAccount'])
+        self.assertEqual(result['rules'][0]['sourceContainer'], src_container)
+        self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
+        self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
         # Update ORS policy
-        self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
-            resource_group, destination_account, self.kwargs["policy_id"], new_account)) \
-            .assert_with_checks(JMESPathCheck('sourceAccount', new_account))
+        result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
+            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
+        self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
 
         # Delete policy from destination and source account
         self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')

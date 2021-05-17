@@ -729,10 +729,11 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
-        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default' \
-                and account_name == or_policy.source_account:
-            raise CLIError(
-                'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')
+        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
+            from msrestazure.tools import parse_resource_id
+            if account_name == parse_resource_id(or_policy.source_account)['name']:
+                raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
+                               'destination account.')
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
