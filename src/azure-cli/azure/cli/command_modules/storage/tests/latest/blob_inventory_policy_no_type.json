@@ -1,17 +1,26 @@
  {
     "enabled": true,
-    "destination": "mycontainer",
     "rules": [
       {
         "enabled": true,
         "name": "inventoryPolicyRule1",
         "definition": {
-          "filters": {
-            "blobTypes": [
-              "blockBlob"
-            ]
-          }
-        }
+          "format": "Parquet",
+          "schedule": "Weekly",
+          "objectType": "Container",
+          "schemaFields": [
+            "Name",
+            "Last-Modified",
+            "Metadata",
+            "LeaseStatus",
+            "LeaseState",
+            "LeaseDuration",
+            "PublicAccess",
+            "HasImmutabilityPolicy",
+            "HasLegalHold"
+          ]
+        },
+        "destination": "mycontainer"
       }
     ]
   }

@@ -1,11 +1,11 @@
  {
     "enabled": true,
     "type": "Inventory",
-    "destination": "mycontainer",
     "rules": [
       {
         "enabled": true,
-        "name": "inventoryPolicyRule1",
+        "name": "inventoryPolicyRule2",
+        "destination": "mycontainer",
         "definition": {
           "filters": {
             "blobTypes": [
@@ -17,7 +17,24 @@
             ],
             "includeSnapshots": true,
             "includeBlobVersions": true
-          }
+          },
+          "format": "Csv",
+          "schedule": "Daily",
+          "objectType": "Blob",
+          "schemaFields": [
+            "Name",
+            "Creation-Time",
+            "Last-Modified",
+            "Content-Length",
+            "Content-MD5",
+            "BlobType",
+            "AccessTier",
+            "AccessTierChangeTime",
+            "Snapshot",
+            "VersionId",
+            "IsCurrentVersion",
+            "Metadata"
+          ]
         }
       }
     ]
