@@ -1472,7 +1472,6 @@ def validate_or_policy(cmd, namespace):
             resource_group=namespace.resource_group_name,
             namespace='Microsoft.Storage', type='storageAccounts',
             name=namespace.destination_account)
-        print(namespace.destination_account)
 
 
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):

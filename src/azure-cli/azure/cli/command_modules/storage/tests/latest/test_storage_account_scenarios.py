@@ -1943,7 +1943,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account create -n {src_sc} -g {rg} -r true', checks=[
             JMESPathCheck('allowCrossTenantReplication', True)])
 
-    @AllowLargeResponse()
+    @record_only()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
     @StorageAccountPreparer(parameter_name='destination_account', location='eastus2euap', kind='StorageV2')
