@@ -621,7 +621,12 @@ def iot_hub_sku_list(client, hub_name, resource_group_name=None):
 def iot_hub_consumer_group_create(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     consumer_group_body = EventHubConsumerGroupBodyDescription(properties=EventHubConsumerGroupName(name=consumer_group_name))
-    return client.iot_hub_resource.create_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name, consumer_group_body=consumer_group_body)
+    # Fix for breaking change argument in track 1 SDK method.
+    from azure.cli.core.util import get_arg_list
+    create_cg_op = client.iot_hub_resource.create_event_hub_consumer_group
+    if "consumer_group_body" not in get_arg_list(create_cg_op):
+        return create_cg_op(resource_group_name, hub_name, event_hub_name, consumer_group_name)
+    return create_cg_op(resource_group_name, hub_name, event_hub_name, consumer_group_name, consumer_group_body=consumer_group_body)
 
 
 def iot_hub_consumer_group_list(client, hub_name, resource_group_name=None, event_hub_name='events'):
@@ -836,7 +841,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
                 entity_path=entity_path,
-                identity=ManagedIdentity(user_assigned_identity=identity) if identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
             )
         )
     elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
@@ -849,7 +854,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
                 entity_path=entity_path,
-                identity=ManagedIdentity(user_assigned_identity=identity) if identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
             )
         )
     elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
@@ -862,7 +867,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
                 entity_path=entity_path,
-                identity=ManagedIdentity(user_assigned_identity=identity) if identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
             )
         )
     elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
@@ -881,7 +886,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 max_chunk_size_in_bytes=(chunk_size_window * 1048576),
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
-                identity=ManagedIdentity(user_assigned_identity=identity) if identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
             )
         )
 
@@ -1291,13 +1296,15 @@ def _process_fileupload_args(
     if fileupload_sas_ttl is not None:
         default_storage_endpoint.sas_ttl_as_iso8601 = timedelta(hours=fileupload_sas_ttl)
 
-    # If we are now (or will be) using fsa=identity AND we've set a new identity
-    if default_storage_endpoint.authentication_type == AuthenticationType.IdentityBased and fileupload_storage_identity:
-        # setup new fsi
-        default_storage_endpoint.identity = ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
-    # otherwise - let them know they need identity-based auth enabled
-    elif fileupload_storage_identity:
-        raise CLIError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
+    # Fix for identity/authentication-type params missing on hybrid profile api
+    if hasattr(default_storage_endpoint, 'authentication_type'):
+        # If we are now (or will be) using fsa=identity AND we've set a new identity
+        if default_storage_endpoint.authentication_type == AuthenticationType.IdentityBased and fileupload_storage_identity:
+            # setup new fsi
+            default_storage_endpoint.identity = ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
+        # otherwise - let them know they need identity-based auth enabled
+        elif fileupload_storage_identity:
+            raise CLIError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
 
     return default_storage_endpoint
 
