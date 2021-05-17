@@ -287,7 +287,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
-<<<<<<< HEAD
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -297,9 +296,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
-=======
         c.argument('default_share_permission', default_share_permission_type)
->>>>>>> 9ac43bfd1... support default permission
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -353,7 +350,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
-<<<<<<< HEAD
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')
@@ -362,9 +358,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
-=======
         c.argument('default_share_permission', default_share_permission_type)
->>>>>>> 9ac43bfd1... support default permission
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
