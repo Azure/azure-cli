@@ -100,9 +100,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_hana
         })
 
-
         # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
-
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
@@ -133,11 +131,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
-
         # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            # self.check("length([?name == '{name}'])", 0)])
+        # self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_policy(self):
@@ -471,7 +468,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            # self.check("length([?name == '{name}'])", 0)])
+        # self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_hana_protectable_item(self):
@@ -740,7 +737,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            # self.check("length([?name == '{name}'])", 0)])
+        # self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_hana_restore(self):
