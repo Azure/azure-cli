@@ -232,7 +232,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'sqlpool_sensitivity_label_show')
         g.command('list', 'list_current')
         g.custom_command('create', 'sqlpool_sensitivity_label_create')
-        g.command('delete', 'begin_delete')
+        g.command('delete', 'delete')
         g.custom_command('update', 'sqlpool_sensitivity_label_update')
 
     with self.command_group('synapse sql pool classification recommendation',
@@ -246,8 +246,10 @@ def load_command_table(self, _):
 
     #  Management Plane Commands --SqlPool Tde
     with self.command_group('synapse sql pool tde', command_type=synapse_sqlpool_transparent_data_encryptions_sdk,
+                            custom_command_type=get_custom_sdk('sqlpooltde',
+                                                               cf_synapse_client_sqlpool_transparent_data_encryptions_factory),
                             client_factory=cf_synapse_client_sqlpool_transparent_data_encryptions_factory) as g:
-        g.command('set', 'create_or_update')
+        g.custom_command('set', 'create_or_update')
         g.show_command('show', 'get')
 
     #  Management Plane Commands --SqlPool Threat-policy
@@ -274,7 +276,7 @@ def load_command_table(self, _):
                             client_factory=cf_synapse_client_workspace_aad_admins_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_sql_aad_admin', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
+        g.generic_begin_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
                                  setter_arg_name='aad_admin_info', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
@@ -333,7 +335,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_key', supports_no_wait=True)
         g.custom_command('update', 'update_workspace_key', supports_no_wait=True)
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --Managed-Identity
@@ -346,10 +348,12 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('synapse integration-runtime-node', command_type=synapse_integrationruntimenodes_sdk,
+                            custom_command_type=get_custom_sdk('integrationruntimenode',
+                                                               cf_synapse_client_integrationruntimenodes_factory),
                             client_factory=cf_synapse_client_integrationruntimenodes_factory) as g:
         g.show_command('show', 'get')
-        g.command('update', 'update')
-        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('update', 'update')
+        g.command('delete', 'delete', confirmation=True)
         g.command('get-ip-address', 'get', command_type=synapse_integrationruntimenodeipaddress_sdk,
                   client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory)
 

@@ -1307,6 +1307,36 @@ class AzCommandGroup(CommandGroup):
 
         return operations_tmpl.format(name)
 
+    def generic_begin_update_command(self, name, getter_name='get', getter_type=None,
+                               setter_name='begin_create_or_update', setter_type=None, setter_arg_name='parameters',
+                               child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
+                               custom_func_name=None, custom_func_type=None, **kwargs):
+        from azure.cli.core.commands.command_operation import GenericUpdateCommandOperation
+        self._check_stale()
+        merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg())
+        merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
+        self._apply_tags(merged_kwargs, kwargs, name)
+
+        getter_op_path = self._resolve_operation(merged_kwargs, getter_name, getter_type)
+        setter_op_path = self._resolve_operation(merged_kwargs, setter_name, setter_type)
+        custom_function_op_path = self._resolve_operation(merged_kwargs_custom, custom_func_name, custom_func_type,
+                                                          custom_command=True) if custom_func_name else None
+        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        command_operation = GenericUpdateCommandOperation(
+            command_loader=self.command_loader,
+            getter_op_path=getter_op_path,
+            setter_op_path=setter_op_path,
+            setter_arg_name=setter_arg_name,
+            custom_function_op_path=custom_function_op_path,
+            child_collection_prop_name=child_collection_prop_name,
+            child_collection_key=child_collection_key,
+            child_arg_name=child_arg_name,
+            **merged_kwargs
+        )
+        self.command_loader.add_cli_command(command_name,
+                                            command_operation=command_operation,
+                                            **merged_kwargs)
+
     def generic_update_command(self, name, getter_name='get', getter_type=None,
                                setter_name='create_or_update', setter_type=None, setter_arg_name='parameters',
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
