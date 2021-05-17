@@ -1,4 +1,4 @@
-param ($version, $dir)
+param ($version, $dir, $upgradeVersion)
 
 if ($null -eq $version) {
     $version = Read-Host -Prompt "Please enter a version"
@@ -13,6 +13,10 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # The following are executed by elevated PowerShell
+if ($null -eq $dir) {
+    $dir = $pwd
+}
+
 $logDate=$(Get-Date -f yyyyMMddHHmmss)
 Start-Transcript -Path $dir\msi_install_measure_$logDate.txt
 $oldPreference = $ErrorActionPreference
@@ -33,20 +37,58 @@ finally {
     $ErrorActionPreference=$oldPreference
 }
 
-$download_link = "https://azcliprod.blob.core.windows.net/msi/azure-cli-$version.msi"
+if (-not(Test-Path -Path $dir\azure-cli-$version.msi -PathType Leaf)) {
+    $download_link = "https://azcliprod.blob.core.windows.net/msi/azure-cli-$version.msi"
+    Write-Host "Download link:" $download_link
+    Invoke-WebRequest -Uri $download_link -OutFile $dir\azure-cli-$version.msi
+}
 
-Write-Host "Downlaod link:" $download_link 
 
 $InstallArgs = @(
 "/i"
-"$download_link"
+"$dir\azure-cli-$version.msi"
 "/q"
 "/norestart"
-"/l*v"
-".\install_logs_$logDate.txt"
 )
 
 $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
 
 Write-Host 'Install time(seconds):' $install_time
+
+Start-Sleep -s 5
+
+if ($null -eq $upgradeVersion) {
+    $RemoveArgs = @(
+    "/x"
+    "$dir\azure-cli-$version.msi"
+    "/q"
+    )
+    $remove_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $RemoveArgs -Wait -NoNewWindow} | select -expand TotalSeconds
+    Write-Host 'Uninstall time(seconds):' $remove_time
+} else {
+    if (-not(Test-Path -Path $dir\azure-cli-$upgradeVersion.msi -PathType Leaf)) {
+        $download_link = "https://azcliprod.blob.core.windows.net/msi/azure-cli-$upgradeVersion.msi"
+        Write-Host "Upgrade link:" $download_link
+        Invoke-WebRequest -Uri $download_link -OutFile $dir\azure-cli-$upGradeVersion.msi
+    }
+    $UpgradeArgs = @(
+    "/i"
+    "$dir\azure-cli-$upgradeVersion.msi"
+    "/q"
+    "/norestart"
+    )
+    Write-Host 'Upgrade to version:' $upgradeVersion
+    $upgrade_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $UpgradeArgs -Wait -NoNewWindow} | select -expand TotalSeconds
+    Write-Host 'Upgrade time(seconds):' $upgrade_time
+
+    $RemoveArgs = @(
+    "/x"
+    "$dir\azure-cli-$upgradeVersion.msi"
+    "/q"
+    )
+    $remove_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $RemoveArgs -Wait -NoNewWindow} | select -expand TotalSeconds
+    Write-Host 'Uninstall version:' $upgradeVersion
+    Write-Host 'Uninstall time(seconds):' $remove_time
+}
+
 Stop-Transcript
