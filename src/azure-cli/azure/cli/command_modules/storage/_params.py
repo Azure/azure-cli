@@ -190,7 +190,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
 
     t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
-    default_share_permission_type = CLIArgumentType( options_list=['--default-share-permission', '-d'],
+    default_share_permission_type = CLIArgumentType(
+        options_list=['--default-share-permission', '-d'],
         arg_type=get_enum_type(t_share_permission), min_api='2020-08-01-preview',
         arg_group='Azure Files Identity Based Authentication',
         help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
