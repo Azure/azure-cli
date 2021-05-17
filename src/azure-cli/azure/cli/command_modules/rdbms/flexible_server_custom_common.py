@@ -9,7 +9,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.util import user_confirmation
 
-
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
 
