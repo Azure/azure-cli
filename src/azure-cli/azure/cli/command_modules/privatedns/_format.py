@@ -53,14 +53,14 @@ def transform_privatedns_link_table_output(result):
 
 
 def transform_privatedns_record_set_output(result):
-    from azure.mgmt.privatedns.models import RecordSetListResult
+    from azure.mgmt.privatedns.models import RecordSetPaged
 
     def _strip_null_records(item):
         for prop in [x for x in dir(item) if 'record' in x]:
             if not getattr(item, prop):
                 delattr(item, prop)
 
-    if isinstance(result, RecordSetListResult):
+    if isinstance(result, RecordSetPaged):
         result = list(result)
         for item in result:
             _strip_null_records(item)

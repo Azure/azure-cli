@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait, user_confirmation
-from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    location=None, tags=None, no_wait=False, cluster_version='default', cluster_tier=None,
                    cluster_configurations=None, component_version=None,
-                   headnode_size=None, workernode_size=None, zookeepernode_size=None, edgenode_size=None,
+                   headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
                    kafka_management_node_size=None, kafka_management_node_count=2,
                    kafka_client_group_id=None, kafka_client_group_name=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
@@ -39,7 +39,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    resource_provider_connection=None, enable_private_link=None, enable_compute_isolation=None,
                    host_sku=None, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
-        get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size
+        get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
@@ -196,16 +196,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             disk_size_gb=workernode_data_disk_size
         )
     ]
-
-    # call get default vm size api to set vm size if customer does not provide the value
-    if not (workernode_size and headnode_size):
-        headnode_size, workernode_size = set_vm_size(cmd.cli_ctx, location, cluster_type, headnode_size,
-                                                     workernode_size)
-
-    if not headnode_size:
-        raise RequiredArgumentMissingError('Please specify --headnode-size explicitly.')
-    if not workernode_size:
-        raise RequiredArgumentMissingError('Please specify --workernode-size explicitly.')
 
     os_profile = OsProfile(
         linux_operating_system_profile=LinuxOperatingSystemProfile(

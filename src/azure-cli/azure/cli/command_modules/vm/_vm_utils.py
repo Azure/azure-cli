@@ -74,7 +74,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.core.exceptions import HttpResponseError
+    from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
@@ -96,7 +96,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
         return True
-    except HttpResponseError:
+    except CloudError:
         return False
 
 

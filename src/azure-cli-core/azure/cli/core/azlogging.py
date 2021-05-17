@@ -174,7 +174,8 @@ class AzCliLogging(CLILogging):
                 continue
 
             # else if positional or optional argument / value
-            cleaned_args.append(placeholder)
+            else:
+                cleaned_args.append(placeholder)
 
         return cleaned_args
 

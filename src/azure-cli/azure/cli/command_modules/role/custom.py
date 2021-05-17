@@ -1493,15 +1493,15 @@ def create_service_principal_for_rbac(
                         logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
-                    if _error_caused_by_role_assignment_exists(ex):
+                    elif _error_caused_by_role_assignment_exists(ex):
                         logger.warning('  Role assignment already exists.\n')
                         break
-
-                    # dump out history for diagnoses
-                    logger.warning('  Role assignment creation failed.\n')
-                    if getattr(ex, 'response', None) is not None:
-                        logger.warning('  role assignment response headers: %s\n',
-                                       ex.response.headers)  # pylint: disable=no-member
+                    else:
+                        # dump out history for diagnoses
+                        logger.warning('  Role assignment creation failed.\n')
+                        if getattr(ex, 'response', None) is not None:
+                            logger.warning('  role assignment response headers: %s\n',
+                                           ex.response.headers)  # pylint: disable=no-member
                     raise
 
     logger.warning(CREDENTIAL_WARNING_MESSAGE)

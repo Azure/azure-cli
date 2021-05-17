@@ -284,7 +284,7 @@ class AzCliCommandParser(CLICommandParser):
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
         return self._namespace, self._raw_arguments
 
-    def _check_value(self, action, value):
+    def _check_value(self, action, value):  # pylint: too-many-locals, too-many-branches
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks

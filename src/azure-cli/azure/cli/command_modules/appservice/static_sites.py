@@ -122,7 +122,7 @@ def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_grou
         setting_dict[key] = value
 
     return client.create_or_update_static_site_function_app_settings(
-        resource_group_name, name, app_settings=setting_dict)
+        resource_group_name, name, kind=None, properties=setting_dict)
 
 
 def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
@@ -139,7 +139,7 @@ def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_g
             logger.warning("key '%s' not found in app settings", key)
 
     return client.create_or_update_static_site_function_app_settings(
-        resource_group_name, name, app_settings=app_settings)
+        resource_group_name, name, kind=None, properties=app_settings)
 
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):
@@ -265,8 +265,8 @@ def _parse_pair(pair, delimiter):
     if delimiter not in pair:
         CLIError("invalid format of pair {0}".format(pair))
 
-    index = pair.index(delimiter)
-    return pair[:index], pair[1 + index:]
+    pair_split = pair.split(delimiter)
+    return pair_split[0], pair_split[1]
 
 
 def _raise_missing_token_suggestion():

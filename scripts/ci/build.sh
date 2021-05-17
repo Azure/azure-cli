@@ -137,7 +137,6 @@ cat >>$testsrc_dir/setup.py <<EOL
     package_data={'': ['recordings/*.yaml',
                        'data/*.zip',
                        'data/*.whl',
-                       'data/*.yaml',
                        '*.zip',
                        '*.pem',
                        '*.pfx',

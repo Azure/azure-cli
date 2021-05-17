@@ -21,6 +21,8 @@ def show_endpoint_waf_policy_link(client: EndpointsOperations,
                                   profile_name: str,
                                   endpoint_name: str):
 
+    from azure.mgmt.cdn.models import (EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink)
+
     link = client.get(resource_group_name, profile_name, endpoint_name).web_application_firewall_policy_link
     if link is not None:
         return link

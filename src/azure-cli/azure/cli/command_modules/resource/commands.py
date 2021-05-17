@@ -95,7 +95,7 @@ def load_command_table(self, _):
     )
 
     resource_deployment_operation_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentOperationsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentOperations.{}',
         client_factory=cf_deployment_operations,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
@@ -179,7 +179,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_lock')
 
     with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
         g.command('exists', 'check_existence')
         g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
@@ -248,7 +248,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
         g.show_command('show', 'get', table_transformer=transform_deployment)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
+        g.command('delete', 'delete', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_deployment_as_template')
         g.wait_command('wait')
@@ -416,14 +416,14 @@ def load_command_table(self, _):
 
     with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_application')
-        g.command('delete', 'begin_delete')
+        g.command('delete', 'delete')
         g.custom_show_command('show', 'show_application')
         g.custom_command('list', 'list_applications')
 
     with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_or_update_applicationdefinition')
         g.custom_command('update', 'create_or_update_applicationdefinition')
-        g.command('delete', 'begin_delete')
+        g.command('delete', 'delete')
         g.custom_show_command('show', 'show_applicationdefinition')
         g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)
 

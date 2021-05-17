@@ -628,7 +628,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_create_account_sas(self, storage_account_info):
+    def test_create_account_sas(self, storage_account):
         from azure.cli.core.azclierror import RequiredArgumentMissingError
         with self.assertRaises(RequiredArgumentMissingError):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
@@ -639,9 +639,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
                      '--permissions r --connection-string {}'.format(invalid_connection_string))
 
-        sas = self.storage_cmd('storage account generate-sas --resource-types o --services b '
-                               '--expiry 2046-12-31T08:23Z --permissions r --https-only ',
-                               storage_account_info).output
+        sas = self.cmd('storage account generate-sas --resource-types o --services b '
+                       '--expiry 2046-12-31T08:23Z --permissions r --https-only --account-name {}'
+                       .format(storage_account)).output
         self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
         self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
 

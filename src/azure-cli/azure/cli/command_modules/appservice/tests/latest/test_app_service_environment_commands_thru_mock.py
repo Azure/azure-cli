@@ -117,11 +117,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
                                          ignore_network_security_group=True, ignore_route_table=True,
                                          location='westeurope')
 
-        # Assert begin_create_or_update is called with correct rg and deployment name
-        resource_client_mock.deployments.begin_create_or_update.assert_called_once()
-        call_args = resource_client_mock.deployments.begin_create_or_update.call_args
-        self.assertEqual(call_args[0][0], rg_name)
-        self.assertEqual(call_args[0][1], deployment_name)
+        # Assert create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.create_or_update.assert_called_once()
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
@@ -212,11 +211,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
                                          subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
                                          location='westeurope')
 
-        # Assert begin_create_or_update is called with correct rg and deployment name
-        resource_client_mock.deployments.begin_create_or_update.assert_called_once()
-        call_args = resource_client_mock.deployments.begin_create_or_update.call_args
-        self.assertEqual(call_args[0][0], rg_name)
-        self.assertEqual(call_args[0][1], deployment_name)
+        # Assert create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.create_or_update.assert_called_once()
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
 
 
 if __name__ == '__main__':

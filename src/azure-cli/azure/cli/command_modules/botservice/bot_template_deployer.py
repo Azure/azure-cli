@@ -46,12 +46,15 @@ class BotTemplateDeployer:
 
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
 
         resource_mgmt_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-        deployment_poller = resource_mgmt_client.begin_create_or_update(resource_group_name, deployment_name,
-                                                                        deployment)
+
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+            deployment = Deployment(properties=properties)
+            deployment_poller = resource_mgmt_client.create_or_update(resource_group_name, deployment_name, deployment)
+        else:
+            deployment_poller = resource_mgmt_client.create_or_update(resource_group_name, deployment_name, properties)
 
         return LongRunningOperation(cmd.cli_ctx, 'Deploying ARM Tempalte')(deployment_poller)
 

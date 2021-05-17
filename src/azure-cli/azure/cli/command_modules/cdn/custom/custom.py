@@ -461,7 +461,7 @@ def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_n
             if rule_name is not None and rule.name == rule_name:
                 pop_index = idx
                 break
-            if order is not None and rule.order == order:
+            elif order is not None and rule.order == order:
                 pop_index = idx
                 break
 

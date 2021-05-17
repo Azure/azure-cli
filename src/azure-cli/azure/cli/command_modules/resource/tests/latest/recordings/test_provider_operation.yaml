@@ -13,8 +13,8 @@ interactions:
       ParameterSetName:
       - --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -120,14 +120,13 @@ interactions:
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
         Write IOPS","unit":"CountPerSecond","aggregationType":"Average"},{"name":"CPU
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
-        number of credits available to burst. Only available on B-series burstable
-        VMs","unit":"Count","aggregationType":"Average"},{"name":"CPU Credits Consumed","displayName":"CPU
-        Credits Consumed","displayDescription":"Total number of credits consumed by
-        the Virtual Machine. Only available on B-series burstable VMs","unit":"Count","aggregationType":"Average"},{"name":"Data
+        number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
+        Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Data
         Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Write
@@ -138,25 +137,11 @@ interactions:
         Percentage","displayDescription":"Percentage of data disk bandwidth consumed
         per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk IOPS Consumed Percentage","displayName":"Data Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target Bandwidth","displayName":"Data Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target IOPS","displayName":"Data Disk Target IOPS","displayDescription":"Baseline
-        IOPS Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst Bandwidth","displayName":"Data Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst IOPS","displayName":"Data Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst BPS Credits Percentage","displayName":"Data Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst IO Credits Percentage","displayName":"Data Disk Used Burst
-        IO Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        I/O credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
+        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Write
@@ -167,21 +152,7 @@ interactions:
         Percentage","displayDescription":"Percentage of operating system disk bandwidth
         consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk IOPS Consumed Percentage","displayName":"OS Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target Bandwidth","displayName":"OS Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target IOPS","displayName":"OS Disk Target IOPS","displayDescription":"Baseline
-        IOPS OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst Bandwidth","displayName":"OS Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst IOPS","displayName":"OS Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst BPS Credits Percentage","displayName":"OS Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of OS Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst IO Credits Percentage","displayName":"OS Disk Used Burst IO
-        Credits Percentage","displayDescription":"Percentage of OS Disk burst I/O
-        credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
+        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
         Flows","displayName":"Inbound Flows","displayDescription":"Inbound Flows are
         number of current flows in the inbound direction (traffic going into the VM)","unit":"Count","aggregationType":"Average"},{"name":"Outbound
         Flows","displayName":"Outbound Flows","displayDescription":"Outbound Flows
@@ -296,14 +267,13 @@ interactions:
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
         Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"CPU
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
-        number of credits available to burst. Only available on B-series burstable
-        VMs","unit":"Count","aggregationType":"Average"},{"name":"CPU Credits Consumed","displayName":"CPU
-        Credits Consumed","displayDescription":"Total number of credits consumed by
-        the Virtual Machine. Only available on B-series burstable VMs","unit":"Count","aggregationType":"Average"},{"name":"Data
+        number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
+        Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Data
         Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
+        read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
+        written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Write
@@ -314,25 +284,11 @@ interactions:
         Percentage","displayDescription":"Percentage of data disk bandwidth consumed
         per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk IOPS Consumed Percentage","displayName":"Data Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target Bandwidth","displayName":"Data Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target IOPS","displayName":"Data Disk Target IOPS","displayDescription":"Baseline
-        IOPS Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst Bandwidth","displayName":"Data Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst IOPS","displayName":"Data Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst BPS Credits Percentage","displayName":"Data Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst IO Credits Percentage","displayName":"Data Disk Used Burst
-        IO Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        I/O credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
+        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
+        read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
+        written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Write
@@ -343,21 +299,7 @@ interactions:
         Percentage","displayDescription":"Percentage of operating system disk bandwidth
         consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk IOPS Consumed Percentage","displayName":"OS Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target Bandwidth","displayName":"OS Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target IOPS","displayName":"OS Disk Target IOPS","displayDescription":"Baseline
-        IOPS OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst Bandwidth","displayName":"OS Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst IOPS","displayName":"OS Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst BPS Credits Percentage","displayName":"OS Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of OS Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst IO Credits Percentage","displayName":"OS Disk Used Burst IO
-        Credits Percentage","displayDescription":"Percentage of OS Disk burst I/O
-        credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Inbound
+        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Inbound
         Flows","displayName":"Inbound Flows","displayDescription":"Inbound Flows are
         number of current flows in the inbound direction (traffic going into the VM)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Outbound
         Flows","displayName":"Outbound Flows","displayDescription":"Outbound Flows
@@ -456,14 +398,13 @@ interactions:
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
         Write IOPS","unit":"CountPerSecond","aggregationType":"Average"},{"name":"CPU
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
-        number of credits available to burst. Only available on B-series burstable
-        VMs","unit":"Count","aggregationType":"Average"},{"name":"CPU Credits Consumed","displayName":"CPU
-        Credits Consumed","displayDescription":"Total number of credits consumed by
-        the Virtual Machine. Only available on B-series burstable VMs","unit":"Count","aggregationType":"Average"},{"name":"Data
+        number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
+        Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Data
         Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Write
@@ -474,25 +415,11 @@ interactions:
         Percentage","displayDescription":"Percentage of data disk bandwidth consumed
         per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk IOPS Consumed Percentage","displayName":"Data Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target Bandwidth","displayName":"Data Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target IOPS","displayName":"Data Disk Target IOPS","displayDescription":"Baseline
-        IOPS Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst Bandwidth","displayName":"Data Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst IOPS","displayName":"Data Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst BPS Credits Percentage","displayName":"Data Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst IO Credits Percentage","displayName":"Data Disk Used Burst
-        IO Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        I/O credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
+        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Write
@@ -503,21 +430,7 @@ interactions:
         Percentage","displayDescription":"Percentage of operating system disk bandwidth
         consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk IOPS Consumed Percentage","displayName":"OS Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target Bandwidth","displayName":"OS Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target IOPS","displayName":"OS Disk Target IOPS","displayDescription":"Baseline
-        IOPS OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst Bandwidth","displayName":"OS Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst IOPS","displayName":"OS Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst BPS Credits Percentage","displayName":"OS Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of OS Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst IO Credits Percentage","displayName":"OS Disk Used Burst IO
-        Credits Percentage","displayDescription":"Percentage of OS Disk burst I/O
-        credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
+        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
         Flows","displayName":"Inbound Flows","displayDescription":"Inbound Flows are
         number of current flows in the inbound direction (traffic going into the VM)","unit":"Count","aggregationType":"Average"},{"name":"Outbound
         Flows","displayName":"Outbound Flows","displayDescription":"Outbound Flows
@@ -733,14 +646,10 @@ interactions:
         DiskAccess","description":"Get the properties of DiskAccess resource","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/write","displayName":"Create
         or Update DiskAccess","description":"Create a new DiskAccess resource or update
         an existing one","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/delete","displayName":"Delete
-        DiskAccess","description":"Delete a DiskAccess resource","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionsApproval/action","displayName":"Auto
-        Approve PrivateEndpointConnections","description":"Auto Approve a Private
-        Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnections","displayName":"DiskAccess
+        DiskAccess","description":"Delete a DiskAccess resource","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionsApproval/action","displayName":"Approve
+        PrivateEndpointConnections","description":"Approve a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnections","displayName":"DiskAccess
         PrivateEndpointConnections","operations":[{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnections/delete","displayName":"Delete
-        PrivateEndpointConnection","description":"Delete a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnections/read","displayName":"Get
-        PrivateEndpointConnection","description":"Get a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnections/write","displayName":"Approve
-        or Reject PrivateEndpointConnection","description":"Approve or Reject a Private
-        Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnectionProxies","displayName":"DiskAccess
+        PrivateEndpointConnection","description":"Delete a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnectionProxies","displayName":"DiskAccess
         PrivateEndpointConnection proxies","operations":[{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionProxies/read","displayName":"Get
         PrivateEndpointConnectionProxy","description":"Get the properties of a private
         endpoint connection proxy","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionProxies/write","displayName":"Create
@@ -872,28 +781,16 @@ interactions:
         or Update Capacity Reservation Group","description":"Creates a new capacity
         reservation group or updates an existing capacity reservation group","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/capacityReservationGroups/delete","displayName":"Delete
         Capacity Reservation Group","description":"Deletes the capacity reservation
-        group","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"restorePointCollections/restorePoints/diskRestorePoints","displayName":"DiskRestorePoint","operations":[{"name":"Microsoft.Compute/restorePointCollections/restorePoints/diskRestorePoints/read","displayName":"Get
-        incremental DiskRestorePoint","description":"Get the properties of an incremental
-        DiskRestorePoint","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/restorePointCollections/restorePoints/diskRestorePoints/beginGetAccess/action","displayName":"Get
-        incremental DiskRestorePoint SAS URI","description":"Get the SAS URI of the
-        incremental DiskRestorePoint","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/restorePointCollections/restorePoints/diskRestorePoints/endGetAccess/action","displayName":"Revoke
-        incremental DiskRestorePoint SAS URI","description":"Revoke the SAS URI of
-        the incremental DiskRestorePoint","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"locations/cloudServiceOsVersions","displayName":"CloudService
-        OS Versions","operations":[{"name":"Microsoft.Compute/locations/cloudServiceOsVersions/read","displayName":"Read
-        Cloud Service OS Version","description":"Read any guest OS Version that can
-        be specified in the XML service configuration (.cscfg) for a Cloud Service.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"locations/cloudServiceOsFamilies","displayName":"CloudService
-        OS Families","operations":[{"name":"Microsoft.Compute/locations/cloudServiceOsFamilies/read","displayName":"Read
-        Cloud Service OS Family","description":"Read any guest OS Family that can
-        be specified in the XML service configuration (.cscfg) for a Cloud Service.","origin":"user,system","properties":null,"isDataAction":false}]}],"id":"/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute","type":"Microsoft.Authorization/providerOperations","name":"Microsoft.Compute"}'
+        group","origin":"user,system","properties":null,"isDataAction":false}]}],"id":"/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute","type":"Microsoft.Authorization/providerOperations","name":"Microsoft.Compute"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '118574'
+      - '103523'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:02:50 GMT
+      - Thu, 17 Dec 2020 19:30:20 GMT
       expires:
       - '-1'
       pragma:
@@ -925,8 +822,8 @@ interactions:
       ParameterSetName:
       - --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -1032,14 +929,13 @@ interactions:
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
         Write IOPS","unit":"CountPerSecond","aggregationType":"Average"},{"name":"CPU
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
-        number of credits available to burst. Only available on B-series burstable
-        VMs","unit":"Count","aggregationType":"Average"},{"name":"CPU Credits Consumed","displayName":"CPU
-        Credits Consumed","displayDescription":"Total number of credits consumed by
-        the Virtual Machine. Only available on B-series burstable VMs","unit":"Count","aggregationType":"Average"},{"name":"Data
+        number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
+        Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Data
         Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Write
@@ -1050,25 +946,11 @@ interactions:
         Percentage","displayDescription":"Percentage of data disk bandwidth consumed
         per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk IOPS Consumed Percentage","displayName":"Data Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target Bandwidth","displayName":"Data Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target IOPS","displayName":"Data Disk Target IOPS","displayDescription":"Baseline
-        IOPS Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst Bandwidth","displayName":"Data Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst IOPS","displayName":"Data Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst BPS Credits Percentage","displayName":"Data Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst IO Credits Percentage","displayName":"Data Disk Used Burst
-        IO Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        I/O credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
+        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Write
@@ -1079,21 +961,7 @@ interactions:
         Percentage","displayDescription":"Percentage of operating system disk bandwidth
         consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk IOPS Consumed Percentage","displayName":"OS Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target Bandwidth","displayName":"OS Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target IOPS","displayName":"OS Disk Target IOPS","displayDescription":"Baseline
-        IOPS OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst Bandwidth","displayName":"OS Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst IOPS","displayName":"OS Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst BPS Credits Percentage","displayName":"OS Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of OS Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst IO Credits Percentage","displayName":"OS Disk Used Burst IO
-        Credits Percentage","displayDescription":"Percentage of OS Disk burst I/O
-        credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
+        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
         Flows","displayName":"Inbound Flows","displayDescription":"Inbound Flows are
         number of current flows in the inbound direction (traffic going into the VM)","unit":"Count","aggregationType":"Average"},{"name":"Outbound
         Flows","displayName":"Outbound Flows","displayDescription":"Outbound Flows
@@ -1208,14 +1076,13 @@ interactions:
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
         Write IOPS","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"CPU
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
-        number of credits available to burst. Only available on B-series burstable
-        VMs","unit":"Count","aggregationType":"Average"},{"name":"CPU Credits Consumed","displayName":"CPU
-        Credits Consumed","displayDescription":"Total number of credits consumed by
-        the Virtual Machine. Only available on B-series burstable VMs","unit":"Count","aggregationType":"Average"},{"name":"Data
+        number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
+        Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Data
         Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
+        read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
+        written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Write
@@ -1226,25 +1093,11 @@ interactions:
         Percentage","displayDescription":"Percentage of data disk bandwidth consumed
         per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
         Disk IOPS Consumed Percentage","displayName":"Data Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target Bandwidth","displayName":"Data Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target IOPS","displayName":"Data Disk Target IOPS","displayDescription":"Baseline
-        IOPS Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst Bandwidth","displayName":"Data Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst IOPS","displayName":"Data Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst BPS Credits Percentage","displayName":"Data Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst IO Credits Percentage","displayName":"Data Disk Used Burst
-        IO Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        I/O credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
+        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
+        read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
+        written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Write
@@ -1255,21 +1108,7 @@ interactions:
         Percentage","displayDescription":"Percentage of operating system disk bandwidth
         consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
         Disk IOPS Consumed Percentage","displayName":"OS Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target Bandwidth","displayName":"OS Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target IOPS","displayName":"OS Disk Target IOPS","displayDescription":"Baseline
-        IOPS OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst Bandwidth","displayName":"OS Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst IOPS","displayName":"OS Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst BPS Credits Percentage","displayName":"OS Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of OS Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst IO Credits Percentage","displayName":"OS Disk Used Burst IO
-        Credits Percentage","displayDescription":"Percentage of OS Disk burst I/O
-        credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Inbound
+        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true},{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Inbound
         Flows","displayName":"Inbound Flows","displayDescription":"Inbound Flows are
         number of current flows in the inbound direction (traffic going into the VM)","unit":"Count","aggregationType":"Average","dimensions":[{"name":"VMName","displayName":"VMName","internalName":"VMName","toBeExportedForShoebox":true}]},{"name":"Outbound
         Flows","displayName":"Outbound Flows","displayDescription":"Outbound Flows
@@ -1368,14 +1207,13 @@ interactions:
         Write Operations/Sec","displayName":"Disk Write Operations/Sec","displayDescription":"Disk
         Write IOPS","unit":"CountPerSecond","aggregationType":"Average"},{"name":"CPU
         Credits Remaining","displayName":"CPU Credits Remaining","displayDescription":"Total
-        number of credits available to burst. Only available on B-series burstable
-        VMs","unit":"Count","aggregationType":"Average"},{"name":"CPU Credits Consumed","displayName":"CPU
-        Credits Consumed","displayDescription":"Total number of credits consumed by
-        the Virtual Machine. Only available on B-series burstable VMs","unit":"Count","aggregationType":"Average"},{"name":"Data
+        number of credits available to burst","unit":"Count","aggregationType":"Average"},{"name":"CPU
+        Credits Consumed","displayName":"CPU Credits Consumed","displayDescription":"Total
+        number of credits consumed by the Virtual Machine","unit":"Count","aggregationType":"Average"},{"name":"Data
         Disk Read Bytes/sec","displayName":"Data Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        read from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Bytes/sec","displayName":"Data Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period","unit":"BytesPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
+        written to a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Read Operations/Sec","displayName":"Data Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period","unit":"CountPerSecond","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk Write Operations/Sec","displayName":"Data Disk Write Operations/Sec","displayDescription":"Write
@@ -1386,25 +1224,11 @@ interactions:
         Percentage","displayDescription":"Percentage of data disk bandwidth consumed
         per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
         Disk IOPS Consumed Percentage","displayName":"Data Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target Bandwidth","displayName":"Data Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Target IOPS","displayName":"Data Disk Target IOPS","displayDescription":"Baseline
-        IOPS Data Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst Bandwidth","displayName":"Data Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Max Burst IOPS","displayName":"Data Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS Data Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst BPS Credits Percentage","displayName":"Data Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Data
-        Disk Used Burst IO Credits Percentage","displayName":"Data Disk Used Burst
-        IO Credits Percentage","displayDescription":"Percentage of Data Disk burst
-        I/O credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
+        of data disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk Read Bytes/sec","displayName":"OS Disk Read Bytes/Sec","displayDescription":"Bytes/Sec
-        read from a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        read from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Bytes/sec","displayName":"OS Disk Write Bytes/Sec","displayDescription":"Bytes/Sec
-        written to a single disk during monitoring period for OS disk","unit":"BytesPerSecond","aggregationType":"Average"},{"name":"OS
+        written to a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Read Operations/Sec","displayName":"OS Disk Read Operations/Sec","displayDescription":"Read
         IOPS from a single disk during monitoring period for OS disk","unit":"CountPerSecond","aggregationType":"Average"},{"name":"OS
         Disk Write Operations/Sec","displayName":"OS Disk Write Operations/Sec","displayDescription":"Write
@@ -1415,21 +1239,7 @@ interactions:
         Percentage","displayDescription":"Percentage of operating system disk bandwidth
         consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
         Disk IOPS Consumed Percentage","displayName":"OS Disk IOPS Consumed Percentage","displayDescription":"Percentage
-        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target Bandwidth","displayName":"OS Disk Target Bandwidth","displayDescription":"Baseline
-        bytes per second throughput OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Target IOPS","displayName":"OS Disk Target IOPS","displayDescription":"Baseline
-        IOPS OS Disk can achieve without bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst Bandwidth","displayName":"OS Disk Max Burst Bandwidth","displayDescription":"Maximum
-        bytes per second throughput OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Max Burst IOPS","displayName":"OS Disk Max Burst IOPS","displayDescription":"Maximum
-        IOPS OS Disk can achieve with bursting","unit":"Count","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst BPS Credits Percentage","displayName":"OS Disk Used Burst
-        BPS Credits Percentage","displayDescription":"Percentage of OS Disk burst
-        bandwidth credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"OS
-        Disk Used Burst IO Credits Percentage","displayName":"OS Disk Used Burst IO
-        Credits Percentage","displayDescription":"Percentage of OS Disk burst I/O
-        credits used so far","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
+        of operating system disk I/Os consumed per minute","unit":"Percent","aggregationType":"Average","dimensions":[{"name":"LUN","displayName":"LUN","internalName":"LUN","toBeExportedForShoebox":true}]},{"name":"Inbound
         Flows","displayName":"Inbound Flows","displayDescription":"Inbound Flows are
         number of current flows in the inbound direction (traffic going into the VM)","unit":"Count","aggregationType":"Average"},{"name":"Outbound
         Flows","displayName":"Outbound Flows","displayDescription":"Outbound Flows
@@ -1645,14 +1455,10 @@ interactions:
         DiskAccess","description":"Get the properties of DiskAccess resource","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/write","displayName":"Create
         or Update DiskAccess","description":"Create a new DiskAccess resource or update
         an existing one","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/delete","displayName":"Delete
-        DiskAccess","description":"Delete a DiskAccess resource","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionsApproval/action","displayName":"Auto
-        Approve PrivateEndpointConnections","description":"Auto Approve a Private
-        Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnections","displayName":"DiskAccess
+        DiskAccess","description":"Delete a DiskAccess resource","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionsApproval/action","displayName":"Approve
+        PrivateEndpointConnections","description":"Approve a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnections","displayName":"DiskAccess
         PrivateEndpointConnections","operations":[{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnections/delete","displayName":"Delete
-        PrivateEndpointConnection","description":"Delete a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnections/read","displayName":"Get
-        PrivateEndpointConnection","description":"Get a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnections/write","displayName":"Approve
-        or Reject PrivateEndpointConnection","description":"Approve or Reject a Private
-        Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnectionProxies","displayName":"DiskAccess
+        PrivateEndpointConnection","description":"Delete a Private Endpoint Connection","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"diskAccesses/privateEndpointConnectionProxies","displayName":"DiskAccess
         PrivateEndpointConnection proxies","operations":[{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionProxies/read","displayName":"Get
         PrivateEndpointConnectionProxy","description":"Get the properties of a private
         endpoint connection proxy","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/diskAccesses/privateEndpointConnectionProxies/write","displayName":"Create
@@ -1784,28 +1590,16 @@ interactions:
         or Update Capacity Reservation Group","description":"Creates a new capacity
         reservation group or updates an existing capacity reservation group","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/capacityReservationGroups/delete","displayName":"Delete
         Capacity Reservation Group","description":"Deletes the capacity reservation
-        group","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"restorePointCollections/restorePoints/diskRestorePoints","displayName":"DiskRestorePoint","operations":[{"name":"Microsoft.Compute/restorePointCollections/restorePoints/diskRestorePoints/read","displayName":"Get
-        incremental DiskRestorePoint","description":"Get the properties of an incremental
-        DiskRestorePoint","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/restorePointCollections/restorePoints/diskRestorePoints/beginGetAccess/action","displayName":"Get
-        incremental DiskRestorePoint SAS URI","description":"Get the SAS URI of the
-        incremental DiskRestorePoint","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/restorePointCollections/restorePoints/diskRestorePoints/endGetAccess/action","displayName":"Revoke
-        incremental DiskRestorePoint SAS URI","description":"Revoke the SAS URI of
-        the incremental DiskRestorePoint","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"locations/cloudServiceOsVersions","displayName":"CloudService
-        OS Versions","operations":[{"name":"Microsoft.Compute/locations/cloudServiceOsVersions/read","displayName":"Read
-        Cloud Service OS Version","description":"Read any guest OS Version that can
-        be specified in the XML service configuration (.cscfg) for a Cloud Service.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"locations/cloudServiceOsFamilies","displayName":"CloudService
-        OS Families","operations":[{"name":"Microsoft.Compute/locations/cloudServiceOsFamilies/read","displayName":"Read
-        Cloud Service OS Family","description":"Read any guest OS Family that can
-        be specified in the XML service configuration (.cscfg) for a Cloud Service.","origin":"user,system","properties":null,"isDataAction":false}]}],"id":"/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute","type":"Microsoft.Authorization/providerOperations","name":"Microsoft.Compute"}'
+        group","origin":"user,system","properties":null,"isDataAction":false}]}],"id":"/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute","type":"Microsoft.Authorization/providerOperations","name":"Microsoft.Compute"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '118574'
+      - '103523'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:02:50 GMT
+      - Thu, 17 Dec 2020 19:30:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1837,8 +1631,8 @@ interactions:
       ParameterSetName:
       - --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.21.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -1871,7 +1665,7 @@ interactions:
         blob permissions\",\"description\":\"Modifies permissions of the blob\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/runAsSuperUser/action\",\"displayName\":\"Execute
         the command as super user\",\"description\":\"Returns the result of the blob
         command\",\"origin\":null,\"properties\":null,\"isDataAction\":true}]},{\"name\":\"storageAccounts/blobServices/containers\",\"displayName\":\"Storage
-        Blob Service Containers\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"displayName\":\"Patch
+        Blob Service Containers\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/write\",\"displayName\":\"Patch
         blob container\",\"description\":\"Returns the result of patch blob container\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/delete\",\"displayName\":\"Delete
         blob container\",\"description\":\"Returns the result of deleting a container\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/read\",\"displayName\":\"Get
         blob container\",\"description\":\"Returns a container\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/read\",\"displayName\":\"List
@@ -1954,12 +1748,12 @@ interactions:
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
         Server Latency\",\"displayDescription\":\"The average time used to process
         a successful request by Azure Storage. This value does not include the network
         latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
@@ -2012,12 +1806,12 @@ interactions:
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
         Server Latency\",\"displayDescription\":\"The average time used to process
         a successful request by Azure Storage. This value does not include the network
         latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
@@ -2059,12 +1853,12 @@ interactions:
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
         Server Latency\",\"displayDescription\":\"The average time used to process
         a successful request by Azure Storage. This value does not include the network
         latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
@@ -2123,13 +1917,13 @@ interactions:
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true},{\"name\":\"FileShare\",\"displayName\":\"File
-        Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
+        Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true},{\"name\":\"FileShare\",\"displayName\":\"File
-        Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
+        Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
         Server Latency\",\"displayDescription\":\"The average time used to process
         a successful request by Azure Storage. This value does not include the network
         latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
@@ -2174,12 +1968,12 @@ interactions:
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
-        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":true,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
+        name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
         Server Latency\",\"displayDescription\":\"The average time used to process
         a successful request by Azure Storage. This value does not include the network
         latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
@@ -2267,7 +2061,7 @@ interactions:
         is not in use.\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/shares\",\"displayName\":\"File
         Share\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/delete\",\"displayName\":\"Delete
         File Share\",\"description\":\"Delete file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":\"Get
-        File Share\",\"description\":\"Get file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/lease/action\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":\"List
+        File Share\",\"description\":\"Get file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":\"List
         File Shares\",\"description\":\"List file shares\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/write\",\"displayName\":\"Put
         File Share\",\"description\":\"Create or update file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/encryptionScopes\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/objectReplicationPolicies\",\"displayName\":\"Object
         Replication Policy\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/delete\",\"displayName\":\"Delete
@@ -2281,16 +2075,16 @@ interactions:
         Local User Keys\",\"description\":\"List local user keys\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":\"List
         Local Users\",\"description\":\"List local users\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":\"Get
         Local User\",\"description\":\"Get local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/write\",\"displayName\":\"Put
-        Local User\",\"description\":\"Create or update local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"deletedAccounts\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/deletedAccounts/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices/tables\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/inventoryPolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/accountLocks\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/consumerDataSharePolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/consumerDataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/consumerDataSharePolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"resilienciesProgressions\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/resilienciesProgressions/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/blobServices/containers/blobs/worm\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/blobs/worm/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":true}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\",\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"}"
+        Local User\",\"description\":\"Create or update local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"deletedAccounts\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/deletedAccounts/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices/tables\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/inventoryPolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/accountLocks\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/accountLocks/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\",\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '70097'
+      - '68864'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:02:51 GMT
+      - Thu, 17 Dec 2020 19:30:22 GMT
       expires:
       - '-1'
       pragma:

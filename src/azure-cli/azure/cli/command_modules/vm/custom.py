@@ -978,24 +978,32 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                      aux_subscriptions=aux_subscriptions).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    deployment = Deployment(properties=properties)
 
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
 
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-        return client.validate(resource_group_name, deployment_name, deployment)
+        # creates the VM deployment
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
 
-    # creates the VM deployment
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-    LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
+        # creates the VM deployment
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
 
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
@@ -1449,20 +1457,27 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    deployment = Deployment(properties=properties)
 
-    if validate:
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-        return client.validate(resource_group_name, deployment_name, deployment)
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.begin_create_or_update,
-                                                  resource_group_name, deployment_name, deployment))
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, properties))
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
@@ -2730,18 +2745,24 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         log_pprint_template(template)
         log_pprint_template(parameters)
 
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    deployment = Deployment(properties=properties)
-    if validate:
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
             return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-        return client.validate(resource_group_name, deployment_name, deployment)
+        # creates the VMSS deployment
+        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
 
-    # creates the VMSS deployment
-    deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-        sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment))
+        # creates the VMSS deployment
+        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
 
     if orchestration_mode.lower() == uniform_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
