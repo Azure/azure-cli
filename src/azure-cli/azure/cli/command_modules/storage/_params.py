@@ -572,10 +572,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('object_replication_policy_id', policy_id_type)
         c.argument('policy_id', policy_id_type)
         c.argument('source_account', options_list=['--source-account', '-s'],
-                   help='The source storage account name. Required when no --policy provided.')
+                   help='The source storage account name or resource Id. Required when no --policy provided.')
         c.argument('destination_account', options_list=['--destination-account', '-d'],
-                   help='The destination storage account name. Apply --account-name value as destination account '
-                   'when there is no destination account provided in --policy and --destination-account.')
+                   help='The destination storage account name or resource Id. Apply --account-name value as '
+                   'destination account when there is no destination account provided in --policy and '
+                   '--destination-account.')
         c.argument('properties', or_policy_type)
         c.argument('prefix_match', prefix_math_type)
         c.argument('min_creation_time', min_creation_time_type)
