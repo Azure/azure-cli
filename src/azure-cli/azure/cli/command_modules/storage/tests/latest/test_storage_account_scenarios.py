@@ -1920,7 +1920,7 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
     @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(name_prefix='cli_test_blob_inventory', location='eastus2')
-    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2')
     def test_storage_account_blob_inventory_policy(self, resource_group, storage_account):
         import os
         curr_dir = os.path.dirname(os.path.realpath(__file__))
