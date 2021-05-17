@@ -571,6 +571,7 @@ def _set_upgrade_policy(current_upgrade_policy,
                         force_restart,
                         recreate_application,
                         upgrade_replica_set_check_timeout,
+                        instance_close_delay_duration,
                         failure_action,
                         upgrade_mode,
                         health_check_retry_timeout,
@@ -595,6 +596,8 @@ def _set_upgrade_policy(current_upgrade_policy,
         current_upgrade_policy.upgrade_mode = upgrade_mode
     if upgrade_replica_set_check_timeout is not None:
         current_upgrade_policy.upgrade_replica_set_check_timeout = upgrade_replica_set_check_timeout
+    if instance_close_delay_duration is not None:
+        current_upgrade_policy.instance_close_delay_duration = instance_close_delay_duration
 
     # RollingUpgradeMonitoringPolicy
     if current_upgrade_policy.rolling_upgrade_monitoring_policy is None:
