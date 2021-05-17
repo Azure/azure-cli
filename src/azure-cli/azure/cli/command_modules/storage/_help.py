@@ -32,7 +32,7 @@ type: command
 short-summary: Create Blob Inventory Policy for storage account.
 examples:
   - name: Create Blob Inventory Policy trough json file for storage account.
-    text: az storage account blob-inventory-policy create -g ResourceGroupName --account-name storageAccountName --policy @policy.json
+    text: az storage account blob-inventory-policy create -g myresourcegroup --account-name mystorageaccount --policy @policy.json
 """
 
 helps['storage account blob-inventory-policy show'] = """
