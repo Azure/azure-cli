@@ -94,6 +94,15 @@ helps['sig share reset'] = """
                az sig share reset --gallery-name "myGalleryName" --resource-group "myResourceGroup"
 """
 
+helps['sig share wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a shared gallery is met.
+examples:
+  - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
+    text: |
+        az sig share wait --update -g MyResourceGroup --gallery-name Gallery
+"""
+
 helps['sig shared-gallery list'] = """
     type: command
     short-summary: "List shared galleries by subscription id or tenant id."
