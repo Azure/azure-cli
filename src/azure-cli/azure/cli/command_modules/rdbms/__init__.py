@@ -16,6 +16,7 @@ import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-im
 import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
 
 
+# pylint: disable=import-outside-toplevel
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
