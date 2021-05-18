@@ -926,7 +926,7 @@ helps['cosmosdb sql role definition delete'] = """
 type: command
 short-summary: Delete a SQL role definition under an Azure Cosmos DB account.
 examples:
-  - name: Create a SQL role definition under an Azure Cosmos DB account.
+  - name: Delete a SQL role definition under an Azure Cosmos DB account.
     text: az cosmosdb sql role definition delete --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
 """
 
@@ -960,6 +960,14 @@ short-summary: Update a SQL role definition under an Azure Cosmos DB account.
 examples:
   - name: Update a SQL role definition under an Azure Cosmos DB account.
     text: az cosmosdb sql role definition update --account-name MyAccount --resource-group MyResourceGroup --body @role-definition.json
+"""
+
+helps['cosmosdb sql role definition wait'] = """
+type: command
+short-summary: Poll on a SQL role definition until a specific condition is met.
+examples:
+  - name: Poll on a SQL role definition until it is deleted.
+    text: az cosmosdb sql role definition wait --account-name MyAccount --resource-group MyResourceGroup --id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8 --deleted
 """
 
 helps['cosmosdb sql role assignment'] = """
@@ -1028,4 +1036,12 @@ examples:
       az cosmosdb sql role assignment update --account-name MyAccount --resource-group MyResourceGroup \\
         --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8 \\
         --role-definition-id updated-role-definition-id
+"""
+
+helps['cosmosdb sql role assignment wait'] = """
+type: command
+short-summary: Poll on a SQL role assignment until a specific condition is met.
+examples:
+  - name: Poll on a SQL role assignment until it is deleted.
+    text: az cosmosdb sql role assignment wait --account-name MyAccount --resource-group MyResourceGroup --role-assignment-id cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8 --deleted
 """

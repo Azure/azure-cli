@@ -3,14 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.commands.client_factory import get_subscription_id
+from knack.util import CLIError
 
 
 def validate_failover_policies(ns):
     """ Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format """
-    from azure.mgmt.cosmosdb.models import FailoverPolicy, FailoverPolicies
+    from azure.mgmt.cosmosdb.models import FailoverPolicies, FailoverPolicy
     fp_dict = []
     for item in ns.failover_parameters:
         comps = item.split('=', 1)
@@ -67,9 +67,10 @@ def validate_virtual_network_rules(ns):
 
 def validate_role_definition_body(cmd, ns):
     """ Extracts role definition body """
-    from azure.mgmt.cosmosdb.models import Permission, RoleDefinitionType
-    from azure.cli.core.util import get_file_json, shell_safe_json_parse
     import os
+
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from azure.mgmt.cosmosdb.models import Permission, RoleDefinitionType
     if ns.role_definition_body is not None:
         if os.path.exists(ns.role_definition_body):
             role_definition = get_file_json(ns.role_definition_body)
@@ -81,7 +82,10 @@ def validate_role_definition_body(cmd, ns):
                 'Invalid role definition. A valid dictionary JSON representation is expected.')
 
         if 'Id' in role_definition:
-            role_definition['Id'] = _parse_resource_path(role_definition['Id'], False, "sqlRoleDefinitions")
+            role_definition['Id'] = _parse_resource_path(
+                resource=role_definition['Id'],
+                to_fully_qualified=False,
+                resource_type="sqlRoleDefinitions")
         else:
             role_definition['Id'] = _gen_guid()
 
@@ -95,11 +99,12 @@ def validate_role_definition_body(cmd, ns):
             role_definition['Type'] = RoleDefinitionType.custom_role
 
         role_definition['AssignableScopes'] = [_parse_resource_path(
-            scope,
-            True,
-            None,
-            get_subscription_id(cmd.cli_ctx),
-            ns.resource_group_name, ns.account_name) for scope in role_definition['AssignableScopes']]
+            resource=scope,
+            to_fully_qualified=True,
+            resource_type=None,
+            subscription_id=get_subscription_id(cmd.cli_ctx),
+            resource_group_name=ns.resource_group_name,
+            account_name=ns.account_name) for scope in role_definition['AssignableScopes']]
 
         ns.role_definition_body = role_definition
 
@@ -107,24 +112,31 @@ def validate_role_definition_body(cmd, ns):
 def validate_role_definition_id(ns):
     """ Extracts Guid role definition Id """
     if ns.role_definition_id is not None:
-        ns.role_definition_id = _parse_resource_path(ns.role_definition_id, False, "sqlRoleDefinitions")
+        ns.role_definition_id = _parse_resource_path(
+            resource=ns.role_definition_id,
+            to_fully_qualified=False,
+            resource_type="sqlRoleDefinitions")
 
 
 def validate_fully_qualified_role_definition_id(cmd, ns):
     """ Extracts fully qualified role definition Id """
     if ns.role_definition_id is not None:
-        ns.role_definition_id = _parse_resource_path(ns.role_definition_id,
-                                                     True,
-                                                     "sqlRoleDefinitions",
-                                                     get_subscription_id(cmd.cli_ctx),
-                                                     ns.resource_group_name,
-                                                     ns.account_name)
+        ns.role_definition_id = _parse_resource_path(
+            resource=ns.role_definition_id,
+            to_fully_qualified=True,
+            resource_type="sqlRoleDefinitions",
+            subscription_id=get_subscription_id(cmd.cli_ctx),
+            resource_group_name=ns.resource_group_name,
+            account_name=ns.account_name)
 
 
 def validate_role_assignment_id(ns):
     """ Extracts Guid role assignment Id """
     if ns.role_assignment_id is not None:
-        ns.role_assignment_id = _parse_resource_path(ns.role_assignment_id, False, "sqlRoleAssignments")
+        ns.role_assignment_id = _parse_resource_path(
+            resource=ns.role_assignment_id,
+            to_fully_qualified=False,
+            resource_type="sqlRoleAssignments")
     else:
         ns.role_assignment_id = _gen_guid()
 
@@ -132,12 +144,13 @@ def validate_role_assignment_id(ns):
 def validate_scope(cmd, ns):
     """ Extracts fully qualified scope """
     if ns.scope is not None:
-        ns.scope = _parse_resource_path(ns.scope,
-                                        True,
-                                        None,
-                                        get_subscription_id(cmd.cli_ctx),
-                                        ns.resource_group_name,
-                                        ns.account_name)
+        ns.scope = _parse_resource_path(
+            resource=ns.scope,
+            to_fully_qualified=True,
+            resource_type=None,
+            subscription_id=get_subscription_id(cmd.cli_ctx),
+            resource_group_name=ns.resource_group_name,
+            account_name=ns.account_name)
 
 
 def _parse_resource_path(resource,
