@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.24.0
+++++++
+
+**ACR**
+
+* `az acr check-health`: Add support to verify dns routings to private endpoints (#17746)
+* Fix #17618: Update credential add/update handling for tasks created using --auth-mode (#17715)
+
 2.23.0
 ++++++
 
