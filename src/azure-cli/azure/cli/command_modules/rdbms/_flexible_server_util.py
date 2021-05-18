@@ -372,16 +372,16 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
         os.makedirs(action_dir)
 
     process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
-    secrets = process.stdout.read().strip().decode('UTF-8')
+    github_secrets = process.stdout.read().strip().decode('UTF-8')
     connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
     file_format = 'plsql-file' if database_engine == 'postgresql' else 'sql-file'
 
-    if AZURE_CREDENTIALS not in secrets:
+    if AZURE_CREDENTIALS not in github_secrets:
         register_credential_secrets(cmd,
                                     server=server,
                                     repository=repository)
 
-    if connection_string not in secrets:
+    if connection_string not in github_secrets:
         register_connection_secrets(cmd,
                                     database_engine=database_engine,
                                     server=server,
