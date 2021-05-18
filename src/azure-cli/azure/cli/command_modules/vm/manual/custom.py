@@ -33,9 +33,7 @@ def sshkey_create(client,
                       ssh_public_key_name=ssh_public_key_name)
 
 
-def sig_group_list(client,
-                   location,
-                   shared_to=None):
+def sig_shared_gallery_list(client, location, shared_to=None):
     if shared_to == 'subscription':
         shared_to = None
     return client.list(location=location,
@@ -67,10 +65,7 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
                                sharing_update=sharing_update)
 
 
-def sig_share_image_definition_list(client,
-                                    location,
-                                    gallery_unique_name,
-                                    shared_to=None):
+def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
     if shared_to == 'subscription':
         shared_to = None
     return client.list(location=location,
@@ -78,14 +73,8 @@ def sig_share_image_definition_list(client,
                        shared_to=shared_to)
 
 
-def sig_share_image_version_list(client,
-                                 location,
-                                 gallery_unique_name,
-                                 gallery_image_name,
-                                 shared_to=None):
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       gallery_unique_name=gallery_unique_name,
-                       gallery_image_name=gallery_image_name,
-                       shared_to=shared_to)
+    return client.list(location=location, gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name, shared_to=shared_to)

@@ -56,23 +56,23 @@ def load_arguments(self, _):
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
 
-    with self.argument_context('sig group-list') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+    with self.argument_context('sig shared-gallery list') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant']), help='The query '
                    'parameter to decide what shared galleries to fetch when doing listing operations.')
 
-    with self.argument_context('sig share show') as c:
+    with self.argument_context('sig shared-gallery show') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
 
-    with self.argument_context('sig share image-definition list') as c:
+    with self.argument_context('sig shared-image-definition list') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.')
         c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant']), help='The query '
                    'parameter to decide what shared galleries to fetch when doing listing operations.')
 
-    with self.argument_context('sig share image-definition show') as c:
+    with self.argument_context('sig shared-image-definition show') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
@@ -80,7 +80,7 @@ def load_arguments(self, _):
                    'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
                    id_part='child_name_2')
 
-    with self.argument_context('sig share image-version list') as c:
+    with self.argument_context('sig shared-image-version list') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.')
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
@@ -88,7 +88,7 @@ def load_arguments(self, _):
         c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant']), help='The query '
                    'parameter to decide what shared galleries to fetch when doing listing operations.')
 
-    with self.argument_context('sig share image-version show') as c:
+    with self.argument_context('sig shared-image-version show') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
