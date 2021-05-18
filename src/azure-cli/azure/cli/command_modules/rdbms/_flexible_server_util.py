@@ -3,17 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument, line-too-long
+# pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import datetime as dt
 from datetime import datetime
 import random
+import secrets
+import string
 from knack.log import get_logger
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from msrestazure.tools import parse_resource_id
-from msrestazure.azure_exceptions import CloudError
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
 logger = get_logger(__name__)
@@ -67,8 +68,6 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
 
 
 def generate_password(administrator_login_password):
-    import secrets
-    import string
     if administrator_login_password is None:
         passwordlength = 16
         administrator_login_password = secrets.token_urlsafe(passwordlength)
@@ -310,7 +309,7 @@ def get_id_components(rid):
 
 def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
-
+    from azure.core.exceptions import HttpResponseError
     parent_path = ''
     if parent_name and parent_type:
         parent_path = '{}/{}'.format(parent_type, parent_name)
@@ -319,7 +318,7 @@ def check_existence(resource_client, value, resource_group, provider_namespace, 
 
     try:
         resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
-    except CloudError:
+    except HttpResponseError:
         return False
     return True
 

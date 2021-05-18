@@ -18,7 +18,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
 import azure.cli.core.keys as keys
 
-from azure.mgmt.containerservice.v2021_02_01.models import ManagedClusterPropertiesAutoScalerProfile
+from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterPropertiesAutoScalerProfile
 
 logger = get_logger(__name__)
 
