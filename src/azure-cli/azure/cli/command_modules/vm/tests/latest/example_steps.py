@@ -12,33 +12,22 @@
 from .. import try_manual
 
 
-# EXAMPLE: /Galleries/get/Get a gallery.
+# EXAMPLE: /SharedGalleries/get/Get a gallery.
 @try_manual
-def step_group_list(test, checks=None):
+def step_shared_gallery_list(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sig group-list '
-             '--location "myLocation"',
-             checks=checks)
-
-
-# EXAMPLE: /GallerySharingProfile/get/Get a gallery.
-@try_manual
-def step_share_show(test, checks=None):
-    if checks is None:
-        checks = []
-    test.cmd('az sig share show '
-             '--gallery-unique-name "galleryUniqueName" '
+    test.cmd('az sig shared-gallery list '
              '--location "myLocation"',
              checks=checks)
 
 
 # EXAMPLE: /SharedGalleryImages/get/Get a gallery.
 @try_manual
-def step_share_image_definition_list(test, checks=None):
+def step_shared_image_definition_list(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sig share image-definition list '
+    test.cmd('az sig shared-image-definition list '
              '--gallery-unique-name "galleryUniqueName" '
              '--location "myLocation"',
              checks=checks)
@@ -46,10 +35,10 @@ def step_share_image_definition_list(test, checks=None):
 
 # EXAMPLE: /SharedGalleryImageVersions/get/Get a gallery.
 @try_manual
-def step_share_image_version_list(test, checks=None):
+def step_shared_image_version_list(test, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sig share image-version list '
+    test.cmd('az sig shared-image-version list '
              '--gallery-image-definition "myGalleryImageName" '
              '--gallery-unique-name "galleryUniqueName" '
              '--location "myLocation"',
