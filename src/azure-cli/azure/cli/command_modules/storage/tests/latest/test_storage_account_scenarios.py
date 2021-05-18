@@ -459,6 +459,24 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
                          JMESPathCheck('sasPolicy.sasExpirationPeriod', '100000.00:00:00')])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer()
+    def test_storage_account_with_default_share_permission(self, resource_group):
+        self.kwargs = {
+            'name': self.create_random_name(prefix='cli', length=24),
+            'rg': resource_group}
+
+        self.cmd('az storage account create -n {name} -g {rg}',
+                 checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+
+        self.cmd('az storage account create -n {name} -g {rg} --default-share-permission StorageFileDataSmbShareReader',
+                 checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication.defaultSharePermission',
+                                       'StorageFileDataSmbShareReader')])
+
+        self.cmd('az storage account update -n {name} -g {rg} --default-share-permission None',
+                 checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication.defaultSharePermission',
+                                       'None')])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
