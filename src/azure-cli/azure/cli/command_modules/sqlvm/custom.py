@@ -127,13 +127,10 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
 def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_virtual_machine_group_name,
                             resource_group_name, availability_group_name, ip_address, subnet_resource_id,
                             load_balancer_resource_id, probe_port, sql_virtual_machine_instances, port=1433,
-                            public_ip_address_resource_id=None, vnet_name=None):
+                            public_ip_address_resource_id=None, vnet_name=None):  # pylint: disable=unused-variable
     '''
     Creates an availability group listener
     '''
-    # Not using vnet, just for validation
-    vnet_name = vnet_name
-
     # Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
                                          subnet_resource_id=subnet_resource_id
