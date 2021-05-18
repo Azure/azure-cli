@@ -104,7 +104,8 @@ def sig_shared_image_version_list(client, location, gallery_unique_name, gallery
     return client.list(location=location, gallery_unique_name=gallery_unique_name,
                        gallery_image_name=gallery_image_name, shared_to=shared_to)
 
+
 def get_gallery_instance(cmd, resource_group_name, gallery_name):
     client = cf_vm_cl(cmd.cli_ctx)
-    SelectPermissions = cmd.get_models('SelectPermissions');
+    SelectPermissions = cmd.get_models('SelectPermissions')
     return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
