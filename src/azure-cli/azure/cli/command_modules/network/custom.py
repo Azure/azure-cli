@@ -1041,8 +1041,8 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
      ApplicationGatewayUrlConfiguration) = cmd.get_models('ApplicationGatewayRewriteRule',
                                                           'ApplicationGatewayRewriteRuleActionSet',
                                                           'ApplicationGatewayUrlConfiguration')
-    if not request_headers and not response_headers:
-        raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
+    # if not request_headers and not response_headers:
+    #     raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     rule_set = find_child_item(ag, rule_set_name,
@@ -1056,8 +1056,8 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
         name=rule_name,
         rule_sequence=sequence,
         action_set=ApplicationGatewayRewriteRuleActionSet(
-            request_header_configurations=request_headers,
-            response_header_configurations=response_headers,
+            request_header_configurations=request_headers or [],
+            response_header_configurations=response_headers or [],
             url_configuration=url_configuration
         )
     )
