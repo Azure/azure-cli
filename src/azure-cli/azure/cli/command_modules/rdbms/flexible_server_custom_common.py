@@ -178,6 +178,8 @@ def user_confirmation(message, yes=False):
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
 
     server = client.get(resource_group_name, server_name)
+    if server.public_network_access == 'Disabled':
+        raise ClientRequestError("This command only works with public access enabled server.")
     if allow_push and not branch:
         raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
     if action_name is None:
@@ -188,9 +190,6 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
         database_engine = 'mysql'
     else:
         database_engine = 'postgresql'
-
-    if server.public_network_access == 'Disabled':
-        raise ClientRequestError("This command only works with public access enabled server.")
 
     fill_action_template(cmd,
                          database_engine=database_engine,

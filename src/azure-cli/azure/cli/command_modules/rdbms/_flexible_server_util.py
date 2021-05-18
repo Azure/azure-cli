@@ -374,7 +374,6 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
     process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
     github_secrets = process.stdout.read().strip().decode('UTF-8')
     connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
-    file_format = 'plsql-file' if database_engine == 'postgresql' else 'sql-file'
 
     if AZURE_CREDENTIALS not in github_secrets:
         register_credential_secrets(cmd,
@@ -390,38 +389,15 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
                                     administrator_login_password=administrator_login_password,
                                     repository=repository)
 
-    condition = "on: [workflow_dispatch]\n"
-    yml_content = {
-        'jobs': {
-            'build': {
-                'runs-on': 'ubuntu-latest',
-                'steps': [
-                    {
-                        'uses': 'actions/checkout@v2.3.2'
-                    },
-                    {
-                        'uses': 'azure/login@v1',
-                        'with': {
-                            'creds': '${{secrets.AZURE_CREDENTIALS}}'
-                        }
-                    },
-                    {
-                        'uses': 'azure/{}@v1'.format(database_engine),
-                        'with': {
-                            'connection-string': '${{secrets.' + connection_string + '}}',
-                            'server-name': server.fully_qualified_domain_name,
-                            file_format: file_name,
-                        }
-                    }
-                ],
-            }
-        }
-    }
+    current_location = os.path.dirname(__file__)
 
-    with open(action_dir + action_name + '.yml', 'w') as yml_file:
-        yml_file.write(condition)
-        yaml.dump(yml_content, yml_file)
-
+    with open(current_location + "/templates/" + database_engine + "_githubaction_template.yaml", "r") as template_file:
+        template = yaml.safe_load(template_file)
+        template['jobs']['build']['steps'][2]['with']['server-name'] = server.fully_qualified_domain_name
+        template['jobs']['build']['steps'][2]['with']['sql-file'] = file_name
+        with open(action_dir + action_name + '.yml', 'w', encoding='utf8') as yml_file:
+            yml_file.write("on: [workflow_dispatch]\n")
+            yml_file.write(yaml.dump(template))
 
 def get_git_root_dir():
     process = run_subprocess_get_output("git rev-parse --show-toplevel")
