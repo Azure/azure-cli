@@ -19,6 +19,9 @@ from ._client_factory import cf_gallery_sharing_profile
 
 def load_command_table(self, _):
 
+    custom_tmpl = 'azure.cli.command_modules.vm.manual.custom#{}'
+
+    compute_custom = CliCommandType(operations_tmpl=custom_tmpl)
     from ..generated._client_factory import cf_ssh_public_key
 
     vm_ssh_public_key = CliCommandType(
@@ -46,6 +49,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'sig_share_update', supports_no_wait=True)
         g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
+        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 
     with self.command_group('sig shared-image-definition', vm_shared_gallery_image, min_api='2020-09-30',
                             is_experimental=True, operation_group='shared_galleries',
