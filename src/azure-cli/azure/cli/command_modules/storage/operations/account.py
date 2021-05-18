@@ -59,7 +59,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           default_share_permission=None):
+                           allow_cross_tenant_replication=None, default_share_permission=None):
 
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
@@ -202,6 +202,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         SasPolicy = cmd.get_models('SasPolicy')
         params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
 
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -280,7 +283,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           default_share_permission=None):
+                           allow_cross_tenant_replication=None, default_share_permission=None):
 
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
@@ -458,6 +461,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if sas_expiration_period:
         SasPolicy = cmd.get_models('SasPolicy')
         params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
 
     return params
 
@@ -736,10 +742,11 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
-        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default' \
-                and account_name == or_policy.source_account:
-            raise CLIError(
-                'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')
+        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
+            from msrestazure.tools import parse_resource_id
+            if account_name == parse_resource_id(or_policy.source_account)['name']:
+                raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
+                               'destination account.')
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
