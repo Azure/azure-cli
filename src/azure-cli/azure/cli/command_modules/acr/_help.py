@@ -489,7 +489,7 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
   - name: Update the attributes of the Repository to disable Teleport feature.
     text: az acr repository update -n MyRegistry --teleport-enabled false
-  - name: Update the attributes to enable Teleport feature on all new images in the Repository, which improves container startup performance.
+  - name: Update the attributes to enable Teleport feature on all new images pushed to the Repository. Enabling this improves container startup performance on Teleport-enabled hosts.
     text: az acr repository update -n MyRegistry --teleport-enabled true
 """
 
