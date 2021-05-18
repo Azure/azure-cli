@@ -224,6 +224,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
 
+    with self.argument_context('storage account blob-inventory-policy') as c:
+        c.ignore('blob_inventory_policy_name')
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('account_name',
+                   help='The name of the storage account within the specified resource group. Storage account names '
+                        'must be between 3 and 24 characters in length and use numbers and lower-case letters only.')
+
+    with self.argument_context('storage account blob-inventory-policy create') as c:
+        c.argument('policy', type=file_type, completer=FilesCompleter(),
+                   help='The Storage Account Blob Inventory Policy, string in JSON format or json file path. See more '
+                   'details in https://review.docs.microsoft.com/en-us/azure/storage/blobs/blob-inventory#'
+                   'inventory-policy.')
+
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
                    help='The name of the storage account within the specified resource group')

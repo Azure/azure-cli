@@ -22,6 +22,43 @@ type: command
 short-summary: Check that the storage account name is valid and is not already in use.
 """
 
+helps['storage account blob-inventory-policy'] = """
+type: group
+short-summary: Manage storage account Blob Inventory Policy.
+"""
+
+helps['storage account blob-inventory-policy create'] = """
+type: command
+short-summary: Create Blob Inventory Policy for storage account.
+examples:
+  - name: Create Blob Inventory Policy trough json file for storage account.
+    text: az storage account blob-inventory-policy create -g myresourcegroup --account-name mystorageaccount --policy @policy.json
+"""
+
+helps['storage account blob-inventory-policy show'] = """
+type: command
+short-summary: Show Blob Inventory Policy properties associated with the specified storage account.
+examples:
+  - name: Show Blob Inventory Policy properties associated with the specified storage account without prompt.
+    text: az storage account blob-inventory-policy show -g ResourceGroupName --account-name storageAccountName
+"""
+
+helps['storage account blob-inventory-policy update'] = """
+type: command
+short-summary: Update Blob Inventory Policy associated with the specified storage account.
+examples:
+  - name: Update Blob Inventory Policy associated with the specified storage account.
+    text: az storage account blob-inventory-policy update -g ResourceGroupName --account-name storageAccountName --set "policy.rules[0].name=newname"
+"""
+
+helps['storage account blob-inventory-policy delete'] = """
+type: command
+short-summary: Delete Blob Inventory Policy associated with the specified storage account.
+examples:
+  - name: Delete Blob Inventory Policy associated with the specified storage account without prompt.
+    text: az storage account blob-inventory-policy delete -g ResourceGroupName --account-name storageAccountName -y
+"""
+
 helps['storage account blob-service-properties'] = """
 type: group
 short-summary: Manage the properties of a storage account's blob service.

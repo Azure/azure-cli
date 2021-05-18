@@ -17,7 +17,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
-                                                               cf_queue_service)
+                                                               cf_queue_service, cf_sa_blob_inventory)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -137,6 +137,29 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account',
                             command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
         g.storage_command('generate-sas', 'generate_sas')
+
+    blob_inventory_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#BlobInventoryPoliciesOperations.{}',
+        client_factory=cf_sa_blob_inventory,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    blob_inventory_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_sa_blob_inventory,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    with self.command_group('storage account blob-inventory-policy', blob_inventory_sdk,
+                            custom_command_type=blob_inventory_custom_type, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview') as g:
+        g.custom_command('create', 'create_blob_inventory_policy')
+        g.generic_update_command('update', getter_name='get_blob_inventory_policy',
+                                 getter_type=blob_inventory_custom_type,
+                                 setter_name='update_blob_inventory_policy',
+                                 setter_type=blob_inventory_custom_type)
+        g.custom_command('delete', 'delete_blob_inventory_policy', confirmation=True)
+        g.custom_show_command('show', 'get_blob_inventory_policy')
 
     encryption_scope_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#EncryptionScopesOperations.{}',
