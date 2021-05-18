@@ -1402,6 +1402,7 @@ class CosmosDBTests(ScenarioTest):
         role_def_id2 = '6328f5f7-dbf7-4244-bba8-fbb9d8066506'
         role_assignment_id = 'cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8'
         role_assignment_id2 = '09d117e6-ab6a-4a8b-948a-c6c34aa631db'
+        role_assignment_id3 = 'd6496da9-2eb3-472a-ba38-140fa2a6a304'
         role_definition_create_body = ' {{ \\"Id\\": \\"{0}\\", \\"RoleName\\": \\"roleName\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\", \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }} '.format(role_def_id)
         role_definition_update_body = ' {{ \\"Id\\": \\"{0}\\", \\"RoleName\\": \\"roleName2\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"Permissions\\": [ {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\" ] }}, {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }} ] }}'.format(role_def_id)
         role_definition_create_body2 = ' {{ \\"Id\\": \\"{0}\\", \\"RoleName\\": \\"roleName3\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"Permissions\\": [ {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\" ] }}, {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }}, {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/replace\\" ] }} ] }}'.format(role_def_id2)
@@ -1425,6 +1426,7 @@ class CosmosDBTests(ScenarioTest):
             'fully_qualified_role_def_id2': fully_qualified_role_def_id2,
             'role_assignment_id': role_assignment_id,
             'role_assignment_id2': role_assignment_id2,
+            'role_assignment_id3': role_assignment_id3,
             'fully_qualified_role_assignment_id': fully_qualified_role_assignment_id,
             'fully_qualified_role_assignment_id2': fully_qualified_role_assignment_id2,
             'scope': scope,
@@ -1493,11 +1495,18 @@ class CosmosDBTests(ScenarioTest):
             self.check('principalId', principal_id)
         ])
 
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -n roleName2 -i {role_assignment_id3} --no-wait')
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        self.cmd('az cosmosdb sql role assignment wait -g {rg} -a {acc} -i {role_assignment_id3} --exists')
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json()
+
         role_assignment_list = self.cmd('az cosmosdb sql role assignment list -g {rg} -a {acc}').get_output_in_json()
-        assert len(role_assignment_list) == 2
+        assert len(role_assignment_list) == 3
 
         self.cmd('az cosmosdb sql role assignment delete -g {rg} -a {acc} -i {role_assignment_id} --yes')
         self.cmd('az cosmosdb sql role assignment delete -g {rg} -a {acc} -i {role_assignment_id2} --yes')
+        self.cmd('az cosmosdb sql role assignment delete -g {rg} -a {acc} -i {role_assignment_id3} --yes')
         role_assignment_list = self.cmd('az cosmosdb sql role assignment list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_assignment_list) == 0
 

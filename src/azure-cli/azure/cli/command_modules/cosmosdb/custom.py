@@ -8,9 +8,9 @@
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -57,12 +57,6 @@ from azure.mgmt.cosmosdb.models import (
 )
 
 logger = get_logger(__name__)
-
-
-def _handle_exists_exception(cloud_error):
-    if cloud_error.status_code == 404:
-        return False
-    raise cloud_error
 
 
 class CosmosKeyTypes(Enum):
@@ -1670,8 +1664,8 @@ def cli_cosmosdb_sql_role_definition_exists(client,
     """Checks if an Azure Cosmos DB Sql Role Definition exists"""
     try:
         client.get_sql_role_definition(role_definition_id, resource_group_name, account_name)
-    except CloudError as ex:
-        return _handle_exists_exception(ex.response)
+    except ResourceNotFoundError:
+        return False
 
     return True
 
@@ -1683,7 +1677,8 @@ def cli_cosmosdb_sql_role_assignment_create(client,
                                             principal_id,
                                             role_assignment_id=None,
                                             role_definition_name=None,
-                                            role_definition_id=None):
+                                            role_definition_id=None,
+                                            no_wait=False):
     """Creates an Azure Cosmos DB Sql Role Assignment"""
 
     if role_definition_id is not None and role_definition_name is not None:
@@ -1700,7 +1695,7 @@ def cli_cosmosdb_sql_role_assignment_create(client,
         scope=scope,
         principal_id=principal_id)
 
-    return client.begin_create_update_sql_role_assignment(role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
+    return sdk_no_wait(no_wait, client.begin_create_update_sql_role_assignment, role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
 
 
 def cli_cosmosdb_sql_role_assignment_update(client,
@@ -1710,7 +1705,8 @@ def cli_cosmosdb_sql_role_assignment_update(client,
                                             scope=None,
                                             principal_id=None,
                                             role_definition_name=None,
-                                            role_definition_id=None):
+                                            role_definition_id=None,
+                                            no_wait=False):
     """Updates an Azure Cosmos DB Sql Role Assignment"""
 
     if role_definition_id is not None and role_definition_name is not None:
@@ -1729,7 +1725,7 @@ def cli_cosmosdb_sql_role_assignment_update(client,
         scope=scope if scope is not None else role_assignment.scope,
         principal_id=principal_id if principal_id is not None else role_assignment.principal_id)
 
-    return client.begin_create_update_sql_role_assignment(role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
+    return sdk_no_wait(no_wait, client.begin_create_update_sql_role_assignment, role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
 
 
 def cli_cosmosdb_sql_role_assignment_exists(client,
@@ -1739,8 +1735,8 @@ def cli_cosmosdb_sql_role_assignment_exists(client,
     """Checks if an Azure Cosmos DB Sql Role Assignment exists"""
     try:
         client.get_sql_role_assignment(role_assignment_id, resource_group_name, account_name)
-    except CloudError as ex:
-        return _handle_exists_exception(ex.response)
+    except ResourceNotFoundError:
+        return False
 
     return True
 
@@ -1757,8 +1753,3 @@ def get_associated_role_definition_id(client,
         raise CLIError('No Role Definition found with name [{}].'.format(role_definition_name))
 
     return matching_role_definition.id
-
-
-def _gen_guid():
-    import uuid
-    return uuid.uuid4()
