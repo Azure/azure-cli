@@ -2260,7 +2260,7 @@ examples:
 helps['storage share-rm delete'] = """
 type: command
 short-summary: Delete the specified Azure file share or share snapshot.
-long-summary: 'Incoming BREAKING CHANGE: Snapshot will not be deleted by default and we will add a new parameter to use if you want to include sanpshots for delete operation.'
+long-summary: 'BREAKING CHANGE: Snapshot will not be deleted by default and we will add a new parameter to use if you want to include sanpshots for delete operation.'
 examples:
   - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
@@ -2270,6 +2270,10 @@ examples:
     text: az storage share-rm delete --ids file-share-id
   - name: Delete an Azure file share snapshot.
     text: az storage share-rm delete --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
+  - name: Delete an Azure file share and all its snapshots.
+    text: az storage share-rm delete --include snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Delete an Azure file share and all its snapshots (leased/unleased).
+    text: az storage share-rm delete --include leased-snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
 """
 
 helps['storage share-rm exists'] = """
@@ -2294,6 +2298,10 @@ examples:
     text: az storage share-rm list --storage-account mystorageaccount
   - name: List all file shares include deleted under the storage account 'mystorageaccount' .
     text: az storage share-rm list --storage-account mystorageaccount --include-deleted
+  - name: List all file shares include its all snapshots under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-snapshot
+  - name: List all file shares include its all snapshots and deleted file shares under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-deleted --include-snapshot
 """
 
 helps['storage share-rm restore'] = """

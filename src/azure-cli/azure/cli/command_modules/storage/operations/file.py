@@ -66,11 +66,11 @@ def list_share_rm(client, resource_group_name, account_name, include_deleted=Non
     expand = None
     expand_item = []
     if include_deleted:
-        expand_item .append('deleted')
+        expand_item.append('deleted')
     if include_snapshot:
-        expand_item .append('snapshots')
-    if expand:
-        expand = '.'.join(expand_item)
+        expand_item.append('snapshots')
+    if expand_item:
+        expand = ','.join(expand_item)
     return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=expand)
 
 

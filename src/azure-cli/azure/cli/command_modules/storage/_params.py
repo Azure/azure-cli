@@ -1206,6 +1206,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
 
+    with self.argument_context('storage share-rm delete', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('include', default='none')
+
     with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.ignore('x_ms_snapshot')
 
