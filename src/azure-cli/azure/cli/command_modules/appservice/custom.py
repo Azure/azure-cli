@@ -1419,12 +1419,12 @@ def _mask_creds_related_appsettings(settings):
 
 
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
-    HostNameBinding = cmd.get_models('HostNameBinding')
+    from azure.mgmt.web.models import HostNameBinding
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
-    binding = HostNameBinding(location=webapp.location, site_name=webapp.name)
+    binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 
