@@ -41,6 +41,7 @@ def load_arguments(self, _):
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
+    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -944,7 +945,7 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
-        c.argument('permissions', arg_type=get_enum_type(['Private', 'Groups']), arg_group='Sharing Profile',
+        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
 
     with self.argument_context('sig image-definition create') as c:

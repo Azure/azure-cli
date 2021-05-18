@@ -93,3 +93,31 @@ helps['sig share reset'] = """
         text: |-
                az sig share reset --gallery-name "myGalleryName" --resource-group "myResourceGroup"
 """
+
+helps['sig shared-gallery list'] = """
+    type: command
+    short-summary: "List shared galleries by subscription id or tenant id."
+    examples:
+      - name: List shared galleries.
+        text: |-
+               az sig shared-gallery list --location "myLocation"
+"""
+
+helps['sig shared-image-definition list'] = """
+    type: command
+    short-summary: "List shared gallery images by subscription id or tenant id."
+    examples:
+      - name: List shared images.
+        text: |-
+               az sig shared-image-definition list --gallery-unique-name "galleryUniqueName" --location "myLocation"
+"""
+
+helps['sig shared-image-version list'] = """
+    type: command
+    short-summary: "List shared gallery image versions by subscription id or tenant id."
+    examples:
+      - name: List shared image versions.
+        text: |-
+               az sig shared-image-version list --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+"galleryUniqueName" --location "myLocation"
+"""
