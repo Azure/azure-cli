@@ -57,7 +57,7 @@ def load_command_table(self, _):
         g.custom_command('browse', 'acs_browse')
         g.custom_command('create', 'acs_create', supports_no_wait=True,
                          table_transformer=deployment_validate_table_format)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'delete', confirmation=True)    # TODO: track2/delete
         g.custom_command('list', 'list_container_services')
         g.custom_command('list-locations', 'list_acs_locations')
         g.custom_command('scale', 'update_acs')
@@ -81,7 +81,7 @@ def load_command_table(self, _):
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.custom_command('update', 'aks_update', supports_no_wait=True)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('update-credentials',
                          'aks_update_credentials', supports_no_wait=True)
         g.custom_command('disable-addons', 'aks_disable_addons',
@@ -107,8 +107,8 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.wait_command('wait')
-        g.command('stop', 'stop', supports_no_wait=True)
-        g.command('start', 'start', supports_no_wait=True)
+        g.command('stop', 'begin_stop', supports_no_wait=True)
+        g.command('start', 'begin_start', supports_no_wait=True)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
@@ -141,7 +141,7 @@ def load_command_table(self, _):
                             client_factory=cf_openshift_managed_clusters,
                             deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'delete', supports_no_wait=True, confirmation=True) # TODO: track2/delete
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)
         g.custom_show_command('show', 'openshift_show')
         g.custom_command('list', 'osa_list',

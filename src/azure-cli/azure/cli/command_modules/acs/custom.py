@@ -1474,7 +1474,7 @@ def _create_role_assignment(cli_ctx, role, assignee,
         role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
+    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers) # TODO: track2/custom headers
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
@@ -4516,7 +4516,7 @@ def _put_managed_cluster_ensuring_permission(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
-            custom_headers=headers))
+            headers=headers))
         cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -4559,6 +4559,6 @@ def _put_managed_cluster_ensuring_permission(
                               resource_group_name=resource_group_name,
                               resource_name=name,
                               parameters=managed_cluster,
-                              custom_headers=headers)
+                              headers=headers)
 
     return cluster
