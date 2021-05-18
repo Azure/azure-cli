@@ -16,17 +16,5 @@ def cf_vm_cl(cli_ctx, *_):
                                    ComputeManagementClient)
 
 
-def cf_ssh_public_key(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).ssh_public_keys
-
-
-def cf_shared_gallery(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).shared_galleries
-
-
-def cf_shared_gallery_image(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).shared_gallery_images
-
-
-def cf_shared_gallery_image_version(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).shared_gallery_image_versions
+def cf_gallery_sharing_profile(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).gallery_sharing_profile

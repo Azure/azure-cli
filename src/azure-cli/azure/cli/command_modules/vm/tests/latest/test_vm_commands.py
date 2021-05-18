@@ -3926,10 +3926,10 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         # Check result by shared user
-        self.cmd('sig group-list --location {location}')
-        self.cmd('sig share image-definition list --gallery-unique-name {unique_name} --location {location}')
-        self.cmd('sig share image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
-        self.cmd('sig share image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
+        self.cmd('sig shared-gallery list --location {location}')
+        self.cmd('sig shared-image-definition list --gallery-unique-name {unique_name} --location {location}')
+        self.cmd('sig shared-image-version list --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
+        self.cmd('sig shared-image-definition show --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location}')
 
         # gallery permissions must be reset, or the resource group can't be deleted
         self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
