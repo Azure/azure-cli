@@ -10,7 +10,7 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.mgmt.rdbms import postgresql_flexibleservers
@@ -248,24 +248,21 @@ def flexible_server_update_custom_func(cmd, instance,
 
 
 def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
-    confirm = yes
     result = None
     if not yes:
-        confirm = user_confirmation(
+        user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name),
-            yes=yes)
-    if confirm:
-        try:
-            result = client.begin_delete(resource_group_name, server_name)
-            if cmd.cli_ctx.local_context.is_on:
-                local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
-                local_context_file.remove_option('postgres flexible-server', 'server_name')
-                local_context_file.remove_option('postgres flexible-server', 'administrator_login')
-                local_context_file.remove_option('postgres flexible-server', 'database_name')
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
-            raise CLIError(ex)
+                                                                                              resource_group_name), yes=yes)
+    try:
+        result = client.begin_delete(resource_group_name, server_name)
+        if cmd.cli_ctx.local_context.is_on:
+            local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
+            local_context_file.remove_option('postgres flexible-server', 'server_name')
+            local_context_file.remove_option('postgres flexible-server', 'administrator_login')
+            local_context_file.remove_option('postgres flexible-server', 'database_name')
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
+        raise CLIError(ex)
     return result
 
 

@@ -8,11 +8,11 @@ from datetime import datetime
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
+from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     GITHUB_ACTION_PATH
-
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
@@ -77,17 +77,15 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
 
 
 def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
-    confirm = yes
     result = None
     if not yes:
-        confirm = user_confirmation(
+        user_confirmation(
             "Are you sure you want to delete the firewall-rule '{0}' in server '{1}', resource group '{2}'".format(
                 firewall_rule_name, server_name, resource_group_name))
-    if confirm:
-        try:
-            result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
+    try:
+        result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
     return result
 
 
@@ -112,23 +110,21 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 
 
 def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
-    confirm = yes
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
         raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
-                       "If your local context is turned ON, make sure these three parameters exist in local context "
-                       "using \'az local-context show\' If your local context is turned ON, but they are missing or "
-                       "If your local context is turned OFF, consider passing them explicitly.")
+                       "If your parameter persistence is turned ON, make sure these three parameters exist in "
+                       "persistent parameters using \'az config param-persist show\'. "
+                       "If your parameter persistence is turned OFF, consider passing them explicitly.")
     if not yes:
-        confirm = user_confirmation(
+        user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name),
-            yes=yes)
-    if confirm:
-        try:
-            result = client.begin_delete(resource_group_name, server_name, database_name)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
+                                                                                              resource_group_name), yes=yes)
+
+    try:
+        result = client.begin_delete(resource_group_name, server_name, database_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
     return result
 
 
