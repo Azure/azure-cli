@@ -46,7 +46,9 @@ def generate_sas(client, services, resource_types, permission, expiry, start=Non
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
-                           tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
+                           tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
+                           encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
+                           access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
@@ -54,7 +56,11 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
-                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None):
+                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
+                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           allow_cross_tenant_replication=None, default_share_permission=None):
+
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -70,8 +76,30 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
+
+    # Encryption
     if encryption_services:
         params.encryption = Encryption(services=encryption_services)
+
+    if encryption_key_source is not None:
+        params.encryption.key_source = encryption_key_source
+
+    if params.encryption.key_source and params.encryption.key_source == "Microsoft.Keyvault":
+        if params.encryption.key_vault_properties is None:
+            KeyVaultProperties = cmd.get_models('KeyVaultProperties')
+            params.encryption.key_vault_properties = KeyVaultProperties(key_name=encryption_key_name,
+                                                                        key_vault_uri=encryption_key_vault,
+                                                                        key_version=encryption_key_version)
+
+    if identity_type and 'UserAssigned' in identity_type and user_identity_id:
+        params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
+    elif identity_type:
+        params.identity = Identity(type=identity_type)
+    if key_vault_user_identity_id is not None:
+        EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        params.encryption.encryption_identity = EncryptionIdentity(
+            encryption_user_assigned_identity=key_vault_user_identity_id)
+
     if access_tier:
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
@@ -113,6 +141,12 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='None')
+
+    if default_share_permission is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
@@ -159,6 +193,17 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         ExtendedLocation, ExtendedLocationTypes = cmd.get_models('ExtendedLocation', 'ExtendedLocationTypes')
         params.extended_location = ExtendedLocation(name=edge_zone,
                                                     type=ExtendedLocationTypes.EDGE_ZONE)
+
+    if key_expiration_period_in_days is not None:
+        KeyPolicy = cmd.get_models('KeyPolicy')
+        params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
+
+    if sas_expiration_period:
+        SasPolicy = cmd.get_models('SasPolicy')
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -235,7 +280,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None):
+                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
+                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           allow_cross_tenant_replication=None, default_share_permission=None):
+
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -256,8 +305,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if encryption_key_source:
         encryption.key_source = encryption_key_source
 
-    KeySource = cmd.get_models('KeySource')
-    if encryption.key_source == KeySource.microsoft_keyvault:
+    if encryption.key_source and encryption.key_source == "Microsoft.Keyvault":
         if encryption.key_vault_properties is None:
             KeyVaultProperties = cmd.get_models('KeyVaultProperties')
             encryption.key_vault_properties = KeyVaultProperties()
@@ -283,6 +331,22 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+
+    if identity_type and 'UserAssigned' in identity_type and user_identity_id:
+        user_assigned_identities = {user_identity_id: {}}
+        if instance.identity.user_assigned_identities:
+            for item in instance.identity.user_assigned_identities:
+                if item != user_identity_id:
+                    user_assigned_identities[item] = None
+        params.identity = Identity(type=identity_type, user_assigned_identities=user_assigned_identities)
+    elif identity_type:
+        params.identity = Identity(type=identity_type)
+
+    if key_vault_user_identity_id is not None:
+        EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        params.encryption.encryption_identity = EncryptionIdentity(
+            encryption_user_assigned_identity=key_vault_user_identity_id)
+
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         if enable_files_aadds:  # enable AADDS
@@ -345,6 +409,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             else:
                 params.azure_files_identity_based_authentication = \
                     origin_storage_account.azure_files_identity_based_authentication
+    if default_share_permission is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')
@@ -384,6 +453,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_shared_key_access is not None:
         params.allow_shared_key_access = allow_shared_key_access
+
+    if key_expiration_period_in_days is not None:
+        KeyPolicy = cmd.get_models('KeyPolicy')
+        params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
+
+    if sas_expiration_period:
+        SasPolicy = cmd.get_models('SasPolicy')
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
 
     return params
 
@@ -662,10 +742,11 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
-        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default' \
-                and account_name == or_policy.source_account:
-            raise CLIError(
-                'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')
+        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
+            from msrestazure.tools import parse_resource_id
+            if account_name == parse_resource_id(or_policy.source_account)['name']:
+                raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
+                               'destination account.')
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
@@ -755,3 +836,38 @@ def update_or_rule(client, resource_group_name, account_name, policy_id, rule_id
 
     return get_or_rule(client, resource_group_name=resource_group_name, account_name=account_name,
                        policy_id=policy_id, rule_id=rule_id)
+
+
+def create_blob_inventory_policy(cmd, client, resource_group_name, account_name, policy):
+    if os.path.exists(policy):
+        policy = get_file_json(policy)
+    else:
+        policy = shell_safe_json_parse(policy)
+
+    BlobInventoryPolicy, InventoryRuleType, BlobInventoryPolicyName = \
+        cmd.get_models('BlobInventoryPolicy', 'InventoryRuleType', 'BlobInventoryPolicyName')
+    properties = BlobInventoryPolicy()
+    if 'type' not in policy:
+        policy['type'] = InventoryRuleType.INVENTORY
+    properties.policy = policy
+
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=properties)
+
+
+def delete_blob_inventory_policy(cmd, client, resource_group_name, account_name):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.delete(resource_group_name=resource_group_name, account_name=account_name,
+                         blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT)
+
+
+def get_blob_inventory_policy(cmd, client, resource_group_name, account_name):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                      blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT)
+
+
+def update_blob_inventory_policy(cmd, client, resource_group_name, account_name, parameters=None):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)

@@ -8,7 +8,7 @@ Here is a list of known CLI features that are not supported in airgapped clouds:
 * `az upgrade` to upgrade Azure CLI to the latest version. Instead, you can follow the below [Install](#Install) instructions to upgrade CLI.
 * `az find` to find command examples.
 * Command recommendations based on Aladdin service when the command cannot be parsed correctly.
-* Commands that install another tool such as `az aks install-cli`, `az acr helm install-cli`, `az storage copy`.
+* Commands that install another tool such as `az aks install-cli`, `az storage copy`.
 * External channel operations in `az bot` are not available such as Facebook and Wechat.
 * Some links in help messages or error messages cannot be accessible.
 

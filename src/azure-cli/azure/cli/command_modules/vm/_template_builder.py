@@ -516,6 +516,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             'vTpmEnabled': enable_vtpm
         }
 
+    # Compatibility of various API versions
+    if vm_properties['securityProfile'] == {}:
+        del vm_properties['securityProfile']
+
     if platform_fault_domain is not None:
         vm_properties['platformFaultDomain'] = platform_fault_domain
 

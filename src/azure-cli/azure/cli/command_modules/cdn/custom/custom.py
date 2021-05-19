@@ -64,6 +64,19 @@ def _update_mapper(existing, new, keys):
         setattr(new, key, new_value if new_value is not None else existing_value)
 
 
+def _convert_to_unified_delivery_rules(policy):
+    for existing_rule in policy.rules:
+        if existing_rule.conditions:
+            for con in existing_rule.conditions:
+                if con.parameters.operator is None and con.parameters.match_values is None:
+                    if con.parameters.odata_type == UrlPathMatchConditionParameters.odata_type:
+                        con.parameters.operator = con.parameters.additional_properties["matchType"]
+                        con.parameters.match_values = con.parameters.additional_properties["path"].split(',')
+                    if con.parameters.odata_type == UrlFileExtensionMatchConditionParameters.odata_type:
+                        con.parameters.operator = "Any"
+                        con.parameters.match_values = con.parameters.additional_properties["extensions"]
+
+
 # region Custom Commands
 def list_profiles(client, resource_group_name=None):
     profiles = client.profiles
@@ -339,19 +352,28 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
 
 # pylint: disable=too-many-locals
 def add_rule(client, resource_group_name, profile_name, endpoint_name,
-             order, rule_name, action_name, match_variable=None, operator=None,
+             order, action_name, match_variable=None, operator=None,
              match_values=None, selector=None, negate_condition=None, transform=None,
              cache_behavior=None, cache_duration=None, header_action=None,
              header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
              redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
              custom_querystring=None, custom_fragment=None, source_pattern=None,
-             destination=None, preserve_unmatched_path=None):
+             destination=None, preserve_unmatched_path=None, rule_name=None):
+
+    partner_skus = [SkuName.PREMIUM_VERIZON, SkuName.CUSTOM_VERIZON, SkuName.STANDARD_AKAMAI, SkuName.STANDARD_VERIZON]
+    profile = client.profiles.get(resource_group_name, profile_name)
+    if rule_name is None and profile.sku.name not in partner_skus:
+        raise CLIError("--rule-name is required for Microsoft SKU")
+
     endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
+
     policy = endpoint.delivery_policy
     if policy is None:
         policy = EndpointPropertiesUpdateParametersDeliveryPolicy(
             description='delivery_policy',
             rules=[])
+
+    _convert_to_unified_delivery_rules(policy)
 
     conditions = []
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
@@ -422,14 +444,36 @@ def add_action(client, resource_group_name, profile_name, endpoint_name,
     return client.endpoints.begin_update(resource_group_name, profile_name, endpoint_name, params)
 
 
-def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_name):
+def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_name=None, order: int = None):
+
+    if rule_name is None and order is None:
+        raise CLIError("Either --rule-name or --order must be specified")
+
+    if order is not None and order < 0:
+        raise CLIError("Order should be non-negative.")
 
     endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is not None:
-        for rule in policy.rules:
-            if rule.name == rule_name:
-                policy.rules.remove(rule)
+        _convert_to_unified_delivery_rules(policy)
+        pop_index = -1
+        for idx, rule in enumerate(policy.rules):
+            if rule_name is not None and rule.name == rule_name:
+                pop_index = idx
+                break
+            if order is not None and rule.order == order:
+                pop_index = idx
+                break
+
+        # To guarantee the consecutive rule order, we need to make sure the rule with order larger than the deleted one
+        # to decrease its order by one. Rule with order 0 is special and no rule order adjustment is required.
+        if pop_index != -1:
+            pop_order = policy.rules[pop_index].order
+            policy.rules.pop(pop_index)
+            for rule in policy.rules:
+                if rule.order > pop_order and pop_order != 0:
+                    rule.order -= 1
+
     else:
         logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
 
