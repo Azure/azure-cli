@@ -197,7 +197,6 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
             'replica_restart_wait_duration': '00:11:00',
             'min_instance_count': 2,
             'min_instance_percentage': 20,
-            'instance_close_delay_duration': '00:11:00',
         })
         _create_managed_cluster(self, self.kwargs)
         _wait_for_managed_cluster_state_ready(self, self.kwargs)
@@ -235,12 +234,10 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
                          self.check('properties.replicaRestartWaitDuration', '00:11:00')])
         # Update Stateless Service
         self.cmd('az sf managed-service update -g {rg} -c {cluster_name} --application-name {app_name} --service-name {stateless_service_name} '
-                 '--min-instance-count {min_instance_count} --min-instance-percentage {min_instance_percentage} '
-                 '--instance-close-delay-duration {instance_close_delay_duration}',
+                 '--min-instance-count {min_instance_count} --min-instance-percentage {min_instance_percentage} ',
                  checks=[self.check('properties.provisioningState', 'Succeeded'),
                          self.check('properties.minInstanceCount', '2'),
-                         self.check('properties.minInstancePercentage', '20'),
-                         self.check('properties.instanceCloseDelayDuration', '00:11:00')])
+                         self.check('properties.minInstancePercentage', '20'),])
         # Delete Stateless Service
         self.cmd('az sf managed-service delete -g {rg} -c {cluster_name} --application-name {app_name} --service-name {stateless_service_name}')
         # Delete Stateful Service
