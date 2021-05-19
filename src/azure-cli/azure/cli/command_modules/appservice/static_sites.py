@@ -200,6 +200,8 @@ def create_staticsites(cmd, resource_group_name, name, location,
         from ._github_oauth import get_github_access_token
         scopes = ["admin:repo_hook", "repo", "workflow"]
         token = get_github_access_token(cmd, scopes)
+    elif token and login_with_github:
+        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
