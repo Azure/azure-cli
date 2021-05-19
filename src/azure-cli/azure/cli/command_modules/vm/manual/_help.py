@@ -100,7 +100,7 @@ short-summary: Place the CLI in a waiting state until a condition of a shared ga
 examples:
   - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
     text: |
-        az sig share wait --update -g MyResourceGroup --gallery-name Gallery
+        az sig share wait --updated -g MyResourceGroup --gallery-name Gallery
 """
 
 helps['sig shared-gallery list'] = """
