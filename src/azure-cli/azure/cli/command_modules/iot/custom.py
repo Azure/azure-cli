@@ -1311,9 +1311,10 @@ def _process_fileupload_args(
 
 
 def _build_identity(identities):
-    identities = identities or []
     identity_type = IdentityType.none.value
-    if not identities or SYSTEM_IDENTITY in identities:
+    if not identities:
+        return ArmIdentity(type=identity_type)
+    if SYSTEM_IDENTITY in identities:
         identity_type = IdentityType.system_assigned.value
     user_identities = [i for i in identities if i != SYSTEM_IDENTITY]
     if user_identities and identity_type == IdentityType.system_assigned.value:
