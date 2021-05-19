@@ -96,6 +96,6 @@ def load_arguments(self, _):
                    'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
                    id_part='child_name_2')
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], type=str, help='The '
-                   'name of the gallery image version to be created. Needs to follow semantic version name pattern: '
+                   'name of the gallery image version to be created. Need to follow semantic version name pattern: '
                    'The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. '
                    'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
