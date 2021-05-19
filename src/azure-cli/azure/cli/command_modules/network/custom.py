@@ -4072,8 +4072,11 @@ def set_lb_rule(
             instance.backend_address_pools = [instance.backend_address_pool]
     if backend_pools_name is not None:
         instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
+<<<<<<< HEAD
         # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
         instance.backend_address_pool = None
+=======
+>>>>>>> 6ad1929af3dcae62b3a81672af9a33e54aaeec3c
 
     if probe_name == '':
         instance.probe = None
