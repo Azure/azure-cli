@@ -417,7 +417,6 @@ class IoTHubTest(ScenarioTest):
         storage_account_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
 
         # identities
-        system_identity = '[system]'
         user_identity_names = [
             self.create_random_name(prefix='iot-user-identity', length=32),
             self.create_random_name(prefix='iot-user-identity', length=32),
@@ -432,8 +431,8 @@ class IoTHubTest(ScenarioTest):
 
         # create hub with system-assigned identity, user-assigned identity, and assign storage roles
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
-            self.cmd('iot hub create -n {0} -g {1} --sku s1 --location {2} --mintls "1.2" --assign-identity {3} {4} --role "{5}" --scopes "{6}"'
-                     .format(identity_hub, rg, location, system_identity, user_identity_1, identity_storage_role, storage_account_id))
+            self.cmd('iot hub create -n {0} -g {1} --sku s1 --location {2} --mintls "1.2" --mi-system-assigned --mi-user-assigned {3} --role "{4}" --scopes "{5}"'
+                     .format(identity_hub, rg, location, user_identity_1, identity_storage_role, storage_account_id))
 
         hub_props = self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
             self.check('properties.minTlsVersion', '1.2'),
@@ -575,8 +574,8 @@ class IoTHubTest(ScenarioTest):
         # fix for hanging 'Transitioning' state from previous commands
         self._poll_for_hub_state(hub_name=identity_hub, resource_group_name=rg, desired_state='Active', polling_interval=10)
 
-        # add multiple user-assigned identities (2, 3)
-        self.cmd('iot hub identity assign -n {0} -g {1} --identities {2} {3}'
+        # assign (user) add multiple user-assigned identities (2, 3)
+        self.cmd('iot hub identity assign -n {0} -g {1} --user {2} {3}'
                  .format(identity_hub, rg, user_identity_2, user_identity_3),
                  checks=[
                      self.check('length(userAssignedIdentities)', 3),
@@ -585,27 +584,55 @@ class IoTHubTest(ScenarioTest):
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
 
-        # remove single identity (system)
-        self.cmd('iot hub identity remove -n {0} -g {1} --identities {2}'.format(identity_hub, rg, system_identity),
+        # remove (system)
+        self.cmd('iot hub identity remove -n {0} -g {1} --system'.format(identity_hub, rg),
                  checks=[
                      self.check('length(userAssignedIdentities)', 3),
                      self.check('type', IdentityType.user_assigned.value),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+        
+        # assign (system) re-add system identity
+        self.cmd('iot hub identity assign -n {0} -g {1} --system'.format(identity_hub, rg),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 3),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3)),
+                     self.check('type', IdentityType.system_assigned_user_assigned.value)])
 
-        # remove all remaining user identities (1, 2, 3)
-        self.cmd('iot hub identity remove -n {0} -g {1} --identities {2} {3} {4}'
-                 .format(identity_hub, rg, user_identity_1, user_identity_2, user_identity_3),
+        # update (user) - remove system identity
+        self.cmd('iot hub identity update -n {0} -g {1} --type user_assigned'.format(identity_hub, rg),
+                 checks=[
+                     self.check('type', IdentityType.user_assigned.value),
+                     self.check('length(userAssignedIdentities)', 3),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+
+        # remove (user) - remove single identity (2)
+        self.cmd('iot hub identity remove -n {0} -g {1} --user {2}'.format(identity_hub, rg, user_identity_2),
+                 checks=[
+                     self.check('type', IdentityType.user_assigned.value),
+                     self.check('length(userAssignedIdentities)', 2),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+
+        # update (none) remove all remaining identities
+        self.cmd('iot hub identity update -n {0} -g {1} --type none'
+                 .format(identity_hub, rg),
                  checks=[
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.none.value)])
-
-        # re-add system identity
-        self.cmd('iot hub identity assign -n {0} -g {1} --identities {2}'.format(identity_hub, rg, system_identity),
+        
+        # update (system) re-add system identity
+        self.cmd('iot hub identity update -n {0} -g {1} --type system_assigned'
+                 .format(identity_hub, rg),
                  checks=[
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.system_assigned.value)])
+
 
     def _get_eventhub_connectionstring(self, rg):
         ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)

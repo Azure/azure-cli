@@ -19,6 +19,7 @@ from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
                                                           AllocationPolicy,
                                                           AccessRightsDescription)
 from azure.cli.command_modules.iot.shared import (EndpointType,
+                                                  IdentityUpdateType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
@@ -187,21 +188,40 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    type=str, help='Specify the minimum TLS version to support for this hub. Can be set to'
                                   ' "1.2" to have clients that use a TLS version below 1.2 to be rejected.')
         c.argument('tags', tags_type)
-        c.argument('identities', options_list=['--assign-identity'],
-                   nargs='*', help="Accepts system or user-assigned managed identities separated by spaces. "
-                   "Use '[system]' to refer to the system-assigned identity or a resource ID to refer to "
-                   "a user-assigned identity.")
+        c.argument('system_identity', options_list=['--mi-system-assigned'],
+                   arg_type=get_three_state_flag(),
+                   help="Enable system-assigned managed identity for this hub")
+        c.argument('user_identities', options_list=['--mi-user-assigned'],
+                   nargs='*', help="Enable user-assigned managed identities for this hub. "
+                   "Accept space-separated list of identity resource IDs.")
         c.argument('identity_role', options_list=['--role'],
                    help="Role to assign to the hub's system-assigned managed identity.")
         c.argument('identity_scopes', options_list=['--scopes'], nargs='*',
                    help="Space separated list of scopes to assign the role (--role) "
                    "for the system-assigned managed identity.")
 
-    with self.argument_context('iot hub identity') as c:
-        c.argument('identities', options_list=['--identities'],
-                   nargs='*', help="Accepts system or user-assigned managed identities separated by spaces. "
-                   "Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a "
-                   "user-assigned identity.")
+    with self.argument_context('iot hub identity assign') as c:
+        c.argument('system_identity', options_list=['--system-assigned', '--system'],
+                   arg_type=get_three_state_flag(),
+                   nargs='*', help="Assign a system-assigned managed identity to this hub.")
+        c.argument('user_identities', options_list=['--user-assigned', '--user'],
+                   nargs='*', help="Assign user-assigned managed identities to this hub. "
+                   "Accept space-separated list of identity resource IDs.")
+
+    with self.argument_context('iot hub identity update') as c:
+        c.argument('identity_type', options_list=['--type'],
+                   arg_type=get_enum_type(IdentityUpdateType),
+                   help="Update hub's system or user-assigned managed identities. "
+                   "Use 'system_assigned' to remove all user identities, 'user_assigned' to "
+                   "remove all user-assigned identities, or 'none' to remove all identities.")
+
+    with self.argument_context('iot hub identity remove') as c:
+        c.argument('system_identity', options_list=['--system-assigned', '--system'],
+                   arg_type=get_three_state_flag(),
+                   nargs='*', help="Remove a system-assigned managed identity from this hub.")
+        c.argument('user_identities', options_list=['--user-assigned', '--user'],
+                   nargs='*', help="Remove user-assigned managed identities from this hub. "
+                   "Accept space-separated list of identity resource IDs.")
 
     for subgroup in ['consumer-group', 'policy', 'certificate', 'routing-endpoint', 'route']:
         with self.argument_context('iot hub {}'.format(subgroup)) as c:

@@ -73,3 +73,13 @@ class IdentityType(Enum):
     user_assigned = "UserAssigned"
     system_assigned_user_assigned = "SystemAssigned, UserAssigned"
     none = "None"
+
+
+# pylint: disable=too-few-public-methods
+class IdentityUpdateType(Enum):
+    """
+    Type of identity update operation.
+    """
+    system_assigned = "system_assigned"
+    user_assigned = "user_assigned"
+    none = "none"

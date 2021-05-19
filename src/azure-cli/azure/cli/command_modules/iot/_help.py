@@ -404,7 +404,7 @@ examples:
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --tags a=b c=d
   - name: Create an IoT Hub with a system-assigned managed identity, and assign a role and scope to a storage account for the created identity.
     text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --assign-identity [system] --role "Storage Blob Data Contributor" --scopes {resourceId}
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --mi-system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
 """
 
 helps['iot hub delete'] = """
@@ -440,12 +440,12 @@ helps['iot hub identity assign'] = """
 type: command
 short-summary: Assign managed identities to an IoT Hub
 examples:
-  - name: Assign a user-assigned managed identity to an IoT Hub
+  - name: Assign user-assigned managed identities to an IoT Hub
     text: >
-        az iot hub identity assign --name MyIoTHub --resource-group MyResourceGroup --identities {resourceId}
+        az iot hub identity assign --name MyIoTHub --resource-group MyResourceGroup --user-assigned {resourceId1} {resourceId2}
   - name: Assign a system-assigned managed identity to an IoT Hub and assign a role to that identity.
     text: >
-        az iot hub identity assign --name MyIoTHub --resource-group MyResourceGroup --identities [system] --role "Storage Blob Data Contributor" --scopes {resourceId}
+        az iot hub identity assign --name MyIoTHub --resource-group MyResourceGroup --system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
 """
 
 helps['iot hub identity show'] = """
@@ -463,10 +463,25 @@ short-summary: Remove managed identities from an IoT Hub
 examples:
   - name: Remove a user-assigned managed identity from an IoT Hub
     text: >
-        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --identities {resourceId}
+        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --user-assigned {resourceId}
   - name: Remove a system-assigned managed identity from an IoT Hub.
     text: >
-        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --identities [system]
+        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --system-assigned
+"""
+
+helps['iot hub identity update'] = """
+type: command
+short-summary: Update managed identity type for an IoT Hub.
+examples:
+  - name: Enable only user-assigned managed identities for an IoT Hub (removes system-assigned identity). Requires at least one user-assigned managed identity to be assigned previously.
+    text: >
+        az iot hub identity update --name MyIoTHub --resource-group MyResourceGroup --type user_assigned
+  - name: Enable only system-assigned managed identities for an IoT Hub (removes all user-assigned identities, enables system-assigned identity if not previously enabled).
+    text: >
+        az iot hub identity update --name MyIoTHub --resource-group MyResourceGroup --type system_assigned
+  - name: Remove all identities from an IoT Hub.
+    text: >
+        az iot hub identity update --name MyIoTHub --resource-group MyResourceGroup --type none
 """
 
 helps['iot hub list'] = """
