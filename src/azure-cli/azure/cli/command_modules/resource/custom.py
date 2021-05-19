@@ -196,7 +196,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     result[param_name] = None
                     no_tty = True
                 break
-            elif param_type == 'securestring':
+            if param_type == 'securestring':
                 try:
                     value = prompt_pass(prompt_str, help_string=description)
                 except NoTTYException:
@@ -204,7 +204,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     no_tty = True
                 result[param_name] = value
                 break
-            elif param_type == 'int':
+            if param_type == 'int':
                 try:
                     int_value = prompt_int(prompt_str, help_string=description)
                     result[param_name] = int_value
@@ -212,7 +212,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     result[param_name] = 0
                     no_tty = True
                 break
-            elif param_type == 'bool':
+            if param_type == 'bool':
                 try:
                     value = prompt_t_f(prompt_str, help_string=description)
                     result[param_name] = value
@@ -220,7 +220,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     result[param_name] = False
                     no_tty = True
                 break
-            elif param_type in ['object', 'array']:
+            if param_type in ['object', 'array']:
                 try:
                     value = prompt(prompt_str, help_string=description)
                 except NoTTYException:
@@ -237,13 +237,13 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                         continue
                 result[param_name] = value
                 break
-            else:
-                try:
-                    result[param_name] = prompt(prompt_str, help_string=description)
-                except NoTTYException:
-                    result[param_name] = None
-                    no_tty = True
-                break
+
+            try:
+                result[param_name] = prompt(prompt_str, help_string=description)
+            except NoTTYException:
+                result[param_name] = None
+                no_tty = True
+            break
     if no_tty and fail_on_no_tty:
         raise NoTTYException
     return result
@@ -1627,7 +1627,6 @@ def _single_or_collection(obj, default=None):
     return obj
 
 
-# pylint: unused-argument
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None, include_response_body=False, latest_include_preview=False):
@@ -1697,7 +1696,6 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
     return _single_or_collection(results)
 
 
-# pylint: unused-argument
 def update_resource(cmd, parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
@@ -1714,7 +1712,6 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
                  is_incremental=None, latest_include_preview=False):
@@ -1732,7 +1729,6 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
             tags, is_incremental)) for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
