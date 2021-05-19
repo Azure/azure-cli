@@ -3204,7 +3204,7 @@ short-summary: update one tunnel interface of load balance tunnel interface pool
 examples:
   - name: update one tunnel interface of load balance tunnel interface pool.
     text: az network lb address-pool tunnel-interface update -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool \
-    --type external --protocol vxlan --identifier 901 --port 10000
+    --type external --protocol vxlan --identifier 901 --port 10000 --index 0
 """
 
 helps['network lb address-pool tunnel-interface remove'] = """
