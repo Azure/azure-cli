@@ -488,12 +488,11 @@ class AzureBatchDataPlaneCommand:
                             param_value = kwargs.pop(arg)
                             if param_value is None:
                                 continue
-                            else:
-                                self._build_parameters(
-                                    details['path'],
-                                    kwargs,
-                                    details['root'],
-                                    param_value)
+                            self._build_parameters(
+                                details['path'],
+                                kwargs,
+                                details['root'],
+                                param_value)
                         except KeyError:
                             continue
 
