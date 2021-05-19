@@ -156,6 +156,7 @@ def process_release_policy(ns):
 
         # for sdk function: key set-attributes
         if hasattr(ns, 'key_attributes'):
+            # Fix KeyReleasePolicy to v7.3-preview in private package, need to be replaced in production
             from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_keys_t1.models import KeyReleasePolicy
             ns.key_attributes.exportable = True
             ns.release_policy = KeyReleasePolicy(

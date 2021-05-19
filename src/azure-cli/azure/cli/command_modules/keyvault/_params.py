@@ -415,6 +415,8 @@ def load_arguments(self, _):
                    help='Name of the key. (Only for restoring from storage account)')
 
     with self.argument_context('keyvault key set-attributes') as c:
+        # Fix KeyAttributes to v7.3-preview in private package, need to be replaced in production
+        from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_keys_t1.models import KeyAttributes
         c.attributes_argument('key', KeyAttributes)
 
     for scope in ['encrypt', 'decrypt']:
