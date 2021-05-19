@@ -4942,5 +4942,96 @@ class NetworkExtendedLocation(ScenarioTest):
                  checks=self.check('extendedLocation.name', '{edge_name}'))
 
 
+class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_tunnel_interface', location='eastus')
+    def test_network_lb_tunnel_interface(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'sku': 'Gateway',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
+            'bap': 'backend-address-pool-name',
+            'type': 'external',
+            'protocol': 'vxlan',
+            'identifier': '950',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku {sku} --vnet-name {vnet} --subnet {subnet}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap} --vnet {vnet}')
+
+        # default
+        self.cmd('network lb address-pool tunnel-interface add -g {rg} --lb-name {lb} --address-pool {bap} '
+                 '--type {type} --protocol {protocol} --identifier {identifier} --port 15000',
+                 checks=self.check('length(tunnelInterfaces)', 2))
+        self.cmd('network lb address-pool tunnel-interface list -g {rg} --lb-name {lb} --address-pool {bap}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network lb address-pool tunnel-interface remove -g {rg} --lb-name {lb} --address-pool {bap} '
+                 '--index 0',
+                 checks=self.check('length(tunnelInterfaces)', 1))
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_front_ip', location='eastus')
+    def test_network_lb_front_ip(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'lb1': 'lb1',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
+            'ip': 'public-ip',
+            'ip1': 'public-ip1',
+            'fip': 'load-balancer-frontend-end',
+            'subnet': 'subnet',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard --public-ip-address {ip}')
+        self.cmd('network lb create -g {rg} -n {lb1} --sku Gateway --vnet-name {vnet} --subnet {subnet} ')
+        self.cmd('network public-ip create -g {rg} -n {ip}1 --sku standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} --public-ip-address {ip1}',
+                 checks=self.not_exists('gatewayLoadBalancer'))
+        result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n {fip} '
+                          '--vnet-name {vnet} --subnet {subnet}').get_output_in_json()
+        # test --gateway-lb
+        self.kwargs['id'] = result['id']
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb {id}',
+                 checks=self.exists('gatewayLoadBalancer'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_front_ip', location='eastus2euap')
+    def test_network_nic_front_ip(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'vnet': 'vnet',
+            'vnet1': 'vnet1',
+            'subnet': 'subnet',
+            'subnet1': 'subnet1',
+            'ip': 'public-ip',
+            'ip1': 'public-ip1',
+            'fip': 'load-balancer-frontend-end',
+            'nic': 'nic-name',
+            'nip': 'nic-ip-config-name',
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network nic create -g {rg} -n {nic} --public-ip-address {ip} --vnet-name {vnet} --subnet {subnet}')
+        self.cmd('network lb create -g {rg} -n {lb} --sku Gateway --vnet-name {vnet1} --subnet {subnet1} ')
+        result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} '
+                          '--vnet-name {vnet1} --subnet {subnet1}').get_output_in_json()
+        self.kwargs['id'] = result['id']
+        self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {nip} --make-primary '
+                 '--public-ip-address {ip1}',
+                 checks=self.not_exists('gatewayLoadBalancer'))
+
+        # test --gateway-lb
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {nip} --gateway-lb {id}',
+                 checks=self.exists('gatewayLoadBalancer'))
+
+
 if __name__ == '__main__':
     unittest.main()

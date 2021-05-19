@@ -1,0 +1,986 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_lb_tunnel_interface000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001","name":"test_network_lb_tunnel_interface000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-05-18T08:40:41Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:40:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_network_lb_tunnel_interface000001%27%20and%20name%20eq%20%27vnet%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2020-10-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:40:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"name": "vnet", "type": "Microsoft.Network/virtualNetworks", "location": "eastus",
+      "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties": {"addressSpace":
+      {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name": "subnet", "properties":
+      {"addressPrefix": "10.0.0.0/24"}}]}}, {"type": "Microsoft.Network/loadBalancers",
+      "name": "lb", "location": "eastus", "tags": {}, "apiVersion": "2021-02-01",
+      "dependsOn": ["Microsoft.Network/virtualNetworks/vnet"], "properties": {"backendAddressPools":
+      [{"name": "lbbepool", "properties": {"tunnelInterfaces": [{"protocol": "VXLAN",
+      "type": "Internal", "identifier": 900}]}}], "frontendIPConfigurations": [{"name":
+      "LoadBalancerFrontEnd", "properties": {"privateIPAllocationMethod": "Dynamic",
+      "privateIPAddress": null, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet"},
+      "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Gateway"}}], "outputs":
+      {"loadBalancer": {"type": "object", "value": "[reference(''lb'')]"}}}, "parameters":
+      {}, "mode": "incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1394'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Resources/deployments/lb_deploy_mlql5uKKftyfo49xIQousr7e3tKMgTDF","name":"lb_deploy_mlql5uKKftyfo49xIQousr7e3tKMgTDF","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1869078125405875547","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-05-18T08:40:51.2511233Z","duration":"PT2.6379986S","correlationId":"751a8190-274a-4ac5-b042-f082da921d16","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"loadBalancers","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/virtualNetworks/vnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Resources/deployments/lb_deploy_mlql5uKKftyfo49xIQousr7e3tKMgTDF/operationStatuses/08585802796368644968?api-version=2020-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1324'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:40:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585802796368644968?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Resources/deployments/lb_deploy_mlql5uKKftyfo49xIQousr7e3tKMgTDF","name":"lb_deploy_mlql5uKKftyfo49xIQousr7e3tKMgTDF","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1869078125405875547","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-05-18T08:41:14.6947756Z","duration":"PT26.0816509S","correlationId":"751a8190-274a-4ac5-b042-f082da921d16","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"loadBalancers","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/virtualNetworks/vnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"445a376e-7241-4bd2-adbc-f733995f694d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"97db60d3-f17d-4bfc-8cc2-f99cd881ab99\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAddress":"10.0.0.4","privateIPAllocationMethod":"Dynamic","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet"},"privateIPAddressVersion":"IPv4"}}],"backendAddressPools":[{"name":"lbbepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/lbbepool","etag":"W/\"97db60d3-f17d-4bfc-8cc2-f99cd881ab99\"","properties":{"provisioningState":"Succeeded","tunnelInterfaces":[{"port":0,"identifier":900,"protocol":"VXLAN","type":"Internal"}]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/virtualNetworks/vnet"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3289'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --vnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"lb\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb\",\r\n
+        \ \"etag\": \"W/\\\"97db60d3-f17d-4bfc-8cc2-f99cd881ab99\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"445a376e-7241-4bd2-adbc-f733995f694d\",\r\n    \"frontendIPConfigurations\":
+        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
+        \       \"etag\": \"W/\\\"97db60d3-f17d-4bfc-8cc2-f99cd881ab99\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet\"\r\n
+        \         },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n        }\r\n
+        \     }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n        \"name\":
+        \"lbbepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/lbbepool\",\r\n
+        \       \"etag\": \"W/\\\"97db60d3-f17d-4bfc-8cc2-f99cd881ab99\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"tunnelInterfaces\": [\r\n            {\r\n              \"port\":
+        0,\r\n              \"identifier\": 900,\r\n              \"protocol\": \"VXLAN\",\r\n
+        \             \"type\": \"Internal\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
+        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
+        \   \"inboundNatRules\": [],\r\n    \"outboundRules\": [],\r\n    \"inboundNatPools\":
+        []\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Gateway\",\r\n    \"tier\":
+        \"Regional\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:24 GMT
+      etag:
+      - W/"97db60d3-f17d-4bfc-8cc2-f99cd881ab99"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 07bb9a49-d451-4653-ac1b-9c97d1d0499e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "backend-address-pool-name", "properties": {"tunnelInterfaces":
+      [{"identifier": 900, "protocol": "VXLAN", "type": "Internal"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '137'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --lb-name -n --vnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"de1ee5da-3a13-4971-b921-fa7029f9e8dd\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      }\r\n    ]\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/64f9e9d8-bac8-4320-b28d-945c2316576b?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '633'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 01aba9e0-8225-455e-a5a9-b25b3e3f8cac
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --vnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/64f9e9d8-bac8-4320-b28d-945c2316576b?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 52ea3ef6-fc0a-467e-bf5b-a93e26ec2c37
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --vnet
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"8181cc7a-9185-45ca-b2eb-b8fe007a5b39\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      }\r\n    ]\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '634'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:35 GMT
+      etag:
+      - W/"8181cc7a-9185-45ca-b2eb-b8fe007a5b39"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 78cb4aee-0a11-4d60-a5f1-6e572c44d063
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool --type --protocol --identifier --port
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"8181cc7a-9185-45ca-b2eb-b8fe007a5b39\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      }\r\n    ]\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '634'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:36 GMT
+      etag:
+      - W/"8181cc7a-9185-45ca-b2eb-b8fe007a5b39"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3836981b-7a1f-4360-a2a5-b911d5f32476
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name",
+      "name": "backend-address-pool-name", "properties": {"tunnelInterfaces": [{"port":
+      0, "identifier": 900, "protocol": "VXLAN", "type": "Internal"}, {"port": 15000,
+      "identifier": 950, "protocol": "VXLAN", "type": "external"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '468'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --lb-name --address-pool --type --protocol --identifier --port
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"dbc8b8b0-f615-4c1f-a336-6c190718e040\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      },\r\n      {\r\n        \"port\":
+        15000,\r\n        \"identifier\": 950,\r\n        \"protocol\": \"VXLAN\",\r\n
+        \       \"type\": \"External\"\r\n      }\r\n    ]\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/f606546a-02e8-442c-9e5d-b4c690c601ad?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '762'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f1736646-7279-40a8-8257-c48b199285a0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool --type --protocol --identifier --port
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/f606546a-02e8-442c-9e5d-b4c690c601ad?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3246eb23-c404-4839-9648-77ed3e20a3da
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool --type --protocol --identifier --port
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"b841f70b-af58-4ef7-ad92-bc80c4a15256\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      },\r\n      {\r\n        \"port\":
+        15000,\r\n        \"identifier\": 950,\r\n        \"protocol\": \"VXLAN\",\r\n
+        \       \"type\": \"External\"\r\n      }\r\n    ]\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '763'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:47 GMT
+      etag:
+      - W/"b841f70b-af58-4ef7-ad92-bc80c4a15256"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bb2f6241-af46-43f2-a432-730d4887813d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"b841f70b-af58-4ef7-ad92-bc80c4a15256\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      },\r\n      {\r\n        \"port\":
+        15000,\r\n        \"identifier\": 950,\r\n        \"protocol\": \"VXLAN\",\r\n
+        \       \"type\": \"External\"\r\n      }\r\n    ]\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '763'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:48 GMT
+      etag:
+      - W/"b841f70b-af58-4ef7-ad92-bc80c4a15256"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - de386d8c-70bf-4748-974b-96d0714f8c97
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool --index
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"b841f70b-af58-4ef7-ad92-bc80c4a15256\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 0,\r\n        \"identifier\": 900,\r\n        \"protocol\":
+        \"VXLAN\",\r\n        \"type\": \"Internal\"\r\n      },\r\n      {\r\n        \"port\":
+        15000,\r\n        \"identifier\": 950,\r\n        \"protocol\": \"VXLAN\",\r\n
+        \       \"type\": \"External\"\r\n      }\r\n    ]\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '763'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:48 GMT
+      etag:
+      - W/"b841f70b-af58-4ef7-ad92-bc80c4a15256"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7a087098-a1c4-4500-80bb-03e86e01d869
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name",
+      "name": "backend-address-pool-name", "properties": {"tunnelInterfaces": [{"port":
+      15000, "identifier": 950, "protocol": "VXLAN", "type": "External"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '395'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --lb-name --address-pool --index
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"d183e5bc-fb40-4ceb-b306-098e03c7653a\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 15000,\r\n        \"identifier\": 950,\r\n
+        \       \"protocol\": \"VXLAN\",\r\n        \"type\": \"External\"\r\n      }\r\n
+        \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/ce04a47e-3e2d-4c1a-a74a-879618472c5e?api-version=2021-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '637'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 21945a9f-c04b-48df-9078-822e1d0fe7c6
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool --index
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/ce04a47e-3e2d-4c1a-a74a-879618472c5e?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4e7a2868-8706-4fb6-b8f2-4024fdf4f28f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb address-pool tunnel-interface remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name --address-pool --index
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"backend-address-pool-name\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_lb_tunnel_interface000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/backend-address-pool-name\",\r\n
+        \ \"etag\": \"W/\\\"95e2465f-6226-421d-9396-bea181ffb541\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"tunnelInterfaces\":
+        [\r\n      {\r\n        \"port\": 15000,\r\n        \"identifier\": 950,\r\n
+        \       \"protocol\": \"VXLAN\",\r\n        \"type\": \"External\"\r\n      }\r\n
+        \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '638'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 May 2021 08:41:59 GMT
+      etag:
+      - W/"95e2465f-6226-421d-9396-bea181ffb541"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fbf2ae81-cee4-4f02-b947-c6405ab9000d
+    status:
+      code: 200
+      message: OK
+version: 1

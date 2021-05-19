@@ -3619,6 +3619,12 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
     new_pool = BackendAddressPool(name=backend_address_pool_name,
                                   load_balancer_backend_addresses=new_addresses)
+
+    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
+    if cmd.supported_api_version(min_api='2021-02-01') and lb.sku.name.lower() == 'gateway':
+        GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
+        new_pool.tunnel_interfaces = [
+            GatewayLoadBalancerTunnelInterface(type='Internal', protocol='VXLAN', identifier=900)]
     return ncf.load_balancer_backend_address_pools.begin_create_or_update(resource_group_name,
                                                                           load_balancer_name,
                                                                           backend_address_pool_name,
@@ -4056,7 +4062,7 @@ def set_lb_rule(
 
 
 def add_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
-                                                 backend_address_pool_name, port=None, protocol=None, identifier=None, traffic_type=None):
+                                                 backend_address_pool_name, protocol, identifier, traffic_type, port=None):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
