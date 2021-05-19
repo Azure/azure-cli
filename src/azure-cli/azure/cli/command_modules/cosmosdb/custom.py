@@ -1620,7 +1620,8 @@ def cli_cosmosdb_collection_update(client,
 def cli_cosmosdb_sql_role_definition_create(client,
                                             resource_group_name,
                                             account_name,
-                                            role_definition_body):
+                                            role_definition_body,
+                                            no_wait=False):
     '''Creates an Azure Cosmos DB SQL Role Definition '''
     role_definition_create_resource = SqlRoleDefinitionCreateUpdateParameters(
         role_name=role_definition_body['RoleName'],
@@ -1628,13 +1629,14 @@ def cli_cosmosdb_sql_role_definition_create(client,
         assignable_scopes=role_definition_body['AssignableScopes'],
         permissions=role_definition_body['Permissions'])
 
-    return client.begin_create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
+    return sdk_no_wait(no_wait, client.begin_create_update_sql_role_definition, role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
 
 
 def cli_cosmosdb_sql_role_definition_update(client,
                                             resource_group_name,
                                             account_name,
-                                            role_definition_body):
+                                            role_definition_body,
+                                            no_wait=False):
     '''Update an existing Azure Cosmos DB Sql Role Definition'''
     logger.debug('reading SQL role definition')
     role_definition = client.get_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name)
@@ -1654,7 +1656,7 @@ def cli_cosmosdb_sql_role_definition_update(client,
         assignable_scopes=role_definition.assignable_scopes,
         permissions=role_definition.permissions)
 
-    return client.begin_create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_update_resource)
+    return sdk_no_wait(no_wait, client.begin_create_update_sql_role_definition, role_definition_body['Id'], resource_group_name, account_name, role_definition_update_resource)
 
 
 def cli_cosmosdb_sql_role_definition_exists(client,
