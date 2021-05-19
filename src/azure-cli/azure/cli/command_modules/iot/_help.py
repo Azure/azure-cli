@@ -820,7 +820,7 @@ examples:
   - name: Update the IoT Hub feedback queue settings
     text: >
         az iot hub update --name MyIoTHub --feedback-max-delivery-count 20 --feedback-lock-duration 100 --feedback-ttl 4
-  - name: Update the IoT Hub file upload settings, and assign a managed identity to user for file upload)
+  - name: Update the IoT Hub file upload settings, and assign a managed identity to user for file upload
     text: >
         az iot hub update -n MyIoTHub --fileupload-sas-ttl 5 --fileupload-storage-auth-type identityBased --fileupload-storage-identity [system]
   - name: Update the IoT Hub file upload notification settings
