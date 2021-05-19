@@ -927,7 +927,7 @@ def load_arguments(self, _):
 
     # region LoadBalancers
     with self.argument_context('network lb rule create') as c:
-        c.argument('backend_address_pool_name', nargs='+', help='List of the backend address pool name. {}'.format(default_existing))
+        c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
         c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
     for item in ['rule', 'pool']:
@@ -1008,7 +1008,8 @@ def load_arguments(self, _):
         c.argument('protocol', arg_type=get_enum_type(GatewayLoadBalancerTunnelProtocol), help='Protocol of gateway load balancer tunnel interface.')
         c.argument('identifier', help='Identifier of gateway load balancer tunnel interface.', type=int)
         c.argument('port', help='Port of gateway load balancer tunnel interface.')
-        c.argument('traffic_type', options_list='--type', help='Traffic type of gateway load balancer tunnel interface.')
+        c.argument('traffic_type', options_list='--type', arg_type=get_enum_type(GatewayLoadBalancerTunnelInterfaceType), help='Traffic type of gateway load balancer tunnel interface.')
+        c.argument('index', type=int, help='Index of the tunnel interfaces to change')
 
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
@@ -1046,9 +1047,6 @@ def load_arguments(self, _):
         c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
         c.argument('disable_outbound_snat', min_api='2018-08-01', help='Configures SNAT for the VMs in the backend pool to use the publicIP address specified in the frontend of the load balancing rule.', arg_type=get_three_state_flag())
         c.argument('backend_pools_name', nargs='+', help='List of name of the backend address pool', min_api='2021-02-01', is_preview=True)
-
-    with self.argument_context('network lb address-pool tunnel-interface remove') as c:
-        c.argument('index', type=int, help='Index of the tunnel interfaces to remove.')
     # endregion
 
     # region cross-region load balancer

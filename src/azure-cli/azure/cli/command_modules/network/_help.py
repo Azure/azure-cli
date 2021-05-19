@@ -3194,7 +3194,17 @@ type: command
 short-summary: Add one tunnel interface into the load balance tunnel interface pool.
 examples:
   - name: Add one tunnel interface into the load balance tunnel interface pool.
-    text: az network lb address-pool tunnel-interface add -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool 
+    text: az network lb address-pool tunnel-interface add -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool \
+    --type external --protocol vxlan --identifier 901 --port 10000
+"""
+
+helps['network lb address-pool tunnel-interface update'] = """
+type: command
+short-summary: update one tunnel interface of load balance tunnel interface pool.
+examples:
+  - name: update one tunnel interface of load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface update -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool \
+    --type external --protocol vxlan --identifier 901 --port 10000
 """
 
 helps['network lb address-pool tunnel-interface remove'] = """
@@ -3202,7 +3212,8 @@ type: command
 short-summary: Remove one tunnel interface from the load balance tunnel interface pool.
 examples:
   - name: Remove one tunnel interface from the load balance tunnel interface pool.
-    text: az network lb address-pool tunnel-interface remove -g MyResourceGroup --lb-name MyLb
+    text: az network lb address-pool tunnel-interface remove -g MyResourceGroup --lb-name MyLb  --address-pool MyAddressPool \
+    --index 0
 """
 
 helps['network lb address-pool tunnel-interface list'] = """

@@ -4954,9 +4954,11 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
             'vnet': 'vnet',
             'subnet': 'subnet',
             'bap': 'backend-address-pool-name',
-            'type': 'external',
+            'type': 'External',
+            'type1': 'Internal',
             'protocol': 'vxlan',
             'identifier': '950',
+            'identifier1': '960',
         })
 
         self.cmd('network lb create -g {rg} -n {lb} --sku {sku} --vnet-name {vnet} --subnet {subnet}')
@@ -4971,6 +4973,9 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
         self.cmd('network lb address-pool tunnel-interface remove -g {rg} --lb-name {lb} --address-pool {bap} '
                  '--index 0',
                  checks=self.check('length(tunnelInterfaces)', 1))
+        self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap} '
+                 '--type {type1} --protocol {protocol} --identifier {identifier1} --port 10000 --index 0',
+                 checks=self.check('tunnelInterfaces[0].type', '{type1}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_lb_front_ip', location='eastus')
     def test_network_lb_front_ip(self, resource_group):
@@ -5031,6 +5036,49 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
         # test --gateway-lb
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {nip} --gateway-lb {id}',
                  checks=self.exists('gatewayLoadBalancer'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_rule_backend_address_pools', location='eastus2euap')
+    def test_network_lb_rule_backend_address_pools(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'fip': 'LoadBalancerFrontEnd',
+            'bap1': 'address-pool-name1',
+            'bap2': 'address-pool-name2',
+            'bap3': 'address-pool-name3',
+            'type': 'External',
+            'protocol': 'vxlan',
+            'identifier': '901',
+            'identifier1': '902',
+            'port': '10700',
+            'fport': '40',
+            'fport1': '60',
+            'bport': '60',
+            'bport1': '80',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Gateway --vnet-name vnet --subnet subnet')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap1}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap2}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap3}')
+        self.cmd('network lb address-pool tunnel-interface add -g {rg} --lb-name {lb} --address-pool {bap1} --type {type}  --protocol {protocol} --identifier {identifier}')
+        self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap2} --type {type} --index 0')
+        self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap3} --port {port} --identifier {identifier1} --index 0')
+
+        # test --backend-pool-name
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule1 --frontend-ip-name {fip} '
+                 '--frontend-port {fport}  --protocol tcp --backend-port {bport} --backend-pool-name {bap1} ',
+                 checks=[self.exists('backendAddressPool'),
+                         self.check('length(backendAddressPools)', 1)])
+        # test --backend-pools-name
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
+                 '--frontend-port {fport1} --backend-pools-name {bap3} {bap2} --protocol tcp  --backend-port {bport1}',
+                 checks=[self.not_exists('backendAddressPool'),
+                         self.check('length(backendAddressPools)', 2)])
+        self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
+                 '--backend-pools-name {bap1} ',
+                 checks=[self.check('length(backendAddressPools)', 1)])
 
 
 if __name__ == '__main__':

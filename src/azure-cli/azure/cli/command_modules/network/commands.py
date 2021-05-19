@@ -938,6 +938,7 @@ def load_command_table(self, _):
 
     with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
         g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
         g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
         g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
 

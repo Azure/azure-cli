@@ -4013,8 +4013,11 @@ def create_lb_rule(
     lb = lb_get_operation(lb)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
+    # avoid break when backend_address_pool_name is None and backend_pools_name is not None
+    if not backend_address_pool_name and backend_pools_name:
+        backend_address_pool_name = backend_pools_name[0]
     if not backend_address_pool_name:
-        backend_address_pool_name = [_get_default_name(lb, 'backend_address_pools', '--backend-pool-name')]
+        backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
     new_rule = LoadBalancingRule(
         name=item_name,
         protocol=protocol,
@@ -4023,7 +4026,7 @@ def create_lb_rule(
         frontend_ip_configuration=get_property(lb.frontend_ip_configurations,
                                                frontend_ip_name),
         backend_address_pool=get_property(lb.backend_address_pools,
-                                          backend_address_pool_name[0]),
+                                          backend_address_pool_name),
         probe=get_property(lb.probes, probe_name) if probe_name else None,
         load_distribution=load_distribution,
         enable_floating_ip=floating_ip,
@@ -4033,6 +4036,8 @@ def create_lb_rule(
 
     if backend_pools_name:
         new_rule.backend_address_pools = [get_property(lb.backend_address_pools, name) for name in backend_pools_name]
+        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
+        new_rule.backend_address_pool = None
 
     upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
@@ -4067,6 +4072,8 @@ def set_lb_rule(
             instance.backend_address_pools = [instance.backend_address_pool]
     if backend_pools_name is not None:
         instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
+        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
+        instance.backend_address_pool = None
 
     if probe_name == '':
         instance.probe = None
@@ -4081,10 +4088,30 @@ def add_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
-    tunnel_interface = GatewayLoadBalancerTunnelInterface(port=port, identifier=identifier, protocol=protocol,type=traffic_type)
+    tunnel_interface = GatewayLoadBalancerTunnelInterface(port=port, identifier=identifier, protocol=protocol, type=traffic_type)
     if not address_pool.tunnel_interfaces:
         address_pool.tunnel_interfaces = []
     address_pool.tunnel_interfaces.append(tunnel_interface)
+    return client.begin_create_or_update(resource_group_name, load_balancer_name,
+                                         backend_address_pool_name, address_pool)
+
+
+def update_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                    backend_address_pool_name, index, protocol=None, identifier=None, traffic_type=None, port=None):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    if index >= len(address_pool.tunnel_interfaces):
+        raise UnrecognizedArgumentError(f'{index} is out of scope, please input proper index')
+
+    item = address_pool.tunnel_interfaces[index]
+    if protocol:
+        item.protocol = protocol
+    if identifier:
+        item.identifier = identifier
+    if port:
+        item.port = port
+    if traffic_type:
+        item.type = traffic_type
     return client.begin_create_or_update(resource_group_name, load_balancer_name,
                                          backend_address_pool_name, address_pool)
 
