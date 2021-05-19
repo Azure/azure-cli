@@ -478,7 +478,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     gallery_image_name=res['child_name_1'])
                 namespace.os_type = image_info.os_type
             except Exception:  # pylint: disable=broad-except
-                logger.warning('Failed to get shared gallery image definition.')
+                logger.warning('Failed to get shared gallery image definition. Assume it is Linux.')
+                namespace.os_type = 'Linux'
 
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
