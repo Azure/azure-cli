@@ -20,6 +20,7 @@ from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysq
 logger = get_logger(__name__)
 
 
+# pylint: disable=import-outside-toplevel, raise-missing-from
 def _get_resource_group_from_server_name(cli_ctx, server_name):
     """
     Fetch resource group from server name

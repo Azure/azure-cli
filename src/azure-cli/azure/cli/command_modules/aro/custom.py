@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import random
+import os
 
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
@@ -35,7 +36,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                resource_name,
                master_subnet,
                worker_subnet,
-               vnet=None,
+               vnet=None,  # pylint: disable=unused-argument
                vnet_resource_group_name=None,  # pylint: disable=unused-argument
                location=None,
                pull_secret=None,
@@ -61,8 +62,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         raise UnauthorizedError('Microsoft.RedHatOpenShift provider is not registered.',
                                 'Run `az provider register -n Microsoft.RedHatOpenShift --wait`.')
 
-    vnet = validate_subnets(master_subnet, worker_subnet)
-    resources = get_network_resources(cmd.cli_ctx, [master_subnet, worker_subnet], vnet)
+    validate_subnets(master_subnet, worker_subnet)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -77,15 +77,9 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     if not client_sp:
         client_sp = aad.create_service_principal(client_id)
 
-    rp_client_id = FP_CLIENT_ID
-    rp_client_sp = aad.get_service_principal(rp_client_id)
+    rp_client_sp = aad.get_service_principal(resolve_rp_client_id())
     if not rp_client_sp:
         raise ResourceNotFoundError("RP service principal not found.")
-
-    for sp_id in [client_sp.object_id, rp_client_sp.object_id]:
-        for resource in sorted(resources):
-            if not has_network_contributor_on_resource(cmd.cli_ctx, resource, sp_id):
-                assign_network_contributor_to_resource(cmd.cli_ctx, resource, sp_id)
 
     worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
 
@@ -136,6 +130,9 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         ],
     )
 
+    sp_obj_ids = [client_sp.object_id, rp_client_sp.object_id]
+    ensure_resource_permissions(cmd.cli_ctx, oc, True, sp_obj_ids)
+
     return sdk_no_wait(no_wait, client.create_or_update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
@@ -145,22 +142,17 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     # TODO: clean up rbac
     rp_client_sp = None
-    resources = set()
 
     try:
         oc = client.get(resource_group_name, resource_name)
-
-        # Get cluster resources we need to assign network contributor on
-        resources = get_cluster_network_resources(cmd.cli_ctx, oc)
     except (CloudError, HttpOperationError) as e:
         logger.info(e.message)
 
     aad = AADManager(cmd.cli_ctx)
-    rp_client_id = FP_CLIENT_ID
 
     # Best effort - assume the role assignments on the SP exist if exception raised
     try:
-        rp_client_sp = aad.get_service_principal(rp_client_id)
+        rp_client_sp = aad.get_service_principal(resolve_rp_client_id())
         if not rp_client_sp:
             raise ResourceNotFoundError("RP service principal not found.")
     except GraphErrorException as e:
@@ -169,20 +161,7 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     # Customers frequently remove the Cluster or RP's service principal permissions.
     # Attempt to fix this before performing any action against the cluster
     if rp_client_sp:
-        for resource in sorted(resources):
-            # Create the role assignment if it doesn't exist
-            # Assume that the role assignment exists if we fail to look it up
-            resource_contributor_exists = True
-
-            try:
-                resource_contributor_exists = has_network_contributor_on_resource(cmd.cli_ctx, resource,
-                                                                                  rp_client_sp.object_id)
-            except CloudError as e:
-                logger.info(e.message)
-                continue
-
-            if not resource_contributor_exists:
-                assign_network_contributor_to_resource(cmd.cli_ctx, resource, rp_client_sp.object_id)
+        ensure_resource_permissions(cmd.cli_ctx, oc, False, [rp_client_sp.object_id])
 
     return sdk_no_wait(no_wait, client.delete,
                        resource_group_name=resource_group_name,
@@ -203,67 +182,43 @@ def aro_list_credentials(client, resource_group_name, resource_name):
     return client.list_credentials(resource_group_name, resource_name)
 
 
-def aro_update(cmd, client, resource_group_name, resource_name, no_wait=False):
-    rp_client_sp = None
-    client_sp = None
-    resources = set()
+def aro_update(cmd,
+               client,
+               resource_group_name,
+               resource_name,
+               refresh_cluster_credentials=False,
+               client_id=None,
+               client_secret=None,
+               no_wait=False):
+    # if we can't read cluster spec, we will not be able to do much. Fail.
+    oc = client.get(resource_group_name, resource_name)
 
-    try:
-        oc = client.get(resource_group_name, resource_name)
+    ocUpdate = openshiftcluster.OpenShiftClusterUpdate()
 
-        # Get cluster resources we need to assign network contributor on
-        resources = get_cluster_network_resources(cmd.cli_ctx, oc)
-    except (CloudError, HttpOperationError) as e:
-        logger.info(e.message)
+    client_id, client_secret = cluster_application_update(cmd.cli_ctx, oc, client_id, client_secret, refresh_cluster_credentials)  # pylint: disable=line-too-long
 
-    aad = AADManager(cmd.cli_ctx)
-    rp_client_id = FP_CLIENT_ID
+    if client_id is not None or client_secret is not None:
+        # construct update payload
+        ocUpdate.service_principal_profile = openshiftcluster.ServicePrincipalProfile()
 
-    # Best effort - assume the role assignments on the SP exist if exception raised
-    try:
+        if client_secret is not None:
+            ocUpdate.service_principal_profile.client_secret = client_secret
 
-        rp_client_sp = aad.get_service_principal(rp_client_id)
-        if not rp_client_sp:
-            raise ResourceNotFoundError("RP service principal not found.")
-    except GraphErrorException as e:
-        logger.info(e.message)
-
-    client_id = oc.service_principal_profile.client_id
-
-    # Best effort - assume the role assignments on the SP exist if exception raised
-    try:
-        client_sp = aad.get_service_principal(client_id)
-        if not client_sp:
-            raise ResourceNotFoundError("Cluster service principal not found.")
-    except GraphErrorException as e:
-        logger.info(e.message)
-
-    # Drop any None service principal objects
-    sp_obj_ids = [sp.object_id for sp in [rp_client_sp, client_sp] if sp]
-
-    # Customers frequently remove the Cluster or RP's service principal permissions.
-    # Attempt to fix this before performing any action against the cluster
-    for sp_id in sp_obj_ids:
-        for resource in sorted(resources):
-            # Create the role assignment if it doesn't exist
-            # Assume that the role assignment exists if we fail to look it up
-            resource_contributor_exists = True
-
-            try:
-                resource_contributor_exists = has_network_contributor_on_resource(cmd.cli_ctx, resource, sp_id)
-            except CloudError as e:
-                logger.info(e.message)
-                continue
-
-            if not resource_contributor_exists:
-                assign_network_contributor_to_resource(cmd.cli_ctx, resource, sp_id)
-
-    oc = openshiftcluster.OpenShiftClusterUpdate()
+        if client_id is not None:
+            ocUpdate.service_principal_profile.client_id = client_id
 
     return sdk_no_wait(no_wait, client.update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
-                       parameters=oc)
+                       parameters=ocUpdate)
+
+
+def rp_mode_development():
+    return os.environ.get('RP_MODE', '').lower() == 'development'
+
+
+def rp_mode_production():
+    return os.environ.get('RP_MODE', '') == ''
 
 
 def generate_random_id():
@@ -297,7 +252,7 @@ def get_cluster_network_resources(cli_ctx, oc):
     # Ensure that worker_profiles exists
     # it will not be returned if the cluster resources do not exist
     if oc.worker_profiles is not None:
-        worker_subnets = {w.subnet_id for w in oc.worker_profiles if w}
+        worker_subnets = {w.subnet_id for w in oc.worker_profiles}
 
     master_parts = parse_resource_id(master_subnet)
     vnet = resource_id(
@@ -319,3 +274,111 @@ def get_network_resources(cli_ctx, subnets, vnet):
     resources.update(route_tables)
 
     return resources
+
+
+# cluster_application_update manages cluster application & service principal update
+# If called without parameters it should be best-effort
+# If called with parameters it fails if something is not possible
+# Flow:
+# 1. Set fail - if we are in fail mode or best effort.
+# 2. Sort out client_id, rp_client_sp, resources we care for RBAC.
+# 3. If we are in refresh_cluster_credentials mode - attempt to reuse/recreate
+# cluster service principal application and acquire client_id, client_secret
+# 4. Reuse/Recreate service principal.
+# 5. Sort out required rbac
+def cluster_application_update(cli_ctx,
+                               oc,
+                               client_id,
+                               client_secret,
+                               refresh_cluster_credentials):
+    # QUESTION: is there possible unification with the create path?
+
+    rp_client_sp = None
+    client_sp = None
+    random_id = generate_random_id()
+
+    # if any of these are set - we expect users to have access to fix rbac so we fail
+    # common for 1 and 2 flows
+    fail = client_id or client_secret or refresh_cluster_credentials
+
+    aad = AADManager(cli_ctx)
+
+    # check if we can see if RP service principal exists
+    try:
+        rp_client_sp = aad.get_service_principal(resolve_rp_client_id())
+        if not rp_client_sp:
+            raise ResourceNotFoundError("RP service principal not found.")
+    except GraphErrorException as e:
+        if fail:
+            logger.error(e.message)
+            raise
+        logger.info(e.message)
+
+    # refresh_cluster_credentials refreshes cluster SP application.
+    # At firsts it tries to re-use existing application and generate new password.
+    # If application does not exist - creates new one
+    if refresh_cluster_credentials:
+        try:
+            app = aad.get_application_by_client_id(client_id or oc.service_principal_profile.client_id)
+            if not app:
+                # we were not able to find and applications, create new one
+                parts = parse_resource_id(oc.cluster_profile.resource_group_id)
+                cluster_resource_group = parts['resource_group']
+
+                app, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
+                client_id = app.app_id
+            else:
+                client_secret = aad.refresh_application_credentials(app.object_id)
+        except GraphErrorException as e:
+            logger.error(e.message)
+            raise
+
+    # attempt to get/create SP if one was not found.
+    try:
+        client_sp = aad.get_service_principal(client_id or oc.service_principal_profile.client_id)
+    except GraphErrorException as e:
+        if fail:
+            logger.error(e.message)
+            raise
+        logger.info(e.message)
+
+    if fail and not client_sp:
+        client_sp = aad.create_service_principal(client_id or oc.service_principal_profile.client_id)
+
+    sp_obj_ids = [sp.object_id for sp in [rp_client_sp, client_sp] if sp]
+    ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids)
+
+    return client_id, client_secret
+
+
+def resolve_rp_client_id():
+    return FP_CLIENT_ID
+
+
+def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
+    try:
+        # Get cluster resources we need to assign network contributor on
+        resources = get_cluster_network_resources(cli_ctx, oc)
+    except (CloudError, HttpOperationError) as e:
+        if fail:
+            logger.error(e.message)
+            raise
+        logger.info(e.message)
+        return
+
+    for sp_id in sp_obj_ids:
+        for resource in sorted(resources):
+            # Create the role assignment if it doesn't exist
+            # Assume that the role assignment exists if we fail to look it up
+            resource_contributor_exists = True
+
+            try:
+                resource_contributor_exists = has_network_contributor_on_resource(cli_ctx, resource, sp_id)
+            except CloudError as e:
+                if fail:
+                    logger.error(e.message)
+                    raise
+                logger.info(e.message)
+
+            if not resource_contributor_exists:
+                assign_network_contributor_to_resource(cli_ctx, resource, sp_id)
