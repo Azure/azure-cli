@@ -1872,7 +1872,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_version = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
+        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}

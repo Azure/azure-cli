@@ -182,7 +182,7 @@ def _absolute_to_relative_path(root_dir_path, abs_file_path):
 
 def unpack(cmd, exported_template, target_dir, template_file_name):
 
-    packaged_template = PackagedTemplate(exported_template.template, exported_template.artifacts)
+    packaged_template = PackagedTemplate(exported_template.main_template, exported_template.linked_templates)
     # Ensure paths are normalized:
     template_file_name = os.path.basename(template_file_name)
     target_dir = os.path.abspath(target_dir).rstrip(os.sep).rstrip(os.altsep)
@@ -218,5 +218,5 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
         if not os.path.exists(os.path.dirname(abs_local_path)):
             os.makedirs(os.path.dirname(abs_local_path))
         with open(abs_local_path, 'w') as artifact_file:
-            json.dump(getattr(artifact, 'mainTemplate'), artifact_file, indent=2)
+            json.dump(getattr(artifact, 'template'), artifact_file, indent=2)
     return target_dir
