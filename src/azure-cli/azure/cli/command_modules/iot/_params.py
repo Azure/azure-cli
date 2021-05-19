@@ -192,7 +192,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    "Use '[system]' to refer to the system-assigned identity or a resource ID to refer to "
                    "a user-assigned identity.")
         c.argument('identity_role', options_list=['--role'],
-                   help="Role to assign to the hub's system-assigned managed identity")
+                   help="Role to assign to the hub's system-assigned managed identity.")
         c.argument('identity_scopes', options_list=['--scopes'], nargs='*',
                    help="Space separated list of scopes to assign the role (--role) "
                    "for the system-assigned managed identity.")
