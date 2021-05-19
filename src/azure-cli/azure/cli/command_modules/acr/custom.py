@@ -5,6 +5,7 @@
 
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.util import user_confirmation
 
 from ._constants import get_managed_sku, get_premium_sku
 from ._utils import (
@@ -12,7 +13,6 @@ from ._utils import (
     validate_managed_registry,
     validate_sku_update,
     get_resource_group_name_by_registry_name,
-    user_confirmation,
     resolve_identity_client_id
 )
 from ._docker_utils import get_login_credentials, EMPTY_GUID
