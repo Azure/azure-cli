@@ -9,6 +9,7 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import user_confirmation
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -19,7 +20,6 @@ from ._utils import (
     remove_timer_trigger,
     get_task_id_from_task_name,
     prepare_source_location,
-    user_confirmation
 )
 from ._stream_utils import stream_logs
 from ._constants import (

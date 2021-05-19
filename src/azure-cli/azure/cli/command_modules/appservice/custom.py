@@ -756,7 +756,7 @@ def _build_identities_info(identities):
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -801,7 +801,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
@@ -1419,12 +1419,12 @@ def _mask_creds_related_appsettings(settings):
 
 
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
-    HostNameBinding = cmd.get_models('HostNameBinding')
+    from azure.mgmt.web.models import HostNameBinding
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
-    binding = HostNameBinding(location=webapp.location, site_name=webapp.name)
+    binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 
@@ -1520,7 +1520,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, slot_def, slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
@@ -1758,8 +1758,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backup_status_secrets',
-                                   slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,

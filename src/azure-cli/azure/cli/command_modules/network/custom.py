@@ -245,22 +245,19 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     deployment_name = 'ag_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
@@ -3337,22 +3334,19 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
@@ -3709,22 +3703,19 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def create_cross_region_lb_frontend_ip_configuration(
@@ -3827,7 +3818,7 @@ def create_cross_region_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, backend_pools_name=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
@@ -3850,6 +3841,8 @@ def create_cross_region_lb_rule(
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset)
+    if backend_pools_name:
+        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, i) for i in backend_pools_name]
     upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
     return get_property(poller.result().load_balancing_rules, item_name)
@@ -3858,7 +3851,7 @@ def create_cross_region_lb_rule(
 def set_cross_region_lb_rule(
         cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
-        load_distribution=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        load_distribution=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None, backend_pools_name=None):
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port', frontend_port)
@@ -3875,6 +3868,12 @@ def set_cross_region_lb_rule(
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
             get_property(parent.backend_address_pools, backend_address_pool_name)
+        # To keep compatible when bump version from '2020-11-01' to '2021-02-01'
+        # https://github.com/Azure/azure-rest-api-specs/issues/14430
+        if cmd.supported_api_version(min_api='2021-02-01') and not backend_pools_name:
+            instance.backend_address_pools = [instance.backend_address_pool]
+    if backend_pools_name is not None:
+        instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
 
     if probe_name == '':
         instance.probe = None
@@ -3999,7 +3998,7 @@ def create_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None, backend_pools_name=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
@@ -4023,6 +4022,8 @@ def create_lb_rule(
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
+    if backend_pools_name:
+        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, name) for name in backend_pools_name]
     upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
     return get_property(poller.result().load_balancing_rules, item_name)
@@ -4032,7 +4033,7 @@ def set_lb_rule(
         cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        disable_outbound_snat=None):
+        disable_outbound_snat=None, backend_pools_name=None):
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port', frontend_port)
@@ -4050,6 +4051,12 @@ def set_lb_rule(
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
             get_property(parent.backend_address_pools, backend_address_pool_name)
+        # To keep compatible when bump version from '2020-11-01' to '2021-02-01'
+        # https://github.com/Azure/azure-rest-api-specs/issues/14430
+        if cmd.supported_api_version(min_api='2021-02-01') and not backend_pools_name:
+            instance.backend_address_pools = [instance.backend_address_pool]
+    if backend_pools_name is not None:
+        instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
 
     if probe_name == '':
         instance.probe = None
@@ -6651,22 +6658,19 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
