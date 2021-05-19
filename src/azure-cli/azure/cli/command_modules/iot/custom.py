@@ -8,6 +8,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -418,18 +419,18 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
         if not fileupload_storage_connectionstring or not fileupload_storage_container_name:
-            raise CLIError('Please specify storage endpoint (storage connection string and storage container name).')
+            raise RequiredArgumentMissingError('Please specify storage endpoint (storage connection string and storage container name).')
     if fileupload_storage_connectionstring and not fileupload_storage_container_name:
-        raise CLIError('Please mention storage container name.')
+        raise RequiredArgumentMissingError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
-        raise CLIError('Please mention storage connection string.')
+        raise RequiredArgumentMissingError('Please mention storage connection string.')
     identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
     if not identity_based_file_upload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
-        raise CLIError('Key-based authentication requires a connection string.')
+        raise RequiredArgumentMissingError('Key-based authentication requires a connection string.')
     if identity_based_file_upload and not fileupload_storage_container_uri:
-        raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
+        raise RequiredArgumentMissingError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
     if not identity_based_file_upload and fileupload_storage_identity:
-        raise CLIError('In order to set a fileupload storage identity, please set file upload storage authentication (--fsa) to IdentityBased')
+        raise RequiredArgumentMissingError('In order to set a fileupload storage identity, please set file upload storage authentication (--fsa) to IdentityBased')
 
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
@@ -468,7 +469,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                         tags=tags)
     hub_description.identity = _build_identity(identities) if identities else None
     if bool(identity_role) ^ bool(identity_scopes):
-        raise CLIError('At least one scope (--scopes) and one role (--role) required for system-assigned managed identity role assignment')
+        raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-assigned managed identity role assignment')
 
     def identity_assignment(lro):
         try:
@@ -669,7 +670,7 @@ def iot_hub_identity_assign(cmd, client, hub_name, identities, identity_role=Non
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     if bool(identity_role) ^ bool(identity_scopes):
-        raise CLIError('At least one scope (--scopes) and one role (--role) required for system-managed identity role assignment')
+        raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-managed identity role assignment')
 
     if identity_role and identity_scopes:
         from azure.cli.core.commands.arm import assign_identity
