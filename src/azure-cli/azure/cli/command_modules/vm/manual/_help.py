@@ -98,7 +98,7 @@ helps['sig share wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a shared gallery is met.
 examples:
-  - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
+  - name: Place the CLI in a waiting state until the gallery sharing object is updated.
     text: |
         az sig share wait --updated -g MyResourceGroup --gallery-name Gallery
 """
