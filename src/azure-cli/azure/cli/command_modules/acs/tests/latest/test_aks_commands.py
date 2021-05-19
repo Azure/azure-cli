@@ -1920,7 +1920,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
     @RoleBasedServicePrincipalPreparer()
     def test_managed_aad_enable_azure_rbac(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
