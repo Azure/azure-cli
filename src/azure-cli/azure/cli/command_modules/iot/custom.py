@@ -8,7 +8,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -698,7 +698,7 @@ def iot_hub_identity_remove(cmd, client, hub_name, identities, resource_group_na
                 IdentityType.system_assigned.value,
                 IdentityType.system_assigned_user_assigned.value
         ]:
-            raise CLIError('Hub {} is not currently using a system-assigned identity'.format(hub_name))
+            raise ArgumentUsageError('Hub {} is not currently using a system-assigned identity'.format(hub_name))
         hub_identity.type = IdentityType.user_assigned if hub.identity.type in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value] else IdentityType.none.value
 
     # separate user identities from system identity
@@ -707,7 +707,7 @@ def iot_hub_identity_remove(cmd, client, hub_name, identities, resource_group_na
     # loop through user_identities to remove
     for identity in user_identities:
         if not hub_identity.user_assigned_identities[identity]:
-            raise CLIError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
+            raise ArgumentUsageError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
         del hub_identity.user_assigned_identities[identity]
 
     if hub_identity.type in [
@@ -830,7 +830,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if identity and authentication_type.lower() != AuthenticationType.IdentityBased.value:
-        raise CLIError("In order to use an identity for authentication, you must select --auth-type as 'identityBased'")
+        raise ArgumentUsageError("In order to use an identity for authentication, you must select --auth-type as 'identityBased'")
 
     if EndpointType.EventHub.value == endpoint_type.lower():
         hub.properties.routing.endpoints.event_hubs.append(
@@ -1291,9 +1291,9 @@ def _process_fileupload_args(
         default_storage_endpoint.connection_string = fileupload_storage_connectionstring
         default_storage_endpoint.container_name = fileupload_storage_container_name
     elif fileupload_storage_connectionstring is not None:
-        raise CLIError('Please mention storage container name.')
+        raise RequiredArgumentMissingError('Please mention storage container name.')
     elif fileupload_storage_container_name is not None:
-        raise CLIError('Please mention storage connection string.')
+        raise RequiredArgumentMissingError('Please mention storage connection string.')
     if fileupload_sas_ttl is not None:
         default_storage_endpoint.sas_ttl_as_iso8601 = timedelta(hours=fileupload_sas_ttl)
 
@@ -1305,7 +1305,7 @@ def _process_fileupload_args(
             default_storage_endpoint.identity = ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity not in [IdentityType.none.value, SYSTEM_IDENTITY] else None
         # otherwise - let them know they need identity-based auth enabled
         elif fileupload_storage_identity:
-            raise CLIError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
+            raise ArgumentUsageError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
 
     return default_storage_endpoint
 
