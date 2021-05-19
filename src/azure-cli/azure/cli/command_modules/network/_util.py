@@ -11,6 +11,7 @@ from ._client_factory import network_client_factory
 from .custom import lb_get
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 
+
 def list_network_resource_property(resource, prop):
     """ Factory method for creating list functions. """
 
@@ -103,6 +104,6 @@ def _list_to_dict(enum_list):
 
 def enum_check(value, enum_list):
     try:
-       return _list_to_dict(enum_list)[value.lower()]
+        return _list_to_dict(enum_list)[value.lower()]
     except:
         raise UnrecognizedArgumentError(f'{value} is not recognized, it must be one of {enum_list}')

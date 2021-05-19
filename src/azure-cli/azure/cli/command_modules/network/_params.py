@@ -1946,7 +1946,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet-gateway', arg_group='Root Cert Authentication', min_api='2020-11-01') as c:
         c.argument('root_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter())
         c.argument('root_cert_name', help='Root certificate name')
-        
+
     with self.argument_context('network vnet-gateway', arg_group='Nat Rule', min_api='2021-02-01') as c:
         c.argument('nat_rule', nargs='+', action=NatRuleCreate)
 
