@@ -159,8 +159,7 @@ def process_release_policy(ns):
             from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_keys_t1.models import KeyReleasePolicy
             ns.key_attributes.exportable = True
             ns.release_policy = KeyReleasePolicy(
-                data=json.dumps(ns.release_policy).encode('utf-8'),
-                content_type='application/json; charset=utf-8; version=1.0'
+                data=json.dumps(ns.release_policy).encode('utf-8')
             )
 
 

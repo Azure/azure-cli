@@ -1107,7 +1107,7 @@ def create_key(cmd, client, key_name=None, vault_base_url=None,
     key_rp = None
     if release_policy:
         KeyReleasePolicy = cmd.get_models('KeyReleasePolicy', resource_type=resource_type)
-        key_rp = KeyReleasePolicy(data=release_policy, content_type='application/json; charset=utf-8; version=1.0')
+        key_rp = KeyReleasePolicy(data=release_policy)
 
     return client.create_key(vault_base_url=vault_base_url,
                              key_name=key_name,
@@ -1286,7 +1286,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
     key_rp = None
     if release_policy:
         KeyReleasePolicy = cmd.get_models('KeyReleasePolicy', resource_type=resource_type)
-        key_rp = KeyReleasePolicy(data=release_policy, content_type='application/json; charset=utf-8; version=1.0')
+        key_rp = KeyReleasePolicy(data=release_policy)
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags,
                              release_policy=key_rp)
 
