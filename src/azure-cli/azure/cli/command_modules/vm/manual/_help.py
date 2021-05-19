@@ -78,7 +78,7 @@ helps['sig share remove'] = """
     type: command
     short-summary: "Remove sharing profile of a gallery."
     examples:
-      - name: Add sharing id to the sharing profile of a gallery.
+      - name: Remove sharing ID to the sharing profile of a gallery.
         text: |-
                az sig share remove --gallery-name "myGalleryName" --resource-group "myResourceGroup" \
 --subscription-ids "34a4ab42-0d72-47d9-bd1a-aed207386dac" "380fd389-260b-41aa-bad9-0a83108c370b" \
