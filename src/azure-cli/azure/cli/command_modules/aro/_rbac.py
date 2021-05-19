@@ -13,9 +13,7 @@ from knack.log import get_logger
 from msrest.exceptions import ValidationError
 from msrestazure.tools import resource_id
 
-
 NETWORK_CONTRIBUTOR = '4d97b98b-1d4f-4787-a291-c67834d212e7'
-
 
 logger = get_logger(__name__)
 

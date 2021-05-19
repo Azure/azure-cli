@@ -318,13 +318,13 @@ def _assign_role(cmd, role, sp_oid, scope):
                 logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                _RETRY_TIMES)
                 continue
-            else:
-                # dump out history for diagnoses
-                logger.warning('Role assignment creation failed.\n')
-                if getattr(ex, 'response', None) is not None:
-                    logger.warning('role assignment response headers: %s\n',
-                                   ex.response.headers)  # pylint: disable=no-member
-                raise
+
+            # dump out history for diagnoses
+            logger.warning('Role assignment creation failed.\n')
+            if getattr(ex, 'response', None) is not None:
+                logger.warning('role assignment response headers: %s\n',
+                               ex.response.headers)  # pylint: disable=no-member
+            raise
 
 
 def _build_sp_result(subscription_id, location, resource_group_name, account_name,
