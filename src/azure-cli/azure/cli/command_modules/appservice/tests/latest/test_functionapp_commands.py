@@ -937,7 +937,6 @@ class FunctionAppServicePlanLinux(ScenarioTest):
 
 
 class FunctionAppSlotTests(ScenarioTest):
-    @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_slot_appsetting_update(self, resource_group, storage_account):
@@ -966,7 +965,6 @@ class FunctionAppSlotTests(ScenarioTest):
         ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
-    @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_slot_swap(self, resource_group, storage_account):
