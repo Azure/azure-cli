@@ -1361,6 +1361,106 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp delete -n {functionapp_name}')
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
+class FunctionappIdentityTest(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_assign_system_identity(self, resource_group, storage_account):
+        scope = '/subscriptions/{}/resourcegroups/{}'.format(
+            self.get_subscription_id(), resource_group)
+        role = 'Reader'
+        plan_name = self.create_random_name('func-msi-plan', 20)
+        functionapp_name = self.create_random_name('func-msi', 20)
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            result = self.cmd('functionapp identity assign -g {} -n {} --role {} --scope {}'.format(
+                resource_group, functionapp_name, role, scope)).get_output_in_json()
+            self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                self.check('principalId', result['principalId'])
+            ])
+
+        self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].roleDefinitionName', role)
+        ])
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
+                                                           functionapp_name), checks=self.check('principalId', result['principalId']))
+        self.cmd(
+            'functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
+                                                           functionapp_name), checks=self.is_empty())
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_assign_user_identity(self, resource_group, storage_account):
+        plan_name = self.create_random_name('func-msi-plan', 20)
+        functionapp_name = self.create_random_name('func-msi', 20)
+        identity_name = self.create_random_name('id1', 8)
+
+        msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
+            self.check('name', identity_name)]).get_output_in_json()
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name))
+        result = self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(
+            resource_group, functionapp_name, msi_result['id'])).get_output_in_json()
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
+            resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities', None),
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_remove_identity(self, resource_group, storage_account):
+        plan_name = self.create_random_name('func-msi-plan', 20)
+        functionapp_name = self.create_random_name('func-msi', 20)
+        identity_name = self.create_random_name('id1', 8)
+        identity2_name = self.create_random_name('id1', 8)
+
+        msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
+            self.check('name', identity_name)]).get_output_in_json()
+        msi2_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity2_name)).get_output_in_json()
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
+            resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
+
+        result = self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
+            resource_group, functionapp_name, msi2_result['id'])).get_output_in_json()
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            self.check('principalId', None),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('functionapp identity remove -g {} -n {} --identities [system] {}'.format(
+            resource_group, functionapp_name, msi_result['id']))
+        self.cmd('functionapp identity show -g {} -n {}'.format(
+            resource_group, functionapp_name), checks=self.is_empty())
 
 if __name__ == '__main__':
     unittest.main()
