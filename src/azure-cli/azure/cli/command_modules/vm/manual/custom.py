@@ -10,12 +10,19 @@
 # pylint: disable=too-many-lines
 
 
+from knack.log import get_logger
+
+logger = get_logger(__name__)
+
+
 def sshkey_create(client,
                   resource_group_name,
                   ssh_public_key_name,
                   location,
                   tags=None,
                   public_key=None):
+    import time
+    from pathlib import Path
     parameters = {
         'location': location,
         'tags': tags,
@@ -25,7 +32,25 @@ def sshkey_create(client,
                   ssh_public_key_name=ssh_public_key_name,
                   parameters=parameters)
     if public_key is None:  # Generate one if public key is None
-        client.generate_key_pair(resource_group_name=resource_group_name,
-                                 ssh_public_key_name=ssh_public_key_name)
+        logger.warning('No public key is provided. A key pair is being generated for you.')
+        key_pair = client.generate_key_pair(
+            resource_group_name=resource_group_name, ssh_public_key_name=ssh_public_key_name)
+        # Save keys to local files
+        private_key = key_pair.private_key
+        public_key = key_pair.public_key
+        sshpath = Path.home().joinpath('.ssh')
+        # Create ~/.ssh if it does not exist
+        if not sshpath.exists():
+            sshpath.mkdir()
+        # File path
+        private_key_file = str(sshpath.joinpath(str(time.time()).replace('.', '_')))
+        public_key_file = private_key_file + '.pub'
+        # Write to files
+        with open(private_key_file, 'w', newline='\n') as f:
+            f.write(private_key)
+        logger.warning('Private key is saved to "%s".', private_key_file)
+        with open(public_key_file, 'w', newline='\n') as f:
+            f.write(public_key)
+        logger.warning('Public key is saved to "%s".', public_key_file)
     return client.get(resource_group_name=resource_group_name,
                       ssh_public_key_name=ssh_public_key_name)

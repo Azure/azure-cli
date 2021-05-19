@@ -9,7 +9,6 @@ import tempfile
 from knack.util import CLIError
 from knack.log import get_logger
 
-from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
@@ -193,17 +192,6 @@ def _invalid_sku_update(cmd):
 def _invalid_sku_downgrade():
     raise CLIError(
         "Managed registries could not be downgraded to Classic SKU.")
-
-
-def user_confirmation(message, yes=False):
-    if yes:
-        return
-    try:
-        if not prompt_y_n(message):
-            raise CLIError('Operation cancelled.')
-    except NoTTYException:
-        raise CLIError(
-            'Unable to prompt for confirmation as no tty available. Use --yes.')
 
 
 def get_validate_platform(cmd, platform):
