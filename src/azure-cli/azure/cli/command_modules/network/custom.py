@@ -6225,7 +6225,7 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.ddos_protection_plan = None
     elif ddos_protection_plan is not None:
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
-    if flowtimeout:
+    if flowtimeout is not None:
         instance.flow_timeout_in_minutes = flowtimeout
     return instance
 
