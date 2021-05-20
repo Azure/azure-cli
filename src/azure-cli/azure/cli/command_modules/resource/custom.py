@@ -2166,9 +2166,7 @@ def _build_identities_info(cmd, identities):
 
 def update_policy_assignment(cmd, name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
-                             not_scopes=None, assign_identity=None,
-                             identity_scope=None, identity_role='Contributor', enforcement_mode=None,
-                             description=None):
+                             not_scopes=None, enforcement_mode=None, description=None):
     """Updates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -2203,22 +2201,12 @@ def update_policy_assignment(cmd, name=None, display_name=None, params=None,
 
     if cmd.supported_api_version(min_api='2018-05-01'):
         assignment.location = existing_assignment.location
-        identity = existing_assignment.identity
-        if assign_identity is not None:
-            identity = _build_identities_info(cmd, assign_identity)
-        assignment.identity = identity
+        assignment.identity = existing_assignment.identity
 
     if cmd.supported_api_version(min_api='2020-09-01'):
-        assignment.non_compliance_messages=existing_assignment.non_compliance_messages
+        assignment.non_compliance_messages = existing_assignment.non_compliance_messages
 
-    created_assignment = policy_client.policy_assignments.create(scope, name, assignment)
-
-    # Create the identity's role assignment if requested
-    if assign_identity is not None and identity_scope:
-        from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
-        _assign_identity_helper(cmd.cli_ctx, lambda: created_assignment, lambda resource: created_assignment, identity_role, identity_scope)
-
-    return created_assignment
+    return policy_client.policy_assignments.create(scope, name, assignment)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
