@@ -401,7 +401,6 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
 
 
 def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
-    deleted = client.get_deleted(name=hsm_name, location=location)
     from azure.cli.core._profile import Profile
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -415,8 +414,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
     parameters = ManagedHsm(location=location,
                             sku=ManagedHsmSku(name='Standard_B1', family='B'),
-                            properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value,
-                                        'initial_admin_object_ids': deleted.properties.additional_properties.get('initialAdminObjectIds')})
+                            properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
 
     return sdk_no_wait(
         no_wait, client.begin_create_or_update,

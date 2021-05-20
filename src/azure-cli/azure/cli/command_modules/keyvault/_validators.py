@@ -312,7 +312,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
         if vault_name:
             id_comps = parse_resource_id(resource.properties.vault_id)
         else:
-            id_comps = parse_resource_id(resource.id)
+            id_comps = parse_resource_id(resource.properties.mhsm_id)
 
     # otherwise, iterate through deleted vaults to find one with a matching name
     else:
