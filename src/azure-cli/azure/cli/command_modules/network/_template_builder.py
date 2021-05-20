@@ -358,6 +358,14 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
         ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
+
+    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
+    if cmd.supported_api_version(min_api='2021-02-01') and sku and str(sku).lower() == 'gateway':
+        lb_properties['backendAddressPools'][0]['properties'] = {
+            'tunnelInterfaces': [{'protocol': 'VXLAN',
+                                  'type': 'Internal',
+                                  "identifier": 900}]}
+
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
