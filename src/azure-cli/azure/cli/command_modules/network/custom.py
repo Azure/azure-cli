@@ -6195,7 +6195,7 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
     if edge_zone:
         vnet.extended_location = _edge_zone_model(cmd, edge_zone)
-    if flowtimeout:
+    if flowtimeout is not None:
         vnet.flow_timeout_in_minutes = flowtimeout
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
