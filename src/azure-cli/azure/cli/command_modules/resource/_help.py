@@ -1521,6 +1521,15 @@ examples:
         az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
 """
 
+helps['policy assignment update'] = """
+type: command
+short-summary: Update a resource policy assignment.
+examples:
+  - name: Update a resource policy assignment's description.
+    text: |
+        az policy assignment update --name myPolicy --description 'My policy description'
+"""
+
 helps['policy assignment delete'] = """
 type: command
 short-summary: Delete a resource policy assignment.
@@ -1561,6 +1570,44 @@ examples:
     text: |
         az policy assignment identity show --name MyPolicyAssignment --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup'
     crafted: true
+"""
+
+helps['policy assignment non-compliance-message'] = """
+type: group
+short-summary: Manage a policy assignment's non-compliance messages.
+"""
+
+helps['policy assignment non-compliance-message create'] = """
+type: command
+short-summary: Add a non-compliance message to a policy assignment.
+examples:
+  - name: Add a non-compliance message to a policy assignment.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Add a non-compliance message for a specific policy in an assigned policy set definition.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
+"""
+
+helps['policy assignment non-compliance-message list'] = """
+type: command
+short-summary: List the non-compliance messages for a policy assignment.
+examples:
+  - name: List the non-compliance messages for a policy assignment.
+    text: >
+        az policy assignment non-compliance-message list -g MyResourceGroup -n MyPolicyAssignment
+"""
+
+helps['policy assignment non-compliance-message delete'] = """
+type: command
+short-summary: Remove one or more non-compliance messages from a policy assignment.
+examples:
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and no policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and a specific policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
 """
 
 helps['policy assignment list'] = """
