@@ -2220,7 +2220,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         aad_profile = ManagedClusterAADProfile(
             managed=True,
             enable_azure_rbac=enable_azure_rbac,
-            admin_group_object_ids=_parse_comma_separated_list(
+            admin_group_object_i_ds=_parse_comma_separated_list(    # ids -> i_ds due to track 2 naming issue
                 aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
@@ -2751,7 +2751,8 @@ def aks_update(cmd, client, resource_group_name, name,
         if aad_tenant_id is not None:
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
-            instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(
+            # ids -> i_ds due to track 2 naming issue
+            instance.aad_profile.admin_group_object_i_ds = _parse_comma_separated_list(
                 aad_admin_group_object_ids)
         if enable_azure_rbac and disable_azure_rbac:
             raise MutuallyExclusiveArgumentError(

@@ -4427,8 +4427,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4457,8 +4457,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster_with_addons(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
