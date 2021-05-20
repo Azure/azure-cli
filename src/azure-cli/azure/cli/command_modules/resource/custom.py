@@ -2177,19 +2177,19 @@ def update_policy_assignment(cmd, name=None, display_name=None, params=None,
     scope = _build_policy_scope(subscription_id, resource_group_name, scope)
     params = _load_file_string_or_uri(params, 'params', False)
 
-    existingAssignment = policy_client.policy_assignments.get(scope, name)
+    existing_assignment = policy_client.policy_assignments.get(scope, name)
     PolicyAssignment = cmd.get_models('PolicyAssignment')
     assignment = PolicyAssignment(
-        display_name=display_name if display_name is not None else existingAssignment.display_name,
-        policy_definition_id=existingAssignment.policy_definition_id,
-        scope=existingAssignment.scope,
-        enforcement_mode=enforcement_mode if enforcement_mode is not None else existingAssignment.enforcement_mode,
-        metadata=existingAssignment.metadata,
-        parameters=params if params is not None else existingAssignment.parameters,
-        description=description if description is not None else existingAssignment.description)
+        display_name=display_name if display_name is not None else existing_assignment.display_name,
+        policy_definition_id=existing_assignment.policy_definition_id,
+        scope=existing_assignment.scope,
+        enforcement_mode=enforcement_mode if enforcement_mode is not None else existing_assignment.enforcement_mode,
+        metadata=existing_assignment.metadata,
+        parameters=params if params is not None else existing_assignment.parameters,
+        description=description if description is not None else existing_assignment.description)
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
-        kwargs_list = existingAssignment.not_scopes
+        kwargs_list = existing_assignment.not_scopes
         if not_scopes:
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
@@ -2202,23 +2202,23 @@ def update_policy_assignment(cmd, name=None, display_name=None, params=None,
         assignment.not_scopes = kwargs_list
 
     if cmd.supported_api_version(min_api='2018-05-01'):
-        assignment.location = existingAssignment.location
-        identity = existingAssignment.identity
+        assignment.location = existing_assignment.location
+        identity = existing_assignment.identity
         if assign_identity is not None:
             identity = _build_identities_info(cmd, assign_identity)
         assignment.identity = identity
 
     if cmd.supported_api_version(min_api='2020-09-01'):
-        assignment.non_compliance_messages=existingAssignment.non_compliance_messages
+        assignment.non_compliance_messages=existing_assignment.non_compliance_messages
 
-    createdAssignment = policy_client.policy_assignments.create(scope, name, assignment)
+    created_assignment = policy_client.policy_assignments.create(scope, name, assignment)
 
     # Create the identity's role assignment if requested
     if assign_identity is not None and identity_scope:
         from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
-        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
+        _assign_identity_helper(cmd.cli_ctx, lambda: created_assignment, lambda resource: created_assignment, identity_role, identity_scope)
 
-    return createdAssignment
+    return created_assignment
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
