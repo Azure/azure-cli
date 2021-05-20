@@ -5,8 +5,12 @@
 
 # pylint: disable=unused-argument, line-too-long
 
+import uuid
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.util import send_raw_request
 
 logger = get_logger(__name__)
 
@@ -68,6 +72,104 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         server_name,
         firewall_rule_name,
         parameters)
+
+
+def migration_create_func(cmd, client, subscription_id, resource_group_name, server_name, body, migration_id=None):
+
+    if migration_id is None:
+        # Convert a UUID to a string of hex digits in standard form
+        migration_id = str(uuid.uuid4())
+
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, body)
+
+    return r.json()
+
+
+def migration_show_func(cmd, client, subscription_id, resource_group_name, server_name, migration_id, level="Default"):
+
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id, level))
+
+    return r.json()
+
+
+def migration_list_func(cmd, client, subscription_id, resource_group_name, server_name, migration_filter="Active"):
+
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
+
+    return r.json()
+
+
+def migration_update_func(cmd, client, subscription_id, resource_group_name, server_name, migration_id, setup_logical_replication=None, db1=None, db2=None, db3=None, db4=None, db5=None, db6=None, db7=None, db8=None, overwrite_dbs=None, start_time_utc=None, initiate_data_migration=None, cutover=None, cancel=None):
+
+    operationSpecified = False
+    if setup_logical_replication is True:
+        operationSpecified = True
+        body = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
+
+    db_names = None
+    db_names = db_names_concat_func(db_names, db1)
+    db_names = db_names_concat_func(db_names, db2)
+    db_names = db_names_concat_func(db_names, db3)
+    db_names = db_names_concat_func(db_names, db4)
+    db_names = db_names_concat_func(db_names, db5)
+    db_names = db_names_concat_func(db_names, db6)
+    db_names = db_names_concat_func(db_names, db7)
+    db_names = db_names_concat_func(db_names, db8)
+
+    if db_names is not None:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        prefix = "{ \"properties\": { \"dBsToMigrate\": ["
+        suffix = "] } }"
+        body = prefix + db_names + suffix
+
+    if overwrite_dbs is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        body = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
+
+    # if start_time_utc is not None:
+    #     if operationSpecified is True:
+    #         raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+    #     operationSpecified = True
+    #     body = "{\"properties\": {\"MigrationWindowStartTimeInUtc\": \"{}\"} }".format(start_time_utc)
+
+    # if initiate_data_migration is True:
+    #     if operationSpecified is True:
+    #         raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+    #     operationSpecified = True
+    #     body = "{\"properties\": {\"startDataMigration\": \"true\"} }"
+
+    if cutover is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        body = "{\"properties\": {\"triggerCutover\": \"true\"} }"
+
+    if operationSpecified is False:
+        raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
+
+    send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, body)
+
+    return migration_id
+
+
+def migration_delete_func(cmd, client, subscription_id, resource_group_name, server_name, migration_id):
+
+    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id))
+
+    return r.json()
+
+
+def db_names_concat_func(current_db_names, new_db_name):
+
+    if new_db_name is not None:
+        db = "\"{}\"".format(new_db_name)
+        current_db_names = db if current_db_names is None else current_db_names + ", " + db
+
+    return current_db_names
 
 
 def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
