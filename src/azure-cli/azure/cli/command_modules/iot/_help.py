@@ -467,21 +467,9 @@ examples:
   - name: Remove a system-assigned managed identity from an IoT Hub.
     text: >
         az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --system-assigned
-"""
-
-helps['iot hub identity update'] = """
-type: command
-short-summary: Update managed identity type for an IoT Hub.
-examples:
-  - name: Enable only user-assigned managed identities for an IoT Hub (removes system-assigned identity). Requires at least one user-assigned managed identity to be assigned previously.
-    text: >
-        az iot hub identity update --name MyIoTHub --resource-group MyResourceGroup --type user_assigned
-  - name: Enable only system-assigned managed identities for an IoT Hub (removes all user-assigned identities, enables system-assigned identity if not previously enabled).
-    text: >
-        az iot hub identity update --name MyIoTHub --resource-group MyResourceGroup --type system_assigned
   - name: Remove all identities from an IoT Hub.
     text: >
-        az iot hub identity update --name MyIoTHub --resource-group MyResourceGroup --type none
+        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --system-assigned --user-assigned
 """
 
 helps['iot hub list'] = """

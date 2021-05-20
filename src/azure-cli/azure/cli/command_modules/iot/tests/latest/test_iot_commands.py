@@ -602,8 +602,8 @@ class IoTHubTest(ScenarioTest):
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_3)),
                      self.check('type', IdentityType.system_assigned_user_assigned.value)])
 
-        # update (user) - remove system identity
-        self.cmd('iot hub identity update -n {0} -g {1} --type user_assigned'.format(identity_hub, rg),
+        # remove (system) - remove system identity
+        self.cmd('iot hub identity remove -n {0} -g {1} --system-assigned'.format(identity_hub, rg),
                  checks=[
                      self.check('type', IdentityType.user_assigned.value),
                      self.check('length(userAssignedIdentities)', 3),
@@ -619,19 +619,19 @@ class IoTHubTest(ScenarioTest):
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
 
-        # update (none) remove all remaining identities
-        self.cmd('iot hub identity update -n {0} -g {1} --type none'
+        # assign (system) re-add system identity
+        self.cmd('iot hub identity assign -n {0} -g {1} --system'
+                 .format(identity_hub, rg),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 2),
+                     self.check('type', IdentityType.system_assigned_user_assigned.value)])
+
+        # remove (--user-assigned, --system-assigned) remove all remaining identities
+        self.cmd('iot hub identity remove -n {0} -g {1} --user-assigned --system-assigned'
                  .format(identity_hub, rg),
                  checks=[
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.none.value)])
-        
-        # update (system) re-add system identity
-        self.cmd('iot hub identity update -n {0} -g {1} --type system_assigned'
-                 .format(identity_hub, rg),
-                 checks=[
-                     self.check('userAssignedIdentities', None),
-                     self.check('type', IdentityType.system_assigned.value)])
 
 
     def _get_eventhub_connectionstring(self, rg):

@@ -122,7 +122,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('assign', 'iot_hub_identity_assign')
         g.custom_show_command('show', 'iot_hub_identity_show')
         g.custom_command('remove', 'iot_hub_identity_remove')
-        g.custom_command('update', 'iot_hub_identity_update')
 
     # iot hub policy commands
     with self.command_group('iot hub policy', client_factory=iot_hub_service_factory) as g:

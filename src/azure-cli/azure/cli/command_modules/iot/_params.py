@@ -19,7 +19,6 @@ from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
                                                           AllocationPolicy,
                                                           AccessRightsDescription)
 from azure.cli.command_modules.iot.shared import (EndpointType,
-                                                  IdentityUpdateType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
@@ -205,15 +204,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    arg_type=get_three_state_flag(),
                    nargs='*', help="Assign a system-assigned managed identity to this hub.")
         c.argument('user_identities', options_list=['--user-assigned', '--user'],
-                   nargs='*', help="Assign user-assigned managed identities to this hub. "
+                   nargs='+', help="Assign user-assigned managed identities to this hub. "
                    "Accept space-separated list of identity resource IDs.")
-
-    with self.argument_context('iot hub identity update') as c:
-        c.argument('identity_type', options_list=['--type'],
-                   arg_type=get_enum_type(IdentityUpdateType),
-                   help="Update hub's system or user-assigned managed identities. "
-                   "Use 'system_assigned' to remove all user identities, 'user_assigned' to "
-                   "remove all user-assigned identities, or 'none' to remove all identities.")
 
     with self.argument_context('iot hub identity remove') as c:
         c.argument('system_identity', options_list=['--system-assigned', '--system'],

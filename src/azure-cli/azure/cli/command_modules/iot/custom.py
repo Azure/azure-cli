@@ -54,7 +54,7 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 from azure.mgmt.iotcentral.models import (AppSkuInfo,
                                           App)
 from azure.cli.command_modules.iot._constants import SYSTEM_ASSIGNED_IDENTITY
-from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, IdentityUpdateType, RenewKeyType, AuthenticationType, IdentityType
+from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType, IdentityType
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate, generate_key
 
@@ -694,7 +694,7 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     hub_identity = hub.identity
 
-    if not system_identity and not user_identities:
+    if not system_identity and user_identities is None:
         raise RequiredArgumentMissingError('No identities provided to remove. Please provide system (--system) or user-assigned identities (--user).')
     # Turn off system managed identity
     if system_identity:
@@ -711,6 +711,8 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
             if not hub_identity.user_assigned_identities[identity]:
                 raise ArgumentUsageError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
             del hub_identity.user_assigned_identities[identity]
+    elif isinstance(user_identities, list):
+        del hub_identity.user_assigned_identities
 
     if hub_identity.type in [
             IdentityType.system_assigned.value,
@@ -718,32 +720,10 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
     ]:
         hub_identity.type = IdentityType.system_assigned_user_assigned.value if hub_identity.user_assigned_identities else IdentityType.system_assigned.value
     else:
-        hub_identity.type = IdentityType.user_assigned.value if hub_identity.user_assigned_identities else IdentityType.none.value
+        hub_identity.type = IdentityType.user_assigned.value if hasattr(hub_identity, 'user_assigned_identities') else IdentityType.none.value
 
     hub.identity = hub_identity
-    if not hub.identity.user_assigned_identities:
-        hub.identity.user_assigned_identities = None
-    poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
-    lro = LongRunningOperation(cmd.cli_ctx)(poller)
-    return lro.identity
-
-
-def iot_hub_identity_update(cmd, client, hub_name, identity_type, resource_group_name=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
-    hub_identity = None
-
-    if identity_type == IdentityUpdateType.none.value:
-        hub_identity = _build_identity(system=False, identities=None)
-    elif identity_type == IdentityUpdateType.system_assigned.value:
-        hub_identity = _build_identity(system=True, identities=None)
-    elif identity_type == IdentityUpdateType.user_assigned.value:
-        if not hub.identity.user_assigned_identities:
-            raise ArgumentUsageError('Hub {0} is not currently using any user-assigned identities.'.format(hub_name))
-        hub_identity = _build_identity(system=False, identities=hub.identity.user_assigned_identities)
-
-    hub.identity = hub_identity
-    if not hub.identity.user_assigned_identities:
+    if not getattr(hub.identity, 'user_assigned_identities', None):
         hub.identity.user_assigned_identities = None
     poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
     lro = LongRunningOperation(cmd.cli_ctx)(poller)
