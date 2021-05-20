@@ -641,6 +641,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
             if hasattr(expanded_arg, '_subscription'):
                 cmd_copy.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
+                self.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
 
             self._validation(expanded_arg)
             jobs.append((expanded_arg, cmd_copy))
