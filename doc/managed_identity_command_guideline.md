@@ -34,16 +34,20 @@ Create the `identity` subgroup under the main resource command group. Support th
     ```
 4. Update identities with `identity update` command
 
-    Use different identity types to do the following:
+    Use different identity types to do the following (the enum values available for type may vary with different services):
     - Remove all assigned identities
         ```
         az <resource> identity update ... --type none
         ```
     - Remove all user assigned identities if exist and enable system assigned identity if not enabled
         ```
-        az <resource> identity update ... --type system_assigned
+        az <resource> identity update ... --type SystemAssigned
         ```
     - Remove system assigned identities only when both system assigned and user assigned identities exist
         ```
-        az <resource> identity update ... --type user_assigned
+        az <resource> identity update ... --type UserAssigned
+        ```
+    - Add system assigned identity only when user assigned identities exist
+        ```
+        az <resource> identity update ... --type "SystemAssigned, UserAssigned"
         ```
