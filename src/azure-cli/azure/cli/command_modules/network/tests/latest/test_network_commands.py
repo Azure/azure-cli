@@ -3586,6 +3586,54 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
 
 
+class NetworkVpnConnectionNatRule(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_vpn_connection_nat_rule')
+    def test_network_vpn_connection_nat_rule(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1',
+            'subnet': 'GatewaySubnet',
+            'vg': 'vnet-gateway-name',
+            'ip': 'ip-name',
+            'sku': 'VpnGw2',
+            'nat': 'nat-name',
+            'nat1': 'nat-name1',
+            'i_map': '10.4.0.0/24',
+            'i_map1': '10.5.0.0/24',
+            'e_map': '192.168.21.0/24',
+            'e_map1': '192.168.22.0/24',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+
+        vg = self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip} --sku {sku} '
+                      '--nat-rule name={nat} mode=IngressSnat internal-mappings={i_map} external-mappings={e_map} '
+                      '--nat-rule name={nat1} mode=EgressSnat internal-mappings={i_map1} external-mappings={e_map1}',
+                      checks=[self.check('length(vnetGateway.natRules)', 2)]).get_output_in_json()
+
+        self.kwargs.update({'id': vg['vnetGateway']['natRules'][0]['id']})
+        self.kwargs.update({'id1': vg['vnetGateway']['natRules'][1]['id']})
+
+        self.cmd('network local-gateway create -g {rg} -n {lgw1} --gateway-ip-address {lgw1ip} '
+                 '--local-address-prefixes {lgw1_prefix1} {lgw1_prefix2}')
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {vg} --local-gateway2 {lgw1} '
+                 '--shared-key AzureA1b2C3 --ingress-nat-rule {id}',
+                 checks=[self.check('length(resource.ingressNatRules)', 1)])
+
+        self.cmd('network vpn-connection delete -g {rg} -n {conn1}')
+
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {vg} --local-gateway2 {lgw1} '
+                 '--shared-key AzureA1b2C3 --egress-nat-rule {id1}',
+                 checks=[self.check('length(resource.egressNatRules)', 1)])
+
+
 class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_gateway_ipsec')
@@ -4701,6 +4749,71 @@ class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
 
         self.cmd('network vnet subnet delete -n {subnet}')
         self.cmd('network vnet delete -n {vnet}')
+
+
+class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_network_vnet_gateway_nat_rule(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip': 'ip',
+            'ip1': 'ip1',
+            'vnet': 'vnet',
+            'vnet1': 'vnet1',
+            'subnet': 'GatewaySubnet',
+            'vg': 'vnet-gateway-name',
+            'vg1': 'vnet-gateway-name1',
+            'sku': 'VpnGw2',
+        })
+
+        # minimal parameters
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip}  --sku {sku} '
+                 '--nat-rule name=nat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ',
+                 checks=[self.check('length(vnetGateway.natRules)', 1)])
+
+        # minimal parameters(ip-config-id can only be set when type is Dynamic, and only allowlist sub-ids support Dynamic)
+        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vg1} --vnet {vnet1} --public-ip-address {ip1}  --sku {sku} '
+                 '--nat-rule name=nat type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 '
+                 'external-mappings=192.168.21.0/24',
+                 checks=[self.check('length(vnetGateway.natRules)', 1)])
+
+    @ResourceGroupPreparer()
+    def test_network_vnet_gateway_nat_rule_sub_cmd(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip': 'ip',
+            'vnet': 'vnet',
+            'subnet': 'GatewaySubnet',
+            'vg': 'vnet-gateway-name',
+            'sku': 'VpnGw2',
+            'nat': 'nat-rule-name',
+            'nat1': 'nat-rule-name1',
+        })
+
+        # minimal parameters
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip}  --sku {sku}')
+
+        # sub cmd
+        self.cmd('network vnet-gateway nat-rule add -g {rg} --gateway-name {vg} --name {nat} '
+                 '--internal-mappings 10.4.0.0/24 --external-mappings 192.168.21.0/24',
+                 checks=[self.check('length(natRules)', 1)])
+
+        self.cmd('network vnet-gateway nat-rule add -g {rg} --gateway-name {vg} --name {nat1} '
+                 '--internal-mappings 10.3.0.0/24 --external-mappings 192.168.22.0/24',
+                 checks=[self.check('length(natRules)', 2)])
+
+        self.cmd('network vnet-gateway nat-rule list -g {rg} --gateway-name {vg} ',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('network vnet-gateway nat-rule remove -g {rg} --gateway-name {vg} --name {nat}',
+                 checks=[self.check('length(natRules)', 1)])
 
 
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):

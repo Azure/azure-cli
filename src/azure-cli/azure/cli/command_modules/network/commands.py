@@ -1375,6 +1375,11 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
         g.custom_show_command('show', 'show_vnet_gateway_aad')
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
+
+    with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
+        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
+        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
+        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
     # endregion
 
     # region VirtualNetworkGatewayConnections
