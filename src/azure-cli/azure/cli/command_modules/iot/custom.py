@@ -673,7 +673,7 @@ def iot_hub_identity_assign(cmd, client, hub_name, system_identity=None, user_id
     if bool(identity_role) ^ bool(identity_scopes):
         raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-managed identity role assignment.')
     if not system_identity and not user_identities:
-        raise RequiredArgumentMissingError('No identities provided to assign. Please provide system (--system) or user-assigned identities (--user-identities).')
+        raise RequiredArgumentMissingError('No identities provided to assign. Please provide system (--system) or user-assigned identities (--user).')
     if identity_role and identity_scopes:
         from azure.cli.core.commands.arm import assign_identity
         for scope in identity_scopes:
@@ -695,7 +695,7 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
     hub_identity = hub.identity
 
     if not system_identity and not user_identities:
-        raise RequiredArgumentMissingError('No identities provided to remove. Please provide system (--system) or user-assigned identities (--user-identities).')
+        raise RequiredArgumentMissingError('No identities provided to remove. Please provide system (--system) or user-assigned identities (--user).')
     # Turn off system managed identity
     if system_identity:
         if hub_identity.type not in [
