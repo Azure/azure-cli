@@ -2285,10 +2285,10 @@ def create_policy_non_compliance_message(cmd, name, message, scope=None, resourc
     assignment = policy_client.policy_assignments.get(scope, name)
 
     NonComplianceMessage = cmd.get_models('NonComplianceMessage')
-    createdMessage = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    created_message = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
     if not assignment.non_compliance_messages:
         assignment.non_compliance_messages = []
-    assignment.non_compliance_messages.append(createdMessage)
+    assignment.non_compliance_messages.append(created_message)
 
     return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
 
@@ -2302,20 +2302,20 @@ def delete_policy_non_compliance_message(cmd, name, message, scope=None, resourc
     assignment = policy_client.policy_assignments.get(scope, name)
 
     NonComplianceMessage = cmd.get_models('NonComplianceMessage')
-    messageToRemove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    message_to_remove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
     if assignment.non_compliance_messages:
-        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, messageToRemove)]
+        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
 
     return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
 
 
 def _is_non_compliance_message_equivalent(first, second):
-    first.message = '' if first.message is None else first.message
-    second.message = '' if second.message is None else second.message
-    first.policy_definition_reference_id = '' if first.policy_definition_reference_id is None else first.policy_definition_reference_id
-    second.policy_definition_reference_id = '' if second.policy_definition_reference_id is None else second.policy_definition_reference_id
+    first_message = '' if first.message is None else first.message
+    seccond_message = '' if second.message is None else second.message
+    first_reference_id = '' if first.policy_definition_reference_id is None else first.policy_definition_reference_id
+    second_reference_id = '' if second.policy_definition_reference_id is None else second.policy_definition_reference_id
 
-    return first.message.lower() == second.message.lower() and first.policy_definition_reference_id.lower() == second.policy_definition_reference_id.lower()
+    return first_message.lower() == seccond_message.lower() and first_reference_id.lower() == second_reference_id.lower()
 
 
 def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
