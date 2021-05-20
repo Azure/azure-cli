@@ -6,19 +6,23 @@
 # pylint: disable=line-too-long,too-many-lines
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.command_modules.servicefabric._sf_utils import (_log_error_exception)
-from azure.mgmt.servicefabric.models import (ErrorModelException,
-                                             NodeType,
-                                             EndpointRangeDescription,
-                                             VMSSExtension,
-                                             VaultSecretGroup,
-                                             VaultCertificate,
-                                             SubResource)
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.servicefabricmanagedclusters.models import (
+    NodeType,
+    EndpointRangeDescription,
+    VMSSExtension,
+    VaultSecretGroup,
+    VaultCertificate,
+    SubResource,
+    NodeTypeActionParameters
+)
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
 
 
+# pylint:disable=too-many-locals,
 def create_node_type(cmd,
                      client,
                      resource_group_name,
@@ -27,6 +31,7 @@ def create_node_type(cmd,
                      instance_count,
                      primary=False,
                      disk_size=None,
+                     disk_type=None,
                      application_start_port=None,
                      application_end_port=None,
                      ephemeral_start_port=None,
@@ -37,7 +42,9 @@ def create_node_type(cmd,
                      vm_image_sku=None,
                      vm_image_version=None,
                      capacity=None,
-                     placement_property=None):
+                     placement_property=None,
+                     is_stateless=False,
+                     multiple_placement_groups=False):
 
     #  set defult parameters
     if disk_size is None:
@@ -62,13 +69,16 @@ def create_node_type(cmd,
         new_node_type = NodeType(is_primary=primary,
                                  vm_instance_count=int(instance_count),
                                  data_disk_size_gb=disk_size,
+                                 data_disk_type=disk_type,
                                  vm_size=vm_size,
                                  vm_image_publisher=vm_image_publisher,
                                  vm_image_offer=vm_image_offer,
                                  vm_image_sku=vm_image_sku,
                                  vm_image_version=vm_image_version,
                                  capacities=capacity,
-                                 placement_properties=placement_property)
+                                 placement_properties=placement_property,
+                                 is_stateless=is_stateless,
+                                 multiple_placement_groups=multiple_placement_groups)
 
         if application_start_port and application_end_port:
             new_node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
@@ -79,11 +89,11 @@ def create_node_type(cmd,
                                                                      end_port=ephemeral_end_port)
 
         logger.info("Creating node type '%s'", node_type_name)
-        poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, new_node_type)
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, new_node_type)
         node_type = LongRunningOperation(cmd.cli_ctx)(poller)
         return node_type
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -119,10 +129,10 @@ def update_node_type(cmd,
         if placement_property is not None:
             node_type.placement_properties = placement_property
 
-        poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -135,10 +145,11 @@ def reimage_node(cmd,
                  force=False):
     try:
         nodes = [node_name] if isinstance(node_name, str) else node_name
-        poller = client.node_types.reimage(resource_group_name, cluster_name, node_type_name, nodes=nodes, force=force)
+        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force)
+        poller = client.node_types.begin_reimage(resource_group_name, cluster_name, node_type_name, parameters=action_parameters)
         LongRunningOperation(cmd.cli_ctx, start_msg='Reimaging nodes', finish_msg='Nodes reimaged')(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -151,10 +162,11 @@ def restart_node(cmd,
                  force=False):
     try:
         nodes = [node_name] if isinstance(node_name, str) else node_name
-        poller = client.node_types.restart(resource_group_name, cluster_name, node_type_name, nodes=nodes, force=force)
+        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force)
+        poller = client.node_types.begin_restart(resource_group_name, cluster_name, node_type_name, parameters=action_parameters)
         LongRunningOperation(cmd.cli_ctx, start_msg='Restarting nodes', finish_msg='Nodes restarted')(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -167,10 +179,11 @@ def delete_node(cmd,
                 force=False):
     try:
         nodes = [node_name] if isinstance(node_name, str) else node_name
-        poller = client.node_types.delete_node(resource_group_name, cluster_name, node_type_name, nodes=nodes, force=force)
+        action_parameters = NodeTypeActionParameters(nodes=nodes, force=force)
+        poller = client.node_types.begin_delete_node(resource_group_name, cluster_name, node_type_name, parameters=action_parameters)
         LongRunningOperation(cmd.cli_ctx, start_msg='Deleting nodes', finish_msg='Nodes deleted')(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -206,10 +219,10 @@ def add_vm_extension(cmd,
 
         node_type.vm_extensions.append(newExtension)
 
-        poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -228,10 +241,10 @@ def delete_vm_extension(cmd,
             if original_len == len(node_type.vm_extensions):
                 raise 'Extension with name {} not found'.format(extension_name)
 
-        poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -266,8 +279,8 @@ def add_vm_secret(cmd,
         if new_vault_secret_group:
             node_type.vm_secrets.append(vault)
 
-        poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
+        poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise

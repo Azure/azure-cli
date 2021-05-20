@@ -154,7 +154,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
                 context['subscriptionId'] = subscription_id
 
         parameters = self._normalize_parameters(self.parameters)
-        parameters = [item for item in parameters if item not in ['--debug', '--verbose', '--only-show-errors']]
+        parameters = [item for item in set(parameters) if item not in ['--debug', '--verbose', '--only-show-errors']]
         query = {
             "command": self.command,
             "parameters": ','.join(parameters)
@@ -294,7 +294,10 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
 
             # generate decorated commands shown to users
             decorated_command = highlight_command(raw_command)
-            decorated_description = [(Style.SECONDARY, recommendation['description'] + '\n')]
+            decorated_description = [(
+                Style.SECONDARY,
+                recommendation.get('description', 'No description is found.') + '\n'
+            )]
             decorated_recommendations.append((decorated_command, decorated_description))
 
         # add reference link as a recommendation

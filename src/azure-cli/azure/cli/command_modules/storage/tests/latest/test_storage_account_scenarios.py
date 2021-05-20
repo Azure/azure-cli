@@ -435,6 +435,48 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {} --allow-shared-key-access true'.format(name),
                  checks=[JMESPathCheck('allowSharedKeyAccess', True)])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-02-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    def test_storage_account_with_key_and_sas_policy(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {}'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy', None),
+                         JMESPathCheck('sasPolicy', None)])
+
+        self.cmd('az storage account create -n {} -g {} --key-exp-days 3'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 3),
+                         JMESPathCheck('sasPolicy', None)])
+
+        self.cmd('az storage account create -n {} -g {} --sas-exp 1.23:59:59'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 3),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '1.23:59:59')])
+
+        self.cmd('az storage account update -n {} -g {} --key-exp-days 100000'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '1.23:59:59')])
+
+        self.cmd('az storage account update -n {} -g {} --sas-exp 100000.00:00:00'.format(name, resource_group),
+                 checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
+                         JMESPathCheck('sasPolicy.sasExpirationPeriod', '100000.00:00:00')])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer()
+    def test_storage_account_with_default_share_permission(self, resource_group):
+        self.kwargs = {
+            'name': self.create_random_name(prefix='cli', length=24),
+            'rg': resource_group}
+
+        self.cmd('az storage account create -n {name} -g {rg}',
+                 checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+
+        self.cmd('az storage account create -n {name} -g {rg} --default-share-permission StorageFileDataSmbShareReader',
+                 checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication.defaultSharePermission',
+                                       'StorageFileDataSmbShareReader')])
+
+        self.cmd('az storage account update -n {name} -g {rg} --default-share-permission None',
+                 checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication.defaultSharePermission',
+                                       'None')])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -604,7 +646,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_create_account_sas(self, storage_account):
+    def test_create_account_sas(self, storage_account_info):
         from azure.cli.core.azclierror import RequiredArgumentMissingError
         with self.assertRaises(RequiredArgumentMissingError):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
@@ -615,9 +657,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             self.cmd('storage account generate-sas --resource-types o --services b --expiry 2000-01-01 '
                      '--permissions r --connection-string {}'.format(invalid_connection_string))
 
-        sas = self.cmd('storage account generate-sas --resource-types o --services b '
-                       '--expiry 2046-12-31T08:23Z --permissions r --https-only --account-name {}'
-                       .format(storage_account)).output
+        sas = self.storage_cmd('storage account generate-sas --resource-types o --services b '
+                               '--expiry 2046-12-31T08:23Z --permissions r --https-only ',
+                               storage_account_info).output
         self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
         self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
 
@@ -693,6 +735,322 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                           '--encryption-key-source Microsoft.Storage').get_output_in_json()
 
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
+
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_user_assigned_identity(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'sa1': self.create_random_name(prefix='sa1', length=24),
+            'sa2': self.create_random_name(prefix='sa2', length=24),
+            'sa3': self.create_random_name(prefix='sa3', length=24),
+            'identity': self.create_random_name(prefix='id', length=24),
+            'vt': self.create_random_name('clitest', 24)
+        }
+        # Prepare managed identity
+        identity = self.cmd('az identity create -n {identity} -g {rg}').get_output_in_json()
+        self.kwargs['iid'] = identity['id']
+        self.kwargs['oid'] = identity['principalId']
+
+        # Prepare key vault
+        keyvault = self.cmd('az keyvault create -n {vt} -g {rg} ').get_output_in_json()
+        self.kwargs['vid'] = keyvault['id']
+        self.kwargs['vtn'] = keyvault['properties']['vaultUri']
+
+        self.kwargs['ver'] = self.cmd("az keyvault key create -n testkey -p software --vault-name {vt} "
+                                      "-otsv --query 'key.kid'").output.rsplit('/', 1)[1].rstrip('\n')
+
+        # Make UAI access to keyvault
+        self.cmd('az keyvault set-policy -n {vt} --object-id {oid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+        self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
+        self.cmd('az resource update --id {vid} --set properties.enablePurgeProtection=true')
+
+        # CMK at create with UAI
+        result = self.cmd('az storage account create -n {sa1} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--key-vault-user-identity-id {iid} '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Clear a UserAssigned identity when in use with CMK will break access to the account
+        result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type None ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'None')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+
+        # Recover from Identity clear
+        result = self.cmd('az storage account update -n {sa1} -g {rg} --identity-type UserAssigned --user-identity-id {iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # CMK with UAI -> CMK with SAI
+        # 1. Add System Assigned Identity if it does not exist.
+        result = self.cmd('az storage account update -n {sa1} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--identity-type SystemAssigned,UserAssigned ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+
+        # 2. Add GET/WRAP/UNWRAP permissions on $KeyVaultUri for System Assigned identity.
+        self.kwargs['oid'] = self.cmd("az storage account update -n {sa1} -g {rg} --assign-identity "
+                                      "-otsv --query 'identity.principalId'").output.strip('\n')
+
+        self.cmd('az keyvault set-policy -n {vt} --object-id {oid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+
+        # 3. Update encryption.identity to use the SystemAssigned identity. SAI must have access to existing KeyVault.
+        result = self.cmd('az storage account update -n {sa1} -g {rg} '
+                          '--key-vault-user-identity-id "" ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned')
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], "")
+
+        # CMK with SAI -> MMK
+        result = self.cmd('az storage account update -n {sa1} -g {rg} '
+                          '--encryption-key-source Microsoft.Storage ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa1'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
+        self.assertEqual(result['encryption']['keyVaultProperties'], None)
+
+        # MMK at create
+        result = self.cmd('az storage account create -n {sa2} -g {rg} --encryption-key-source Microsoft.Storage')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
+        self.assertEqual(result['encryption']['keyVaultProperties'], None)
+
+        # CMK with UAI and add SAI at create
+        result = self.cmd('az storage account create -n {sa3} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--key-vault-user-identity-id {iid} '
+                          '--identity-type SystemAssigned,UserAssigned '
+                          '--user-identity-id {iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa3'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'],
+                         self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # MMK -> CMK wth UAI
+        self.kwargs['sid'] = self.cmd("az storage account update -n {sa2} -g {rg} --assign-identity "
+                                      "-otsv --query 'identity.principalId'").output.strip('\n')
+        self.cmd('az keyvault set-policy -n {vt} --object-id {sid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+        self.cmd('az keyvault set-policy -n {vt} --object-id {sid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--identity-type SystemAssigned ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned')
+        self.assertEqual(result['identity']['principalId'], self.kwargs['sid'])
+        self.assertEqual(result['encryption']['encryptionIdentity'], None)
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # CMK wth UAI -> MMK
+        result = self.cmd('az storage account create -n {sa2} -g {rg} --encryption-key-source Microsoft.Storage')\
+            .get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
+        self.assertEqual(result['encryption']['keyVaultProperties'], None)
+
+        # MMK -> CMK wth SAI
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--identity-type SystemAssigned ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned')
+        self.assertEqual(result['identity']['principalId'], self.kwargs['sid'])
+        self.assertEqual(result['encryption']['encryptionIdentity'], None)
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Clear a SystemAssigned identity when in use with CMK will break access to the account
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --identity-type None ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'None')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+
+        # Recover account if SystemAssignedIdentity used for CMK is cleared
+        # 1. Create a new $UserAssignedIdentity that has access to $KeyVaultUri and update the account to use the new $UserAssignedIdentity for encryption (if not present already).
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {iid} '
+                          '--key-vault-user-identity-id {iid} ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # 2. Update account to use SAI,UAI identity.
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --identity-type SystemAssigned,UserAssigned')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # 3. Clear the $UserAssignedIdentity used for encryption.
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --key-vault-user-identity-id ""')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], '')
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # 4. Remove $UserAssignedIdentity from the top level identity bag.
+        result = self.cmd('az storage account update -n {sa2} -g {rg} --identity-type SystemAssigned')\
+            .get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], '')
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        self.kwargs['sid'] = result['identity']['principalId']
+
+        # CMK with SAI -> CMK with UAI
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--key-vault-user-identity-id {iid} '
+                          '--identity-type SystemAssigned,UserAssigned '
+                          '--user-identity-id {iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'SystemAssigned,UserAssigned')
+        self.assertIn(self.kwargs['iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # CMK with UAI1 -> CMK with UAI2
+        self.kwargs['new_id'] = self.create_random_name(prefix='newid', length=24)
+        identity = self.cmd('az identity create -n {new_id} -g {rg}').get_output_in_json()
+        self.kwargs['new_iid'] = identity['id']
+        self.kwargs['new_oid'] = identity['principalId']
+
+        self.cmd('az keyvault set-policy -n {vt} --object-id {new_oid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey '
+                          '--key-vault-user-identity-id {new_iid} '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {new_iid}').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['new_iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['new_iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Clear a UserAssigned identity when in use with CMK will break access to the account
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--identity-type None ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'None')
+        self.assertEqual(result['identity']['userAssignedIdentities'], None)
+
+        # Recover from Identity clear
+        result = self.cmd('az storage account update -n {sa2} -g {rg} '
+                          '--identity-type UserAssigned '
+                          '--user-identity-id {new_iid} '
+                          '--key-vault-user-identity-id {new_iid} ').get_output_in_json()
+
+        self.assertEqual(result['name'], self.kwargs['sa2'])
+        self.assertEqual(result['identity']['type'], 'UserAssigned')
+        self.assertIn(self.kwargs['new_iid'], result['identity']['userAssignedIdentities'])
+        self.assertEqual(result['encryption']['encryptionIdentity']['encryptionUserAssignedIdentity'], self.kwargs['new_iid'])
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -1460,7 +1818,8 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='source_account', location='eastus2', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='destination_account', location='eastus2', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='new_account', location='eastus2', kind='StorageV2')
-    def test_storage_account_or_policy(self, resource_group, source_account, destination_account, new_account):
+    def test_storage_account_or_policy(self, resource_group, source_account, destination_account,
+                                       new_account):
         src_account_info = self.get_account_info(resource_group, source_account)
         src_container = self.create_container(src_account_info)
         dest_account_info = self.get_account_info(resource_group, destination_account)
@@ -1468,8 +1827,11 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'src_sc': source_account,
+            'src_sc_id': self.get_account_id(resource_group, source_account),
             'dest_sc': destination_account,
+            'dest_sc_id': self.get_account_id(resource_group, destination_account),
             'new_sc': new_account,
+            'new_sc_id': self.get_account_id(resource_group, new_account),
             'scont': src_container,
             'dcont': dest_container,
         })
@@ -1500,8 +1862,8 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         # Get policy properties from destination account
         self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \
             .assert_with_checks(JMESPathCheck('type', "Microsoft.Storage/storageAccounts/objectReplicationPolicies")) \
-            .assert_with_checks(JMESPathCheck('sourceAccount', source_account)) \
-            .assert_with_checks(JMESPathCheck('destinationAccount', destination_account)) \
+            .assert_with_checks(JMESPathCheck('sourceAccount', self.kwargs['src_sc_id'])) \
+            .assert_with_checks(JMESPathCheck('destinationAccount', self.kwargs['dest_sc_id'])) \
             .assert_with_checks(JMESPathCheck('rules[0].sourceContainer', src_container)) \
             .assert_with_checks(JMESPathCheck('rules[0].destinationContainer', dest_container))
 
@@ -1516,7 +1878,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('destinationContainer', dest_container))
 
         result = self.cmd('storage account or-policy rule add -g {} -n {} --policy-id {} -d {} -s {} -t "2020-02-19T16:05:00Z"'.format(
-            resource_group, destination_account, self.kwargs["policy_id"], dest_container1, src_container1)).get_output_in_json()
+            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], dest_container1, src_container1)).get_output_in_json()
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
 
         self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}')\
@@ -1524,20 +1886,20 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
         # Update rules
         self.cmd('storage account or-policy rule update -g {} -n {} --policy-id {} --rule-id {} --prefix-match blobA blobB -t "2020-02-20T16:05:00Z"'.format(
-            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId'])) \
+            resource_group, self.kwargs["dest_sc"], result['policyId'], result['rules'][1]['ruleId'])) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[0]', 'blobA')) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[1]', 'blobB')) \
             .assert_with_checks(JMESPathCheck('filters.minCreationTime', '2020-02-20T16:05:00Z'))
 
         self.cmd('storage account or-policy rule show -g {} -n {} --policy-id {} --rule-id {}'.format(
-            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId'])) \
+            resource_group, self.kwargs["dest_sc"], result['policyId'], result['rules'][1]['ruleId'])) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[0]', 'blobA')) \
             .assert_with_checks(JMESPathCheck('filters.prefixMatch[1]', 'blobB')) \
             .assert_with_checks(JMESPathCheck('filters.minCreationTime', '2020-02-20T16:05:00Z'))
 
         # Remove rules
         self.cmd('storage account or-policy rule remove -g {} -n {} --policy-id {} --rule-id {}'.format(
-            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId']))
+            resource_group, self.kwargs["dest_sc"], result['policyId'], result['rules'][1]['ruleId']))
         self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}') \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
@@ -1553,18 +1915,18 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
                 .get_output_in_json()
             json.dump(policy, f)
         self.kwargs['policy'] = policy_file
-        self.cmd('storage account or-policy create -g {rg} -n {src_sc} -p @"{policy}"')\
-            .assert_with_checks(JMESPathCheck('type', "Microsoft.Storage/storageAccounts/objectReplicationPolicies")) \
-            .assert_with_checks(JMESPathCheck('sourceAccount', source_account)) \
-            .assert_with_checks(JMESPathCheck('destinationAccount', destination_account)) \
-            .assert_with_checks(JMESPathCheck('rules[0].sourceContainer', src_container)) \
-            .assert_with_checks(JMESPathCheck('rules[0].destinationContainer', dest_container)) \
-            .assert_with_checks(JMESPathCheck('rules[0].filters.minCreationTime', '2020-02-19T16:05:00Z'))
+        result = self.cmd('storage account or-policy create -g {rg} -n {src_sc} -p @"{policy}"').get_output_in_json()
+        self.assertEqual(result['type'], "Microsoft.Storage/storageAccounts/objectReplicationPolicies")
+        self.assertIn(self.kwargs['src_sc'], result['sourceAccount'])
+        self.assertIn(self.kwargs['dest_sc'], result['destinationAccount'])
+        self.assertEqual(result['rules'][0]['sourceContainer'], src_container)
+        self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
+        self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
         # Update ORS policy
-        self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
-            resource_group, destination_account, self.kwargs["policy_id"], new_account)) \
-            .assert_with_checks(JMESPathCheck('sourceAccount', new_account))
+        result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
+            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
+        self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
 
         # Delete policy from destination and source account
         self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')
@@ -1574,3 +1936,152 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account or-policy delete -g {rg} -n {dest_sc} --policy-id {policy_id}')
         self.cmd('storage account or-policy list -g {rg} -n {dest_sc}') \
             .assert_with_checks(JMESPathCheck('length(@)', 0))
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
+    def test_storage_account_allow_cross_tenant_replication(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'src_sc': self.create_random_name(prefix='clicor', length=24),
+        })
+
+        self.cmd('storage account create -n {src_sc} -g {rg} ', checks=[
+            JMESPathCheck('allowCrossTenantReplication', None)])
+
+        self.cmd('storage account update -n {src_sc} -g {rg} -r false', checks=[
+            JMESPathCheck('allowCrossTenantReplication', False)])
+
+        self.cmd('storage account update -n {src_sc} -g {rg} -r true', checks=[
+            JMESPathCheck('allowCrossTenantReplication', True)])
+
+        self.cmd('storage account create -n {src_sc} -g {rg} -r false', checks=[
+            JMESPathCheck('allowCrossTenantReplication', False)])
+
+        self.cmd('storage account create -n {src_sc} -g {rg} -r true', checks=[
+            JMESPathCheck('allowCrossTenantReplication', True)])
+
+    @record_only()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2euap', kind='StorageV2')
+    def test_storage_account_cross_tenant_or_policy(self, resource_group, destination_account):
+
+        dest_account_info = self.get_account_info(resource_group, destination_account)
+        dest_container = self.create_container(dest_account_info)
+        self.kwargs.update({
+            'rg': resource_group,
+            'dest_sc': destination_account,
+            'scont': 'scont',
+            'dcont': dest_container,
+        })
+
+        self.cmd('storage account blob-service-properties update -n {dest_sc} -g {rg} --enable-versioning', checks=[
+                 JMESPathCheck('isVersioningEnabled', True)])
+
+        # Create ORS policy on destination account with cross tenant account as source account
+        result = self.cmd('storage account or-policy create -n {dest_sc} '
+                          '-s /subscriptions/1c638cf4-608f-4ee6-b680-c329e824c3a8/resourcegroups/clitest/providers/Microsoft.Storage/storageAccounts/clitestcor '
+                          '--dcont {dcont} --scont {scont} -t "2020-02-19T16:05:00Z"').get_output_in_json()
+        self.assertIn('policyId', result)
+        self.assertIn('ruleId', result['rules'][0])
+        self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
+
+
+class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer(name_prefix='cli_test_blob_inventory', location='eastus2')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2')
+    def test_storage_account_blob_inventory_policy(self, resource_group, storage_account):
+        import os
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        policy_file = os.path.join(curr_dir, 'blob_inventory_policy.json').replace('\\', '\\\\')
+        policy_file_no_type = os.path.join(curr_dir, 'blob_inventory_policy_no_type.json').replace('\\', '\\\\')
+        self.kwargs = {'rg': resource_group,
+                       'sa': storage_account,
+                       'policy': policy_file,
+                       'policy_no_type': policy_file_no_type}
+        account_info = self.get_account_info(resource_group, storage_account)
+        self.storage_cmd('storage container create -n mycontainer', account_info)
+
+        # Create policy without type specified
+        self.cmd('storage account blob-inventory-policy create --account-name {sa} -g {rg} --policy @"{policy_no_type}"',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters", None),
+                         JMESPathCheck("policy.rules[0].definition.format", "Parquet"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Container"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Weekly"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule1"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters", None),
+                         JMESPathCheck("policy.rules[0].definition.format", "Parquet"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Container"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Weekly"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule1"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        # Enable Versioning for Storage Account when includeBlobInventory=true in policy
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --enable-versioning', checks=[
+                 JMESPathCheck('isVersioningEnabled', True)])
+
+        self.cmd('storage account blob-inventory-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.blobTypes[0]", "blockBlob"),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeBlobVersions", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.format", "Csv"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule2"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.blobTypes[0]", "blockBlob"),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeBlobVersions", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.format", "Csv"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule2"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        self.cmd('storage account blob-inventory-policy update --account-name {sa} -g {rg}'
+                 ' --set "policy.rules[0].name=newname"')
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}',
+                 checks=JMESPathCheck('policy.rules[0].name', 'newname'))
+
+        self.cmd('storage account blob-inventory-policy delete --account-name {sa} -g {rg} -y')
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}', expect_failure=True)

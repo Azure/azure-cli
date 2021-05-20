@@ -437,6 +437,12 @@ parameters:
   - name: --enable-sgxquotehelper
     type: bool
     short-summary: Enable SGX quote helper for confcom addon.
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -474,6 +480,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
   - name: Create a kubernetes cluster with ephemeral OS enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a kubernetes cluster with EncryptionAtHost enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
+  - name: Create a kubernetes cluster with Azure RBAC enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
 """
 
 helps['aks update'] = """
@@ -559,6 +569,18 @@ parameters:
             * Has a special character (Regex match [\\W_])
           - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
       Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Update current cluster to use managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
+  - name: --disable-azure-rbac
+    type: bool
+    short-summary: Disable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -586,6 +608,16 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
   - name: Update Windows password of a kubernetes cluster
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --windows-admin-password "Repl@cePassw0rd12345678"
+  - name: Update the cluster to use system assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Update the cluster to use user assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Update a non managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Update a managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
+  - name: Disable Azure RBAC in a managed AAD AKS cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
 """
 
 helps['aks delete'] = """
@@ -786,9 +818,14 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a nodepool with EncryptionAtHost enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
 """
 
 helps['aks nodepool delete'] = """
@@ -1016,6 +1053,32 @@ helps['aks rotate-certs'] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
+"""
+
+helps['aks command'] = """
+    type: group
+    short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
+"""
+
+helps['aks command invoke'] = """
+    type: command
+    short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
+    parameters:
+        - name: --command -c
+          type: string
+          short-summary: Command or shell script you want to run.
+        - name: --file -f
+          type: string
+          short-summary: Files to be used by the command, use '.' to attach the current folder.
+"""
+
+helps['aks command result'] = """
+    type: command
+    short-summary: Fetch result from previously triggered 'aks command invoke'.
+    parameters:
+        - name: --command-id -i
+          type: string
+          short-summary: commandId returned from 'aks command invoke'.
 """
 
 helps['openshift'] = """

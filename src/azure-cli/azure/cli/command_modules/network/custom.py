@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 from collections import Counter, OrderedDict
 
-from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
@@ -246,22 +245,19 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     deployment_name = 'ag_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
@@ -669,6 +665,57 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
 
+
+def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
+                           protocol=None, host=None, path=None, timeout=None, host_name_from_http_settings=None,
+                           match_body=None, match_status_codes=None, address_pool=None, http_settings=None):
+    from azure.cli.core.commands import LongRunningOperation
+    on_demand_arguments = {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes,
+                           address_pool, http_settings}
+    if on_demand_arguments.difference({None}) and cmd.supported_api_version(min_api='2019-04-01'):
+        SubResource, ApplicationGatewayOnDemandProbe, ApplicationGatewayProbeHealthResponseMatch = cmd.get_models(
+            "SubResource", "ApplicationGatewayOnDemandProbe", "ApplicationGatewayProbeHealthResponseMatch")
+        probe_request = ApplicationGatewayOnDemandProbe(
+            protocol=protocol,
+            host=host,
+            path=path,
+            timeout=timeout,
+            pick_host_name_from_backend_http_settings=host_name_from_http_settings
+        )
+        if match_body is not None or match_status_codes is not None:
+            probe_request.match = ApplicationGatewayProbeHealthResponseMatch(
+                body=match_body,
+                status_codes=match_status_codes,
+            )
+        if address_pool is not None:
+            if not is_valid_resource_id(address_pool):
+                address_pool = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='applicationGateways',
+                    name=application_gateway_name,
+                    child_type_1='backendAddressPools',
+                    child_name_1=address_pool
+                )
+            probe_request.backend_address_pool = SubResource(id=address_pool)
+        if http_settings is not None:
+            if not is_valid_resource_id(http_settings):
+                http_settings = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='applicationGateways',
+                    name=application_gateway_name,
+                    child_type_1='backendHttpSettingsCollection',
+                    child_name_1=http_settings
+                )
+            probe_request.backend_http_settings = SubResource(id=http_settings)
+        return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health_on_demand(
+            resource_group_name, application_gateway_name, probe_request, expand))
+
+    return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health(
+        resource_group_name, application_gateway_name, expand))
 
 # endregion
 
@@ -1907,6 +1954,7 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
      :param child_zone_name: name of the child zone
     """
     import sys
+    from azure.core.exceptions import HttpResponseError
     parent_rg = child_rg
     parent_subscription_id = None
     parent_zone_name = parent_zone
@@ -1923,7 +1971,7 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
             for dname in child_zone.name_servers:
                 add_dns_ns_record(cmd, parent_rg, parent_zone_name, record_set_name, dname, parent_subscription_id)
             print('Delegation added succesfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
-        except CloudError as ex:
+        except HttpResponseError as ex:
             logger.error(ex)
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
@@ -2010,7 +2058,7 @@ def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
 
 def _type_to_property_name(key):
     type_dict = {
-        'a': 'arecords',
+        'a': 'a_records',
         'aaaa': 'aaaa_records',
         'caa': 'caa_records',
         'cname': 'cname_record',
@@ -2142,6 +2190,7 @@ def _build_record(cmd, data):
 # pylint: disable=too-many-statements
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
+    from azure.core.exceptions import HttpResponseError
     import sys
     logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
@@ -2240,7 +2289,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
-        except CloudError as ex:
+        except HttpResponseError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
           .format(cum_records, total_records, zone_name), file=sys.stderr)
@@ -2452,11 +2501,12 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None, ttl=None, if_none_match=None):
+    from azure.core.exceptions import HttpResponseError
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
-    except CloudError:
+    except HttpResponseError:
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
         record_set = RecordSet(ttl=3600)
 
@@ -3284,22 +3334,24 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
+
+
+def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
+    return client.list(resource_group_name, load_balancer_name)
 
 
 def create_lb_inbound_nat_rule(
@@ -3440,7 +3492,7 @@ def create_lb_frontend_ip_configuration(
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None,
-        subnet=None, virtual_network_name=None, public_ip_prefix=None):
+        subnet=None, virtual_network_name=None, public_ip_prefix=None, gateway_lb=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
@@ -3465,6 +3517,8 @@ def set_lb_frontend_ip_configuration(
 
     if public_ip_prefix:
         instance.public_ip_prefix = SubResource(id=public_ip_prefix)
+    if gateway_lb is not None:
+        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
 
     return parent
 
@@ -3565,6 +3619,12 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
     new_pool = BackendAddressPool(name=backend_address_pool_name,
                                   load_balancer_backend_addresses=new_addresses)
+
+    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
+    if cmd.supported_api_version(min_api='2021-02-01') and lb.sku.name.lower() == 'gateway':
+        GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
+        new_pool.tunnel_interfaces = [
+            GatewayLoadBalancerTunnelInterface(type='Internal', protocol='VXLAN', identifier=900)]
     return ncf.load_balancer_backend_address_pools.begin_create_or_update(resource_group_name,
                                                                           load_balancer_name,
                                                                           backend_address_pool_name,
@@ -3651,22 +3711,19 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def create_cross_region_lb_frontend_ip_configuration(
@@ -3769,7 +3826,7 @@ def create_cross_region_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, backend_pools_name=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
@@ -3792,6 +3849,8 @@ def create_cross_region_lb_rule(
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset)
+    if backend_pools_name:
+        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, i) for i in backend_pools_name]
     upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
     return get_property(poller.result().load_balancing_rules, item_name)
@@ -3800,7 +3859,7 @@ def create_cross_region_lb_rule(
 def set_cross_region_lb_rule(
         cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
-        load_distribution=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        load_distribution=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None, backend_pools_name=None):
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port', frontend_port)
@@ -3817,6 +3876,12 @@ def set_cross_region_lb_rule(
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
             get_property(parent.backend_address_pools, backend_address_pool_name)
+        # To keep compatible when bump version from '2020-11-01' to '2021-02-01'
+        # https://github.com/Azure/azure-rest-api-specs/issues/14430
+        if cmd.supported_api_version(min_api='2021-02-01') and not backend_pools_name:
+            instance.backend_address_pools = [instance.backend_address_pool]
+    if backend_pools_name is not None:
+        instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
 
     if probe_name == '':
         instance.probe = None
@@ -3941,13 +4006,16 @@ def create_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None, backend_pools_name=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
     lb = lb_get_operation(lb)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
+    # avoid break when backend_address_pool_name is None and backend_pools_name is not None
+    if not backend_address_pool_name and backend_pools_name:
+        backend_address_pool_name = backend_pools_name[0]
     if not backend_address_pool_name:
         backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
     new_rule = LoadBalancingRule(
@@ -3965,6 +4033,12 @@ def create_lb_rule(
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
+
+    if backend_pools_name:
+        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, name) for name in backend_pools_name]
+        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
+        new_rule.backend_address_pool = None
+
     upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
     return get_property(poller.result().load_balancing_rules, item_name)
@@ -3974,7 +4048,7 @@ def set_lb_rule(
         cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        disable_outbound_snat=None):
+        disable_outbound_snat=None, backend_pools_name=None):
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('frontend_port', frontend_port)
@@ -3992,6 +4066,14 @@ def set_lb_rule(
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
             get_property(parent.backend_address_pools, backend_address_pool_name)
+        # To keep compatible when bump version from '2020-11-01' to '2021-02-01'
+        # https://github.com/Azure/azure-rest-api-specs/issues/14430
+        if cmd.supported_api_version(min_api='2021-02-01') and not backend_pools_name:
+            instance.backend_address_pools = [instance.backend_address_pool]
+    if backend_pools_name is not None:
+        instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
+        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
+        instance.backend_address_pool = None
 
     if probe_name == '':
         instance.probe = None
@@ -3999,6 +4081,57 @@ def set_lb_rule(
         instance.probe = get_property(parent.probes, probe_name)
 
     return parent
+
+
+def add_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                 backend_address_pool_name, protocol, identifier, traffic_type, port=None):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
+    tunnel_interface = GatewayLoadBalancerTunnelInterface(port=port, identifier=identifier, protocol=protocol, type=traffic_type)
+    if not address_pool.tunnel_interfaces:
+        address_pool.tunnel_interfaces = []
+    address_pool.tunnel_interfaces.append(tunnel_interface)
+    return client.begin_create_or_update(resource_group_name, load_balancer_name,
+                                         backend_address_pool_name, address_pool)
+
+
+def update_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                    backend_address_pool_name, index, protocol=None, identifier=None, traffic_type=None, port=None):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    if index >= len(address_pool.tunnel_interfaces):
+        raise UnrecognizedArgumentError(f'{index} is out of scope, please input proper index')
+
+    item = address_pool.tunnel_interfaces[index]
+    if protocol:
+        item.protocol = protocol
+    if identifier:
+        item.identifier = identifier
+    if port:
+        item.port = port
+    if traffic_type:
+        item.type = traffic_type
+    return client.begin_create_or_update(resource_group_name, load_balancer_name,
+                                         backend_address_pool_name, address_pool)
+
+
+def remove_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                    backend_address_pool_name, index):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    if index >= len(address_pool.tunnel_interfaces):
+        raise UnrecognizedArgumentError(f'{index} is out of scope, please input proper index')
+    address_pool.tunnel_interfaces.pop(index)
+    return client.begin_create_or_update(resource_group_name, load_balancer_name,
+                                         backend_address_pool_name, address_pool)
+
+
+def list_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
+                                                  backend_address_pool_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    return address_pool.tunnel_interfaces
 # endregion
 
 
@@ -4188,7 +4321,7 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
                       private_ip_address=None,
                       private_ip_address_version=None, make_primary=False,
                       application_security_groups=None,
-                      app_gateway_backend_address_pools=None):
+                      app_gateway_backend_address_pools=None, gateway_lb=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
 
     if make_primary:
@@ -4239,7 +4372,8 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
     elif app_gateway_backend_address_pools:
         instance.application_gateway_backend_address_pools = \
             [SubResource(id=x) for x in app_gateway_backend_address_pools]
-
+    if gateway_lb is not None:
+        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
     return parent
 
 
@@ -4619,9 +4753,12 @@ def create_nw_connection_monitor(cmd,
                                                               tags,
                                                               do_not_start,
                                                               monitoring_interval)
-        client = get_mgmt_service_client(cmd.cli_ctx,
-                                         ResourceType.MGMT_NETWORK,
-                                         api_version='2019-06-01').connection_monitors
+        from azure.cli.core.profiles._shared import AD_HOC_API_VERSIONS
+        client = get_mgmt_service_client(
+            cmd.cli_ctx,
+            ResourceType.MGMT_NETWORK,
+            api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['nw_connection_monitor']
+        ).connection_monitors
     elif any(v2_required_parameter_set):  # V2 creation
         connection_monitor = _create_nw_connection_monitor_v2(cmd,
                                                               location,
@@ -6031,7 +6168,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None,
-                ddos_protection_plan=None, network_security_group=None, edge_zone=None):
+                ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
                        'SubResource', 'NetworkSecurityGroup')
@@ -6058,11 +6195,13 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
     if edge_zone:
         vnet.extended_location = _edge_zone_model(cmd, edge_zone)
+    if flowtimeout is not None:
+        vnet.flow_timeout_in_minutes = flowtimeout
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
 def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None):
+                ddos_protection_plan=None, flowtimeout=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
@@ -6086,6 +6225,8 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.ddos_protection_plan = None
     elif ddos_protection_plan is not None:
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
+    if flowtimeout is not None:
+        instance.flow_timeout_in_minutes = flowtimeout
     return instance
 
 
@@ -6352,11 +6493,14 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
-                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None):
+                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None,
+                        nat_rule=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
-     VpnClientConfiguration, AddressSpace, VpnClientRootCertificate) = cmd.get_models(
+     VpnClientConfiguration, AddressSpace, VpnClientRootCertificate, VirtualNetworkGatewayNatRule,
+     VpnNatRuleMapping) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
-         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace', 'VpnClientRootCertificate')
+         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace', 'VpnClientRootCertificate',
+         'VirtualNetworkGatewayNatRule', 'VpnNatRuleMapping')
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
@@ -6402,7 +6546,14 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.custom_routes.address_prefixes = custom_routes
 
     if edge_zone:
-        vnet_gateway.virtual_network_extended_location = _edge_zone_model(cmd, edge_zone)
+        vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
+    if nat_rule:
+        vnet_gateway.nat_rules = [
+            VirtualNetworkGatewayNatRule(type_properties_type=rule.get('type'), mode=rule.get('mode'), name=rule.get('name'),
+                                         internal_mappings=[VpnNatRuleMapping(address_space=i_map) for i_map in rule.get('internal_mappings')] if rule.get('internal_mappings') else None,
+                                         external_mappings=[VpnNatRuleMapping(address_space=i_map) for i_map in rule.get('external_mappings')] if rule.get('external_mappings') else None,
+                                         ip_configuration_id=rule.get('ip_config_id')) for rule in nat_rule]
+
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
 
@@ -6489,6 +6640,22 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
     return instance
 
 
+def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                       filter_data=None, no_wait=False):
+    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
+    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
+    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
+                       virtual_network_gateway_name, parameters=parameters)
+
+
+def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                      sas_url, no_wait=False):
+    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
+    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
+    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
+                       virtual_network_gateway_name, parameters=parameters)
+
+
 def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
@@ -6503,6 +6670,32 @@ def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gatewa
         return client.begin_generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
     # legacy implementation
     return client.begin_generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
+
+
+def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                sa_life_time_seconds, sa_data_size_kilobytes,
+                                ipsec_encryption, ipsec_integrity,
+                                ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+    VpnClientIPsecParameters = cmd.get_models('VpnClientIPsecParameters')
+    vpnclient_ipsec_params = VpnClientIPsecParameters(sa_life_time_seconds=sa_life_time_seconds,
+                                                      sa_data_size_kilobytes=sa_data_size_kilobytes,
+                                                      ipsec_encryption=ipsec_encryption,
+                                                      ipsec_integrity=ipsec_integrity,
+                                                      ike_encryption=ike_encryption,
+                                                      ike_integrity=ike_integrity,
+                                                      dh_group=dh_group,
+                                                      pfs_group=pfs_group)
+    return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
+                       virtual_network_gateway_name, vpnclient_ipsec_params)
+
+
+def disconnect_vnet_gateway_vpn_connections(cmd, client, resource_group_name, virtual_network_gateway_name,
+                                            vpn_connection_ids, no_wait=False):
+    P2SVpnConnectionRequest = cmd.get_models('P2SVpnConnectionRequest')
+    request = P2SVpnConnectionRequest(vpn_connection_ids=vpn_connection_ids)
+    return sdk_no_wait(no_wait, client.begin_disconnect_virtual_network_gateway_vpn_connections,
+                       resource_group_name, virtual_network_gateway_name, request)
+
 # endregion
 
 
@@ -6514,7 +6707,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
                           authorization_key=None, enable_bgp=False, routing_weight=10,
                           connection_type=None, shared_key=None,
                           use_policy_based_traffic_selectors=False,
-                          express_route_gateway_bypass=None):
+                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
@@ -6529,7 +6722,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         cmd, connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
         connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
-        use_policy_based_traffic_selectors, express_route_gateway_bypass)
+        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
     if shared_key:
@@ -6544,22 +6737,19 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate:
-            from azure.cli.core.commands import LongRunningOperation
-            _log_pprint_template(template)
-            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            from azure.cli.core.commands import LongRunningOperation
+            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        return client.validate(resource_group_name, deployment_name, deployment)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
@@ -6593,6 +6783,42 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
             gateway2_id['resource_group'], gateway2_id['name'])
 
     return instance
+
+
+def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
+    if virtual_network_gateway_name:
+        client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+        return client.list_connections(resource_group_name, virtual_network_gateway_name)
+    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    return client.list(resource_group_name)
+
+
+def start_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
+                                   filter_data=None, no_wait=False):
+    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
+    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
+    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
+                       virtual_network_gateway_connection_name, parameters=parameters)
+
+
+def stop_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
+                                  sas_url, no_wait=False):
+    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
+    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
+    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
+                       virtual_network_gateway_connection_name, parameters=parameters)
+
+
+def show_vpn_connection_device_config_script(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
+                                             vendor, device_family, firmware_version):
+    VpnDeviceScriptParameters = cmd.get_models('VpnDeviceScriptParameters')
+    parameters = VpnDeviceScriptParameters(
+        vendor=vendor,
+        device_family=device_family,
+        firmware_version=firmware_version
+    )
+    return client.vpn_device_configuration_script(resource_group_name, virtual_network_gateway_connection_name,
+                                                  parameters=parameters)
 # endregion
 
 
@@ -6646,7 +6872,7 @@ def list_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
         raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
 
 
-def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
+def add_vpn_conn_ipsec_policy(cmd, client, resource_group_name, connection_name,
                               sa_life_time_seconds, sa_data_size_kilobytes,
                               ipsec_encryption, ipsec_integrity,
                               ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
@@ -6660,31 +6886,28 @@ def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
                              dh_group=dh_group,
                              pfs_group=pfs_group)
 
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    conn = ncf.get(resource_group_name, connection_name)
+    conn = client.get(resource_group_name, connection_name)
     if conn.ipsec_policies:
         conn.ipsec_policies.append(new_policy)
     else:
         conn.ipsec_policies = [new_policy]
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, connection_name, conn)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
 
 
-def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    conn = ncf.get(resource_group_name, connection_name)
+def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
+    conn = client.get(resource_group_name, connection_name)
     conn.ipsec_policies = None
     conn.use_policy_based_traffic_selectors = False
     if no_wait:
-        return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, connection_name, conn)
+        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
 
     from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, connection_name, conn)
+    poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
     return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
 
 
-def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    return ncf.get(resource_group_name, connection_name).ipsec_policies
+def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
+    return client.get(resource_group_name, connection_name).ipsec_policies
 
 
 def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
@@ -6726,6 +6949,41 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
         gateway.vpn_client_configuration.vpn_authentication_types = None
 
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+
+
+def add_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, internal_mappings, external_mappings,
+                              rule_type=None, mode=None, ip_config_id=None, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    VirtualNetworkGatewayNatRule, VpnNatRuleMapping = cmd.get_models('VirtualNetworkGatewayNatRule',
+                                                                     'VpnNatRuleMapping')
+    gateway.nat_rules.append(
+        VirtualNetworkGatewayNatRule(type_properties_type=rule_type, mode=mode, name=name,
+                                     internal_mappings=[VpnNatRuleMapping(address_space=i_map) for i_map in internal_mappings] if internal_mappings else None,
+                                     external_mappings=[VpnNatRuleMapping(address_space=e_map) for e_map in external_mappings] if external_mappings else None,
+                                     ip_configuration_id=ip_config_id))
+
+    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+
+
+def show_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    return gateway.nat_rules
+
+
+def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    for rule in gateway.nat_rules:
+        if name == rule.name:
+            gateway.nat_rules.remove(rule)
+            return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+
+    raise UnrecognizedArgumentError(f'Do not find nat_rules named {name}!!!')
 # endregion
 
 
@@ -7214,10 +7472,9 @@ def list_security_partner_provider(cmd, resource_group_name=None):
 
 
 # region network gateway connection
-def reset_shared_key(cmd, virtual_network_gateway_connection_name, key_length, resource_group_name=None):
+def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_length, resource_group_name=None):
     ConnectionResetSharedKey = cmd.get_models('ConnectionResetSharedKey')
     shared_key = ConnectionResetSharedKey(key_length=key_length)
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return client.begin_reset_shared_key(resource_group_name=resource_group_name,
                                          virtual_network_gateway_connection_name=virtual_network_gateway_connection_name,  # pylint: disable=line-too-long
                                          parameters=shared_key)
