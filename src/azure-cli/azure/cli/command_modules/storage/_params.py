@@ -1238,6 +1238,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
 
+    with self.argument_context('storage share-rm delete', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('include', default='none')
+
     with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.ignore('x_ms_snapshot')
 
@@ -1266,6 +1269,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', storage_account_type, id_part=None)
         c.argument('include_deleted', action='store_true',
                    help='Include soft deleted file shares when specified.')
+        c.argument('include_snapshot', action='store_true',
+                   help='Include file share snapshots when specified.')
 
     with self.argument_context('storage share-rm restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('deleted_version',

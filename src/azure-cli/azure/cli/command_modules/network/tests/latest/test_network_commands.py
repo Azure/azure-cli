@@ -3484,6 +3484,19 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
 
 class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_flowtimeout', location='centraluseuap')
+    def test_network_vnet_flowtimeout(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'time': 10,
+            'time1': 20,
+        })
+
+        self.cmd('network vnet create -g {rg} -n vnet --flowtimeout {time}',
+                 checks=self.check('newVNet.flowTimeoutInMinutes', '{time}'))
+        self.cmd('network vnet update -g {rg} -n vnet --flowtimeout {time1}',
+                 checks=self.check('flowTimeoutInMinutes', '{time1}'))
+
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
     def test_network_vnet_peering(self, resource_group):
 
@@ -3584,6 +3597,54 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+
+
+class NetworkVpnConnectionNatRule(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_vpn_connection_nat_rule')
+    def test_network_vpn_connection_nat_rule(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1',
+            'subnet': 'GatewaySubnet',
+            'vg': 'vnet-gateway-name',
+            'ip': 'ip-name',
+            'sku': 'VpnGw2',
+            'nat': 'nat-name',
+            'nat1': 'nat-name1',
+            'i_map': '10.4.0.0/24',
+            'i_map1': '10.5.0.0/24',
+            'e_map': '192.168.21.0/24',
+            'e_map1': '192.168.22.0/24',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+
+        vg = self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip} --sku {sku} '
+                      '--nat-rule name={nat} mode=IngressSnat internal-mappings={i_map} external-mappings={e_map} '
+                      '--nat-rule name={nat1} mode=EgressSnat internal-mappings={i_map1} external-mappings={e_map1}',
+                      checks=[self.check('length(vnetGateway.natRules)', 2)]).get_output_in_json()
+
+        self.kwargs.update({'id': vg['vnetGateway']['natRules'][0]['id']})
+        self.kwargs.update({'id1': vg['vnetGateway']['natRules'][1]['id']})
+
+        self.cmd('network local-gateway create -g {rg} -n {lgw1} --gateway-ip-address {lgw1ip} '
+                 '--local-address-prefixes {lgw1_prefix1} {lgw1_prefix2}')
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {vg} --local-gateway2 {lgw1} '
+                 '--shared-key AzureA1b2C3 --ingress-nat-rule {id}',
+                 checks=[self.check('length(resource.ingressNatRules)', 1)])
+
+        self.cmd('network vpn-connection delete -g {rg} -n {conn1}')
+
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {vg} --local-gateway2 {lgw1} '
+                 '--shared-key AzureA1b2C3 --egress-nat-rule {id1}',
+                 checks=[self.check('length(resource.egressNatRules)', 1)])
 
 
 class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
@@ -4703,6 +4764,71 @@ class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('network vnet delete -n {vnet}')
 
 
+class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_network_vnet_gateway_nat_rule(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip': 'ip',
+            'ip1': 'ip1',
+            'vnet': 'vnet',
+            'vnet1': 'vnet1',
+            'subnet': 'GatewaySubnet',
+            'vg': 'vnet-gateway-name',
+            'vg1': 'vnet-gateway-name1',
+            'sku': 'VpnGw2',
+        })
+
+        # minimal parameters
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip}  --sku {sku} '
+                 '--nat-rule name=nat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ',
+                 checks=[self.check('length(vnetGateway.natRules)', 1)])
+
+        # minimal parameters(ip-config-id can only be set when type is Dynamic, and only allowlist sub-ids support Dynamic)
+        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vg1} --vnet {vnet1} --public-ip-address {ip1}  --sku {sku} '
+                 '--nat-rule name=nat type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 '
+                 'external-mappings=192.168.21.0/24',
+                 checks=[self.check('length(vnetGateway.natRules)', 1)])
+
+    @ResourceGroupPreparer()
+    def test_network_vnet_gateway_nat_rule_sub_cmd(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'ip': 'ip',
+            'vnet': 'vnet',
+            'subnet': 'GatewaySubnet',
+            'vg': 'vnet-gateway-name',
+            'sku': 'VpnGw2',
+            'nat': 'nat-rule-name',
+            'nat1': 'nat-rule-name1',
+        })
+
+        # minimal parameters
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip}  --sku {sku}')
+
+        # sub cmd
+        self.cmd('network vnet-gateway nat-rule add -g {rg} --gateway-name {vg} --name {nat} '
+                 '--internal-mappings 10.4.0.0/24 --external-mappings 192.168.21.0/24',
+                 checks=[self.check('length(natRules)', 1)])
+
+        self.cmd('network vnet-gateway nat-rule add -g {rg} --gateway-name {vg} --name {nat1} '
+                 '--internal-mappings 10.3.0.0/24 --external-mappings 192.168.22.0/24',
+                 checks=[self.check('length(natRules)', 2)])
+
+        self.cmd('network vnet-gateway nat-rule list -g {rg} --gateway-name {vg} ',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('network vnet-gateway nat-rule remove -g {rg} --gateway-name {vg} --name {nat}',
+                 checks=[self.check('length(natRules)', 1)])
+
+
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
@@ -4753,7 +4879,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         # self.cmd('extension remove -n virtual-wan')
         super(NetworkVirtualApplianceScenarioTest, self).tearDown()
 
-    @ResourceGroupPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
     def test_network_virtual_appliance(self, resource_group):
         self.kwargs.update({
             'vwan': 'clitestvwan',
@@ -4796,7 +4922,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network virtual-appliance sku list', checks=[
-            self.check('length(@)', 2)
+            self.check('length(@)', 3)
         ])
         self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
             self.check('name', 'barracudasdwanrelease')
@@ -4885,7 +5011,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {ip1} --length 30 --edge-zone {edge_name}',
                  checks=self.check('extendedLocation.name', '{edge_name}'))
 
-    @unittest.skip('wait for service ready')
+    # @unittest.skip('wait for service ready')
     @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_edge_zone', location='eastus2euap')
     def test_network_vnet_gateway_edge_zone(self, resource_group):
 
@@ -4899,7 +5025,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
         self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --public-ip-address {ip1} '
                  '--edge-zone {edge_name}',
-                 checks=self.check('extendedLocation.name', '{edge_name}'))
+                 checks=self.check('vnetGateway.extendedLocation.name', '{edge_name}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
     def test_network_private_endpoint_edge_zone(self, resource_group):
@@ -4928,6 +5054,145 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network private-endpoint create -g {rg} -n pe --vnet-name {vnet} --subnet {subnet2} '
                  '--private-connection-resource-id {pls_id} --connection-name cn --edge-zone {edge_name}',
                  checks=self.check('extendedLocation.name', '{edge_name}'))
+
+
+class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_tunnel_interface', location='eastus')
+    def test_network_lb_tunnel_interface(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'sku': 'Gateway',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
+            'bap': 'backend-address-pool-name',
+            'type': 'External',
+            'type1': 'Internal',
+            'protocol': 'vxlan',
+            'identifier': '950',
+            'identifier1': '960',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku {sku} --vnet-name {vnet} --subnet {subnet}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap} --vnet {vnet}')
+
+        # default
+        self.cmd('network lb address-pool tunnel-interface add -g {rg} --lb-name {lb} --address-pool {bap} '
+                 '--type {type} --protocol {protocol} --identifier {identifier} --port 15000',
+                 checks=self.check('length(tunnelInterfaces)', 2))
+        self.cmd('network lb address-pool tunnel-interface list -g {rg} --lb-name {lb} --address-pool {bap}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network lb address-pool tunnel-interface remove -g {rg} --lb-name {lb} --address-pool {bap} '
+                 '--index 0',
+                 checks=self.check('length(tunnelInterfaces)', 1))
+        self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap} '
+                 '--type {type1} --protocol {protocol} --identifier {identifier1} --port 10000 --index 0',
+                 checks=self.check('tunnelInterfaces[0].type', '{type1}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_front_ip', location='eastus')
+    def test_network_lb_front_ip(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'lb1': 'lb1',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
+            'ip': 'public-ip',
+            'ip1': 'public-ip1',
+            'fip': 'load-balancer-frontend-end',
+            'subnet': 'subnet',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard --public-ip-address {ip}')
+        self.cmd('network lb create -g {rg} -n {lb1} --sku Gateway --vnet-name {vnet} --subnet {subnet} ')
+        self.cmd('network public-ip create -g {rg} -n {ip}1 --sku standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} --public-ip-address {ip1}',
+                 checks=self.not_exists('gatewayLoadBalancer'))
+        result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n {fip} '
+                          '--vnet-name {vnet} --subnet {subnet}').get_output_in_json()
+        # test --gateway-lb
+        self.kwargs['id'] = result['id']
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb} -n {fip} --gateway-lb {id}',
+                 checks=self.exists('gatewayLoadBalancer'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_front_ip', location='eastus2euap')
+    def test_network_nic_front_ip(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'vnet': 'vnet',
+            'vnet1': 'vnet1',
+            'subnet': 'subnet',
+            'subnet1': 'subnet1',
+            'ip': 'public-ip',
+            'ip1': 'public-ip1',
+            'fip': 'load-balancer-frontend-end',
+            'nic': 'nic-name',
+            'nip': 'nic-ip-config-name',
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network nic create -g {rg} -n {nic} --public-ip-address {ip} --vnet-name {vnet} --subnet {subnet}')
+        self.cmd('network lb create -g {rg} -n {lb} --sku Gateway --vnet-name {vnet1} --subnet {subnet1} ')
+        result = self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n {fip} '
+                          '--vnet-name {vnet1} --subnet {subnet1}').get_output_in_json()
+        self.kwargs['id'] = result['id']
+        self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {nip} --make-primary '
+                 '--public-ip-address {ip1}',
+                 checks=self.not_exists('gatewayLoadBalancer'))
+
+        # test --gateway-lb
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {nip} --gateway-lb {id}',
+                 checks=self.exists('gatewayLoadBalancer'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_lb_rule_backend_address_pools', location='eastus2euap')
+    def test_network_lb_rule_backend_address_pools(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'lb': 'lb',
+            'fip': 'LoadBalancerFrontEnd',
+            'bap1': 'address-pool-name1',
+            'bap2': 'address-pool-name2',
+            'bap3': 'address-pool-name3',
+            'type': 'External',
+            'protocol': 'vxlan',
+            'identifier': '901',
+            'identifier1': '902',
+            'port': '10700',
+            'fport': '40',
+            'fport1': '60',
+            'bport': '60',
+            'bport1': '80',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Gateway --vnet-name vnet --subnet subnet')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap1}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap2}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap3}')
+        self.cmd('network lb address-pool tunnel-interface add -g {rg} --lb-name {lb} --address-pool {bap1} --type {type}  --protocol {protocol} --identifier {identifier}')
+        self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap2} --type {type} --index 0')
+        self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap3} --port {port} --identifier {identifier1} --index 0')
+
+        # test --backend-pool-name
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule1 --frontend-ip-name {fip} '
+                 '--frontend-port {fport}  --protocol tcp --backend-port {bport} --backend-pool-name {bap1} ',
+                 checks=[self.exists('backendAddressPool'),
+                         self.check('length(backendAddressPools)', 1)])
+        # test --backend-pools-name
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
+                 '--frontend-port {fport1} --backend-pools-name {bap3} {bap2} --protocol tcp  --backend-port {bport1}',
+                 checks=[self.not_exists('backendAddressPool'),
+                         self.check('length(backendAddressPools)', 2)])
+        self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
+                 '--backend-pools-name {bap1} ',
+                 checks=[self.check('length(backendAddressPools)', 1)])
 
 
 if __name__ == '__main__':
