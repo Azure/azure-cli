@@ -44,7 +44,7 @@ def _create_cluster_with_separate_kv(test, kwargs):
             if cluster['provisioningState'] == 'Succeeded':
                 return
             if cluster['provisioningState'] == 'Failed':
-                raise CLIError("Cluster deployment was not succesful")
+                raise CLIError("Cluster deployment was not successful")
 
         if time.time() > timeout:
             raise CLIError("Cluster deployment timed out")
@@ -61,7 +61,7 @@ def _create_cluster(test, kwargs):
             if cluster['provisioningState'] == 'Succeeded':
                 return
             if cluster['provisioningState'] == 'Failed':
-                raise CLIError("Cluster deployment was not succesful")
+                raise CLIError("Cluster deployment was not successful")
 
         if time.time() > timeout:
             raise CLIError("Cluster deployment timed out")
