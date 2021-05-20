@@ -6474,7 +6474,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.custom_routes.address_prefixes = custom_routes
 
     if edge_zone:
-        vnet_gateway.virtual_network_extended_location = _edge_zone_model(cmd, edge_zone)
+        vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
 
