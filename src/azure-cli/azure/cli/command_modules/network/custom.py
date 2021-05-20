@@ -6168,7 +6168,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None,
-                ddos_protection_plan=None, network_security_group=None, edge_zone=None):
+                ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
                        'SubResource', 'NetworkSecurityGroup')
@@ -6195,11 +6195,13 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
     if edge_zone:
         vnet.extended_location = _edge_zone_model(cmd, edge_zone)
+    if flowtimeout is not None:
+        vnet.flow_timeout_in_minutes = flowtimeout
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
 def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None):
+                ddos_protection_plan=None, flowtimeout=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
@@ -6223,6 +6225,8 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.ddos_protection_plan = None
     elif ddos_protection_plan is not None:
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
+    if flowtimeout is not None:
+        instance.flow_timeout_in_minutes = flowtimeout
     return instance
 
 
@@ -6542,7 +6546,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.custom_routes.address_prefixes = custom_routes
 
     if edge_zone:
-        vnet_gateway.virtual_network_extended_location = _edge_zone_model(cmd, edge_zone)
+        vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
     if nat_rule:
         vnet_gateway.nat_rules = [
             VirtualNetworkGatewayNatRule(type_properties_type=rule.get('type'), mode=rule.get('mode'), name=rule.get('name'),

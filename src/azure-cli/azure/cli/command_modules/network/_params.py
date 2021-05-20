@@ -1865,6 +1865,7 @@ def load_arguments(self, _):
         c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Control whether DDoS protection is enabled.', min_api='2017-09-01')
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan to associate with the VNet.', min_api='2018-02-01', validator=validate_ddos_name_or_id)
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
+        c.argument('flowtimeout', type=int, help='The FlowTimeout value (in minutes) for the Virtual Network', min_api='2021-02-01', is_preview=True)
 
     with self.argument_context('network vnet check-ip-address') as c:
         c.argument('ip_address', required=True)
@@ -1973,7 +1974,7 @@ def load_arguments(self, _):
         vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
         c.argument('virtual_network', options_list='--vnet', help=vnet_help)
         c.argument('vpn_gateway_generation', arg_type=get_enum_type(['Generation1', 'Generation2']), min_api='2019-07-01', help='The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
-        c.ignore('edge_zone')  # wait for service ready
+        c.argument('edge_zone', edge_zone, min_api='2021-02-01')
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))

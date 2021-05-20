@@ -3484,6 +3484,19 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
 
 class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_flowtimeout', location='centraluseuap')
+    def test_network_vnet_flowtimeout(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'time': 10,
+            'time1': 20,
+        })
+
+        self.cmd('network vnet create -g {rg} -n vnet --flowtimeout {time}',
+                 checks=self.check('newVNet.flowTimeoutInMinutes', '{time}'))
+        self.cmd('network vnet update -g {rg} -n vnet --flowtimeout {time1}',
+                 checks=self.check('flowTimeoutInMinutes', '{time1}'))
+
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
     def test_network_vnet_peering(self, resource_group):
 
@@ -4998,7 +5011,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {ip1} --length 30 --edge-zone {edge_name}',
                  checks=self.check('extendedLocation.name', '{edge_name}'))
 
-    @unittest.skip('wait for service ready')
+    # @unittest.skip('wait for service ready')
     @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_edge_zone', location='eastus2euap')
     def test_network_vnet_gateway_edge_zone(self, resource_group):
 
@@ -5012,7 +5025,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
         self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --public-ip-address {ip1} '
                  '--edge-zone {edge_name}',
-                 checks=self.check('extendedLocation.name', '{edge_name}'))
+                 checks=self.check('vnetGateway.extendedLocation.name', '{edge_name}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
     def test_network_private_endpoint_edge_zone(self, resource_group):
