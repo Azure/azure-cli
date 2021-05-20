@@ -114,7 +114,9 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
         choices=['1', '2', '3']
     )
-    edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2020-08-01')
+    edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2021-02-01')
+    gateway_lb = CLIArgumentType(help='The reference to gateway load balancer frontend IP. If you want to delete it, '
+                                      'input \'\"\"\'(Powershell) or \"\"(Linux)', is_preview=True, min_api='2020-08-01')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -1027,7 +1029,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network lb frontend-ip update') as c:
         c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use ""(\'""\' in PowerShell) to remove the static address and use a dynamic address instead.')
-        c.argument('gateway_lb', help='The reference to gateway load balancer frontend IP. If you want to delete it, input \'\"\"\'', min_api='2021-02-01', is_preview=True)
+        c.argument('gateway_lb', gateway_lb)
 
     with self.argument_context('network lb probe') as c:
         c.argument('interval', help='Probing time interval in seconds.')
@@ -1203,7 +1205,7 @@ def load_arguments(self, _):
         c.argument('public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
         c.argument('make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
         c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or ""(\'""\' in PowerShell) to use a dynamic address.')
-        c.argument('gateway_lb', help='The reference to gateway load balancer frontend IP. If you want to delete it, input \'\"\"\'', min_api='2021-02-01', is_preview=True)
+        c.argument('gateway_lb', gateway_lb)
 
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
