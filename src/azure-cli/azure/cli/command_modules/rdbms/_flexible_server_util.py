@@ -15,7 +15,6 @@ from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from msrestazure.tools import parse_resource_id
-from msrestazure.azure_exceptions import CloudError
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 from .flexible_server_custom_common import firewall_rule_create_func
 logger = get_logger(__name__)
@@ -310,7 +309,7 @@ def get_id_components(rid):
 
 def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
-
+    from azure.core.exceptions import HttpResponseError
     parent_path = ''
     if parent_name and parent_type:
         parent_path = '{}/{}'.format(parent_type, parent_name)
@@ -319,7 +318,7 @@ def check_existence(resource_client, value, resource_group, provider_namespace, 
 
     try:
         resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
-    except CloudError:
+    except HttpResponseError:
         return False
     return True
 

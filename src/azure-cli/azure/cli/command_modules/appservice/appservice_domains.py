@@ -139,16 +139,10 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
-    else:
-        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+    deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+        sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment))
 
     return deployment_result
 
