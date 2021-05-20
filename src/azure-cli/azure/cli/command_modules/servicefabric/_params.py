@@ -69,7 +69,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_output_folder', options_list=['--certificate-output-folder', '--cert-out-folder'], help='The folder of the new certificate file to be created.')
         c.argument('certificate_password', help='The password of the certificate file.')
         c.argument('certificate_subject_name', options_list=['--certificate-subject-name', '--cert-subject-name'], help='The subject name of the certificate to be created.')
-        c.argument('vault_resource_group_name', options_list=['--vault-rg'], help='Key vault resource group name, if not given it will be cluster resource group name')
+        c.argument('vault_resource_group_name', options_list=['--vault-rg', c.deprecate(target='--vault-resource-group', redirect='--vault-rg', hide=True)],
+                   help='Key vault resource group name, if not given it will be cluster resource group name')
         c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
         c.argument('vm_sku', help='VM Sku')
