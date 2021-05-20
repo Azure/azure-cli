@@ -36,9 +36,11 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
                            vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None):
+
+    # Populate desired parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'mysql')
     # validator
-    if location is None:
-        location = DEFAULT_LOCATION_MySQL
     sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
 
@@ -57,9 +59,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
     server_result = firewall_id = subnet_id = None
 
-    # Populate desired parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'mysql')
+    
     server_name = server_name.lower()
     validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 

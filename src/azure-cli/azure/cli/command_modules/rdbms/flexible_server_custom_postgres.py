@@ -42,8 +42,9 @@ def flexible_server_create(cmd, client,
                            vnet_address_prefix=None, subnet_address_prefix=None,
                            private_dns_zone_arguments=None):
     # validator
-    if location is None:
-        location = DEFAULT_LOCATION_PG
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+
     sku_info = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
     storage_mb *= 1024
@@ -63,9 +64,6 @@ def flexible_server_create(cmd, client,
 
     server_result = firewall_id = subnet_id = None
 
-    # Populate desired parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'postgres')
     server_name = server_name.lower()
     validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
