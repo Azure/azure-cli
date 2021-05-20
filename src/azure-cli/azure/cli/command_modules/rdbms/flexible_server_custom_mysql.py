@@ -17,8 +17,7 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db, cf_mysql_check_resource_availability
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
-    DEFAULT_LOCATION_MySQL
+    parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator, validate_server_name
 
@@ -58,8 +57,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                        "and --public_access is invalid. Use either one of them.")
 
     server_result = firewall_id = subnet_id = None
-
-    
     server_name = server_name.lower()
     validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 

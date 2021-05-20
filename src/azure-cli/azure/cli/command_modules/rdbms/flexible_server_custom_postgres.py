@@ -16,8 +16,7 @@ from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsag
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG
+    parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
 
