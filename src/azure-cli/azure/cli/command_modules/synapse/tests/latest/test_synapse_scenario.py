@@ -65,7 +65,7 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_pool(self):
         self.kwargs.update({
@@ -122,37 +122,37 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse spark pool show --name {spark-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
-    #@record_only()
+    @record_only()
     def test_workspace_with_cmk(self):
         self.kwargs.update({
             'location': 'eastus2euap',
-            'workspace': self.create_random_name(prefix='testws', length=10),
+            'workspace': 'testws052002',#self.create_random_name(prefix='testws', length=10),
             'rg': 'chayang-test-rg',
             'storage-account': 'chayangstoragewestus2',
             'file-system': 'synapsews1',
             'login-user': 'cliuser1',
             'login-password': self.create_random_name(prefix='Pswd1', length=16),
-            'key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/keyzes0513',
-            'new-key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/newkey',
+            'key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/keyzes0512',
+            'new-key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/newkey0521',
             'managed-identity': '00000000-0000-1111-2222-333333333333'
         })
 
-        # create workspace supporting cmk, data exfiltration
-        workspace_cmk = self.cmd(
-            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
-            '--file-system {file-system} --sql-admin-login-user {login-user} '
-            '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
-            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids "" ', checks=[
-                self.check('name', self.kwargs['workspace']),
-                self.check('type', 'Microsoft.Synapse/workspaces'),
-                self.check('provisioningState', 'Succeeded')
-            ]).get_output_in_json()
-
-        self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
-
-        # set access policy
-        self.cmd(
-            'az keyvault set-policy --name wskeyvaultzes --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+        # # create workspace supporting cmk, data exfiltration
+        # workspace_cmk = self.cmd(
+        #     'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+        #     '--file-system {file-system} --sql-admin-login-user {login-user} '
+        #     '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
+        #     ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids "" ', checks=[
+        #         self.check('name', self.kwargs['workspace']),
+        #         self.check('type', 'Microsoft.Synapse/workspaces'),
+        #         self.check('provisioningState', 'Succeeded')
+        #     ]).get_output_in_json()
+        #
+        # self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
+        #
+        # # set access policy
+        # self.cmd(
+        #     'az keyvault set-policy --name wskeyvaultzes --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
 
         # active workspace
         self.cmd(
@@ -213,9 +213,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # switch active key
         self.cmd(
-            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ', checks=[
-                self.check('encryption.cmk.key.name', 'newkey')
-            ])
+            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ')
 
         # update allowed tenant ids
         self.cmd(
@@ -223,15 +221,15 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool(self):
         self.kwargs.update({
-            'location': 'eastus',
+            'location': 'eastus2euap',
             'workspace': 'testsynapseworkspace',
             'rg': 'rg',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW1000c'
+            'performance-level': 'DW400c'
         })
 
         # create a workspace
@@ -307,7 +305,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
@@ -354,14 +352,13 @@ class SynapseScenarioTests(ScenarioTest):
                      self.greater_than("length([])", 0)
                  ])
 
-   # @record_only()
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
             'location': 'eastus2euap',
             'workspace': 'zes0514test',
             'rg': 'chayang-test-rg',
-            'sql-pool': 'sqlzes0514test', #self.create_random_name(prefix='testpool', length=15),
+            'sql-pool': 'sqlzes0514test',
             'schema': 'dbo',
             'table': 'Persons',
             'column': 'City',
@@ -423,8 +420,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check("length([])", 0)
                  ])
 
-    #@record_only()
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @record_only()
     def test_sql_pool_tde(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -444,7 +440,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('status', "Enabled")
                  ])
 
-    #@record_only()
+    @record_only()
     def test_sql_pool_threat_policy(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -464,7 +460,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Enabled')
                  ])
 
-    #@record_only()
+    @record_only()
     def test_sql_pool_audit_policy(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -503,8 +499,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Disabled')
                  ])
 
-    #@record_only()
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @record_only()
     def test_sql_aad_admin(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -572,7 +567,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Disabled')
                  ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_ip_firewall_rules(self, resource_group):
         self.kwargs.update({
@@ -1261,8 +1256,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
-    #@ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
             'rg': 'chayang-test-rg',
