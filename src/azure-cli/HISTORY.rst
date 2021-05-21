@@ -6,20 +6,9 @@ Release History
 2.24.0
 ++++++
 
-**[Service Fabric**
-
-* [BREAKING CHANGE] az sf cluster certificate: remove all commands under this group. Please follow the instructions here to add/remove cluster certificates: https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security-update-certs-azure#add-a-secondary-certificate-using-azure-resource-manager. (#18056)
-* [BREAKING CHANGE] az sf managed-service update: remove deprecated parameter --drop-source-replica-on-move. (#18056)
-* [BREAKING CHANGE] sf managed-service create: remove deprecated parameters --service-dns-name, --drop-source-replica-on-move and -instance-close-delay-duration. (#18056)
-* [BREAKING CHANGE] az sf cluster: rename parameter --vault-resource-group to --vault-rg. (#18056)
-* `az sf managed-cluster and sf managed-node-type`: set groups as not preview (#18056)
-* Update azure-mgmt-servicefabricmanagedclusters package to the latest version 1.0.0 that uses 2021-05-01 GA api version. (#18056)
-* sf managed-cluster create: add parameters --upgrade-mode, --upgrade-cadence and --code-version. (#18056)
-* sf managed-node-type: add parameters --data-disk-type, --is-stateless and --multiple-placement-groups. (#18056)
-
 **AKS**
 
-* `az aks check-acr`: add the nodeslector linux to avoid the "canipull" pod to be scheduled on the windows node (#17933)
+* `az aks check-acr`: Add the nodeslector linux to avoid the "canipull" pod to be scheduled on the windows node (#17933)
 * Sdk update (#18031)
 * az aks create and update azure-rbac (#18026)
 * Add run-command cli (#18051)
@@ -30,20 +19,21 @@ Release History
 
 **App Service**
 
-* [BREAKING CHANGE] az webapp list-runtimes: Add Dotnet6 support and update runtimes (#17967)
-* `webapp log tail` Fix #17987: logging.warning call with invalid 'end' argument (#17988)
-* : fix #16838- az cli update app setting command always making slotsetting to true (#17895)
+* [BREAKING CHANGE] `az webapp list-runtimes`: Add Dotnet6 support and update runtimes (#17967)
+* `webapp log tail`: Fix #17987: logging.warning call with invalid 'end' argument (#17988)
+* Fix #16838- az cli update app setting command always making slotsetting to true (#17895)
 * `az appservice`: Add function to retrieve users github personal access token (#17826)
 * az staticwebapp appsettings set issue #17792 (#18034)
-* Fix#18033: az staticwebapp appsettings set of missing positional param app_settings (#18043)
-* : Fixing issues with APIs signature that changed with Track2 update (#18082)
+* Fix #18033: az staticwebapp appsettings set of missing positional param app_settings (#18043)
+* Fix issues with APIs signature that changed with Track2 update (#18082)
 * Fix get resource management client properly (#18142)
 * Add interactive way to get token for staticwebapp (#18083)
+* Fix an issue where assign and remove identities would fail with a call to NoneType (#18084)
 
 **ARM**
 
 * Migrate resource to track2 SDK (#17783)
-* `az ts `: Add UiFormDefinition file support to TemplateSpecs for GA (05/04) (#17869)
+* `az ts`: Add UiFormDefinition file support to TemplateSpecs for GA (05/04) (#17869)
 
 **ARO**
 
@@ -51,7 +41,7 @@ Release History
 
 **Compute**
 
-* sshkey create: Save private key to local file system (#18022)
+* `az sshkey create`: Save private key to local file system (#18022)
 
 **Cosmos DB**
 
@@ -61,17 +51,13 @@ Release History
 
 * `az labs create environment`: Fix error creating an environment from an ARM template (#17959)
 
-**FunctionApp**
-
-* Fixed an issue where assign and remove identities would fail with a call to NoneType (#18084)
-
 **HDInsight**
 
-* [BREAKING CHANGE] az hdinsight create: Use getting default sku api to set workernode and headnode size if customer does not provide. (#17552)
+* [BREAKING CHANGE] `az hdinsight create`: Use getting default sku api to set workernode and headnode size if customer does not provide. (#17552)
 
 **IoT**
 
-* `az iot hub create`: now supports assigning identities and assigning roles to system-managed identity. (#18098)
+* `az iot hub create`: Support assigning identities and assigning roles to system-managed identity. (#18098)
 * `az iot hub update`: New parameter `--file-upload-storage-identity` to allow for managed-identity authenticated file upload. (#18098)
 * `az iot hub identity assign`: New command to assign user/system-assigned managed identities to an IoT Hub. (#18098)
 * `az iot hub identity show`: New command to show identity property of an IoT Hub. (#18098)
@@ -82,7 +68,7 @@ Release History
 
 **Kusto**
 
-* Updated command group long summary (#18107)
+* Update command group long summary (#18107)
 
 **Network**
 
@@ -102,8 +88,19 @@ Release History
 
 **RDBMS**
 
-* Changed IOPS logic for MySQL (#17974)
-* Prevent Private DNS zone track2 migration breaking rdbms module (#18062)
+* Change IOPS logic for MySQL (#17974)
+* Prevent private DNS zone track2 migration breaking rdbms module (#18062)
+
+**Service Fabric**
+
+* [BREAKING CHANGE] `az sf cluster certificate`: Remove all commands under this group. Please follow the instructions here to add/remove cluster certificates: https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security-update-certs-azure#add-a-secondary-certificate-using-azure-resource-manager. (#18056)
+* [BREAKING CHANGE] `az sf managed-service update`: Remove deprecated parameter --drop-source-replica-on-move. (#18056)
+* [BREAKING CHANGE] `az sf managed-service create`: Remove deprecated parameters --service-dns-name, --drop-source-replica-on-move and -instance-close-delay-duration. (#18056)
+* [BREAKING CHANGE] `az sf cluster`: Rename parameter --vault-resource-group to --vault-rg. (#18056)
+* `az sf managed-cluster and sf managed-node-type`: Set groups as not preview (#18056)
+* Update azure-mgmt-servicefabricmanagedclusters package to the latest version 1.0.0 that uses 2021-05-01 GA api version. (#18056)
+* `az sf managed-cluster create`: Add parameters --upgrade-mode, --upgrade-cadence and --code-version. (#18056)
+* `az sf managed-node-type`: Add parameters --data-disk-type, --is-stateless and --multiple-placement-groups. (#18056)
 
 **SQL**
 
