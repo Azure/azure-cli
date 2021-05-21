@@ -770,8 +770,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None,
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
-                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        network_api_version=None):
+                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -955,10 +954,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
-
-    if network_api_version and \
-            cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['networkProfile']['networkApVersion'] = network_api_version
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group

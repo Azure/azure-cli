@@ -569,10 +569,8 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-    with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
+    with self.argument_context('vmss create') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
-        NetworkApiVersion = self.get_models('NetworkApiVersion', resource_type=ResourceType.MGMT_COMPUTE,
-                                            operation_group='virtual_machine_scale_sets')
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules. Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Limit the scale set to a single placement group."
@@ -594,9 +592,6 @@ def load_arguments(self, _):
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
-        c.argument('network_api_version', arg_type=get_enum_type(NetworkApiVersion), is_preview=True, min_api='2021-03-01',
-                   help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
-                   "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'.")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)

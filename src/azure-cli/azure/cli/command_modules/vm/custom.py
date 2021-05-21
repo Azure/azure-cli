@@ -2423,8 +2423,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
-                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                network_api_version=None):
+                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2663,8 +2662,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_instance_percent=max_unhealthy_instance_percent,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
-            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone,
-            network_api_version=network_api_version)
+            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
