@@ -37,6 +37,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
         operation_group='managed_clusters',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
