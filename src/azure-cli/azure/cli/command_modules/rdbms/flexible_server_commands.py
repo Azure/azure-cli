@@ -133,7 +133,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_firewall_rules,
                             is_preview=True) as g:
         g.custom_command('create', 'migration_create_func', custom_command_type=flexible_server_custom_common)
-        g.custom_command('show', 'migration_show_func', custom_command_type=flexible_server_custom_common)
+        g.custom_show_command('show', 'migration_show_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('list', 'migration_list_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('update', 'migration_update_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'migration_delete_func', custom_command_type=flexible_server_custom_common)
