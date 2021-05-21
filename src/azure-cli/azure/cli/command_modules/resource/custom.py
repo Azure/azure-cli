@@ -373,7 +373,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
@@ -485,7 +485,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
@@ -566,7 +566,7 @@ def _deploy_arm_template_at_resource_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
@@ -645,7 +645,7 @@ def _deploy_arm_template_at_management_group(cmd,
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -719,7 +719,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
