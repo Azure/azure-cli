@@ -485,8 +485,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomVirtualNetworkPreparer(address_prefixes='10.128.0.0/24', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_virtual_node_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
