@@ -642,7 +642,7 @@ short-summary: Manage blob copy operations. Use `az storage blob show` to check 
 
 helps['storage blob copy start'] = """
 type: command
-short-summary: List blobs in a given container.
+short-summary: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
 parameters:
   - name: --source-uri -u
     type: string
