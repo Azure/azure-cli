@@ -23,10 +23,10 @@ class AroCommandsLoader(AzCommandsLoader):
         suppress = ModExtensionSuppress(__name__, 'aro', '1.0.0',
                                         reason='Its functionality is included in the core az CLI.',
                                         recommend_remove=True)
-        super(AroCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                suppress_extension=suppress,
-                                                custom_command_type=aro_custom,
-                                                resource_type=ResourceType.MGMT_ARO)
+        super().__init__(cli_ctx=cli_ctx,
+                         suppress_extension=suppress,
+                         custom_command_type=aro_custom,
+                         resource_type=ResourceType.MGMT_ARO)
 
     def load_command_table(self, args):
         load_command_table(self, args)

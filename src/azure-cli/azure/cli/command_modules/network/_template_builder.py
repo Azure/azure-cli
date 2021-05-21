@@ -345,7 +345,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
                                  subnet_id, private_ip_address, private_ip_allocation,
-                                 sku, frontend_ip_zone, private_ip_address_version, tier=None):
+                                 sku, frontend_ip_zone, private_ip_address_version, tier=None,
+                                 edge_zone=None, edge_zone_type=None):
     frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation, frontend_ip_zone, private_ip_address_version)
 
@@ -357,6 +358,14 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
         ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
+
+    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
+    if cmd.supported_api_version(min_api='2021-02-01') and sku and str(sku).lower() == 'gateway':
+        lb_properties['backendAddressPools'][0]['properties'] = {
+            'tunnelInterfaces': [{'protocol': 'VXLAN',
+                                  'type': 'Internal',
+                                  "identifier": 900}]}
+
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
@@ -370,10 +379,13 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
         lb['sku'] = {'name': sku}
     if tier and cmd.supported_api_version(min_api='2020-07-01'):
         lb['sku'].update({'tier': tier})
+    if edge_zone and edge_zone_type:
+        lb['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
     return lb
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, tier=None):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, tier=None,
+                             edge_zone=None, edge_zone_type=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -396,6 +408,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip['sku'].update({'tier': tier})
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         public_ip['zones'] = zone
+    if edge_zone and edge_zone_type:
+        public_ip['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
     return public_ip
 
 
@@ -438,7 +452,7 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
 
 def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2, vpn_type, authorization_key,
                                   enable_bgp, routing_weight, shared_key, use_policy_based_traffic_selectors,
-                                  express_route_gateway_bypass):
+                                  express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule):
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'enableBgp': enable_bgp,
@@ -469,6 +483,12 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
         vpn_properties.update({
             'peer': {'id': gateway2}
         })
+
+    if ingress_nat_rule:
+        vpn_properties['ingressNatRules'] = [{'id': rule} for rule in ingress_nat_rule]
+
+    if egress_nat_rule:
+        vpn_properties['egressNatRules'] = [{'id': rule} for rule in egress_nat_rule]
 
     vpn_connection = {
         'type': 'Microsoft.Network/connections',

@@ -9,6 +9,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import user_confirmation
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps
 from ._utils import (
     build_token_id,
@@ -17,7 +18,6 @@ from ._utils import (
     get_scope_map_from_id,
     get_token_from_id,
     parse_scope_map_actions,
-    user_confirmation,
     validate_managed_registry
 )
 
@@ -90,11 +90,6 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
                            "please visit https://aka.ms/acr/connected-registry.")
-        msg = "Can't create the registry '{}'. The ancestor connected ".format(connected_registry_name) +\
-              "registry activation status is not '{}'. ".format(ConnectedRegistryActivationStatus.ACTIVE.value) +\
-              "Please install the parent connected registry and try again. For more information on connected " +\
-              "registries, please visit https://aka.ms/acr/connected-registry."
-        _check_ancestors_are_active(family_tree, parent.id, msg)
         _update_ancestor_permissions(cmd, family_tree, resource_group_name, registry_name, parent.id,
                                      connected_registry_name, repositories, mode, False)
 
@@ -469,14 +464,6 @@ def _get_install_info(cmd,
         "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
     }
 # endregion
-
-
-def _check_ancestors_are_active(family_tree, parent_id, msg):
-    while parent_id and not parent_id.isspace():
-        ancestor = family_tree[parent_id]["connectedRegistry"]
-        if ancestor.activation.status != ConnectedRegistryActivationStatus.ACTIVE.value:
-            raise CLIError(msg)
-        parent_id = ancestor.parent.id
 
 
 def _update_ancestor_permissions(cmd,

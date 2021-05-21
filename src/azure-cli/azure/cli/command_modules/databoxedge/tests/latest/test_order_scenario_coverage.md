@@ -1,8 +1,13 @@
 |Scenario|Result|ErrorMessage|ErrorStack|ErrorNormalized|StartDt|EndDt|
-|step_device_create|successed||||2021-04-03 02:23:32.431701|2021-04-03 02:23:32.506910|
-|step_order_create|successed||||2021-04-03 02:23:32.507230|2021-04-03 02:23:33.175175|
-|step_order_show|successed||||2021-04-03 02:23:33.175463|2021-04-03 02:23:33.209465|
-|step_order_list|successed||||2021-04-03 02:23:33.944007|2021-04-03 02:23:33.967064|
-|step_order_delete|successed||||2021-04-03 02:23:33.244068|2021-04-03 02:23:33.943725|
-|step_device_delete|successed||||2021-04-03 02:23:33.967357|2021-04-03 02:23:33.989675|
-Coverage: 6/6
+|step_device_create|successed||||2021-05-13 02:17:42.463610|2021-05-13 02:17:42.529610|
+|step_device_show|successed||||2021-05-13 02:17:37.477771|2021-05-13 02:17:37.555771|
+|step_device_list|successed||||2021-05-13 02:17:37.629771|2021-05-13 02:17:37.737773|
+|step_device_list2|successed||||2021-05-13 02:17:37.310771|2021-05-13 02:17:37.394771|
+|step_device_update|successed||||2021-05-13 02:17:37.395770|2021-05-13 02:17:37.476771|
+|step_device_delete|successed||||2021-05-13 02:17:44.199678|2021-05-13 02:17:44.256679|
+|step_list_sku|successed||||2021-05-13 02:17:37.872774|2021-05-13 02:17:37.962774|
+|step_order_create|successed||||2021-05-13 02:17:42.529610|2021-05-13 02:17:43.378128|
+|step_order_show|successed||||2021-05-13 02:17:43.379128|2021-05-13 02:17:43.431130|
+|step_order_list|successed||||2021-05-13 02:17:44.130678|2021-05-13 02:17:44.199678|
+|step_order_delete|successed||||2021-05-13 02:17:43.508129|2021-05-13 02:17:44.130678|
+Coverage: 11/11

@@ -595,7 +595,7 @@ def cli_system_topic_create_or_update(
         tags=None,
         identity=None):
 
-    identity_info = _get_identity_info(identity)
+    identity_info = _get_identity_info_only_if_not_none(identity)
 
     system_topic_info = SystemTopic(
         location=location,
@@ -994,7 +994,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
 
     condition1 = endpoint_type is not None and endpoint_type.lower() == WEBHOOK_DESTINATION.lower()
     condition2 = delivery_identity_endpoint_type is not None and \
-        delivery_identity_endpoint_type.lower() == WEBHOOK_DESTINATION.lower()   # pylint: line-too-long
+        delivery_identity_endpoint_type.lower() == WEBHOOK_DESTINATION.lower()
     if condition1 or condition2:
         tennant_id = azure_active_directory_tenant_id
         application_id = azure_active_directory_application_id_or_uri

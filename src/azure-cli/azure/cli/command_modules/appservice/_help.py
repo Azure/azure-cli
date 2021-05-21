@@ -1092,7 +1092,7 @@ parameters:
   - name: --settings
     short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
   - name: --slot-settings
-    short-summary: Space-separated slot appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """
@@ -2293,12 +2293,12 @@ helps['staticwebapp list'] = """
       text: az staticwebapp list
 """
 
-helps['staticwebapp browse'] = """
+helps['staticwebapp show'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
     - name: Show static app in a subscription.
-      text: az staticwebapp browse -n MyStaticAppName
+      text: az staticwebapp show -n MyStaticAppName
 """
 
 helps['staticwebapp create'] = """
@@ -2307,7 +2307,18 @@ helps['staticwebapp create'] = """
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
-       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master -t MyAccessToken
+    - name: Create static app in a subscription, retrieving token interactively
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+"""
+
+helps['staticwebapp update'] = """
+    type: command
+    short-summary: Update a static app. Return the app updated.
+    examples:
+    - name: Update static app to standard sku.
+      text: az staticwebapp update -n MyStaticAppName --sku Standard
 """
 
 helps['staticwebapp disconnect'] = """
@@ -2324,6 +2335,8 @@ helps['staticwebapp reconnect'] = """
     examples:
     - name: Connect a repo and branch to static app.
       text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+    - name: Connect a repo and branch to static app, retrieving token interactively
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --login-with-github
 """
 
 helps['staticwebapp delete'] = """

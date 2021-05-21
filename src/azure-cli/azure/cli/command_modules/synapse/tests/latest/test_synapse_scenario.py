@@ -1150,14 +1150,35 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_notebook(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
             'name': 'notebook',
             'spark-pool': 'testpool',
+            'spark-version': '2.4',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # create spark pool
+        self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
+                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
+                 checks=[
+                     self.check('name', self.kwargs['spark-pool']),
+                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                     self.check('provisioningState', 'Succeeded')
+                 ]).get_output_in_json()
 
         # create notebook
         self.cmd(
