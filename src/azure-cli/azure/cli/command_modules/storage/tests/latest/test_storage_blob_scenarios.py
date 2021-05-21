@@ -755,5 +755,31 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
             time_to_restore, storage_account, resource_group))
 
 
+class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='storageV2')
+    def test_storage_blob_copy_rehydrate_priority(self, resource_group, storage_account):
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        source_container = self.create_container(account_info)
+        target_container = self.create_container(account_info)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src ', account_info,
+                         source_container, source_file)
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive', account_info,
+                         source_container, 'src')
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, source_container, 'src') \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        source_uri = self.storage_cmd('storage blob url -c {} -n src', account_info, source_container).output
+
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {} --tier Cool -r High', account_info,
+                         target_container, source_uri)
+        self.storage_cmd('storage blob show -c {} -n {} ', account_info, target_container, 'dst') \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -977,7 +977,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
-    with self.argument_context('storage blob copy start') as c:
+    with self.argument_context('storage blob copy start', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from ._validators import validate_source_url
 
         c.register_blob_arguments()
