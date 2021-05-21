@@ -101,7 +101,7 @@ def migration_list_func(cmd, client, subscription_id, resource_group_name, serve
     return r.json()
 
 
-def migration_update_func(cmd, client, subscription_id, resource_group_name, server_name, migration_id, setup_logical_replication=None, db1=None, db2=None, db3=None, db4=None, db5=None, db6=None, db7=None, db8=None, overwrite_dbs=None, start_time_utc=None, initiate_data_migration=None, cutover=None, cancel=None):
+def migration_update_func(cmd, client, subscription_id, resource_group_name, server_name, migration_id, setup_logical_replication=None, db1=None, db2=None, db3=None, db4=None, db5=None, db6=None, db7=None, db8=None, overwrite_dbs=None, cutover=None):
 
     operationSpecified = False
     if setup_logical_replication is True:

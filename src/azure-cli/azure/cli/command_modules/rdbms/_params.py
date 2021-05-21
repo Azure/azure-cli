@@ -494,28 +494,37 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 elif scope == "show":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
+                    c.argument('level', options_list=['--level'], required=False,
+                               help='Specifies the level of migration details requested. Valid values are Active and All. Active is the default.')
                 elif scope == "list":
                     c.argument('migration_filter', options_list=['--filter'], required=False,
                                help='Indicates whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
                 elif scope == "update":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
-                    c.argument('setup-logical_replication', options_list=['--setup-logical-replication'], action='store_true', required=False,
+                    c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allows the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                     c.argument('db1', options_list=['--db1', '--db'], required=False,
                                help='Specifies the first DB to migrate. A minimum of 1 and a maximum of 8 DBs can be specified using --db1, --db2, --db3... You can migrate additional DBs concurrently using new migrations. Note that each additional DB affects the performance of the source server.')
-                    c.argument('db2', options_list=['--db2'], required=False)
-                    c.argument('db3', options_list=['--db3'], required=False)
-                    c.argument('db4', options_list=['--db4'], required=False)
-                    c.argument('db5', options_list=['--db5'], required=False)
-                    c.argument('db6', options_list=['--db6'], required=False)
-                    c.argument('db7', options_list=['--db7'], required=False)
-                    c.argument('db8', options_list=['--db8'], required=False)
+                    c.argument('db2', options_list=['--db2'], required=False,
+                               help='Specifies the second DB to migrate.')
+                    c.argument('db3', options_list=['--db3'], required=False,
+                               help='Specifies the third DB to migrate.')
+                    c.argument('db4', options_list=['--db4'], required=False,
+                               help='Specifies the fourth DB to migrate.')
+                    c.argument('db5', options_list=['--db5'], required=False,
+                               help='Specifies the fifth DB to migrate.')
+                    c.argument('db6', options_list=['--db6'], required=False,
+                               help='Specifies the sixth DB to migrate.')
+                    c.argument('db7', options_list=['--db7'], required=False,
+                               help='Specifies the seventh DB to migrate.')
+                    c.argument('db8', options_list=['--db8'], required=False,
+                               help='Specifies the eigth DB to migrate.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allows the migration workflow to overwrite the DB on the target.')
                     # c.argument('start_time_utc', options_list=['--start-time-utc'], required=False,
                     #            help='Specifies the start time for the data migration to start. This should be within 2 weeks from the current time.')
-                    # c.argument('initiate_data_migration', options_list=['--initiate-data-migration'], action='store_true', required=False,
+                    # c.argument('initiate_data_migration', options_list=['--init-data-migration'], action='store_true', required=False,
                     #            help='Starts the data migration now, rather than wait for the migration window start time.')
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
                                help='Cuts over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
