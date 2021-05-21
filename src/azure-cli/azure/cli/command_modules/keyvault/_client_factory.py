@@ -171,7 +171,8 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
