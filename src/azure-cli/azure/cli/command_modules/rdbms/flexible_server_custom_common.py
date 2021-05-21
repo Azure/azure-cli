@@ -162,19 +162,6 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     return firewall.result().name
 
 
-def user_confirmation(message, yes=False):
-    if yes:
-        return True
-
-    try:
-        if not prompt_y_n(message):
-            raise CLIError('Operation cancelled.')
-        return True
-    except NoTTYException:
-        raise CLIError(
-            'Unable to prompt for confirmation as no tty available. Use --yes.')
-
-
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
 
     server = client.get(resource_group_name, server_name)

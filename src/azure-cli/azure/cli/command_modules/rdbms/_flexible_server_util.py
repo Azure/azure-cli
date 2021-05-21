@@ -399,6 +399,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
             yml_file.write("on: [workflow_dispatch]\n")
             yml_file.write(yaml.dump(template))
 
+
 def get_git_root_dir():
     process = run_subprocess_get_output("git rev-parse --show-toplevel")
     return process.stdout.read().strip().decode('UTF-8')
