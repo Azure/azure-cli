@@ -120,7 +120,7 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
         # The exception "CloudError" used in "VirtualNetworkPreparer" is deprecated
         # since the SDK that network commands relies on has been migrated to track 2,
         # the new exception class should be "HttpResponseError".
-        # Only one test case ("test_aks_create_default_service_with_virtual_node_addon") 
+        # Only one test case ("test_aks_create_default_service_with_virtual_node_addon")
         # uses this preparer currently, and the network resources are still used
         # by some resources (such as vmss) after the test, since there is no clean way
         # to sort out dependencies and delete resources one by one, we do
