@@ -1715,6 +1715,16 @@ examples:
         az webapp deployment user show
 """
 
+helps['webapp deployment github-actions add'] = """
+    type: command
+    short-summary: Adds a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
+"""
+
+helps['webapp deployment github-actions remove'] = """
+    type: command
+    short-summary: Removes and disconnects the GitHub Actions workflow file from the specified repository.
+"""
+
 helps['webapp hybrid-connection'] = """
 type: group
 short-summary: methods that list, add and remove hybrid-connections from webapps
