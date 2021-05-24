@@ -724,7 +724,7 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
 
     if not getattr(hub_identity, 'user_assigned_identities', None) and hasattr(hub_identity, 'user_assigned_identities'):
         del hub_identity.user_assigned_identities
-    
+
     hub.identity = hub_identity
     poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
     lro = LongRunningOperation(cmd.cli_ctx)(poller)
