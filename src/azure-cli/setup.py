@@ -143,7 +143,6 @@ DEPENDENCIES = [
     'scp~=0.13.2',
     'semver==2.13.0',
     'sshtunnel~=0.1.4',
-    'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'
 ]

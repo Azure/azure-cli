@@ -256,38 +256,8 @@ def load_arguments(self, _):
             c.argument('repo_url', options_list=['--repo-url', '-u'],
                        help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
             c.argument('branch', help='the branch name of the repository')
-            c.argument('private_repo_username', arg_group='VSTS CD Provider',
-                       help='Username for the private repository')
-            c.argument('private_repo_password', arg_group='VSTS CD Provider',
-                       help='Password for the private repository')
-            c.argument('cd_app_type', arg_group='VSTS CD Provider',
-                       help='Web application framework you used to develop your app. Default is AspNet.',
-                       arg_type=get_enum_type(['AspNet', 'AspNetCore', 'NodeJS', 'PHP', 'Python']))
-            c.argument('app_working_dir', arg_group='VSTS CD Provider',
-                       help='Working directory of the application. Default will be root of the repo')
-            c.argument('nodejs_task_runner', arg_group='VSTS CD Provider',
-                       help='Task runner for nodejs. Default is None',
-                       arg_type=get_enum_type(['None', 'Gulp', 'Grunt']))
-            c.argument('python_framework', arg_group='VSTS CD Provider',
-                       help='Framework used for Python application. Default is Django',
-                       arg_type=get_enum_type(['Bottle', 'Django', 'Flask']))
-            c.argument('python_version', arg_group='VSTS CD Provider',
-                       help='Python version used for application. Default is Python 3.5.3 x86',
-                       arg_type=get_enum_type(['Python 2.7.12 x64', 'Python 2.7.12 x86', 'Python 2.7.13 x64',
-                                               'Python 2.7.13 x86', 'Python 3.5.3 x64', 'Python 3.5.3 x86',
-                                               'Python 3.6.0 x64', 'Python 3.6.0 x86', 'Python 3.6.2 x64',
-                                               'Python 3.6.1 x86']))
-            c.argument('cd_project_url', arg_group='VSTS CD Provider',
-                       help='URL of the Visual Studio Team Services (VSTS) project to use for continuous delivery. URL should be in format `https://<accountname>.visualstudio.com/<projectname>`')
-            c.argument('cd_account_create', arg_group='VSTS CD Provider',
-                       help="To create a new Visual Studio Team Services (VSTS) account if it doesn't exist already",
-                       action='store_true')
-            c.argument('test', arg_group='VSTS CD Provider',
-                       help='Name of the web app to be used for load testing. If web app is not available, it will be created. Default: Disable')
-            c.argument('slot_swap', arg_group='VSTS CD Provider',
-                       help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Not configured')
             c.argument('repository_type', help='repository type',
-                       arg_type=get_enum_type(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
+                       arg_type=get_enum_type(['git', 'mercurial', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
             c.argument('github_action', options_list=['--github-action'], help='If using github action, default to False')
         with self.argument_context(scope + ' identity') as c:
