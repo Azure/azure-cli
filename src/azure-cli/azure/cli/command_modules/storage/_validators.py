@@ -465,7 +465,6 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
-            import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
             source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                      dir_name, file_name)
