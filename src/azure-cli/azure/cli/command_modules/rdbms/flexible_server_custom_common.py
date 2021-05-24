@@ -77,7 +77,7 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         parameters)
 
 
-def migration_create_func(cmd, client, resource_group_name, server_name, body, migration_id=None):
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_id=None):
 
     subscription_id=get_subscription_id(cmd.cli_ctx)
 
@@ -85,7 +85,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, body, m
         # Convert a UUID to a string of hex digits in standard form
         migration_id = str(uuid.uuid4())
 
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, body)
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
 
     return r.json()
 
@@ -115,7 +115,7 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
     operationSpecified = False
     if setup_logical_replication is True:
         operationSpecified = True
-        body = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
+        properties = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
 
     db_names = None
     db_names = db_names_concat_func(db_names, db1)
@@ -133,36 +133,36 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         operationSpecified = True
         prefix = "{ \"properties\": { \"dBsToMigrate\": ["
         suffix = "] } }"
-        body = prefix + db_names + suffix
+        properties = prefix + db_names + suffix
 
     if overwrite_dbs is True:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        body = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
+        properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
 
     # if start_time_utc is not None:
     #     if operationSpecified is True:
     #         raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
     #     operationSpecified = True
-    #     body = "{\"properties\": {\"MigrationWindowStartTimeInUtc\": \"{}\"} }".format(start_time_utc)
+    #     properties = "{\"properties\": {\"MigrationWindowStartTimeInUtc\": \"{}\"} }".format(start_time_utc)
 
     # if initiate_data_migration is True:
     #     if operationSpecified is True:
     #         raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
     #     operationSpecified = True
-    #     body = "{\"properties\": {\"startDataMigration\": \"true\"} }"
+    #     properties = "{\"properties\": {\"startDataMigration\": \"true\"} }"
 
     if cutover is True:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        body = "{\"properties\": {\"triggerCutover\": \"true\"} }"
+        properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
 
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
 
-    send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, body)
+    send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
 
     return migration_id
 

@@ -480,8 +480,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type,
                            help='Migration target server name.')
                 if scope == "create":
-                    c.argument('body', options_list=['--body', '-b'],
-                               help='Request body. Use @{file} to load from a file. For quoting issues in different terminals, '
+                    c.argument('properties', options_list=['--properties', '-b'],
+                               help='Request properties. Use @{file} to load from a file. For quoting issues in different terminals, '
                                'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')

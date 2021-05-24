@@ -59,23 +59,23 @@ class MigrationScenarioTest(ScenarioTest):
         #                   .format(database_engine), expect_failure=True)
 
         # # test create migration - error - no sub
-        # result = self.cmd('{} flexible-server migration create --resource-group {} --name {} --body @migrationPublic.json'
+        # result = self.cmd('{} flexible-server migration create --resource-group {} --name {} --properties @migrationPublic.json'
         #                   .format(database_engine, target_resource_group_name, target_server_name), expect_failure=True)
 
         # # test create migration - error - no resource-group
-        # result = self.cmd('{} flexible-server migration create --subscription {} --name {} --body @migrationPublic.json'
+        # result = self.cmd('{} flexible-server migration create --subscription {} --name {} --properties @migrationPublic.json'
         #                   .format(database_engine, target_subscription_id, target_server_name), expect_failure=True)
 
         # # test create migration - error - no server name
-        # result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --body @migrationPublic.json'
+        # result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --properties @migrationPublic.json'
         #                   .format(database_engine, target_subscription_id, target_resource_group_name), expect_failure=True)
 
-        # # test create migration - error - no body
+        # # test create migration - error - no properties
         # result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {}'
         #                   .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name), expect_failure=True)
 
         # test create migration - success
-        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-id {} --body @migrationVNet.json'
+        result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-id {} --properties @migrationVNet.json'
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id)).get_output_in_json()
 
         migration_id = result['name']

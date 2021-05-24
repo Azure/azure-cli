@@ -31,7 +31,7 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --subscription --resource-group --name --migration-id --body
+      - --subscription --resource-group --name --migration-id --properties
       User-Agent:
       - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.23.0
     method: PUT
@@ -49,7 +49,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 May 2021 16:11:06 GMT
+      - Mon, 24 May 2021 23:06:26 GMT
       expires:
       - '-1'
       pragma:
@@ -93,7 +93,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 May 2021 16:11:06 GMT
+      - Mon, 24 May 2021 23:06:26 GMT
       expires:
       - '-1'
       pragma:
@@ -139,7 +139,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 May 2021 16:11:06 GMT
+      - Mon, 24 May 2021 23:06:26 GMT
       expires:
       - '-1'
       pragma:
@@ -176,17 +176,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000?level=Default&api-version=2020-02-14-privatepreview
   response:
     body:
-      string: '{"properties":{"migrationId":"00000000-0000-0000-0000-000000000000","migrationDetailsLevel":"Default","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationCreateFullRequest":{"sourceDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1","targetDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet","targetDBServerSubnetResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet","dBsToMigrate":["dvdrental"],"migrationResourceGroup":{"resourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo","location":"West
-        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"migrationWindowStartTimeInUtc":"2021-05-24T16:11:06.4576202Z","triggerCutover":true}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"00000000-0000-0000-0000-000000000000","migrationDetailsLevel":"Default","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"sourceDBServerMetadata":{"location":"westus2","version":"10","storageMB":102400,"sku":{"name":"GP_Gen5_4","tier":"GeneralPurpose"}},"targetDBServerMetadata":{"location":"West
+        US 2","version":"12","storageMB":32768,"sku":{"name":"Standard_B1ms","tier":"Burstable"}},"migrationCreateFullRequest":{"sourceDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1","targetDBServerSubnetResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet","dBsToMigrate":["dvdrental"],"migrationResourceGroup":{"resourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo","location":"West
+        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"migrationWindowStartTimeInUtc":"2021-05-24T23:06:26.7533397Z","triggerCutover":true,"targetDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1514'
+      - '1780'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 May 2021 16:11:07 GMT
+      - Mon, 24 May 2021 23:06:26 GMT
       expires:
       - '-1'
       pragma:
@@ -226,7 +227,7 @@ interactions:
   response:
     body:
       string: '{"properties":{"sourceDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1","targetDBServerSubnetResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet","dBsToMigrate":["dvdrental"],"migrationResourceGroup":{"resourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo","location":"West
-        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"migrationWindowStartTimeInUtc":"2021-05-24T16:11:06.4576202Z","triggerCutover":true},"location":"West
+        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"migrationWindowStartTimeInUtc":"2021-05-24T23:06:26.7533397Z","triggerCutover":true},"location":"West
         US 2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
@@ -236,7 +237,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 May 2021 16:11:07 GMT
+      - Mon, 24 May 2021 23:06:28 GMT
       expires:
       - '-1'
       pragma:
