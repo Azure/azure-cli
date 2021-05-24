@@ -399,9 +399,12 @@ examples:
   - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku F1 --partition-count 2
-  - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region.
+  - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region, with tags.
     text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --tags a=b c=d
+  - name: Create an IoT Hub with a system-assigned managed identity, and assign a role and scope to a storage account for the created identity.
+    text: >
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --mi-system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
 """
 
 helps['iot hub delete'] = """
@@ -426,6 +429,47 @@ examples:
   - name: Get all the device streams from "MyIotHub" IoT Hub.
     text: >
         az iot hub devicestream show -n MyIotHub
+"""
+
+helps['iot hub identity'] = """
+type: group
+short-summary: Manage identities of an Azure IoT hub.
+"""
+
+helps['iot hub identity assign'] = """
+type: command
+short-summary: Assign managed identities to an IoT Hub
+examples:
+  - name: Assign user-assigned managed identities to an IoT Hub
+    text: >
+        az iot hub identity assign --name MyIoTHub --resource-group MyResourceGroup --user-assigned {resourceId1} {resourceId2}
+  - name: Assign a system-assigned managed identity to an IoT Hub and assign a role to that identity.
+    text: >
+        az iot hub identity assign --name MyIoTHub --resource-group MyResourceGroup --system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
+"""
+
+helps['iot hub identity show'] = """
+type: command
+short-summary: Show the identity properties of an IoT Hub
+examples:
+  - name: Show identity properties of an IoT Hub
+    text: >
+        az iot hub identity show --name MyIoTHub --resource-group MyResourceGroup
+"""
+
+helps['iot hub identity remove'] = """
+type: command
+short-summary: Remove managed identities from an IoT Hub
+examples:
+  - name: Remove a user-assigned managed identity from an IoT Hub
+    text: >
+        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --user-assigned {resourceId}
+  - name: Remove a system-assigned managed identity from an IoT Hub.
+    text: >
+        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --system-assigned
+  - name: Remove all identities from an IoT Hub.
+    text: >
+        az iot hub identity remove --name MyIoTHub --resource-group MyResourceGroup --system-assigned --user-assigned
 """
 
 helps['iot hub list'] = """
@@ -653,9 +697,9 @@ examples:
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
         --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
         --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}
-  - name: Add a new identity-based EventHub endpoint named "EventHubIdentity"
+  - name: Add a new identity-based EventHub endpoint named "EventHubIdentity" and authenticate using a user-assigned managed identity
     text: >
-        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name EventHubIdentity --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --auth-type identityBased --endpoint-uri {EventHubEndpointUri} --entity-path {EntityPath}
+        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name EventHubIdentity --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --auth-type identityBased --identity {userIdentityResourceId} --endpoint-uri {EventHubEndpointUri} --entity-path {EntityPath}
 """
 
 helps['iot hub routing-endpoint delete'] = """
@@ -764,9 +808,9 @@ examples:
     text: |
         az iot hub update --name MyIotHub --set properties.allocationPolicy="GeoLatency"
     crafted: true
-  - name: Update units of an IoT Hub to 2
+  - name: Update units of an IoT Hub to 2 and add tags
     text: >
-        az iot hub update -n MyIotHub --unit 2
+        az iot hub update -n MyIotHub --unit 2 --tags a=b c=d
   - name: Update pricing tier for an IoT Hub as S2
     text: >
         az iot hub update -n MyIotHub --sku S2
@@ -779,9 +823,9 @@ examples:
   - name: Update the IoT Hub feedback queue settings
     text: >
         az iot hub update --name MyIoTHub --feedback-max-delivery-count 20 --feedback-lock-duration 100 --feedback-ttl 4
-  - name: Update the IoT Hub file upload settings
+  - name: Update the IoT Hub file upload settings, and assign a managed identity to user for file upload
     text: >
-        az iot hub update -n MyIoTHub --fileupload-sas-ttl 5 --fileupload-storage-auth-type identityBased
+        az iot hub update -n MyIoTHub --fileupload-sas-ttl 5 --fileupload-storage-auth-type identityBased --fileupload-storage-identity [system]
   - name: Update the IoT Hub file upload notification settings
     text: >
         az iot hub update -n MyIoTHub --fileupload-notification-max-delivery-count 50

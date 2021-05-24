@@ -7,9 +7,11 @@
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
+    from argcomplete.completers import DirectoriesCompleter
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
+    from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
 
     from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
@@ -21,7 +23,7 @@ def load_arguments(self, _):
     from knack.arguments import ignore_type, CLIArgumentType
 
     from azure.cli.command_modules.resource._completers import (
-        get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
+        get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list, get_policy_exemption_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
@@ -48,9 +50,10 @@ def load_arguments(self, _):
     deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
     management_group_id_type = CLIArgumentType(options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
-                                                    help="a template file path in the file system")
+                                                    help="a path to a template file or Bicep file in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
+    deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], is_preview=True, help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
@@ -85,6 +88,8 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
+    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], is_preview=True, completer=FilesCompleter(), type=file_type,
+                                                   help="A path to a uiFormDefinition file in the file system")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -137,6 +142,8 @@ def load_arguments(self, _):
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
 
     with self.argument_context('provider register') as c:
+        c.argument('mg', help="The management group id to register.", options_list=['--management-group-id', '-m'])
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
         c.argument('wait', action='store_true', help='wait for the registration to finish')
 
     with self.argument_context('provider unregister') as c:
@@ -184,7 +191,7 @@ def load_arguments(self, _):
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
         c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
-        c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']))
+        c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
@@ -196,7 +203,7 @@ def load_arguments(self, _):
         c.argument('identity_role', arg_type=identity_role_type)
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
-        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(['Default', 'DoNotEnforce']))
+        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('identity_scope', arg_type=identity_scope_type)
@@ -216,6 +223,22 @@ def load_arguments(self, _):
 
     with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy set definition.')
+
+    with self.argument_context('policy exemption', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.ignore('_subscription')
+        c.argument('name', options_list=['--name', '-n'], completer=get_policy_exemption_completion_list, help='Name of the policy exemption.')
+        c.argument('scope', help='Scope to which this policy exemption applies.')
+        c.argument('disable_scope_strict_match', options_list=['--disable-scope-strict-match', '-i'], action='store_true', help='Include policy exemptions either inherited from parent scope or at child scope.')
+        c.argument('display_name', help='Display name of the policy exemption.')
+        c.argument('description', help='Description of policy exemption.')
+        c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption', arg_type=get_enum_type(ExemptionCategory))
+        c.argument('policy_definition_reference_ids', nargs='+', options_list=['--policy-definition-reference-ids', '-r'], help='The policy definition reference ids to exempt in the initiative (policy set).')
+        c.argument('expires_on', help='The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
+        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
+
+    with self.argument_context('policy exemption create', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy exemption.')
+        c.argument('policy_assignment', options_list=['--policy-assignment', '-a'], help='The referenced policy assignment Id for the policy exemption.')
 
     with self.argument_context('group') as c:
         c.argument('tag', tag_type)
@@ -261,6 +284,7 @@ def load_arguments(self, _):
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type)
 
     with self.argument_context('deployment create') as c:
@@ -504,11 +528,12 @@ def load_arguments(self, _):
         c.argument('managedby_resource_group_id', options_list=['--managed-rg-id', '-m'], help='the resource group managed by the managed application')
         c.argument('parameters', help='JSON formatted string or a path to a file with such content', type=file_type)
 
-    with self.argument_context('managedapp definition create') as c:
-        c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
-        c.argument('createUiDefinition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
-        c.argument('mainTemplate', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
+    for operation in ['create', 'update']:
+        with self.argument_context('managedapp definition {}'.format(operation)) as c:
+            c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
+            c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
+            c.argument('create_ui_definition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('main_template', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)
@@ -536,19 +561,23 @@ def load_arguments(self, _):
     with self.argument_context('ts create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
         c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('ui_form_definition_file', arg_type=ui_form_definition_file_type, help='The uiFormDefinition file path in the file system for the template spec version.')
         c.argument('location', options_list=['--location', '-l'], help='The location to store the template-spec and template-spec version(s). Cannot be changed after creation.')
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('tags', tags_type)
         c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
     with self.argument_context('ts update') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
         c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('ui_form_definition_file', arg_type=ui_form_definition_file_type, help='The uiFormDefinition file path in the file system for the template spec version.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('tags', tags_type)
 
     with self.argument_context('ts show') as c:
         c.argument('template_spec', arg_type=deployment_template_spec_type)
@@ -563,3 +592,20 @@ def load_arguments(self, _):
 
     with self.argument_context('ts list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type)
+
+    with self.argument_context('bicep build') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep file to build in the file system."))
+        c.argument('outdir', arg_type=CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(),
+                                                      help="When set, saves the output at the specified directory."))
+        c.argument('outfile', arg_type=CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(),
+                                                       help="When set, saves the output as the specified file path."))
+        c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
+                                                      help="When set, prints all output to stdout instead of corresponding files."))
+
+    with self.argument_context('bicep decompile') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the ARM template to decompile in the file system."))
+
+    with self.argument_context('bicep install') as c:
+        c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

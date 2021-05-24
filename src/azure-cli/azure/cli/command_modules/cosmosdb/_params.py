@@ -14,7 +14,12 @@ from azure.cli.core.util import shell_safe_json_parse
 
 from azure.cli.command_modules.cosmosdb._validators import (
     validate_failover_policies, validate_capabilities,
-    validate_virtual_network_rules, validate_ip_range_filter)
+    validate_virtual_network_rules, validate_ip_range_filter,
+    validate_role_definition_body,
+    validate_role_definition_id,
+    validate_fully_qualified_role_definition_id,
+    validate_role_assignment_id,
+    validate_scope)
 
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation)
@@ -37,6 +42,9 @@ MONGODB_INDEXES_EXAMPLE = """--idx "[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"op
 CASSANDRA_SCHEMA_EXAMPLE = """--schema "{\\"columns\\": [{\\"name\\": \\"columnA\\",\\"type\\": \\"uuid\\"}, {\\"name\\": \\"columnB\\",\\"type\\": \\"Ascii\\"}],\\"partitionKeys\\": [{\\"name\\": \\"columnA\\"}]}"
 """
 
+SQL_ROLE_DEFINITION_EXAMPLE = """--body "{ \\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\", \\"RoleName\\": \\"My Read Write Role\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\", \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ]}"
+"""
+
 
 class ThroughputTypes(str, Enum):
     autoscale = "autoscale"
@@ -45,7 +53,7 @@ class ThroughputTypes(str, Enum):
 
 def load_arguments(self, _):
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind, TriggerType, TriggerOperation, ServerVersion
+    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind, TriggerType, TriggerOperation, ServerVersion, NetworkAclBypass
 
     with self.argument_context('cosmosdb') as c:
         c.argument('account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part='name')
@@ -55,7 +63,7 @@ def load_arguments(self, _):
         c.argument('account_name', completer=None)
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
-        c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
+        c.argument('assign_identity', nargs='*', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity. Currently only system assigned identity is supported.", is_preview=True)
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -75,13 +83,20 @@ def load_arguments(self, _):
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
             c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.", is_preview=True)
+            c.argument('network_acl_bypass', arg_type=get_enum_type(NetworkAclBypass), options_list=['--network-acl-bypass'], help="Flag to enable or disable Network Acl Bypass.")
+            c.argument('network_acl_bypass_resource_ids', nargs='+', options_list=['--network-acl-bypass-resource-ids', '-i'], help="List of Resource Ids to allow Network Acl Bypass.")
+            c.argument('backup_interval', type=int, help="the frequency(in minutes) with which backups are taken (only for accounts with periodic mode backups)", arg_group='Backup Policy')
+            c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)", arg_group='Backup Policy')
+            c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
+            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.", is_preview=True)
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
-            c.argument('key_kind', arg_type=get_enum_type(KeyKind))
+            c.argument('key_kind', arg_type=get_enum_type(KeyKind), help="The access key to regenerate.")
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
-        c.argument('failover_policies', validator=validate_failover_policies, help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
+        c.argument('failover_parameters', options_list=['--failover-policies'], validator=validate_failover_policies,
+                   help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)
@@ -307,3 +322,20 @@ def load_arguments(self, _):
                   'table throughput migrate']:
         with self.argument_context('cosmosdb {}'.format(scope)) as c:
             c.argument('throughput_type', throughput_type)
+
+    account_name_type = CLIArgumentType(options_list=['--account-name', '-a'], help="Cosmosdb account name.")
+
+    # SQL role definition
+    with self.argument_context('cosmosdb sql role definition') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('role_definition_id', options_list=['--id', '-i'], validator=validate_role_definition_id, help="Unique ID for the Role Definition.")
+        c.argument('role_definition_body', options_list=['--body', '-b'], validator=validate_role_definition_body, completer=FilesCompleter(), help="Role Definition body with Id (Optional for create), DataActions or Permissions, Type (Default is CustomRole), and AssignableScopes.  You can enter it as a string or as a file, e.g., --body @rdbody-file.json or " + SQL_ROLE_DEFINITION_EXAMPLE)
+
+    # SQL role assignment
+    with self.argument_context('cosmosdb sql role assignment') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('role_assignment_id', options_list=['--role-assignment-id', '-i'], validator=validate_role_assignment_id, help="Optional for Create. Unique ID for the Role Assignment. If not provided, a new GUID will be used.")
+        c.argument('role_definition_id', options_list=['--role-definition-id', '-d'], validator=validate_fully_qualified_role_definition_id, help="Unique ID of the Role Definition that this Role Assignment refers to.")
+        c.argument('role_definition_name', options_list=['--role-definition-name', '-n'], help="Unique Name of the Role Definition that this Role Assignment refers to. Eg. 'Contoso Reader Role'.")
+        c.argument('scope', validator=validate_scope, options_list=['--scope', '-s'], help="Data plane resource path at which this Role Assignment is being granted.")
+        c.argument('principal_id', options_list=['--principal-id', '-p'], help="AAD Object ID of the principal to which this Role Assignment is being granted.")

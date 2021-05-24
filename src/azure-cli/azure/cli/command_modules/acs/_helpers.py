@@ -5,7 +5,7 @@
 
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 # pylint: disable=no-name-in-module,import-error
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAPIServerAccessProfile
+from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterAPIServerAccessProfile
 from knack.util import CLIError
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
 
@@ -22,10 +22,12 @@ def _populate_api_server_access_profile(api_server_authorized_ip_ranges, enable_
     if api_server_authorized_ip_ranges is None or api_server_authorized_ip_ranges == "":
         authorized_ip_ranges = []
     else:
-        authorized_ip_ranges = [ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
+        authorized_ip_ranges = [
+            ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
 
     if profile.enable_private_cluster and authorized_ip_ranges:
-        raise CLIError('--api-server-authorized-ip-ranges is not supported for private cluster')
+        raise CLIError(
+            '--api-server-authorized-ip-ranges is not supported for private cluster')
 
     profile.authorized_ip_ranges = authorized_ip_ranges
     return profile
@@ -66,7 +68,8 @@ def _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_ba
         return CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
     if load_balancer_sku == "basic":
-        raise CLIError("userDefinedRouting doesn't support basic load balancer sku")
+        raise CLIError(
+            "userDefinedRouting doesn't support basic load balancer sku")
 
     if vnet_subnet_id in ["", None]:
         raise CLIError("--vnet-subnet-id must be specified for userDefinedRouting and it must \
@@ -76,7 +79,8 @@ def _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_ba
         if (load_balancer_profile.managed_outbound_ips or
                 load_balancer_profile.outbound_ips or
                 load_balancer_profile.outbound_ip_prefixes):
-            raise CLIError("userDefinedRouting doesn't support customizing a standard load balancer with IP addresses")
+            raise CLIError(
+                "userDefinedRouting doesn't support customizing a standard load balancer with IP addresses")
 
     return CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
 

@@ -435,7 +435,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
-        c.argument('destination_path', help='The destination path that will be appended to the blob name.')
+        c.argument('destination_path', help='The destination path that will be prepended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
@@ -650,6 +650,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
+        c.argument('requires_sync', arg_type=get_three_state_flag(),
+                   help='Enforce that the service will not return a response until the copy is complete.'
+                        'Not support for standard page blob.')
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
@@ -755,7 +758,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container legal-hold') as c:
         c.argument('container_name', container_name_type)
         c.argument('tags', nargs='+',
-                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
+                   help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
+                        'to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list

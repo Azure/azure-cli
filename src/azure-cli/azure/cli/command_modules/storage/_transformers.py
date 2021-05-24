@@ -246,3 +246,26 @@ def transform_restore_policy_output(result):
     if hasattr(result, 'restore_policy') and hasattr(result.restore_policy, 'last_enabled_time'):
         del result.restore_policy.last_enabled_time
     return result
+
+
+def transform_response_with_bytearray(response):
+    """ transform bytearray to string """
+    from msrest import Serializer
+    for item in response:
+        if response[item] and isinstance(response[item], (bytes, bytearray)):
+            response[item] = Serializer.serialize_bytearray(response[item])
+    return response
+
+
+def transform_share_rm_output(result):
+    if hasattr(result, 'snapshot_time') and result.snapshot_time:
+        snapshot = result.snapshot_time
+        result.snapshot_time = snapshot.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+    return result
+
+
+def transform_share_rm_list_output(result):
+    new_result = []
+    for item in result:
+        new_result.append(transform_share_rm_output(item))
+    return new_result

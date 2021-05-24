@@ -5,13 +5,22 @@
 
 import os
 import datetime
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
+from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
+
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
 
     def _get_test_data_file(self, filename):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
@@ -84,6 +93,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04"'
                                 ' --disk-encryption-targets "TemporaryDisk"')
 
+        time.sleep(120)
+
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
@@ -104,7 +115,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
         if self.is_live or self.in_recording:
-            import time
             time.sleep(120)
 
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
@@ -191,11 +201,13 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
         if self.is_live or self.in_recording:
-            import time
             time.sleep(10)
-        task_counts = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
-        self.assertEqual(task_counts["completed"], 0)
-        self.assertEqual(task_counts["active"], 1)
+        task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
+
+        self.assertEqual(task_result["taskCounts"]["completed"], 0)
+        self.assertEqual(task_result["taskCounts"]["active"], 1)
+        self.assertEqual(task_result["taskSlotCounts"]["completed"], 0)
+        self.assertEqual(task_result["taskSlotCounts"]["active"], 1)
 
         self.batch_cmd('batch task delete --job-id {j_id} --task-id aaa --yes')
 
@@ -324,7 +336,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --json-file "{json}"')
         self.batch_cmd('batch pool show --pool-id azure-cli-test-json').assert_with_checks([
             self.check('userAccounts[0].name', 'cliTestUser'),
-            self.check('startTask.userIdentity.userName', 'cliTestUser')])
+            self.check('startTask.userIdentity.userName', 'cliTestUser'),
+            self.check('taskSlotsPerNode', 3)
+        ])
 
         # test create pool from non-existant JSON file
         with self.assertRaises(SystemExit):
@@ -391,8 +405,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test delete iaas pool
         self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')
-        self.batch_cmd('batch pool show --pool-id {pool_i} --select "state"').assert_with_checks([
-            self.check('state', 'deleting')])
 
         # test app package reference
         self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '

@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "properties": {"publicNetworkAccess": "Enabled"},
-      "sku": {"name": "Standard"}}'
+    body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"publicNetworkAccess":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -14,22 +14,19 @@ interactions:
       Content-Length:
       - '101'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --sku --enable-public-network
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002?api-version=2020-06-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Creating","creationDate":"2020-11-07T00:11:55.1066377+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null},"sku":{"name":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002","name":"PubNetworkTrue000002","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2021-05-06T21:20:30.4302247+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null},"sku":{"name":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002","name":"PubNetworkTrue000002","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/a2c913c6-0181-f163-543e-3eec49572429?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d5923e3f-fbd5-2d49-e3dc-ce2ca089cb0e?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -37,159 +34,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:11:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku --enable-public-network
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/a2c913c6-0181-f163-543e-3eec49572429?api-version=2020-06-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/a2c913c6-0181-f163-543e-3eec49572429","name":"a2c913c6-0181-f163-543e-3eec49572429","status":"Succeeded","error":null}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/a2c913c6-0181-f163-543e-3eec49572429?api-version=2020-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '248'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Nov 2020 00:12:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku --enable-public-network
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002?api-version=2020-06-01
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2020-11-07T00:12:01+00:00","endpoint":"https://pubnetworktrueumhtzj5n2u.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled"},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworktrueumhtzj5n2u","name":"PubNetworkTrue000002","location":"eastus","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '634'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Nov 2020 00:12:05 GMT
-      etag:
-      - W/"2e003631-0000-0100-0000-5fa5e6500000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "eastus", "properties": {"publicNetworkAccess": "Disabled"},
-      "sku": {"name": "Standard"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '102'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -l --sku --enable-public-network
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkFalse000003?api-version=2020-06-01
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Creating","creationDate":"2020-11-07T00:12:07.8124977+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null},"sku":{"name":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkFalse000003","name":"PubNetworkFalse000003","location":"eastus","tags":{}}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/4cadab93-fdd4-d423-dac7-9da133fe3207?api-version=2020-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '544'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Nov 2020 00:12:07 GMT
+      - Thu, 06 May 2021 21:20:30 GMT
       expires:
       - '-1'
       pragma:
@@ -209,7 +54,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -219,16 +64,15 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku --enable-public-network
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/4cadab93-fdd4-d423-dac7-9da133fe3207?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d5923e3f-fbd5-2d49-e3dc-ce2ca089cb0e?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/4cadab93-fdd4-d423-dac7-9da133fe3207","name":"4cadab93-fdd4-d423-dac7-9da133fe3207","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d5923e3f-fbd5-2d49-e3dc-ce2ca089cb0e","name":"d5923e3f-fbd5-2d49-e3dc-ce2ca089cb0e","status":"Succeeded","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/4cadab93-fdd4-d423-dac7-9da133fe3207?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d5923e3f-fbd5-2d49-e3dc-ce2ca089cb0e?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -236,7 +80,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:12:17 GMT
+      - Thu, 06 May 2021 21:20:40 GMT
       expires:
       - '-1'
       pragma:
@@ -258,7 +102,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -268,24 +112,23 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku --enable-public-network
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkFalse000003?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002?api-version=2020-06-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2020-11-07T00:12:08+00:00","endpoint":"https://pubnetworkfalsep6wd6v4kd.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Disabled"},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworkfalsep6wd6v4kd","name":"PubNetworkFalse000003","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2021-05-06T21:20:34+00:00","endpoint":"https://pubnetworktruechr6mlmbam.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled"},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworktruechr6mlmbam","name":"PubNetworkTrue000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '635'
+      - '634'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:12:17 GMT
+      - Thu, 06 May 2021 21:20:40 GMT
       etag:
-      - W/"2f01e8e8-0000-0100-0000-5fa5e6580000"
+      - W/"03006276-0000-0100-0000-60945da10000"
       expires:
       - '-1'
       pragma:
@@ -317,22 +160,19 @@ interactions:
       Content-Length:
       - '51'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000004?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003?api-version=2020-06-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Creating","creationDate":"2020-11-07T00:12:20.6552196+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null},"sku":{"name":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000004","name":"PubNetworkNull000004","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2021-05-06T21:20:42.1980067+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null},"sku":{"name":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003","name":"PubNetworkNull000003","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/773154f1-5d1a-495b-c56b-166351e494bc?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/1a925282-174e-6a14-105a-8d1adf4d0fdd?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -340,7 +180,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:12:20 GMT
+      - Thu, 06 May 2021 21:20:41 GMT
       expires:
       - '-1'
       pragma:
@@ -360,7 +200,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -370,16 +210,15 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/773154f1-5d1a-495b-c56b-166351e494bc?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/1a925282-174e-6a14-105a-8d1adf4d0fdd?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/773154f1-5d1a-495b-c56b-166351e494bc","name":"773154f1-5d1a-495b-c56b-166351e494bc","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/1a925282-174e-6a14-105a-8d1adf4d0fdd","name":"1a925282-174e-6a14-105a-8d1adf4d0fdd","status":"Succeeded","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/773154f1-5d1a-495b-c56b-166351e494bc?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/1a925282-174e-6a14-105a-8d1adf4d0fdd?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -387,7 +226,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:12:31 GMT
+      - Thu, 06 May 2021 21:20:51 GMT
       expires:
       - '-1'
       pragma:
@@ -409,7 +248,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -419,13 +258,12 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000004?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003?api-version=2020-06-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2020-11-07T00:12:21+00:00","endpoint":"https://pubnetworknullvzgewgo5g5.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullvzgewgo5g5","name":"PubNetworkNull000004","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2021-05-06T21:20:45+00:00","endpoint":"https://pubnetworknullo5rlav5mii.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullo5rlav5mii","name":"PubNetworkNull000003","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -434,9 +272,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:12:31 GMT
+      - Thu, 06 May 2021 21:20:51 GMT
       etag:
-      - W/"2e006a31-0000-0100-0000-5fa5e6650000"
+      - W/"0300a076-0000-0100-0000-60945dad0000"
       expires:
       - '-1'
       pragma:
@@ -468,19 +306,16 @@ interactions:
       Content-Length:
       - '50'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --enable-public-network
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-mgmt-appconfiguration/1.0.1 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000004?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003?api-version=2020-06-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2020-11-07T00:12:21+00:00","endpoint":"https://pubnetworknullvzgewgo5g5.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled"},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullvzgewgo5g5","name":"PubNetworkNull000004","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2021-05-06T21:20:45+00:00","endpoint":"https://pubnetworknullo5rlav5mii.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled"},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullo5rlav5mii","name":"PubNetworkNull000003","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -489,9 +324,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sat, 07 Nov 2020 00:12:32 GMT
+      - Thu, 06 May 2021 21:20:53 GMT
       etag:
-      - W/"2e007b31-0000-0100-0000-5fa5e6700000"
+      - W/"0300cd76-0000-0100-0000-60945db50000"
       expires:
       - '-1'
       pragma:
@@ -508,63 +343,6 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"publicNetworkAccess": "Disabled"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '51'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --enable-public-network
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-appconfiguration/0.6.0 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
-      accept-language:
-      - en-US
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000004?api-version=2020-06-01
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2020-11-07T00:12:21+00:00","endpoint":"https://pubnetworknullvzgewgo5g5.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Disabled"},"sku":{"name":"standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullvzgewgo5g5","name":"PubNetworkNull000004","location":"eastus","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '635'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sat, 07 Nov 2020 00:12:33 GMT
-      etag:
-      - W/"2e007d31-0000-0100-0000-5fa5e6710000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
     status:
       code: 200
       message: OK

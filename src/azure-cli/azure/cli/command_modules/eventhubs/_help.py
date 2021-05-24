@@ -146,7 +146,7 @@ examples:
 
 helps['eventhubs eventhub list'] = """
 type: command
-short-summary: List the EventHub by Namepsace
+short-summary: List the EventHub by Namespace
 examples:
   - name: Get the Eventhubs by Namespace.
     text: az eventhubs eventhub list --resource-group myresourcegroup --namespace-name mynamespace

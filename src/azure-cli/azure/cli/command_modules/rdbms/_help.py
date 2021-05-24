@@ -906,7 +906,7 @@ examples:
         az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\
             --sku-name B_Gen5_1 --ssl-enforcement Enabled --minimal-tls-version TLS1_0 --public-network-access Disabled \\
             --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 \\
-            --tags "key=value" --version 11.0
+            --tags "key=value" --version 11
 """
 
 helps['postgres server delete'] = """
@@ -1220,14 +1220,28 @@ examples:
     text: az postgres server ad-admin wait --server-name testsvr -g testgroup --created
 """
 
-helps['mysql flexible-server show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for a MySQL flexible-server database.
+helps['mysql server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MySQL server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mysql server show-connection-string -s testServer -u username -p password -d databasename
 """
 
-helps['postgres flexible-server show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for a PostgreSQL flexible-server database.
+helps['postgres server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a PostgreSQL server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az postgres server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['mariadb server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MariaDB server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mariadb server show-connection-string -s testServer -u username -p password -d databasename
 """
 
 helps['postgres server list-skus'] = """

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import threading
 import time
 import ast
@@ -20,7 +19,6 @@ import ssl
 import sys
 import uuid
 from functools import reduce
-from http import HTTPStatus
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
@@ -31,12 +29,12 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
-from azure.mgmt.web.models import KeyInfo, DefaultErrorResponseException
+from azure.mgmt.web.models import KeyInfo
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
@@ -44,24 +42,26 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
-from azure.cli.core.util import get_az_user_agent
+from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
+                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError,
+                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
 
 from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
-from ._appservice_utils import _generic_site_operation
+from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src, get_current_stack_from_runtime)
+                           detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD)
 
 logger = get_logger(__name__)
 
@@ -96,7 +96,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_EXACT_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
-    name_validation = client.check_name_availability(name, 'Site')
+    name_validation = get_site_availability(cmd, name)
     if not name_validation.name_available:
         if name_validation.reason == 'Invalid':
             raise CLIError(name_validation.message)
@@ -152,7 +152,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif plan_info.is_xenon:  # windows container webapp
-        site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        if deployment_container_image_name:
+            site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
         # set the needed app settings for container image validation
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
@@ -173,6 +174,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
 
+        # TODO: Ask Calvin the purpose of this - seems like unneeded set of calls
         # portal uses the current_stack propety in metadata to display stack for windows apps
         current_stack = get_current_stack_from_runtime(runtime)
 
@@ -194,9 +196,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                                           value='https://{}.scm.azurewebsites.net/detectors'
                                                           .format(name)))
 
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
+    # TO DO: (Check with Calvin) This seems to be something specific to portal client use only & should be removed
     if current_stack:
         _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
@@ -207,6 +210,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
 
     if deployment_container_image_name:
+        logger.info("Updating container settings")
         update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
                                   deployment_container_image_name, docker_registry_server_user,
                                   docker_registry_server_password=docker_registry_server_password)
@@ -248,22 +252,23 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
     # pylint: disable=too-many-nested-blocks
-    for src, dest in [(settings, result), (slot_settings, slot_result)]:
+    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
                     for t in temp:
-                        if t.get('slotSetting', True):
-                            slot_result[t['name']] = t['value']
-                            # Mark each setting as the slot setting
-                        else:
-                            result[t['name']] = t['value']
+                        if 'slotSetting' in t.keys():
+                            slot_result[t['name']] = t['slotSetting']
+                        if setting_type == "SlotSettings":
+                            slot_result[t['name']] = True
+                        result[t['name']] = t['value']
                 else:
                     dest.update(temp)
             except CLIError:
                 setting_name, value = s.split('=', 1)
                 dest[setting_name] = value
+                result.update(dest)
 
     result.update(slot_result)
     for setting_name, value in result.items():
@@ -272,14 +277,18 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_application_settings',
-                                         app_settings.properties, slot, client)
+                                         app_settings, slot, client)
 
     app_settings_slot_cfg_names = []
     if slot_result:
-        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
-        slot_cfg_names.app_setting_names += new_slot_setting_names
+        # Slot settings logic to add a new setting(s) or remove an existing setting(s)
+        for slot_setting_name, value in slot_result.items():
+            if value and slot_setting_name not in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.append(slot_setting_name)
+            elif not value and slot_setting_name in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
@@ -303,7 +312,7 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
     client = web_client_factory(cmd.cli_ctx)
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         'update_azure_storage_accounts', azure_storage_accounts,
                                          slot, client)
 
     if slot_setting:
@@ -343,7 +352,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         'update_azure_storage_accounts', azure_storage_accounts,
                                          slot, client)
 
     if slot_setting:
@@ -553,7 +562,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
                                              progress_callback=progress_callback)
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
     BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
@@ -578,19 +587,9 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         # This SDK function throws an error if Status Code is 200
         if ex.status_code != 200:
             raise ex
-    except DefaultErrorResponseException as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code != 200:
             raise ex
-
-
-def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
-                                setting_properties, slot=None, client=None):
-    client = client or web_client_factory(cli_ctx)
-    operation = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
-    if slot is None:
-        return operation(resource_group_name, name, str, setting_properties)
-
-    return operation(resource_group_name, name, slot, str, setting_properties)
 
 
 def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
@@ -598,7 +597,8 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     if not app_instance:  # when the routine is invoked as a help method, not through commands
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("WebApp'{}', is not found on RG '{}'.".format(name, resource_group_name))
+    webapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
     return webapp
@@ -609,16 +609,12 @@ def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
 
-def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,
-               skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):
+def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=None,  # pylint: disable=unused-argument
+               skip_custom_domain_verification=None, force_dns_registration=None, ttl_in_seconds=None, **kwargs):  # pylint: disable=unused-argument
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
-    updater = client.web_apps.create_or_update_slot if slot else client.web_apps.create_or_update
-    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance,
-                  skip_dns_registration=skip_dns_registration,
-                  skip_custom_domain_verification=skip_custom_domain_verification,
-                  force_dns_registration=force_dns_registration,
-                  ttl_in_seconds=ttl_in_seconds)
+    updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
+    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
     if slot:
         kwargs['slot'] = slot
 
@@ -691,7 +687,7 @@ def set_functionapp(cmd, resource_group_name, name, **kwargs):
     if 'function' not in instance.kind:
         raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
-    return client.web_apps.create_or_update(resource_group_name, name, site_envelope=instance)
+    return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
 
 
 def list_webapp(cmd, resource_group_name=None):
@@ -760,7 +756,7 @@ def _build_identities_info(identities):
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -790,7 +786,8 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
             for identity in external_identities:
                 webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
-        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update',
+                                         extra_parameter=webapp, slot=slot)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
@@ -804,7 +801,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
@@ -842,7 +839,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
             for identity in list(existing_identities):
                 webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
-        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
@@ -912,9 +909,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 
 def list_instances(cmd, resource_group_name, name, slot=None):
-    # API Version 2019-08-01 (latest as of writing this code) does not return slot instances, however 2018-02-01 does
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot,
-                                   api_version="2018-02-01")
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
 # Currently using hardcoded values instead of this function. This function calls the stacks API;
@@ -945,18 +940,16 @@ def delete_function_app(cmd, resource_group_name, name, slot=None):
 
 
 def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
-                  keep_dns_registration=None, slot=None):
+                  keep_dns_registration=None, slot=None):  # pylint: disable=unused-argument
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         client.web_apps.delete_slot(resource_group_name, name, slot,
                                     delete_metrics=False if keep_metrics else None,
-                                    delete_empty_server_farm=False if keep_empty_plan else None,
-                                    skip_dns_registration=False if keep_dns_registration else None)
+                                    delete_empty_server_farm=False if keep_empty_plan else None)
     else:
         client.web_apps.delete(resource_group_name, name,
                                delete_metrics=False if keep_metrics else None,
-                               delete_empty_server_farm=False if keep_empty_plan else None,
-                               skip_dns_registration=False if keep_dns_registration else None)
+                               delete_empty_server_farm=False if keep_empty_plan else None)
 
 
 def stop_webapp(cmd, resource_group_name, name, slot=None):
@@ -1050,8 +1043,11 @@ def get_azure_storage_accounts(cmd, resource_group_name, name, slot=None):
 
 def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-    setattr(webapp, 'ftpPublishingUrl', url)
+    try:
+        url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
+        setattr(webapp, 'ftpPublishingUrl', url)
+    except StopIteration:
+        pass
     return webapp
 
 
@@ -1077,7 +1073,7 @@ def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None
     web_app = get_webapp(cmd, resource_group_name, name, slot)
     if not web_app:
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
-    linux_fx = fx_version if web_app.reserved else None
+    linux_fx = fx_version if (web_app.reserved or not web_app.is_xenon) else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
                                linux_fx_version=linux_fx, windows_fx_version=windows_fx, slot=slot)
@@ -1165,7 +1161,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     generic_configurations = generic_configurations or []
-
     # https://github.com/Azure/azure-cli/issues/14857
     updating_ip_security_restrictions = False
 
@@ -1188,7 +1183,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
-
+        setattr(configs, 'scm_ip_security_restrictions', None)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
 
@@ -1209,7 +1204,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_application_settings',
-                                         app_settings.properties, slot, client)
+                                         app_settings, slot, client)
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
@@ -1231,7 +1226,7 @@ def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slo
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                         'update_azure_storage_accounts', azure_storage_accounts.properties,
+                                         'update_azure_storage_accounts', azure_storage_accounts,
                                          slot, client)
 
     return result.properties
@@ -1275,7 +1270,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_connection_strings',
-                                         conn_strings.properties, slot, client)
+                                         conn_strings, slot, client)
 
     if slot_settings:
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
@@ -1305,7 +1300,7 @@ def delete_connection_strings(cmd, resource_group_name, name, setting_names, slo
 
     return _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                        'update_connection_strings',
-                                       conn_strings.properties, slot, client)
+                                       conn_strings, slot, client)
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
@@ -1424,12 +1419,12 @@ def _mask_creds_related_appsettings(settings):
 
 
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
-    HostNameBinding = cmd.get_models('HostNameBinding')
+    from azure.mgmt.web.models import HostNameBinding
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
-    binding = HostNameBinding(location=webapp.location, site_name=webapp.name)
+    binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 
@@ -1506,8 +1501,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
                      "DOCKER_REGISTRY_SERVER_URL"):
                 settings.append(NameValuePair(name=k, value=v))
         slot_def.site_config = SiteConfig(app_settings=settings)
-
-    poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, webapp, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
@@ -1526,7 +1520,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    poller = client.web_apps.create_or_update_slot(resource_group_name, name, slot_def, slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
@@ -1562,17 +1556,17 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
 
     _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
                                 'update_application_settings',
-                                app_settings.properties, slot, client)
+                                app_settings, slot, client)
     _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
                                 'update_connection_strings',
-                                connection_strings.properties, slot, client)
+                                connection_strings, slot, client)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
                           manual_integration=None, git_token=None, slot=None, cd_app_type=None,
                           app_working_dir=None, nodejs_task_runner=None, python_framework=None,
                           python_version=None, cd_account_create=None, cd_project_url=None, test=None,
-                          slot_swap=None, private_repo_username=None, private_repo_password=None):
+                          slot_swap=None, private_repo_username=None, private_repo_password=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
     location = _get_location_from_webapp(client, resource_group_name, name)
 
@@ -1613,13 +1607,13 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 
     source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
+                                       is_mercurial=(repository_type != 'git'), is_git_hub_action=bool(github_action))
 
     # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
     for i in range(5):
         try:
             poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                             'create_or_update_source_control',
+                                             'begin_create_or_update_source_control',
                                              slot, source_control)
             return LongRunningOperation(cmd.cli_ctx)(poller)
         except Exception as ex:  # pylint: disable=broad-except
@@ -1695,23 +1689,24 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     sku = _normalize_sku(sku)
     _validate_asp_sku(app_service_environment, sku)
     if is_linux and hyper_v:
-        raise CLIError('usage error: --is-linux | --hyper-v')
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
         if hyper_v:
-            raise CLIError('Windows containers is not yet supported in app service environment')
+            raise ArgumentUsageError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
         for ase in ase_list:
-            if ase.name.lower() == app_service_environment.lower():
+            if ase.name.lower() == app_service_environment.lower() or ase.id.lower() == app_service_environment.lower():
                 ase_def = HostingEnvironmentProfile(id=ase.id)
                 location = ase.location
                 ase_found = True
                 break
         if not ase_found:
-            raise CLIError("App service environment '{}' not found in subscription.".format(ase.id))
+            err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
+            raise ResourceNotFoundError(err_msg)
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -1722,7 +1717,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
-    return sdk_no_wait(no_wait, client.app_service_plans.create_or_update, name=name,
+    return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
@@ -1763,8 +1758,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backups',
-                                   slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
@@ -1797,7 +1791,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
                                                 'get_backup_configuration', slot)
-    except DefaultErrorResponseException:
+    except Exception:  # pylint: disable=broad-except
         # No configuration set yet
         if not all([storage_account_url, frequency, retention_period_in_days,
                     keep_at_least_one_backup]):
@@ -1989,15 +1983,14 @@ def set_deployment_user(cmd, user_name, password=None):
 
 def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                      'list_publishing_credentials', slot)
+                                      'begin_list_publishing_credentials', slot)
     return content.result()
 
 
 def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
-
     content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                      'list_publishing_profile_xml_with_secrets', slot)
+                                      'list_publishing_profile_xml_with_secrets', slot, {"format": "WebDeploy"})
     full_xml = ''
     for f in content:
         full_xml += f.decode()
@@ -2005,6 +1998,10 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     if not xml:
         profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
         converted = []
+
+        if not isinstance(profiles, list):
+            profiles = [profiles]
+
         for profile in profiles:
             new = {}
             for key in profile:
@@ -2012,6 +2009,7 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
                 new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
+
     cmd.cli_ctx.invocation.data['output'] = 'tsv'
     return full_xml
 
@@ -2085,10 +2083,10 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     if application_logging:
         fs_log = None
         blob_log = None
-        level = application_logging != 'off'
+        level = level if application_logging != 'off' else False
+        level = True if level is None else level
         if application_logging in ['filesystem', 'off']:
             fs_log = FileSystemApplicationLogsConfig(level=level)
-        level = application_logging != 'off'
         if application_logging in ['azureblobstorage', 'off']:
             blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
                                                              sas_url=None)
@@ -2197,19 +2195,22 @@ def list_slots(cmd, resource_group_name, webapp):
     return slots
 
 
-def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
+def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
+    # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
+    isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
+    # converstion from string to Boolean
+    isPreserveVnet = bool(isPreserveVnet == 'true')
+    CsmSlotEntity = cmd.get_models('CsmSlotEntity')
+    slot_swap_entity = CsmSlotEntity(target_slot=target_slot or 'production', preserve_vnet=isPreserveVnet)
     if action == 'swap':
-        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                slot, (target_slot or 'production'), True)
+        poller = client.web_apps.begin_swap_slot(resource_group_name, webapp, slot, slot_swap_entity)
         return poller
     if action == 'preview':
-        if target_slot is None:
-            result = client.web_apps.apply_slot_config_to_production(resource_group_name,
-                                                                     webapp, slot, True)
+        if slot is None:
+            result = client.web_apps.apply_slot_config_to_production(resource_group_name, webapp, slot_swap_entity)
         else:
-            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
-                                                                   slot, target_slot, True)
+            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp, slot, slot_swap_entity)
         return result
     # we will reset both source slot and target slot
     if target_slot is None:
@@ -2306,7 +2307,7 @@ def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot
 
 
 def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
-    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'list_publishing_credentials', slot)
+    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'begin_list_publishing_credentials', slot)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
 
@@ -2343,9 +2344,10 @@ def _get_log(url, user_name, password, log_file=None):
         for chunk in r.stream():
             if chunk:
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'
-                print(chunk.decode(encoding='utf-8', errors='replace')
-                      .encode(std_encoding, errors='replace')
-                      .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
+                logger.warning(chunk.decode(encoding='utf-8', errors='replace')
+                               .encode(std_encoding, errors='replace')
+                               .decode(std_encoding, errors='replace')
+                               .rstrip('\n\r'))  # each line of log has CRLF.
     r.release_conn()
 
 
@@ -2382,6 +2384,11 @@ def _get_cert(certificate_password, certificate_file):
 def list_ssl_certs(cmd, resource_group_name):
     client = web_client_factory(cmd.cli_ctx)
     return client.certificates.list_by_resource_group(resource_group_name)
+
+
+def show_ssl_cert(cmd, resource_group_name, certificate_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.certificates.get(resource_group_name, certificate_name)
 
 
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
@@ -2425,6 +2432,30 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
+
+    # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
+    # subscription
+    kv_secret_name = None
+    cloud_type = cmd.cli_ctx.cloud.name
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    if cloud_type.lower() == PUBLIC_CLOUD.lower():
+        if kv_subscription.lower() != subscription_id.lower():
+            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                               subscription_id=kv_subscription)
+            ascs = diff_subscription_client.app_service_certificate_orders.list()
+        else:
+            ascs = client.app_service_certificate_orders.list()
+
+        kv_secret_name = None
+        for asc in ascs:
+            if asc.name == key_vault_certificate_name:
+                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+
+    # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
+    if not kv_secret_name:
+        kv_secret_name = key_vault_certificate_name
+
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
@@ -2434,7 +2465,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -2465,8 +2496,31 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     location = webapp.location
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
-    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
-                                                certificate_envelope=easy_cert_def)
+
+    # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
+    try:
+        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                    certificate_envelope=easy_cert_def)
+    except Exception as ex:
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError:
+                    return r.text
+            logger.warning("Managed Certificate creation in progress. Please use the command "
+                           "'az webapp config ssl show -g %s --certificate-name %s' "
+                           " to view your certificate once it is created", resource_group_name, hostname)
+            return
+        raise CLIError(ex)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
@@ -2503,7 +2557,7 @@ def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
                                                                  thumbprint=thumbprint,
                                                                  to_update=True)],
                           location=webapp.location, tags=webapp.tags)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'create_or_update',
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'begin_create_or_update',
                                    slot, updated_webapp)
 
 
@@ -2511,27 +2565,36 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(name))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+
+    found_cert = None
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                                   webapp_cert.host_names[0], ssl_type,
-                                                   certificate_thumbprint, slot)
+            found_cert = webapp_cert
+    if not found_cert:
+        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+        for webapp_cert in webapp_certs:
+            if webapp_cert.thumbprint == certificate_thumbprint:
+                found_cert = webapp_cert
+    if found_cert:
+        if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
+            return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                               found_cert.host_names[0], ssl_type,
+                                               certificate_thumbprint, slot)
 
-            query_result = list_hostnames(cmd, resource_group_name, name, slot)
-            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-            to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
-            for h in to_update:
-                _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                            h, ssl_type, certificate_thumbprint, slot)
+        query_result = list_hostnames(cmd, resource_group_name, name, slot)
+        hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+        to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
+        for h in to_update:
+            _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                        h, ssl_type, certificate_thumbprint, slot)
 
-            return show_webapp(cmd, resource_group_name, name, slot)
+        return show_webapp(cmd, resource_group_name, name, slot)
 
-    raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
+    raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
 def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
@@ -2571,7 +2634,13 @@ class _StackRuntimeHelper:
     @staticmethod
     def remove_delimiters(runtime):
         import re
-        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        # delimiters allowed: '|', ':'
+        if '|' in runtime:
+            runtime = re.split('[|]', runtime)
+        elif ':' in runtime:
+            runtime = re.split('[:]', runtime)
+        else:
+            runtime = [runtime]
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name):
@@ -2717,7 +2786,7 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
                               hyper_v=None, name=name)
-    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
+    return client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
 
 
 def is_plan_consumption(cmd, plan_info):
@@ -2899,6 +2968,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
+    # temporary workaround for dotnet-isolated linux consumption apps
+    if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
+        site_config.linux_fx_version = ''
+
     # adding app settings
     for app_setting, value in app_settings_json.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
@@ -2933,7 +3006,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     elif not disable_app_insights and runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
         create_app_insights = True
 
-    poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
+    poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if consumption_plan_location and is_linux:
@@ -3238,11 +3311,6 @@ def remove_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=No
 
 
 def list_hc(cmd, name, resource_group_name, slot=None):
-    linux_webapp = show_webapp(cmd, resource_group_name, name, slot)
-    is_linux = linux_webapp.reserved
-    if is_linux:
-        return logger.warning("hybrid connections not supported on a linux app.")
-
     client = web_client_factory(cmd.cli_ctx)
     if slot is None:
         listed_vals = client.web_apps.list_hybrid_connections(resource_group_name, name)
@@ -3502,6 +3570,83 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     client = web_client_factory(cmd.cli_ctx)
     vnet_client = network_client_factory(cmd.cli_ctx)
 
+    subnet_resource_id = _validate_subnet(cmd.cli_ctx, subnet, vnet, resource_group_name)
+
+    if slot is None:
+        swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
+    else:
+        swift_connection_info = client.web_apps.get_swift_virtual_network_connection_slot(resource_group_name,
+                                                                                          name, slot)
+    # check to see if the connection would be supported
+    if swift_connection_info.swift_supported is not True:
+        return logger.warning("""Your app must be in an Azure App Service deployment that is
+              capable of scaling up to Premium v2\nLearn more:
+              https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
+
+    subnet_id_parts = parse_resource_id(subnet_resource_id)
+    vnet_name = subnet_id_parts['name']
+    vnet_resource_group = subnet_id_parts['resource_group']
+    subnet_name = subnet_id_parts['child_name_1']
+
+    subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+    delegations = subnetObj.delegations
+    delegated = False
+    for d in delegations:
+        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+            delegated = True
+
+    if not delegated:
+        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
+        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
+                                                   subnet_parameters=subnetObj)
+
+    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
+                                    swift_supported=True)
+
+    if slot is None:
+        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group_name, name,
+                                                                                        swiftVnet)
+    else:
+        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
+                                                                                             swiftVnet, slot)
+
+    # reformats the vnet entry, removing unnecessary information
+    id_strings = return_vnet.id.split('/')
+    resourceGroup = id_strings[4]
+    mod_vnet = {
+        "id": return_vnet.id,
+        "location": return_vnet.additional_properties["location"],
+        "name": return_vnet.name,
+        "resourceGroup": resourceGroup,
+        "subnetResourceId": return_vnet.subnet_resource_id
+    }
+
+    return mod_vnet
+
+
+def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
+    subnet_is_id = is_valid_resource_id(subnet)
+    if subnet_is_id:
+        subnet_id_parts = parse_resource_id(subnet)
+        vnet_name = subnet_id_parts['name']
+        if not (vnet_name.lower() == vnet.lower() or subnet.startswith(vnet)):
+            logger.warning('Subnet ID is valid. Ignoring vNet input.')
+        return subnet
+
+    vnet_is_id = is_valid_resource_id(vnet)
+    if vnet_is_id:
+        vnet_id_parts = parse_resource_id(vnet)
+        return resource_id(
+            subscription=vnet_id_parts['subscription'],
+            resource_group=vnet_id_parts['resource_group'],
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet_id_parts['name'],
+            child_type_1='subnets',
+            child_name_1=subnet)
+
+    # Reuse logic from existing command to stay backwards compatible
+    vnet_client = network_client_factory(cli_ctx)
     list_all_vnets = vnet_client.virtual_networks.list_all()
 
     vnets = []
@@ -3524,54 +3669,15 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
         logger.warning("Multiple virtual networks of name %s were found. Using virtual network with resource ID: %s. "
                        "To use a different virtual network, specify the virtual network resource ID using --vnet.",
                        vnet, vnet_id)
-    if slot is None:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
-    else:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection_slot(resource_group_name,
-                                                                                          name, slot)
-
-    # check to see if the connection would be supported
-    if swift_connection_info.swift_supported is not True:
-        return logger.warning("""Your app must be in an Azure App Service deployment that is
-              capable of scaling up to Premium v2\nLearn more:
-              https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
-
-    subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
-    delegations = subnetObj.delegations
-    delegated = False
-    for d in delegations:
-        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
-            delegated = True
-
-    if not delegated:
-        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=subnetObj)
-
-    id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
-    subnet_resource_id = id_subnet.id
-    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
-                                    swift_supported=True)
-
-    if slot is None:
-        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group_name, name,
-                                                                                        swiftVnet)
-    else:
-        return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
-                                                                                             swiftVnet, slot)
-
-    # reformats the vnet entry, removing unecessary information
-    id_strings = return_vnet.id.split('/')
-    resourceGroup = id_strings[4]
-    mod_vnet = {
-        "id": return_vnet.id,
-        "location": return_vnet.additional_properties["location"],
-        "name": return_vnet.name,
-        "resourceGroup": resourceGroup,
-        "subnetResourceId": return_vnet.subnet_resource_id
-    }
-
-    return mod_vnet
+    vnet_id_parts = parse_resource_id(vnet_id)
+    return resource_id(
+        subscription=vnet_id_parts['subscription'],
+        resource_group=vnet_id_parts['resource_group'],
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_id_parts['name'],
+        child_type_1='subnets',
+        child_name_1=subnet)
 
 
 def remove_vnet_integration(cmd, name, resource_group_name, slot=None):
@@ -3590,8 +3696,11 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
+def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
+    if not name:
+        name = generate_default_app_name(cmd)
+
     import os
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
@@ -3659,7 +3768,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                            "Please check if you have configured defaults for plan name and re-run command."
                            .format(plan, current_plan))
         plan = plan or plan_details['name']
-        plan_info = client.app_service_plans.get(rg_name, plan)
+        plan_info = client.app_service_plans.get(plan_details['resource_group'], plan)
         sku = plan_info.sku.name if isinstance(plan_info, AppServicePlan) else 'Free'
         current_os = 'Linux' if plan_info.reserved else 'Windows'
         # Raise error if current OS of the app is different from the current one
@@ -3709,12 +3818,21 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating Resource group '%s' ...", rg_name)
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
-        # create ASP
-        logger.warning("Creating AppServicePlan '%s' ...", plan)
+    # create ASP
+    logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=loc)
+    try:
+        create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                                number_of_workers=1 if _is_linux else None, location=loc)
+    except Exception as ex:  # pylint: disable=broad-except
+        if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
+            try:
+                response_content = json.loads(ex.response._content.decode('utf-8'))  # pylint: disable=protected-access
+            except Exception:  # pylint: disable=broad-except
+                raise CLIInternalError(ex)
+            raise UnclassifiedUserFault(response_content['error']['message'])
+        raise AzureResponseError(ex)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
@@ -3814,7 +3932,7 @@ def _update_webapp_current_stack_property_if_needed(cmd, resource_group, name, c
     app_metadata = client.web_apps.list_metadata(resource_group, name)
     if 'CURRENT_STACK' not in app_metadata.properties or app_metadata.properties["CURRENT_STACK"] != current_stack:
         app_metadata.properties["CURRENT_STACK"] = current_stack
-        client.web_apps.update_metadata(resource_group, name, kind="app", properties=app_metadata.properties)
+        client.web_apps.update_metadata(resource_group, name, metadata=app_metadata)
 
 
 def _ping_scm_site(cmd, resource_group, name, instance=None):
@@ -3917,6 +4035,205 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
             time.sleep(5)
 
 
+def perform_onedeploy(cmd,
+                      resource_group_name,
+                      name,
+                      src_path=None,
+                      src_url=None,
+                      target_path=None,
+                      artifact_type=None,
+                      is_async=None,
+                      restart=None,
+                      clean=None,
+                      ignore_stack=None,
+                      timeout=None,
+                      slot=None):
+    params = OneDeployParams()
+
+    params.cmd = cmd
+    params.resource_group_name = resource_group_name
+    params.webapp_name = name
+    params.src_path = src_path
+    params.src_url = src_url
+    params.target_path = target_path
+    params.artifact_type = artifact_type
+    params.is_async_deployment = is_async
+    params.should_restart = restart
+    params.is_clean_deployment = clean
+    params.should_ignore_stack = ignore_stack
+    params.timeout = timeout
+    params.slot = slot
+
+    return _perform_onedeploy_internal(params)
+
+
+# Class for OneDeploy parameters
+# pylint: disable=too-many-instance-attributes,too-few-public-methods
+class OneDeployParams:
+    def __init__(self):
+        self.cmd = None
+        self.resource_group_name = None
+        self.webapp_name = None
+        self.src_path = None
+        self.src_url = None
+        self.artifact_type = None
+        self.is_async_deployment = None
+        self.target_path = None
+        self.should_restart = None
+        self.is_clean_deployment = None
+        self.should_ignore_stack = None
+        self.timeout = None
+        self.slot = None
+# pylint: enable=too-many-instance-attributes,too-few-public-methods
+
+
+def _build_onedeploy_url(params):
+    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
+
+    if params.is_async_deployment is not None:
+        deploy_url = deploy_url + '&async=' + str(params.is_async_deployment)
+
+    if params.should_restart is not None:
+        deploy_url = deploy_url + '&restart=' + str(params.should_restart)
+
+    if params.is_clean_deployment is not None:
+        deploy_url = deploy_url + '&clean=' + str(params.is_clean_deployment)
+
+    if params.should_ignore_stack is not None:
+        deploy_url = deploy_url + '&ignorestack=' + str(params.should_ignore_stack)
+
+    if params.target_path is not None:
+        deploy_url = deploy_url + '&path=' + params.target_path
+
+    return deploy_url
+
+
+def _get_onedeploy_status_url(params):
+    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    return scm_url + '/api/deployments/latest'
+
+
+def _get_basic_headers(params):
+    import urllib3
+
+    user_name, password = _get_site_credential(params.cmd.cli_ctx, params.resource_group_name,
+                                               params.webapp_name, params.slot)
+
+    if params.src_path:
+        content_type = 'application/octet-stream'
+    elif params.src_url:
+        content_type = 'application/json'
+    else:
+        raise CLIError('Unable to determine source location of the artifact being deployed')
+
+    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers['Cache-Control'] = 'no-cache'
+    headers['User-Agent'] = get_az_user_agent()
+    headers['Content-Type'] = content_type
+
+    return headers
+
+
+def _get_onedeploy_request_body(params):
+    import os
+
+    if params.src_path:
+        logger.info('Deploying from local path: %s', params.src_path)
+        try:
+            with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
+                body = fs.read()
+        except Exception as e:  # pylint: disable=broad-except
+            raise CLIError("Either '{}' is not a valid local file path or you do not have permissions to access it"
+                           .format(params.src_path)) from e
+    elif params.src_url:
+        logger.info('Deploying from URL: %s', params.src_url)
+        body = json.dumps({
+            "packageUri": params.src_url
+        })
+    else:
+        raise CLIError('Unable to determine source location of the artifact being deployed')
+
+    return body
+
+
+def _update_artifact_type(params):
+    import ntpath
+
+    if params.artifact_type is not None:
+        return
+
+    # Interpret deployment type from the file extension if the type parameter is not passed
+    file_name = ntpath.basename(params.src_path)
+    file_extension = file_name.split(".", 1)[1]
+    if file_extension in ('war', 'jar', 'ear', 'zip'):
+        params.artifact_type = file_extension
+    elif file_extension in ('sh', 'bat'):
+        params.artifact_type = 'startup'
+    else:
+        params.artifact_type = 'static'
+    logger.warning("Deployment type: %s. To override deloyment type, please specify the --type parameter. "
+                   "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
+
+
+def _make_onedeploy_request(params):
+    import requests
+
+    from azure.cli.core.util import (
+        should_disable_connection_verify,
+    )
+
+    # Build the request body, headers, API URL and status URL
+    body = _get_onedeploy_request_body(params)
+    headers = _get_basic_headers(params)
+    deploy_url = _build_onedeploy_url(params)
+    deployment_status_url = _get_onedeploy_status_url(params)
+
+    logger.info("Deployment API: %s", deploy_url)
+    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+
+    # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
+    # For that, set poll_async_deployment_for_debugging=True
+    poll_async_deployment_for_debugging = True
+
+    # check the status of async deployment
+    if response.status_code == 202 or response.status_code == 200:
+        response_body = None
+        if poll_async_deployment_for_debugging:
+            logger.info('Polling the status of async deployment')
+            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
+                                                         deployment_status_url, headers, params.timeout)
+            logger.info('Async deployment complete. Server response: %s', response_body)
+        return response_body
+
+    # API not available yet!
+    if response.status_code == 404:
+        raise CLIError("This API isn't available in this environment yet!")
+
+    # check if there's an ongoing process
+    if response.status_code == 409:
+        raise CLIError("Another deployment is in progress. You can track the ongoing deployment at {}"
+                       .format(deployment_status_url))
+
+    # check if an error occured during deployment
+    if response.status_code:
+        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
+                       .format(response.status_code, response.text))
+
+
+# OneDeploy
+def _perform_onedeploy_internal(params):
+
+    # Update artifact type, if required
+    _update_artifact_type(params)
+
+    # Now make the OneDeploy API call
+    logger.info("Initiating deployment")
+    response = _make_onedeploy_request(params)
+    logger.info("Deployment has completed successfully")
+    return response
+
+
 def _wait_for_webapp(tunnel_server):
     tries = 0
     while True:
@@ -3968,12 +4285,19 @@ def _start_ssh_session(hostname, port, username, password):
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
-        raise CLIError('webapp ssh is only supported on linux and mac')
+        webapp = show_webapp(cmd, resource_group_name, name, slot)
+        is_linux = webapp.reserved
+        if not is_linux:
+            raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.remote_debugging_enabled:
-        raise CLIError('remote debugging is enabled, please disable')
-    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+        open_page_in_browser(scm_url + '/webssh/host')
+    else:
+        config = get_site_configs(cmd, resource_group_name, name, slot)
+        if config.remote_debugging_enabled:
+            raise ValidationError('Remote debugging is enabled, please disable')
+        create_tunnel_and_session(
+            cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(
@@ -4007,7 +4331,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
     if ase_is_id:
         return ase
 
-    from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=get_subscription_id(cli_ctx),
@@ -4019,7 +4342,7 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
 
 def _validate_asp_sku(app_service_environment, sku):
     # Isolated SKU is supported only for ASE
-    if sku in ['I1', 'I2', 'I3']:
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
@@ -4034,7 +4357,6 @@ def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
     if key_vault_is_id:
         return key_vault
 
-    from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=get_subscription_id(cli_ctx),
@@ -4050,7 +4372,8 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
     verified_hostname_found = False
     for hostname_binding in hostname_bindings:
         binding_name = hostname_binding.name.split('/')[-1]
-        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+        if binding_name.lower() == hostname and (hostname_binding.host_name_type == 'Verified' or
+                                                 hostname_binding.host_name_type == 'Managed'):
             verified_hostname_found = True
 
     return verified_hostname_found
@@ -4058,6 +4381,7 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
 
 def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_value=None, slot=None):
     # pylint: disable=protected-access
+    key_info = KeyInfo(name=key_name, value=key_value)
     KeyInfo._attribute_map = {
         'name': {'key': 'properties.name', 'type': 'str'},
         'value': {'key': 'properties.value', 'type': 'str'},
@@ -4068,15 +4392,11 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
                                                                  name,
                                                                  key_type,
                                                                  key_name,
-                                                                 slot,
-                                                                 name1=key_name,
-                                                                 value=key_value)
+                                                                 slot, key=key_info)
     return client.web_apps.create_or_update_host_secret(resource_group_name,
                                                         name,
                                                         key_type,
-                                                        key_name,
-                                                        name1=key_name,
-                                                        value=key_value)
+                                                        key_name, key=key_info)
 
 
 def list_host_keys(cmd, resource_group_name, name, slot=None):
@@ -4089,14 +4409,8 @@ def list_host_keys(cmd, resource_group_name, name, slot=None):
 def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        result = client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot, raw=True)
-    result = client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name, raw=True)
-
-    if result.response.status_code == HTTPStatus.NO_CONTENT:
-        return "Successfully deleted key '{}' of type '{}' from function app '{}'".format(key_name, key_type, name)
-    if result.response.status_code == HTTPStatus.NOT_FOUND:
-        return "Key '{}' of type '{}' does not exist in function app '{}'".format(key_name, key_type, name)
-    return result
+        return client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot)
+    return client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name)
 
 
 def show_function(cmd, resource_group_name, name, function_name):
@@ -4109,17 +4423,13 @@ def show_function(cmd, resource_group_name, name, function_name):
 
 def delete_function(cmd, resource_group_name, name, function_name):
     client = web_client_factory(cmd.cli_ctx)
-    result = client.web_apps.delete_function(resource_group_name, name, function_name, raw=True)
-
-    if result.response.status_code == HTTPStatus.NO_CONTENT:
-        return "Successfully deleted function '{}' from app '{}'".format(function_name, name)
-    if result.response.status_code == HTTPStatus.NOT_FOUND:
-        return "Function '{}' does not exist in app '{}'".format(function_name, name)
+    result = client.web_apps.delete_function(resource_group_name, name, function_name)
     return result
 
 
 def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value=None, slot=None):
     # pylint: disable=protected-access
+    key_info = KeyInfo(name=key_name, value=key_value)
     KeyInfo._attribute_map = {
         'name': {'key': 'properties.name', 'type': 'str'},
         'value': {'key': 'properties.value', 'type': 'str'},
@@ -4131,14 +4441,12 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
                                                                      function_name,
                                                                      key_name,
                                                                      slot,
-                                                                     name1=key_name,
-                                                                     value=key_value)
+                                                                     key_info)
     return client.web_apps.create_or_update_function_secret(resource_group_name,
                                                             name,
                                                             function_name,
                                                             key_name,
-                                                            name1=key_name,
-                                                            value=key_value)
+                                                            key_info)
 
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
@@ -4151,16 +4459,5 @@ def list_function_keys(cmd, resource_group_name, name, function_name, slot=None)
 def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        result = client.web_apps.delete_function_secret_slot(resource_group_name,
-                                                             name,
-                                                             function_name,
-                                                             key_name,
-                                                             slot,
-                                                             raw=True)
-    result = client.web_apps.delete_function_secret(resource_group_name, name, function_name, key_name, raw=True)
-
-    if result.response.status_code == HTTPStatus.NO_CONTENT:
-        return "Successfully deleted key '{}' from function '{}'".format(key_name, function_name)
-    if result.response.status_code == HTTPStatus.NOT_FOUND:
-        return "Key '{}' does not exist in function '{}'".format(key_name, function_name)
-    return result
+        return client.web_apps.delete_function_secret_slot(resource_group_name, name, function_name, key_name, slot)
+    return client.web_apps.delete_function_secret(resource_group_name, name, function_name, key_name)

@@ -52,6 +52,12 @@ parameters:
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
+  - name: --security-operators
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+  - name: --ldap-over-tls
+    short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+  - name: --allow-local-ldap-users
+    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
 examples:
   - name: Add an active directory to the account
     text: >
@@ -92,6 +98,8 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --encryption
+    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -139,6 +147,8 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --encryption
+    short-summary: Encryption settings
 examples:
   - name: Update the tags of an ANF account
     text: >
@@ -160,6 +170,34 @@ examples:
   - name: Get a list of all ANF account backup
     text: >
         az netappfiles account backup list -g mygroup --account-name myaccountname
+"""
+
+helps['netappfiles account backup show'] = """
+type: command
+short-summary: Get Backup for a Netapp Files (ANF) Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --backup-name
+    short-summary: The name of the backup
+examples:
+  - name: Get a list of all ANF account backup
+    text: >
+        az netappfiles account backup show -g mygroup --account-name myaccountname --backup-name mybackupname
+"""
+
+helps['netappfiles account backup delete'] = """
+type: command
+short-summary: Delete Backup for a Netapp Files (ANF) Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --backup-name
+    short-summary: The name of the backup
+examples:
+  - name: Get a list of all ANF account backup
+    text: >
+        az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackupname
 """
 
 
@@ -496,6 +534,24 @@ parameters:
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
     short-summary: Has root access to volume
+  - name: --smb-encryption
+    short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
+  - name: --smb-continuously-avl
+    short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
+  - name: --encryption-key-source
+    short-summary: Encryption Key Source
+  - name: --allowed-clients
+    short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
+  - name: --cifs
+    short-summary: Allows NFSv3 protocol. Enable only for NFSv3 type volumes
+  - name: --rule-index
+    short-summary: Order index
+  - name: --unix-read-only
+    short-summary: Read only access
+  - name: --unix-read-write
+    short-summary: Read and write access
+  - name: --ldap-enabled
+    short-summary: Specifies whether LDAP is enabled or not for a given NFS volume
 examples:
   - name: Create an ANF volume
     text: >

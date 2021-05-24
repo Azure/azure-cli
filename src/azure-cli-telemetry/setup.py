@@ -19,6 +19,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -40,7 +41,7 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=[
         'applicationinsights>=0.11.1,<0.12',
-        'portalocker~=1.2',
+        'portalocker~=1.6',
     ],
     packages=[
         'azure.cli.telemetry',

@@ -258,7 +258,7 @@ class ImageTemplateTest(ScenarioTest):
         self.assertTrue(parsed['name'], self.kwargs['gallery'])
         self.assertTrue(parsed['child_name_1'], self.kwargs['sig1'])
 
-    @record_only()
+    # @record_only()
     @ResourceGroupPreparer(name_prefix='img_tmpl_managed')
     def test_image_build_managed_image(self, resource_group, resource_group_location):
         self._identity_role(resource_group)
@@ -297,7 +297,7 @@ class ImageTemplateTest(ScenarioTest):
         self.assertEqual(img_tmpl['source']['imageId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'managedimage')
 
-    @record_only()
+    # @record_only()
     @ResourceGroupPreparer(name_prefix='img_tmpl_sig')
     def test_image_build_shared_image(self, resource_group, resource_group_location):
         self._identity_role(resource_group)

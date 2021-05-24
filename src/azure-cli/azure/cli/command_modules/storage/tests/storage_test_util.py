@@ -26,11 +26,21 @@ class StorageScenarioMixin:
 
         return self.cmd(template.format(name, group)).output
 
+    def get_connection_string(self, group, name):
+        return self.cmd('storage account show-connection-string -n {} -g {} '
+                        '--query connectionString -otsv'.format(name, group)).output.strip()
+
+    def get_account_id(self, group, name):
+        return self.cmd('storage account show -n {} -g {} --query id -otsv'.format(name, group)).output.strip()
+
     def get_account_info(self, group, name):
         """Returns the storage account name and key in a tuple"""
         return name, self.get_account_key(group, name)
 
     def oauth_cmd(self, cmd, *args, **kwargs):
+        if args:
+            cmd = cmd.format(*args)
+            args = ()
         return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
 
     def storage_cmd(self, cmd, account_info, *args):

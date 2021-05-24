@@ -4,16 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from __future__ import print_function
 from collections import Counter, OrderedDict
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
+from azure.core.exceptions import HttpResponseError
 
 logger = get_logger(__name__)
 
@@ -105,7 +104,7 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
         logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
                         "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
     zone = PrivateZone(location='global')
-    result = LongRunningOperation(cmd.cli_ctx)(client.private_zones.create_or_update(resource_group_name, private_zone_name, zone))
+    result = LongRunningOperation(cmd.cli_ctx)(client.private_zones.begin_create_or_update(resource_group_name, private_zone_name, zone))
     if result.provisioning_state != 'Succeeded':
         raise CLIError('Error occured while creating or updating private dns zone.')
 
@@ -130,7 +129,7 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
-        except CloudError as ex:
+        except HttpResponseError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
           .format(cum_records, total_records, private_zone_name), file=sys.stderr)
@@ -271,7 +270,7 @@ def create_privatedns_zone(cmd, resource_group_name, private_zone_name, tags=Non
         logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
                         "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
     zone = PrivateZone(location='global', tags=tags)
-    return client.create_or_update(resource_group_name, private_zone_name, zone, if_none_match='*')
+    return client.begin_create_or_update(resource_group_name, private_zone_name, zone, if_none_match='*')
 
 
 def update_privatedns_zone(instance, tags=None):
@@ -293,7 +292,7 @@ def create_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_
         link.virtual_network = virtual_network
 
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
+    return client.begin_create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
 
 
 def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, registration_enabled=None, tags=None, if_match=None, **kwargs):
@@ -308,7 +307,7 @@ def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_
 
     aux_subscription = parse_resource_id(link.virtual_network.id)['subscription']
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
+    return client.begin_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
 
 
 def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, relative_record_set_name, record_type, metadata=None, ttl=3600):
@@ -360,7 +359,7 @@ def _privatedns_add_save_record(client, record, record_type, relative_record_set
     try:
         record_set = client.get(
             resource_group_name, private_zone_name, record_type, relative_record_set_name)
-    except CloudError:
+    except HttpResponseError:
         record_set = RecordSet(ttl=3600)
 
     _privatedns_add_record(record_set, record, record_type, is_list)
