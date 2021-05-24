@@ -228,10 +228,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                                help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
                                                local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
-        subscription_arg_type = CLIArgumentType(metavar='NAME',
-                                                help="ID of subscription. You can configure the default subscription using `az account set -s NAME_OR_ID`",
-                                                local_context_attribute=LocalContextAttribute(name='subscription_id', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
-
         migration_id_arg_type = CLIArgumentType(metavar='NAME',
                                                 help="ID of the migration.",
                                                 local_context_attribute=LocalContextAttribute(name='migration_id', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
@@ -408,7 +404,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 else:
                     c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
 
-        handle_migration_parameters(command_group, server_name_arg_type, subscription_arg_type, migration_id_arg_type)
+        handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
@@ -475,12 +471,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], help='Name of the replica server.')
 
-    def handle_migration_parameters(command_group, server_name_arg_type, subscription_arg_type, migration_id_arg_type):
+    def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
         for scope in ['create', 'show', 'list', 'update', 'delete']:
             argument_context_string = '{} flexible-server migration {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('subscription_id', arg_type=subscription_arg_type, options_list=['--subscription-id'],
-                           help='Subscription ID of the migration target server.')
                 c.argument('resource_group_name', arg_type=resource_group_name_type,
                            help='Resource Group Name of the migration target server.')
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type,
@@ -495,39 +489,39 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
                     c.argument('level', options_list=['--level'], required=False,
-                               help='Specifies the level of migration details requested. Valid values are Active and All. Active is the default.')
+                               help='Specify the level of migration details requested. Valid values are Active and All. Active is the default.')
                 elif scope == "list":
                     c.argument('migration_filter', options_list=['--filter'], required=False,
-                               help='Indicates whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
+                               help='Indicate whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
                 elif scope == "update":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
-                               help='Allows the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
+                               help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                     c.argument('db1', options_list=['--db1', '--db'], required=False,
-                               help='Specifies the first DB to migrate. A minimum of 1 and a maximum of 8 DBs can be specified using --db1, --db2, --db3... You can migrate additional DBs concurrently using new migrations. Note that each additional DB affects the performance of the source server.')
+                               help='Specify the first DB to migrate. A minimum of 1 and a maximum of 8 DBs can be specified using --db1, --db2, --db3... You can migrate additional DBs concurrently using new migrations. Note that each additional DB affects the performance of the source server.')
                     c.argument('db2', options_list=['--db2'], required=False,
-                               help='Specifies the second DB to migrate.')
+                               help='Specify the second DB to migrate.')
                     c.argument('db3', options_list=['--db3'], required=False,
-                               help='Specifies the third DB to migrate.')
+                               help='Specify the third DB to migrate.')
                     c.argument('db4', options_list=['--db4'], required=False,
-                               help='Specifies the fourth DB to migrate.')
+                               help='Specify the fourth DB to migrate.')
                     c.argument('db5', options_list=['--db5'], required=False,
-                               help='Specifies the fifth DB to migrate.')
+                               help='Specify the fifth DB to migrate.')
                     c.argument('db6', options_list=['--db6'], required=False,
-                               help='Specifies the sixth DB to migrate.')
+                               help='Specify the sixth DB to migrate.')
                     c.argument('db7', options_list=['--db7'], required=False,
-                               help='Specifies the seventh DB to migrate.')
+                               help='Specify the seventh DB to migrate.')
                     c.argument('db8', options_list=['--db8'], required=False,
-                               help='Specifies the eigth DB to migrate.')
+                               help='Specify the eigth DB to migrate.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
-                               help='Allows the migration workflow to overwrite the DB on the target.')
+                               help='Allow the migration workflow to overwrite the DB on the target.')
                     # c.argument('start_time_utc', options_list=['--start-time-utc'], required=False,
-                    #            help='Specifies the start time for the data migration to start. This should be within 2 weeks from the current time.')
+                    #            help='Specify the start time for the data migration to start. This should be within 2 weeks from the current time.')
                     # c.argument('initiate_data_migration', options_list=['--init-data-migration'], action='store_true', required=False,
-                    #            help='Starts the data migration now, rather than wait for the migration window start time.')
+                    #            help='Start the data migration now, rather than wait for the migration window start time.')
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
-                               help='Cuts over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
+                               help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
                 elif scope == "delete":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
