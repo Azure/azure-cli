@@ -193,7 +193,8 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
 
 
 class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
-    @live_only()
+    @unittest.skip('Accross subs are not supported now.')
+    # @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_storage_metric_alerts_across_subs_scenario(self, resource_group):
         self.kwargs.update({
