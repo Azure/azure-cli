@@ -133,8 +133,8 @@ class SynapseScenarioTests(ScenarioTest):
             'file-system': self.create_random_name(prefix='fs', length=16),
             'login-user': 'cliuser1',
             'login-password': self.create_random_name(prefix='Pswd1', length=16),
-            'key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/keyzes0512',
-            'new-key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/newkey0521',
+            'key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newcmk',
+            'new-key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newkey',
             'managed-identity': '00000000-0000-1111-2222-333333333333'
         })
 
@@ -143,7 +143,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
             '--file-system {file-system} --sql-admin-login-user {login-user} '
             '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
-            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids "" ', checks=[
+            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids \'""\' ', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
                 self.check('provisioningState', 'Succeeded')
@@ -153,7 +153,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # set access policy
         self.cmd(
-            'az keyvault set-policy --name wskeyvaultzes --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
 
         # active workspace
         self.cmd(
@@ -173,7 +173,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # set access policy
         self.cmd(
-            'az keyvault set-policy --name wskeyvaultzes --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
 
         # list workspace key
         self.cmd(
@@ -214,7 +214,9 @@ class SynapseScenarioTests(ScenarioTest):
 
         # switch active key
         self.cmd(
-            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ')
+            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ', checks=[
+                self.check('encryption.cmk.key.name', 'newkey')
+            ])
 
         # update allowed tenant ids
         self.cmd(
