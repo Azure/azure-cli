@@ -340,6 +340,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse sql pool delete --name {dest-sql-pool} --workspace-name {workspace} --resource-group {rg} --yes')
 
+        # deleted list take several mins to show
         time.sleep(200)
 
         # test list-deleted
@@ -416,7 +417,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check("length([])", 0)
                  ])
 
-    #@record_only()
+    @record_only()
     def test_sql_pool_tde(self):
         self.kwargs.update({
             'location': 'eastus2euap',

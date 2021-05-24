@@ -109,17 +109,17 @@ def update_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_
 
 def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
     key_properties = Key(key_vault_url=key_identifier)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_properties = key_properties)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_properties=key_properties)
 
 
 def update_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
     key_properties = Key(key_vault_url=key_identifier)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_properties = key_properties)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_properties=key_properties)
 
 
 def grant_sql_access_to_managed_identity(cmd, client, resource_group_name, workspace_name, no_wait=False):
     grant_sql_control_to_managed_identity = ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity(desired_state="Enabled")
-    grant_sql_access_setting = ManagedIdentitySqlControlSettingsModel(grant_sql_control_to_managed_identity = grant_sql_control_to_managed_identity)
+    grant_sql_access_setting = ManagedIdentitySqlControlSettingsModel(grant_sql_control_to_managed_identity=grant_sql_control_to_managed_identity)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, grant_sql_access_setting)
 
 
