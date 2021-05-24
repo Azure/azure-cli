@@ -3,6 +3,259 @@
 Release History
 ===============
 
+2.24.0
+++++++
+
+**AKS**
+
+* `az aks check-acr`: Add the nodeslector linux to avoid the "canipull" pod to be scheduled on the windows node (#17933)
+* Sdk update (#18031)
+* az aks create and update azure-rbac (#18026)
+* Add run-command cli (#18051)
+
+**App Config**
+
+* Allow importing key-values with unicode characters from file (#17990)
+
+**App Service**
+
+* [BREAKING CHANGE] `az webapp list-runtimes`: Add Dotnet6 support and update runtimes (#17967)
+* `webapp log tail`: Fix #17987: logging.warning call with invalid 'end' argument (#17988)
+* Fix #16838- az cli update app setting command always making slotsetting to true (#17895)
+* `az appservice`: Add function to retrieve users github personal access token (#17826)
+* az staticwebapp appsettings set issue #17792 (#18034)
+* Fix #18033: az staticwebapp appsettings set of missing positional param app_settings (#18043)
+* Fix issues with APIs signature that changed with Track2 update (#18082)
+* Fix get resource management client properly (#18142)
+* Add interactive way to get token for staticwebapp (#18083)
+* Fix an issue where assign and remove identities would fail with a call to NoneType (#18084)
+
+**ARM**
+
+* Migrate resource to track2 SDK (#17783)
+* `az ts`: Add UiFormDefinition file support to TemplateSpecs for GA (05/04) (#17869)
+
+**ARO**
+
+* Add cluster credential rotation (#17925)
+
+**Compute**
+
+* `az sshkey create`: Save private key to local file system (#18022)
+
+**Cosmos DB**
+
+* Create and manage Role Definitions and Role Assignments for enforcing data plane RBAC on Cosmos DB SQL accounts (#18091)
+
+**DevTestLabs**
+
+* `az labs create environment`: Fix error creating an environment from an ARM template (#17959)
+
+**HDInsight**
+
+* [BREAKING CHANGE] `az hdinsight create`: Use getting default sku api to set workernode and headnode size if customer does not provide. (#17552)
+
+**IoT**
+
+* `az iot hub create`: Support assigning identities and assigning roles to system-managed identity. (#18098)
+* `az iot hub update`: New parameter `--file-upload-storage-identity` to allow for managed-identity authenticated file upload. (#18098)
+* `az iot hub identity assign`: New command to assign user/system-assigned managed identities to an IoT Hub. (#18098)
+* `az iot hub identity show`: New command to show identity property of an IoT Hub. (#18098)
+* `az iot hub identity show`: New command to update identity type of an IoT Hub. (#18098)
+* `az iot hub identity remove`: New command to remove user/system-assigned managed identities from an IoT Hub. (#18098)
+* `az iot hub routing-endpoint create`: New `--identity` parameter allows choosing a user/system-assigned identity for routing endpoints. (#18098)
+* `az iot hub route create`: New routing source-type `DeviceConnectionStateEvents` (#18098)
+
+**Kusto**
+
+* Update command group long summary (#18107)
+
+**Network**
+
+* Bump api version from '2020-11-01' to '2021-02-01' (#18104)
+* New command group `az network lb address-pool tunnel-interface` (#18136)
+* `az network lb frontend-ip update`: New parameter `--gateway-lb` (#18136)
+* `az network nic ip-config update`: New parameter `--gateway-lb` (#18136)
+* `az network rule create/update`: New parameter `--backend-pools-name` (#18136)
+* `az network vnet-gateway create`: Add new paramter `--nat-rule` (#18045)
+* Add new cmd group `az network vnet-gateway nat-rule` (#18045)
+* `az network vpn-conncetion create`: Add new paramter `--ingress-nat-rule` and `--egress-nat-rule` (#18045)
+* `az network vnet create`: Add new parameter `--flowtimeout` (#18032)
+
+**Packaging**
+
+* Support Python 3.9 (#17368)
+
+**RDBMS**
+
+* Change IOPS logic for MySQL (#17974)
+* Prevent private DNS zone track2 migration breaking rdbms module (#18062)
+
+**Service Fabric**
+
+* [BREAKING CHANGE] `az sf cluster certificate`: Remove all commands under this group. Please follow the instructions here to add/remove cluster certificates: https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security-update-certs-azure#add-a-secondary-certificate-using-azure-resource-manager. (#18056)
+* [BREAKING CHANGE] `az sf managed-service update`: Remove deprecated parameter --drop-source-replica-on-move. (#18056)
+* [BREAKING CHANGE] `az sf managed-service create`: Remove deprecated parameters --service-dns-name, --drop-source-replica-on-move and -instance-close-delay-duration. (#18056)
+* [BREAKING CHANGE] `az sf cluster`: Rename parameter --vault-resource-group to --vault-rg. (#18056)
+* `az sf managed-cluster and sf managed-node-type`: Set groups as not preview (#18056)
+* Update azure-mgmt-servicefabricmanagedclusters package to the latest version 1.0.0 that uses 2021-05-01 GA api version. (#18056)
+* `az sf managed-cluster create`: Add parameters --upgrade-mode, --upgrade-cadence and --code-version. (#18056)
+* `az sf managed-node-type`: Add parameters --data-disk-type, --is-stateless and --multiple-placement-groups. (#18056)
+
+**SQL**
+
+* `az sql server create`: Add a space to split the concatenated words in the help message of the argument --assign-identity. (#17966)
+* `az sql server update`: Add a space to split the concatenated words in the help message of the argument --assign_identity. (#17966)
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage share-rm delete`: Raise error when there are snapshots for target file share and add `--include` to specify deleting target file share and its snapshots (#18088)
+* `az storage blob generate-sas`: Add spaces to split the concatenated words in the help message of the arguments --cache-control, --content-disposition, --content-encoding, --content-language and --content-type. (#17940)
+* `az storage blob url`: Add a space to split the concatenated words in the help message of the argument --snapshot. (#17940)
+* `az storage container generate-sas`: Add spaces to split the concatenated words in the help message of the arguments --cache-control, --content-disposition, --content-encoding, --content-language and --content-type. (#17940)
+* Upgrade storage API version to 2021-04-01 (#18064)
+* Support default share permission (#16462)
+* Support cross tenant object replication (#18063)
+* GA blob inventory (#18046)
+* `az storage share-rm list`: Support list with snapshots. (#18088)
+
+2.23.0
+++++++
+
+**ACR**
+
+* `az acr check-health`: Add support to verify dns routings to private endpoints (#17746)
+* Fix #17618: Update credential add/update handling for tasks created using --auth-mode (#17715)
+
+**AKS**
+
+* `az aks update`: Add `--windows-admin-password` to support updating Windows password (#17684)
+* `az aks update`: Support updating from SPN cluster to MSI cluster. (#17902)
+* `az aks create`: Add `--enable-encryption-at-host` parameter (#17813)
+
+**App Service**
+
+* [BREAKING CHANGE] Update websites SDK to the latest version (azure-mgmt-web==2.0.0) & Adopt track2 SDK (#17146)
+* [BREAKING CHANGE] Rename `az staticwebapp browse` to `az staticwebapp show` (#17870)
+* Add option of sku for `az staticwebapp create --sku` (#17870)
+* Add command `az staticwebapp update` (#17870)
+* `az webapp/functionapp config access-restriction add/remove`: Support for Service Tag, Http headers and multi-source rules. (#17687)
+
+**ARM**
+
+* `az bicep`: Replace datetime APIs that are not available in Python 3.6 (#17675)
+* `az deployment group create`: Fix the compatibility issue of api-version for parameter `--template-specs` (#17896)
+
+**Backup**
+
+* `az backup vault create`: Add tags as an optional argument (#17735)
+* Make AFS configure backup flow idempotent (#17839)
+
+**CDN**
+
+* `az cdn endpoint rule add`: Fix delivery rule creation for non-Microsoft SKU (#17822)
+
+**Compute**
+
+* Extended location for Compute RP (#17522)
+* `az sig image-version create`: Support creating from a VHD (#16371)
+* `az vm create --count`: Support vnet and subnet configuration (#17660)
+* `az vmss extension upgrade`: Fix a bug (#17711)
+* Add error message for `vm identity assign` (#17685)
+* Zone-redundant storage (ZRS) managed disks (#17754)
+* `az disk create`: Trusted launch (#17775)
+* `az disk create`: Hibernation (#17775)
+* Fix a compatibility issue of old API version (#17906)
+* `az sig image version create`: Support data disk VHDs (#17706)
+
+**Feedback**
+
+* Do not minify feedback issue body (#17353)
+
+**FunctionApp**
+
+* Fix issue with zip deploy where local time was provided but UTC was expected (#17722)
+* Update stacks api json to add PowerShell on Linux in Functions (#17678)
+
+**HDInsight**
+
+* Add Incoming BREAKING CHANGE for removing default value of `--workernode-size` and  `--headnode-size` (#17862)
+
+**Key Vault**
+
+* [BREAKING CHANGE] Support soft-delete feature for managed-HSM. `keyvault delete --hsm-name` will perform soft delete on a MHSM. (#17834)
+
+**Marketplace Ordering**
+
+* New command group `az term` to accept/show terms (#17686)
+
+**Misc.**
+
+* Define theme for Cloud Shell (#17283)
+
+**Monitor**
+
+* New command `az monitor metrics list-namespaces` (#17472)
+
+**Network**
+
+* [BREAKING CHANGE] az network dns record-set a show: Property `arecords` in output will be changed to `aRecords`. (#17787)
+* New command `az network express-route list-route-tables-summary`. (#17450)
+* New command `az network express-route peering get-stats`. (#17450)
+* New command `az network express-route peering connection list`. (#17450)
+* `az network lb create`: Add new parameter `--edge-zone` (#17623)
+* `az network nic create`: Add new parameter `--edge-zone` (#17623)
+* `az network private-endpoint create`: Add new parameter `--edge-zone` (#17623)
+* `az network private-link-service create`: Add new parameter `--edge-zone` (#17623)
+* `az network public-ip create`: Add new parameter `--edge-zone` (#17623)
+* `az network public-ip prefix create`: Add new parameter `--edge-zone` (#17623)
+* `az network vnet create`: Add new parameter `--edge-zone` (#17623)
+* New Command `az network lb list-nic` (#17729)
+* `az network application-gateway show-backend-health`: support probe operation arguments. (#17753)
+* `az network vpn-connection list`: support parameter `--vnet-gateway`. (#17664)
+* New command `az network vnet-gateway disconnect-vpn-connections`. (#17664)
+* New command `az network vnet-gateway vpn-client show-health`. (#17664)
+* New command `az network vnet-gateway vpn-client ipsec-policy show`. (#17664)
+* New command `az network vnet-gateway vpn-client ipsec-policy set`. (#17664)
+* New command `az network vnet-gateway packet-capture start`. (#17664)
+* New command `az network vnet-gateway packet-capture stop`. (#17664)
+* New command `az network vnet-gateway show-supported-devices`. (#17664)
+* New command `az network vpn-connection list-ike-sas`. (#17664)
+* New command `az network vpn-connection packet-capture start`. (#17664)
+* New command `az network vpn-connection packet-capture stop`. (#17664)
+* New command `az network vpn-connection show-device-config-script`. (#17664)
+* `az network private-link-resource list`: support more providers for `--type` (#17731)
+
+**Packaging**
+
+* Bump python to `3.8.9` in docker image (#17840)
+* Bump bundled python to `3.8.9` in MSI. (#17816)
+
+**Role**
+
+* `az role assignment create/update`: Auto complete `assignee_principal_type` (#17669)
+
+**SQL**
+
+* `az sql db create`: Add --ha-replicas argument (#17636)
+* `az sql db replica create`: Add --ha-replicas argument (#17636)
+* Allow short mw policy names for mi (#17703)
+
+**SQL VM**
+
+* Make SqlServerLicenseType as optional (#17766)
+
+**Storage**
+
+* Fix #16272 & #16853: Refine error message (#17630)
+* `az storage account create`: Add edge zone support (#17528)
+* Support user assigned identity for storage account (#16613)
+* `az storage account create/update`: Support sas&key policy (#17815)
+
+**Synapse**
+
+* `az synapse notebook create`: Create a notebook (#17867)
+
 2.22.1
 ++++++
 

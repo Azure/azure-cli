@@ -617,17 +617,17 @@ class WebappConfigureTest(ScenarioTest):
 
         self.assertEqual(output[0], {
             'name': 's',
-            'value': 'value',
+            'value': 'False',
             'slotSetting': False
         })
         self.assertEqual(output[1], {
             'name': 's2',
-            'value': 'value2',
+            'value': 'False',
             'slotSetting': False
         })
         self.assertEqual(output[2], {
             'name': 's3',
-            'value': 'value3',
+            'value': 'True',
             'slotSetting': True
         })
         # update site config

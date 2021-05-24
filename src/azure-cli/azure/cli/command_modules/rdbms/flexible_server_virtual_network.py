@@ -3,15 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument, line-too-long
+# pylint: disable=unused-argument, line-too-long, import-outside-toplevel
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name  # pylint: disable=import-error
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import ValidationError
-from ._client_factory import resource_client_factory, network_client_factory
+from azure.mgmt.privatedns.models import PrivateZone
+from azure.mgmt.privatedns.models import SubResource
+from azure.mgmt.privatedns.models import VirtualNetworkLink
+from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import get_id_components, check_existence
 
 logger = get_logger(__name__)
@@ -19,7 +22,7 @@ DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
 DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, import-outside-toplevel
 def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref):
 
     nw_client = network_client_factory(cmd.cli_ctx)
@@ -63,7 +66,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
                                                            location, server_name, vnet_address_pref, subnet_address_pref)
 
         else:
-            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs.")
+            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use an existing subnet, please provide the subnet Id only (not vnet Id).")
 
     elif subnet is None and vnet is None:
         subnet_result = _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group_name, 'Vnet' + server_name[6:], 'Subnet' + server_name[6:],
@@ -96,7 +99,7 @@ def _change_client_with_different_subscription(cmd, subscription, nw_client, res
 
 def _resource_group_verify_and_create(resource_client, resource_group, location):
     if not resource_client.resource_groups.check_existence(resource_group):
-        logger.warning("Provided resource group in the Vnet/Subnet ID doesn't exist. Creating the resource group %s", resource_group)
+        logger.warning("Provided resource group in the resource ID doesn't exist. Creating the resource group %s", resource_group)
         resource_client.resource_groups.create_or_update(resource_group, {'location': location})
 
 
@@ -116,8 +119,9 @@ def _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_s
         # check if vnet prefix is in address space and add if not there
         vnet = nw_client.virtual_networks.get(resource_group, vnet_name)
         prefixes = vnet.address_space.address_prefixes
-        if vnet_address_pref not in prefixes:
-            logger.warning('Adding address prefix %s to Vnet %s', vnet_address_pref, vnet_name)
+        subnet_exist = check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks')
+        if not subnet_exist and vnet_address_pref not in prefixes:
+            logger.warning('The default/input address prefix does not exist in the Vnet. Adding address prefix %s to Vnet %s.', vnet_address_pref, vnet_name)
             nw_client.virtual_networks.begin_create_or_update(resource_group, vnet_name,
                                                               VirtualNetwork(location=location,
                                                                              address_space=AddressSpace(
@@ -127,18 +131,16 @@ def _create_vnet_subnet_delegation(cmd, nw_client, resource_client, delegation_s
 
 
 def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_service_name, resource_group, vnet_name, subnet_name, location, server_name, subnet_address_pref):
-    Delegation, Subnet, ServiceEndpoint = cmd.get_models('Delegation', 'Subnet', 'ServiceEndpointPropertiesFormat', resource_type=ResourceType.MGMT_NETWORK)
+    Delegation, Subnet = cmd.get_models('Delegation', 'Subnet', resource_type=ResourceType.MGMT_NETWORK)
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
-    service_endpoint = ServiceEndpoint(service='Microsoft.Storage')
 
-    # subnet exist
+    # subnet not exist
     if not check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
         subnet_result = Subnet(
             name=subnet_name,
             location=location,
             address_prefix=subnet_address_pref,
-            delegations=[delegation],
-            service_endpoints=[service_endpoint])
+            delegations=[delegation])
 
         vnet = nw_client.virtual_networks.get(resource_group, vnet_name)
         vnet_subnet_prefixes = [subnet.address_prefix for subnet in vnet.subnets]
@@ -148,6 +150,7 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
         logger.warning('Creating new Subnet "%s" in resource group "%s"', subnet_name, resource_group)
         subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
                                                           subnet_result).result()
+    # subnet exist
     else:
         subnet = nw_client.subnets.get(resource_group, vnet_name, subnet_name)
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
@@ -157,17 +160,109 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
         # Add Delegation if not delegated already
         if not subnet.delegations:
             logger.warning('Adding "%s" delegation to the existing subnet %s.', delegation_service_name, subnet_name)
+            subnet.delegations = [delegation]
+            subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet).result()
         else:
             for delgtn in subnet.delegations:
                 if delgtn.service_name != delegation_service_name:
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(
                         delegation_service_name))
 
-        subnet.service_endpoints = [service_endpoint]
-        subnet.delegations = [delegation]
-        subnet = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet).result()
-
     return subnet
+
+
+def prepare_private_dns_zone(cmd, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location):
+    dns_suffix_client = cf_postgres_flexible_private_dns_zone_suffix_operations(cmd.cli_ctx, '_')
+
+    private_dns_zone_suffix = dns_suffix_client.execute(database_engine)
+    vnet_sub, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
+    private_dns_client = private_dns_client_factory(cmd.cli_ctx)
+    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx)
+    resource_client = resource_client_factory(cmd.cli_ctx)
+
+    vnet_id = resource_id(subscription=vnet_sub,
+                          resource_group=vnet_rg,
+                          namespace='Microsoft.Network',
+                          type='virtualNetworks',
+                          name=vnet_name)
+    nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
+    vnet = nw_client.virtual_networks.get(vnet_rg, vnet_name)
+
+    dns_rg = None
+    if private_dns_zone is None:
+        if 'private' in private_dns_zone_suffix:
+            private_dns_zone = server_name + '.' + private_dns_zone_suffix
+        else:
+            private_dns_zone = server_name + '.private.' + private_dns_zone_suffix
+    #  resource ID input => check subscription and change client
+    elif not _check_if_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
+        subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
+        if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
+            raise ValidationError('The suffix of the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+
+        if subscription != get_subscription_id(cmd.cli_ctx):
+            logger.warning('The provided private DNS zone ID is in different subscription from the server')
+            resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription)
+            private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription)
+            private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription)
+        _resource_group_verify_and_create(resource_client, dns_rg, location)
+    #  check Invalid resource ID or Name format
+    elif _check_if_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
+            or not _check_if_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
+        raise ValidationError("Check if the private dns zone name or Id is in correct format.")
+    #  Invalid resource name suffix check
+    elif _check_if_resource_name(private_dns_zone) and private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
+        raise ValidationError('The suffix of the private DNS zone should be in "{}" format'.format(private_dns_zone_suffix))
+
+    link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
+    link.registration_enabled = True
+
+    # check existence DNS zone and change resource group
+    zone_exist_flag = False
+    if dns_rg is not None and check_existence(resource_client, private_dns_zone, dns_rg, 'Microsoft.Network', 'privateDnsZones'):
+        zone_exist_flag = True
+    elif dns_rg is None and check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
+        zone_exist_flag = True
+        dns_rg = resource_group
+    elif dns_rg is None and check_existence(resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
+        zone_exist_flag = True
+        dns_rg = vnet_rg
+    else:
+        dns_rg = vnet_rg
+
+    # create DNS zone if not exist
+    if not zone_exist_flag:
+        logger.warning('Creating a private dns zone %s in resource group "%s"', private_dns_zone, dns_rg)
+        private_zone = private_dns_client.begin_create_or_update(resource_group_name=dns_rg,
+                                                                 private_zone_name=private_dns_zone,
+                                                                 parameters=PrivateZone(location='global'),
+                                                                 if_none_match='*').result()
+
+        private_dns_link_client.begin_create_or_update(resource_group_name=dns_rg,
+                                                       private_zone_name=private_dns_zone,
+                                                       virtual_network_link_name=vnet_name + '-link',
+                                                       parameters=link, if_none_match='*').result()
+    else:
+        logger.warning('Using the existing private dns zone %s in resource group "%s"', private_dns_zone, dns_rg)
+
+        private_zone = private_dns_client.get(resource_group_name=dns_rg,
+                                              private_zone_name=private_dns_zone)
+        virtual_links = private_dns_link_client.list(resource_group_name=dns_rg,
+                                                     private_zone_name=private_dns_zone)
+
+        link_exist_flag = False
+        for virtual_link in virtual_links:
+            if virtual_link.virtual_network.id == vnet_id:
+                link_exist_flag = True
+                break
+
+        if not link_exist_flag:
+            private_dns_link_client.begin_create_or_update(resource_group_name=dns_rg,
+                                                           private_zone_name=private_dns_zone,
+                                                           virtual_network_link_name=vnet_name + '-link',
+                                                           parameters=link, if_none_match='*').result()
+
+    return private_zone.id
 
 
 def _check_if_resource_name(resource):

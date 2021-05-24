@@ -49,7 +49,13 @@ examples:
       az postgres flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
   - name: Create a PostgreSQL flexible server using new virtual network, subnet with non-default address prefix.
     text: |
-      az postgres flexible-server create --vnet myVnet --address-prefixes 10.0.0.0/24 --subnet mySubnet --subnet-prefixes 10.0.0.0/24
+      az postgres flexible-server create --vnet myVnet --address-prefixes 15.0.0.0/24 --subnet mySubnet --subnet-prefixes 15.0.0.0/24
+  - name: Create a PostgreSQL flexible server using new virtual network, subnet, and new private dns zone address
+    text: |
+      az postgres flexible-server create --vnet myVnet --subnet mySubnet --private-dns-zone myDnsZone.private.postgres.database.azure.com
+  - name: Create a PostgreSQL flexible server using existing subnet and private dns zone address in different resource group
+    text: |
+      az postgres flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName} --private-dns-zone /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/privateDnsZones/myDnsZone.private.postgres.database.azure.com
   - name: Create a PostgreSQL flexible server with  parameters set.
     text: |
         az postgres flexible-server create --location northeurope --resource-group testGroup \\

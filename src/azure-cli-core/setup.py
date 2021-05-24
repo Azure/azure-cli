@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.22.1"
+VERSION = "2.24.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -38,6 +38,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -46,11 +47,11 @@ DEPENDENCIES = [
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'azure-common~=1.1',
-    'azure-mgmt-core>=1.2.0,<2.0.0',
+    'azure-mgmt-core>=1.2.0,<1.3.0',     # the preview version of azure-mgmt-core is 1.3.0b1, it cannot fit azure-core >=1.14.0
     'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
-    'knack~=0.8.1',
+    'knack~=0.8.2',
     'msal>=1.10.0,<2.0.0',
     # Dependencies of the vendored subscription SDK
     # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86

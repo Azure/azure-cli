@@ -39,7 +39,8 @@ def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
                        resource_group_name=resource_group_name, name=name)
 
 
-def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_name=None, no_wait=False):
+def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_name=None, login_with_github=False,
+                         no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -47,7 +48,7 @@ def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_n
     location = _get_staticsite_location(client, name, resource_group_name)
 
     return create_staticsites(cmd, resource_group_name, name, location,
-                              source, branch, token, no_wait=no_wait)
+                              source, branch, token, login_with_github=login_with_github, no_wait=no_wait)
 
 
 def list_staticsite_environments(cmd, name, resource_group_name=None):
@@ -122,7 +123,7 @@ def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_grou
         setting_dict[key] = value
 
     return client.create_or_update_static_site_function_app_settings(
-        resource_group_name, name, kind=None, properties=setting_dict)
+        resource_group_name, name, app_settings=setting_dict)
 
 
 def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
@@ -139,7 +140,7 @@ def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_g
             logger.warning("key '%s' not found in app settings", key)
 
     return client.create_or_update_static_site_function_app_settings(
-        resource_group_name, name, kind=None, properties=app_settings)
+        resource_group_name, name, app_settings=app_settings)
 
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):
@@ -192,9 +193,15 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', output_location='.github/workflows',
-                       tags=None, no_wait=False, sku='Free'):
-    if not token:
+                       tags=None, no_wait=False, sku='Free', login_with_github=False):
+    if not token and not login_with_github:
         _raise_missing_token_suggestion()
+    elif not token:
+        from ._github_oauth import get_github_access_token
+        scopes = ["admin:repo_hook", "repo", "workflow"]
+        token = get_github_access_token(cmd, scopes)
+    elif token and login_with_github:
+        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
@@ -265,15 +272,16 @@ def _parse_pair(pair, delimiter):
     if delimiter not in pair:
         CLIError("invalid format of pair {0}".format(pair))
 
-    pair_split = pair.split(delimiter)
-    return pair_split[0], pair_split[1]
+    index = pair.index(delimiter)
+    return pair[:index], pair[1 + index:]
 
 
 def _raise_missing_token_suggestion():
     pat_documentation = "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"
     raise CLIError("GitHub access token is required to authenticate to your repositories. "
                    "If you need to create a Github Personal Access Token, "
-                   "please follow the steps found at the following link:\n{0}".format(pat_documentation))
+                   "please run with the '--login-with-github' flag or follow "
+                   "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
 def _get_staticsite_location(client, static_site_name, resource_group_name):

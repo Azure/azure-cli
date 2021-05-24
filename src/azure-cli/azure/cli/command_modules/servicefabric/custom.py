@@ -119,7 +119,7 @@ def list_cluster(client, resource_group_name=None):
 def new_cluster(cmd,
                 client,
                 resource_group_name,
-                location,
+                location=None,
                 certificate_subject_name=None,
                 parameter_file=None,
                 template_file=None,
@@ -170,6 +170,9 @@ def new_cluster(cmd,
     rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
     if rg is None:
         _create_resource_group_name(cli_ctx, resource_group_name, location)
+
+    if location is None:
+        location = rg.location
 
     if vault_name is None:
         vault_name = resource_group_name
@@ -439,72 +442,6 @@ def remove_client_cert(client,
     patch_request = ClusterUpdateParameters(client_certificate_thumbprints=cluster.client_certificate_thumbprints,
                                             client_certificate_common_names=cluster.client_certificate_common_names)
 
-    return client.update(resource_group_name, cluster_name, patch_request)
-
-
-def add_cluster_cert(cmd,
-                     client,
-                     resource_group_name,
-                     cluster_name,
-                     certificate_file=None,
-                     certificate_password=None,
-                     vault_name=None,
-                     vault_resource_group_name=None,
-                     certificate_output_folder=None,
-                     certificate_subject_name=None,
-                     secret_identifier=None):
-    cli_ctx = cmd.cli_ctx
-    cluster = client.get(resource_group_name, cluster_name)
-    if cluster.certificate is None:
-        raise CLIError("Unsecure cluster is not allowed to add certificate")
-
-    result = _create_certificate(cmd,
-                                 cli_ctx,
-                                 resource_group_name,
-                                 certificate_file,
-                                 certificate_password,
-                                 vault_name,
-                                 vault_resource_group_name,
-                                 certificate_output_folder,
-                                 certificate_subject_name,
-                                 secret_identifier)
-
-    vault_id = result[0]
-    secret_url = result[1]
-    thumbprint = result[2]
-
-    compute_client = compute_client_factory(cli_ctx)
-    primary_node_type = [n for n in cluster.node_types if n.is_primary is True][0]
-    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, primary_node_type.name)
-    fabric_ext = _get_sf_vm_extension(vmss)
-    if fabric_ext is None:
-        raise CLIError("Failed to find service fabric extension")
-
-    # add cert and star vmss update
-    _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster.cluster_id, vault_id, secret_url, is_cluster_cert=True, thumbprint=thumbprint)
-
-    # cluser update
-    patch_request = ClusterUpdateParameters(certificate=cluster.certificate)
-    patch_request.certificate.thumbprint_secondary = thumbprint
-    return client.update(resource_group_name, cluster_name, patch_request)
-
-
-def remove_cluster_cert(client, resource_group_name, cluster_name, thumbprint):
-    cluster = client.get(resource_group_name, cluster_name)
-    if cluster.certificate is None:
-        raise CLIError("Unsecure cluster is not allowed to remove certificate")
-    if cluster.certificate.thumbprint_secondary.lower() == thumbprint.lower():
-        cluster.certificate.thumbprint_secondary = None
-    else:
-        if cluster.certificate.thumbprint.lower() == thumbprint.lower():
-            cluster.certificate.thumbprint = cluster.certificate.thumbprint_secondary
-            cluster.certificate.thumbprint_secondary = None
-        else:
-            raise CLIError(
-                "Unable to find the certificate with the thumbprint {} in the cluster".format(thumbprint))
-
-    patch_request = ClusterUpdateParameters(certificate=cluster.certificate)
-    patch_request.certificate = cluster.certificate
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
@@ -1343,25 +1280,19 @@ def _deploy_arm_template_core(cmd,
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
     client = resource_client_factory(cmd.cli_ctx)
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        if validate_only:
-            deploy_poll = sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
-                                      deployment)
-        else:
-            deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
-                                      deployment_name, deployment)
-        return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
 
     if validate_only:
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
-                           properties)
+        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_validate, resource_group_name, deployment_name,
+                                      deployment)
+            return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
-    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name, deployment_name,
-                              properties)
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, deployment)
+
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_create_or_update, resource_group_name, deployment_name,
+                              deployment)
     return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
 
