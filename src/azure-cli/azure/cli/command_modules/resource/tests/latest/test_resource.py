@@ -753,13 +753,13 @@ class TemplateSpecsTest(ScenarioTest):
         })
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
-            self.check('template.variables.provider', "[split(parameters('resource'), '/')[0]]"),
-            self.check('template.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
-            self.check('template.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
-            self.check('template.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
-            self.check('template.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
-            self.check('template.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
-            self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
+            self.check('mainTemplate.variables.provider', "[split(parameters('resource'), '/')[0]]"),
+            self.check('mainTemplate.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
+            self.check('mainTemplate.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
+            self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
+            self.check('mainTemplate.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
+            self.check('mainTemplate.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
+            self.check('mainTemplate.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
 
         with self.assertRaises(IncorrectUsageError) as err:
@@ -781,6 +781,7 @@ class TemplateSpecsTest(ScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
+            'uf': os.path.join(curr_dir, 'sample_form_ui_definition_rg.json').replace('\\', '\\\\')
         })
 
         path = os.path.join(curr_dir, 'artifacts')
@@ -790,11 +791,12 @@ class TemplateSpecsTest(ScenarioTest):
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
-            self.check('artifacts.length([])', 3),
-            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
-            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
-            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --ui-form-definition "{uf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
+            self.check('linkedTemplates.length([])', 3),
+            self.check_pattern('linkedTemplates[0].path', 'artifacts.createResourceGroup.json'),
+            self.check_pattern('linkedTemplates[1].path', 'artifacts.createKeyVault.json'),
+            self.check_pattern('linkedTemplates[2].path', 'artifacts.createKeyVaultWithSecret.json'),
+            self.check('uiFormDefinition.view.properties.title', 'titleFooRG')
         ]).get_output_in_json()
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
@@ -818,27 +820,29 @@ class TemplateSpecsTest(ScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
+            'uf': os.path.join(curr_dir, 'sample_form_ui_definition_sub.json').replace('\\', '\\\\'),
+            'uf1': os.path.join(curr_dir, 'sample_form_ui_definition_mg.json').replace('\\', '\\\\'),
         })
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
                           self.check('name', '1.0'),
                           self.check('description', None),
                           self.check('display_name', None),
-                          self.check('artifacts.length([])', 0)]).get_output_in_json()
+                          self.check('artifacts', None)]).get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
         self.cmd('ts update -s {template_spec_id} --display-name {display_name} --description {description} --yes', checks=[
-                 self.check('name', self.kwargs['template_spec_name']),
-                 self.check('description', self.kwargs['description'].replace('"', '')),
-                 self.check('displayName', self.kwargs['display_name'].replace('"', ''))
-                 ])
+            self.check('name', self.kwargs['template_spec_name']),
+            self.check('description', self.kwargs['description'].replace('"', '')),
+            self.check('displayName', self.kwargs['display_name'].replace('"', ''))
+        ])
 
         self.cmd('ts update -s {template_spec_version_id} --version-description {version_description} --yes', checks=[
-                 self.check('name', '1.0'),
-                 self.check('description', self.kwargs['version_description'].replace('"', '')),
-                 self.check('artifacts', None)
-                 ])
+            self.check('name', '1.0'),
+            self.check('description', self.kwargs['version_description'].replace('"', '')),
+            self.check('linkedTemplates', None)
+        ])
 
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
@@ -847,13 +851,14 @@ class TemplateSpecsTest(ScenarioTest):
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
-        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
-                 self.check('description', self.kwargs['version_description'].replace('"', '')),
-                 self.check('artifacts.length([])', 3),
-                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
-                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
-                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
-                 ])
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --ui-form-definition "{uf1}" --yes', checks=[
+            self.check('description', self.kwargs['version_description'].replace('"', '')),
+            self.check('linkedTemplates.length([])', 3),
+            self.check_pattern('linkedTemplates[0].path', 'artifacts.createResourceGroup.json'),
+            self.check_pattern('linkedTemplates[1].path', 'artifacts.createKeyVault.json'),
+            self.check_pattern('linkedTemplates[2].path', 'artifacts.createKeyVaultWithSecret.json'),
+            self.check('uiFormDefinition.view.properties.title', 'titleFooMG')
+        ])
 
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
@@ -1042,7 +1047,7 @@ class TemplateSpecsExportTest(LiveScenarioTest):
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
-    @StorageAccountPreparer(name_prefix='testquerystrrg', location='eastus', kind='StorageV2')
+    @StorageAccountPreparer(name_prefix='testquerystr', location='eastus', kind='StorageV2')
     def test_resource_group_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
 
         container_name = self.create_random_name('querystr', 20)
@@ -1808,7 +1813,7 @@ class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
         self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("length(changes)", 3),
-            self.check("changes[0].changeType", "Create"),
+            self.check("changes[0].changeType", "Modify"),
             self.check("changes[1].changeType", "Create"),
             self.check("changes[2].changeType", "Create"),
         ])
@@ -2531,7 +2536,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(IncorrectUsageError):
+            with self.assertRaises(SystemExit):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
@@ -2755,7 +2760,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'waiver'),
+                self.check('exemptionCategory', 'Waiver'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{metadata}')
             ]).get_output_in_json()
@@ -2771,7 +2776,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -2782,7 +2787,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -2807,7 +2812,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'waiver'),
+                self.check('exemptionCategory', 'Waiver'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{metadata}')
             ]).get_output_in_json()
@@ -2823,7 +2828,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -2834,7 +2839,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
                 self.check('displayName', '{pedn}'),
-                self.check('exemptionCategory', 'mitigated'),
+                self.check('exemptionCategory', 'Mitigated'),
                 self.check('description', '{pe_desc}'),
                 self.check('metadata.category', '{updated_metadata}'),
                 self.check('policyDefinitionReferenceIds[0]', '{prids}'),
@@ -3472,6 +3477,8 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
 
 
 class BicepScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     def test_bicep_list_versions(self):
         self.cmd('az bicep list-versions', checks=[
             self.greater_than('length(@)', 0)

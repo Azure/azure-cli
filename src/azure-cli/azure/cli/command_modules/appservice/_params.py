@@ -179,14 +179,14 @@ def load_arguments(self, _):
         c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_custom_domain_verification',
                    help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -196,7 +196,7 @@ def load_arguments(self, _):
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
-                   deprecate_info=c.deprecate(expiration='2.24.0'))
+                   deprecate_info=c.deprecate(expiration='3.0.0'))
 
     with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
@@ -984,8 +984,9 @@ def load_arguments(self, _):
         c.argument('token', options_list=['--token', '-t'],
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets. If you need to create a Github Personal Access Token, "
-                        "please follow the steps found at the following link:\n"
+                        "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
                         "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token")
         c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
     with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',
