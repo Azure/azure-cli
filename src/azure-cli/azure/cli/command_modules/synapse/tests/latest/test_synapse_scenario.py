@@ -6,6 +6,7 @@
 
 import os
 import unittest
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
@@ -125,11 +126,11 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_workspace_with_cmk(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'testws052002',#self.create_random_name(prefix='testws', length=10),
-            'rg': 'chayang-test-rg',
-            'storage-account': 'chayangstoragewestus2',
-            'file-system': 'synapsews1',
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspacecmk',
+            'rg': 'testrg',
+            'storage-account': 'teststorageforsynapsecmk',
+            'file-system': self.create_random_name(prefix='fs', length=16),
             'login-user': 'cliuser1',
             'login-password': self.create_random_name(prefix='Pswd1', length=16),
             'key-identifier': 'https://wskeyvaultzes.vault.azure.net/keys/keyzes0512',
@@ -137,26 +138,26 @@ class SynapseScenarioTests(ScenarioTest):
             'managed-identity': '00000000-0000-1111-2222-333333333333'
         })
 
-        # # create workspace supporting cmk, data exfiltration
-        # workspace_cmk = self.cmd(
-        #     'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
-        #     '--file-system {file-system} --sql-admin-login-user {login-user} '
-        #     '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
-        #     ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids "" ', checks=[
-        #         self.check('name', self.kwargs['workspace']),
-        #         self.check('type', 'Microsoft.Synapse/workspaces'),
-        #         self.check('provisioningState', 'Succeeded')
-        #     ]).get_output_in_json()
-        #
-        # self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
-        #
-        # # set access policy
-        # self.cmd(
-        #     'az keyvault set-policy --name wskeyvaultzes --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+        # create workspace supporting cmk, data exfiltration
+        workspace_cmk = self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
+            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids "" ', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ]).get_output_in_json()
+
+        self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name wskeyvaultzes --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
 
         # active workspace
         self.cmd(
-            'az synapse workspace key update --name default --key-identifier {key-identifier} --resource-group {rg} --workspace-name {workspace}', checks=[
+            'az synapse workspace key update --name default --key-identifier {key-identifier} --is-active True  --resource-group {rg} --workspace-name {workspace}', checks=[
                 self.check('name', 'default'),
                 self.check('type', 'Microsoft.Synapse/workspaces/keys')
             ])
@@ -306,25 +307,16 @@ class SynapseScenarioTests(ScenarioTest):
                  expect_failure=True)
 
     @record_only()
-    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'location': 'eastus2euap',
+            'workspace': 'zes0219test',
+            'rg': 'chayang-test-rg',
+            'sql-pool': 'rivertiger0220 ',
             'performance-level': 'DW1000c',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
-            'restore-point-time': '2020-11-25T02:47:37'
+            'restore-point-time': '2021-05-24T08:09:15'
         })
-
-        # create a workspace
-        self._create_workspace()
-
-        # check workspace name
-        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
-            self.check('available', False)
-        ])
 
         # restore sql pool
         self.cmd('az synapse sql pool restore --name {sql-pool} --workspace-name {workspace} --resource-group {rg} '
@@ -345,6 +337,8 @@ class SynapseScenarioTests(ScenarioTest):
         # delete dest sql pool with dest sql pool name
         self.cmd(
             'az synapse sql pool delete --name {dest-sql-pool} --workspace-name {workspace} --resource-group {rg} --yes')
+
+        time.sleep(200)
 
         # test list-deleted
         self.cmd('az synapse sql pool list-deleted --workspace-name {workspace} --resource-group {rg}',
@@ -420,7 +414,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check("length([])", 0)
                  ])
 
-    @record_only()
+    #@record_only()
     def test_sql_pool_tde(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -430,10 +424,10 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         self.cmd(
-            'az synapse sql pool tde set --parameters Enabled '
+            'az synapse sql pool tde set --status Enabled '
             '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --transparent-data-encryption-name current')
 
-        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg}'
+        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} '
                  '--transparent-data-encryption-name current',
                  checks=[
                      self.check('name', "current"),
