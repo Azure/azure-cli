@@ -711,20 +711,21 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
             if not hub_identity.user_assigned_identities[identity]:
                 raise ArgumentUsageError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
             del hub_identity.user_assigned_identities[identity]
-    elif isinstance(user_identities, list):
+    elif isinstance(user_identities, list) and getattr(hub_identity, 'user_assigned_identities', None):
         del hub_identity.user_assigned_identities
 
     if hub_identity.type in [
             IdentityType.system_assigned.value,
             IdentityType.system_assigned_user_assigned.value
     ]:
-        hub_identity.type = IdentityType.system_assigned_user_assigned.value if hub_identity.user_assigned_identities else IdentityType.system_assigned.value
+        hub_identity.type = IdentityType.system_assigned_user_assigned.value if getattr(hub.identity, 'user_assigned_identities', None) else IdentityType.system_assigned.value
     else:
-        hub_identity.type = IdentityType.user_assigned.value if hasattr(hub_identity, 'user_assigned_identities') else IdentityType.none.value
+        hub_identity.type = IdentityType.user_assigned.value if getattr(hub_identity, 'user_assigned_identities', None) else IdentityType.none.value
 
+    if not getattr(hub_identity, 'user_assigned_identities', None) and hasattr(hub_identity, 'user_assigned_identities'):
+        del hub_identity.user_assigned_identities
+    
     hub.identity = hub_identity
-    if not getattr(hub.identity, 'user_assigned_identities', None):
-        hub.identity.user_assigned_identities = None
     poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
     lro = LongRunningOperation(cmd.cli_ctx)(poller)
     return lro.identity
