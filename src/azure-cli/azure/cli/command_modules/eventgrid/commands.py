@@ -100,8 +100,8 @@ def load_command_table(self, _):
     with self.command_group('eventgrid topic', topics_mgmt_util, client_factory=topics_factory) as g:
         g.show_command('show', 'get')
         g.command('key list', 'list_shared_access_keys')
-        g.command('key regenerate', 'regenerate_key')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
+        g.custom_command('key regenerate', 'cli_topic_regenerate_key')
         g.custom_command('list', 'cli_topic_list')
         g.custom_command('create', 'cli_topic_create_or_update')
         g.custom_command('update', 'cli_topic_update')
@@ -126,7 +126,7 @@ def load_command_table(self, _):
 
     with self.command_group('eventgrid system-topic', system_topics_mgmt_util, client_factory=system_topics_factory, is_preview=True) as g:
         g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_system_topic_list')
         g.custom_command('create', 'cli_system_topic_create_or_update')
         g.custom_command('update', 'cli_system_topic_update')
