@@ -1708,7 +1708,7 @@ def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, to
 
             subscription_id = id_parts[1]
             _validate_subscription_id_matches_default_subscription_id(
-                default_subscription_id=client._config.subscription_id,
+                default_subscription_id=client._config.subscription_id,  # pylint: disable=protected-access
                 provided_subscription_id=subscription_id)
 
             if len(id_parts) == 2:
@@ -1732,7 +1732,7 @@ def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, to
     id_parts = parse_resource_id(resource_id)
     subscription_id = id_parts.get('subscription')
     _validate_subscription_id_matches_default_subscription_id(
-        default_subscription_id=client._config.subscription_id,
+        default_subscription_id=client._config.subscription_id,  # pylint: disable=protected-access
         provided_subscription_id=subscription_id)
 
     rg_name = id_parts.get('resource_group')
