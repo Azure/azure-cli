@@ -125,7 +125,7 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
     return _keyvault_mgmt_client_factory
 
 
-def keyvault_data_plane_factory(cli_ctx, _):
+def keyvault_data_plane_factory(cli_ctx, *_):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.util import should_disable_connection_verify
 

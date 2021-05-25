@@ -1598,7 +1598,7 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
 
 def _get_keyVault_not_arm_client(cli_ctx):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx, None)
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_keyvault(cmd,

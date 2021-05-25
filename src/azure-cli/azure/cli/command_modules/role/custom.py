@@ -1539,7 +1539,7 @@ def _get_signed_in_user_object_id(graph_client):
 
 def _get_keyvault_client(cli_ctx):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx, None)
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals

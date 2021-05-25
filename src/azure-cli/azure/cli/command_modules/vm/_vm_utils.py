@@ -102,7 +102,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
 
 def create_keyvault_data_plane_client(cli_ctx):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx, None)
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
