@@ -226,7 +226,7 @@ def cli_domain_update(
         sku=sku_info,
         identity=identity_info)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         domain_name,
         domain_update_parameters)
@@ -276,7 +276,7 @@ def cli_domain_create_or_update(
         sku=sku_info,
         identity=identity_info)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         domain_name,
         domain_info)
@@ -287,7 +287,7 @@ def cli_domain_topic_create_or_update(
         resource_group_name,
         domain_name,
         domain_topic_name):
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         domain_name,
         domain_topic_name)
@@ -298,7 +298,7 @@ def cli_domain_topic_delete(
         resource_group_name,
         domain_name,
         domain_topic_name):
-    return client.delete(
+    return client.begin_delete(
         resource_group_name,
         domain_name,
         domain_topic_name)
@@ -415,7 +415,7 @@ def cli_partner_namespace_create_or_update(
         partner_registration_fully_qualified_id=partner_registration_id,
         tags=tags)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         partner_namespace_name,
         partner_namespace_info)
@@ -549,7 +549,7 @@ def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         partner_topic_name,
         event_subscription_name,
@@ -697,7 +697,7 @@ def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=t
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         system_topic_name,
         event_subscription_name,
@@ -1183,7 +1183,7 @@ def cli_system_topic_event_subscription_update(
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         system_topic_name,
         event_subscription_name,
@@ -1228,7 +1228,7 @@ def cli_partner_topic_event_subscription_update(
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         partner_topic_name,
         event_subscription_name,
