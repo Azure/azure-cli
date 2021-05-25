@@ -286,6 +286,8 @@ def acr_repository_update(cmd,
             'writeEnabled': write_enabled
         })
     if teleport_enabled is not None:
+        if not repository:
+            raise CLIError("--teleport-enabled can only be used with --repository.")
         json_payload.update({
             'teleportEnabled': teleport_enabled
         })

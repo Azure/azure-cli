@@ -131,7 +131,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
-        c.argument('teleport_enabled', help='Indicates whether Teleport feature is enabled on the repository.', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('teleport_enabled', help='Indicates whether Teleport feature is enabled on the repository. Please see https://aka.ms/acr/teleport', arg_type=get_three_state_flag(), is_preview=True)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
