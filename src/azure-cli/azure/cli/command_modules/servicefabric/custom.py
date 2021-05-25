@@ -20,8 +20,7 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
-from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
 

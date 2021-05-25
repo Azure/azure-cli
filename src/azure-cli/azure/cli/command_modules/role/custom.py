@@ -19,7 +19,7 @@ from msrestazure.azure_exceptions import CloudError
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
