@@ -186,7 +186,7 @@ type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
   - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-    text: az postgres flexible-server migration create --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --body @"migrationConfig.json"
+    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --properties @"migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
@@ -194,9 +194,9 @@ type: command
 short-summary: List the migrations of a flexible server.
 examples:
   - name: List the currently active migrations of a target flexible server.
-    text: az postgres flexible-server migration list --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --filter Active
+    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --filter Active
   - name: List all (Active/Completed) migrations of a target flexible server.
-    text: az postgres flexible-server migration list --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --filter All
+    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --filter All
 """
 
 helps['postgres flexible-server migration show'] = """
@@ -204,7 +204,7 @@ type: command
 short-summary: Get the details of a specific migration.
 examples:
   - name: Get the details of a specific migration of a target flexible server.
-    text: az postgres flexible-server migration show --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    text: az postgres flexible-server migration show --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
 helps['postgres flexible-server migration update'] = """
@@ -212,26 +212,26 @@ type: command
 short-summary: Update a specific migration.
 examples:
   - name: Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.
-    text: az postgres flexible-server migration update --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --setup-replication
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --setup-replication
   - name: Specify the list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate additional DBs concurrently using new migrations. Note that each additional DB affects the performance of the source server.
-    text: az postgres flexible-server migration update --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db1 dbName1 --db2 dbName2 --db3 dbName3
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db1 dbName1 --db2 dbName2 --db3 dbName3
   - name: Allow the migration workflow to overwrite the DB on the target.
-    text: az postgres flexible-server migration update --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
   - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
-    text: az postgres flexible-server migration update --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
 """
 
 # - name: Specify the start time for the data migration to start. This should be within 2 weeks from the current time.
-#   text: az postgres flexible-server migration update --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-time-utc '2021-12-28T17:06:03.4669999-07:00'
+#   text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-time-utc '2021-12-28T17:06:03.4669999-07:00'
 # - name: Start the data migration now, rather than wait for the migration window start time.
-#   text: az postgres flexible-server migration update --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --init-data-migration
+#   text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --init-data-migration
 
 helps['postgres flexible-server migration delete'] = """
 type: command
 short-summary: Delete a specific migration.
 examples:
   - name: Cancel/delete the migration workflow. The migration workflows can be canceled/deleted at any point.
-    text: az postgres flexible-server migration delete --subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    text: az postgres flexible-server migration delete --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
 helps['postgres flexible-server parameter'] = """
