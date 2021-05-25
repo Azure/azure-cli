@@ -50,7 +50,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | SQL   | No |**In progress** | 06/30/2021 |Yong|GA (1.0.0) | Preview (0.25.0) | Medium (Once two months) | Module |
 | ACS   |  Yes |Not Started | 06/30/2021 |Catherine|ContainerService: GA (14.0.0)<br> ContainerInstance: GA (7.0.0) | ContainerService: GA (11.0.0)<br> ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
 | ACR   | Yes |Not Started | 06/30/2021 |Catherine|Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
-| ServiceBus   | Yes |Not Started | 06/30/2021 |Catherine|GA (6.0.0) | GA (1.0.0) | Medium (Once four months) | Module |
+| ServiceBus   | Yes |**Completed** | 06/30/2021 |Catherine|GA (6.0.0) | GA (1.0.0) | Medium (Once four months) | Module |
 | EventGrid | Yes |Not Started | 06/30/2021 |Catherine| GA (8.0.0) | Preview (3.0.0rc8) | Medium (Once three months) | Module |
 | HDInsight | Yes |Not Started | 06/30/2021 |Catherine| GA (7.0.0) | GA (2.1.0) | Medium (Once two months) | Module |
 | Kusto |  Yes |Not Started | 06/30/2021 |Catherine|Preview (1.0.0b1) | Preview (0.10.0) | Medium (Once two months | Module |
@@ -76,12 +76,12 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | Relay |  |Not Started | N/A|Yong|GA (1.0.0) | Preview (0.2.0) | Low (Once two years) | Module |
 | AppConfiguration  |  |**Completed** | N/A |Catherine|GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Container   |   |Not Started | N/A |Catherine| ContainerInstance: GA (7.0.0) |  ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
-| Batch   |  |Not Started | N/A |Catherine|GA (14.0.0) | GA (9.0.0) | Low (Once half year) | Module |
-| ServiceFabric |  |Not Started | N/A|Catherine|Preview (1.0.0b1) | Preview (0.5.0) | Low (Once a year) | Module |
+| Batch   |  |**In progress** | N/A |Catherine|GA (15.0.0) | GA (9.0.0) | Low (Once half year) | Module |
+| ServiceFabric |  |**Completed** | N/A|Catherine|Preview (1.0.0) | Preview (0.5.0) | Low (Once a year) | Module |
 | ContainerInstance |  |Not Started | N/A |Catherine|GA (7.0.0) | GA (2.0.0) | Low (Once a year) | Module |
 | BotService   |  |Not Started | N/A|Catherine|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once two years) | Module |
 | Maps |  |Not Started | N/A|Catherine|Preview (1.0.0b1) | Preview (0.1.0) | Low (Once three years) | Module |
-| Backup   | |Not Started | N/A|Catherine|RecoveryServices: GA (1.0.0)<br> RecoveryServicesBackup: N/A | RecoveryServices: Preview (0.6.0)<br> RecoveryServicesBackup: Preview (0.11.0) | Low (Once half year) | Module |
+| Backup   | |**In progress** | N/A|Catherine|RecoveryServices: GA (1.0.0)<br> RecoveryServicesBackup: N/A | RecoveryServices: Preview (0.6.0)<br> RecoveryServicesBackup: Preview (0.11.0) | Low (Once half year) | Module |
 | BatchAI   | | Not Started | N/A |Catherine |N/A | GA (2.0.0) | | Module |
 | Lab  | |Not Started | N/A |Catherine|DevTestLabs: GA (9.0.0) | DevTestLabs: GA (4.0.0) | Low (Once half year) | Module |
 | Reservations |  |Not Started | N/A |Catherine|Preview (1.0.0b1) | Preview (0.8.0) | Low (Once half year) | Module |
