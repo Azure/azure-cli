@@ -4,23 +4,22 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
-from .flexible_server_custom_common import user_confirmation
-from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG
+from .flexible_server_custom_common import user_confirmation, create_firewall_rule
+from ._flexible_server_util import generate_missing_parameters, resolve_poller, parse_public_access_input, \
+    generate_password, parse_maintenance_window, get_postgres_list_skus_info, DEFAULT_LOCATION_PG
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
-
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -30,6 +29,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 # region create without args
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=raise-missing-from
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
@@ -51,6 +51,10 @@ def flexible_server_create(cmd, client,
     db_context = DbContext(
         azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         logging_name='PostgreSQL', command_group='postgres', server_client=client)
+
+    if high_availability is not None and high_availability.lower() == 'enabled':
+        if tier == 'Burstable':
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
 
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
@@ -189,8 +193,6 @@ def flexible_server_update_custom_func(cmd, instance,
     sku_info = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
 
-    from importlib import import_module
-
     server_module_path = instance.__module__
     module = import_module(server_module_path)
     ServerForUpdate = getattr(module, 'ServerForUpdate')
@@ -246,24 +248,21 @@ def flexible_server_update_custom_func(cmd, instance,
 
 
 def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
-    confirm = yes
     result = None
     if not yes:
-        confirm = user_confirmation(
+        user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name),
-            yes=yes)
-    if confirm:
-        try:
-            result = client.begin_delete(resource_group_name, server_name)
-            if cmd.cli_ctx.local_context.is_on:
-                local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
-                local_context_file.remove_option('postgres flexible-server', 'server_name')
-                local_context_file.remove_option('postgres flexible-server', 'administrator_login')
-                local_context_file.remove_option('postgres flexible-server', 'database_name')
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
-            raise CLIError(ex)
+                                                                                              resource_group_name), yes=yes)
+    try:
+        result = client.begin_delete(resource_group_name, server_name)
+        if cmd.cli_ctx.local_context.is_on:
+            local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
+            local_context_file.remove_option('postgres flexible-server', 'server_name')
+            local_context_file.remove_option('postgres flexible-server', 'administrator_login')
+            local_context_file.remove_option('postgres flexible-server', 'database_name')
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
+        raise CLIError(ex)
     return result
 
 

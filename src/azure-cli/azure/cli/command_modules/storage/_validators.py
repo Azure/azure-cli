@@ -1413,7 +1413,9 @@ def validate_match_condition(namespace):
         del namespace.if_none_match
 
 
-def validate_or_policy(namespace):
+def validate_or_policy(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     error_elements = []
     if namespace.properties is None:
         error_msg = "Please provide --policy in JSON format or the following arguments: "
@@ -1457,6 +1459,19 @@ def validate_or_policy(namespace):
 
         if "policyId" in or_policy.keys() and or_policy["policyId"]:
             namespace.policy_id = or_policy['policyId']
+
+    if not is_valid_resource_id(namespace.source_account):
+        namespace.source_account = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts',
+            name=namespace.source_account)
+    if not is_valid_resource_id(namespace.destination_account):
+        namespace.destination_account = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts',
+            name=namespace.destination_account)
 
 
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):

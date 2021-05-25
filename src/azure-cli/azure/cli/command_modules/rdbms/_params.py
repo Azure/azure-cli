@@ -298,7 +298,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('public_access', options_list=['--public-access'],
                        help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
                        validator=public_access_validator)
-            c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
+            c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled. High availability can only be set during flexible server create time')
             c.argument('assign_identity', options_list=['--assign-identity'],
                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
             c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'], help='The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
@@ -464,6 +464,23 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], help='Name of the replica server.')
+
+        with self.argument_context('{} flexible-server deploy setup'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of the database')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_arg_type,
+                       help='Administrator username for the server.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], arg_group='Authentication', help='The password of the administrator.')
+            c.argument('sql_file_path', options_list=['--sql-file'], help='The path of the sql file. The sql file should be already in the repository')
+            c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
+            c.argument('repository', options_list=['--repo'], help='The name of your github username and repository e.g., Azure/azure-cli ')
+            c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
+            c.argument('allow_push', default=False, options_list=['--allow-push'], arg_type=get_three_state_flag(), help='Push the action yml file to the remote repository. The changes will be pushed to origin repository, speicified branch or current branch if not specified.')
+
+        with self.argument_context('{} flexible-server deploy run'.format(command_group)) as c:
+            c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
+            c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

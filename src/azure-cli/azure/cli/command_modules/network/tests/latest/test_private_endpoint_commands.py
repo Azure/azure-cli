@@ -1810,6 +1810,7 @@ def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
 
 # Rely on other modules. The test may be broken when other modules bump sdk. At that time, run the failed test in live.
 class NetworkPrivateLinkScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_automation", location="eastus2")
     def test_private_endpoint_connection_automation(self, resource_group):
         self.kwargs.update({
@@ -1847,6 +1848,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_health_care_apis", location="eastus")
     @AllowLargeResponse()
     def test_private_endpoint_connection_health_care_apis(self, resource_group):

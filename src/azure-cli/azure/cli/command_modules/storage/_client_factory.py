@@ -143,6 +143,10 @@ def cf_sa(cli_ctx, _):
     return storage_client_factory(cli_ctx).storage_accounts
 
 
+def cf_sa_blob_inventory(cli_ctx, _):
+    return storage_client_factory(cli_ctx).blob_inventory_policies
+
+
 def cf_sa_for_keys(cli_ctx, _):
     from knack.log import get_logger
     logger = get_logger(__name__)
