@@ -88,6 +88,8 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
+    ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], is_preview=True, completer=FilesCompleter(), type=file_type,
+                                                   help="A path to a uiFormDefinition file in the file system")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -559,6 +561,7 @@ def load_arguments(self, _):
     with self.argument_context('ts create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
         c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('ui_form_definition_file', arg_type=ui_form_definition_file_type, help='The uiFormDefinition file path in the file system for the template spec version.')
         c.argument('location', options_list=['--location', '-l'], help='The location to store the template-spec and template-spec version(s). Cannot be changed after creation.')
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
@@ -569,6 +572,7 @@ def load_arguments(self, _):
     with self.argument_context('ts update') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
         c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('ui_form_definition_file', arg_type=ui_form_definition_file_type, help='The uiFormDefinition file path in the file system for the template spec version.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)

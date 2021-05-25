@@ -210,9 +210,28 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('snapshotTime', self.kwargs['snapshot'])
         ])
 
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-snapshot', checks={
+            JMESPathCheck('length(@)', 2)
+        })
+
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaises(ResourceExistsError):
+            self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+
         self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot} -y')
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --include-snapshot', checks={
+            JMESPathCheck('length(@)', 1)
+        })
+
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}')
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --include-snapshot', checks={
+            JMESPathCheck('length(@)', 1)
+        })
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_tier", location="eastus")

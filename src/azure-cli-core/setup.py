@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.23.0"
+VERSION = "2.24.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -47,7 +47,7 @@ DEPENDENCIES = [
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'azure-common~=1.1',
-    'azure-mgmt-core>=1.2.0,<2.0.0',
+    'azure-mgmt-core>=1.2.0,<1.3.0',     # the preview version of azure-mgmt-core is 1.3.0b1, it cannot fit azure-core >=1.14.0
     'cryptography>=3.2,<3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',

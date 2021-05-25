@@ -7,19 +7,30 @@
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
+from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
+                                      ArmIdentity,
+                                      CertificateDescription,
+                                      CertificateProperties,
+                                      CertificateVerificationDescription,
                                       CloudToDeviceProperties,
                                       IotHubDescription,
                                       IotHubSkuInfo,
                                       SharedAccessSignatureAuthorizationRule,
                                       IotHubProperties,
                                       EventHubProperties,
+                                      EventHubConsumerGroupBodyDescription,
+                                      EventHubConsumerGroupName,
+                                      FailoverInput,
                                       FeedbackProperties,
+                                      ManagedIdentity,
                                       MessagingEndpointProperties,
+                                      OperationInputs,
                                       EnrichmentProperties,
                                       RoutingEventHubProperties,
                                       RoutingServiceBusQueueEndpointProperties,
@@ -42,8 +53,8 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 
 from azure.mgmt.iotcentral.models import (AppSkuInfo,
                                           App)
-
-from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
+from azure.cli.command_modules.iot._constants import SYSTEM_ASSIGNED_IDENTITY
+from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType, IdentityType
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate, generate_key
 
@@ -339,7 +350,10 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, None, certificate)
+
+    cert_properties = CertificateProperties(certificate=certificate)
+    cert_description = CertificateDescription(properties=cert_properties)
+    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
 
 def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None):
@@ -350,7 +364,9 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, etag, certificate)
+            cert_properties = CertificateProperties(certificate=certificate)
+            cert_description = CertificateDescription(properties=cert_properties)
+            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
                    .format(certificate_name))
 
@@ -370,7 +386,8 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate)
+    certificate_verify_body = CertificateVerificationDescription(certificate=certificate)
+    return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate_verify_body)
 
 
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
@@ -391,22 +408,30 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
                    fileupload_storage_container_uri=None,
+                   fileupload_storage_identity=None,
                    min_tls_version=None,
-                   tags=None):
+                   tags=None,
+                   system_identity=None,
+                   user_identities=None,
+                   identity_role=None,
+                   identity_scopes=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
         if not fileupload_storage_connectionstring or not fileupload_storage_container_name:
-            raise CLIError('Please specify storage endpoint(storage connection string and storage container name).')
+            raise RequiredArgumentMissingError('Please specify storage endpoint (storage connection string and storage container name).')
     if fileupload_storage_connectionstring and not fileupload_storage_container_name:
-        raise CLIError('Please mention storage container name.')
+        raise RequiredArgumentMissingError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
-        raise CLIError('Please mention storage connection string.')
+        raise RequiredArgumentMissingError('Please mention storage connection string.')
     identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
     if not identity_based_file_upload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
-        raise CLIError('Key-based authentication requires a connection string.')
+        raise RequiredArgumentMissingError('Key-based authentication requires a connection string.')
     if identity_based_file_upload and not fileupload_storage_container_uri:
-        raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
+        raise RequiredArgumentMissingError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
+    if not identity_based_file_upload and fileupload_storage_identity:
+        raise RequiredArgumentMissingError('In order to set a fileupload storage identity, please set file upload storage authentication (--fsa) to IdentityBased')
+
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
@@ -428,7 +453,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
         container_name=fileupload_storage_container_name if fileupload_storage_container_name else '',
         authentication_type=fileupload_storage_authentication_type if fileupload_storage_authentication_type else None,
-        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '')
+        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '',
+        identity=ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity else None)
 
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
@@ -441,8 +467,29 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                         sku=sku,
                                         properties=properties,
                                         tags=tags)
+    if (system_identity or user_identities):
+        hub_description.identity = _build_identity(system=bool(system_identity), identities=user_identities)
+    if bool(identity_role) ^ bool(identity_scopes):
+        raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-assigned managed identity role assignment')
 
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
+    def identity_assignment(lro):
+        try:
+            from azure.cli.core.commands.arm import assign_identity
+            instance = lro.resource().as_dict()
+            identity = instance.get("identity")
+            if identity:
+                principal_id = identity.get("principal_id")
+                if principal_id:
+                    hub_description.identity.principal_id = principal_id
+                    for scope in identity_scopes:
+                        assign_identity(cmd.cli_ctx, lambda: hub_description, lambda hub: hub_description, identity_role=identity_role, identity_scope=scope)
+        except CloudError as e:
+            raise e
+
+    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description, polling=True)
+    if identity_role and identity_scopes:
+        create.add_done_callback(identity_assignment)
+    return create
 
 
 def iot_hub_get(cmd, client, hub_name, resource_group_name=None):
@@ -451,7 +498,7 @@ def iot_hub_get(cmd, client, hub_name, resource_group_name=None):
         return _get_iot_hub_by_name(client, hub_name)
     if not _ensure_resource_group_existence(cli_ctx, resource_group_name):
         raise CLIError("Resource group '{0}' could not be found.".format(resource_group_name))
-    name_availability = client.iot_hub_resource.check_name_availability(hub_name)
+    name_availability = client.iot_hub_resource.check_name_availability(OperationInputs(name=hub_name))
     if name_availability is not None and name_availability.name_available:
         raise CLIError("An IotHub '{0}' under resource group '{1}' was not found."
                        .format(hub_name, resource_group_name))
@@ -481,6 +528,7 @@ def update_iot_hub_custom(instance,
                           fileupload_sas_ttl=None,
                           fileupload_storage_authentication_type=None,
                           fileupload_storage_container_uri=None,
+                          fileupload_storage_identity=None,
                           tags=None):
     from datetime import timedelta
     if tags is not None:
@@ -511,34 +559,29 @@ def update_iot_hub_custom(instance,
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
 
-    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
-    if identity_based_file_upload:
-        instance.properties.storage_endpoints['$default'].authentication_type = AuthenticationType.IdentityBased
-        instance.properties.storage_endpoints['$default'].container_uri = fileupload_storage_container_uri
-    elif fileupload_storage_authentication_type is not None:
-        instance.properties.storage_endpoints['$default'].authentication_type = None
-        instance.properties.storage_endpoints['$default'].container_uri = None
-    # TODO - remove connection string and set containerURI once fileUpload SAS URL is enabled
-    if fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
-        instance.properties.storage_endpoints['$default'].connection_string = fileupload_storage_connectionstring
-        instance.properties.storage_endpoints['$default'].container_name = fileupload_storage_container_name
-    elif fileupload_storage_connectionstring is not None:
-        raise CLIError('Please mention storage container name.')
-    elif fileupload_storage_container_name is not None:
-        raise CLIError('Please mention storage connection string.')
-    if fileupload_sas_ttl is not None:
-        instance.properties.storage_endpoints['$default'].sas_ttl_as_iso8601 = timedelta(hours=fileupload_sas_ttl)
+    default_storage_endpoint = _process_fileupload_args(
+        instance.properties.storage_endpoints['$default'],
+        fileupload_storage_connectionstring,
+        fileupload_storage_container_name,
+        fileupload_sas_ttl,
+        fileupload_storage_authentication_type,
+        fileupload_storage_container_uri,
+        fileupload_storage_identity,
+    )
+
+    instance.properties.storage_endpoints['$default'] = default_storage_endpoint
+
     return instance
 
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag}, polling=True)
 
 
 def iot_hub_delete(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.delete(resource_group_name, hub_name)
+    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name, polling=True)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -579,7 +622,13 @@ def iot_hub_sku_list(client, hub_name, resource_group_name=None):
 
 def iot_hub_consumer_group_create(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.create_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name)
+    consumer_group_body = EventHubConsumerGroupBodyDescription(properties=EventHubConsumerGroupName(name=consumer_group_name))
+    # Fix for breaking change argument in track 1 SDK method.
+    from azure.cli.core.util import get_arg_list
+    create_cg_op = client.iot_hub_resource.create_event_hub_consumer_group
+    if "consumer_group_body" not in get_arg_list(create_cg_op):
+        return create_cg_op(resource_group_name, hub_name, event_hub_name, consumer_group_name)
+    return create_cg_op(resource_group_name, hub_name, event_hub_name, consumer_group_name, consumer_group_body=consumer_group_body)
 
 
 def iot_hub_consumer_group_list(client, hub_name, resource_group_name=None, event_hub_name='events'):
@@ -595,6 +644,90 @@ def iot_hub_consumer_group_get(client, hub_name, consumer_group_name, resource_g
 def iot_hub_consumer_group_delete(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.iot_hub_resource.delete_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name)
+
+
+def iot_hub_identity_assign(cmd, client, hub_name, system_identity=None, user_identities=None, identity_role=None, identity_scopes=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+
+    def getter():
+        return iot_hub_get(cmd, client, hub_name, resource_group_name)
+
+    def setter(hub):
+
+        if user_identities and not hub.identity.user_assigned_identities:
+            hub.identity.user_assigned_identities = {}
+        if user_identities:
+            for identity in user_identities:
+                hub.identity.user_assigned_identities[identity] = hub.identity.user_assigned_identities.get(identity, {}) if hub.identity.user_assigned_identities else {}
+
+        has_system_identity = hub.identity.type in [IdentityType.system_assigned_user_assigned.value, IdentityType.system_assigned.value]
+
+        if system_identity or has_system_identity:
+            hub.identity.type = IdentityType.system_assigned_user_assigned.value if hub.identity.user_assigned_identities else IdentityType.system_assigned.value
+        else:
+            hub.identity.type = IdentityType.user_assigned.value if hub.identity.user_assigned_identities else IdentityType.none.value
+
+        poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    if bool(identity_role) ^ bool(identity_scopes):
+        raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-managed identity role assignment.')
+    if not system_identity and not user_identities:
+        raise RequiredArgumentMissingError('No identities provided to assign. Please provide system (--system) or user-assigned identities (--user).')
+    if identity_role and identity_scopes:
+        from azure.cli.core.commands.arm import assign_identity
+        for scope in identity_scopes:
+            hub = assign_identity(cmd.cli_ctx, getter, setter, identity_role=identity_role, identity_scope=scope)
+        return hub.identity
+    result = setter(getter())
+    return result.identity
+
+
+def iot_hub_identity_show(cmd, client, hub_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
+    return hub.identity
+
+
+def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_identities=None, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
+    hub_identity = hub.identity
+
+    if not system_identity and user_identities is None:
+        raise RequiredArgumentMissingError('No identities provided to remove. Please provide system (--system) or user-assigned identities (--user).')
+    # Turn off system managed identity
+    if system_identity:
+        if hub_identity.type not in [
+                IdentityType.system_assigned.value,
+                IdentityType.system_assigned_user_assigned.value
+        ]:
+            raise ArgumentUsageError('Hub {} is not currently using a system-assigned identity'.format(hub_name))
+        hub_identity.type = IdentityType.user_assigned if hub.identity.type in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value] else IdentityType.none.value
+
+    if user_identities:
+        # loop through user_identities to remove
+        for identity in user_identities:
+            if not hub_identity.user_assigned_identities[identity]:
+                raise ArgumentUsageError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
+            del hub_identity.user_assigned_identities[identity]
+    elif isinstance(user_identities, list):
+        del hub_identity.user_assigned_identities
+
+    if hub_identity.type in [
+            IdentityType.system_assigned.value,
+            IdentityType.system_assigned_user_assigned.value
+    ]:
+        hub_identity.type = IdentityType.system_assigned_user_assigned.value if hub_identity.user_assigned_identities else IdentityType.system_assigned.value
+    else:
+        hub_identity.type = IdentityType.user_assigned.value if hasattr(hub_identity, 'user_assigned_identities') else IdentityType.none.value
+
+    hub.identity = hub_identity
+    if not getattr(hub.identity, 'user_assigned_identities', None):
+        hub.identity.user_assigned_identities = None
+    poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    lro = LongRunningOperation(cmd.cli_ctx)(poller)
+    return lro.identity
 
 
 def iot_hub_policy_list(client, hub_name, resource_group_name=None):
@@ -616,7 +749,7 @@ def iot_hub_policy_create(cmd, client, hub_name, policy_name, permissions, resou
         raise CLIError("Policy {0} already existed.".format(policy_name))
     policies.append(SharedAccessSignatureAuthorizationRule(key_name=policy_name, rights=rights))
     hub.properties.authorization_policies = policies
-    return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_policy_delete(cmd, client, hub_name, policy_name, resource_group_name=None):
@@ -627,7 +760,7 @@ def iot_hub_policy_delete(cmd, client, hub_name, policy_name, resource_group_nam
         raise CLIError("Policy {0} not found.".format(policy_name))
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     hub.properties.authorization_policies = updated_policies
-    return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key, resource_group_name=None, no_wait=False):
@@ -652,8 +785,8 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
                                                                    secondary_key=requested_policy[0].secondary_key))
     hub.properties.authorization_policies = updated_policies
     if no_wait:
-        return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
-    LongRunningOperation(cmd.cli_ctx)(client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag}))
+        return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+    LongRunningOperation(cmd.cli_ctx)(client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag}))
     return iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
 
 
@@ -696,9 +829,13 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                                     connection_string=None, container_name=None, encoding=None,
                                     resource_group_name=None, batch_frequency=300, chunk_size_window=300,
                                     file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}',
-                                    authentication_type=None, endpoint_uri=None, entity_path=None):
+                                    authentication_type=None, endpoint_uri=None, entity_path=None,
+                                    identity=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
+    if identity and authentication_type.lower() != AuthenticationType.IdentityBased.value:
+        raise ArgumentUsageError("In order to use an identity for authentication, you must select --auth-type as 'identityBased'")
+
     if EndpointType.EventHub.value == endpoint_type.lower():
         hub.properties.routing.endpoints.event_hubs.append(
             RoutingEventHubProperties(
@@ -708,7 +845,8 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 resource_group=endpoint_resource_group,
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
-                entity_path=entity_path
+                entity_path=entity_path,
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
             )
         )
     elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
@@ -720,7 +858,8 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 resource_group=endpoint_resource_group,
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
-                entity_path=entity_path
+                entity_path=entity_path,
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
             )
         )
     elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
@@ -732,7 +871,8 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 resource_group=endpoint_resource_group,
                 authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
-                entity_path=entity_path
+                entity_path=entity_path,
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
             )
         )
     elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
@@ -750,10 +890,12 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 batch_frequency_in_seconds=batch_frequency,
                 max_chunk_size_in_bytes=(chunk_size_window * 1048576),
                 authentication_type=authentication_type,
-                endpoint_uri=endpoint_uri
+                endpoint_uri=endpoint_uri,
+                identity=ManagedIdentity(user_assigned_identity=identity) if identity and identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
             )
         )
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_routing_endpoint_list(cmd, client, hub_name, endpoint_type=None, resource_group_name=None):
@@ -793,7 +935,7 @@ def iot_hub_routing_endpoint_delete(cmd, client, hub_name, endpoint_name=None, e
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     hub.properties.routing.endpoints = _delete_routing_endpoints(endpoint_name, endpoint_type, hub.properties.routing.endpoints)
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_route_create(cmd, client, hub_name, route_name, source_type, endpoint_name, enabled=None, condition=None,
@@ -809,7 +951,7 @@ def iot_hub_route_create(cmd, client, hub_name, route_name, source_type, endpoin
             is_enabled=(True if enabled is None else enabled)
         )
     )
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_route_list(cmd, client, hub_name, source_type=None, resource_group_name=None):
@@ -840,7 +982,7 @@ def iot_hub_route_delete(cmd, client, hub_name, route_name=None, source_type=Non
     if source_type:
         hub.properties.routing.routes = [route for route in hub.properties.routing.routes
                                          if route.source.lower() != source_type.lower()]
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, endpoint_name=None, enabled=None,
@@ -856,7 +998,7 @@ def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, en
         updated_route.is_enabled = updated_route.is_enabled if enabled is None else enabled
     else:
         raise CLIError("No route found.")
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_hub_route_test(cmd, client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
@@ -875,13 +1017,13 @@ def iot_hub_route_test(cmd, client, hub_name, route_name=None, source_type=None,
             twin=None,
             route=route
         )
-        return client.iot_hub_resource.test_route(test_route_input, hub_name, resource_group_name)
+        return client.iot_hub_resource.test_route(hub_name, resource_group_name, test_route_input)
     test_all_routes_input = TestAllRoutesInput(
         routing_source=source_type,
         message=route_message,
         twin=None
     )
-    return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
+    return client.iot_hub_resource.test_all_routes(hub_name, resource_group_name, test_all_routes_input)
 
 
 def iot_message_enrichment_create(cmd, client, hub_name, key, value, endpoints, resource_group_name=None):
@@ -890,7 +1032,7 @@ def iot_message_enrichment_create(cmd, client, hub_name, key, value, endpoints, 
     if hub.properties.routing.enrichments is None:
         hub.properties.routing.enrichments = []
     hub.properties.routing.enrichments.append(EnrichmentProperties(key=key, value=value, endpoint_names=endpoints))
-    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
 def iot_message_enrichment_update(cmd, client, hub_name, key, value, endpoints, resource_group_name=None):
@@ -901,7 +1043,7 @@ def iot_message_enrichment_update(cmd, client, hub_name, key, value, endpoints, 
         to_update.key = key
         to_update.value = value
         to_update.endpoint_names = endpoints
-        return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+        return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
     raise CLIError('No message enrichment with that key exists')
 
 
@@ -911,7 +1053,7 @@ def iot_message_enrichment_delete(cmd, client, hub_name, key, resource_group_nam
     to_remove = next((endpoint for endpoint in hub.properties.routing.enrichments if endpoint.key == key), None)
     if to_remove:
         hub.properties.routing.enrichments.remove(to_remove)
-        return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+        return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
     raise CLIError('No message enrichment with that key exists')
 
 
@@ -924,7 +1066,7 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
 def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client, ResourceType
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    # DeviceStreams property is still in preview, so until GA we need to use an older API version (2019-07-01-preview)
+    # DeviceStreams property is still in preview, so until GA we need to use a preview API-version
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
     hub = client.iot_hub_resource.get(resource_group_name, hub_name)
     return hub.properties.device_streams
@@ -934,9 +1076,10 @@ def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     resource_group_name = hub.additional_properties['resourcegroup']
     failover_region = next(x.location for x in hub.properties.locations if x.role.lower() == 'secondary')
+    failover_input = FailoverInput(failover_region=failover_region)
     if no_wait:
-        return client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region))
+        return client.iot_hub.begin_manual_failover(hub_name, resource_group_name, failover_input)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_hub.begin_manual_failover(hub_name, resource_group_name, failover_input))
     return iot_hub_get(cmd, client, hub_name, resource_group_name)
 
 
@@ -1129,3 +1272,63 @@ def _get_iot_central_app_by_name(client, app_name):
         raise CLIError(
             "No IoT Central application found with name {} in current subscription.".format(app_name))
     return target_app
+
+
+def _process_fileupload_args(
+        default_storage_endpoint,
+        fileupload_storage_connectionstring=None,
+        fileupload_storage_container_name=None,
+        fileupload_sas_ttl=None,
+        fileupload_storage_authentication_type=None,
+        fileupload_storage_container_uri=None,
+        fileupload_storage_identity=None,
+):
+    from datetime import timedelta
+    if fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value:
+        default_storage_endpoint.authentication_type = AuthenticationType.IdentityBased
+        default_storage_endpoint.container_uri = fileupload_storage_container_uri
+    elif fileupload_storage_authentication_type is not None:
+        default_storage_endpoint.authentication_type = None
+        default_storage_endpoint.container_uri = None
+    # TODO - remove connection string and set containerURI once fileUpload SAS URL is enabled
+    if fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
+        default_storage_endpoint.connection_string = fileupload_storage_connectionstring
+        default_storage_endpoint.container_name = fileupload_storage_container_name
+    elif fileupload_storage_connectionstring is not None:
+        raise RequiredArgumentMissingError('Please mention storage container name.')
+    elif fileupload_storage_container_name is not None:
+        raise RequiredArgumentMissingError('Please mention storage connection string.')
+    if fileupload_sas_ttl is not None:
+        default_storage_endpoint.sas_ttl_as_iso8601 = timedelta(hours=fileupload_sas_ttl)
+
+    # Fix for identity/authentication-type params missing on hybrid profile api
+    if hasattr(default_storage_endpoint, 'authentication_type'):
+        # If we are now (or will be) using fsa=identity AND we've set a new identity
+        if default_storage_endpoint.authentication_type == AuthenticationType.IdentityBased and fileupload_storage_identity:
+            # setup new fsi
+            default_storage_endpoint.identity = ManagedIdentity(
+                user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity not in [IdentityType.none.value, SYSTEM_ASSIGNED_IDENTITY] else None
+        # otherwise - let them know they need identity-based auth enabled
+        elif fileupload_storage_identity:
+            raise ArgumentUsageError('In order to set a file upload storage identity, you must set the file upload storage authentication type (--fsa) to IdentityBased')
+
+    return default_storage_endpoint
+
+
+def _build_identity(system=False, identities=None):
+    identity_type = IdentityType.none.value
+    if not (system or identities):
+        return ArmIdentity(type=identity_type)
+    if system:
+        identity_type = IdentityType.system_assigned.value
+    user_identities = [i for i in identities] if identities else None
+    if user_identities and identity_type == IdentityType.system_assigned.value:
+        identity_type = IdentityType.system_assigned_user_assigned.value
+    elif user_identities:
+        identity_type = IdentityType.user_assigned.value
+
+    identity = ArmIdentity(type=identity_type)
+    if user_identities:
+        identity.user_assigned_identities = {i: {} for i in user_identities}  # pylint: disable=not-an-iterable
+
+    return identity
