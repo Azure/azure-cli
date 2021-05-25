@@ -32,10 +32,12 @@ from azure.mgmt.eventgrid.models import (
     TopicUpdateParameters,
     TopicRegenerateKeyRequest,
     DomainUpdateParameters,
+    DomainRegenerateKeyRequest,
     ResourceSku,
     IdentityInfo,
     PartnerRegistration,
     PartnerNamespace,
+    PartnerNamespaceRegenerateKeyRequest,
     EventChannel,
     PartnerTopic,
     EventChannelSource,
@@ -243,6 +245,20 @@ def cli_domain_list(
     return client.list_by_subscription(odata_query, DEFAULT_TOP)
 
 
+def cli_domain_regenerate_key(
+        client,
+        resource_group_name,
+        domain_name,
+        key_name):
+    regenerate_key_request = DomainRegenerateKeyRequest(key_name=key_name)
+
+    return client.regenerate_key(
+        resource_group_name=resource_group_name,
+        domain_name=domain_name,
+        regenerate_key_request=regenerate_key_request
+    )
+
+
 def cli_domain_create_or_update(
         client,
         resource_group_name,
@@ -419,6 +435,20 @@ def cli_partner_namespace_create_or_update(
         resource_group_name,
         partner_namespace_name,
         partner_namespace_info)
+
+
+def cli_partner_namespace_regenerate_key(
+        client,
+        resource_group_name,
+        partner_namespace_name,
+        key_name):
+    regenerate_key_request = PartnerNamespaceRegenerateKeyRequest(key_name=key_name)
+
+    return client.regenerate_key(
+        resource_group_name=resource_group_name,
+        partner_namespace_name=partner_namespace_name,
+        regenerate_key_request=regenerate_key_request
+    )
 
 
 def cli_event_channel_list(

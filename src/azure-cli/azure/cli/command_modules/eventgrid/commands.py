@@ -118,7 +118,7 @@ def load_command_table(self, _):
     with self.command_group('eventgrid domain', domains_mgmt_util, client_factory=domains_factory) as g:
         g.show_command('show', 'get')
         g.command('key list', 'list_shared_access_keys')
-        g.command('key regenerate', 'regenerate_key')
+        g.custom_command('key regenerate', 'cli_domain_regenerate_key')
         g.custom_command('list', 'cli_domain_list')
         g.custom_command('create', 'cli_domain_create_or_update')
         g.command('delete', 'begin_delete')
@@ -151,7 +151,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'cli_partner_namespace_list')
         g.custom_command('create', 'cli_partner_namespace_create_or_update')
         g.command('key list', 'list_shared_access_keys')
-        g.command('key regenerate', 'regenerate_key')
+        g.custom_command('key regenerate', 'cli_partner_namespace_regenerate_key')
         # g.custom_command('update', 'cli_partner_namespace_update')
 
     with self.command_group('eventgrid partner namespace event-channel', event_channels_mgmt_util, client_factory=event_channels_factory, is_preview=True) as g:
