@@ -182,8 +182,11 @@ def get_mysql_list_skus_info(cmd, location):
 
 def _parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
+    single_az = False
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
+    if len(result) == 1:
+        single_az = True
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -219,8 +222,8 @@ def _parse_list_skus(result, database_engine):
         tiers_dict[tier_name] = tier_dict
 
     if database_engine == 'mysql':
-        return tiers_dict, iops_dict
-    return tiers_dict
+        return tiers_dict, iops_dict, single_az
+    return tiers_dict, single_az
 
 
 def _get_available_values(sku_info, argument, tier=None):
