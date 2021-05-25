@@ -16,9 +16,9 @@ from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db, cf_mysql_check_resource_availability
-from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
-    DEFAULT_LOCATION_MySQL
+from ._flexible_server_util import resolve_poller, generate_missing_parameters, parse_public_access_input, \
+    DEFAULT_LOCATION_MySQL, generate_password, parse_maintenance_window, get_mysql_list_skus_info
+from .flexible_server_custom_common import user_confirmation, create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator, validate_server_name
 
