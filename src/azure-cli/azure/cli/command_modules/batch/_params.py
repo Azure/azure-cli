@@ -82,6 +82,12 @@ def load_arguments(self, _):
         c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
 
     with self.argument_context('batch account keys renew') as c:
+        c.argument('resource_group_name', resource_group_name_type,
+                   help='Name of the resource group. If not specified will display currently set account.',
+                   required=False)
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'),
+                   help='Name of the batch account to show. If not specified will display currently set account.',
+                   required=False)
         c.argument('key_name', arg_type=get_enum_type(AccountKeyType))
 
     with self.argument_context('batch account login') as c:
@@ -95,10 +101,12 @@ def load_arguments(self, _):
     with self.argument_context('batch application create') as c:
         c.argument('allow_updates', options_list=('--allow-updates',), action="store_true", help="Specify to indicate whether packages within the application may be overwritten using the same version string. True if flag present.")
 
-    with self.argument_context('batch application package create') as c:
-        c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
-        c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
-        c.argument('version_name', options_list=('--version-name',), help="The version name of the application.")
+    for command in ['create', 'activate']:
+        with self.argument_context('batch application package {}'.format(command)) as c:
+            c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
+            c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
+            c.argument('version_name', options_list=('--version-name',), help="The version name of the application.")
+            c.argument('format', options_list=('--format',), help="The format of the application package binary file.")
 
     with self.argument_context('batch location quotas show') as c:
         c.argument('location_name', get_location_type(self.cli_ctx), help='The region from which to display the Batch service quotas.')

@@ -13,9 +13,10 @@ from msrest.exceptions import DeserializationError
 
 from azure.mgmt.batch import BatchManagement
 from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
-                                     AutoStorageBaseProperties,
+                                     AutoStorageBaseProperties, ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
-                                     KeyVaultProperties, BatchAccountIdentity)
+                                     KeyVaultProperties, BatchAccountIdentity,
+                                     BatchAccountRegenerateKeyParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
@@ -171,6 +172,13 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             }
 
 
+def renew_accounts_keys(client, resource_group_name, account_name, key_name=None):
+    parameters = BatchAccountRegenerateKeyParameters(key_name=key_name)
+
+    return client.regenerate_key(resource_group_name=resource_group_name,
+                       account_name=account_name,parameters=parameters)
+
+
 @transfer_doc(Application)
 def update_application(client,
                        resource_group_name, account_name, application_name, allow_updates=None,
@@ -228,8 +236,20 @@ def create_application_package(cmd, client,
     _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
-    client.activate(resource_group_name, account_name, application_name, version_name, "zip")
+    parameters = ActivateApplicationPackageParameters(format="zip")
+    client.activate(resource_group_name, account_name, application_name, version_name, parameters)
     return client.get(resource_group_name, account_name, application_name, version_name)
+
+
+
+@transfer_doc(ApplicationPackageOperations.activate)
+def activate_application_package(cmd, client,
+                               resource_group_name, account_name, application_name, version_name,
+                                 format):
+
+    # activate the application package
+    parameters = ActivateApplicationPackageParameters(format=format)
+    return client.activate(resource_group_name, account_name, application_name, version_name, parameters)
 
 
 # Data plane custom commands
