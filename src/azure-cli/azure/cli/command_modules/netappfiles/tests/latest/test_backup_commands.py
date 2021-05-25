@@ -169,10 +169,10 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
         # update backup
-        tags = "Tag1=Value1 Tag2=Value2"
-        # label = "label"
-        self.cmd("netappfiles volume backup update -g {rg} -a %s -p %s -v %s --backup-name %s --tags %s" %
-                 (account_name, pool_name, volume_name, backup_name, tags))
+        # tags = "Tag1=Value1 Tag2=Value2"
+        label = "label"
+        self.cmd("netappfiles volume backup update -g {rg} -a %s -p %s -v %s --backup-name %s --label %s" %
+                 (account_name, pool_name, volume_name, backup_name, label))
 
         # get backup and validate
         backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
@@ -231,3 +231,21 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         self.delete_backup(account_name, pool_name, volume_name)
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_')
+    def test_get_status(self):
+        # create backup
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        backup_name = self.create_random_name(prefix='cli-backup-', length=24)
+        vnet_name = self.create_random_name(prefix='cli-vnet-backup', length=24)
+        self.create_backup(account_name, pool_name, volume_name, backup_name, vnet_name=vnet_name)
+
+        status = self.cmd("az netappfiles volume backup status -g {rg} -a %s -p %s -v %s")
+        assert status['mirrorState'] == "Uninitialized"
+
+        self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
+
+        status = self.cmd("az netappfiles volume backup status -g {rg} -a %s -p %s -v %s")
+        assert status['mirrorState'] == "Mirrored"

@@ -7,7 +7,7 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, ResourceIdentity
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -28,9 +28,10 @@ def _update_mapper(existing, new, keys):
 # ---- ACCOUNT ----
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
-def create_account(client, account_name, resource_group_name, location, tags=None, encryption=None):
-    account_encryption = AccountEncryption(key_source=encryption)
-    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
+def create_account(client, account_name, resource_group_name, location, tags=None, encryption=None, identity_type=None):
+    account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
+    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption,
+                         identiry=ResourceIdentity(type=identity_type))
     return client.begin_create_or_update(resource_group_name, account_name, body)
 
 
@@ -204,14 +205,24 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None,
-                 backup_enabled=False, backup_policy_id=None, policy_enforced=False, throughput_mibps=None):
+def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
+                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None):
+    data_protection = None
+    backup = None
+    snapshot = None
+    if vault_id is not None:
+        backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
+                                        backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
+    if snapshot_policy_id is not None:
+        snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
+
+    if backup is not None or snapshot is not None:
+        data_protection = VolumePatchPropertiesDataProtection(backup=backup, snapshot=snapshot)
+
     params = VolumePatch(
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
-        data_protection=None if vault_id is None else VolumePatchPropertiesDataProtection(
-            backup=VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
-                                          backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
+        data_protection=data_protection,
         tags=tags)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
@@ -338,13 +349,15 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 
 # ---- VOLUME BACKUPS ----
-def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location):
-    body = Backup(location=location)
+def create_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, location,
+                  use_existing_snapshot=None):
+    body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
     return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
-def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, tags=None):
-    body = BackupPatch(tags=tags)
+def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name,
+                  label=None):
+    body = BackupPatch(label=label)
     return client.begin_update(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
