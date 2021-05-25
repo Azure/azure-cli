@@ -1598,14 +1598,8 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
 
 
 def _get_keyVault_not_arm_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
-    return client
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx, None)
 
 
 def _create_keyvault(cmd,
