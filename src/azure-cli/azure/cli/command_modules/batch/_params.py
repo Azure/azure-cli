@@ -88,7 +88,7 @@ def load_arguments(self, _):
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'),
                    help='Name of the batch account to show. If not specified will display currently set account.',
                    required=False)
-        c.argument('key_name', arg_type=get_enum_type(AccountKeyType))
+        c.argument('key_name', arg_type=get_enum_type(AccountKeyType), help='Name of the batch account key.')
 
     with self.argument_context('batch account login') as c:
         c.argument('shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')

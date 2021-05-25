@@ -176,7 +176,7 @@ def renew_accounts_keys(client, resource_group_name, account_name, key_name=None
     parameters = BatchAccountRegenerateKeyParameters(key_name=key_name)
 
     return client.regenerate_key(resource_group_name=resource_group_name,
-                       account_name=account_name,parameters=parameters)
+                                 account_name=account_name, parameters=parameters)
 
 
 @transfer_doc(Application)
@@ -241,12 +241,8 @@ def create_application_package(cmd, client,
     return client.get(resource_group_name, account_name, application_name, version_name)
 
 
-
 @transfer_doc(ApplicationPackageOperations.activate)
-def activate_application_package(cmd, client,
-                               resource_group_name, account_name, application_name, version_name,
-                                 format):
-
+def activate_application_package(client, resource_group_name, account_name, application_name, version_name, format):
     # activate the application package
     parameters = ActivateApplicationPackageParameters(format=format)
     return client.activate(resource_group_name, account_name, application_name, version_name, parameters)
