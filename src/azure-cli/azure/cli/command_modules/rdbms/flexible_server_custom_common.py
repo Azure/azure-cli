@@ -79,7 +79,7 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_id=None):
 
-    subscription_id=get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if migration_id is None:
         # Convert a UUID to a string of hex digits in standard form
@@ -92,7 +92,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_id, level="Default"):
 
-    subscription_id=get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id, level))
 
@@ -101,7 +101,7 @@ def migration_show_func(cmd, client, resource_group_name, server_name, migration
 
 def migration_list_func(cmd, client, resource_group_name, server_name, migration_filter="Active"):
 
-    subscription_id=get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
 
@@ -110,7 +110,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
 
 def migration_update_func(cmd, client, resource_group_name, server_name, migration_id, setup_logical_replication=None, db1=None, db2=None, db3=None, db4=None, db5=None, db6=None, db7=None, db8=None, overwrite_dbs=None, cutover=None):
 
-    subscription_id=get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     operationSpecified = False
     if setup_logical_replication is True:
@@ -169,7 +169,7 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
 
 def migration_delete_func(cmd, client, resource_group_name, server_name, migration_id):
 
-    subscription_id=get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id))
 
