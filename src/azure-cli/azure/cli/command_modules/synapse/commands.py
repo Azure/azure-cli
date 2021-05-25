@@ -276,7 +276,7 @@ def load_command_table(self, _):
                             client_factory=cf_synapse_client_workspace_aad_admins_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_sql_aad_admin', supports_no_wait=True)
-        g.generic_begin_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_workspace_sql_aad_admin',
                                  setter_arg_name='aad_admin_info', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
