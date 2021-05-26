@@ -232,6 +232,7 @@ def load_arguments(self, _):
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
         c.argument('status', arg_type=get_enum_type(TransparentDataEncryptionStatus),
                    required=True, help='Status of the transparent data encryption.')
+        c.argument('transparent_data_encryption_name', help='Name of the transparent data encryption.')
 
     # synapse sql pool threat-policy
     with self.argument_context('synapse sql pool threat-policy') as c:
@@ -713,3 +714,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse integration-runtime-node update') as c:
         c.argument('concurrent_jobs_limit', options_list=['--concurrent-jobs'], help='The number of concurrent jobs permitted to '
                    'run on the integration runtime node. Values between 1 and maxConcurrentJobs are allowed.')
+        c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']),
+                   help='Enable or disable the self-hosted integration runtime auto-update.')
+        c.argument('update_delay_offset',
+                   help='The time of the day for the self-hosted integration runtime auto-update.')
