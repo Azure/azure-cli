@@ -313,7 +313,7 @@ short-summary: Update a schedule condition.
 examples:
   - name: Update a schedule condition.
     text: |-
-        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
+        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0 \\
         --time 10:00 --workernode-count 5
 """
 
