@@ -85,11 +85,13 @@ def load_arguments(self, _):
                    help='Space-separated list of managed identities to be assigned. Use "[system]" to refer to system-assigned managed identity or a resource ID to refer to user-assigned managed identity. If this argument is provided without any value, system-assigned managed identity will be assigned by default. If this argument is not provided, no managed identities will be assigned to this App Configuration store.')
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
+        c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disables all authentication methods other than AAD authentication.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
+        c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disables all authentication methods other than AAD authentication.')
 
     with self.argument_context('appconfig update', arg_group='Customer Managed Key') as c:
         c.argument('encryption_key_name', help='The name of the KeyVault key.')
