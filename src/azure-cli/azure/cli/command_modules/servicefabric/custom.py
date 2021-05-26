@@ -1817,7 +1817,6 @@ def _set_parameters_for_customize_template(cmd,
                                            certificate_subject_name,
                                            secret_identifier,
                                            parameter_file):
-    cli_ctx = cli_ctx
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')

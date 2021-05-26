@@ -44,7 +44,7 @@ examples:
   - name: Create a PostgreSQL flexible server using already existing virtual network and subnet. If provided virtual network and subnet does not exists then virtual network and subnet with default address prefix will be created.
     text: |
       az postgres flexible-server create --vnet myVnet --subnet mySubnet
-  - name: Create a PostgreSQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+  - name: Create a PostgreSQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers, if not already delegated.
     text: |
       az postgres flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
   - name: Create a PostgreSQL flexible server using new virtual network, subnet with non-default address prefix.
@@ -356,4 +356,27 @@ short-summary: Show the connection strings for a PostgreSQL flexible-server data
 examples:
   - name: Show connection strings for cmd and programming languages.
     text: az postgres flexible-server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['postgres flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for PostgreSQL server
+"""
+
+helps['postgres flexible-server deploy setup'] = """
+type: command
+short-summary: Create github action workflow file for PostgreSQL server.
+examples:
+  - name: Create github action workflow file for PostgreSQL server.
+    text: az postgres flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
+  - name: Create github action workflow file for PostgreSQL server and push it to the remote repository
+    text: az postgres flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
+"""
+
+helps['postgres flexible-server deploy run'] = """
+type: command
+short-summary: Run an existing workflow in your github repository
+examples:
+  - name: Run an existing workflow in your github repository
+    text: az postgres flexible-server deploy run --action-name testAction --branch userBranch
 """
