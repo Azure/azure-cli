@@ -412,7 +412,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
     # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
-    # Will change it back to CreateMode.recover.value(which is 'recover' in lower case) from SDK definition after service fix
+    # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
     parameters = ManagedHsm(location=location,
                             sku=ManagedHsmSku(name='Standard_B1', family='B'),
                             properties={'tenant_id': tenant_id, 'create_mode': 'Recover'})
