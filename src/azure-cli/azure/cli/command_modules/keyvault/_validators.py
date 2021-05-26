@@ -16,7 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -289,9 +289,6 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
 
-    # if hsm_name and 'keyvault recover' in cmd.name:
-    #     raise InvalidArgumentValueError('Operation "recover" has not been supported for HSM.')
-
     if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')
 
@@ -320,11 +317,10 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
             if vault_name:
                 id_comps = parse_resource_id(v.properties.vault_id)
             else:
-                id_comps = parse_resource_id(v.id)
+                id_comps = parse_resource_id(v.properties.mhsm_id)
             if id_comps['name'].lower() == resource_name.lower():
                 resource = v
-                ns.location = resource.properties.location if vault_name \
-                    else resource.additional_properties.get('location')
+                ns.location = resource.properties.location
                 break
 
     # if the vault was not found, throw an error
