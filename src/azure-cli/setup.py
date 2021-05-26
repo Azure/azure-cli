@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.23.0"
+VERSION = "2.24.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -91,8 +91,8 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=2.2.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=4.1.0',
+    'azure-mgmt-iothub==2.0.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-keyvault==9.0.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=8.0.0',
@@ -114,13 +114,13 @@ DEPENDENCIES = [
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==16.1.0',
+    'azure-mgmt-resource==18.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
-    'azure-mgmt-servicefabricmanagedclusters~=1.0.0b1',
+    'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-signalr~=0.4.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
