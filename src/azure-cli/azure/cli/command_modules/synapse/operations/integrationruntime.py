@@ -27,18 +27,18 @@ def create(cmd, client, resource_group_name, workspace_name, integration_runtime
                        integration_runtime_name, properties, if_match)
 
 
-def regenerate(cmd, client, resource_group_name, workspace_name, integration_runtime_name, key_name="default", \
+def regenerate(cmd, client, resource_group_name, workspace_name, integration_runtime_name, key_name="default",
                no_wait=False):
     regenerate_key_parameters = IntegrationRuntimeRegenerateKeyParameters(key_name=key_name)
-    return sdk_no_wait(no_wait, client.regenerate, resource_group_name, workspace_name, integration_runtime_name, \
+    return sdk_no_wait(no_wait, client.regenerate, resource_group_name, workspace_name, integration_runtime_name,
                        regenerate_key_parameters)
 
 
-def update(cmd, client, resource_group_name, workspace_name, integration_runtime_name, auto_update, \
+def update(cmd, client, resource_group_name, workspace_name, integration_runtime_name, auto_update,
            update_delay_offset, no_wait=False):
     update_integration_runtime_request = UpdateIntegrationRuntimeRequest(
         auto_update=auto_update,
         update_delay_offset=update_delay_offset
     )
-    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name, \
+    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name,
                        update_integration_runtime_request)
