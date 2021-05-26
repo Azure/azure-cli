@@ -9,7 +9,6 @@ import uuid
 from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import send_raw_request
