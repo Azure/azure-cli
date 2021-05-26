@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
+
 2.23.0
 ++++++
 * Display allowed values in error message when enum validation fails (#17621)

@@ -440,6 +440,9 @@ parameters:
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -479,6 +482,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
   - name: Create a kubernetes cluster with EncryptionAtHost enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
+  - name: Create a kubernetes cluster with Azure RBAC enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
 """
 
 helps['aks update'] = """
@@ -570,6 +575,12 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
+  - name: --disable-azure-rbac
+    type: bool
+    short-summary: Disable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -601,6 +612,12 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
   - name: Update the cluster to use user assigned managed identity in control plane.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Update a non managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Update a managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
+  - name: Disable Azure RBAC in a managed AAD AKS cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
 """
 
 helps['aks delete'] = """
@@ -1036,6 +1053,32 @@ helps['aks rotate-certs'] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
+"""
+
+helps['aks command'] = """
+    type: group
+    short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
+"""
+
+helps['aks command invoke'] = """
+    type: command
+    short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
+    parameters:
+        - name: --command -c
+          type: string
+          short-summary: Command or shell script you want to run.
+        - name: --file -f
+          type: string
+          short-summary: Files to be used by the command, use '.' to attach the current folder.
+"""
+
+helps['aks command result'] = """
+    type: command
+    short-summary: Fetch result from previously triggered 'aks command invoke'.
+    parameters:
+        - name: --command-id -i
+          type: string
+          short-summary: commandId returned from 'aks command invoke'.
 """
 
 helps['openshift'] = """

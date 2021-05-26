@@ -2331,7 +2331,7 @@ examples:
   - name: Update the description of a template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description" --yes
   - name: Update all the properties of a template spec version.
-    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description" --ui-form-definition formDefinition.json
   - name: Remove tag(s) from template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --tags --yes
 

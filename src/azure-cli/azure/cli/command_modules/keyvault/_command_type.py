@@ -97,7 +97,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 
             client_arg_name = resolve_client_arg_name(operations_tmpl.format(method_name), kwargs)
             if client_arg_name in op_args:
-                client = client_factory(self.command_loader.cli_ctx, command_args)
+                client = client_factory(command_args['cmd'].cli_ctx, command_args)
                 command_args[client_arg_name] = client
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
