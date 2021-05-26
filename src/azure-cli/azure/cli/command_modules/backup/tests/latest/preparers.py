@@ -281,7 +281,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create a RP, a resource group is required. Please add ' \
+            template = 'To create an RP, a resource group is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
