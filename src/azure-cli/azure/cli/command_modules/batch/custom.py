@@ -242,9 +242,9 @@ def create_application_package(cmd, client,
 
 
 @transfer_doc(ApplicationPackageOperations.activate)
-def activate_application_package(client, resource_group_name, account_name, application_name, version_name, format):
+def activate_application_package(client, resource_group_name, account_name, application_name, version_name, f_ormat):
     # activate the application package
-    parameters = ActivateApplicationPackageParameters(format=format)
+    parameters = ActivateApplicationPackageParameters(format=f_ormat)
     return client.activate(resource_group_name, account_name, application_name, version_name, parameters)
 
 

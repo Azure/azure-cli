@@ -51,12 +51,12 @@ examples:
     crafted: true
 """
 
-helps['batch account renew'] = """
+helps['batch account keys renew'] = """
 type: command
 short-summary: Renew keys for a Batch account.
 examples:
   - name: Renew keys for a Batch account.
-    text: az batch account renew --name MyBatchAccount --resource-group MyResourceGroup --key-name primary
+    text: az batch account keys renew --name MyBatchAccount --resource-group MyResourceGroup --key-name primary
 """
 
 helps['batch account show'] = """
