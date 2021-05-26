@@ -449,10 +449,10 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security-alert-policy-name {threat-policy}')
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --sec-alert-policy-name {threat-policy}')
 
         self.cmd('az synapse sql pool threat-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security-alert-policy-name {threat-policy}',
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --sec-alert-policy-name {threat-policy}',
                  checks=[
                      self.check('state', 'Enabled')
                  ])
