@@ -503,25 +503,6 @@ jobs:
         pythonVersion: '$(python.version)'
         profile: '2019-03-01-hybrid'
 
-- job: AutomationTest20180301
-  displayName: Automation Test (Profile 2018-03-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2018-03-01-hybrid'
-
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
