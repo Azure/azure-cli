@@ -131,7 +131,6 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server migration', postgres_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_firewall_rules,
-                            is_preview=True,
                             is_experimental=True) as g:
         g.custom_command('create', 'migration_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_show_command('show', 'migration_show_func', custom_command_type=flexible_server_custom_common)
