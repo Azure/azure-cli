@@ -114,6 +114,15 @@ AUTOSCALE_TIMEZONES = ["Dateline Standard Time",
                        ]
 
 
+class NodeRoleType:  # pylint: disable=too-few-public-methods
+    HEADNODE = "HeadNodeRole"
+    WORKERNODE = "WorkerNodeRole"
+    ZOOKEEPERNODE = "ZookeeperRole"
+    EDGENODE = "EdgeNodeRole"
+    HIBNODE = "HIBRole"
+    KAFKAMANAGEMENTNODE = "KafkaManagementNodeRole"
+
+
 def get_key_for_storage_account(cmd, storage_account):  # pylint: disable=unused-argument
     from ._client_factory import cf_storage
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
@@ -272,3 +281,53 @@ def get_resource_id_by_name(cli_ctx, resource_type, resource_name):
                        'Please specify one of the following resource IDs explicitly:\n{}'
                        .format(resource_name, '\n'.join([resource.id for resource in resources])))
     return resources[0].id
+
+
+def get_default_vm_sizes_configurations(cli_ctx, location):
+    from ._client_factory import cf_hdinsight_locations
+    locations_client = cf_hdinsight_locations(cli_ctx)
+    billing_response_result = locations_client.list_billing_specs(location)
+    default_vm_sizes_configurations = {}
+    for vm_filter in billing_response_result.vm_size_filters:
+        if vm_filter.filter_mode == "Default":
+            for node_type in vm_filter.node_types:
+                cluster_type_vm_sizes_dict = default_vm_sizes_configurations.get(node_type.upper())
+                if not cluster_type_vm_sizes_dict:
+                    cluster_type_vm_sizes_dict = {}
+                for cluster_type in vm_filter.cluster_flavors:
+                    for vm_size in vm_filter.vm_sizes:
+                        cluster_type_vm_sizes_dict[cluster_type.upper()] = vm_size
+                default_vm_sizes_configurations[node_type.upper()] = cluster_type_vm_sizes_dict
+    return default_vm_sizes_configurations
+
+
+def get_default_vm_size_per_node_cluster_type(cluster_type, node_type, default_vm_sizes_configurations):
+    cluster_type_vm_size_dict = default_vm_sizes_configurations.get(node_type.upper())
+    cluster_type = map_cluster_type(cluster_type)
+
+    vm_size = None
+    if cluster_type_vm_size_dict:
+        vm_size = cluster_type_vm_size_dict.get(cluster_type.upper())
+        if not vm_size:
+            vm_size = cluster_type_vm_size_dict.get("*")
+    return vm_size
+
+
+def set_vm_size(cli_ctx, location, cluster_type, headnode_size, workernode_size):
+    if not headnode_size or not workernode_size:
+        default_vm_size_configurations = get_default_vm_sizes_configurations(cli_ctx, location)
+        if not headnode_size:
+            headnode_size = get_default_vm_size_per_node_cluster_type(cluster_type, NodeRoleType.HEADNODE,
+                                                                      default_vm_size_configurations)
+        if not workernode_size:
+            workernode_size = get_default_vm_size_per_node_cluster_type(cluster_type, NodeRoleType.WORKERNODE,
+                                                                        default_vm_size_configurations)
+
+    return headnode_size, workernode_size
+
+
+def map_cluster_type(cluster_type):
+    # the cluster type is mlservice in the list billing spec response
+    if cluster_type.lower() == 'mlservices' or cluster_type.lower() == 'rserver':
+        cluster_type = 'mlservice'
+    return cluster_type

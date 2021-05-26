@@ -196,7 +196,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     result[param_name] = None
                     no_tty = True
                 break
-            elif param_type == 'securestring':
+            if param_type == 'securestring':
                 try:
                     value = prompt_pass(prompt_str, help_string=description)
                 except NoTTYException:
@@ -204,7 +204,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     no_tty = True
                 result[param_name] = value
                 break
-            elif param_type == 'int':
+            if param_type == 'int':
                 try:
                     int_value = prompt_int(prompt_str, help_string=description)
                     result[param_name] = int_value
@@ -212,7 +212,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     result[param_name] = 0
                     no_tty = True
                 break
-            elif param_type == 'bool':
+            if param_type == 'bool':
                 try:
                     value = prompt_t_f(prompt_str, help_string=description)
                     result[param_name] = value
@@ -220,7 +220,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                     result[param_name] = False
                     no_tty = True
                 break
-            elif param_type in ['object', 'array']:
+            if param_type in ['object', 'array']:
                 try:
                     value = prompt(prompt_str, help_string=description)
                 except NoTTYException:
@@ -237,13 +237,13 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
                         continue
                 result[param_name] = value
                 break
-            else:
-                try:
-                    result[param_name] = prompt(prompt_str, help_string=description)
-                except NoTTYException:
-                    result[param_name] = None
-                    no_tty = True
-                break
+
+            try:
+                result[param_name] = prompt(prompt_str, help_string=description)
+            except NoTTYException:
+                result[param_name] = None
+                no_tty = True
+            break
     if no_tty and fail_on_no_tty:
         raise NoTTYException
     return result
@@ -373,7 +373,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
@@ -485,7 +485,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
@@ -566,7 +566,7 @@ def _deploy_arm_template_at_resource_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
@@ -645,7 +645,7 @@ def _deploy_arm_template_at_management_group(cmd,
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -719,7 +719,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -886,7 +886,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
         # template_spec are consistent in the same profile:
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['template']
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])
@@ -1627,7 +1627,6 @@ def _single_or_collection(obj, default=None):
     return obj
 
 
-# pylint: unused-argument
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None, include_response_body=False, latest_include_preview=False):
@@ -1697,7 +1696,6 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
     return _single_or_collection(results)
 
 
-# pylint: unused-argument
 def update_resource(cmd, parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
@@ -1714,7 +1712,6 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
                  is_incremental=None, latest_include_preview=False):
@@ -1732,7 +1729,6 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
             tags, is_incremental)) for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
@@ -1831,9 +1827,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None, tags=None, no_prompt=False):
-    artifacts = None
-    input_template = None
+                         description=None, version=None, version_description=None, tags=None, no_prompt=False, ui_form_definition_file=None):
     if location is None:
         rcf = _resource_client_factory(cmd.cli_ctx)
         location = rcf.resource_groups.get(resource_group_name).location
@@ -1843,7 +1837,8 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         raise IncorrectUsageError('please provide --version if --template-file is specified')
 
     if version:
-        Exists = False
+        input_template, artifacts, input_ui_form_definition = None, None, None
+        exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
                 existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
@@ -1851,7 +1846,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
                 if not confirmation:
                     return None
-                Exists = True
+                exists = True
             except Exception:  # pylint: disable=broad-except
                 pass
 
@@ -1861,11 +1856,15 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
             input_template = getattr(packed_template, 'RootTemplate')
             artifacts = getattr(packed_template, 'Artifacts')
 
-        if not Exists:
+        if ui_form_definition_file:
+            ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+            input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
+
+        if not exists:
             try:  # Check if parent template spec already exists.
-                exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+                existing_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
                 if tags is None:  # New version should inherit tags from parent if none are provided.
-                    tags = getattr(exisiting_parent, 'tags')
+                    tags = getattr(existing_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 tags = tags or {}
                 TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1873,8 +1872,8 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
-        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
+        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1883,7 +1882,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
 
 def update_template_spec(cmd, resource_group_name=None, name=None, template_spec=None, template_file=None, display_name=None,
-                         description=None, version=None, version_description=None, tags=None):
+                         description=None, version=None, version_description=None, tags=None, ui_form_definition_file=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_spec:
@@ -1893,38 +1892,42 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    existing_template = None
-    artifacts = None
 
+    existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
         packed_template = pack(cmd, template_file)
         input_template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
+    if ui_form_definition_file:
+        ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+        input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
+
     if version:
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
 
-        version_tags = tags
-        if tags is None:  # Do not remove tags if not explicitely empty.
-            version_tags = getattr(existing_template, 'tags')
+        # Do not remove tags if not explicitly empty.
+        if tags is None:
+            tags = getattr(existing_template, 'tags')
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:
-            input_template = getattr(existing_template, 'template')
-
+            input_template = getattr(existing_template, 'main_template')
+        if ui_form_definition_file is None:
+            input_ui_form_definition = getattr(existing_template, 'ui_form_definition')
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=version_tags)
+        updated_template_spec = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
-    version_tags = tags
-    if version_tags is None:  # Do not remove tags if not explicitely empty.
+    # Do not remove tags if not explicitly empty.
+    if tags is None:
         tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')

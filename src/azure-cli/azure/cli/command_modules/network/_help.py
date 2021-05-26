@@ -3184,6 +3184,46 @@ examples:
     text: az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
 """
 
+helps['network lb address-pool tunnel-interface'] = """
+type: group
+short-summary: Manage tunnel interfaces of a load balancer.
+"""
+
+helps['network lb address-pool tunnel-interface add'] = """
+type: command
+short-summary: Add one tunnel interface into the load balance tunnel interface pool.
+examples:
+  - name: Add one tunnel interface into the load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface add -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool \
+    --type external --protocol vxlan --identifier 901 --port 10000
+"""
+
+helps['network lb address-pool tunnel-interface update'] = """
+type: command
+short-summary: update one tunnel interface of load balance tunnel interface pool.
+examples:
+  - name: update one tunnel interface of load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface update -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool \
+    --type external --protocol vxlan --identifier 901 --port 10000 --index 0
+"""
+
+helps['network lb address-pool tunnel-interface remove'] = """
+type: command
+short-summary: Remove one tunnel interface from the load balance tunnel interface pool.
+examples:
+  - name: Remove one tunnel interface from the load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface remove -g MyResourceGroup --lb-name MyLb  --address-pool MyAddressPool \
+    --index 0
+"""
+
+helps['network lb address-pool tunnel-interface list'] = """
+type: command
+short-summary: List all tunnel interfacees of the load balance tunnel interface pool.
+examples:
+  - name: List all tunnel interfacees of the load balance tunnel interface pool.
+    text: az network lb address-pool tunnel-interface list -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool
+"""
+
 helps['network cross-region-lb frontend-ip'] = """
 type: group
 short-summary: Manage frontend IP addresses of a cross-region load balancer.
@@ -3348,7 +3388,6 @@ helps['network lb'] = """
 type: group
 short-summary: Manage and configure load balancers.
 long-summary: |
-  [Coming breaking change] In the coming release, the default behavior will be changed. When sku is Standard and in zone-redundant regions, the default 'zones' of 'frontendIPConfigurations' will display as 'zones:[1,2,3]' instead of 'zones:null'.
   To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
 """
 
@@ -5477,6 +5516,20 @@ long-summary: >
 helps['network vnet-gateway create'] = """
 type: command
 short-summary: Create a virtual network gateway.
+parameters:
+  - name: --nat-rule
+    short-summary: VirtualNetworkGatewayNatRule Resource.
+    long-summary: |
+        Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ip-config-id=/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworkGateways/gateway1/ipConfigurations/default
+
+        name: Required.The name of the resource that is unique within a resource group. This name can be used to access the resource.
+        internal-mappings: Required.The private IP address internal mapping for NAT.
+        external-mappings: Required.The private IP address external mapping for NAT.
+        type: The type of NAT rule for VPN NAT.
+        mode: The Source NAT direction of a VPN NAT.
+        ip-config-id: The IP Configuration ID this NAT rule applies to.
+
+        Multiple nat rules can be specified by using more than one `--nat-rule` argument.
 examples:
   - name: Create a basic virtual network gateway for site-to-site connectivity.
     text: |
@@ -5807,6 +5860,37 @@ examples:
     text: az network vnet-gateway aad remove --resource-group MyResourceGroup --gateway-name MyVnetGateway
 """
 
+helps['network vnet-gateway nat-rule'] = """
+type: group
+short-summary: Manage nat rule in a virtual network gateway
+"""
+
+helps['network vnet-gateway nat-rule add'] = """
+type: command
+short-summary: Add nat rule in a virtual network gateway
+examples:
+  - name: Add nat rule
+    text: az network vnet-gateway nat-rule add --resource-group MyResourceGroup --gateway-name MyVnetGateway --name Nat \
+    --internal-mappings 10.4.0.0/24 --external-mappings 192.168.21.0/24
+"""
+
+helps['network vnet-gateway nat-rule list'] = """
+type: command
+short-summary: List nat rule for a virtual network gateway
+examples:
+  - name: List nat rule
+    text: az network vnet-gateway nat-rule list --resource-group MyResourceGroup --gateway-name MyVnetGateway
+"""
+
+helps['network vnet-gateway nat-rule remove'] = """
+type: command
+short-summary: Remove nat rule from a virtual network gateway
+examples:
+  - name: Remove nat rule
+    text: az network vnet-gateway nat-rule remove --resource-group MyResourceGroup --gateway-name MyVnetGateway \
+    --name Nat
+"""
+
 helps['network vpn-connection'] = """
 type: group
 short-summary: Manage VPN connections.
@@ -5840,6 +5924,10 @@ examples:
         Create a site-to-site connection between an Azure virtual network and an on-premises local network gateway.
     text: >
         az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway --local-gateway2 MyLocalGateway --shared-key Abc123
+  - name: Create a VPN connection with --ingress-nat-rule.
+    text: |
+        az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway --local-gateway2 MyLocalGateway --shared-key Abc123 --ingress-nat-rule /subscriptions/000/resourceGroups/TestBGPRG1/providers/Microsoft.Network/virtualNetworkGateways/gwx/natRules/nat
+    crafted: true
   - name: Create a VPN connection. (autogenerated)
     text: |
         az network vpn-connection create --location westus2 --name MyConnection --resource-group MyResourceGroup --shared-key Abc123 --vnet-gateway1 MyVnetGateway --vnet-gateway2 /subscriptions/{subscriptionID}/resourceGroups/TestBGPRG1/providers/Microsoft.Network/virtualNetworkGateways/VNet1GW

@@ -13,10 +13,10 @@ from azure.cli.core.profiles import ResourceType
 class StorageQueueScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
-    def test_storage_queue_general_scenario(self, resource_group, storage_account):
+    def test_storage_queue_general_scenario(self, resource_group, storage_account_info):
         from datetime import datetime, timedelta
 
-        account_key = self.get_account_key(resource_group, storage_account)
+        storage_account, account_key = storage_account_info
         connection_string = self.get_connection_string(resource_group, storage_account)
 
         self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)

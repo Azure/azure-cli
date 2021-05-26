@@ -6,10 +6,10 @@
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.util import user_confirmation
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
-    user_confirmation
 )
 
 DEFAULT_COUNT = 1
