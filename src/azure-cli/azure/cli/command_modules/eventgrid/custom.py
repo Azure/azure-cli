@@ -885,6 +885,7 @@ def cli_eventgrid_event_subscription_get(
 
 
 def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
+        cmd,
         client,
         source_resource_id=None,
         location=None,
@@ -899,7 +900,7 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
             raise CLIError('usage error: Since --source-resource-id is specified, none of the other parameters must '
                            'be specified.')
 
-        return _list_event_subscriptions_by_resource_id(client, source_resource_id, odata_query, DEFAULT_TOP)
+        return _list_event_subscriptions_by_resource_id(cmd, client, source_resource_id, odata_query, DEFAULT_TOP)
 
     if location is None:
         # Since resource-id was not specified, location must be specified: e.g. "westus2" or "global". If not error
@@ -1695,9 +1696,12 @@ def _get_input_schema_and_mapping(
     return input_schema, input_schema_mapping
 
 
-def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, top):
+def _list_event_subscriptions_by_resource_id(cmd, client, resource_id, oDataQuery, top):
     # parse_resource_id doesn't handle resource_ids for Azure subscriptions and RGs
     # so, first try to look for those two patterns.
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    default_subscription_id = get_subscription_id(cmd.cli_ctx)
+
     if resource_id is not None:
         id_parts = list(filter(None, resource_id.split('/')))
         if len(id_parts) < 5:
@@ -1708,7 +1712,7 @@ def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, to
 
             subscription_id = id_parts[1]
             _validate_subscription_id_matches_default_subscription_id(
-                default_subscription_id=client._config.subscription_id,  # pylint: disable=protected-access
+                default_subscription_id=default_subscription_id,
                 provided_subscription_id=subscription_id)
 
             if len(id_parts) == 2:
@@ -1732,7 +1736,7 @@ def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, to
     id_parts = parse_resource_id(resource_id)
     subscription_id = id_parts.get('subscription')
     _validate_subscription_id_matches_default_subscription_id(
-        default_subscription_id=client._config.subscription_id,  # pylint: disable=protected-access
+        default_subscription_id=default_subscription_id,
         provided_subscription_id=subscription_id)
 
     rg_name = id_parts.get('resource_group')
