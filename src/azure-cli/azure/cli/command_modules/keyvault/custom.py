@@ -1066,7 +1066,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
                                         vault.properties.tenant_id.lower() != p.tenant_id.lower() or
                                         object_id.lower() != p.object_id.lower() or
-                                        _check_application_id_match(application_id, p.application_id)]
+                                        not _check_application_id_match(application_id, p.application_id)]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 
