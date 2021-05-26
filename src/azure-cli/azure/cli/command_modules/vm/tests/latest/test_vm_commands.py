@@ -5237,7 +5237,15 @@ class VMCreateCountScenarioTest(ScenarioTest):
         self.cmd('az network vnet create -g {rg} -n vnet --address-prefix 10.0.0.0/16')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet1 --address-prefixes 10.0.0.0/24')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet2 --address-prefixes 10.0.1.0/24')
-        self.cmd('vm create -g {rg} -n vma --image ubuntults --count 3 --vnet-name vnet --subnet subnet1 --nsg-rule None --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n vma --image ubuntults --count 3 --vnet-name vnet --subnet subnet1 --nsg-rule None '
+                 '--generate-ssh-keys --nic-delete-option Delete')
+        self.cmd('vm list -g {rg}', checks=[
+            self.check('length(@)', 3),
+            self.check('[0].networkProfile.networkInterfaces[0].deleteOption', 'Delete'),
+            self.check('[1].networkProfile.networkInterfaces[0].deleteOption', 'Delete'),
+            self.check('[2].networkProfile.networkInterfaces[0].deleteOption', 'Delete')
+        ])
+
         self.cmd('vm create -g {rg} -n vmb --image ubuntults --count 3 --vnet-name vnet --subnet subnet2 --nsg-rule None --generate-ssh-keys')
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 6)

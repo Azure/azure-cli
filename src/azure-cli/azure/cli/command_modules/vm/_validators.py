@@ -915,7 +915,7 @@ def _validate_vmss_create_public_ip(cmd, namespace):
 
 def validate_delete_options(nic_ids, delete_option):
     """ Extracts multiple space-separated delete_option in key[=value] format """
-    if isinstance(delete_option, list):
+    if nic_ids and isinstance(delete_option, list):
         delete_option_dict = {}
         if len(delete_option) == 1 and len(delete_option[0].split('=', 1)) == 1:
             delete_option_dict = dict.fromkeys(nic_ids, delete_option[0])
@@ -923,7 +923,7 @@ def validate_delete_options(nic_ids, delete_option):
             for item in delete_option:
                 delete_option_dict.update(validate_delete_option(item))
         return delete_option_dict
-    return None
+    return delete_option
 
 
 def validate_delete_option(string):

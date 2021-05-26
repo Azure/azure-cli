@@ -877,7 +877,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 {
                     'id': "[concat('{}', copyIndex())]".format(nics_id),
                     'properties': {
-                         'deleteOption': nic_delete_option
+                         'deleteOption': nic_delete_option[0] if nic_delete_option else None
                      }
                  }
             ]
@@ -886,7 +886,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 {
                     'id': nics_id,
                     'properties': {
-                         'deleteOption': nic_delete_option
+                         'deleteOption': nic_delete_option[0] if nic_delete_option else None
                      }
                 }
             ]
