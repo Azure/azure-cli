@@ -288,7 +288,7 @@ def load_command_table(self, _):
                                                                cf_synapse_client_sqlserver_blob_auditing_policies_factory),
                             client_factory=cf_synapse_client_sqlserver_blob_auditing_policies_factory) as g:
         g.show_command('show', 'get')
-        g.generic_update_command('update', setter_name='create_or_update', custom_func_name='sqlserver_blob_auditing_policy_update',
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='sqlserver_blob_auditing_policy_update',
                                  supports_no_wait=True, validator=validate_audit_policy_arguments)
         g.wait_command('wait')
 
