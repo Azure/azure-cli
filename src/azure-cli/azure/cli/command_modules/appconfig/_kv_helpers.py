@@ -317,7 +317,7 @@ def __read_kv_from_config_store(azconfig_client,
 
     if cli_ctx:
         from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        keyvault_client = keyvault_data_plane_factory(cli_ctx, None)
+        keyvault_client = keyvault_data_plane_factory(cli_ctx)
     else:
         keyvault_client = None
 
