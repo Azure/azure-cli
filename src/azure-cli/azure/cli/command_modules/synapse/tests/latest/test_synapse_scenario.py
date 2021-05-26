@@ -427,10 +427,10 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         self.cmd(
-            'az synapse sql pool tde set --status Enabled '
-            '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --transparent-data-encryption-name current')
+            'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \ '
+            '--resource-group {rg} --transparent-data-encryption-name current')
 
-        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} '
+        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} \ '
                  '--transparent-data-encryption-name current',
                  checks=[
                      self.check('name', "current"),
@@ -1325,8 +1325,8 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update self-hosted integration runtime node
         self.cmd(
-            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--node-name {node} --auto-update On --update-delay-offset PT03H',
+            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} \
+            --name {selfhosted-integration-runtime} --node-name {node} --auto-update On --update-delay-offset PT03H',
             checks=[
                 self.check('nodeName', self.kwargs['node'])
             ])

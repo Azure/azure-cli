@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument
 from azure.cli.core.util import sdk_no_wait
-from azure.mgmt.synapse.models import (IntegrationRuntime, IntegrationRuntimeResource,
+from azure.mgmt.synapse.models import (IntegrationRuntimeResource,
                                        IntegrationRuntimeRegenerateKeyParameters, UpdateIntegrationRuntimeRequest)
 
 
@@ -40,4 +40,5 @@ def update(cmd, client, resource_group_name, workspace_name, integration_runtime
         auto_update=auto_update,
         update_delay_offset=update_delay_offset
     )
-    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name, update_integration_runtime_request)
+    return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, integration_runtime_name, \
+                       update_integration_runtime_request)
