@@ -69,7 +69,7 @@ def acr_create(cmd,
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
 
-    lro_poller = client.create(resource_group_name, registry_name, registry)
+    lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
     if workspace:
         from msrestazure.tools import is_valid_resource_id, resource_id

@@ -7,6 +7,7 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.util import user_confirmation
+from azure.mgmt.containerregistry.v2019_06_01_preview.models import AgentPool
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -32,8 +33,6 @@ def acr_agentpool_create(cmd,
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    AgentPool = cmd.get_models('AgentPool')
-
     agentpool_create_parameters = AgentPool(
         location=registry.location,
         count=count,
@@ -43,10 +42,10 @@ def acr_agentpool_create(cmd,
     )
 
     try:
-        return client.create(resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             agent_pool_name=agent_pool_name,
-                             agent_pool=agentpool_create_parameters)
+        return client.begin_create(resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   agent_pool_name=agent_pool_name,
+                                   agent_pool=agentpool_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -62,10 +61,10 @@ def acr_agentpool_update(cmd,
         cmd, registry_name, resource_group_name)
 
     try:
-        return client.update(resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             agent_pool_name=agent_pool_name,
-                             count=count)
+        return client.begin_update(resource_group_name=resource_group_name,
+                                   registry_name=registry_name,
+                                   agent_pool_name=agent_pool_name,
+                                   count=count)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -84,9 +83,9 @@ def acr_agentpool_delete(cmd,
     user_confirmation("Are you sure you want to delete the agentpool '{}' in registry '{}'?".format(
         agent_pool_name, registry_name), yes)
     try:
-        response = client.delete(resource_group_name=resource_group_name,
-                                 registry_name=registry_name,
-                                 agent_pool_name=agent_pool_name)
+        response = client.begin_delete(resource_group_name=resource_group_name,
+                                       registry_name=registry_name,
+                                       agent_pool_name=agent_pool_name)
 
         if no_wait:
             logger.warning("Started to delete the agent pool '%s': %s", agent_pool_name, response.status())

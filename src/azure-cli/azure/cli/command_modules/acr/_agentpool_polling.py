@@ -6,7 +6,8 @@
 import time
 
 from msrest import Deserializer
-from msrest.polling import PollingMethod, LROPoller
+from msrest.pipeline import ClientRawResponse
+from azure.core.polling import PollingMethod, LROPoller
 from msrestazure.azure_exceptions import CloudError
 
 from ._constants import get_acr_task_models, get_succeeded_agentpool_status, get_finished_agentpool_status
@@ -26,7 +27,7 @@ def delete_agentpool_with_polling(cmd,
     return LROPoller(
         client=client,
         initial_response=client.get(
-            resource_group_name, registry_name, agent_pool_name, raw=True),
+            resource_group_name, registry_name, agent_pool_name),
         deserialization_callback=deserialize_agentpool,
         polling_method=RunPolling(
             cmd=cmd,
