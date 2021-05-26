@@ -912,7 +912,8 @@ def set_policy(cmd, client, resource_group_name, vault_name,
 
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
-                   if object_id.lower() == p.object_id.lower() and application_id == p.application_id and
+                   if object_id.lower() == p.object_id.lower() and
+                   _check_application_id_match(application_id, p.application_id) and
                    vault.properties.tenant_id.lower() == p.tenant_id.lower()), None)
     if not policy:
         # Add new policy as none found
@@ -1064,7 +1065,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
                                         vault.properties.tenant_id.lower() != p.tenant_id.lower() or
-                                        object_id.lower() != p.object_id.lower() or application_id != p.application_id]
+                                        object_id.lower() != p.object_id.lower() or
+                                        _check_application_id_match(application_id, p.application_id)]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 
@@ -1078,6 +1080,16 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
                                     tags=vault.tags,
                                     properties=vault.properties),
                                 no_wait=no_wait)
+
+
+def _check_application_id_match(application_id, existing_application_id):
+    if application_id and not existing_application_id:
+        return False
+    if not application_id and existing_application_id:
+        return False
+    if not application_id and not existing_application_id:
+        return True
+    return application_id.lower() == existing_application_id.lower()
 # endregion
 
 
