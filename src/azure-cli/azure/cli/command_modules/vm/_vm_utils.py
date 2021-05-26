@@ -125,7 +125,8 @@ def list_sku_info(cli_ctx, location=None):
 
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False):
+                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below
@@ -173,7 +174,8 @@ def normalize_disk_info(image_data_disks=None,
             'lun': i,
             'managedDisk': {'storageAccountType': None},
             'createOption': 'empty',
-            'diskSizeGB': sizes_copy.pop(0)
+            'diskSizeGB': sizes_copy.pop(0),
+            'deleteOption': data_disk_delete_option if isinstance(data_disk_delete_option, str) else None
         }
 
     # update storage skus for managed data disks
@@ -205,9 +207,13 @@ def normalize_disk_info(image_data_disks=None,
 
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
+            info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
+                else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
             info[i]['name'] = d.split('/')[-1].split('.')[0]
+            info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
+                else data_disk_delete_option.get(info[i]['name'], None)
 
     # fill in data disk caching
     if data_disk_cachings:

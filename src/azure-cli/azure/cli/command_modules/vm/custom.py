@@ -737,7 +737,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-              enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None):
+              enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
+              data_disk_delete_option=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -877,7 +878,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 {
                     'id': "[concat('{}', copyIndex())]".format(nics_id),
                     'properties': {
-                         'deleteOption': nic_delete_option[0] if nic_delete_option else None
+                         'deleteOption': nic_delete_option
                      }
                  }
             ]
@@ -886,7 +887,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 {
                     'id': nics_id,
                     'properties': {
-                         'deleteOption': nic_delete_option[0] if nic_delete_option else None
+                         'deleteOption': nic_delete_option
                      }
                 }
             ]
@@ -941,7 +942,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
+        data_disk_delete_option=data_disk_delete_option)
 
     vm_resource['dependsOn'] = vm_dependencies
 

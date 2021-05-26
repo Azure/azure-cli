@@ -511,6 +511,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
+    data_disk_delete_option = validate_delete_options(namespace.attach_data_disks, namespace.data_disk_delete_option)
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
@@ -518,7 +519,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               storage_sku=namespace.storage_sku,
                                               os_disk_caching=namespace.os_caching,
                                               data_disk_cachings=namespace.data_caching,
-                                              ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None))
+                                              ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
+                                              data_disk_delete_option=data_disk_delete_option)
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -913,17 +915,16 @@ def _validate_vmss_create_public_ip(cmd, namespace):
     _validate_vm_vmss_create_public_ip(cmd, namespace)
 
 
-def validate_delete_options(nic_ids, delete_option):
+def validate_delete_options(resources, delete_option):
     """ Extracts multiple space-separated delete_option in key[=value] format """
-    if nic_ids and isinstance(delete_option, list):
-        delete_option_dict = {}
+    if resources and isinstance(delete_option, list):
         if len(delete_option) == 1 and len(delete_option[0].split('=', 1)) == 1:
-            delete_option_dict = dict.fromkeys(nic_ids, delete_option[0])
-        else:
-            for item in delete_option:
-                delete_option_dict.update(validate_delete_option(item))
+            return delete_option[0]
+        delete_option_dict = {}
+        for item in delete_option:
+            delete_option_dict.update(validate_delete_option(item))
         return delete_option_dict
-    return delete_option
+    return None
 
 
 def validate_delete_option(string):
@@ -963,7 +964,7 @@ def _validate_vm_create_nics(cmd, namespace):
                                                  subscription=get_subscription_id(cmd.cli_ctx)),
             'properties': {
                 'primary': nic_ids[0] == n,
-                'deleteOption': delete_option.get(n, None)
+                'deleteOption': delete_option if isinstance(delete_option, str) else delete_option.get(n, None)
             }
         })
 
