@@ -913,21 +913,47 @@ def _validate_vmss_create_public_ip(cmd, namespace):
     _validate_vm_vmss_create_public_ip(cmd, namespace)
 
 
+def validate_delete_options(delete_option):
+    """ Extracts multiple space-separated delete_option in key[=value] format """
+    if isinstance(delete_option, list):
+        if len(delete_option) == 1 and len(delete_option.split('=', 1)) == 1:
+            return delete_option
+        delete_option_dict = {}
+        for item in delete_option:
+            delete_option_dict.update(validate_delete_option(item))
+        return delete_option_dict
+    return None
+
+
+def validate_delete_option(string):
+    """ Extracts a single delete_option in key[=value] format """
+    result = {}
+    if string:
+        comps = string.split('=', 1)
+        if len(comps) == 2:
+            result = {comps[0]: comps[1]}
+        else:
+            raise ValueError("Invalid value for delete option. User a singular value to apply on all resources, or use "
+                             "<Name>=<Value> to configure the delete behavior for individual disks.")
+    return result
+
+
 def _validate_vm_create_nics(cmd, namespace):
     from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    nics_value = namespace.nics
+    nic_ids = namespace.nics
+    delete_option = validate_delete_options(namespace.nic_delete_option)
     nics = []
 
-    if not nics_value:
+    if not nic_ids:
         namespace.nic_type = 'new'
         logger.debug('new NIC will be created')
         return
 
-    if not isinstance(nics_value, list):
-        nics_value = [nics_value]
+    if not isinstance(nic_ids, list):
+        nics_value = [nic_ids]
 
-    for n in nics_value:
+    for n in nic_ids:
         nics.append({
             'id': n if '/' in n else resource_id(name=n,
                                                  resource_group=namespace.resource_group_name,
@@ -935,7 +961,8 @@ def _validate_vm_create_nics(cmd, namespace):
                                                  type='networkInterfaces',
                                                  subscription=get_subscription_id(cmd.cli_ctx)),
             'properties': {
-                'primary': nics_value[0] == n
+                'primary': nics_value[0] == n,
+                'deleteOption': delete_option.get(n) if delete_option.get(n) else delete_option
             }
         })
 

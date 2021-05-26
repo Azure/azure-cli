@@ -737,7 +737,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-              enable_vtpm=None, count=None, edge_zone=None):
+              enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -874,11 +874,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if count:
             nics = [
-                {'id': "[concat('{}', copyIndex())]".format(nics_id)}
+                {
+                    'id': "[concat('{}', copyIndex())]".format(nics_id),
+                    'properties': {
+                         'deleteOption': nic_delete_option
+                     }
+                 }
             ]
         else:
             nics = [
-                {'id': nics_id}
+                {
+                    'id': nics_id,
+                    'properties': {
+                         'deleteOption': nic_delete_option
+                     }
+                }
             ]
 
         nic_resource = build_nic_resource(
