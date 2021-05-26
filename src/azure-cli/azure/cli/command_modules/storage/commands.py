@@ -273,7 +273,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account file-service-properties', file_service_mgmt_sdk,
                             custom_command_type=get_custom_sdk('account', client_factory=cf_mgmt_file_services,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01', is_preview=True) as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
         g.show_command('show', 'get_service_properties')
         g.generic_update_command('update',
                                  getter_name='get_service_properties',
