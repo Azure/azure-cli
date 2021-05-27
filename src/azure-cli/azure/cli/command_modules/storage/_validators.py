@@ -462,7 +462,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
             try:
                 source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
             except ValueError:
-                raise ValueError('Source storage account {} not found.'.format(source_account_name))
+                raise RequiredArgumentMissingError('Source storage account {} not found.'.format(source_account_name))
 
     # Both source account name and either key or sas (or both) are now available
     if not source_sas:
