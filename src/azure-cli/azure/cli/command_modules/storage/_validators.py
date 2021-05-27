@@ -389,6 +389,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
 def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     from .util import create_short_lived_blob_sas, create_short_lived_file_sas
+    from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+        MutuallyExclusiveArgumentError
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri [--source-sas]' \
@@ -420,7 +422,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     if uri:
         if any([container, blob, snapshot, share, path, file_snapshot, source_account_name,
                 source_account_key]):
-            raise ValueError(usage_string.format('Unused parameters are given in addition to the '
+            raise InvalidArgumentValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
         if source_sas:
             source_sas = source_sas.lstrip('?')
@@ -433,16 +435,17 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     valid_file_source = share and path and not container and not blob and not snapshot
 
     if not valid_blob_source and not valid_file_source:
-        raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
+        raise RequiredArgumentMissingError(usage_string.format('Neither a valid blob or file source is specified'))
     if valid_blob_source and valid_file_source:
-        raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
+        raise MutuallyExclusiveArgumentError(usage_string.format('Ambiguous parameters, both blob and file sources are '
                                              'specified'))
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
     if not source_account_name:
         if source_account_key:
-            raise ValueError(usage_string.format('Source account key is given but account name is not'))
+            raise RequiredArgumentMissingError(usage_string.format(
+                'Source account key is given but account name is not'))
         # assume that user intends to copy blob in the same account
         source_account_name = ns.get('account_name', None)
 
