@@ -290,7 +290,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
-            template = 'To create a RP, a vault is required. Please add ' \
+            template = 'To create an RP, a vault is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
@@ -299,7 +299,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vm_parameter_name)
         except KeyError:
-            template = 'To create a RP, a VM is required. Please add ' \
+            template = 'To create an RP, a VM is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ItemPreparer.__name__, self.vm_parameter_name))
 
@@ -424,7 +424,7 @@ class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.storage_account_parameter_name)
         except KeyError:
-            template = 'To create an Fileshare, a storage_account is required. Please add ' \
+            template = 'To create a Fileshare, a storage_account is required. Please add ' \
                        'decorator @StorageAccountPreparer in front of this Fileshare preparer.'
             raise CliTestError(template)
 
@@ -563,7 +563,7 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.storage_account_parameter_name)
         except KeyError:
-            template = 'To create a RP, a storage_account is required. Please add ' \
+            template = 'To create an RP, a storage_account is required. Please add ' \
                        'decorator @AFSItemPreparer in front of this RP preparer.'
             raise CliTestError(template)
 
