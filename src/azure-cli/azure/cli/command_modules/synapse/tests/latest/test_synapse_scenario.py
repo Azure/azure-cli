@@ -428,10 +428,10 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd(
             'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \ '
-            '--resource-group {rg} --trans-data-en-name current')
+            '--resource-group {rg} --transparent_data_encryption_name current')
 
         self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} \ '
-                 '--trans-data-en-name current',
+                 '--transparent_data_encryption_name current',
                  checks=[
                      self.check('name', "current"),
                      self.check('status', "Enabled")
@@ -449,10 +449,10 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --sec-alert-policy-name {threat-policy}')
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security_alert_policy_name {threat-policy}')
 
         self.cmd('az synapse sql pool threat-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --sec-alert-policy-name {threat-policy}',
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security_alert_policy_name {threat-policy}',
                  checks=[
                      self.check('state', 'Enabled')
                  ])
