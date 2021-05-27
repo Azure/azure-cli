@@ -271,6 +271,10 @@ def load_arguments(self, _):
         c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
                    help='Name of the blob auditing policy name.')
 
+    with self.argument_context('synapse sql pool audit-policy show') as c:
+        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+                   help='Name of the blob auditing policy name.')
+
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
         with self.argument_context(scope + ' update') as c:
             _configure_security_or_audit_policy_storage_params(c)
@@ -296,8 +300,6 @@ def load_arguments(self, _):
                        type=int,
                        arg_group=policy_arg_group,
                        help='The number of days to retain audit logs.')
-            c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
-                       help='Name of the blob auditing policy name.')
 
     with self.argument_context('synapse sql audit-policy update') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
@@ -305,6 +307,10 @@ def load_arguments(self, _):
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
+
+    with self.argument_context('synapse sql audit-policy') as c:
+        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+                   help='Name of the blob auditing policy name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
         c.argument('workspace_name', help='The workspace name.')
