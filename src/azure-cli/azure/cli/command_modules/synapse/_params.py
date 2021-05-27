@@ -296,6 +296,8 @@ def load_arguments(self, _):
                        type=int,
                        arg_group=policy_arg_group,
                        help='The number of days to retain audit logs.')
+            c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+                       help='Name of the blob auditing policy name.')
 
     with self.argument_context('synapse sql audit-policy update') as c:
         c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],

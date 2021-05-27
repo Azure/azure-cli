@@ -1344,6 +1344,11 @@ examples:
           --name testtrigger
 """
 
+helps['synapse trigger wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a trigger is met.
+"""
+
 helps['synapse trigger-run'] = """
     type: group
     short-summary: synapse trigger-run
