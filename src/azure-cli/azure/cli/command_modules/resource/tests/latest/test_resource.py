@@ -1763,6 +1763,9 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
         deployment_output = self.cmd('deployment sub create --location westus --template-file "{tf}"').get_output_in_json()
         self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
 
+        # Make sure the formatter works without exception
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}"')
+
         self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
