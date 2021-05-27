@@ -4965,7 +4965,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         self.cmd('ppg create -g {rg} -n {ppg}')
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
-                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys',
+                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys ',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
                      self.check('vmss.platformFaultDomainCount', 3)

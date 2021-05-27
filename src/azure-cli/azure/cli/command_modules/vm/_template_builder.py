@@ -771,15 +771,16 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        network_api_version=None):
+                        network_api_version=None, compute_name_prefix=None):
 
     # Build IP configuration
-    ip_configuration = {
-        'name': ip_config_name,
-        'properties': {
+    ip_configuration = {}
+    if ip_config_name:
+        ip_configuration['name'] = ip_config_name
+    if subnet_id:
+        ip_configuration['properties'] = {
             'subnet': {'id': subnet_id}
         }
-    }
 
     if public_ip_per_vm:
         ip_configuration['properties']['publicipaddressconfiguration'] = {
@@ -811,7 +812,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                                                                        for x in application_security_groups]
     # Build storage profile
     storage_properties = {}
-    os_caching = disk_info['os'].get('caching')
+    if disk_info:
+        os_caching = disk_info['os'].get('caching')
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
@@ -859,7 +861,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['imageReference'] = {
             'id': image
         }
-    data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if disk_info:
+        data_disks = [v for k, v in disk_info.items() if k != 'os']
+    else:
+        data_disks = None
     if data_disk_encryption_sets:
         if len(data_disk_encryption_sets) != len(data_disks):
             raise CLIError(
@@ -880,10 +885,12 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['dataDisks'] = data_disks
 
     # Build OS Profile
-    os_profile = {
-        'computerNamePrefix': naming_prefix,
-        'adminUsername': admin_username
-    }
+    os_profile = {}
+    if compute_name_prefix:
+        os_profile['compute_name_prefix'] = compute_name_prefix
+
+    if admin_username:
+        os_profile['adminUsername'] = admin_username
 
     if admin_password:
         os_profile['adminPassword'] = "[parameters('adminPassword')]"
@@ -908,13 +915,14 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         os_profile['secrets'] = secrets
 
     # Build VMSS
-    nic_config = {
-        'name': nic_name,
-        'properties': {
+    nic_config = {}
+    if nic_name:
+        nic_config['name'] = nic_name
+    if ip_configuration:
+        nic_config['properties'] = {
             'primary': 'true',
             'ipConfigurations': [ip_configuration]
         }
-    }
 
     if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         if dns_servers:
@@ -926,9 +934,11 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if nsg:
         nic_config['properties']['networkSecurityGroup'] = {'id': nsg}
 
-    vmss_properties = {
-        'overprovision': overprovision,
-        'upgradePolicy': {
+    vmss_properties = {}
+    if overprovision is not None:
+        vmss_properties['overprovision'] = overprovision
+    if upgrade_policy_mode:
+        vmss_properties['upgradePolicy'] = {
             'mode': upgrade_policy_mode,
             'rollingUpgradePolicy': {
                 'maxBatchInstancePercent': max_batch_instance_percent,
@@ -938,14 +948,14 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                 'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
                 'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
             }
-        },
-        'virtualMachineProfile': {
-            'storageProfile': storage_properties,
-            'networkProfile': {
-                'networkInterfaceConfigurations': [nic_config]
-            }
         }
-    }
+    vmss_properties['virtualMachineProfile'] = {}
+    if storage_properties:
+        vmss_properties['virtualMachineProfile']['storageProfile'] = storage_properties
+
+    vmss_properties['virtualMachineProfile']['networkProfile'] = {}
+    if nic_config:
+        vmss_properties['virtualMachineProfile']['networkProfile']['networkInterfaceConfigurations'] = [nic_config]
 
     if not specialized:
         vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
@@ -1019,19 +1029,22 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
-        'sku': {
-            'name': vm_sku,
-            'capacity': instance_count
-        },
         'properties': vmss_properties
     }
+    if vm_sku:
+        vmss['sku'] = {'name': vm_sku, 'capacity': instance_count}
 
     if zones:
         vmss['zones'] = zones
 
     if edge_zone:
         vmss['extendedLocation'] = edge_zone
-
+    if not vmss['properties']['virtualMachineProfile']['networkProfile']:
+        del vmss['properties']['virtualMachineProfile']['networkProfile']
+    if not vmss['properties']['virtualMachineProfile']['osProfile']:
+        del vmss['properties']['virtualMachineProfile']['osProfile']
+    if not vmss['properties']['virtualMachineProfile']:
+        del vmss['properties']['virtualMachineProfile']
     return vmss
 
 
