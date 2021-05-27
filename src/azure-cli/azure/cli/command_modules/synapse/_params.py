@@ -232,7 +232,7 @@ def load_arguments(self, _):
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
         c.argument('status', arg_type=get_enum_type(TransparentDataEncryptionStatus),
                    required=True, help='Status of the transparent data encryption.')
-        c.argument('transparent_data_encryption_name', options_list=['--name', '-n'], help='Name of the transparent data encryption.')
+        c.argument('transparent_data_encryption_name', options_list=['--tran-data-en', '-d'], help='Name of the transparent data encryption.')
 
     # synapse sql pool threat-policy
     with self.argument_context('synapse sql pool threat-policy') as c:
@@ -266,7 +266,7 @@ def load_arguments(self, _):
     # synapse sql pool audit-policy
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
-        c.argument('blob_auditing_policy_name', options_list=['--name', '-n'], help='The blob auditing policy name.')
+        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-name', '-n'], help='The blob auditing policy name.')
 
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
         with self.argument_context(scope + ' update') as c:
@@ -298,7 +298,7 @@ def load_arguments(self, _):
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
-        c.argument('blob_auditing_policy_name', options_list=['--name', '-n'], help='The blob auditing policy name.')
+        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-name', '-n'], help='The blob auditing policy name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
         c.argument('workspace_name', help='The workspace name.')
