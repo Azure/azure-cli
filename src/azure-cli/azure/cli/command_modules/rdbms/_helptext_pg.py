@@ -221,11 +221,6 @@ examples:
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
 """
 
-# - name: Specify the start time for the data migration to start. This should be within 2 weeks from the current time.
-#   text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-time-utc '2021-12-28T17:06:03.4669999-07:00'
-# - name: Start the data migration now, rather than wait for the migration window start time.
-#   text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --init-data-migration
-
 helps['postgres flexible-server migration delete'] = """
 type: command
 short-summary: Delete a specific migration.

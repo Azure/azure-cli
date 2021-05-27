@@ -144,18 +144,6 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         operationSpecified = True
         properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
 
-    # if start_time_utc is not None:
-    #     if operationSpecified is True:
-    #         raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-    #     operationSpecified = True
-    #     properties = "{\"properties\": {\"MigrationWindowStartTimeInUtc\": \"{}\"} }".format(start_time_utc)
-
-    # if initiate_data_migration is True:
-    #     if operationSpecified is True:
-    #         raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-    #     operationSpecified = True
-    #     properties = "{\"properties\": {\"startDataMigration\": \"true\"} }"
-
     if cutover is True:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
@@ -165,14 +153,19 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
 
-    send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
+    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id), None, None, properties)
 
-    return migration_id
+    return r.json()
 
 
-def migration_delete_func(cmd, client, resource_group_name, server_name, migration_id):
+def migration_delete_func(cmd, client, resource_group_name, server_name, migration_id, yes=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
+                migration_id, server_name, resource_group_name))
 
     r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id))
 

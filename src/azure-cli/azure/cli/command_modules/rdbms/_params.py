@@ -533,15 +533,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                help='Specify the eigth DB to migrate.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
-                    # c.argument('start_time_utc', options_list=['--start-time-utc'], required=False,
-                    #            help='Specify the start time for the data migration to start. This should be within 2 weeks from the current time.')
-                    # c.argument('initiate_data_migration', options_list=['--init-data-migration'], action='store_true', required=False,
-                    #            help='Start the data migration now, rather than wait for the migration window start time.')
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
                                help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
                 elif scope == "delete":
                     c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
                                help='Name or ID of the migration.')
+                    c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                               help='Do not prompt for confirmation.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

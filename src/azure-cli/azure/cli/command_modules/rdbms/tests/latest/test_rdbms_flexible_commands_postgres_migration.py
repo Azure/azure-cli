@@ -54,26 +54,6 @@ class MigrationScenarioTest(ScenarioTest):
         target_resource_group_name = "raganesa-t-m-pg-1"
         target_server_name = "raganesa-t-m-pg-1-vnet"
 
-        # # test create migration - error - no param
-        # result = self.cmd('{} flexible-server migration create'
-        #                   .format(database_engine), expect_failure=True)
-
-        # # test create migration - error - no sub
-        # result = self.cmd('{} flexible-server migration create --resource-group {} --name {} --properties @migrationPublic.json'
-        #                   .format(database_engine, target_resource_group_name, target_server_name), expect_failure=True)
-
-        # # test create migration - error - no resource-group
-        # result = self.cmd('{} flexible-server migration create --subscription {} --name {} --properties @migrationPublic.json'
-        #                   .format(database_engine, target_subscription_id, target_server_name), expect_failure=True)
-
-        # # test create migration - error - no server name
-        # result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --properties @migrationPublic.json'
-        #                   .format(database_engine, target_subscription_id, target_resource_group_name), expect_failure=True)
-
-        # # test create migration - error - no properties
-        # result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {}'
-        #                   .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name), expect_failure=True)
-
         # test create migration - success
         result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-id {} --properties @migrationVNet.json'
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id)).get_output_in_json()
@@ -97,5 +77,5 @@ class MigrationScenarioTest(ScenarioTest):
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id), expect_failure=True)
 
         # test delete migration - success
-        result = self.cmd('{} flexible-server migration delete --subscription {} --resource-group {} --name {} --migration-id {}'
+        result = self.cmd('{} flexible-server migration delete --subscription {} --resource-group {} --name {} --migration-id {} --yes'
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_id)).get_output_in_json()
