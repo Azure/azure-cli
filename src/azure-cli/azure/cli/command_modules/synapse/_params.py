@@ -266,6 +266,7 @@ def load_arguments(self, _):
     # synapse sql pool audit-policy
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
+        c.argument('blob_auditing_policy_name', help='The blob auditing policy name.')
 
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
         with self.argument_context(scope + ' update') as c:
@@ -297,6 +298,7 @@ def load_arguments(self, _):
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
+        c.argument('blob_auditing_policy_name', help='The blob auditing policy name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
         c.argument('workspace_name', help='The workspace name.')
