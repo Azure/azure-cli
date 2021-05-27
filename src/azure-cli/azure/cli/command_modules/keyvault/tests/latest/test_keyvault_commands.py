@@ -287,13 +287,27 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.networkAcls.bypass', 'AzureServices'),
                      self.check('properties.networkAcls.defaultAction', 'Deny')
                  ])
-        # test policy set/delete
+        # test policy set
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapKey',
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapkey',
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+        # test policy for compound identity set
+        result = self.cmd('ad app create --display-name {kv}').get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id} --key-permissions get list',
+                 checks=[
+                     self.check('properties.accessPolicies[1].applicationId', self.kwargs['app_id']),
+                     self.check('properties.accessPolicies[1].objectId', self.kwargs['policy_id']),
+                     self.check('length(properties.accessPolicies[1].permissions.keys)', 2)
+                 ])
+        # test policy for compound identity delete
+        self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id}',
+                 checks=self.check('length(properties.accessPolicies)', 1))
+        self.cmd('ad app delete --id {app_id}')
+        # test policy delete
         self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id}', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
