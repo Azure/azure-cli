@@ -298,7 +298,6 @@ def load_arguments(self, _):
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
-        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-name', '-n'], help='The blob auditing policy name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
         c.argument('workspace_name', help='The workspace name.')
