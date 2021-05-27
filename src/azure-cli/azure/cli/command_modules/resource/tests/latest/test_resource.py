@@ -364,7 +364,8 @@ class TagScenarioTest(ScenarioTest):
             'rg_loc': resource_group_location,
             'uri': 'http://www.microsoft.com',
             'actions': 'push',
-            'sku': 'Standard'
+            'sku': 'Standard',
+            'ip_name': self.create_random_name('cli_ip', 20)
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -392,8 +393,15 @@ class TagScenarioTest(ScenarioTest):
             self.check('[0].tags', {'cli-test': 'test'})
         ])
 
+        # Test Microsoft.Network/publicIPAddresses
+        public_ip = self.cmd('network public-ip create -g {rg} -n {ip_name} --location {loc} --sku Standard ').\
+            get_output_in_json()
+        self.kwargs['public_ip_id'] = public_ip['publicIp']['id']
+        self.cmd('resource tag --ids {public_ip_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {public_ip_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
