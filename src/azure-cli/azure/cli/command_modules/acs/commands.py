@@ -115,15 +115,15 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.wait_command('wait')
-        g.command('stop', 'stop', supports_no_wait=True)
-        g.command('start', 'start', supports_no_wait=True)
+        g.command('stop', 'stop', supports_no_wait=True, min_api='2020-09-01', client_factory=cf_managed_clusters)
+        g.command('start', 'start', supports_no_wait=True, min_api='2020-09-01', client_factory=cf_managed_clusters)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
                          table_transformer=aks_versions_table_format)
 
     # AKS agent pool commands
-    with self.command_group('aks nodepool', agent_pools_sdk, client_factory=cf_agent_pools) as g:
+    with self.command_group('aks nodepool', agent_pools_sdk, client_factory=cf_agent_pools, operation_group='agent_pools') as g:
         g.custom_command('list', 'aks_agentpool_list',
                          table_transformer=aks_agentpool_list_table_format)
         g.custom_show_command('show', 'aks_agentpool_show',
@@ -147,6 +147,7 @@ def load_command_table(self, _):
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,
                             client_factory=cf_openshift_managed_clusters,
+                            operation_group='open_shift_managed_clusters',
                             deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
