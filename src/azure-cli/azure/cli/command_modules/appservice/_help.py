@@ -1718,11 +1718,25 @@ examples:
 helps['webapp deployment github-actions add'] = """
     type: command
     short-summary: Adds a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
+    examples:
+      - name: Add GitHub Actions to a specified repository, providing personal access token
+        text: >
+            az webapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --token MyPersonalAccessToken
+      - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
+        text: >
+            az webapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --login-with-github
 """
 
 helps['webapp deployment github-actions remove'] = """
     type: command
     short-summary: Removes and disconnects the GitHub Actions workflow file from the specified repository.
+    examples:
+      - name: Remove GitHub Actions from a specified repository, providing personal access token
+        text: >
+            az webapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --token MyPersonalAccessToken
+      - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
+        text: >
+            az webapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyWebapp --login-with-github
 """
 
 helps['webapp hybrid-connection'] = """

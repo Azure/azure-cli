@@ -419,6 +419,7 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
         c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added. Defaults to "master" if not specified.')
         c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.')
+        c.argument('login_with_github', help='Interactively log in with Github to retrieve the Personal Access Token')
 
     with self.argument_context('webapp deployment github-actions add')as c:
         c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')

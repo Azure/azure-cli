@@ -56,7 +56,7 @@ from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
-from .utils import _normalize_sku, get_sku_name, retryable_method
+from .utils import _normalize_sku, get_sku_name, retryable_method, raise_missing_token_suggestion
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -4465,11 +4465,14 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
     return client.web_apps.delete_function_secret(resource_group_name, name, function_name, key_name)
 
 
-def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None, branch='master', force=False):
-    if not token:
-        token = get_github_access_token(cmd, ['admin:repo_hook', 'repo', 'workflow'])
-        if not token:
-            raise CLIError("Could not authenticate to the repository. Please create a Personal Access Token and use the --token argument. Run 'az webapp deployment github-actions add --help' for more information.")
+def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None, branch='master', login_with_github=False, force=False):
+    if not token and not login_with_github:
+        raise_missing_token_suggestion()
+    elif not token:
+        scopes = ["admin:repo_hook", "repo", "workflow"]
+        token = get_github_access_token(cmd, scopes)
+    elif token and login_with_github:
+        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
 
     # Verify resource group, app
     site_availability = get_site_availability(cmd, name)
@@ -4590,11 +4593,14 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
     return github_actions_url
 
 
-def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None, branch='master'):
-    if not token:
-        token = get_github_access_token(cmd, ['admin:repo_hook', 'repo', 'workflow'])
-        if not token:
-            raise CLIError("Could not authenticate to the repository. Please create a Personal Access Token and use the --token argument. Run 'az webapp deployment github-actions add --help' for more information.")
+def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None, branch='master', login_with_github=False):
+    if not token and not login_with_github:
+        raise_missing_token_suggestion()
+    elif not token:
+        scopes = ["admin:repo_hook", "repo", "workflow"]
+        token = get_github_access_token(cmd, scopes)
+    elif token and login_with_github:
+        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
 
     # Verify resource group, app
     site_availability = get_site_availability(cmd, name)
