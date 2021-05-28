@@ -422,8 +422,8 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     if uri:
         if any([container, blob, snapshot, share, path, file_snapshot, source_account_name,
                 source_account_key]):
-            raise InvalidArgumentValueError(usage_string.format('Unused parameters are given in addition to the '
-                                                 'source URI'))
+            raise InvalidArgumentValueError(usage_string.format(
+                'Unused parameters are given in addition to the source URI'))
         if source_sas:
             source_sas = source_sas.lstrip('?')
             uri = '{}{}{}'.format(uri, '?', source_sas)
@@ -437,8 +437,8 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements
     if not valid_blob_source and not valid_file_source:
         raise RequiredArgumentMissingError(usage_string.format('Neither a valid blob or file source is specified'))
     if valid_blob_source and valid_file_source:
-        raise MutuallyExclusiveArgumentError(usage_string.format('Ambiguous parameters, both blob and file sources are '
-                                             'specified'))
+        raise MutuallyExclusiveArgumentError(usage_string.format(
+            'Ambiguous parameters, both blob and file sources are specified'))
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
