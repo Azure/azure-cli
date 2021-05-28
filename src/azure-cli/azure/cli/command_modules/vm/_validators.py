@@ -930,14 +930,16 @@ def validate_delete_options(resources, delete_option):
 
 def validate_delete_option(string):
     """ Extracts a single delete_option in key[=value] format """
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     result = {}
     if string:
         comps = string.split('=', 1)
         if len(comps) == 2:
             result = {comps[0]: comps[1]}
         else:
-            raise ValueError("Invalid value for delete option. Use a singular value to apply on all resources, or use "
-                             "<Name>=<Value> to configure the delete behavior for individual resources.")
+            raise InvalidArgumentValueError(
+                "Invalid value for delete option. Use a singular value to apply on all resources, or use "
+                "<Name>=<Value> to configure the delete behavior for individual resources.")
     return result
 
 
