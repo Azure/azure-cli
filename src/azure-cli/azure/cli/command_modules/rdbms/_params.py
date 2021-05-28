@@ -228,6 +228,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                                help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
                                                local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
+        migration_id_arg_type = CLIArgumentType(metavar='NAME',
+                                                help="ID of the migration.",
+                                                local_context_attribute=LocalContextAttribute(name='migration_id', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+
         administrator_login_setter_arg_type = CLIArgumentType(metavar='NAME',
                                                               local_context_attribute=LocalContextAttribute(name='administrator_login', actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
@@ -400,6 +404,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 else:
                     c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
 
+        handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
+
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
@@ -481,6 +487,45 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server deploy run'.format(command_group)) as c:
             c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
             c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
+
+    def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
+        for scope in ['create', 'show', 'list', 'update', 'delete']:
+            argument_context_string = '{} flexible-server migration {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type,
+                           help='Resource Group Name of the migration target server.')
+                c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type,
+                           help='Migration target server name.')
+                if scope == "create":
+                    c.argument('properties', options_list=['--properties', '-b'],
+                               help='Request properties. Use @{file} to load from a file. For quoting issues in different terminals, '
+                               'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
+                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
+                               help='Name or ID of the migration.')
+                elif scope == "show":
+                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
+                               help='Name or ID of the migration.')
+                    c.argument('level', options_list=['--level'], required=False,
+                               help='Specify the level of migration details requested. Valid values are Active and All. Active is the default.')
+                elif scope == "list":
+                    c.argument('migration_filter', options_list=['--filter'], required=False,
+                               help='Indicate whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
+                elif scope == "update":
+                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
+                               help='Name or ID of the migration.')
+                    c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
+                               help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
+                    c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
+                               help='Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.')
+                    c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
+                               help='Allow the migration workflow to overwrite the DB on the target.')
+                    c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
+                               help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
+                elif scope == "delete":
+                    c.argument('migration_id', arg_type=migration_id_arg_type, options_list=['--migration-id'],
+                               help='Name or ID of the migration.')
+                    c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                               help='Do not prompt for confirmation.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
