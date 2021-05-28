@@ -312,6 +312,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_blob_list_output, transform_blob_json_output
         from ._format import transform_blob_output
+        g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
@@ -376,7 +377,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
-        g.storage_command_oauth('copy start', 'copy_blob')
         g.storage_command_oauth('copy cancel', 'abort_copy_blob')
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')

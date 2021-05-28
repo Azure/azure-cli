@@ -837,3 +837,9 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
         return None
 
     return reader.readall().decode("utf-8")
+
+
+def copy_blob(client, source_url, metadata=None, **kwargs):
+    if not kwargs['requires_sync']:
+        kwargs.pop('requires_sync')
+    return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
