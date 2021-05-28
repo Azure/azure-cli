@@ -16,6 +16,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class SynapseScenarioTests(ScenarioTest):
     location = "eastus2euap"
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_workspaces(self, resource_group):
         # create a workspace
@@ -55,6 +56,7 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(120)
         self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_managed_virtual_network_workspace(self):
         # test workspace with managed virtual network
@@ -530,7 +532,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    #@record_only()
+    @record_only()
     def test_sql_audit_policy(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -912,7 +914,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_linked_service(self):
         self.kwargs.update({
@@ -1153,7 +1155,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse trigger stop --workspace-name {workspace} --name {tumbling-window-trigger}')
 
-    # @record_only()
+    @record_only()
     @unittest.skip('(InvalidTokenIssuer) Token Authentication failed with SecurityTokenInvalidIssuerException')
     def test_data_flow(self):
         self.kwargs.update({
@@ -1190,6 +1192,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_notebook(self):
         self.kwargs.update({
