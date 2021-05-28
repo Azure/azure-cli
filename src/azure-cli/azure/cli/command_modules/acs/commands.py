@@ -28,31 +28,24 @@ def load_command_table(self, _):
     container_services_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_container_services_operations#ContainerServicesOperations.{}',
-        operation_group='container_services',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_container_services
     )
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
-        operation_group='managed_clusters',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
     agent_pools_sdk = CliCommandType(
         operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
                         'operations._agent_pools_operations#AgentPoolsOperations.{}',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
     openshift_managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
-        operation_group='open_shift_managed_clusters',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_openshift_managed_clusters
     )
 
@@ -125,8 +118,7 @@ def load_command_table(self, _):
     # AKS agent pool commands
     with self.command_group('aks nodepool',
                             agent_pools_sdk,
-                            client_factory=cf_agent_pools,
-                            operation_group='agent_pools') as g:
+                            client_factory=cf_agent_pools) as g:
         g.custom_command('list', 'aks_agentpool_list',
                          table_transformer=aks_agentpool_list_table_format)
         g.custom_show_command('show', 'aks_agentpool_show',
@@ -150,7 +142,6 @@ def load_command_table(self, _):
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,
                             client_factory=cf_openshift_managed_clusters,
-                            operation_group='open_shift_managed_clusters',
                             deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)

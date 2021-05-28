@@ -256,7 +256,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-03-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-11-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-10-27-preview'
         })

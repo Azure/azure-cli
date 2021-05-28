@@ -116,7 +116,7 @@ def validate_cluster_autoscaler_profile(namespace):
     _extract_cluster_autoscaler_params(namespace)
     if namespace.cluster_autoscaler_profile is not None:
         for key in namespace.cluster_autoscaler_profile.keys():
-            _validate_cluster_autoscaler_key(key)
+            _validate_cluster_autoscaler_key(cmd, key)
 
 
 def _validate_cluster_autoscaler_key(cmd, key):
