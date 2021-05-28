@@ -396,10 +396,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         identity=cluster_identity
     )
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create, resource_group_name, cluster_name, create_params)
-
-    return client.begin_create(resource_group_name, cluster_name, create_params)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, cluster_name, create_params)
 
 
 def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
@@ -414,9 +411,8 @@ def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, no
     cluster_patch_parameters = ClusterPatchParameters(
         tags=tags
     )
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
-    return client.update(resource_group_name, cluster_name, cluster_patch_parameters)
+
+    return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
 
 
 # pylint: disable=unused-argument
@@ -429,11 +425,8 @@ def rotate_hdi_cluster_key(cmd, client, resource_group_name, cluster_name,
         key_version=encryption_key_version
     )
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_rotate_disk_encryption_key, resource_group_name, cluster_name,
+    return sdk_no_wait(no_wait, client.begin_rotate_disk_encryption_key, resource_group_name, cluster_name,
                            rotate_params)
-
-    return client.begin_rotate_disk_encryption_key(resource_group_name, cluster_name, rotate_params)
 
 
 def resize_cluster(cmd, client, cluster_name, resource_group_name, target_instance_count, no_wait=False):
@@ -441,11 +434,9 @@ def resize_cluster(cmd, client, cluster_name, resource_group_name, target_instan
     resize_cluster_parameters = ClusterResizeParameters(
         target_instance_count=target_instance_count
     )
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_resize, resource_group_name, cluster_name, RoleName.WORKERNODE,
-                           resize_cluster_parameters)
 
-    return client.begin_resize(resource_group_name, cluster_name, RoleName.WORKERNODE, resize_cluster_parameters)
+    return sdk_no_wait(no_wait, client.begin_resize, resource_group_name, cluster_name, RoleName.WORKERNODE,
+                           resize_cluster_parameters)
 
 
 def _all_or_none(*params):
