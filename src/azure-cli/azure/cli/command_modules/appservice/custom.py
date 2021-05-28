@@ -1646,10 +1646,8 @@ def delete_source_control(cmd, resource_group_name, name, slot=None):
 
 
 def enable_local_git(cmd, resource_group_name, name, slot=None):
-    SiteConfigResource = cmd.get_models('SiteConfigResource')
     client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, name)
-    site_config = SiteConfigResource(location=location)
+    site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     if slot is None:
         client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
