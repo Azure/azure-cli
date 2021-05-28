@@ -351,7 +351,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.greater_than("length([])", 0)
                  ])
 
-    @record_only()
+    #@record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
             'location': 'eastus2euap',
