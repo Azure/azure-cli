@@ -8,7 +8,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, ManagedHSMPreparer, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
@@ -36,17 +36,20 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'vault'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
-    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', location='centraluseuap')
-    def test_mhsm_private_link_resource(self, resource_group, managed_hsm):
+    def test_mhsm_private_link_resource(self, resource_group):
         self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
             'loc': 'centraluseuap'
         })
-
+        self.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+                 '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
         self.cmd('network private-link-resource list '
                  '--name {hsm} '
                  '-g {rg} '
                  '--type microsoft.keyvault/managedHSMs',
                  checks=self.check('@[0].properties.groupId', 'managedhsm'))
+        self.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
+        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
     @unittest.skip("Query 'properties.provisioningState' doesn't yield expected value 'Succeeded',"
                    "instead the actual value is 'Updating'")

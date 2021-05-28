@@ -47,11 +47,6 @@ def load_command_table(self, _):
     else:
         mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
 
-    mgmt_mhsm_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                      Clients.mhsm_private_endpoint_connections)
-    mgmt_mhsm_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                      Clients.mhsm_private_link_resources)
-
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
         client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.vaults)
@@ -117,8 +112,10 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id, supports_no_wait=True)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
         g.wait_command('wait', validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',

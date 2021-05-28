@@ -228,14 +228,20 @@ def validate_private_endpoint_connection_id(cmd, ns):
         from azure.cli.core.util import parse_proxy_resource_id
         result = parse_proxy_resource_id(ns.connection_id)
         ns.resource_group_name = result['resource_group']
-        ns.vault_name = result['name']
+        if result['type'] and 'managedHSM' in result['type']:
+            ns.hsm_name = result['name']
+        else:
+            ns.vault_name = result['name']
         ns.private_endpoint_connection_name = result['child_name_1']
 
     if ns.vault_name and not ns.resource_group_name:
         ns.resource_group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, ns.vault_name)
 
-    if not all([ns.vault_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
+    if ns.hsm_name and not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, None, ns.hsm_name)
+
+    if not all([(ns.vault_name or ns.hsm_name), ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME | --name NAME --hsm-name NAME]')
 
     del ns.connection_id
 

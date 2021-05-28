@@ -14,7 +14,7 @@ from dateutil import tz
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure_devtools.scenario_tests import RecordingProcessor
-from azure.cli.testsdk import ResourceGroupPreparer, ManagedHSMPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
 
 from knack.util import CLIError
 
@@ -53,6 +53,18 @@ def _create_keyvault(test, kwargs, additional_args=None):
         additional_args += ' --enable-soft-delete false'
     kwargs['add'] = additional_args
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium --retention-days 7 {add}')
+
+
+def _create_hsm(test):
+    # There's no generic way to get the object id of signed in user/sp, just use a fixed one
+    return test.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+                    '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
+
+
+def _delete_and_purge_hsm(test):
+    test.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
+    test.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
+    time.sleep(10)
 
 
 def _clear_hsm_role_assignments(test, hsm_url, assignees):
@@ -107,17 +119,18 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
 
 class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
-    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', location='centraluseuap')
-    def test_mhsm_private_link_resource(self, resource_group, managed_hsm):
+    def test_mhsm_private_link_resource(self, resource_group):
         self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
             'loc': 'centraluseuap'
         })
-
+        _create_hsm(self)
         self.cmd('keyvault private-link-resource list --hsm-name {hsm}',
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].groupId', 'managedhsm')
                  ])
+        _delete_and_purge_hsm(self)
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):

@@ -186,47 +186,6 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             raise CliTestError(template.format(KeyVaultPreparer.__name__))
 
 
-# pylint: disable=too-many-instance-attributes
-class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', location='westus', parameter_name='managed_hsm',
-                 resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_MANAGED_HSM_NAME', key='hsm'):
-        super(ManagedHSMPreparer, self).__init__(name_prefix, 24)
-        self.cli_ctx = get_dummy_cli()
-        self.location = location
-        self.resource_group_parameter_name = resource_group_parameter_name
-        self.skip_delete = skip_delete
-        self.parameter_name = parameter_name
-        self.key = key
-        self.dev_setting_name = os.environ.get(dev_setting_name, None)
-
-    def create_resource(self, name, **kwargs):
-        if not self.dev_setting_name:
-            group = self._get_resource_group(**kwargs)
-            signed_in_user = self.live_only_execute(self.cli_ctx, 'az ad signed-in-user show --query "objectId"').output
-            template = 'az keyvault create --hsm-name {} -g {} -l {} --administrators {}'
-            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, signed_in_user))
-            self.test_class_instance.kwargs[self.key] = name
-            return {self.parameter_name: name}
-
-        self.test_class_instance.kwargs[self.key] = name
-        return {self.parameter_name: self.dev_setting_name}
-
-    def remove_resource(self, name, **kwargs):
-        if not self.skip_delete and not self.dev_setting_name:
-            group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {} --yes'.format(name, group))
-            self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
-
-    def _get_resource_group(self, **kwargs):
-        try:
-            return kwargs.get(self.resource_group_parameter_name)
-        except KeyError:
-            template = 'To create a KeyVault MHSM, a resource group is required. Please add ' \
-                       'decorator @{} in front of this ManagedHSM preparer.'
-            raise CliTestError(template.format(KeyVaultPreparer.__name__))
-
-
 # Role based access control service principal preparer
 
 # pylint: disable=too-many-instance-attributes

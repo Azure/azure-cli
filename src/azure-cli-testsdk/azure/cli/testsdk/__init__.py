@@ -7,7 +7,7 @@ from azure_devtools.scenario_tests import live_only, record_only, get_sha1_hash
 
 from .base import ScenarioTest, LiveScenarioTest, LocalContextScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
-                        KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer,
+                        KeyVaultPreparer, ManagedApplicationPreparer,
                         VirtualNetworkPreparer, VnetNicPreparer)
 from .exceptions import CliTestError
 from .checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck,
@@ -16,7 +16,7 @@ from .decorators import api_version_constraint
 from .utilities import create_random_name, AADGraphUserReplacer
 from .patches import MOCKED_USER_NAME
 
-__all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'StorageAccountPreparer', 'ManagedHSMPreparer',
+__all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'StorageAccountPreparer',
            'RoleBasedServicePrincipalPreparer', 'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck',
            'JMESPathCheckExists', 'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck',
            'get_sha1_hash', 'KeyVaultPreparer', 'JMESPathCheckGreaterThan', 'api_version_constraint',
