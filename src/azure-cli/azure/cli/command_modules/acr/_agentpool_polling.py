@@ -6,11 +6,11 @@
 import time
 
 from msrest import Deserializer
-from msrest.pipeline import ClientRawResponse
+from azure.core.exceptions import HttpResponseError
 from azure.core.polling import PollingMethod, LROPoller
-from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.containerregistry.v2019_06_01_preview import models
 
-from ._constants import get_acr_task_models, get_succeeded_agentpool_status, get_finished_agentpool_status
+from ._constants import get_succeeded_agentpool_status, get_finished_agentpool_status
 
 
 def delete_agentpool_with_polling(cmd,
@@ -19,15 +19,15 @@ def delete_agentpool_with_polling(cmd,
                                   registry_name,
                                   resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in models.__dict__.items() if isinstance(v, type)})
 
     def deserialize_agentpool(response):
-        return deserializer('AgentPool', response)
+        return deserializer('AgentPool', response.http_response)
 
     return LROPoller(
         client=client,
         initial_response=client.get(
-            resource_group_name, registry_name, agent_pool_name),
+            resource_group_name, registry_name, agent_pool_name, cls=lambda x,y,z: x),
         deserialization_callback=deserialize_agentpool,
         polling_method=RunPolling(
             cmd=cmd,
@@ -51,9 +51,9 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self.operation_result = None
 
     def initialize(self, client, initial_response, deserialization_callback):
-        self._client = client
+        self._client = client._client
         self._response = initial_response
-        self._url = initial_response.request.url
+        self._url = initial_response.http_request.url
         self._deserialize = deserialization_callback
 
         self._set_operation_status(initial_response)
@@ -85,13 +85,13 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
     def _set_operation_status(self, response):
         AgentPoolStatus = self._cmd.get_models('ProvisioningState')
-        if response.status_code == 200 or response.status_code == 404:
+        if response.http_response.status_code == 200 or response.http_response.status_code == 404:
             self.operation_result = self._deserialize(response)
             self.operation_status = self.operation_result.provisioning_state or AgentPoolStatus.succeeded.value
             return
-        raise CloudError(response)
+        raise HttpResponseError(response)
 
     def _update_status(self):
-        self._response = self._client.send(
+        self._response = self._client._pipeline.run(
             self._client.get(self._url), stream=False)
         self._set_operation_status(self._response)

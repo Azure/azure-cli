@@ -5,6 +5,13 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.containerregistry.v2019_06_01_preview.models import (
+    Architecture,
+    OS,
+    ProvisioningState as AgentPoolStatus,
+    RunStatus,
+    Variant
+)
 
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
 REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
@@ -42,22 +49,18 @@ def get_premium_sku(cmd):
 
 
 def get_valid_os(cmd):
-    OS = cmd.get_models('OS')
     return [item.value.lower() for item in OS]
 
 
 def get_valid_architecture(cmd):
-    Architecture = cmd.get_models('Architecture')
     return [item.value.lower() for item in Architecture]
 
 
 def get_valid_variant(cmd):
-    Variant = cmd.get_models('Variant')
     return [item.value.lower() for item in Variant]
 
 
 def get_finished_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus')
     return [RunStatus.succeeded.value,
             RunStatus.failed.value,
             RunStatus.canceled.value,
@@ -66,7 +69,6 @@ def get_finished_run_status(cmd):
 
 
 def get_succeeded_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus')
     return [RunStatus.succeeded.value]
 
 
@@ -76,12 +78,10 @@ def get_acr_task_models(cmd):
 
 
 def get_succeeded_agentpool_status(cmd):
-    AgentPoolStatus = cmd.get_models('ProvisioningState')
     return [AgentPoolStatus.succeeded.value]
 
 
 def get_finished_agentpool_status(cmd):
-    AgentPoolStatus = cmd.get_models('ProvisioningState')
     return [AgentPoolStatus.succeeded.value,
             AgentPoolStatus.failed.value,
             AgentPoolStatus.canceled.value]

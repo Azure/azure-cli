@@ -41,7 +41,7 @@ def acr_taskrun_delete(cmd,
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
 
     user_confirmation("Are you sure you want to delete the taskrun '{}' ".format(taskrun_name), yes)
-    return client.delete(resource_group_name, registry_name, taskrun_name)
+    return client.begin_delete(resource_group_name, registry_name, taskrun_name)
 
 
 def acr_taskrun_logs(cmd,

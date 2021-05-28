@@ -9,9 +9,18 @@ import tempfile
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
+from azure.core.exceptions import ResourceNotFoundError
+from azure.mgmt.containerregistry.v2019_06_01_preview.models import (
+    Credentials,
+    CustomRegistryCredentials,
+    SecretObject,
+    SecretObjectType,
+    SourceRegistryCredentials,
+    TimerTrigger,
+    TriggerStatus
+)
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -198,7 +207,8 @@ def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture')
+    from azure.mgmt.containerregistry.v2019_06_01_preview.models import OS, Architecture
+
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
@@ -288,7 +298,6 @@ def get_custom_registry_credentials(cmd,
 
     source_registry_credentials = None
     if auth_mode:
-        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
@@ -300,11 +309,6 @@ def get_custom_registry_credentials(cmd,
         is_identity_credential = False
         if not username and not password:
             is_identity_credential = identity is not None
-
-        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
-            'CustomRegistryCredentials',
-            'SecretObject',
-            'SecretObjectType')
 
         if not is_remove:
             if is_identity_credential:
@@ -328,7 +332,6 @@ def get_custom_registry_credentials(cmd,
 
         custom_registries = {login_server: custom_reg_credential}
 
-    Credentials = cmd.get_models('Credentials')
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
@@ -336,8 +339,6 @@ def get_custom_registry_credentials(cmd,
 
 
 def build_timers_info(cmd, schedules):
-    TimerTrigger, TriggerStatus = cmd.get_models(
-        'TimerTrigger', 'TriggerStatus')
     timer_triggers = []
 
     # Provide a default name for the timer if no name was provided.
@@ -507,11 +508,14 @@ def create_default_scope_map(cmd,
             raise CLIError('The default scope map was already configured with different repository permissions.' +
                            '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
                            .format(registry_name, scope_map_name))
-    except CloudError:
+    except ResourceNotFoundError:
         pass
     logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
-    poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
-                                     actions, scope_map_description)
+    scope_map_request = {
+        'actions': actions,
+        'scope_map_description': scope_map_description
+    }
+    poller = scope_map_client.begin_create(resource_group_name, registry_name, scope_map_name, scope_map_request)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
     return scope_map
 

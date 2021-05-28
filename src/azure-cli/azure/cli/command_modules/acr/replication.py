@@ -44,15 +44,17 @@ def acr_replication_create(cmd,
 
     replication_name = replication_name or normalized_location
     replication_properties = ReplicationType(
-        location=location, region_endpoint_enabled=region_endpoint_enabled, zone_redundancy=zone_redundancy)
+        location=location,
+        region_endpoint_enabled=region_endpoint_enabled,
+        zone_redundancy=zone_redundancy,
+        tags=tags)
 
     try:
-        return client.create(
+        return client.begin_create(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
             replication_name=replication_name,
-            replication=replication_properties,
-            tags=tags
+            replication=replication_properties
         )
     except ValidationError as e:
         raise CLIError(e)
@@ -65,7 +67,7 @@ def acr_replication_delete(cmd,
                            resource_group_name=None):
     _, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
-    return client.delete(resource_group_name, registry_name, replication_name)
+    return client.begin_delete(resource_group_name, registry_name, replication_name)
 
 
 def acr_replication_show(cmd,
@@ -104,9 +106,13 @@ def acr_replication_update_set(cmd,
 
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
-    return client.update(
+    ReplicationUpdateParameters = cmd.get_models('ReplicationUpdateParameters')
+    replication_update_parameters = ReplicationUpdateParameters(
+        region_endpoint_enabled=parameters.region_endpoint_enabled,
+        tags=parameters.tags
+    )
+    return client.begin_update(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         replication_name=replication_name,
-        region_endpoint_enabled=parameters.region_endpoint_enabled,
-        tags=parameters.tags)
+        replication_update_parameters=replication_update_parameters)

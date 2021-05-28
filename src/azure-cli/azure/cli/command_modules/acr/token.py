@@ -48,7 +48,7 @@ def acr_token_create(cmd,
 
     Token = cmd.get_models('Token')
 
-    poller = client.create(
+    poller = client.begin_create(
         resource_group_name,
         registry_name,
         token_name,
@@ -189,7 +189,7 @@ def acr_token_credential_generate(cmd,
 
     GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters')
 
-    return client.generate_credentials(
+    return client.begin_generate_credentials(
         resource_group_name,
         registry_name,
         GenerateCredentialsParameters(

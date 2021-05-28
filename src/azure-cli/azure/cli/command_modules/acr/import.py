@@ -94,7 +94,7 @@ def acr_import(cmd,
                                               target_tags=target_tags,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
-    result_poller = client.import_image(
+    result_poller = client.begin_import_image(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         parameters=import_parameters)

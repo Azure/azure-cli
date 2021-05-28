@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import unittest
+
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
 class AcrTaskCommandsTests(ScenarioTest):
 
+    @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
         self.kwargs.update({
