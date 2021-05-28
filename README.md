@@ -8,7 +8,7 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI*, our nex
 
 Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#cloudshell)!
 
-## Installation
+## Installation test
 
 Please refer to the [install guide](https://docs.microsoft.com/cli/azure/install-azure-cli) for detailed install instructions.
 
