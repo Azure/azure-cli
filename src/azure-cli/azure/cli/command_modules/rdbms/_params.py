@@ -515,22 +515,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                help='Name or ID of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
-                    c.argument('db1', options_list=['--db1', '--db'], required=False,
-                               help='Specify the first DB to migrate. A minimum of 1 and a maximum of 8 DBs can be specified using --db1, --db2, --db3... You can migrate additional DBs concurrently using new migrations. Note that each additional DB affects the performance of the source server.')
-                    c.argument('db2', options_list=['--db2'], required=False,
-                               help='Specify the second DB to migrate.')
-                    c.argument('db3', options_list=['--db3'], required=False,
-                               help='Specify the third DB to migrate.')
-                    c.argument('db4', options_list=['--db4'], required=False,
-                               help='Specify the fourth DB to migrate.')
-                    c.argument('db5', options_list=['--db5'], required=False,
-                               help='Specify the fifth DB to migrate.')
-                    c.argument('db6', options_list=['--db6'], required=False,
-                               help='Specify the sixth DB to migrate.')
-                    c.argument('db7', options_list=['--db7'], required=False,
-                               help='Specify the seventh DB to migrate.')
-                    c.argument('db8', options_list=['--db8'], required=False,
-                               help='Specify the eigth DB to migrate.')
+                    c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
+                               help='Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
                     c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,

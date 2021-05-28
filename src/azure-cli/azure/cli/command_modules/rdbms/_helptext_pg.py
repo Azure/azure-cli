@@ -213,8 +213,8 @@ short-summary: Update a specific migration.
 examples:
   - name: Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --setup-replication
-  - name: Specify the list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate additional DBs concurrently using new migrations. Note that each additional DB affects the performance of the source server.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db1 dbName1 --db2 dbName2 --db3 dbName3
+  - name: Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db-names db1 db2
   - name: Allow the migration workflow to overwrite the DB on the target.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testServer --migration-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
   - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.

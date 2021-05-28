@@ -111,7 +111,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_id, setup_logical_replication=None, db1=None, db2=None, db3=None, db4=None, db5=None, db6=None, db7=None, db8=None, overwrite_dbs=None, cutover=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_id, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -120,23 +120,14 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         operationSpecified = True
         properties = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
 
-    db_names = None
-    db_names = db_names_concat_func(db_names, db1)
-    db_names = db_names_concat_func(db_names, db2)
-    db_names = db_names_concat_func(db_names, db3)
-    db_names = db_names_concat_func(db_names, db4)
-    db_names = db_names_concat_func(db_names, db5)
-    db_names = db_names_concat_func(db_names, db6)
-    db_names = db_names_concat_func(db_names, db7)
-    db_names = db_names_concat_func(db_names, db8)
-
     if db_names is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         prefix = "{ \"properties\": { \"dBsToMigrate\": ["
+        db_names_str = "\"" + "\", \"".join(db_names) + "\""
         suffix = "] } }"
-        properties = prefix + db_names + suffix
+        properties = prefix + db_names_str + suffix
 
     if overwrite_dbs is True:
         if operationSpecified is True:
@@ -170,15 +161,6 @@ def migration_delete_func(cmd, client, resource_group_name, server_name, migrati
     r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_id))
 
     return r.json()
-
-
-def db_names_concat_func(current_db_names, new_db_name):
-
-    if new_db_name is not None:
-        db = "\"{}\"".format(new_db_name)
-        current_db_names = db if current_db_names is None else current_db_names + ", " + db
-
-    return current_db_names
 
 
 def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
