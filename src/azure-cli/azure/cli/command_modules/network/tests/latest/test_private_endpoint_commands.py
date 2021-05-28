@@ -1869,17 +1869,17 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         _test_private_endpoint(self, list_name=False)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
-    def test_private_endpoint_connection_synapse_workspace(self, resource_group):
+    @StorageAccountPreparer(name_prefix="testpesyn")
+    def test_private_endpoint_connection_synapse_workspace(self, resource_group, storage_account):
         self.kwargs.update({
             'rg': resource_group,
             # config begin
             'cmd': 'synapse workspace',
             'list_num': 3,
             'type': 'Microsoft.Synapse/workspaces',
-            'extra_create': '--storage-account saxyz --file-system file-000 -p 123-xyz-456 -u synapse1230',
+            'extra_create': '--storage-account {} --file-system file-000 -p 123-xyz-456 -u synapse1230'.format(
+                storage_account),
         })
-
-        self.cmd('storage account create -n saxyz -g {rg}')
 
         _test_private_endpoint(self, group_id=False)
 
