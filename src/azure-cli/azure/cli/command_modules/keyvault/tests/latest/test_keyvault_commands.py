@@ -184,10 +184,11 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
-            'hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'hsm_name': 'clitest-mhsm',
+            'hsm_url': 'https://clitest-mhsm.managedhsm.azure.net/',
             'rg': 'clitest-mhsm-rg',
-            'loc': 'eastus2',
-            'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
+            'loc': 'westeurope',
+            'init_admin': 'f3ea48f6-a16e-4b37-8260-f69cf2200525'
         })
 
         show_checks = [
@@ -195,17 +196,9 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('name', '{hsm_name}'),
             self.check('resourceGroup', '{rg}'),
             self.check('sku.name', 'Standard_B1'),
-            self.check('type', 'Microsoft.KeyVault/managedHSMs'),
             self.check('length(properties.initialAdminObjectIds)', 1),
             self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
             self.exists('properties.hsmUri')
-        ]
-
-        show_deleted_checks = [
-            self.check('name', '{hsm_name}'),
-            self.check('type', 'Microsoft.Keyvault/deletedManagedHSMs'),
-            self.check('properties.location', '{loc}'),
-            self.exists('properties.deletionDate')
         ]
 
         list_checks = [
@@ -219,13 +212,6 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[0].properties.hsmUri')
         ]
 
-        list_deleted_checks = [
-            self.check('length(@)', 1),
-            self.check('[0].properties.location', '{loc}'),
-            self.check('[0].name', '{hsm_name}'),
-            self.exists('[0].properties.deletionDate')
-        ]
-
         self.cmd('group create -g {rg} -l {loc}'),
         self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin}')
 
@@ -236,15 +222,10 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
-        self.cmd('keyvault show-deleted --hsm-name {hsm_name}', checks=show_deleted_checks)
-        self.cmd('keyvault show-deleted --hsm-name {hsm_name} -l {loc}', checks=show_deleted_checks)
-        self.cmd('keyvault list-deleted --resource-type hsm', checks=list_deleted_checks)
+        self.cmd('keyvault show-deleted --hsm-name {hsm_name}', checks=show_checks)
+        self.cmd('keyvault show-deleted --hsm-name {hsm_name} -l {loc}', checks=show_checks)
+        self.cmd('keyvault list-deleted --resource-type hsm', checks=list_checks)
 
-        self.cmd('keyvault recover --hsm-name {hsm_name}')
-        self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
-        time.sleep(120)
-
-        self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
         self.cmd('group delete -n {rg} --yes')
 
@@ -306,27 +287,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.networkAcls.bypass', 'AzureServices'),
                      self.check('properties.networkAcls.defaultAction', 'Deny')
                  ])
-        # test policy set
+        # test policy set/delete
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapKey',
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapkey',
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
-        # test policy for compound identity set
-        result = self.cmd('ad app create --display-name {kv}').get_output_in_json()
-        self.kwargs['app_id'] = result['appId']
-        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id} --key-permissions get list',
-                 checks=[
-                     self.check('properties.accessPolicies[1].applicationId', self.kwargs['app_id']),
-                     self.check('properties.accessPolicies[1].objectId', self.kwargs['policy_id']),
-                     self.check('length(properties.accessPolicies[1].permissions.keys)', 2)
-                 ])
-        # test policy for compound identity delete
-        self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id}',
-                 checks=self.check('length(properties.accessPolicies)', 1))
-        self.cmd('ad app delete --id {app_id}')
-        # test policy delete
         self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id}', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)

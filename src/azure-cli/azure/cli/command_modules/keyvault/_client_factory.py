@@ -125,7 +125,7 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
     return _keyvault_mgmt_client_factory
 
 
-def keyvault_data_plane_factory(cli_ctx, *_):
+def keyvault_data_plane_factory(cli_ctx, _):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -134,8 +134,7 @@ def keyvault_data_plane_factory(cli_ctx, *_):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
@@ -171,8 +170,7 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
