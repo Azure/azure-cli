@@ -2424,7 +2424,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                network_api_version=None, compute_name_prefix=None):
+                network_api_version=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2438,7 +2438,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
-    flexible_str = 'Flexible'
+    # flexible_str = 'Flexible'
     if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
         if disk_info:
@@ -2640,7 +2640,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
             naming_prefix = computer_name_prefix
         if orchestration_mode.lower() == uniform_str.lower():
-            compute_name_prefix = naming_prefix
+            computer_name_prefix = naming_prefix
         if os_version and os_version != 'latest':
             logger.warning('You are deploying VMSS pinned to a specific image version from Azure Marketplace. '
                            'Consider using "latest" as the image version.')
@@ -2649,7 +2649,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         else:
             overprovision = None
         vmss_resource = build_vmss_resource(
-            cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
+            cmd=cmd, name=vmss_name, location=location, tags=tags,
             overprovision=overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
             instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
             public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
@@ -2673,7 +2673,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone,
-            network_api_version=network_api_version, compute_name_prefix=compute_name_prefix)
+            network_api_version=network_api_version, computer_name_prefix=computer_name_prefix)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 

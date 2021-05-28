@@ -754,7 +754,7 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, too-many-lines
-def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
+def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
@@ -771,7 +771,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        network_api_version=None, compute_name_prefix=None):
+                        network_api_version=None, computer_name_prefix=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -886,8 +886,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     # Build OS Profile
     os_profile = {}
-    if compute_name_prefix:
-        os_profile['compute_name_prefix'] = compute_name_prefix
+    if computer_name_prefix:
+        os_profile['computerNamePrefix'] = computer_name_prefix
 
     if admin_username:
         os_profile['adminUsername'] = admin_username
@@ -935,6 +935,11 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         nic_config['properties']['networkSecurityGroup'] = {'id': nsg}
 
     vmss_properties = {}
+    network_profile = {}
+    virtual_machine_profile = {}
+    if nic_config:
+        network_profile['networkInterfaceConfigurations'] = [nic_config]
+
     if overprovision is not None:
         vmss_properties['overprovision'] = overprovision
     if upgrade_policy_mode:
@@ -949,40 +954,36 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                 'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
             }
         }
-    vmss_properties['virtualMachineProfile'] = {}
+
     if storage_properties:
-        vmss_properties['virtualMachineProfile']['storageProfile'] = storage_properties
+        virtual_machine_profile['storageProfile'] = storage_properties
 
-    vmss_properties['virtualMachineProfile']['networkProfile'] = {}
-    if nic_config:
-        vmss_properties['virtualMachineProfile']['networkProfile']['networkInterfaceConfigurations'] = [nic_config]
-
-    if not specialized:
-        vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
+    if not specialized and os_profile:
+        virtual_machine_profile['osProfile'] = os_profile
 
     if license_type:
-        vmss_properties['virtualMachineProfile']['licenseType'] = license_type
+        virtual_machine_profile['licenseType'] = license_type
 
     if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
+        network_profile['healthProbe'] = {'id': health_probe}
 
     if network_api_version and \
             cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['networkProfile']['networkApVersion'] = network_api_version
+        network_profile['networkApVersion'] = network_api_version
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
 
     if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['priority'] = priority
+        virtual_machine_profile['priority'] = priority
 
     if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
                                                      operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
+        virtual_machine_profile['evictionPolicy'] = eviction_policy
 
     if max_price is not None and cmd.supported_api_version(
             min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_price}
+        virtual_machine_profile['billingProfile'] = {'maxPrice': max_price}
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
@@ -992,7 +993,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
             vmss_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
         else:
-            vmss_properties['virtualMachineProfile']['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+            virtual_machine_profile['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
 
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
@@ -1004,7 +1005,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                 'enable': 'true'
             }
         }
-        vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
     if automatic_repairs_grace_period is not None:
         automatic_repairs_policy = {
@@ -1017,10 +1018,15 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
     if encryption_at_host:
-        vmss_properties['virtualMachineProfile']['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+        virtual_machine_profile['securityProfile'] = {'encryptionAtHost': encryption_at_host}
 
     if host_group:
         vmss_properties['hostGroup'] = {'id': host_group}
+
+    if network_profile:
+        virtual_machine_profile['networkProfile'] = network_profile
+    if virtual_machine_profile:
+        vmss_properties['virtualMachineProfile'] = virtual_machine_profile
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
@@ -1039,12 +1045,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if edge_zone:
         vmss['extendedLocation'] = edge_zone
-    if not vmss['properties']['virtualMachineProfile']['networkProfile']:
-        del vmss['properties']['virtualMachineProfile']['networkProfile']
-    if not vmss['properties']['virtualMachineProfile']['osProfile']:
-        del vmss['properties']['virtualMachineProfile']['osProfile']
-    if not vmss['properties']['virtualMachineProfile']:
-        del vmss['properties']['virtualMachineProfile']
+
     return vmss
 
 
