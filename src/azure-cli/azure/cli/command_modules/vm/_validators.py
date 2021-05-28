@@ -511,7 +511,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
-    data_disk_delete_option = validate_delete_options(namespace.attach_data_disks, namespace.data_disk_delete_option)
+
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
@@ -520,7 +520,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               os_disk_caching=namespace.os_caching,
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
-                                              data_disk_delete_option=data_disk_delete_option)
+                                              data_disk_delete_option=getattr(
+                                                  namespace, 'data_disk_delete_option', None))
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -944,7 +945,7 @@ def _validate_vm_create_nics(cmd, namespace):
     from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     nic_ids = namespace.nics
-    delete_option = validate_delete_options(nic_ids, namespace.nic_delete_option)
+    delete_option = validate_delete_options(nic_ids, getattr(namespace, 'nic_delete_option', None))
     nics = []
 
     if not nic_ids:
@@ -956,17 +957,17 @@ def _validate_vm_create_nics(cmd, namespace):
         nic_ids = [nic_ids]
 
     for n in nic_ids:
-        nics.append({
-            'id': n if '/' in n else resource_id(name=n,
-                                                 resource_group=namespace.resource_group_name,
-                                                 namespace='Microsoft.Network',
-                                                 type='networkInterfaces',
-                                                 subscription=get_subscription_id(cmd.cli_ctx)),
-            'properties': {
-                'primary': nic_ids[0] == n,
-                'deleteOption': delete_option if isinstance(delete_option, str) else delete_option.get(n, None)
-            }
-        })
+        nic = {'id': n if '/' in n else resource_id(name=n,
+                                                    resource_group=namespace.resource_group_name,
+                                                    namespace='Microsoft.Network',
+                                                    type='networkInterfaces',
+                                                    subscription=get_subscription_id(cmd.cli_ctx)),
+               'properties': {'primary': nic_ids[0] == n}
+               }
+        if delete_option:
+            nic['properties']['deleteOption'] = delete_option if isinstance(delete_option, str) else \
+                delete_option.get(n, None)
+        nics.append(nic)
 
     namespace.nics = nics
     namespace.nic_type = 'existing'

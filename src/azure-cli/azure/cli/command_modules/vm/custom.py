@@ -878,17 +878,17 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 {
                     'id': "[concat('{}', copyIndex())]".format(nics_id),
                     'properties': {
-                         'deleteOption': nic_delete_option
-                     }
-                 }
+                        'deleteOption': nic_delete_option
+                    }
+                }
             ]
         else:
             nics = [
                 {
                     'id': nics_id,
                     'properties': {
-                         'deleteOption': nic_delete_option
-                     }
+                        'deleteOption': nic_delete_option
+                    }
                 }
             ]
 
@@ -942,8 +942,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
-        data_disk_delete_option=data_disk_delete_option)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option)
 
     vm_resource['dependsOn'] = vm_dependencies
 

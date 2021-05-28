@@ -801,7 +801,8 @@ def load_arguments(self, _):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
                 c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
             c.argument('nic_delete_option', nargs='+', min_api='2021-03-01',
-                       help='Use a singular value to apply on all resources, or use <Name>=<Value> to configure '
+                       help='Specify what happens to the network interface when the VM is deleted. Use a singular '
+                       'value to apply on all resources, or use <Name>=<Value> to configure '
                        'the delete behavior for individual resources. Possible options are Delete and Detach.')
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
