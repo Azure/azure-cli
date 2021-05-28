@@ -101,15 +101,8 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
 
 
 def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import get_api_version, ResourceType
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
