@@ -530,8 +530,7 @@ short-summary: Get a SQL pool's auditing policy.
 examples:
   - name: Get a SQL pool's auditing policy.
     text: |-
-        az synapse sql pool audit-policy show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --blob-audit-ply bapname
+        az synapse sql pool audit-policy show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool audit-policy update'] = """
@@ -1342,11 +1341,6 @@ examples:
     text: |-
         az synapse trigger stop --workspace-name testsynapseworkspace \\
           --name testtrigger
-"""
-
-helps['synapse trigger wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a trigger is met.
 """
 
 helps['synapse trigger-run'] = """
