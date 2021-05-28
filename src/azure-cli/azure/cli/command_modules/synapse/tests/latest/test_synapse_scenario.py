@@ -427,11 +427,11 @@ class SynapseScenarioTests(ScenarioTest):
         })
 
         self.cmd(
-            'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \ '
-            '--resource-group {rg} --trans-data-encry current')
+            'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \
+            --resource-group {rg} --trans-data-encry current')
 
-        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} \ '
-                 '--trans-data-encry current',
+        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} \
+                 --trans-data-encry current',
                  checks=[
                      self.check('name', "current"),
                      self.check('status', "Enabled")
@@ -530,17 +530,18 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    @record_only()
+    #@record_only()
     def test_sql_audit_policy(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'storage-account': 'teststorageforsynapse'
+            'location': 'eastus2euap',
+            'workspace': 'zes0508test',
+            'rg': 'chayang-test-rg',
+            'storage-account': 'chayangstoragewestus2'
         })
+
         # test show command
         self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 -blob-audit-ply bapname',
+                 --blob-audit-ply bapname',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
