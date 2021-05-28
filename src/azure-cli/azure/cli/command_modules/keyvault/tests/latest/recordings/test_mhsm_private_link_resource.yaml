@@ -1,0 +1,107 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/managedHSMs?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"value":[{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002","name":"cli-test-hsm-plr-000002","type":"Microsoft.KeyVault/managedHSMs","location":"centraluseuap","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://cli-test-hsm-plr-000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enablePurgeProtection":false,"provisioningState":"Provisioning","statusMessage":"Resource
+        creation in progress. Starting service..."}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '767'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 May 2021 08:10:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.338.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hsm-name
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002/privateLinkResources?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_plr_rg000001/providers/Microsoft.KeyVault/managedHSMs/cli-test-hsm-plr-000002/privateLinkResources/managedhsm","name":"managedhsm","type":"Microsoft.KeyVault/managedHSMs/privateLinkResources","properties":{"groupId":"managedhsm","requiredMembers":["default"],"requiredZoneNames":["privatelink.managedhsm.azure.net"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '467'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 May 2021 08:11:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.338.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

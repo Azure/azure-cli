@@ -47,6 +47,11 @@ def load_command_table(self, _):
     else:
         mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
 
+    mgmt_mhsm_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
+                                      Clients.mhsm_private_endpoint_connections)
+    mgmt_mhsm_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
+                                      Clients.mhsm_private_link_resources)
+
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
         client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.vaults)
@@ -122,7 +127,7 @@ def load_command_table(self, _):
                             client_factory=mgmt_plr_entity.client_factory,
                             is_preview=True) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
+        g.custom_command('list', 'list_private_link_resource', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
     if not is_azure_stack_profile(self):

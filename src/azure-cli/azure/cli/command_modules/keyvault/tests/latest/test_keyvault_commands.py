@@ -14,7 +14,7 @@ from dateutil import tz
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure_devtools.scenario_tests import RecordingProcessor
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, ManagedHSMPreparer, ScenarioTest
 
 from knack.util import CLIError
 
@@ -102,6 +102,21 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].groupId', 'vault')
+                 ])
+
+
+class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', location='centraluseuap')
+    def test_mhsm_private_link_resource(self, resource_group, managed_hsm):
+        self.kwargs.update({
+            'loc': 'centraluseuap'
+        })
+
+        self.cmd('keyvault private-link-resource list --hsm-name {hsm}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].groupId', 'managedhsm')
                  ])
 
 

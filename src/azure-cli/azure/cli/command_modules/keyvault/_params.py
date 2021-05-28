@@ -252,8 +252,11 @@ def load_arguments(self, _):
             c.argument('vault_name', vault_name_type, required=False,
                        help='Name of the Key Vault. Required if --id is not specified')
 
-    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14', max_api='2020-04-01-preview') as c:
+        c.argument('vault_name', vault_name_type, required=True)
+    with self.argument_context('keyvault private-link-resource', min_api='2021-04-01-preview') as c:
         c.argument('vault_name', vault_name_type)
+        c.argument('hsm_name', mgmt_plane_hsm_name_type)
     # endregion
 
     # region Shared

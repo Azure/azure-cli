@@ -1745,6 +1745,20 @@ def restore_storage_account(client, vault_base_url, file_path):
 # endregion
 
 
+# region private_link
+def list_private_link_resource(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    if not vault_name and not hsm_name:
+        raise RequiredArgumentMissingError('Please specify --vault-name or --hsm-name.')
+
+    if is_azure_stack_profile(cmd) or vault_name:
+        return client.list_by_vault(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    hsm_plr_client = get_client_factory(ResourceType.MGMT_KEYVAULT,
+                                        Clients.mhsm_private_link_resources)(cmd.cli_ctx, None)
+    return hsm_plr_client.list_by_mhsm_resource(resource_group_name=resource_group_name, name=hsm_name)
+# endregion
+
+
 # region private_endpoint
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
                                                private_endpoint_connection_name, is_approved=True, description=None,
