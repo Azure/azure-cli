@@ -12,8 +12,8 @@ from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
-from knack.arguments import CLIArgumentType
 from azure.cli.core.profiles import ResourceType
+from knack.arguments import CLIArgumentType
 
 from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)

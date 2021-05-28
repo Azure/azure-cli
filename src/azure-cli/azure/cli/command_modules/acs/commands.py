@@ -123,7 +123,10 @@ def load_command_table(self, _):
                          table_transformer=aks_versions_table_format)
 
     # AKS agent pool commands
-    with self.command_group('aks nodepool', agent_pools_sdk, client_factory=cf_agent_pools, operation_group='agent_pools') as g:
+    with self.command_group('aks nodepool',
+                            agent_pools_sdk,
+                            client_factory=cf_agent_pools,
+                            operation_group='agent_pools') as g:
         g.custom_command('list', 'aks_agentpool_list',
                          table_transformer=aks_agentpool_list_table_format)
         g.custom_show_command('show', 'aks_agentpool_show',
