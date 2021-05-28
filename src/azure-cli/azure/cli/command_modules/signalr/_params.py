@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 
+from knack.arguments import CLIArgumentType
 from knack.log import get_logger
 from azure.mgmt.signalr.models import SignalRRequestType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -30,12 +31,14 @@ logger = get_logger(__name__)
 
 
 def load_arguments(self, _):
+    signalr_name_type = CLIArgumentType(options_list='--signalr-name-name', help='Name of the SignalR.', id_part='name')
+
     with self.argument_context('signalr') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location',
                    arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
-        c.argument('signalr_name', options_list=['--name', '-n'],
+        c.argument('signalr_name', signalr_name_type, options_list=['--name', '-n'],
                    completer=get_resource_name_completion_list(SIGNALR_RESOURCE_TYPE),
                    help='Name of signalr service.')
         c.argument('tags', arg_type=tags_type)
