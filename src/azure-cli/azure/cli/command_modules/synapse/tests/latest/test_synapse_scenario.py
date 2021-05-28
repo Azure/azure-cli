@@ -428,10 +428,10 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd(
             'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \ '
-            '--resource-group {rg} --tran-data-en current')
+            '--resource-group {rg} --trans-data-encry current')
 
         self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} \ '
-                 '--tran-data-en current',
+                 '--trans-data-encry current',
                  checks=[
                      self.check('name', "current"),
                      self.check('status', "Enabled")
