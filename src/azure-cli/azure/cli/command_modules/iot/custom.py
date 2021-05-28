@@ -1321,7 +1321,7 @@ def _build_identity(system=False, identities=None):
         return ArmIdentity(type=identity_type)
     if system:
         identity_type = IdentityType.system_assigned.value
-    user_identities = [i for i in identities] if identities else None
+    user_identities = list(identities) if identities else None
     if user_identities and identity_type == IdentityType.system_assigned.value:
         identity_type = IdentityType.system_assigned_user_assigned.value
     elif user_identities:
