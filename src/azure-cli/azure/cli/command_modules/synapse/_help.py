@@ -224,7 +224,8 @@ short-summary: Get a SQL's auditing policy.
 examples:
   - name: Get a SQL's auditing policy.
     text: |-
-        az synapse sql audit-policy show --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql audit-policy show --workspace-name testsynapseworkspace --resource-group rg \\
+        --blob-audit-ply bapolicyname
 """
 
 helps['synapse sql audit-policy update'] = """
@@ -235,19 +236,21 @@ examples:
   - name: Enable by storage account name.
     text: |-
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Enabled --storage-account mystorageaccount
+        --state Enabled --storage-account mystorageaccount --blob-audit-ply bapolicyname
   - name: Enable by storage endpoint and key.
     text: |-
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== \\
+        --blob-audit-ply bapolicyname
   - name: Set the list of audit actions.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
+        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
+        --blob-audit-ply bapolicyname
   - name: Disable an auditing policy.
     text: |-
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Disabled
+        --state Disabled --blob-audit-ply bapolicyname
 """
 
 helps['synapse sql audit-policy wait'] = """
@@ -538,19 +541,20 @@ examples:
   - name: Enable by storage account name.
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Enabled --storage-account mystorageaccount
+        --state Enabled --storage-account mystorageaccount --blob-audit-ply bapname
   - name: Enable by storage endpoint and key.
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== \\
+        --blob-audit-ply bapname
   - name: Set the list of audit actions.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
+        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' --blob-audit-ply bapname
   - name: Disable an auditing policy.
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Disabled
+        --state Disabled --blob-audit-ply bapname
 """
 
 helps['synapse workspace key'] = """
