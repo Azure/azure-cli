@@ -270,7 +270,6 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 dest[setting_name] = value
                 result.update(dest)
 
-    result.update(slot_result)
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
