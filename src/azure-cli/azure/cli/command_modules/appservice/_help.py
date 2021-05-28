@@ -1715,6 +1715,11 @@ examples:
         az webapp deployment user show
 """
 
+helps['webapp deployment github-actions'] = """
+type: group
+short-summary: Configure GitHub Actions for a webapp
+"""
+
 helps['webapp deployment github-actions add'] = """
     type: command
     short-summary: Adds a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
