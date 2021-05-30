@@ -17,7 +17,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
-                                                               cf_queue_service)
+                                                               cf_queue_service, cf_sa_blob_inventory)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -137,6 +137,29 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account',
                             command_type=get_custom_sdk('account', cloud_storage_account_service_factory)) as g:
         g.storage_command('generate-sas', 'generate_sas')
+
+    blob_inventory_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#BlobInventoryPoliciesOperations.{}',
+        client_factory=cf_sa_blob_inventory,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    blob_inventory_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_sa_blob_inventory,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    with self.command_group('storage account blob-inventory-policy', blob_inventory_sdk,
+                            custom_command_type=blob_inventory_custom_type, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview') as g:
+        g.custom_command('create', 'create_blob_inventory_policy')
+        g.generic_update_command('update', getter_name='get_blob_inventory_policy',
+                                 getter_type=blob_inventory_custom_type,
+                                 setter_name='update_blob_inventory_policy',
+                                 setter_type=blob_inventory_custom_type)
+        g.custom_command('delete', 'delete_blob_inventory_policy', confirmation=True)
+        g.custom_show_command('show', 'get_blob_inventory_policy')
 
     encryption_scope_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#EncryptionScopesOperations.{}',
@@ -289,6 +312,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_blob_list_output, transform_blob_json_output
         from ._format import transform_blob_output
+        g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
@@ -353,7 +377,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
-        g.storage_command_oauth('copy start', 'copy_blob')
         g.storage_command_oauth('copy cancel', 'abort_copy_blob')
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')
@@ -501,11 +524,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                cf_mgmt_file_shares,
                                                                resource_type=ResourceType.MGMT_STORAGE),
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01') as g:
-        from ._transformers import transform_share_rm_output
+        from ._transformers import transform_share_rm_output, transform_share_rm_list_output
         g.custom_command('create', 'create_share_rm')
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
-        g.custom_command('list', 'list_share_rm')
+        g.custom_command('list', 'list_share_rm', transform=transform_share_rm_list_output)
         g.show_command('show', 'get', transform=transform_share_rm_output)
         g.generic_update_command('update', setter_name='update', setter_arg_name='file_share',
                                  custom_func_name='update_share_rm')

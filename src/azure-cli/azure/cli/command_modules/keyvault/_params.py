@@ -221,11 +221,13 @@ def load_arguments(self, _):
         c.argument('hsm_name', deleted_hsm_name_type)
         c.argument('location', help='Location of the deleted Vault or HSM', required=False)
 
-    with self.argument_context('keyvault delete-policy') as c:
-        c.argument('object_id', validator=validate_principal)
+    for item in ['set-policy', 'delete-policy']:
+        with self.argument_context('keyvault {}'.format(item)) as c:
+            c.argument('object_id', validator=validate_principal)
+            c.argument('application_id', help='Application ID of the client making request on behalf of a principal. '
+                                              'Exposed for compound identity using on-behalf-of authentication flow.')
 
     with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
-        c.argument('object_id', validator=validate_principal)
         c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*',
                    help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
         c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*',

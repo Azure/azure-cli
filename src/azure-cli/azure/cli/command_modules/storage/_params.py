@@ -81,10 +81,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
              'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
     adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01',
+                                arg_group='Azure Files Identity Based Authentication',
                                 help='Enable Azure Files Active Directory Domain Service Authentication for '
                                      'storage account. When --enable-files-adds is set to true, Azure Active '
                                      'Directory Properties arguments must be provided.')
     aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
+                                 arg_group='Azure Files Identity Based Authentication',
                                  help='Enable Azure Active Directory Domain Services authentication for Azure Files')
     domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the primary domain that the AD DNS server is authoritative for. "
@@ -184,8 +186,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Expiration period in days of the Key Policy assigned to the storage account'
     )
 
+    allow_cross_tenant_replication_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'], min_api='2021-04-01',
+        help='Allow or disallow cross AAD tenant object replication. The default interpretation is true for this '
+        'property.')
+
+    t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
+    default_share_permission_type = CLIArgumentType(
+        options_list=['--default-share-permission', '-d'],
+        arg_type=get_enum_type(t_share_permission), min_api='2020-08-01-preview',
+        arg_group='Azure Files Identity Based Authentication',
+        help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
+
     t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
+    t_rehydrate_priority = self.get_sdk('_generated.models._azure_blob_storage_enums#RehydratePriority',
+                                        resource_type=ResourceType.DATA_STORAGE_BLOB)
+    tier_type = CLIArgumentType(
+        arg_type=get_enum_type(t_blob_tier), min_api='2019-02-02',
+        help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
+             'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
+             'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
+             'values are Archive, Cool and Hot. This is only applicable to block blobs on standard storage accounts.'
+    )
+    rehydrate_priority_type = CLIArgumentType(
+        arg_type=get_enum_type(t_rehydrate_priority), options_list=('--rehydrate-priority', '-r'),
+        min_api='2019-02-02',
+        help='Indicate the priority with which to rehydrate an archived blob.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -210,6 +237,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
 
+    with self.argument_context('storage account blob-inventory-policy') as c:
+        c.ignore('blob_inventory_policy_name')
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('account_name',
+                   help='The name of the storage account within the specified resource group. Storage account names '
+                        'must be between 3 and 24 characters in length and use numbers and lower-case letters only.')
+
+    with self.argument_context('storage account blob-inventory-policy create') as c:
+        c.argument('policy', type=file_type, completer=FilesCompleter(),
+                   help='The Storage Account Blob Inventory Policy, string in JSON format or json file path. See more '
+                   'details in https://review.docs.microsoft.com/en-us/azure/storage/blobs/blob-inventory#'
+                   'inventory-policy.')
+
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
                    help='The name of the storage account within the specified resource group')
@@ -218,8 +258,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
+        t_account_type, t_sku_name, t_kind, t_tls_version, t_share_permission = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DefaultSharePermission',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
@@ -288,6 +328,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
+        c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
+        c.argument('default_share_permission', default_share_permission_type)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -349,6 +391,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
+        c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
+        c.argument('default_share_permission', default_share_permission_type)
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
@@ -565,10 +609,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('object_replication_policy_id', policy_id_type)
         c.argument('policy_id', policy_id_type)
         c.argument('source_account', options_list=['--source-account', '-s'],
-                   help='The source storage account name. Required when no --policy provided.')
+                   help='The source storage account name or resource Id. Required when no --policy provided.')
         c.argument('destination_account', options_list=['--destination-account', '-d'],
-                   help='The destination storage account name. Apply --account-name value as destination account '
-                   'when there is no destination account provided in --policy and --destination-account.')
+                   help='The destination storage account name or resource Id. Apply --account-name value as '
+                   'destination account when there is no destination account provided in --policy and '
+                   '--destination-account.')
         c.argument('properties', or_policy_type)
         c.argument('prefix_match', prefix_math_type)
         c.argument('min_creation_time', min_creation_time_type)
@@ -646,15 +691,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
         c.register_sas_arguments()
-        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '
                                          'using this shared access signature.')
-        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
-                                               'using this shared access signature.')
-        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
+                                               'accessed using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
                                             'using this shared access signature.')
-        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed '
                                             'using this shared access signature.')
-        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed '
                                         'using this shared access signature.')
         c.argument('full_uri', action='store_true',
                    help='Indicates that this command return the full blob URI and the shared access signature token.')
@@ -713,7 +758,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob url') as c:
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
-        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of'
+        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of '
                                     'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
@@ -932,13 +977,37 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
-    with self.argument_context('storage blob copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+    with self.argument_context('storage blob copy start', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        from ._validators import validate_source_url
 
-        c.register_source_uri_arguments(validator=validate_source_uri)
-        c.argument('requires_sync', arg_type=get_three_state_flag(),
-                   help='Enforce that the service will not return a response until the copy is complete.'
-                   'Not support for standard page blob.')
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.register_precondition_options(prefix='source_')
+        c.register_source_uri_arguments(validator=validate_source_url)
+
+        c.ignore('incremental_copy')
+        c.argument('if_match', options_list=['--destination-if-match'])
+        c.argument('if_modified_since', options_list=['--destination-if-modified-since'])
+        c.argument('if_none_match', options_list=['--destination-if-none-match'])
+        c.argument('if_unmodified_since', options_list=['--destination-if-unmodified-since'])
+        c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
+
+        c.argument('blob_name', options_list=['--destination-blob', '-b'], required=True,
+                   help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('container_name', options_list=['--destination-container', '-c'], required=True,
+                   help='The container name.')
+        c.extra('destination_lease', options_list='--destination-lease-id',
+                help='The lease ID specified for this header must match the lease ID of the estination blob. '
+                'If the request does not include the lease ID or it is not valid, the operation fails with status '
+                'code 412 (Precondition Failed).')
+        c.extra('source_lease', options_list='--source-lease-id', arg_group='Copy Source',
+                help='Specify this to perform the Copy Blob operation only if the lease ID given matches the '
+                'active lease ID of the source blob.')
+        c.extra('rehydrate_priority', rehydrate_priority_type)
+        c.extra('requires_sync', arg_type=get_three_state_flag(),
+                help='Enforce that the service will not return a response until the copy is complete.')
+        c.extra('tier', tier_type)
+        c.extra('tags', tags_type)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
@@ -1145,15 +1214,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
-        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed '
                                          'using this shared access signature.')
-        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
-                                               'using this shared access signature.')
-        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is '
+                                               'accessed using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed '
                                             'using this shared access signature.')
-        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed '
                                             'using this shared access signature.')
-        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed '
                                         'using this shared access signature.')
         c.argument('as_user', min_api='2018-11-09', action='store_true',
                    validator=as_user_validator,
@@ -1206,6 +1275,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
 
+    with self.argument_context('storage share-rm delete', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('include', default='none')
+
     with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.ignore('x_ms_snapshot')
 
@@ -1234,6 +1306,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', storage_account_type, id_part=None)
         c.argument('include_deleted', action='store_true',
                    help='Include soft deleted file shares when specified.')
+        c.argument('include_snapshot', action='store_true',
+                   help='Include file share snapshots when specified.')
 
     with self.argument_context('storage share-rm restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('deleted_version',

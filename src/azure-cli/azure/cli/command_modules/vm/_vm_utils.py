@@ -74,7 +74,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
@@ -96,20 +96,13 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
         return True
-    except CloudError:
+    except HttpResponseError:
         return False
 
 
 def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import get_api_version, ResourceType
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):

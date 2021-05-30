@@ -19,7 +19,7 @@ from msrestazure.azure_exceptions import CloudError
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
@@ -1493,15 +1493,15 @@ def create_service_principal_for_rbac(
                         logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
-                    elif _error_caused_by_role_assignment_exists(ex):
+                    if _error_caused_by_role_assignment_exists(ex):
                         logger.warning('  Role assignment already exists.\n')
                         break
-                    else:
-                        # dump out history for diagnoses
-                        logger.warning('  Role assignment creation failed.\n')
-                        if getattr(ex, 'response', None) is not None:
-                            logger.warning('  role assignment response headers: %s\n',
-                                           ex.response.headers)  # pylint: disable=no-member
+
+                    # dump out history for diagnoses
+                    logger.warning('  Role assignment creation failed.\n')
+                    if getattr(ex, 'response', None) is not None:
+                        logger.warning('  role assignment response headers: %s\n',
+                                       ex.response.headers)  # pylint: disable=no-member
                     raise
 
     logger.warning(CREDENTIAL_WARNING_MESSAGE)
@@ -1538,14 +1538,8 @@ def _get_signed_in_user_object_id(graph_client):
 
 
 def _get_keyvault_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals

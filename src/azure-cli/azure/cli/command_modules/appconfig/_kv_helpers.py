@@ -17,9 +17,10 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import ResourceReadOnlyError
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.util import user_confirmation
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants)
-from ._utils import user_confirmation, prep_label_filter_for_url_encoding
+from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -316,7 +317,7 @@ def __read_kv_from_config_store(azconfig_client,
 
     if cli_ctx:
         from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        keyvault_client = keyvault_data_plane_factory(cli_ctx, None)
+        keyvault_client = keyvault_data_plane_factory(cli_ctx)
     else:
         keyvault_client = None
 
