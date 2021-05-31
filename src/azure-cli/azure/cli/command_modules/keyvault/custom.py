@@ -405,16 +405,17 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
-    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
+    # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
+    # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
     parameters = ManagedHsm(location=location,
                             sku=ManagedHsmSku(name='Standard_B1', family='B'),
-                            properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
+                            properties={'tenant_id': tenant_id, 'create_mode': 'Recover'})
 
     return sdk_no_wait(
         no_wait, client.begin_create_or_update,
@@ -885,7 +886,7 @@ def _permissions_distinct(permissions):
 
 
 def set_policy(cmd, client, resource_group_name, vault_name,
-               object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
+               object_id=None, application_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None, no_wait=False):
     """ Update security policy settings for a Key Vault. """
 
@@ -913,12 +914,14 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
+                   (application_id or '').lower() == (p.application_id or '').lower() and
                    vault.properties.tenant_id.lower() == p.tenant_id.lower()), None)
     if not policy:
         # Add new policy as none found
         vault.properties.access_policies.append(AccessPolicyEntry(
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
+            application_id=application_id,
             permissions=Permissions(keys=key_permissions,
                                     secrets=secret_permissions,
                                     certificates=certificate_permissions,
@@ -1043,7 +1046,8 @@ def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint:
     return vault.properties.network_acls
 
 
-def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None, no_wait=False):
+def delete_policy(cmd, client, resource_group_name, vault_name,
+                  object_id=None, application_id=None, spn=None, upn=None, no_wait=False):
     """ Delete security policy settings for a Key Vault. """
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -1062,7 +1066,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
                                         vault.properties.tenant_id.lower() != p.tenant_id.lower() or
-                                        object_id.lower() != p.object_id.lower()]
+                                        object_id.lower() != p.object_id.lower() or
+                                        (application_id or '').lower() != (p.application_id or '').lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 

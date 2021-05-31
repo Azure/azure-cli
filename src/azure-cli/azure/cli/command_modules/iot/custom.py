@@ -711,6 +711,8 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
             if not hub_identity.user_assigned_identities[identity]:
                 raise ArgumentUsageError('Hub {0} is not currently using a user-assigned identity with id: {1}'.format(hub_name, identity))
             del hub_identity.user_assigned_identities[identity]
+        if not hub_identity.user_assigned_identities:
+            del hub_identity.user_assigned_identities
     elif isinstance(user_identities, list):
         del hub_identity.user_assigned_identities
 
@@ -718,9 +720,9 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
             IdentityType.system_assigned.value,
             IdentityType.system_assigned_user_assigned.value
     ]:
-        hub_identity.type = IdentityType.system_assigned_user_assigned.value if hub_identity.user_assigned_identities else IdentityType.system_assigned.value
+        hub_identity.type = IdentityType.system_assigned_user_assigned.value if getattr(hub_identity, 'user_assigned_identities', None) else IdentityType.system_assigned.value
     else:
-        hub_identity.type = IdentityType.user_assigned.value if hasattr(hub_identity, 'user_assigned_identities') else IdentityType.none.value
+        hub_identity.type = IdentityType.user_assigned.value if getattr(hub_identity, 'user_assigned_identities', None) else IdentityType.none.value
 
     hub.identity = hub_identity
     if not getattr(hub.identity, 'user_assigned_identities', None):
