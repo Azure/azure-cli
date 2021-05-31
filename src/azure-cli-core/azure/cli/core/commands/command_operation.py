@@ -312,7 +312,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             'force_string', action='store_true', arg_group=group_name,
             help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON."
         )
-        return [(k, v) for k, v in arguments.items()]
+        return list(arguments.items())
 
     def load_setter_op_arguments(self):
         op = self.get_op_handler(self.setter_op_path)
@@ -365,7 +365,7 @@ class ShowCommandOperation(BaseCommandOperation):
     def arguments_loader(self):
         """ Callback function of CLICommand arguments_loader """
         cmd_args = self.load_getter_op_arguments(self.op_path)
-        return [(k, v) for k, v in cmd_args.items()]
+        return list(cmd_args.items())
 
     def description_loader(self):
         """ Callback function of CLICommand description_loader """
@@ -503,7 +503,7 @@ class WaitCommandOperation(BaseCommandOperation):
                  "provisioningState!='InProgress', "
                  "instanceView.statuses[?code=='PowerState/running']"
         )
-        return [(k, v) for k, v in cmd_args.items()]
+        return list(cmd_args.items())
 
     def description_loader(self):
         """ Callback function of CLICommand description_loader """
