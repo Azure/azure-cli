@@ -1434,8 +1434,8 @@ def process_vmss_create_namespace(cmd, namespace):
             raise CLIError('usage error: In VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
         _validate_proximity_placement_group(cmd, namespace)
-        if namespace.platform_fault_domain_count is None:
-            raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
+        # if namespace.platform_fault_domain_count is None:
+        #     raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
         return
 
     # Uniform mode

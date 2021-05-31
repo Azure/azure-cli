@@ -2700,7 +2700,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
 
-    if orchestration_mode.lower() == uniform_str.lower() and admin_password:
+    if admin_password:
         master_template.add_secure_parameter('adminPassword', admin_password)
 
     template = master_template.build()

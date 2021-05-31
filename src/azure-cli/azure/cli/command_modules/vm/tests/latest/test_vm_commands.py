@@ -2225,7 +2225,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1')
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Flexible')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -4956,7 +4956,7 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
 class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='westus')
-    def test_vmss_orchestration_mode(self, resource_group):
+    def test_vmss_simple_orchestration_mode(self, resource_group):
         self.kwargs.update({
             'ppg': 'ppg1',
             'vmss': 'vmss1',
@@ -4976,6 +4976,26 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('platformFaultDomain', 0)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='westus')
+    def test_vmss_orchestration_mode_with_sku(self, resource_group):
+        self.kwargs.update({
+            'ppg': 'ppg1',
+            'vmss': 'vmss1',
+            'vm': 'vm1'
+        })
+
+        self.cmd('ppg create -g {rg} -n {ppg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
+                 '--ppg {ppg} --platform-fault-domain-count 3 --generate-ssh-keys --vm-sku Standard_DS1_v2',
+                 checks=[
+                     self.check('vmss.singlePlacementGroup', False),
+                     self.check('vmss.platformFaultDomainCount', 3)
+                 ])
+
+        self.cmd('vm create -g {rg} -n {vm} --image centos --platform-fault-domain 0 --vmss {vmss} --generate-ssh-keys --nsg-rule None')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('platformFaultDomain', 0)
+        ])
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
