@@ -1867,14 +1867,15 @@ class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
         self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
 
 
-def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
+def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, group_id=True):
     self.kwargs.update({
-        'resource': self.create_random_name('cli-test-resource-', 24),
         'vnet': self.create_random_name('cli-vnet-', 24),
         'subnet': self.create_random_name('cli-subnet-', 24),
         'pe': self.create_random_name('cli-pe-', 24),
         'pe_connection': self.create_random_name('cli-pec-', 24),
     })
+
+    self.kwargs['resource'] = self.kwargs.get('resource', self.create_random_name('cli-test-resource-', 24))
 
     # create resource
     self.kwargs['extra_create'] = self.kwargs.get('extra_create', '')
@@ -1910,9 +1911,10 @@ def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
     self.cmd('network private-endpoint-connection show --name {name} -g {rg} --resource-name {resource} --type {type}',
              checks=self.check('properties.privateLinkServiceConnectionState.status', 'Approved'))
 
-    self.cmd('network private-endpoint-connection reject --name {name} -g {rg} '
-             '--resource-name {resource} --type {type}',
-             checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
+    if rejected:
+        self.cmd('network private-endpoint-connection reject --name {name} -g {rg} '
+                 '--resource-name {resource} --type {type}',
+                 checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
 
     self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
              '--resource-name {resource} --type {type} -y')
@@ -1977,19 +1979,32 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         _test_private_endpoint(self, list_name=False)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
-    def test_private_endpoint_connection_synapse_workspace(self, resource_group):
+    @StorageAccountPreparer(name_prefix="testpesyn")
+    def test_private_endpoint_connection_synapse_workspace(self, resource_group, storage_account):
         self.kwargs.update({
             'rg': resource_group,
             # config begin
             'cmd': 'synapse workspace',
             'list_num': 3,
             'type': 'Microsoft.Synapse/workspaces',
-            'extra_create': '--storage-account saxyz --file-system file-000 -p 123-xyz-456 -u synapse1230',
+            'extra_create': '--storage-account {} --file-system file-000 -p 123-xyz-456 -u synapse1230'.format(
+                storage_account),
         })
 
-        self.cmd('storage account create -n saxyz -g {rg}')
-
         _test_private_endpoint(self, group_id=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server")
+    def test_private_endpoint_connection_sql_server(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'sql server',
+            'list_num': 1,
+            'type': 'Microsoft.Sql/servers',
+            'extra_create': '--admin-user admin123 --admin-password SecretPassword123',
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
 
 
 if __name__ == '__main__':
