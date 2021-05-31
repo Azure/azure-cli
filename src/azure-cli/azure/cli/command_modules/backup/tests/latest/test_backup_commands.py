@@ -749,3 +749,343 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("tierType", '{rp1_tier}'),
             self.check("resourceGroup", '{rg}')
         ])
+
+    @ResourceGroupPreparer()
+    @VaultPreparer()
+    def test_backup_identity(self, resource_group, vault_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'rg': resource_group,
+        })
+
+
+        self.kwargs['identity1'] = self.create_random_name('clitest-identity', 50)
+        self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
+        
+
+        self.kwargs['identity2'] = self.create_random_name('clitest-identity', 50)
+        self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
+
+        self.kwargs['identity3'] = self.create_random_name('clitest-identity', 50)
+        self.kwargs['identity3_id'] = self.cmd('identity create -n {identity3} -g {rg} --query id').get_output_in_json()
+
+
+        userMSI_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity1_id} {identity2_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+        self.assertIn(self.kwargs['identity2_id'], userMSI)
+
+        userMSI_json = self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned, UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+        self.assertIn(self.kwargs['identity2_id'], userMSI)
+
+        userMSI_json = self.cmd('backup vault update --remove-system-assigned -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+        self.assertIn(self.kwargs['identity2_id'], userMSI)
+
+        userMSI_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity3_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+        self.assertIn(self.kwargs['identity2_id'], userMSI)
+        self.assertIn(self.kwargs['identity3_id'], userMSI)
+
+        userMSI_json = self.cmd('backup vault update --remove-user-assigned --identity-id {identity1_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity2_id'], userMSI)
+        self.assertIn(self.kwargs['identity3_id'], userMSI)
+
+        self.cmd('backup vault update --remove-user-assigned --identity-id {identity2_id} {identity3_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "None"),
+            self.check("properties.provisioningState", "Succeeded")
+        ])
+
+        self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ])
+
+        userMSI_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity1_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned, UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+
+        userMSI_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity2_id} {identity3_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned, UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+        self.assertIn(self.kwargs['identity2_id'], userMSI)
+        self.assertIn(self.kwargs['identity3_id'], userMSI)
+
+        userMSI_json = self.cmd('backup vault update --remove-user-assigned --identity-id {identity2_id} {identity3_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned, UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        userMSI = list(userMSI_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI)
+
+        self.cmd('backup vault update --remove-user-assigned --identity-id {identity1_id} -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ])
+
+        self.cmd('backup vault update --remove-system-assigned -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "None"),
+            self.check("properties.provisioningState", "Succeeded")
+        ])
+
+        self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "SystemAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ])
+
+        self.cmd('backup vault update --identity-type None -g {rg} -v {vault}', checks=[
+            self.check("identity.type", "None"),
+            self.check("properties.provisioningState", "Succeeded")
+        ])
+
+
+    @ResourceGroupPreparer()
+    @VaultPreparer(parameter_name='vault1')
+    @VaultPreparer(parameter_name='vault2')
+    def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2):
+        self.kwargs.update({
+            'loc' : resource_group_location,
+            'vault1': vault1,
+            'vault2': vault2,
+            'rg': resource_group,
+        })
+
+
+        self.kwargs['identity1'] = self.create_random_name('clitest-identity', 50)
+        self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
+        self.kwargs['identity1_principalid'] = self.cmd('az identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
+
+        self.kwargs['identity2'] = self.create_random_name('clitest-identity', 50)
+        self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
+        self.kwargs['identity2_principalid'] = self.cmd('az identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
+
+
+        userMSI_v1_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity1_id} {identity2_id} -g {rg} -v {vault1}', checks=[
+            self.check("identity.type", "UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+
+        userMSI_v1 = list(userMSI_v1_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI_v1)
+        self.assertIn(self.kwargs['identity2_id'], userMSI_v1)
+
+        system_v1_json = self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault1}', checks=[
+            self.check("identity.type", "SystemAssigned, UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        userMSI_v1 = list(system_v1_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI_v1)
+        self.assertIn(self.kwargs['identity2_id'], userMSI_v1)
+
+        userMSI1_v2_json = self.cmd('backup vault update --identity-type userassigned --identity-id {identity1_id} -g {rg} -v {vault2}', checks=[
+            self.check("identity.type", "UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+
+        userMSI_v2 = list(userMSI1_v2_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI_v2)
+
+        system_v2_json = self.cmd('backup vault update --identity-type systemassigned -g {rg} -v {vault2}', checks=[
+            self.check("identity.type", "SystemAssigned, UserAssigned"),
+            self.check("properties.provisioningState", "Succeeded")
+        ]).get_output_in_json()
+
+        userMSI_v2 = list(system_v2_json['identity']['userAssignedIdentities'].keys())
+
+        self.assertIn(self.kwargs['identity1_id'], userMSI_v2)
+
+        self.kwargs['keyvault'] = self.create_random_name('clitest-keyvault', 20)
+        self.cmd('keyvault create -n {keyvault} -g {rg} -l {loc} --enable-purge-protection true', checks=[
+            self.check('location', '{loc}'),
+            self.check('name', '{keyvault}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check("properties.provisioningState", "Succeeded"),
+            self.check("properties.enablePurgeProtection", True)
+        ])
+
+        self.kwargs['key1'] = self.create_random_name('clitest-key1', 20)
+        key1_json = self.cmd('keyvault key create --vault-name {keyvault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+            self.check("attributes.enabled", True),
+            self.check('key.kty', "RSA"),
+        ]).get_output_in_json()
+
+        keyOps1 = key1_json['key']['keyOps']
+        self.assertIn("decrypt", keyOps1)
+        self.assertIn("encrypt", keyOps1)
+        self.assertIn("sign", keyOps1)
+        self.assertIn("unwrapKey", keyOps1)
+        self.assertIn("verify", keyOps1)
+        self.assertIn("wrapKey", keyOps1)
+
+        self.kwargs['key2'] = self.create_random_name('clitest-key2', 20)
+        key2_json = self.cmd('keyvault key create --vault-name {keyvault} -n {key2} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+            self.check("attributes.enabled", True),
+            self.check('key.kty', "RSA"),
+        ]).get_output_in_json()
+
+        keyOps2 = key2_json['key']['keyOps']
+        self.assertIn("decrypt", keyOps2)
+        self.assertIn("encrypt", keyOps2)
+        self.assertIn("sign", keyOps2)
+        self.assertIn("unwrapKey", keyOps2)
+        self.assertIn("verify", keyOps2)
+        self.assertIn("wrapKey", keyOps2)
+
+
+        self.kwargs['key1_id'] = self.cmd('keyvault key show --vault-name {keyvault} --name {key1} --query key.kid').get_output_in_json()
+        self.kwargs['key2_id'] = self.cmd('keyvault key show --vault-name {keyvault} --name {key2} --query key.kid').get_output_in_json()
+
+        policy1_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {identity1_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        identity1_has_access = 0
+
+        access_policy1 = policy1_json['properties']['accessPolicies']
+        for element in access_policy1:
+            if element['objectId'] == self.kwargs['identity1_principalid']:
+                access_policy1 = element
+                identity1_has_access = 1
+            
+        self.assertEqual(identity1_has_access, 1)
+        key_permissions = access_policy1['permissions']['keys']
+        self.assertIn("list", key_permissions)
+        self.assertIn("wrapKey", key_permissions)
+        self.assertIn("get", key_permissions)
+        self.assertIn("unwrapKey", key_permissions)
+
+        policy2_json = self.cmd('keyvault set-policy --name {keyvault} --object-id {identity2_principalid} --key-permissions get list unwrapKey wrapKey').get_output_in_json()
+        identity2_has_access = 0
+
+        access_policy2 = policy2_json['properties']['accessPolicies']
+        for element in access_policy2:
+            if element['objectId'] == self.kwargs['identity2_principalid']:
+                access_policy2 = element
+                identity2_has_access = 1
+            
+        self.assertEqual(identity2_has_access, 1)
+        key_permissions = access_policy2['permissions']['keys']
+        self.assertIn("list", key_permissions)
+        self.assertIn("wrapKey", key_permissions)
+        self.assertIn("get", key_permissions)
+        self.assertIn("unwrapKey", key_permissions)
+
+
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --identity-id {identity1_id} -g {rg} -v {vault1}')
+
+        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+            self.check("properties.encryptionAtRestType", "CustomerManaged"),
+            self.check("properties.infrastructureEncryptionState", "Disabled"),
+            self.check('properties.keyUri', '{key1_id}'),
+            self.check('properties.userAssignedIdentity', '{identity1_id}'),
+            self.check('properties.useSystemAssignedIdentity', False),
+            self.check('properties.lastUpdateStatus', 'Succeeded')
+        ])
+
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --identity-id {identity2_id} -g {rg} -v {vault1}')
+
+        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+            self.check("properties.encryptionAtRestType", "CustomerManaged"),
+            self.check("properties.infrastructureEncryptionState", "Disabled"),
+            self.check('properties.keyUri', '{key1_id}'),
+            self.check('properties.userAssignedIdentity', '{identity2_id}'),
+            self.check('properties.useSystemAssignedIdentity', False),
+            self.check('properties.lastUpdateStatus', 'Succeeded')
+        ])
+
+        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --use-system-assigned -g {rg} -v {vault1}')
+
+        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+            self.check("properties.encryptionAtRestType", "CustomerManaged"),
+            self.check("properties.infrastructureEncryptionState", "Disabled"),
+            self.check('properties.keyUri', '{key2_id}'),
+            self.check('properties.userAssignedIdentity', None),
+            self.check('properties.useSystemAssignedIdentity', True),
+            self.check('properties.lastUpdateStatus', 'Succeeded')
+        ])
+
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} -g {rg} -v {vault1}')
+
+        self.cmd('backup vault encryption show -v {vault1} -g {rg}', checks=[
+            self.check("properties.encryptionAtRestType", "CustomerManaged"),
+            self.check("properties.infrastructureEncryptionState", "Disabled"),
+            self.check('properties.keyUri', '{key1_id}'),
+            self.check('properties.userAssignedIdentity', None),
+            self.check('properties.useSystemAssignedIdentity', True),
+            self.check('properties.lastUpdateStatus', 'Succeeded')
+        ])
+
+
+        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --use-system-assigned --infrastructure-encryption Enabled -g {rg} -v {vault2}')
+
+        self.cmd('backup vault encryption show -v {vault2} -g {rg}', checks=[
+            self.check("properties.encryptionAtRestType", "CustomerManaged"),
+            self.check("properties.infrastructureEncryptionState", "Enabled"),
+            self.check('properties.keyUri', '{key2_id}'),
+            self.check('properties.userAssignedIdentity', None),
+            self.check('properties.useSystemAssignedIdentity', True),
+            self.check('properties.lastUpdateStatus', 'Succeeded')
+        ])
+
+        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --identity-id {identity1_id} -g {rg} -v {vault2}')
+
+        self.cmd('backup vault encryption show -v {vault2} -g {rg}', checks=[
+            self.check("properties.encryptionAtRestType", "CustomerManaged"),
+            self.check("properties.infrastructureEncryptionState", "Enabled"),
+            self.check('properties.keyUri', '{key1_id}'),
+            self.check('properties.userAssignedIdentity', '{identity1_id}'),
+            self.check('properties.useSystemAssignedIdentity', False),
+            self.check('properties.lastUpdateStatus', 'Succeeded')
+        ])
+
+
+        

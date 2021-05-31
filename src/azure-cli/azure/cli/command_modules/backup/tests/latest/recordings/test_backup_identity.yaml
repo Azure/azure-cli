@@ -1,0 +1,2796 @@
+interactions:
+- request:
+    body: '{"location": "westus", "properties": {}, "sku": {"name": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --location
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A40%3A42.3312587Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '532'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:40:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-29T09:40:29Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 29 Jun 2021 09:40:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003?api-version=2015-08-31-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003","name":"clitest-identity000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5","clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=1c8d599d-6d53-4449-baf2-b130b69ca1b5&aid=9c99ff85-dc9a-4ae8-a062-9f930d56d4a8"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1026'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 29 Jun 2021 09:40:51 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-29T09:40:29Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 29 Jun 2021 09:40:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004?api-version=2015-08-31-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004","name":"clitest-identity000004","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c","clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=dab1ead7-ce4d-4b62-97ed-2b1e10a1653c&aid=d3cc3819-bb25-42ac-9432-51369c6a3a59"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1026'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 29 Jun 2021 09:41:01 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-29T09:40:29Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 29 Jun 2021 09:41:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005?api-version=2015-08-31-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005","name":"clitest-identity000005","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"f7e53d3c-7560-4923-a000-8be5d6897484","clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=f7e53d3c-7560-4923-a000-8be5d6897484&aid=de19121c-9820-4ba2-a64a-4448793b4e39"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1026'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 29 Jun 2021 09:41:14 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A40%3A42.3312587Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '532'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:41:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "userassigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":
+      {}, "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '586'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:41:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=\",\r\n
+        \ \"name\": \"NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=\",\r\n
+        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:42:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=\",\r\n
+        \ \"name\": \"NDA5NTs0MjcxYWQ3MC1lZGJhLTRlNTktYTM3Zi01YTQ2NDViM2VkYzM=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:43:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A42%3A17.9712514Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1358'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:43:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A42%3A17.9712514Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1358'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:43:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned,userassigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '53'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:43:23 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=\",\r\n
+        \ \"name\": \"NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=\",\r\n
+        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:44:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=\",\r\n
+        \ \"name\": \"NDA5NTtlYWZlOTk3OC02YTI4LTRmN2UtODg5Yy04MDNjYzk5ZmEwYTQ=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:45:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A44%3A27.1200689Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e099cb50-f640-4d31-8eb1-6feb2e00826f","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1427'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:45:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-system-assigned -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A44%3A27.1200689Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e099cb50-f640-4d31-8eb1-6feb2e00826f","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1427'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:45:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "userassigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --remove-system-assigned -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjZGMyZDM5Yi0zZjE2LTRhZjctYjEwMi02NTFhOTY0MWQxZjA=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:45:35 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtjZGMyZDM5Yi0zZjE2LTRhZjctYjEwMi02NTFhOTY0MWQxZjA=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-system-assigned -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjZGMyZDM5Yi0zZjE2LTRhZjctYjEwMi02NTFhOTY0MWQxZjA=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjZGMyZDM5Yi0zZjE2LTRhZjctYjEwMi02NTFhOTY0MWQxZjA=\",\r\n
+        \ \"name\": \"NDA5NTtjZGMyZDM5Yi0zZjE2LTRhZjctYjEwMi02NTFhOTY0MWQxZjA=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:46:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-system-assigned -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A45%3A37.033773Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1357'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:46:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A45%3A37.033773Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1357'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:46:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "userassigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '326'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:46:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=\",\r\n
+        \ \"name\": \"NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=\",\r\n
+        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:47:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=\",\r\n
+        \ \"name\": \"NDA5NTtkNzA1ZWE3Ny03ZWY0LTRkYzEtOTlkOC1hOTZkMWM4ZmJiODI=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:48:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A47%3A45.6031783Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","objectId":"f7e53d3c-7560-4923-a000-8be5d6897484"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1715'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:48:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A47%3A45.6031783Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","objectId":"f7e53d3c-7560-4923-a000-8be5d6897484"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1715'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:48:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "userassigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":
+      null}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '328'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMzViNWYzYi05YzU0LTRkNmUtYjk2NC1kMTcwOTQxYzYxNmM=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:48:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthMzViNWYzYi05YzU0LTRkNmUtYjk2NC1kMTcwOTQxYzYxNmM=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMzViNWYzYi05YzU0LTRkNmUtYjk2NC1kMTcwOTQxYzYxNmM=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMzViNWYzYi05YzU0LTRkNmUtYjk2NC1kMTcwOTQxYzYxNmM=\",\r\n
+        \ \"name\": \"NDA5NTthMzViNWYzYi05YzU0LTRkNmUtYjk2NC1kMTcwOTQxYzYxNmM=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:49:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A48%3A56.8328179Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","objectId":"f7e53d3c-7560-4923-a000-8be5d6897484"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1358'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:49:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A48%3A56.8328179Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","objectId":"f7e53d3c-7560-4923-a000-8be5d6897484"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1358'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:49:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "none"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '30'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A50%3A02.7076534Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:50:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A50%3A02.7076534Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:50:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A50%3A13.2061181Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '672'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:50:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A50%3A13.2061181Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '672'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:50:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned,userassigned", "userAssignedIdentities":
+      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '341'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:50:20 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '208'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=\",\r\n
+        \ \"name\": \"NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=\",\r\n
+        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:51:22 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=\",\r\n
+        \ \"name\": \"NDA5NTswOTY2OWFmOC1jNTI5LTQ3ZmEtOTI4NS01OWQ1MDNkY2IzNjI=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:52:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A51%3A24.5438336Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1070'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:52:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A51%3A24.5438336Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1070'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:52:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned,userassigned", "userAssignedIdentities":
+      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":
+      {}, "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '601'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTsyNTk1N2YyNS00MGRlLTQ3MTAtOTM2OC1iNjVhOTZmZjVkOTI=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:52:26 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTsyNTk1N2YyNS00MGRlLTQ3MTAtOTM2OC1iNjVhOTZmZjVkOTI=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTsyNTk1N2YyNS00MGRlLTQ3MTAtOTM2OC1iNjVhOTZmZjVkOTI=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTsyNTk1N2YyNS00MGRlLTQ3MTAtOTM2OC1iNjVhOTZmZjVkOTI=\",\r\n
+        \ \"name\": \"NDA5NTsyNTk1N2YyNS00MGRlLTQ3MTAtOTM2OC1iNjVhOTZmZjVkOTI=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:53:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A52%3A28.9421324Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","objectId":"f7e53d3c-7560-4923-a000-8be5d6897484"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1784'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:53:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A52%3A28.9421324Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"d3cc3819-bb25-42ac-9432-51369c6a3a59","objectId":"dab1ead7-ce4d-4b62-97ed-2b1e10a1653c"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"de19121c-9820-4ba2-a64a-4448793b4e39","objectId":"f7e53d3c-7560-4923-a000-8be5d6897484"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1784'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:53:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned,userassigned", "userAssignedIdentities":
+      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":
+      null, "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":
+      null}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '605'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:53:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=\",\r\n
+        \ \"name\": \"NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=\",\r\n
+        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=?api-version=2020-02-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:54:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=?api-version=2020-02-02
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=?api-version=2020-02-02
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=\",\r\n
+        \ \"name\": \"NDA5NTtiMTc4M2RkNi05NjIyLTRhZjItYWUxOS04M2JjZmFkY2JkOWY=\",\r\n
+        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A54%3A34.0914352Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1070'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A54%3A34.0914352Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"9c99ff85-dc9a-4ae8-a062-9f930d56d4a8","objectId":"1c8d599d-6d53-4449-baf2-b130b69ca1b5"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1070'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --remove-user-assigned --identity-id -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A55%3A38.384147Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '671'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --remove-system-assigned -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A55%3A38.384147Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e6c60f8e-d7a0-4597-9290-192cf6233312","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '671'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "none"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '30'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --remove-system-assigned -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A55%3A45.3931322Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A55%3A45.3931322Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "systemassigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A55%3A55.3041794Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"f25f7046-1bc3-45be-b20e-bd20836629ed","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '672'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A55%3A55.3041794Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"f25f7046-1bc3-45be-b20e-bd20836629ed","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '672'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:55:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "none"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '30'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --identity-type -g -v
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2021-06-29T09%3A56%3A03.7501856Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:56:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '209'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-management-type -v -g --query
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-recoveryservicesbackup/0.11.0 Azure-SDK-For-Python AZURECLI/2.25.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2020-10-01&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Jun 2021 09:56:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-recoveryservices/1.0.0b1 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2020-02-02
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Jun 2021 09:56:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '9'
+    status:
+      code: 200
+      message: OK
+version: 1
