@@ -80,3 +80,7 @@ def load_arguments(self, _):
     # Upstream Settings
     with self.argument_context('signalr upstream update') as c:
         c.argument('template', action=UpstreamTemplateAddAction, nargs='+', help='Template item for upstream settings. Use key=value pattern to set properties. Supported keys are "url-template", "hub-pattern", "event-pattern", "category-pattern".')
+
+    # Managed Identity
+    with self.argument_context('signalr identity assign') as c:
+        c.argument('identity', help="Assigns managed identities to the service. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. You can only assign either on of them.")

@@ -38,6 +38,11 @@ def load_command_table(self, _):
         client_factory=cf_signalr
     )
 
+    signalr_msi_utils = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.signalr.msi#{}',
+        client_factory=cf_signalr
+    )
+
     with self.command_group('signalr', signalr_custom_utils) as g:
         g.command('create', 'signalr_create')
         g.command('delete', 'signalr_delete')
@@ -65,3 +70,8 @@ def load_command_table(self, _):
         g.command('list', 'signalr_upstream_list')
         g.command('update', 'signalr_upstream_update')
         g.command('clear', 'signalr_upstream_clear')
+
+    with self.command_group('signalr identity', signalr_msi_utils) as g:
+        g.command('assign', 'signalr_msi_assign')
+        g.command('remove', 'signalr_msi_remove')
+        g.show_command('show', 'signalr_msi_show')
