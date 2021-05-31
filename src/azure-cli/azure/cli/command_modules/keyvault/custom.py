@@ -1816,18 +1816,18 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, privat
                                         vault_name=None, hsm_name=None, description=None, no_wait=False):
     """Approve a private endpoint connection request for a Key Vault."""
     pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
-    return _update_private_endpoint_connection_status(
-        cmd, pec_client, resource_group_name, vault_name or hsm_name, private_endpoint_connection_name,
-        is_approved=True, description=description, no_wait=no_wait)
+    return _update_private_endpoint_connection_status(cmd, pec_client, resource_group_name,
+                                                      vault_name or hsm_name, private_endpoint_connection_name,
+                                                      is_approved=True, description=description, no_wait=no_wait)
 
 
 def reject_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
-                                        vault_name=None, hsm_name=None, description=None, no_wait=False):
+                                       vault_name=None, hsm_name=None, description=None, no_wait=False):
     """Reject a private endpoint connection request for a Key Vault."""
     pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
-    return _update_private_endpoint_connection_status(
-        cmd, pec_client, resource_group_name, vault_name or hsm_name, private_endpoint_connection_name,
-        is_approved=False, description=description, no_wait=no_wait)
+    return _update_private_endpoint_connection_status(cmd, pec_client, resource_group_name,
+                                                      vault_name or hsm_name, private_endpoint_connection_name,
+                                                      is_approved=False, description=description, no_wait=no_wait)
 
 
 def delete_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
