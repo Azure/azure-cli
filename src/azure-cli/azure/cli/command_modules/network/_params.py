@@ -554,7 +554,7 @@ def load_arguments(self, _):
                    nargs='+',
                    help='Space-separated list of transforms to apply when matching.')
         if WebApplicationFirewallMatchVariable:
-            waf_custom_rule_match_variables = [x for x in WebApplicationFirewallMatchVariable]
+            waf_custom_rule_match_variables = list(WebApplicationFirewallMatchVariable)
             help_string = 'Space-separated list of variables to use when matching. ' \
                           'Variable values: {}'.format(', '.join(waf_custom_rule_match_variables))
             c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
