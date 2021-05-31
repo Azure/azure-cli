@@ -1818,8 +1818,7 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, privat
     pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
     return _update_private_endpoint_connection_status(
         cmd, pec_client, resource_group_name, vault_name or hsm_name, private_endpoint_connection_name,
-        is_approved=True, description=description, no_wait=no_wait
-    )
+        is_approved=True, description=description, no_wait=no_wait)
 
 
 def reject_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
@@ -1828,8 +1827,7 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, private
     pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
     return _update_private_endpoint_connection_status(
         cmd, pec_client, resource_group_name, vault_name or hsm_name, private_endpoint_connection_name,
-        is_approved=False, description=description, no_wait=no_wait
-    )
+        is_approved=False, description=description, no_wait=no_wait)
 
 
 def delete_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
