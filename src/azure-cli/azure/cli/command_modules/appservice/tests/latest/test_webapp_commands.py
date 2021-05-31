@@ -575,7 +575,7 @@ class WebappConfigureTest(ScenarioTest):
     def test_update_webapp_settings_thru_json(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-test', 40)
         plan_name = self.create_random_name('webapp-config-plan', 40)
-
+        slot = 'staging'
         # update through a json file with key value pair
         _, settings_file = tempfile.mkstemp()
         with open(settings_file, 'w+') as file:
@@ -585,6 +585,11 @@ class WebappConfigureTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        # create an empty slot
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot),
+                 checks=[
+            JMESPathCheck('name', slot)
+        ])
 
         output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
@@ -617,17 +622,40 @@ class WebappConfigureTest(ScenarioTest):
 
         self.assertEqual(output[0], {
             'name': 's',
-            'value': 'False',
+            'value': 'value',
             'slotSetting': False
         })
         self.assertEqual(output[1], {
             'name': 's2',
-            'value': 'False',
+            'value': 'value2',
             'slotSetting': False
         })
         self.assertEqual(output[2], {
             'name': 's3',
-            'value': 'True',
+            'value': 'value3',
+            'slotSetting': True
+        })
+        with open(settings_file, 'w') as file:
+            file.write(json.dumps(output))
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
             'slotSetting': True
         })
         # update site config
@@ -640,7 +668,8 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --generic-configurations "@{}"'.format(resource_group, webapp_name, settings_file)).assert_with_checks([
             JMESPathCheck("requestTracingEnabled", True),
             JMESPathCheck("alwaysOn", True),
-        ])
+        ])        
+        
 
 
 class WebappScaleTest(ScenarioTest):
