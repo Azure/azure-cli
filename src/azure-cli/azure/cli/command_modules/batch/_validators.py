@@ -166,10 +166,10 @@ def keyvault_id(cmd, namespace):
 
 def application_enabled(cmd, namespace):
     """Validates account has auto-storage enabled"""
-    from azure.mgmt.batch import BatchManagementClient
+    from azure.mgmt.batch import BatchManagement
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
+    client = get_mgmt_service_client(cmd.cli_ctx, BatchManagement)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
         raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
@@ -294,7 +294,7 @@ def validate_cert_settings(namespace):
 
 def validate_client_parameters(cmd, namespace):
     """Retrieves Batch connection parameters from environment variables"""
-    from azure.mgmt.batch import BatchManagementClient
+    from azure.mgmt.batch import BatchManagement
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # simply try to retrieve the remaining variables from environment variables
@@ -315,7 +315,7 @@ def validate_client_parameters(cmd, namespace):
         if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
             endpoint = urlsplit(namespace.account_endpoint)
             host = endpoint.netloc
-            client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
+            client = get_mgmt_service_client(cmd.cli_ctx, BatchManagement)
             acc = next((x for x in client.batch_account.list()
                         if x.name == namespace.account_name and x.account_endpoint == host), None)
             if acc:
