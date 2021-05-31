@@ -208,6 +208,74 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  ])
 
 
+class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
+    def test_hsm_private_endpoint_connection(self, resource_group):
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-pec-', 24),
+            'loc': 'centraluseuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare vault and network
+        hsm = _create_hsm(self).get_output_in_json()
+        self.kwargs['hsm_id'] = hsm['id']
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {hsm_id} '
+                      '--group-id managedhsm').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        # Show the connection at vault side
+        hsm = self.cmd('keyvault show --hsm-name {hsm}',
+                       checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+        self.kwargs['hsm_pec_id'] = hsm['properties']['privateEndpointConnections'][0]['id']
+        self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
+                 checks=self.check('id', '{hsm_pec_id}'))
+        self.kwargs['hsm_pec_name'] = self.kwargs['hsm_pec_id'].split('/')[-1]
+        self.cmd('keyvault private-endpoint-connection show --hsm-name {hsm} --name {hsm_pec_name}',
+                 checks=self.check('name', '{hsm_pec_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd('keyvault private-endpoint-connection approve --hsm-name {hsm} --name {hsm_pec_name} '
+                 '--description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
+                     self.check('provisioningState', 'Updating')
+                 ])
+        self.cmd('keyvault private-endpoint-connection wait --id {hsm_pec_id} --created')
+
+        self.cmd('keyvault private-endpoint-connection reject --id {hsm_pec_id} '
+                 '--description "{rejection_desc}" --no-wait', checks=self.is_empty())
+
+        self.cmd('keyvault private-endpoint-connection wait --id {hsm_pec_id} --created')
+        self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('keyvault private-endpoint-connection delete --hsm-name {hsm} --name {hsm_pec_name}')
+
+        # clear resources
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+        _delete_and_purge_hsm(self)
+
+
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
     def test_keyvault_hsm_mgmt(self):

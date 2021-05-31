@@ -234,13 +234,13 @@ def validate_private_endpoint_connection_id(cmd, ns):
             ns.vault_name = result['name']
         ns.private_endpoint_connection_name = result['child_name_1']
 
-    if ns.vault_name and not ns.resource_group_name:
-        ns.resource_group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, ns.vault_name)
+    if not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_resource_name(cli_ctx=cmd.cli_ctx,
+                                                                        vault_name=getattr(ns, 'vault_name', None),
+                                                                        hsm_name=getattr(ns, 'hsm_name', None))
 
-    if ns.hsm_name and not ns.resource_group_name:
-        ns.resource_group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, None, ns.hsm_name)
-
-    if not all([(ns.vault_name or ns.hsm_name), ns.resource_group_name, ns.private_endpoint_connection_name]):
+    if not all([(getattr(ns, 'vault_name', None) or getattr(ns, 'hsm_name', None)),
+                ns.resource_group_name, ns.private_endpoint_connection_name]):
         raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME | --name NAME --hsm-name NAME]')
 
     del ns.connection_id
