@@ -7,8 +7,7 @@ from azure_devtools.scenario_tests import live_only, record_only, get_sha1_hash
 
 from .base import ScenarioTest, LiveScenarioTest, LocalContextScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
-                        KeyVaultPreparer, ManagedApplicationPreparer,
-                        VirtualNetworkPreparer, VnetNicPreparer)
+                        KeyVaultPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer, VnetNicPreparer)
 from .exceptions import CliTestError
 from .checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck,
                        StringContainCheck)
