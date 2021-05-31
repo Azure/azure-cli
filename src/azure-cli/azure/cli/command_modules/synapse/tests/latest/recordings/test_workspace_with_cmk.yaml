@@ -1,0 +1,2041 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "properties": {"defaultDataLakeStorage": {"accountUrl":
+      "https://teststorageforsynapsecmk.dfs.core.windows.net", "filesystem": "fs000001"},
+      "sqlAdministratorLoginPassword": "Pswd1000002", "sqlAdministratorLogin": "cliuser1",
+      "managedVirtualNetwork": "default", "encryption": {"cmk": {"key": {"name": "default",
+      "keyVaultUrl": "https://testcmksoftdelete.vault.azure.net/keys/newcmk"}}}, "managedVirtualNetworkSettings":
+      {"preventDataExfiltration": true, "allowedAadTenantIdsForLinking": []}}, "identity":
+      {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '567'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk","location":"eastus","name":"testsynapseworkspacecmk","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b"},"properties":{"managedVirtualNetwork":"default","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f964c10bb-8a6c-43bc-83d3-6b318c6c7305%2fresourceGroups%2ftestrg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspacecmk","dev":"https://testsynapseworkspacecmk.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspacecmk-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspacecmk.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-bacba1bd-03ae-409e-bfc4-dc2b14c574d5","defaultDataLakeStorage":{"accountUrl":"https://teststorageforsynapsecmk.dfs.core.windows.net","filesystem":"fs000001"},"privateEndpointConnections":[],"workspaceUID":"79171a39-a360-4444-a301-fa6f95a830e9","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"managedVirtualNetworkSettings":{"preventDataExfiltration":true,"allowedAadTenantIdsForLinking":[]},"encryption":{"doubleEncryptionEnabled":true,"cmk":{"status":"AwaitingUserAction","key":{"name":"default","keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newcmk"}}},"provisioningState":"Provisioning"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1536'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:03:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:04:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:04:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:05:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:05:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:06:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:06:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:07:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:07:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:08:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:08:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:09:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:09:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:10:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:10:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/7a39fb2e-4d19-424d-b103-4b6837d91649?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:11:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --key-identifier --location --enable-managed-vnet
+        --prevent-exfiltration --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk","location":"eastus","name":"testsynapseworkspacecmk","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b"},"properties":{"managedVirtualNetwork":"default","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f964c10bb-8a6c-43bc-83d3-6b318c6c7305%2fresourceGroups%2ftestrg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspacecmk","dev":"https://testsynapseworkspacecmk.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspacecmk-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspacecmk.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-bacba1bd-03ae-409e-bfc4-dc2b14c574d5","defaultDataLakeStorage":{"accountUrl":"https://teststorageforsynapsecmk.dfs.core.windows.net","filesystem":"fs000001"},"sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"79171a39-a360-4444-a301-fa6f95a830e9","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"managedVirtualNetworkSettings":{"preventDataExfiltration":true,"allowedAadTenantIdsForLinking":[]},"encryption":{"doubleEncryptionEnabled":true,"cmk":{"status":"AwaitingUserAction","key":{"name":"default","keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newcmk"}}},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1568'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:11:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adkorlep-devrp/providers/Microsoft.KeyVault/vaults/adkorlep-test","name":"adkorlep-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdi-developers/providers/Microsoft.KeyVault/vaults/hdi-devrp","name":"hdi-devrp","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdi-developers/providers/Microsoft.KeyVault/vaults/hdi-onboarding","name":"hdi-onboarding","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/HDI-EV2-Rollout-Test/providers/Microsoft.KeyVault/vaults/hdi-ev2-rollout-test1","name":"hdi-ev2-rollout-test1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/HDICP-ESP-ENV/providers/Microsoft.KeyVault/vaults/ESPENV","name":"ESPENV","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdiInternal-EastUS/providers/Microsoft.KeyVault/vaults/hdieastus31e81","name":"hdieastus31e81","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdiInternal-WestUS/providers/Microsoft.KeyVault/vaults/hdiwestus34e82","name":"hdiwestus34e82","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/karkrish/providers/Microsoft.KeyVault/vaults/byokkv1102","name":"byokkv1102","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/karthik-eastus2/providers/Microsoft.KeyVault/vaults/karthik-cert-kv","name":"karthik-cert-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/martin-rg/providers/Microsoft.KeyVault/vaults/mawolfenApKv","name":"mawolfenApKv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/martin-rg/providers/Microsoft.KeyVault/vaults/mawolfenRbacKv","name":"mawolfenRbacKv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mktestrg/providers/Microsoft.KeyVault/vaults/mktestvalut123","name":"mktestvalut123","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nabikhchdevrprg/providers/Microsoft.KeyVault/vaults/nabikhch-test-kv","name":"nabikhch-test-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ngzerotouchtest/providers/Microsoft.KeyVault/vaults/ngcert123test","name":"ngcert123test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nisgoel-devrp/providers/Microsoft.KeyVault/vaults/ngcerts","name":"ngcerts","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ReddyRG/providers/Microsoft.KeyVault/vaults/reddytest","name":"reddytest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete","name":"testcmksoftdelete","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testsynapsecmk","name":"testsynapsecmk","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.KeyVault/vaults/test-testsas","name":"test-testsas","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.KeyVault/vaults/testml9680309920","name":"testml9680309920","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.KeyVault/vaults/tertatgsgasgasg","name":"tertatgsgasgasg","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/x1rg/providers/Microsoft.KeyVault/vaults/x1kv0925","name":"x1kv0925","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/x1rg/providers/Microsoft.KeyVault/vaults/x1kvwmsi","name":"x1kvwmsi","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yalu6-ev2rp/providers/Microsoft.KeyVault/vaults/hdi-yalu6-test3","name":"hdi-yalu6-test3","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.KeyVault/vaults/zzykeyvaultforvmss","name":"zzykeyvaultforvmss","type":"Microsoft.KeyVault/vaults","location":"canadaeast","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.KeyVault/vaults/zzytestkeyvault","name":"zzytestkeyvault","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5947'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:11:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete","name":"testcmksoftdelete","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"properties":{"sku":{"family":"A","name":"Standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"a3dce655-d019-49d7-99d2-5a7f6b6421fc","permissions":{"keys":["Get","UnwrapKey","WrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"5e4102d6-d956-4205-a6a9-b3a0f73f195f","permissions":{"keys":["Get","WrapKey","UnwrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"6ae2ff4b-4939-4952-a097-d234aad383a3","permissions":{"keys":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore"],"secrets":["Get","List","Set","Delete","Recover","Backup","Restore"],"certificates":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"00000000-0000-1111-2222-333333333333","permissions":{"keys":["wrapKey","get","unwrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"e385c60a-5e71-4b6c-97cd-7bb51d910201","permissions":{"keys":["unwrapKey","get","wrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"eed677bf-0425-49ee-aee3-f4ae319555b4","permissions":{"keys":["wrapKey","unwrapKey","get"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://testcmksoftdelete.vault.azure.net/","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1955'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:11:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.190.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "sku": {"family": "A", "name": "Standard"}, "accessPolicies": [{"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "a3dce655-d019-49d7-99d2-5a7f6b6421fc",
+      "permissions": {"keys": ["Get", "UnwrapKey", "WrapKey"], "secrets": [], "certificates":
+      []}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "5e4102d6-d956-4205-a6a9-b3a0f73f195f",
+      "permissions": {"keys": ["Get", "WrapKey", "UnwrapKey"], "secrets": [], "certificates":
+      []}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "6ae2ff4b-4939-4952-a097-d234aad383a3",
+      "permissions": {"keys": ["Get", "List", "Update", "Create", "Import", "Delete",
+      "Recover", "Backup", "Restore"], "secrets": ["Get", "List", "Set", "Delete",
+      "Recover", "Backup", "Restore"], "certificates": ["Get", "List", "Update", "Create",
+      "Import", "Delete", "Recover", "Backup", "Restore", "ManageContacts", "ManageIssuers",
+      "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]}}, {"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "00000000-0000-1111-2222-333333333333",
+      "permissions": {"keys": ["wrapKey", "get", "unwrapKey"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "e385c60a-5e71-4b6c-97cd-7bb51d910201", "permissions": {"keys":
+      ["unwrapKey", "get", "wrapKey"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "eed677bf-0425-49ee-aee3-f4ae319555b4", "permissions": {"keys":
+      ["wrapKey", "unwrapKey", "get"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "adc616dd-67f7-4e47-bfb9-ade858d7c92b", "permissions": {"keys":
+      ["get", "wrapKey", "unwrapKey"]}}], "vaultUri": "https://testcmksoftdelete.vault.azure.net/",
+      "enabledForDeployment": false, "enabledForDiskEncryption": false, "enabledForTemplateDeployment":
+      false, "enableSoftDelete": true, "softDeleteRetentionInDays": 90, "enableRbacAuthorization":
+      false, "enablePurgeProtection": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2004'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete","name":"testcmksoftdelete","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"properties":{"sku":{"family":"A","name":"Standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"a3dce655-d019-49d7-99d2-5a7f6b6421fc","permissions":{"keys":["Get","UnwrapKey","WrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"5e4102d6-d956-4205-a6a9-b3a0f73f195f","permissions":{"keys":["Get","WrapKey","UnwrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"6ae2ff4b-4939-4952-a097-d234aad383a3","permissions":{"keys":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore"],"secrets":["Get","List","Set","Delete","Recover","Backup","Restore"],"certificates":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"00000000-0000-1111-2222-333333333333","permissions":{"keys":["wrapKey","get","unwrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"e385c60a-5e71-4b6c-97cd-7bb51d910201","permissions":{"keys":["unwrapKey","get","wrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"eed677bf-0425-49ee-aee3-f4ae319555b4","permissions":{"keys":["wrapKey","unwrapKey","get"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b","permissions":{"keys":["get","wrapKey","unwrapKey"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://testcmksoftdelete.vault.azure.net/","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:11:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.190.0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"isActiveCMK": true, "keyVaultUrl": "https://testcmksoftdelete.vault.azure.net/keys/newcmk"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace key update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '109'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --key-identifier --is-active --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newcmk","isActiveCMK":false},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/default","name":"default","type":"Microsoft.Synapse/workspaces/keys","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '348'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:11:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"keyVaultUrl": "https://testcmksoftdelete.vault.azure.net/keys/newkey"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace key create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '88'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --key-identifier --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/newkey?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newkey","isActiveCMK":false},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/newkey","name":"newkey","type":"Microsoft.Synapse/workspaces/keys","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '346'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adkorlep-devrp/providers/Microsoft.KeyVault/vaults/adkorlep-test","name":"adkorlep-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdi-developers/providers/Microsoft.KeyVault/vaults/hdi-devrp","name":"hdi-devrp","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdi-developers/providers/Microsoft.KeyVault/vaults/hdi-onboarding","name":"hdi-onboarding","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/HDI-EV2-Rollout-Test/providers/Microsoft.KeyVault/vaults/hdi-ev2-rollout-test1","name":"hdi-ev2-rollout-test1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/HDICP-ESP-ENV/providers/Microsoft.KeyVault/vaults/ESPENV","name":"ESPENV","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdiInternal-EastUS/providers/Microsoft.KeyVault/vaults/hdieastus31e81","name":"hdieastus31e81","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdiInternal-WestUS/providers/Microsoft.KeyVault/vaults/hdiwestus34e82","name":"hdiwestus34e82","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/karkrish/providers/Microsoft.KeyVault/vaults/byokkv1102","name":"byokkv1102","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/karthik-eastus2/providers/Microsoft.KeyVault/vaults/karthik-cert-kv","name":"karthik-cert-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/martin-rg/providers/Microsoft.KeyVault/vaults/mawolfenApKv","name":"mawolfenApKv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/martin-rg/providers/Microsoft.KeyVault/vaults/mawolfenRbacKv","name":"mawolfenRbacKv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mktestrg/providers/Microsoft.KeyVault/vaults/mktestvalut123","name":"mktestvalut123","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nabikhchdevrprg/providers/Microsoft.KeyVault/vaults/nabikhch-test-kv","name":"nabikhch-test-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ngzerotouchtest/providers/Microsoft.KeyVault/vaults/ngcert123test","name":"ngcert123test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nisgoel-devrp/providers/Microsoft.KeyVault/vaults/ngcerts","name":"ngcerts","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ReddyRG/providers/Microsoft.KeyVault/vaults/reddytest","name":"reddytest","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete","name":"testcmksoftdelete","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testsynapsecmk","name":"testsynapsecmk","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.KeyVault/vaults/test-testsas","name":"test-testsas","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.KeyVault/vaults/testml9680309920","name":"testml9680309920","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.KeyVault/vaults/tertatgsgasgasg","name":"tertatgsgasgasg","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/x1rg/providers/Microsoft.KeyVault/vaults/x1kv0925","name":"x1kv0925","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/x1rg/providers/Microsoft.KeyVault/vaults/x1kvwmsi","name":"x1kvwmsi","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yalu6-ev2rp/providers/Microsoft.KeyVault/vaults/hdi-yalu6-test3","name":"hdi-yalu6-test3","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.KeyVault/vaults/zzykeyvaultforvmss","name":"zzykeyvaultforvmss","type":"Microsoft.KeyVault/vaults","location":"canadaeast","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zzy-test-rg/providers/Microsoft.KeyVault/vaults/zzytestkeyvault","name":"zzytestkeyvault","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5947'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete","name":"testcmksoftdelete","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"properties":{"sku":{"family":"A","name":"Standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"a3dce655-d019-49d7-99d2-5a7f6b6421fc","permissions":{"keys":["Get","UnwrapKey","WrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"5e4102d6-d956-4205-a6a9-b3a0f73f195f","permissions":{"keys":["Get","WrapKey","UnwrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"6ae2ff4b-4939-4952-a097-d234aad383a3","permissions":{"keys":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore"],"secrets":["Get","List","Set","Delete","Recover","Backup","Restore"],"certificates":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"00000000-0000-1111-2222-333333333333","permissions":{"keys":["wrapKey","get","unwrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"e385c60a-5e71-4b6c-97cd-7bb51d910201","permissions":{"keys":["unwrapKey","get","wrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"eed677bf-0425-49ee-aee3-f4ae319555b4","permissions":{"keys":["wrapKey","unwrapKey","get"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b","permissions":{"keys":["get","wrapKey","unwrapKey"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://testcmksoftdelete.vault.azure.net/","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.190.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "sku": {"family": "A", "name": "Standard"}, "accessPolicies": [{"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "a3dce655-d019-49d7-99d2-5a7f6b6421fc",
+      "permissions": {"keys": ["Get", "UnwrapKey", "WrapKey"], "secrets": [], "certificates":
+      []}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "5e4102d6-d956-4205-a6a9-b3a0f73f195f",
+      "permissions": {"keys": ["Get", "WrapKey", "UnwrapKey"], "secrets": [], "certificates":
+      []}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "6ae2ff4b-4939-4952-a097-d234aad383a3",
+      "permissions": {"keys": ["Get", "List", "Update", "Create", "Import", "Delete",
+      "Recover", "Backup", "Restore"], "secrets": ["Get", "List", "Set", "Delete",
+      "Recover", "Backup", "Restore"], "certificates": ["Get", "List", "Update", "Create",
+      "Import", "Delete", "Recover", "Backup", "Restore", "ManageContacts", "ManageIssuers",
+      "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]}}, {"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "00000000-0000-1111-2222-333333333333",
+      "permissions": {"keys": ["wrapKey", "get", "unwrapKey"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "e385c60a-5e71-4b6c-97cd-7bb51d910201", "permissions": {"keys":
+      ["unwrapKey", "get", "wrapKey"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "eed677bf-0425-49ee-aee3-f4ae319555b4", "permissions": {"keys":
+      ["wrapKey", "unwrapKey", "get"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "adc616dd-67f7-4e47-bfb9-ade858d7c92b", "permissions": {"keys":
+      ["get", "wrapKey", "unwrapKey"]}}], "vaultUri": "https://testcmksoftdelete.vault.azure.net/",
+      "enabledForDeployment": false, "enabledForDiskEncryption": false, "enabledForTemplateDeployment":
+      false, "enableSoftDelete": true, "softDeleteRetentionInDays": 90, "enableRbacAuthorization":
+      false, "enablePurgeProtection": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2004'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.KeyVault/vaults/testcmksoftdelete","name":"testcmksoftdelete","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{},"properties":{"sku":{"family":"A","name":"Standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"a3dce655-d019-49d7-99d2-5a7f6b6421fc","permissions":{"keys":["Get","UnwrapKey","WrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"5e4102d6-d956-4205-a6a9-b3a0f73f195f","permissions":{"keys":["Get","WrapKey","UnwrapKey"],"secrets":[],"certificates":[]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"6ae2ff4b-4939-4952-a097-d234aad383a3","permissions":{"keys":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore"],"secrets":["Get","List","Set","Delete","Recover","Backup","Restore"],"certificates":["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"00000000-0000-1111-2222-333333333333","permissions":{"keys":["wrapKey","get","unwrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"e385c60a-5e71-4b6c-97cd-7bb51d910201","permissions":{"keys":["unwrapKey","get","wrapKey"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"eed677bf-0425-49ee-aee3-f4ae319555b4","permissions":{"keys":["wrapKey","unwrapKey","get"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b","permissions":{"keys":["get","wrapKey","unwrapKey"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://testcmksoftdelete.vault.azure.net/","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.190.0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace key list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newcmk","isActiveCMK":true},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/default","name":"default","type":"Microsoft.Synapse/workspaces/keys","location":"eastus"},{"properties":{"keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newkey","isActiveCMK":false},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/newkey","name":"newkey","type":"Microsoft.Synapse/workspaces/keys","location":"eastus"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '706'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace key show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newcmk","isActiveCMK":true},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/keys/default","name":"default","type":"Microsoft.Synapse/workspaces/keys","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '347'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity show-sql-access
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"grantSqlControlToManagedIdentity":{"desiredState":"Disabled","actualState":"Disabled"}},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourcegroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default","name":"default","type":"Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"grantSqlControlToManagedIdentity": {"desiredState": "Enabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity grant-sql-access
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '81'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"grantSqlControlToManagedIdentity":{"desiredState":"Enabled","actualState":"Enabling"}},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default","name":"default","type":"Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/d064ffcc-9cbe-403e-bbaa-02e343be6a9f?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '383'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity grant-sql-access
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/d064ffcc-9cbe-403e-bbaa-02e343be6a9f?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity grant-sql-access
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"grantSqlControlToManagedIdentity":{"desiredState":"Enabled","actualState":"Enabled"}},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourcegroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default","name":"default","type":"Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '382'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"grantSqlControlToManagedIdentity": {"desiredState": "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity revoke-sql-access
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '82'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"grantSqlControlToManagedIdentity":{"desiredState":"Disabled","actualState":"Disabling"}},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default","name":"default","type":"Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/3e8b1c6e-21dd-4651-9813-3b739fbd88a2?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '385'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:13:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity revoke-sql-access
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/3e8b1c6e-21dd-4651-9813-3b739fbd88a2?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:14:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace managed-identity revoke-sql-access
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"grantSqlControlToManagedIdentity":{"desiredState":"Disabled","actualState":"Disabled"}},"id":"subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourcegroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/managedIdentitySqlControlSettings/default","name":"default","type":"Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:14:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"encryption": {"cmk": {"key": {"name": "newkey"}}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '68'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --key-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk","location":"eastus","name":"testsynapseworkspacecmk","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b"},"properties":{"managedVirtualNetwork":"default","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f964c10bb-8a6c-43bc-83d3-6b318c6c7305%2fresourceGroups%2ftestrg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspacecmk","dev":"https://testsynapseworkspacecmk.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspacecmk-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspacecmk.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-bacba1bd-03ae-409e-bfc4-dc2b14c574d5","defaultDataLakeStorage":{"accountUrl":"https://teststorageforsynapsecmk.dfs.core.windows.net","filesystem":"fs000001"},"sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"79171a39-a360-4444-a301-fa6f95a830e9","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"managedVirtualNetworkSettings":{"preventDataExfiltration":true,"allowedAadTenantIdsForLinking":[]},"encryption":{"doubleEncryptionEnabled":true,"cmk":{"status":"Updating","key":{"name":"newkey","keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newkey"}}},"provisioningState":"Provisioning"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/f8b7fbf0-3094-43c9-81ae-2e9aaa15a4d4?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1560'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:14:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/f8b7fbf0-3094-43c9-81ae-2e9aaa15a4d4?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:14:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk","location":"eastus","name":"testsynapseworkspacecmk","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b"},"properties":{"managedVirtualNetwork":"default","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f964c10bb-8a6c-43bc-83d3-6b318c6c7305%2fresourceGroups%2ftestrg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspacecmk","dev":"https://testsynapseworkspacecmk.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspacecmk-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspacecmk.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-bacba1bd-03ae-409e-bfc4-dc2b14c574d5","defaultDataLakeStorage":{"accountUrl":"https://teststorageforsynapsecmk.dfs.core.windows.net","filesystem":"fs000001"},"sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"79171a39-a360-4444-a301-fa6f95a830e9","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"managedVirtualNetworkSettings":{"preventDataExfiltration":true,"allowedAadTenantIdsForLinking":[]},"encryption":{"doubleEncryptionEnabled":true,"cmk":{"status":"Updating","key":{"name":"newkey","keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newkey"}}},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:14:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"managedVirtualNetworkSettings": {"allowedAadTenantIdsForLinking":
+      ["72f988bf-86f1-41af-91ab-2d7cd011db47"]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '126'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk","location":"eastus","name":"testsynapseworkspacecmk","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b"},"properties":{"managedVirtualNetwork":"default","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f964c10bb-8a6c-43bc-83d3-6b318c6c7305%2fresourceGroups%2ftestrg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspacecmk","dev":"https://testsynapseworkspacecmk.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspacecmk-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspacecmk.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-bacba1bd-03ae-409e-bfc4-dc2b14c574d5","defaultDataLakeStorage":{"accountUrl":"https://teststorageforsynapsecmk.dfs.core.windows.net","filesystem":"fs000001"},"sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"79171a39-a360-4444-a301-fa6f95a830e9","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"managedVirtualNetworkSettings":{"preventDataExfiltration":true,"allowedAadTenantIdsForLinking":["72f988bf-86f1-41af-91ab-2d7cd011db47"]},"encryption":{"doubleEncryptionEnabled":true,"cmk":{"status":"Updating","key":{"name":"newkey","keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newkey"}}},"provisioningState":"Provisioning"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/b8a592ae-b9b0-4d12-ac7d-7e998dc32179?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1598'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:15:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk/operationStatuses/b8a592ae-b9b0-4d12-ac7d-7e998dc32179?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:15:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --allowed-tenant-ids
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Synapse/workspaces/testsynapseworkspacecmk","location":"eastus","name":"testsynapseworkspacecmk","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"adc616dd-67f7-4e47-bfb9-ade858d7c92b"},"properties":{"managedVirtualNetwork":"default","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f964c10bb-8a6c-43bc-83d3-6b318c6c7305%2fresourceGroups%2ftestrg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspacecmk","dev":"https://testsynapseworkspacecmk.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspacecmk-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspacecmk.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-bacba1bd-03ae-409e-bfc4-dc2b14c574d5","defaultDataLakeStorage":{"accountUrl":"https://teststorageforsynapsecmk.dfs.core.windows.net","filesystem":"fs000001"},"sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"79171a39-a360-4444-a301-fa6f95a830e9","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"managedVirtualNetworkSettings":{"preventDataExfiltration":true,"allowedAadTenantIdsForLinking":["72f988bf-86f1-41af-91ab-2d7cd011db47"]},"encryption":{"doubleEncryptionEnabled":true,"cmk":{"status":"Updating","key":{"name":"newkey","keyVaultUrl":"https://testcmksoftdelete.vault.azure.net/keys/newkey"}}},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 Jan 2021 13:15:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
