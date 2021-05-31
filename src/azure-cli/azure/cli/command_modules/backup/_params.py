@@ -25,6 +25,7 @@ allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDa
 allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
+allowed_identity_types = ['systemassigned', 'userassigned', 'none']
 
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
@@ -40,6 +41,7 @@ retain_until_help = """The date until which this backed up copy will be availabl
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
+infrastructure_encryption_type_help = """Infrastructure encryption must be enabled when configuring encryption of the vault for the first time. Once enabled, infrastructure encryption cannot be disabled. Allowed values: Enabled, Disabled"""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -62,6 +64,11 @@ diskslist_type = CLIArgumentType(nargs='+', help=diskslist_help)
 target_container_name_type = CLIArgumentType(options_list=['--target-container-name'], help=target_container_name_help)
 filepath_type = CLIArgumentType(options_list=['--filepath'], help="The path to which the DB should be restored as files.")
 from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="Name of the starting Recovery point.")
+identity_type = CLIArgumentType(options_list=['--identity-type'], arg_type=get_enum_type(allowed_identity_types), help="The identity type to be enabled for this vault, whether it is systemassigned, user-assigned or none")
+identity_id_type = CLIArgumentType(nargs='+', options_list=['--identity-id'], help="Space-separated list of user assigned identities. This will be applicable only for user-assigned identity type")
+user_assigned_identity_id_type = CLIArgumentType(options_list=['--identity-id'], help="This will be applicable only for user-assigned identity type")
+encryption_key_id_type = CLIArgumentType(options_list=['--encryption-key-id'], help="The encryption key id you want to use for encryption")
+infrastructure_encryption_type = CLIArgumentType(options_list=['--infrastructure-encryption'], arg_type=get_enum_type(['Enabled', 'Disabled']), help=infrastructure_encryption_type_help)
 
 
 # pylint: disable=too-many-statements
@@ -82,6 +89,27 @@ def load_arguments(self, _):
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
         c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')
         c.argument('cross_region_restore_flag', arg_type=get_enum_type(['True', 'False']), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
+
+    # Identity
+    with self.argument_context('backup vault update') as c:
+        c.argument('vault_name', vault_name_type)
+        c.argument('identity_type', identity_type)
+        c.argument('identity_id', identity_id_type)
+        c.argument('remove_user_assigned', action='store_true', help="Use this flag to remove user-assigned MSI")
+        c.argument('remove_system_assigned', action='store_true', help="Use this flag to remove system assigned identity")
+
+    # Encryption
+    with self.argument_context('backup vault encryption') as c:
+        c.argument('vault_name', vault_name_type)
+
+    with self.argument_context('backup vault encryption update') as c:
+        c.argument('encryption_key_id', encryption_key_id_type)
+        c.argument('infrastructure_encryption', infrastructure_encryption_type)
+        c.argument('identity_id', user_assigned_identity_id_type)
+        c.argument('use_systemassigned_identity', action='store_true', options_list=['--use-system-assigned'], help="Provide this flag to use system assigned identity for encryption.")
+
+    with self.argument_context('backup vault encryption show') as c:
+        c.argument('vault_name', vault_name_type)
 
     # Container
     with self.argument_context('backup container') as c:
@@ -276,6 +304,7 @@ def load_arguments(self, _):
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
         c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
+        c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id is specified here.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

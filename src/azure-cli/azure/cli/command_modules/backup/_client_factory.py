@@ -166,6 +166,10 @@ def backup_resource_vault_config_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_resource_vault_configs
 
 
+def backup_resource_encryption_config_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_resource_encryption_configs
+
+
 # Azure Active Directory Client Factories
 def aad_properties_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).aad_properties
