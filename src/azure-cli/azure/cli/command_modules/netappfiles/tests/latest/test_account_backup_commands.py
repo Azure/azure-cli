@@ -132,5 +132,5 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
 
         # assert the account backup is deleted
         backup_list = self.cmd("az netappfiles account backup list -g {rg} -a %s" % account_name).get_output_in_json()
-        for backup in backup_list['value']:
+        for backup in backup_list:
             assert backup['name'] != account_name + "/" + backup_name
