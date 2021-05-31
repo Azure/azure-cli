@@ -87,7 +87,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
 
-    source_files = [c for c in glob_files_locally(source, pattern)]
+    source_files = list(glob_files_locally(source, pattern))
     logger = get_logger(__name__)
     settings_class = cmd.get_models('file.models#ContentSettings')
 

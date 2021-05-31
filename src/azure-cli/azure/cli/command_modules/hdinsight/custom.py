@@ -68,7 +68,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
 
     if component_version:
         # See validator
-        component_version = {c: v for c, v in [version.split('=') for version in component_version]}
+        component_version = dict([version.split('=') for version in component_version])
 
     # Validate whether HTTP credentials were provided
     if 'gateway' in cluster_configurations:
