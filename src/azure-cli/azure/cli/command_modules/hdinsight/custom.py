@@ -426,7 +426,7 @@ def rotate_hdi_cluster_key(cmd, client, resource_group_name, cluster_name,
     )
 
     return sdk_no_wait(no_wait, client.begin_rotate_disk_encryption_key, resource_group_name, cluster_name,
-                           rotate_params)
+                       rotate_params)
 
 
 def resize_cluster(cmd, client, cluster_name, resource_group_name, target_instance_count, no_wait=False):
@@ -436,7 +436,7 @@ def resize_cluster(cmd, client, cluster_name, resource_group_name, target_instan
     )
 
     return sdk_no_wait(no_wait, client.begin_resize, resource_group_name, cluster_name, RoleName.WORKERNODE,
-                           resize_cluster_parameters)
+                       resize_cluster_parameters)
 
 
 def _all_or_none(*params):
