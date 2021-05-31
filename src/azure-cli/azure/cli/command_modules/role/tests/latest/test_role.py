@@ -29,41 +29,23 @@ class RoleScenarioTest(ScenarioTest):
 class RbacSPSecretScenarioTest(RoleScenarioTest):
     def test_create_for_rbac_with_right_display_name(self):
         sp_name = self.create_random_name('cli-test-sp', 15)
-        self.kwargs['sp'] = 'http://{}'.format(sp_name)
         self.kwargs['display_name'] = sp_name
         self.kwargs['display_name_new'] = self.create_random_name('cli-test-sp', 15)
-        self.kwargs['display_name_special'] = 'Test SP Name/DisplayName'
 
         try:
             sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
-            self.assertTrue(sp_info['name'] == self.kwargs['sp'])
+            self.assertTrue(sp_info['name'] == sp_info['appId'])
+            self.assertTrue(sp_info['displayName'] == sp_name)
+            self.kwargs['app_id'] = sp_info['appId']
+
             # verify password can be used in cli
             self.kwargs['gen_password'] = sp_info['password']
             sp_info2 = self.cmd('ad app create --display-name {display_name_new} --password {gen_password}')\
                 .get_output_in_json()
             self.kwargs['sp_new'] = sp_info2['appId']
-
-            special_sp_name = 'http://{}'.format(
-                self.kwargs['display_name_special'].replace(' ', '-').replace('/', '-').replace('\\', '-')
-            )
-            sp_special = self.cmd('ad sp create-for-rbac -n "{display_name_special}" --skip-assignment', checks=[
-                self.check('name', special_sp_name)
-            ]).get_output_in_json()
-            self.kwargs['sp_special'] = sp_special['appId']
         finally:
-            self.cmd('ad app delete --id {sp}')
+            self.cmd('ad app delete --id {app_id}')
             self.cmd('ad app delete --id {sp_new}')
-            self.cmd('ad app delete --id {sp_special}')
-
-        # verify we can extrat out disply name from name which starts with protocol
-        sp_name2 = self.create_random_name('cli-test-sp', 15)
-        self.kwargs['sp2'] = 'http://{}'.format(sp_name2)
-        self.kwargs['display_name2'] = sp_name2
-
-        try:
-            self.cmd('ad sp create-for-rbac -n {sp2} --skip-assignment', checks=self.check('displayName', '{display_name2}'))
-        finally:
-            self.cmd('ad app delete --id {sp2}')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
@@ -73,24 +55,24 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         self.kwargs.update({
             'sub': subscription_id,
             'scope': '/subscriptions/{}'.format(subscription_id),
-            'sp': 'http://{}'.format(resource_group),
             'display_name': resource_group
         })
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg}',
-                         checks=self.check('name', '{sp}'))
-                self.cmd('role assignment list --assignee {sp} --scope {scope}',
+                result = self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg}',
+                                  checks=self.check('displayName', '{display_name}')).get_output_in_json()
+                self.kwargs['app_id'] = result['appId']
+                self.cmd('role assignment list --assignee {app_id} --scope {scope}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment list --assignee {sp} -g {rg}',
+                self.cmd('role assignment list --assignee {app_id} -g {rg}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {sp} -g {rg}',
+                self.cmd('role assignment delete --assignee {app_id} -g {rg}',
                          checks=self.is_empty())
-                self.cmd('role assignment delete --assignee {sp}',
+                self.cmd('role assignment delete --assignee {app_id}',
                          checks=self.is_empty())
         finally:
-            self.cmd('ad app delete --id {sp}')
+            self.cmd('ad app delete --id {app_id}')
 
 
 class RbacSPCertScenarioTest(RoleScenarioTest):
@@ -101,22 +83,23 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
         self.kwargs.update({
             'sub': subscription_id,
             'scope': '/subscriptions/{}'.format(subscription_id),
-            'sp': 'http://' + resource_group,
             'display_name': resource_group
         })
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 result = self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg} --create-cert',
-                                  checks=self.check('name', '{sp}')).get_output_in_json()
+                                  checks=self.check('displayName', '{display_name}')).get_output_in_json()
+                self.kwargs['app_id'] = result['appId']
+
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
                 os.remove(result['fileWithCertAndPrivateKey'])
-                result = self.cmd('ad sp credential reset -n {sp} --create-cert',
-                                  checks=self.check('name', '{sp}')).get_output_in_json()
+                result = self.cmd('ad sp credential reset -n {app_id} --create-cert',
+                                  checks=self.check('name', '{app_id}')).get_output_in_json()
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
                 os.remove(result['fileWithCertAndPrivateKey'])
         finally:
-            self.cmd('ad app delete --id {sp}',
+            self.cmd('ad app delete --id {app_id}',
                      checks=self.is_empty())
 
 
@@ -128,7 +111,6 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
-            'sp': 'http://{}'.format(resource_group),
             'display_name': resource_group,
             'sub': subscription_id,
             'scope': '/subscriptions/{}'.format(subscription_id),
@@ -141,18 +123,20 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 try:
-                    self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {display_name}')
+                    result = self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --create-cert '
+                                      '--keyvault {kv} --cert {cert} -n {display_name}').get_output_in_json()
+                    self.kwargs['app_id'] = result['appId']
                 except KeyVaultErrorException:
                     if not self.is_live and not self.in_recording:
                         pass  # temporary workaround for keyvault challenge handling was ignored under playback
                     else:
                         raise
                 cer1 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
-                self.cmd('ad sp credential reset -n {sp} --create-cert --keyvault {kv} --cert {cert}')
+                self.cmd('ad sp credential reset -n {app_id} --create-cert --keyvault {kv} --cert {cert}')
                 cer2 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
                 self.assertTrue(cer1 != cer2)
         finally:
-            self.cmd('ad app delete --id {sp}')
+            self.cmd('ad app delete --id {app_id}')
 
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
@@ -164,8 +148,6 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
-            'sp': 'http://{}'.format(resource_group),
-            'sp2': 'http://{}2'.format(resource_group),
             'display_name': resource_group,
             'display_name2': resource_group + '2',
             'sub': subscription_id,
@@ -180,11 +162,13 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
             self.kwargs['policy'] = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 24')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                self.cmd('ad sp create-for-rbac -n {display_name} --keyvault {kv} --cert {cert} --scopes {scope}/resourceGroups/{rg}')
-            self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
+                result = self.cmd('ad sp create-for-rbac -n {display_name} --keyvault {kv} '
+                                  '--cert {cert} --scopes {scope}/resourceGroups/{rg}').get_output_in_json()
+                self.kwargs['app_id'] = result['appId']
+            self.cmd('ad sp credential reset -n {app_id} --keyvault {kv} --cert {cert}')
         finally:
             try:
-                self.cmd('ad app delete --id {sp}')
+                self.cmd('ad app delete --id {app_id}')
             except:
                 # Mute the exception, otherwise the exception thrown in the `try` clause will be hidden
                 pass
@@ -193,11 +177,13 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
         try:
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 6')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {display_name2}')
-            self.cmd('ad sp credential reset -n {sp2} --keyvault {kv} --cert {cert}')
+                result = self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} '
+                                  '--cert {cert} -n {display_name2}').get_output_in_json()
+                self.kwargs['app_id2'] = result['appId']
+            self.cmd('ad sp credential reset -n {app_id2} --keyvault {kv} --cert {cert}')
         finally:
             try:
-                self.cmd('ad app delete --id {sp2}')
+                self.cmd('ad app delete --id {app_id2}')
             except:
                 pass
 
