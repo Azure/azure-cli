@@ -552,7 +552,7 @@ examples:
   - name: Set the list of audit actions.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\ 
+        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
         --blob-auditing-policy-name bapname
   - name: Disable an auditing policy.
     text: |-
