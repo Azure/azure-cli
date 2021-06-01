@@ -4,10 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
 
@@ -19,7 +15,14 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
-
+        ManagedClusterLoadBalancerProfile = cmd.get_models('ManagedClusterLoadBalancerProfile',
+                                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+        ManagedClusterLoadBalancerProfileManagedOutboundIPs = cmd.get_models(
+                'ManagedClusterLoadBalancerProfileManagedOutboundIPs', resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+        ManagedClusterLoadBalancerProfileOutboundIPs = cmd.get_models(
+                'ManagedClusterLoadBalancerProfileOutboundIPs', resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+        ManagedClusterLoadBalancerProfileOutboundIPPrefixes = cmd.get_models(
+                'ManagedClusterLoadBalancerProfileOutboundIPPrefixes', resource_type=ResourceType.MGMT_CONTAINERSERVICE)
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
             count=2

@@ -25,7 +25,6 @@ from azure.cli.command_modules.acs.custom import (merge_kubernetes_configuration
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs._consts import (CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
                                                    CONST_MONITORING_ADDON_NAME,
@@ -661,6 +660,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         # kube-dashboard disabled, there's existing dashboard addon profile
         instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
         # test lower cased key name
+        ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
+                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                operation_group='managed_clusters')
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
