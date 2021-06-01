@@ -533,7 +533,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    #@record_only()
+    @record_only()
     def test_sql_audit_policy(self):
         self.kwargs.update({
             'location': 'eastus2euap',
