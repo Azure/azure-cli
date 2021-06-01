@@ -782,6 +782,11 @@ def load_arguments(self, _):
             c.argument('data_disk_mbps', min_api='2019-07-01', nargs='+', type=int, help='Specify the bandwidth in MB per second (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
             c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
+            c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2021-03-01',
+                       help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
+            c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', '--data-delete-option'],
+                       nargs='+', min_api='2021-03-01',
+                       help='Specify whether data disk should be deleted or detached upon VM deletion.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -796,6 +801,10 @@ def load_arguments(self, _):
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
                 c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+            c.argument('nic_delete_option', nargs='+', min_api='2021-03-01',
+                       help='Specify what happens to the network interface when the VM is deleted. Use a singular '
+                       'value to apply on all resources, or use <Name>=<Value> to configure '
+                       'the delete behavior for individual resources. Possible options are Delete and Detach.')
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
