@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 
 
 def load_arguments(self, _):
-    signalr_name_type = CLIArgumentType(options_list='--signalr-name-name', help='Name of the SignalR.', id_part='name')
+    signalr_name_type = CLIArgumentType(options_list='--signalr-name', help='Name of the SignalR.', id_part='name')
 
     with self.argument_context('signalr') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -68,6 +68,9 @@ def load_arguments(self, _):
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr cors remove') as c:
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+
+    with self.argument_context('signalr cors update') as c:
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     # Network Rule

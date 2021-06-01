@@ -61,6 +61,7 @@ def load_command_table(self, _):
         g.command('add', 'signalr_cors_add')
         g.command('remove', 'signalr_cors_remove')
         g.command('list', 'signalr_cors_list')
+        g.command('update', 'signalr_cors_update')
 
     with self.command_group('signalr network-rule', signalr_network_utils) as g:
         g.command('list', 'list_network_rules')

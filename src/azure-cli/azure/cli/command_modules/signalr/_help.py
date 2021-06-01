@@ -55,6 +55,15 @@ examples:
         az signalr cors remove -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
 """
 
+helps['signalr cors update'] = """
+type: command
+short-summary: Update allowed origins to a SignalR Service
+examples:
+  - name: Update a list of allowed origins to a SignalR Service
+    text: >
+        az signalr cors update -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
+"""
+
 helps['signalr create'] = """
 type: command
 short-summary: Creates a SignalR Service.

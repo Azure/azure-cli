@@ -10,6 +10,7 @@ from azure.mgmt.signalr.models import (
 
 SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 
+
 def signalr_msi_assign(client, resource_group_name, signalr_name, identity):
     msiType, user_identity = _analyze_identity(identity)
 
@@ -28,8 +29,8 @@ def signalr_msi_show(client, resource_group_name, signalr_name):
     res = client.get(resource_group_name, signalr_name)
     return res.identity
 
+
 def _analyze_identity(identity):
     if identity == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
         return "SystemAssigned", None
-    else:
-        return "UserAssigned", identity
+    return "UserAssigned", identity
