@@ -173,11 +173,13 @@ def load_command_table(self, _):
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
+        from ._format import transform_secret_list
         g.keyvault_command('list', 'get_secrets',
                            transform=multi_transformers(
                                filter_out_managed_resources,
                                keep_max_results,
-                               extract_subresource_name()))
+                               extract_subresource_name()),
+                           table_transformer=transform_secret_list)
         g.keyvault_command('list-versions', 'get_secret_versions',
                            transform=multi_transformers(
                                keep_max_results,
