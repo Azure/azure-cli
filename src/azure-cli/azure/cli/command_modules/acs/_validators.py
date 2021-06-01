@@ -107,7 +107,7 @@ def validate_k8s_version(namespace):
                            'such as "1.11.8" or "1.12.6"')
 
 
-def validate_cluster_autoscaler_profile(namespace):
+def validate_cluster_autoscaler_profile(cmd, namespace):
     """ Validates that cluster autoscaler profile is acceptable by:
         1. Extracting the key[=value] format to map
         2. Validating that the key isn't empty and that the key is valid
