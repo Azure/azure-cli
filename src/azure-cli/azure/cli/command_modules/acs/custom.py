@@ -81,7 +81,8 @@ from azure.mgmt.containerservice.v2021_03_01.models import AgentPool
 from azure.mgmt.containerservice.v2021_03_01.models import AgentPoolUpgradeSettings
 from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterSKU
 from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterWindowsProfile
-from azure.mgmt.containerservice.v2021_03_01.models import Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties
+from azure.mgmt.containerservice.v2021_03_01.models import (
+    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties)
 from azure.mgmt.containerservice.v2021_03_01.models import RunCommandRequest
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
@@ -2266,6 +2267,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
     elif enable_managed_identity and assign_identity:
         user_assigned_identity = {
+            # pylint: disable=line-too-long
             assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
         }
         identity = ManagedClusterIdentity(
@@ -2806,6 +2808,7 @@ def aks_update(cmd, client, resource_group_name, name,
                 type="SystemAssigned"
             )
         elif goal_identity_type == "userassigned":
+            # pylint: disable=line-too-long
             user_assigned_identity = {
                 assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
             }
@@ -2932,7 +2935,13 @@ def aks_upgrade(cmd,
 
 
 def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
-    return sdk_no_wait(no_wait, client.begin_upgrade_node_image_version, resource_group_name, cluster_name, nodepool_name)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_upgrade_node_image_version,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+    )
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
@@ -3817,7 +3826,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        agent_pool,
+    )
 
 
 def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
@@ -3832,7 +3848,14 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
         raise CLIError(
             "The new node count is the same as the current node count.")
     instance.count = new_node_count  # pylint: disable=no-member
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
 
 
 def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
@@ -3842,8 +3865,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           max_surge=None,
                           no_wait=False):
     if kubernetes_version != '' and node_image_only:
-        raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version.'
-                       'If you only want to upgrade the node version please use the "--node-image-only" option only.')
+        raise CLIError(
+            'Conflicting flags. Upgrading the Kubernetes version will also '
+            'upgrade node image version. If you only want to upgrade the '
+            'node version please use the "--node-image-only" option only.'
+        )
 
     if node_image_only:
         return _upgrade_single_nodepool_image_version(no_wait,
@@ -3861,7 +3887,14 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
 
 
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
