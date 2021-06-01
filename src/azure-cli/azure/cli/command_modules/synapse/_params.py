@@ -232,7 +232,7 @@ def load_arguments(self, _):
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
         c.argument('status', arg_type=get_enum_type(TransparentDataEncryptionStatus),
                    required=True, help='Status of the transparent data encryption.')
-        c.argument('transparent_data_encryption_name', options_list=['--trans-data-encry', '-d'], help='Name of the transparent data encryption.')
+        c.argument('transparent_data_encryption_name', options_list=['--transparent-data-encryption-name', '-d'], help='Name of the transparent data encryption.')
 
     # synapse sql pool threat-policy
     with self.argument_context('synapse sql pool threat-policy') as c:
