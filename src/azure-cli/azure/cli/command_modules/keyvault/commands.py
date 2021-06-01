@@ -15,6 +15,8 @@ from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results)
 
+from azure.cli.command_modules.keyvault._format import transform_secret_list
+
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
     validate_private_endpoint_connection_id, validate_role_assignment_args)
@@ -173,7 +175,6 @@ def load_command_table(self, _):
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
-        from ._format import transform_secret_list
         g.keyvault_command('list', 'get_secrets',
                            transform=multi_transformers(
                                filter_out_managed_resources,
