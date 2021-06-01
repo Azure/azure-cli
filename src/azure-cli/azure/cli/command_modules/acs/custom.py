@@ -1311,7 +1311,7 @@ def update_acs(cmd, client, resource_group_name, container_service_name, new_age
     # null out the windows profile so that validation doesn't complain about not having the admin password
     instance.windows_profile = None
 
-    return client.create_or_update(resource_group_name, container_service_name, instance)   # TODO: track2/still using create_or_update
+    return client.begin_create_or_update(resource_group_name, container_service_name, instance)
 
 
 def list_container_services(cmd, client, resource_group_name=None):
@@ -1474,7 +1474,8 @@ def _create_role_assignment(cli_ctx, role, assignee,
         role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers) # TODO: track2/custom headers
+    # TODO: track2/remove custom headers, depends on 'azure.mgmt.authorization'
+    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
@@ -3538,8 +3539,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
             if ex.status_code != 404:
                 raise ex
     else:
+        # TODO: track2/replace create_or_update with begin_create_or_update, depends on 'azure.mgmt.resource.resources'
         resource_groups.create_or_update(default_workspace_resource_group, {
-                                         'location': workspace_region}) # TODO: track2/still using create_or_update
+                                         'location': workspace_region})
 
     from azure.cli.core.profiles import ResourceType
     GenericResource = cmd.get_models(
@@ -4413,7 +4415,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     try:
         # long_running_operation_timeout=300
-        result = sdk_no_wait(no_wait, client.create_or_update,  # TODO: track2/still using create_or_update
+        result = sdk_no_wait(no_wait, client.begin_create_or_update,
                              resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
         result = LongRunningOperation(cmd.cli_ctx)(result)
         instance = client.get(resource_group_name, name)
@@ -4457,7 +4459,7 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)   # TODO: track2/still using create_or_update
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
@@ -4469,7 +4471,7 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
         enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)   # TODO: track2/still using create_or_update
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
@@ -4479,7 +4481,7 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(
         enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)   # TODO: track2/still using create_or_update
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def _is_msi_cluster(managed_cluster):

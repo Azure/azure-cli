@@ -57,7 +57,7 @@ def load_command_table(self, _):
         g.custom_command('browse', 'acs_browse')
         g.custom_command('create', 'acs_create', supports_no_wait=True,
                          table_transformer=deployment_validate_table_format)
-        g.command('delete', 'delete', confirmation=True)    # TODO: track2/delete
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'list_container_services')
         g.custom_command('list-locations', 'list_acs_locations')
         g.custom_command('scale', 'update_acs')
@@ -141,7 +141,7 @@ def load_command_table(self, _):
                             client_factory=cf_openshift_managed_clusters,
                             deprecate_info=self.deprecate(redirect='aro', hide=True)) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True) # TODO: track2/delete
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)
         g.custom_show_command('show', 'openshift_show')
         g.custom_command('list', 'osa_list',
