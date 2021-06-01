@@ -489,7 +489,7 @@ examples:
   - name: Get a SQL pool's threat detection policy.
     text: |-
         az synapse sql pool threat-policy show --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --sec-alert-ply threatpolicy
+        --resource-group rg --security-alert-policy-name threatpolicy
 """
 
 helps['synapse sql pool threat-policy update'] = """
@@ -500,23 +500,25 @@ examples:
   - name: Enable by storage account name.
     text: |-
         az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Enabled --storage-account mystorageaccount --sec-alert-ply threatpolicy
+        --state Enabled --storage-account mystorageaccount --security-alert-policy-name threatpolicy
   - name: Enable by storage endpoint and key.
     text: |-
         az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== --sec-alert-ply threatpolicy
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== \\
+        --security-alert-policy-name threatpolicy
   - name: Disable a subset of alert types.
     text: |-
         az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly --sec-alert-ply threatpolicy
+        --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly --security-alert-policy-name threatpolicy
   - name: Configure email recipients for a policy.
     text: |-
         az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --email-addresses me@examlee.com you@example.com --email-account-admins true --sec-alert-ply threatpolicy
+        --email-addresses me@examlee.com you@example.com --email-account-admins true \\
+        --security-alert-policy-name threatpolicy
   - name: Disable a threat policy.
     text: |-
         az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Disabled --sec-alert-ply threatpolicy
+        --state Disabled --security-alert-policy-name threatpolicy
 """
 
 helps['synapse sql pool audit-policy'] = """

@@ -237,7 +237,7 @@ def load_arguments(self, _):
     # synapse sql pool threat-policy
     with self.argument_context('synapse sql pool threat-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
-        c.argument('security_alert_policy_name', options_list=['--sec-alert-ply', '-s'],
+        c.argument('security_alert_policy_name', options_list=['--security-alert-policy-name', '-s'],
                    help='Name of the security alert policy.')
 
     with self.argument_context('synapse sql pool threat-policy update') as c:
