@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.24.1
+++++++
+* No changes
+
 2.24.0
 ++++++
 * Fix issue #16798: Azure CLI output is corrupted! (#18065)
