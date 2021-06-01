@@ -34,6 +34,7 @@ def register_providers():
     _register_one_provider("Microsoft.EventHub/namespaces", "2018-01-01-preview", True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
+    _register_one_provider('Microsoft.KeyVault/managedHSMs', '2021-04-01-preview', True)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
     # "Microsoft.Media/mediaservices", "2020-05-01", True
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
