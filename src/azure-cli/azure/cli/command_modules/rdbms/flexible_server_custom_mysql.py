@@ -543,8 +543,7 @@ def _determine_iops(storage_gb, iops_info, iops_input, tier, sku_name):
 def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
     free_iops = MINIMUM_IOPS + (storage_in_mb // 1024) * 3
     max_supported_iops = iops_info[tier][sku_name]  # free iops cannot exceed maximum supported iops for the sku
-    logger.warning(iops_info[tier])
-    logger.warning(iops_info[tier][sku_name])
+
     return min(free_iops, max_supported_iops)
 
 

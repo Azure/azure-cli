@@ -205,7 +205,7 @@ def flexible_server_update_custom_func(cmd, instance,
 
     # validator
     location = ''.join(instance.location.lower().split())
-    sku_info = get_postgres_list_skus_info(cmd, location)
+    sku_info, _ = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
 
     server_module_path = instance.__module__
