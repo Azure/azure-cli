@@ -537,7 +537,7 @@ class SynapseScenarioTests(ScenarioTest):
     def test_sql_audit_policy(self):
         self.kwargs.update({
             'location': 'eastus2euap',
-            'workspace': 'zes05111test',
+            'workspace': 'zes0508test',
             'rg': 'chayang-test-rg',
             'storage-account': 'chayangstoragewestus2'
         })
