@@ -88,7 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==3.0.0rc9',
     'azure-mgmt-eventhub~=4.1.0',
-    'azure-mgmt-hdinsight~=2.2.0',
+    'azure-mgmt-hdinsight~=7.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=4.1.0',
     'azure-mgmt-iothub==2.0.0',
