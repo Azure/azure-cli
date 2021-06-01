@@ -268,11 +268,11 @@ def load_arguments(self, _):
     # synapse sql pool audit-policy
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
-        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
 
     with self.argument_context('synapse sql pool audit-policy show') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
 
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
@@ -302,14 +302,14 @@ def load_arguments(self, _):
                        help='The number of days to retain audit logs.')
 
     with self.argument_context('synapse sql audit-policy update') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
 
     with self.argument_context('synapse sql audit-policy') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-audit-ply', '-b'],
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
                    help='Name of the blob auditing policy name.')
 
     with self.argument_context('synapse sql ad-admin') as c:

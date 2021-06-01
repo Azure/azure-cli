@@ -533,41 +533,41 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    @record_only()
+    #@record_only()
     def test_sql_audit_policy(self):
         self.kwargs.update({
             'location': 'eastus2euap',
-            'workspace': 'zes0508test',
+            'workspace': 'zes05111test',
             'rg': 'chayang-test-rg',
             'storage-account': 'chayangstoragewestus2'
         })
 
         # test show command
         self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 --blob-audit-ply bapname',
+                 --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
 
         # test validator of this command
         self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg} \
-                 --blob-audit-ply bapname', expect_failure=True)
+                 --blob-auditing-policy-name bapname', expect_failure=True)
 
         # test for updating state from Disabled to Enabled with storage and retention days
         self.cmd('az synapse sql audit-policy update --state Enabled --storage-account {storage-account} '
                  '--retention-days 7 --workspace-name {workspace} --resource-group {rg} \
-                 --blob-audit-ply bapname')
+                 --blob-auditing-policy-name bapname')
         self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                --blob-audit-ply bapname',
+                --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Enabled')
                  ])
 
         # test for updating state from Enabled to Disabled
         self.cmd('az synapse sql audit-policy update --state Disabled '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-audit-ply bapname')
+                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname')
         self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
-                 --blob-audit-ply bapname',
+                 --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
