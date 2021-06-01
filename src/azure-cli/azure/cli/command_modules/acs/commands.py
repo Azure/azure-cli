@@ -80,7 +80,8 @@ def load_command_table(self, _):
 
     # ACS Kubernetes commands
     with self.command_group('acs kubernetes', container_services_sdk,
-                            resource_type=ResourceType.MGMT_CONTAINERSERVICE, client_factory=cf_container_services) as g:
+                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                            client_factory=cf_container_services) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
