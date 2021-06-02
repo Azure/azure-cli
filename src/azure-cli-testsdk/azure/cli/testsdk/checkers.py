@@ -29,9 +29,6 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
         else:
             equals = actual_result == self._expected_result \
                 or str(actual_result).lower() == str(self._expected_result).lower()
-        # TODO: fuming/remove these prints
-        print("JSON: {}".format(json_value))
-        print("ER: {}, AR: {}, Q: {}, E: {}".format(self._expected_result, actual_result, self._query, equals))
         if not equals:
             if actual_result:
                 raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,

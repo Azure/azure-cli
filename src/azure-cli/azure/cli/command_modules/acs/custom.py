@@ -2222,7 +2222,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         aad_profile = ManagedClusterAADProfile(
             managed=True,
             enable_azure_rbac=enable_azure_rbac,
-            admin_group_object_i_ds=_parse_comma_separated_list(    # ids -> i_ds due to track 2 naming issue
+            # ids -> i_ds due to track 2 naming issue
+            admin_group_object_i_ds=_parse_comma_separated_list(
                 aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
