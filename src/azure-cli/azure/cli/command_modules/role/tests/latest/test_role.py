@@ -47,6 +47,17 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
             self.cmd('ad app delete --id {app_id}')
             self.cmd('ad app delete --id {sp_new}')
 
+    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
+    def test_create_for_rbac_with_secret_no_assignment(self, resource_group):
+
+        self.kwargs['display_name'] = resource_group
+        try:
+            result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
+                              checks=self.check('displayName', '{display_name}')).get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
+        finally:
+            self.cmd('ad app delete --id {app_id}')
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
     def test_create_for_rbac_with_secret_with_assignment(self, resource_group):

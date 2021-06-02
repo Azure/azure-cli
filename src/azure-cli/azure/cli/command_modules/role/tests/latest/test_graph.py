@@ -20,11 +20,11 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         self.kwargs['display_name'] = self.create_random_name('clisp-test-', 20)
 
         # create app through express option
-        sp_result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
-                             checks=self.check('displayName', '{display_name}')).get_output_in_json()
+        result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
+                          checks=self.check('displayName', '{display_name}')).get_output_in_json()
 
-        self.assertEqual(sp_result['name'], sp_result['appId'])
-        self.kwargs['app_id'] = sp_result['appId']
+        self.assertEqual(result['name'], result['appId'])
+        self.kwargs['app_id'] = result['appId']
 
         # show/list app
         self.cmd('ad app show --id {app_id}', checks=self.check('identifierUris', []))
@@ -293,8 +293,8 @@ class CreateForRbacScenarioTest(ScenarioTest):
         self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            sp_result = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
-            self.kwargs['app_id'] = sp_result['appId']
+            result = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
 
             self.cmd('ad sp list --spn {app_id}',
                      checks=self.check('length([*])', 1))
@@ -541,8 +541,8 @@ class GraphAppCredsScenarioTest(ScenarioTest):
         }
 
         try:
-            sp_result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
-            self.kwargs['app_id'] = sp_result['appId']
+            result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
 
             result = self.cmd('ad sp credential list --id {app_id}').get_output_in_json()
             key_id = result[0]['keyId']
@@ -580,8 +580,8 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('az ad sp update --id {app_id} --set appRoleAssignmentRequired=true')
             self.cmd('az ad sp show --id {app_id}')
 
-            sp_result = self.cmd('ad sp create-for-rbac --name {display_name2} --skip-assignment --years 10').get_output_in_json()
-            self.kwargs['app_id2'] = sp_result['appId']
+            result = self.cmd('ad sp create-for-rbac --name {display_name2} --skip-assignment --years 10').get_output_in_json()
+            self.kwargs['app_id2'] = result['appId']
 
             result = self.cmd('ad sp credential list --id {app_id2}', checks=self.check('length([*])', 1)).get_output_in_json()
             diff = dateutil.parser.parse(result[0]['endDate']).replace(tzinfo=None) - datetime.datetime.utcnow()
