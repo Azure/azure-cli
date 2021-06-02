@@ -3,11 +3,39 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import mock
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _validators as validators
 
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
+class MockCLI(CLI):
+    def __init__(self):
+        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
+        self.cloud = get_active_cloud(self)
+
+class MockLoader(object):
+    def __init__(self, ctx):
+        self.ctx = ctx
+
+    def get_models(self, *attr_args, **_):
+        from azure.cli.core.profiles import get_sdk
+        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, *attr_args, mod='models')
+
+class MockCmd(object):
+    def __init__(self, ctx, arguments={}):
+        self.cli_ctx = ctx
+        self.loader = MockLoader(self.cli_ctx)
+        self.arguments = arguments
+
+    def get_models(self, *attr_args, **kwargs):
+        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, *attr_args, **kwargs)
 
 class TestValidateIPRanges(unittest.TestCase):
+
     def test_simultaneous_allow_and_disallow_with_spaces(self):
         api_server_authorized_ip_ranges = " 0.0.0.0/32 , 129.1.1.1.1 "
         namespace = Namespace(api_server_authorized_ip_ranges)
@@ -62,53 +90,56 @@ class TestValidateIPRanges(unittest.TestCase):
 
 
 class TestClusterAutoscalerParamsValidators(unittest.TestCase):
-    def test_empty_key_empty_value(cmd, self):
+    def setUp(self):
+        self.cli = MockCLI()
+
+    def test_empty_key_empty_value(self):
         cluster_autoscaler_profile = ["="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(cmd, namespace)
+            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
         self.assertEqual(str(cm.exception), err)
 
-    def test_non_empty_key_empty_value(cmd, self):
+    def test_non_empty_key_empty_value(self):
         cluster_autoscaler_profile = ["scan-interval="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
 
-        validators.validate_cluster_autoscaler_profile(cmd, namespace)
+        validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
 
-    def test_two_empty_keys_empty_value(cmd, self):
+    def test_two_empty_keys_empty_value(self):
         cluster_autoscaler_profile = ["=", "="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(cmd, namespace)
+            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
         self.assertEqual(str(cm.exception), err)
 
-    def test_one_empty_key_in_pair_one_non_empty(cmd, self):
+    def test_one_empty_key_in_pair_one_non_empty(self):
         cluster_autoscaler_profile = ["scan-interval=20s", "="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(cmd, namespace)
+            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
         self.assertEqual(str(cm.exception), err)
 
-    def test_invalid_key(cmd, self):
+    def test_invalid_key(self):
         cluster_autoscaler_profile = ["bad-key=val"]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "'bad-key' is an invalid key for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(cmd, namespace)
+            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
         self.assertIn(err, str(cm.exception),)
 
-    def test_valid_parameters(cmd, self):
+    def test_valid_parameters(self):
         cluster_autoscaler_profile = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
 
-        validators.validate_cluster_autoscaler_profile(cmd, namespace)
+        validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
 
 
 class Namespace:
