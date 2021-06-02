@@ -30,11 +30,14 @@ from azure.mgmt.eventgrid.models import (
     StorageBlobDeadLetterDestination,
     EventSubscriptionFilter,
     TopicUpdateParameters,
+    TopicRegenerateKeyRequest,
     DomainUpdateParameters,
+    DomainRegenerateKeyRequest,
     ResourceSku,
     IdentityInfo,
     PartnerRegistration,
     PartnerNamespace,
+    PartnerNamespaceRegenerateKeyRequest,
     EventChannel,
     PartnerTopic,
     EventChannelSource,
@@ -155,7 +158,7 @@ def cli_topic_create_or_update(
         kind=kind_name,
         extended_location=extended_location)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         topic_name,
         topic_info)
@@ -183,10 +186,24 @@ def cli_topic_update(
         sku=sku_info,
         identity=identity_info)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name=resource_group_name,
         topic_name=topic_name,
         topic_update_parameters=topic_update_parameters)
+
+
+def cli_topic_regenerate_key(
+        client,
+        resource_group_name,
+        topic_name,
+        key_name):
+    regenerate_key_request = TopicRegenerateKeyRequest(key_name=key_name)
+
+    return client.begin_regenerate_key(
+        resource_group_name=resource_group_name,
+        topic_name=topic_name,
+        regenerate_key_request=regenerate_key_request
+    )
 
 
 def cli_domain_update(
@@ -211,7 +228,7 @@ def cli_domain_update(
         sku=sku_info,
         identity=identity_info)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         domain_name,
         domain_update_parameters)
@@ -226,6 +243,20 @@ def cli_domain_list(
         return client.list_by_resource_group(resource_group_name, odata_query, DEFAULT_TOP)
 
     return client.list_by_subscription(odata_query, DEFAULT_TOP)
+
+
+def cli_domain_regenerate_key(
+        client,
+        resource_group_name,
+        domain_name,
+        key_name):
+    regenerate_key_request = DomainRegenerateKeyRequest(key_name=key_name)
+
+    return client.regenerate_key(
+        resource_group_name=resource_group_name,
+        domain_name=domain_name,
+        regenerate_key_request=regenerate_key_request
+    )
 
 
 def cli_domain_create_or_update(
@@ -261,7 +292,7 @@ def cli_domain_create_or_update(
         sku=sku_info,
         identity=identity_info)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         domain_name,
         domain_info)
@@ -272,7 +303,7 @@ def cli_domain_topic_create_or_update(
         resource_group_name,
         domain_name,
         domain_topic_name):
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         domain_name,
         domain_topic_name)
@@ -283,7 +314,7 @@ def cli_domain_topic_delete(
         resource_group_name,
         domain_name,
         domain_topic_name):
-    return client.delete(
+    return client.begin_delete(
         resource_group_name,
         domain_name,
         domain_topic_name)
@@ -400,10 +431,24 @@ def cli_partner_namespace_create_or_update(
         partner_registration_fully_qualified_id=partner_registration_id,
         tags=tags)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         partner_namespace_name,
         partner_namespace_info)
+
+
+def cli_partner_namespace_regenerate_key(
+        client,
+        resource_group_name,
+        partner_namespace_name,
+        key_name):
+    regenerate_key_request = PartnerNamespaceRegenerateKeyRequest(key_name=key_name)
+
+    return client.regenerate_key(
+        resource_group_name=resource_group_name,
+        partner_namespace_name=partner_namespace_name,
+        regenerate_key_request=regenerate_key_request
+    )
 
 
 def cli_event_channel_list(
@@ -534,7 +579,7 @@ def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         partner_topic_name,
         event_subscription_name,
@@ -604,7 +649,7 @@ def cli_system_topic_create_or_update(
         source=source,
         identity=identity_info)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         system_topic_name,
         system_topic_info)
@@ -623,7 +668,7 @@ def cli_system_topic_update(
         tags=tags,
         identity=identity_info)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name=resource_group_name,
         system_topic_name=system_topic_name,
         system_topic_update_parameters=system_topic_update_parameters)
@@ -682,7 +727,7 @@ def cli_system_topic_event_subscription_create_or_update(    # pylint: disable=t
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         system_topic_name,
         event_subscription_name,
@@ -791,7 +836,7 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         source_resource_id,
         event_subscription_name,
         event_subscription_info)
@@ -801,7 +846,7 @@ def cli_eventgrid_event_subscription_delete(
         client,
         event_subscription_name,
         source_resource_id=None):
-    return client.delete(
+    return client.begin_delete(
         source_resource_id,
         event_subscription_name)
 
@@ -812,7 +857,7 @@ def event_subscription_setter(
         event_subscription_name,
         source_resource_id=None):
 
-    return client.update(
+    return client.begin_update(
         source_resource_id,
         event_subscription_name,
         parameters)
@@ -840,6 +885,7 @@ def cli_eventgrid_event_subscription_get(
 
 
 def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
+        cmd,
         client,
         source_resource_id=None,
         location=None,
@@ -854,7 +900,7 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
             raise CLIError('usage error: Since --source-resource-id is specified, none of the other parameters must '
                            'be specified.')
 
-        return _list_event_subscriptions_by_resource_id(client, source_resource_id, odata_query, DEFAULT_TOP)
+        return _list_event_subscriptions_by_resource_id(cmd, client, source_resource_id, odata_query, DEFAULT_TOP)
 
     if location is None:
         # Since resource-id was not specified, location must be specified: e.g. "westus2" or "global". If not error
@@ -1168,7 +1214,7 @@ def cli_system_topic_event_subscription_update(
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         system_topic_name,
         event_subscription_name,
@@ -1213,7 +1259,7 @@ def cli_partner_topic_event_subscription_update(
         enable_advanced_filtering_on_arrays=enable_advanced_filtering_on_arrays,
         delivery_attribute_mapping=delivery_attribute_mapping)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         partner_topic_name,
         event_subscription_name,
@@ -1650,9 +1696,12 @@ def _get_input_schema_and_mapping(
     return input_schema, input_schema_mapping
 
 
-def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, top):
+def _list_event_subscriptions_by_resource_id(cmd, client, resource_id, oDataQuery, top):
     # parse_resource_id doesn't handle resource_ids for Azure subscriptions and RGs
     # so, first try to look for those two patterns.
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    default_subscription_id = get_subscription_id(cmd.cli_ctx)
+
     if resource_id is not None:
         id_parts = list(filter(None, resource_id.split('/')))
         if len(id_parts) < 5:
@@ -1663,7 +1712,7 @@ def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, to
 
             subscription_id = id_parts[1]
             _validate_subscription_id_matches_default_subscription_id(
-                default_subscription_id=client.config.subscription_id,
+                default_subscription_id=default_subscription_id,
                 provided_subscription_id=subscription_id)
 
             if len(id_parts) == 2:
@@ -1687,7 +1736,7 @@ def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, to
     id_parts = parse_resource_id(resource_id)
     subscription_id = id_parts.get('subscription')
     _validate_subscription_id_matches_default_subscription_id(
-        default_subscription_id=client.config.subscription_id,
+        default_subscription_id=default_subscription_id,
         provided_subscription_id=subscription_id)
 
     rg_name = id_parts.get('resource_group')
