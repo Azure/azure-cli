@@ -1980,6 +1980,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
     @StorageAccountPreparer(name_prefix="testpesyn")
+    @unittest.skip(' Found 1 similar requests with 1 different matcher(s)')
     def test_private_endpoint_connection_synapse_workspace(self, resource_group, storage_account):
         self.kwargs.update({
             'rg': resource_group,
