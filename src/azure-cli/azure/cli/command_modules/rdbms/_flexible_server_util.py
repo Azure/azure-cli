@@ -403,7 +403,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
         template['jobs']['build']['steps'][2]['with']['server-name'] = server.fully_qualified_domain_name
         template['jobs']['build']['steps'][2]['with']['sql-file'] = file_name
         with open(action_dir + action_name + '.yml', 'w', encoding='utf8') as yml_file:
-            yml_file.write("on: [workflow_dispatch]\n")
+            yml_file.write("on: [push, workflow_dispatch]\n")
             yml_file.write(yaml.dump(template))
 
 

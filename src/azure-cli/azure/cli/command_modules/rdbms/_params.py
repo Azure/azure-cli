@@ -474,7 +474,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_arg_type,
                        help='Administrator username for the server.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], arg_group='Authentication', help='The password of the administrator.')
-            c.argument('sql_file_path', options_list=['--sql-file'], help='The path of the sql file. The sql file should be already in the root folder of the repository')
+            c.argument('sql_file_path', options_list=['--sql-file'], help='The path of the sql file. The sql file should be already in the repository')
             c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
             c.argument('repository', options_list=['--repo'], help='The name of your github username and repository e.g., Azure/azure-cli ')
             c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
