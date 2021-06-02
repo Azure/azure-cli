@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.24.2
+++++++
+
+**Container**
+
+* Hotfix: Fix #18276: `az container create` fails with `AttributeError: 'ResourcesOperations' object has no attribute 'create_or_update'`
+
 2.24.1
 ++++++
 

@@ -404,7 +404,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
     api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
 
     return sdk_no_wait(no_wait,
-                       resource_client.resources.create_or_update,
+                       resource_client.resources.begin_create_or_update,
                        resource_group_name,
                        "Microsoft.ContainerInstance",
                        '',
