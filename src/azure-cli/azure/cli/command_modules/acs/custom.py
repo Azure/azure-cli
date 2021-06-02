@@ -2963,7 +2963,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
     commandResultFuture = client.begin_run_command(
-        resource_group_name, name, request_payload, long_running_operation_timeout=5, retry_total=0)
+        resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
 
     return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
 
