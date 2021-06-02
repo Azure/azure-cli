@@ -40,7 +40,7 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
         library_requirements_content = read_file_content(library_requirements)
         big_data_pool_info.library_requirements = LibraryRequirements(filename=library_requirements,
                                                                       content=library_requirements_content)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, spark_pool_name,
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,
                        big_data_pool_info)
 
 
@@ -83,9 +83,9 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
         existing_spark_pool.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                              delay_in_minutes=delay)
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, spark_pool_name,
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,
                        existing_spark_pool, force=force)
 
 
 def delete_spark_pool(cmd, client, resource_group_name, workspace_name, spark_pool_name, no_wait=False):
-    return sdk_no_wait(no_wait, client.delete, resource_group_name, workspace_name, spark_pool_name)
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, workspace_name, spark_pool_name)

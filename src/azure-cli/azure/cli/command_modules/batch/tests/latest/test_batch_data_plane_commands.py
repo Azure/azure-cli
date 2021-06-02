@@ -229,7 +229,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id {p_id} --vm-size small --os-family 4')
 
         # test create job with missing parameters
-        self.kwargs['start'] = datetime.datetime.now().isoformat()
+        self.kwargs['start'] = datetime.datetime.utcnow().isoformat()
         with self.assertRaises(SystemExit):
             self.batch_cmd('batch job create --id {j_id} --metadata test=value '
                            '--job-manager-task-environment-settings a=b '
