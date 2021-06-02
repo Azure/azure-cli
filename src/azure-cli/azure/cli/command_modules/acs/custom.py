@@ -3964,7 +3964,14 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
     if mode is not None:
         instance.mode = mode
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
 
 
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
