@@ -336,9 +336,12 @@ def run_subprocess_get_output(command):
     return process
 
 
-def register_credential_secrets(cmd, server, repository):
+def register_credential_secrets(cmd, database_engine, server, repository):
     resource_group = parse_resource_id(server.id)["resource_group"]
-    scope = "/subscriptions/{}/resourceGroups/{}".format(get_subscription_id(cmd.cli_ctx), resource_group)
+    provider = "DBforMySQL"
+    if database_engine == "postgresql":
+        provider = "DBforPostgreSQL"
+    scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
 
     app = create_service_principal_for_rbac(cmd, name=server.name, role='contributor', scopes=[scope])
     app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
@@ -380,6 +383,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
     if AZURE_CREDENTIALS not in github_secrets:
         register_credential_secrets(cmd,
+                                    database_engine=database_engine,
                                     server=server,
                                     repository=repository)
 
