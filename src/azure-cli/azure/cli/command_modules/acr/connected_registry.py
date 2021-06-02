@@ -64,7 +64,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("usage error: you must provide either --sync-token-name or --repository, but not both.")
-    if (len(connected_registry_name) < 5): # Check needed since the sync token gateway actions must be at least 5 characters long.
+    # Check needed since the sync token gateway actions must be at least 5 characters long.
+    if len(connected_registry_name) < 5: 
         raise CLIError("argument error: Connected registry name must be at least 5 characters long")
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
