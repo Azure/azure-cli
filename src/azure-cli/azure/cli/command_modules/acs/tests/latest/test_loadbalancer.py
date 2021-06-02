@@ -9,7 +9,7 @@ from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
 
 
 class TestLoadBalancer(unittest.TestCase):
-    def test_configure_load_balancer_profile(self):
+    def test_configure_load_balancer_profile(cmd, self):
         managed_outbound_ip_count = 5
         outbound_ips = None
         outbound_ip_prefixes = None

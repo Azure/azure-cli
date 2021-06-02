@@ -2259,6 +2259,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         raise CLIError("Please use standard load balancer for private cluster")
     if api_server_authorized_ip_ranges or enable_private_cluster:
         api_server_access_profile = _populate_api_server_access_profile(
+            cmd,
             api_server_authorized_ip_ranges,
             enable_private_cluster=enable_private_cluster
         )
@@ -2761,6 +2762,7 @@ def aks_update(cmd, client, resource_group_name, name,
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
             _populate_api_server_access_profile(
+                cmd,
                 api_server_authorized_ip_ranges, instance=instance)
 
     if enable_aad:
@@ -2967,7 +2969,8 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
     if not command_string:
         raise ValidationError('Command cannot be empty.')
-    RunCommandRequest = cmd.get_models('RunCommandRequest', resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+    RunCommandRequest = cmd.get_models('RunCommandRequest', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                       operation_group='managed_clusters')
     request_payload = RunCommandRequest(command=command_string)
     request_payload.context = _get_command_context(command_files)
 
