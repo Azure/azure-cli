@@ -59,7 +59,7 @@ DEPENDENCIES = [
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.22',
     'six~=1.12',
-    'urllib3[secure]>=1.26.4',
+    'urllib3[secure]>=1.26.5',
 ]
 
 # dependencies for specific OSes
