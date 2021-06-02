@@ -8,7 +8,7 @@ Release History
 
 **Container**
 
-* Hotfix: Fix the issue that when creating container with yaml input file will be failed
+* Hotfix: Fix #18276: `az container create` fails with `AttributeError: 'ResourcesOperations' object has no attribute 'create_or_update'`
 
 2.24.1
 ++++++
