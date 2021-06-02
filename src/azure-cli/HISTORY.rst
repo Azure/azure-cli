@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.24.2
+++++++
+
+**Container**
+
+* Hotfix: Fix the issue that when creating container with yaml input file will be failed
+
 2.24.1
 ++++++
 
