@@ -37,7 +37,7 @@ class MockCmd(object):
         self.arguments = arguments
 
     def get_models(self, *attr_args, **kwargs):
-        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, *attr_args, **kwargs)
+        return get_sdk(self.cli_ctx, *attr_args, **kwargs)
 
 
 class TestPopulateApiServerAccessProfile(unittest.TestCase):
