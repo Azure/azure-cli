@@ -24,7 +24,7 @@ from azure.identity import (
 from ._environment import get_config_dir
 from .util import get_file_json, resource_to_scopes, scopes_to_resource
 
-AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+AZURE_CLI_CLIENT_ID = '888bce95-fde5-40f8-a7d4-2debf0f96f4c'
 
 logger = get_logger(__name__)
 
