@@ -195,7 +195,6 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
     if allow_push:
         logger.warning("Pushing the created action file to origin %s branch", branch)
         run_subprocess("git push origin {}".format(branch))
-        github_actions_run(action_name, branch)
     else:
         logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
