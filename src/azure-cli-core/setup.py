@@ -50,7 +50,7 @@ DEPENDENCIES = [
     'azure-identity==1.6.0b3',
     'azure-mgmt-core==1.3.0b1',
     'colorama~=0.4.1',
-    'cryptography>=3.2,<3.4',
+    'cryptography>=3.4',
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack~=0.8.0',

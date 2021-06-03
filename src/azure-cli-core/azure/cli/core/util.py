@@ -1207,7 +1207,7 @@ def resource_to_scopes(resource):
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
     # We should not trim the trailing slash, like in https://management.azure.com/
     # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
-    scope = resource + '/.default'
+    scope = 'https://graph.microsoft.com' + '/.default'
     return [scope]
 
 

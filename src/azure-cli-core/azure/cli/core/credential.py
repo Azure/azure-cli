@@ -75,7 +75,7 @@ class CredentialAdaptor:
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("CredentialAdaptor.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
-        scopes = _normalize_scopes(scopes)
+        scopes = _normalize_scopes(['user.read'])
         token, _ = self._get_token(scopes, **kwargs)
         return token
 

@@ -168,7 +168,7 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
     from azure.mgmt.core.policies import ARMChallengeAuthenticationPolicy
 
     # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
-    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+    scopes = resource_to_scopes('https://graph.microsoft.com')
     policy = ARMChallengeAuthenticationPolicy(cred, *scopes)
 
     client_kwargs['credential_scopes'] = scopes
