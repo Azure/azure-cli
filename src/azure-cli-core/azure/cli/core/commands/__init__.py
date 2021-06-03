@@ -1058,7 +1058,7 @@ def _load_extension_command_loader(loader, args, ext):
 
 
 def _load_module_command_loader(loader, args, mod):
-    return _load_command_loader(loader, args, mod, 'azure.cli.command_modules.')
+    return _load_command_loader(loader, args, mod, 'msgraph.cli.command_modules.')
 
 
 class ExtensionCommandSource:

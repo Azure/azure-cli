@@ -230,7 +230,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 # Perform module discovery
                 command_modules = []
                 try:
-                    mods_ns_pkg = import_module('azure.cli.command_modules')
+                    mods_ns_pkg = import_module('msgraph.cli.command_modules')
                     command_modules = [modname for _, modname, _ in
                                        pkgutil.iter_modules(mods_ns_pkg.__path__)]
                     logger.debug('Discovered command modules: %s', command_modules)
@@ -556,7 +556,7 @@ class CommandIndex:
             index_extensions = []
             # Found modules from index
             logger.debug("Modules found from index for '%s': %s", top_command, index_modules_extensions)
-            command_module_prefix = 'azure.cli.command_modules.'
+            command_module_prefix = 'msgraph.cli.command_modules.'
             for m in index_modules_extensions:
                 if m.startswith(command_module_prefix):
                     # The top-level command is from a command module
