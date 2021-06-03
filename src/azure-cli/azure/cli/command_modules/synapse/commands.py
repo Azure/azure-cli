@@ -190,7 +190,7 @@ def load_command_table(self, _):
         g.custom_command('check-name', 'custom_check_name_availability',
                          command_type=synapse_operations_sdk,
                          client_factory=cf_synapse_client_operations_factory)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --SparkPool
@@ -211,10 +211,10 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_workspace')
         g.custom_command('create', 'create_sql_pool', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('update', 'update_sql_pool')
-        g.command('pause', 'pause')
-        g.command('resume', 'resume')
+        g.command('pause', 'begin_pause')
+        g.command('resume', 'begin_resume')
         g.custom_command('restore', 'restore_sql_pool')
         g.custom_command('show-connection-string', 'sql_pool_show_connection_string')
         g.wait_command('wait')
@@ -246,8 +246,10 @@ def load_command_table(self, _):
 
     #  Management Plane Commands --SqlPool Tde
     with self.command_group('synapse sql pool tde', command_type=synapse_sqlpool_transparent_data_encryptions_sdk,
+                            custom_command_type=get_custom_sdk('sqlpooltde',
+                                                               cf_synapse_client_sqlpool_transparent_data_encryptions_factory),
                             client_factory=cf_synapse_client_sqlpool_transparent_data_encryptions_factory) as g:
-        g.command('set', 'create_or_update')
+        g.custom_command('set', 'create_or_update')
         g.show_command('show', 'get')
 
     #  Management Plane Commands --SqlPool Threat-policy
@@ -274,9 +276,9 @@ def load_command_table(self, _):
                             client_factory=cf_synapse_client_workspace_aad_admins_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_sql_aad_admin', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_workspace_sql_aad_admin',
                                  setter_arg_name='aad_admin_info', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --Sql audit-policy
@@ -286,7 +288,7 @@ def load_command_table(self, _):
                                                                cf_synapse_client_sqlserver_blob_auditing_policies_factory),
                             client_factory=cf_synapse_client_sqlserver_blob_auditing_policies_factory) as g:
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='sqlserver_blob_auditing_policy_update',
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='sqlserver_blob_auditing_policy_update',
                                  supports_no_wait=True, validator=validate_audit_policy_arguments)
         g.wait_command('wait')
 
@@ -298,7 +300,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_firewall_rule', supports_no_wait=True)
         g.custom_command('update', 'update_firewall_rule', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --IntegrationRuntime
@@ -308,13 +310,13 @@ def load_command_table(self, _):
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
-        g.command('update', 'update')
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('update', 'update')
         g.command('upgrade', 'upgrade')
         g.command('list-auth-key', 'list', command_type=synapse_integrationruntimeauthkeys_sdk,
                   client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
-        g.command('regenerate-auth-key', 'regenerate', command_type=synapse_integrationruntimeauthkeys_sdk,
-                  client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
+        g.custom_command('regenerate-auth-key', 'regenerate', command_type=synapse_integrationruntimeauthkeys_sdk,
+                         client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
         g.command('get-monitoring-data', 'list', command_type=synapse_integrationruntimemonitoringdata_sdk,
                   client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory)
         g.command('sync-credentials', 'sync', command_type=synapse_integrationruntimecredentials_sdk,
@@ -346,9 +348,11 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('synapse integration-runtime-node', command_type=synapse_integrationruntimenodes_sdk,
+                            custom_command_type=get_custom_sdk('integrationruntimenode',
+                                                               cf_synapse_client_integrationruntimenodes_factory),
                             client_factory=cf_synapse_client_integrationruntimenodes_factory) as g:
         g.show_command('show', 'get')
-        g.command('update', 'update')
+        g.custom_command('update', 'update')
         g.command('delete', 'delete', confirmation=True)
         g.command('get-ip-address', 'get', command_type=synapse_integrationruntimenodeipaddress_sdk,
                   client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory)
