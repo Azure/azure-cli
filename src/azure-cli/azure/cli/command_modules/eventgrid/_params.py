@@ -233,6 +233,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid topic key') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('key_name', help='Key name to regenerate key1 or key2')
 
     with self.argument_context('eventgrid topic list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -245,6 +246,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid domain key') as c:
         c.argument('domain_name', arg_type=domain_name_type, options_list=['--name', '-n'], id_part=None)
+        c.argument('key_name', help='Key name to regenerate key1 or key2')
 
     with self.argument_context('eventgrid domain topic') as c:
         c.argument('domain_name', arg_type=domain_name_type, id_part='name')
@@ -278,6 +280,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid partner namespace key') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, help='Name of the partner namespace', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
+        c.argument('key_name', help='Key name to regenerate key1 or key2')
 
     with self.argument_context('eventgrid partner namespace show') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, options_list=['--name', '-n'], id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))

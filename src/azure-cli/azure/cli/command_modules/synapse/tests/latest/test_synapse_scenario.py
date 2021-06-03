@@ -6,6 +6,7 @@
 
 import os
 import unittest
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
@@ -13,8 +14,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class SynapseScenarioTests(ScenarioTest):
-    location = "northeurope"
+    location = "eastus2euap"
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_workspaces(self, resource_group):
         # create a workspace
@@ -54,6 +56,7 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(120)
         self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_managed_virtual_network_workspace(self):
         # test workspace with managed virtual network
@@ -66,6 +69,7 @@ class SynapseScenarioTests(ScenarioTest):
         ])
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -74,6 +78,15 @@ class SynapseScenarioTests(ScenarioTest):
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
             'spark-version': '2.4'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
                               ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
@@ -113,6 +126,7 @@ class SynapseScenarioTests(ScenarioTest):
                  expect_failure=True)
 
     @record_only()
+    @unittest.skip('(keyvaultfailure) KeyVault set-policy failed with Bad Request')
     def test_workspace_with_cmk(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -214,14 +228,24 @@ class SynapseScenarioTests(ScenarioTest):
             ])
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool(self):
         self.kwargs.update({
-            'location': 'eastus',
+            'location': 'eastus2euap',
             'workspace': 'testsynapseworkspace',
             'rg': 'rg',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW1000c'
+            'performance-level': 'DW400c'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
@@ -290,12 +314,13 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'sql-pool': 'sqlpoolcli1',
+            'location': 'eastus2euap',
+            'workspace': 'zes0219test',
+            'rg': 'chayang-test-rg',
+            'sql-pool': 'rivertiger0220 ',
+            'performance-level': 'DW1000c',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
-            'restore-point-time': '2020-11-25T02:47:37'
+            'restore-point-time': '2021-05-24T08:09:15'
         })
 
         # restore sql pool
@@ -318,6 +343,9 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse sql pool delete --name {dest-sql-pool} --workspace-name {workspace} --resource-group {rg} --yes')
 
+        # deleted list take several mins to show
+        time.sleep(200)
+
         # test list-deleted
         self.cmd('az synapse sql pool list-deleted --workspace-name {workspace} --resource-group {rg}',
                  checks=[
@@ -327,13 +355,13 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'sql-pool': 'sqlpoolcli1',
+            'location': 'eastus2euap',
+            'workspace': 'zes0514test',
+            'rg': 'chayang-test-rg',
+            'sql-pool': 'sqlzes0514test',
             'schema': 'dbo',
-            'table': 'Person',
-            'column': 'phone',
+            'table': 'Persons',
+            'column': 'City',
             'label': 'Confidential',
             'information-type': '"Contact Info"'
         })
@@ -395,17 +423,18 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_tde(self):
         self.kwargs.update({
-            'location': 'northeurope',
-            'workspace': 'testtde1',
-            'rg': 'rg',
-            'sql-pool': 'sqlpooltde',  # self.create_random_name(prefix='testsqlpool', length=15),
+            'location': 'eastus2euap',
+            'workspace': 'zes0508test',
+            'rg': 'chayang-test-rg',
+            'sql-pool': 'zes0508test1pool' #self.create_random_name(prefix='testsqlpool', length=15),
         })
 
         self.cmd(
-            'az synapse sql pool tde set --status Enabled '
-            '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+            'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \
+            --resource-group {rg} --transparent-data-encryption-name current')
 
-        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+        self.cmd('az synapse sql pool tde show --name {sql-pool} --workspace-name {workspace} --resource-group {rg} \
+                 --transparent-data-encryption-name current',
                  checks=[
                      self.check('name', "current"),
                      self.check('status', "Enabled")
@@ -414,18 +443,19 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_threat_policy(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'sql-pool': 'sqlpoolcli1',  # self.create_random_name(prefix='testsqlpool', length=15),
-            'storage-account': 'zzystorageforsynapse'
+            'location': 'eastus2euap',
+            'workspace': 'zes0508test',
+            'rg': 'chayang-test-rg',
+            'sql-pool': 'zes0508test1pool',  # self.create_random_name(prefix='testsqlpool', length=15),
+            'storage-account': 'chayangstoragewestus2',
+            'threat-policy': 'threatpolicy'
         })
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security-alert-policy-name {threat-policy}')
 
         self.cmd('az synapse sql pool threat-policy show '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security-alert-policy-name {threat-policy}',
                  checks=[
                      self.check('state', 'Enabled')
                  ])
@@ -433,11 +463,11 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_audit_policy(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'sql-pool': 'sqlpoolcli1',
-            'storage-account': 'teststorageforsynapse'
+            'location': 'eastus2euap',
+            'workspace': 'zes0508test',
+            'rg': 'chayang-test-rg',
+            'sql-pool': 'zes0508test1pool',
+            'storage-account': 'chayangstoragewestus2'
         })
 
         # test show command
@@ -472,11 +502,11 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_aad_admin(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
+            'location': 'eastus2euap',
+            'workspace': 'zes0508test',
+            'rg': 'chayang-test-rg',
             'user-name': 'fakeuser',
-            'object-id': '00000000-0000-0000-0000-000000000000',
+            'object-id': '00000000-0000-4002-becf-488f3e6ab703',
             'user-email': 'fakeuser@fakedomain.com'
         })
         # Test create cmdlet
@@ -506,33 +536,38 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_audit_policy(self):
         self.kwargs.update({
-            'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
-            'storage-account': 'teststorageforsynapse'
+            'location': 'eastus2euap',
+            'workspace': 'zes0508test',
+            'rg': 'chayang-test-rg',
+            'storage-account': 'chayangstoragewestus2'
         })
+
         # test show command
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
+                 --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
 
         # test validator of this command
-        self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg}',
-                 expect_failure=True)
+        self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg} \
+                 --blob-auditing-policy-name bapname', expect_failure=True)
 
         # test for updating state from Disabled to Enabled with storage and retention days
         self.cmd('az synapse sql audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--retention-days 7 --workspace-name {workspace} --resource-group {rg}')
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 '--retention-days 7 --workspace-name {workspace} --resource-group {rg} \
+                 --blob-auditing-policy-name bapname')
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
+                --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Enabled')
                  ])
 
         # test for updating state from Enabled to Disabled
         self.cmd('az synapse sql audit-policy update --state Disabled '
-                 '--workspace-name {workspace} --resource-group {rg}')
-        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname')
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
+                 --blob-auditing-policy-name bapname',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
@@ -548,6 +583,14 @@ class SynapseScenarioTests(ScenarioTest):
             'endIpAddress': "255.255.255.255",
             'secondIpAddress': "192.0.0.1"
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
 
         # create a firewall rule
         self.cmd(
@@ -872,7 +915,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_linked_service(self):
         self.kwargs.update({
@@ -1113,7 +1156,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse trigger stop --workspace-name {workspace} --name {tumbling-window-trigger}')
 
-    # @record_only()
+    @record_only()
     @unittest.skip('(InvalidTokenIssuer) Token Authentication failed with SecurityTokenInvalidIssuerException')
     def test_data_flow(self):
         self.kwargs.update({
@@ -1150,6 +1193,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_notebook(self):
         self.kwargs.update({
@@ -1221,12 +1265,12 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
-            'rg': 'rg',
-            'workspace': 'testsynapseworkspace',
+            'rg': 'chayang-test-rg',
+            'workspace': 'zes0219test',
             'name': 'integrationruntime',
             'type': 'Managed',
-            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
-            'node': 'testnode'})
+            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
+            'node': 'MININT-Q3EGQJ8'})
 
         # create integration runtime
         self.cmd(
@@ -1290,8 +1334,8 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update self-hosted integration runtime node
         self.cmd(
-            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--node-name {node}',
+            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} \
+            --name {selfhosted-integration-runtime} --node-name {node} --auto-update On --update-delay-offset PT03H',
             checks=[
                 self.check('nodeName', self.kwargs['node'])
             ])
