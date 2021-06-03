@@ -7,10 +7,6 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.util import user_confirmation
-from azure.mgmt.containerregistry.v2019_06_01_preview.models import (
-    AgentPool,
-    AgentPoolUpdateParameters
-)
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -35,6 +31,8 @@ def acr_agentpool_create(cmd,
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
+    
+    AgentPool = cmd.get_models('AgentPool', operation_group='agent_pools')
 
     agentpool_create_parameters = AgentPool(
         location=registry.location,
@@ -62,6 +60,8 @@ def acr_agentpool_update(cmd,
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
+
+    AgentPoolUpdateParameters = cmd.get_models('AgentPoolUpdateParameters', operation_group='agent_pools')
 
     update_parameters = AgentPoolUpdateParameters(count=count)
 

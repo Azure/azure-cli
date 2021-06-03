@@ -47,12 +47,13 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
-        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, \
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, \
         TokenStatus, ZoneRedundancy = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
-            'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
             'TokenStatus', 'ZoneRedundancy')
+    TaskStatus, BaseImageTriggerType, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models(
+        'TaskStatus', 'BaseImageTriggerType', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', operation_group='tasks')
+    RunStatus = self.get_models('RunStatus', operation_group='runs')
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)

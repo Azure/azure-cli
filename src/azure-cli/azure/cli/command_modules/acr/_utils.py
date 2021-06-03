@@ -12,15 +12,6 @@ from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 from azure.core.exceptions import ResourceNotFoundError
-from azure.mgmt.containerregistry.v2019_06_01_preview.models import (
-    Credentials,
-    CustomRegistryCredentials,
-    SecretObject,
-    SecretObjectType,
-    SourceRegistryCredentials,
-    TimerTrigger,
-    TriggerStatus
-)
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -207,7 +198,7 @@ def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    from azure.mgmt.containerregistry.v2019_06_01_preview.models import OS, Architecture
+    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='runs')
 
     # Defaults
     platform_os = OS.linux.value
@@ -295,6 +286,17 @@ def get_custom_registry_credentials(cmd,
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
+    Credentials, \
+    SourceRegistryCredentials, \
+    CustomRegistryCredentials, \
+    SecretObject, \
+    SecretObjectType = cmd.get_models(
+        'Credentials',
+        'CustomRegistryCredentials',
+        'SourceRegistryCredentials',
+        'SecretObject',
+        'SecretObjectType',
+        operation_group='tasks')
 
     source_registry_credentials = None
     if auth_mode:
@@ -340,6 +342,7 @@ def get_custom_registry_credentials(cmd,
 
 def build_timers_info(cmd, schedules):
     timer_triggers = []
+    TriggerStatus, TimerTrigger = cmd.get_models('TriggerStatus', 'TimerTrigger', operation_group='tasks')
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):

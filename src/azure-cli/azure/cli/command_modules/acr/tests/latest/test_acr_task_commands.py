@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGrou
 
 class AcrTaskCommandsTests(ScenarioTest):
 
-    @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
+#     @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
         self.kwargs.update({
@@ -47,7 +47,8 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.imageNames', ['testtask:v1']),
                          self.check('step.arguments', []),
                          self.check('step.isPushEnabled', True),
-                         self.check('step.noCache', False)])
+                         self.check('step.noCache', False),
+                         self.check('step.type', 'Docker')])
 
         # Create a contextless task.
         self.cmd('acr task create -n {task_no_context} -r {registry_name} --cmd {existing_image} -c {no_context}',

@@ -163,7 +163,12 @@ AZURE_API_PROFILES = {
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2020-11-01-preview',
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2020-11-01-preview', {
+            'agent_pools': '2019-06-01-preview',
+            'tasks': '2019-06-01-preview',
+            'task_runs': '2019-06-01-preview',
+            'runs': '2019-06-01-preview',
+        }),
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',

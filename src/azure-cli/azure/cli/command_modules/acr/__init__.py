@@ -13,7 +13,8 @@ class ACRCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.profiles import ResourceType
         super(ACRCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                                                resource_type=ResourceType.MGMT_CONTAINERREGISTRY,
+                                                operation_group='webhooks')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.acr.commands import load_command_table

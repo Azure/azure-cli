@@ -8,9 +8,8 @@ import time
 from msrest import Deserializer
 from azure.core.exceptions import HttpResponseError
 from azure.core.polling import PollingMethod, LROPoller
-from azure.mgmt.containerregistry.v2019_06_01_preview import models
 
-from ._constants import get_succeeded_agentpool_status, get_finished_agentpool_status
+from ._constants import get_acr_task_models, get_succeeded_agentpool_status, get_finished_agentpool_status
 
 
 def delete_agentpool_with_polling(cmd,
@@ -19,7 +18,7 @@ def delete_agentpool_with_polling(cmd,
                                   registry_name,
                                   resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in models.__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in  get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
 
     def deserialize_agentpool(response):
         return deserializer('AgentPool', response.http_response)
