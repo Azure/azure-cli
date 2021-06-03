@@ -31,7 +31,7 @@ class MockLoader(object):
 
     def get_models(self, *attr_args, **_):
         from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, *attr_args, mod='models')
+        return get_sdk(self.ctx, *attr_args, mod='models')
 
 
 class MockCmd(object):
