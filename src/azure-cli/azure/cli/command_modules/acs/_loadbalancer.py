@@ -41,7 +41,8 @@ def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, o
                                              outbound_ports, idle_timeout):
         return None
 
-    ManagedClusterLoadBalancerProfile = cmd.get_models('ManagedClusterLoadBalancerProfile')
+    ManagedClusterLoadBalancerProfile = cmd.get_models('ManagedClusterLoadBalancerProfile',
+                                                       operation_group='managed_clusters')
     profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                            outbound_ports, idle_timeout, profile)
@@ -63,19 +64,19 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
         profile.outbound_ip_prefixes = None
         if managed_outbound_ip_count:
             ManagedClusterLoadBalancerProfileManagedOutboundIPs = cmd.get_models(
-                'ManagedClusterLoadBalancerProfileManagedOutboundIPs')
+                'ManagedClusterLoadBalancerProfileManagedOutboundIPs', operation_group='managed_clusters')
             profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
                 count=managed_outbound_ip_count
             )
         if outbound_ip_resources:
             ManagedClusterLoadBalancerProfileOutboundIPs = cmd.get_models(
-                'ManagedClusterLoadBalancerProfileOutboundIPs')
+                'ManagedClusterLoadBalancerProfileOutboundIPs', operation_group='managed_clusters')
             profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
                 public_ips=outbound_ip_resources
             )
         if outbound_ip_prefix_resources:
             ManagedClusterLoadBalancerProfileOutboundIPPrefixes = cmd.get_models(
-                'ManagedClusterLoadBalancerProfileOutboundIPPrefixes')
+                'ManagedClusterLoadBalancerProfileOutboundIPPrefixes', operation_group='managed_clusters')
             profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
                 public_ip_prefixes=outbound_ip_prefix_resources
             )
