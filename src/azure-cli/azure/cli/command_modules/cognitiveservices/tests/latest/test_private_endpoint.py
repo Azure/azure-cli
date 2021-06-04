@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
@@ -17,7 +18,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'kind': 'TextAnalytics',
-            'sku': 'S0',
+            'sku': 'S',
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
@@ -30,7 +31,15 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         ])
+
+        for i in range(15):
+            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+            if 'Creating' != account['properties']['provisioningState']:
+                break
+            time.sleep(10)
+
+        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
 
         # delete the cognitive services account
         plResource = self.cmd('az network private-link-resource list -g {rg} -n {sname} '
@@ -79,7 +88,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'kind': 'TextAnalytics',
-            'sku': 'S1',
+            'sku': 'S',
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
@@ -92,7 +101,15 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         ])
+
+        for i in range(15):
+            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+            if 'Creating' != account['properties']['provisioningState']:
+                break
+            time.sleep(10)
+
+        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
 
         # delete the cognitive services account
         plResource = self.cmd('az network private-link-resource list -g {rg} -n {sname} '

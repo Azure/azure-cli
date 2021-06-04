@@ -35,7 +35,15 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         ])
+
+        for i in range(15):
+            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+            if 'Creating' != account['properties']['provisioningState']:
+                break
+            time.sleep(10)
+
+        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
 
         rules = self.cmd('az cognitiveservices account network-rule list -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(len(rules['ipRules']), 0)

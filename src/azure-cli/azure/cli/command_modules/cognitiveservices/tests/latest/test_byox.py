@@ -41,6 +41,10 @@ class CognitiveServicesByoxTests(ScenarioTest):
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
+        self.kwargs.update({
+            'sname': self.create_random_name(prefix='cs_cli_test_', length=16)
+        })
+
         # test to create cognitive services account
         self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} '
                  '--assign-identity --yes',
