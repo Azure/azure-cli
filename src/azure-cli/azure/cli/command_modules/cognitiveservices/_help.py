@@ -203,3 +203,40 @@ examples:
   - name: Remove the identity from a Cognitive Services account.
     text: az cognitiveservices account identity remove --name myresource --resource-group cognitive-services-resource-group
 """
+
+helps['cognitiveservices account list-deleted'] = """
+type: command
+short-summary: List soft-deleted Azure Cognitive Services accounts.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+examples:
+  - name: List all the Cognitive Services accounts in a subscription.
+    text: az cognitiveservices account list-deleted
+"""
+
+
+helps['cognitiveservices account show-deleted'] = """
+type: command
+short-summary: Show a soft-deleted Azure Cognitive Services account.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+examples:
+  - name: Show a soft-deleted Azure Cognitive Services account.
+    text: az cognitiveservices account show-deleted --location eastus --resource-group cognitive-services-resource-group --name cognitive-services-account-name
+"""
+
+helps['cognitiveservices account recover'] = """
+type: command
+short-summary: Recover a soft-deleted Azure Cognitive Services account.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+examples:
+  - name: Recover a soft-deleted Azure Cognitive Services account.
+    text: az cognitiveservices account recover --location eastus --resource-group cognitive-services-resource-group --name cognitive-services-account-name
+"""
+
+helps['cognitiveservices account purge'] = """
+type: command
+short-summary: Purge a soft-deleted Azure Cognitive Services account.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+examples:
+  - name: Purge a soft-deleted Azure Cognitive Services account.
+    text: az cognitiveservices account purge --location eastus --resource-group cognitive-services-resource-group --name cognitive-services-account-name
+"""

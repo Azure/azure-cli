@@ -13,6 +13,9 @@ def get_cognitiveservices_management_client(cli_ctx, *_):
 def cf_accounts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).accounts
 
+def cf_deleted_accounts(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).deleted_accounts
+
 
 def cf_resource_skus(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).resource_skus

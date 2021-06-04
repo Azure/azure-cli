@@ -147,7 +147,7 @@ def load_arguments(self, _):
         c.argument('kind', help='the API name of cognitive services account',
                    completer=kind_completer)
         c.argument('tags', tags_type)
-        c.argument('key_name', required=True, help='Key name to generate', choices=['key1', 'key2'])
+        c.argument('key_name', required=True, help='Key name to generate', choices=['Key1', 'Key2'])
         c.argument('api_properties', api_properties_type)
         c.argument('custom_domain', help='User domain assigned to the account. Name is the CNAME source.')
         c.argument('storage', help='The storage accounts for this resource, in JSON array format.')
