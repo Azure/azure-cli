@@ -28,7 +28,7 @@ LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 
 class WebappBasicE2ETest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_e2e(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
