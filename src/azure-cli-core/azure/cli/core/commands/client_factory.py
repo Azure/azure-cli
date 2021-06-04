@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.core.pipeline.policies import HeadersPolicy
+
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
 from azure.cli.core.util import get_az_user_agent, is_track2, resource_to_scopes
+from azure.cli.core import __version__
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -71,6 +74,7 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
                                          api_version=api_version, sdk_profile=sdk_profile,
                                          aux_subscriptions=aux_subscriptions,
                                          aux_tenants=aux_tenants,
+                                         headers_policy=HeadersPolicy(headers={'SdkVersion': f'graph-cli-{__version__}'}),
                                          **kwargs)
     return client
 
