@@ -9,12 +9,12 @@ from knack.prompting import prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.mgmt.cognitiveservices.models import Account, Sku,\
+from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku,\
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
-    AccountProperties, ApiProperties,\
-    Identity, ResourceIdentityType
+    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties,\
+    Identity, ResourceIdentityType as IdentityType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
-
+from azure.core.polling import AsyncLROPoller, LROPoller
 
 logger = get_logger(__name__)
 
@@ -23,6 +23,15 @@ def list_resources(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+def recover(client, location, resource_group_name, account_name):
+    properties = CognitiveServicesAccountProperties()
+    properties.restore = True
+    params = CognitiveServicesAccount(properties=properties)
+    params.location = location
+
+    return client.begin_create(resource_group_name, account_name, params).result()
 
 
 def list_usages(client, resource_group_name, account_name):
@@ -109,16 +118,16 @@ def create(
 
     sku = Sku(name=sku_name)
 
-    properties = AccountProperties()
+    properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        api_properties = ApiProperties.deserialize(api_properties)
+        api_properties = CognitiveServicesAccountApiProperties.deserialize(api_properties)
         properties.api_properties = api_properties
     if custom_domain:
         properties.custom_sub_domain_name = custom_domain
-    params = Account(sku=sku, kind=kind, location=location,
-                     properties=properties, tags=tags)
+    params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,
+                                      properties=properties, tags=tags)
     if assign_identity:
-        params.identity = Identity(type=ResourceIdentityType.system_assigned)
+        params.identity = Identity(type=IdentityType.system_assigned)
 
     if storage is not None:
         params.properties.user_owned_storage = json.loads(storage)
@@ -126,7 +135,7 @@ def create(
     if encryption is not None:
         params.properties.encryption = json.loads(encryption)
 
-    return client.begin_create(resource_group_name, account_name, params)
+    return client.begin_create(resource_group_name, account_name, params).result()
 
 
 def update(client, resource_group_name, account_name, sku_name=None, custom_domain=None,
@@ -138,13 +147,13 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
 
     sku = Sku(name=sku_name)
 
-    properties = AccountProperties()
+    properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        api_properties = ApiProperties.deserialize(api_properties)
+        api_properties = CognitiveServicesAccountApiProperties.deserialize(api_properties)
         properties.api_properties = api_properties
     if custom_domain:
         properties.custom_sub_domain_name = custom_domain
-    params = Account(sku=sku, properties=properties, tags=tags)
+    params = CognitiveServicesAccount(sku=sku, properties=properties, tags=tags)
 
     if storage is not None:
         params.properties.user_owned_storage = json.loads(storage)
@@ -152,7 +161,7 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
     if encryption is not None:
         params.properties.encryption = json.loads(encryption)
 
-    return client.begin_update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params).result()
 
 
 def default_network_acls():
@@ -191,11 +200,11 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
             rules.ip_rules = []
         rules.ip_rules.append(IpRule(value=ip_address))
 
-    properties = AccountProperties()
+    properties = CognitiveServicesAccountProperties()
     properties.network_acls = rules
-    params = Account(properties=properties)
+    params = CognitiveServicesAccount(properties=properties)
 
-    return client.begin_update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params).result()
 
 
 def remove_network_rule(client, resource_group_name, account_name, ip_address=None, subnet=None,
@@ -212,24 +221,24 @@ def remove_network_rule(client, resource_group_name, account_name, ip_address=No
     if ip_address:
         rules.ip_rules = [x for x in rules.ip_rules if x.value != ip_address]
 
-    properties = AccountProperties()
+    properties = CognitiveServicesAccountProperties()
     properties.network_acls = rules
-    params = Account(properties=properties)
+    params = CognitiveServicesAccount(properties=properties)
 
-    return client.begin_update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params).result()
 
 
 def identity_assign(client, resource_group_name, account_name):
-    params = Account()
-    params.identity = Identity(type=ResourceIdentityType.system_assigned)
+    params = CognitiveServicesAccount()
+    params.identity = Identity(type=IdentityType.system_assigned)
     sa = client.begin_update(resource_group_name, account_name, params).result()
     return sa.identity if sa.identity else {}
 
 
 def identity_remove(client, resource_group_name, account_name):
-    params = Account()
-    params.identity = Identity(type=ResourceIdentityType.none)
-    client.begin_update(resource_group_name, account_name, params)
+    params = CognitiveServicesAccount()
+    params.identity = Identity(type=IdentityType.none)
+    client.begin_update(resource_group_name, account_name, params).wait()
 
 
 def identity_show(client, resource_group_name, account_name):
