@@ -39,7 +39,7 @@ class MockCmd(object):
 
     def get_models(self, *attr_args, **kwargs):
         return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAPIServerAccessProfile',
-                       operation_group='managed_clusters')
+                       mod='models', operation_group='managed_clusters')
 
 
 class TestPopulateApiServerAccessProfile(unittest.TestCase):

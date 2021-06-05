@@ -39,7 +39,7 @@ class MockCmd(object):
 
     def get_models(self, *attr_args, **kwargs):
         return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterPropertiesAutoScalerProfile',
-                       operation_group='managed_clusters')
+                       mod='models', operation_group='managed_clusters')
 
 
 class TestValidateIPRanges(unittest.TestCase):
@@ -97,6 +97,8 @@ class TestValidateIPRanges(unittest.TestCase):
 
 
 class TestClusterAutoscalerParamsValidators(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
 
     def test_empty_key_empty_value(self):
         cluster_autoscaler_profile = ["="]
