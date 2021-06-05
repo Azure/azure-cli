@@ -95,9 +95,9 @@ class TestValidateIPRanges(unittest.TestCase):
 
 
 class TestClusterAutoscalerParamsValidators(unittest.TestCase):
-    cmd = mock.MagicMock()
 
     def test_empty_key_empty_value(self):
+        cmd = mock.MagicMock()
         cluster_autoscaler_profile = ["="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "Empty key specified for cluster-autoscaler-profile"
@@ -107,12 +107,14 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
     def test_non_empty_key_empty_value(self):
+        cmd = mock.MagicMock()
         cluster_autoscaler_profile = ["scan-interval="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
 
         validators.validate_cluster_autoscaler_profile(cmd, namespace)
 
     def test_two_empty_keys_empty_value(self):
+        cmd = mock.MagicMock()
         cluster_autoscaler_profile = ["=", "="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "Empty key specified for cluster-autoscaler-profile"
@@ -122,6 +124,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
     def test_one_empty_key_in_pair_one_non_empty(self):
+        cmd = mock.MagicMock()
         cluster_autoscaler_profile = ["scan-interval=20s", "="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "Empty key specified for cluster-autoscaler-profile"
@@ -131,6 +134,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
     def test_invalid_key(self):
+        cmd = mock.MagicMock()
         cluster_autoscaler_profile = ["bad-key=val"]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
         err = "'bad-key' is an invalid key for cluster-autoscaler-profile"
@@ -140,6 +144,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         self.assertIn(err, str(cm.exception),)
 
     def test_valid_parameters(self):
+        cmd = mock.MagicMock()
         cluster_autoscaler_profile = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
 

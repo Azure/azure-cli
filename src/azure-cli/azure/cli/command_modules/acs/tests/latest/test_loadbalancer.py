@@ -44,9 +44,9 @@ class MockCmd(object):
         return get_sdk(self.cli_ctx, *attr_args, **kwargs)
 
 class TestLoadBalancer(unittest.TestCase):
-    cmd = mock.MagicMock()
 
     def test_configure_load_balancer_profile(self):
+        cmd = mock.MagicMock()
         managed_outbound_ip_count = 5
         outbound_ips = None
         outbound_ip_prefixes = None
