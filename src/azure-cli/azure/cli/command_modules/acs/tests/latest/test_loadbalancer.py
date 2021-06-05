@@ -18,31 +18,6 @@ from azure.mgmt.containerservice.v2021_03_01.models import ManagedClusterLoadBal
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
 
-class MockCLI(CLI):
-    def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
-                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
-        self.cloud = get_active_cloud(self)
-
-
-class MockLoader(object):
-    def __init__(self, ctx):
-        self.ctx = ctx
-
-    def get_models(self, *attr_args, **_):
-        from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.ctx, *attr_args, mod='models')
-
-
-class MockCmd(object):
-    def __init__(self, ctx, arguments={}):
-        self.cli_ctx = ctx
-        self.loader = MockLoader(self.cli_ctx)
-        self.arguments = arguments
-
-    def get_models(self, *attr_args, **kwargs):
-        return get_sdk(self.cli_ctx, *attr_args, **kwargs)
-
 class TestLoadBalancer(unittest.TestCase):
 
     def test_configure_load_balancer_profile(self):
