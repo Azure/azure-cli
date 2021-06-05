@@ -15,7 +15,8 @@ def _populate_api_server_access_profile(cmd,
                                         enable_private_cluster=False, instance=None):
     if instance is None or instance.api_server_access_profile is None:
         ManagedClusterAPIServerAccessProfile = cmd.get_models('ManagedClusterAPIServerAccessProfile',
-                                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+                                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                              operation_group='managed_clusters')
         profile = ManagedClusterAPIServerAccessProfile()
     else:
         profile = instance.api_server_access_profile

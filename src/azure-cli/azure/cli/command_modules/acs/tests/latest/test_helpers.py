@@ -27,7 +27,8 @@ class MockLoader(object):
 
     def get_models(self, *attr_args, **_):
         from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAPIServerAccessProfile', mod='models')
+        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAPIServerAccessProfile',
+                       mod='models', operation_group='managed_clusters')
 
 
 class MockCmd(object):
@@ -37,7 +38,8 @@ class MockCmd(object):
         self.arguments = arguments
 
     def get_models(self, *attr_args, **kwargs):
-        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAPIServerAccessProfile')
+        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAPIServerAccessProfile',
+                       operation_group='managed_clusters')
 
 
 class TestPopulateApiServerAccessProfile(unittest.TestCase):
