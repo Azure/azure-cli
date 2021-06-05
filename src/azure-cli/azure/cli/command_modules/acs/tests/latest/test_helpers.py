@@ -41,21 +41,20 @@ class MockCmd(object):
 
 
 class TestPopulateApiServerAccessProfile(unittest.TestCase):
-    def setUp(self):
-        self.cli = MockCLI()
+    cmd = mock.MagicMock()
 
     def test_single_cidr_with_spaces(self):
         api_server_authorized_ip_ranges = "0.0.0.0/32 "
-        profile = helpers._populate_api_server_access_profile(MockCmd(self.cli), api_server_authorized_ip_ranges, enable_private_cluster=False)
+        profile = helpers._populate_api_server_access_profile(cmd, api_server_authorized_ip_ranges, enable_private_cluster=False)
         self.assertListEqual(profile.authorized_ip_ranges, ["0.0.0.0/32"])
 
     def test_multi_cidr_with_spaces(self):
         api_server_authorized_ip_ranges = " 0.0.0.0/32 , 129.1.1.1/32"
-        profile = helpers._populate_api_server_access_profile(MockCmd(self.cli), api_server_authorized_ip_ranges, enable_private_cluster=False)
+        profile = helpers._populate_api_server_access_profile(cmd, api_server_authorized_ip_ranges, enable_private_cluster=False)
         self.assertListEqual(profile.authorized_ip_ranges, ["0.0.0.0/32", "129.1.1.1/32"])
 
     def test_private_cluster(self):
-        profile = helpers._populate_api_server_access_profile(MockCmd(self.cli), None, enable_private_cluster=True)
+        profile = helpers._populate_api_server_access_profile(cmd, None, enable_private_cluster=True)
         self.assertListEqual(profile.authorized_ip_ranges, [])
         self.assertEqual(profile.enable_private_cluster, True)
 

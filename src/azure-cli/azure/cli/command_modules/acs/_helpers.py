@@ -6,6 +6,7 @@
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 # pylint: disable=no-name-in-module,import-error
 from knack.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
 
 
@@ -14,7 +15,7 @@ def _populate_api_server_access_profile(cmd,
                                         enable_private_cluster=False, instance=None):
     if instance is None or instance.api_server_access_profile is None:
         ManagedClusterAPIServerAccessProfile = cmd.get_models('ManagedClusterAPIServerAccessProfile',
-                                                              operation_group='managed_clusters')
+                                                              resource_type=ResourceType.MGMT_CONTAINERSERVICE)
         profile = ManagedClusterAPIServerAccessProfile()
     else:
         profile = instance.api_server_access_profile

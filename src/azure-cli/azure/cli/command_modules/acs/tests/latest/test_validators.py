@@ -95,8 +95,7 @@ class TestValidateIPRanges(unittest.TestCase):
 
 
 class TestClusterAutoscalerParamsValidators(unittest.TestCase):
-    def setUp(self):
-        self.cli = MockCLI()
+    cmd = mock.MagicMock()
 
     def test_empty_key_empty_value(self):
         cluster_autoscaler_profile = ["="]
@@ -104,14 +103,14 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
+            validators.validate_cluster_autoscaler_profile(cmd, namespace)
         self.assertEqual(str(cm.exception), err)
 
     def test_non_empty_key_empty_value(self):
         cluster_autoscaler_profile = ["scan-interval="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
 
-        validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
+        validators.validate_cluster_autoscaler_profile(cmd, namespace)
 
     def test_two_empty_keys_empty_value(self):
         cluster_autoscaler_profile = ["=", "="]
@@ -119,7 +118,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
+            validators.validate_cluster_autoscaler_profile(cmd, namespace)
         self.assertEqual(str(cm.exception), err)
 
     def test_one_empty_key_in_pair_one_non_empty(self):
@@ -128,7 +127,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
+            validators.validate_cluster_autoscaler_profile(cmd, namespace)
         self.assertEqual(str(cm.exception), err)
 
     def test_invalid_key(self):
@@ -137,14 +136,14 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         err = "'bad-key' is an invalid key for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
+            validators.validate_cluster_autoscaler_profile(cmd, namespace)
         self.assertIn(err, str(cm.exception),)
 
     def test_valid_parameters(self):
         cluster_autoscaler_profile = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
 
-        validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
+        validators.validate_cluster_autoscaler_profile(cmd, namespace)
 
 
 class Namespace:

@@ -13,6 +13,8 @@ from ipaddress import ip_network
 # pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
+from azure.cli.core.profiles import ResourceType
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -122,7 +124,7 @@ def _validate_cluster_autoscaler_key(cmd, key):
     if not key:
         raise CLIError('Empty key specified for cluster-autoscaler-profile')
     ManagedClusterPropertiesAutoScalerProfile = cmd.get_models('ManagedClusterPropertiesAutoScalerProfile',
-                                                               operation_group='managed_clusters')
+                                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE)
     valid_keys = list(k.replace("_", "-") for k, v in ManagedClusterPropertiesAutoScalerProfile._attribute_map.items())  # pylint: disable=protected-access
     if key not in valid_keys:
         raise CLIError("'{0}' is an invalid key for cluster-autoscaler-profile. "

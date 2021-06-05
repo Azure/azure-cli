@@ -42,7 +42,7 @@ def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, o
         return None
 
     ManagedClusterLoadBalancerProfile = cmd.get_models('ManagedClusterLoadBalancerProfile',
-                                                       operation_group='managed_clusters')
+                                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE)
     profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                            outbound_ports, idle_timeout, profile)
@@ -64,19 +64,22 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
         profile.outbound_ip_prefixes = None
         if managed_outbound_ip_count:
             ManagedClusterLoadBalancerProfileManagedOutboundIPs = cmd.get_models(
-                'ManagedClusterLoadBalancerProfileManagedOutboundIPs', operation_group='managed_clusters')
+                'ManagedClusterLoadBalancerProfileManagedOutboundIPs',
+                resource_type=ResourceType.MGMT_CONTAINERSERVICE)
             profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
                 count=managed_outbound_ip_count
             )
         if outbound_ip_resources:
             ManagedClusterLoadBalancerProfileOutboundIPs = cmd.get_models(
-                'ManagedClusterLoadBalancerProfileOutboundIPs', operation_group='managed_clusters')
+                'ManagedClusterLoadBalancerProfileOutboundIPs',
+                resource_type=ResourceType.MGMT_CONTAINERSERVICE)
             profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
                 public_ips=outbound_ip_resources
             )
         if outbound_ip_prefix_resources:
             ManagedClusterLoadBalancerProfileOutboundIPPrefixes = cmd.get_models(
-                'ManagedClusterLoadBalancerProfileOutboundIPPrefixes', operation_group='managed_clusters')
+                'ManagedClusterLoadBalancerProfileOutboundIPPrefixes',
+                resource_type=ResourceType.MGMT_CONTAINERSERVICE)
             profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
                 public_ip_prefixes=outbound_ip_prefix_resources
             )
