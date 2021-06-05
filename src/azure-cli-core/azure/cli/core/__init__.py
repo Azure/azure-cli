@@ -865,7 +865,7 @@ def get_default_cli():
     from azure.cli.core._help import AzCliHelp
     from azure.cli.core._output import AzOutputProducer
 
-    return AzCli(cli_name='az',
+    return AzCli(cli_name='mg',
                  config_dir=GLOBAL_CONFIG_DIR,
                  config_env_var_prefix=ENV_VAR_PREFIX,
                  commands_loader_cls=MainCommandsLoader,
