@@ -57,7 +57,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         :param tenant_id:
         :param client_id::param kwargs:
         """
-        self.authority = 'https://login.microsoftonline.com'
+        self.authority = authority
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         # self._cred_cache = AdalCredentialCache()
