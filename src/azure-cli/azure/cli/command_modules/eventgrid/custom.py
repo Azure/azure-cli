@@ -1624,9 +1624,10 @@ def _warn_if_manual_handshake_needed(endpoint_type, endpoint):
        "eventgridextension" not in endpoint.lower() and \
        "logic.azure" not in endpoint.lower():
 
-        logger.warning('If you are creating an event subscription from a topic that has “Azure” as the value for its “kind” property, '
-                       'you must validate your webhook endpoint by following the steps described in '
+        logger.warning('If you are creating an event subscription from a topic that has “Azure” as the value for its '
+                       '“kind” property, you must validate your webhook endpoint by following the steps described in '
                        'https://aka.ms/eg-webhook-endpoint-validation.')
+
 
 def _get_sku(sku_name):
     if sku_name.lower() == 'basic':
