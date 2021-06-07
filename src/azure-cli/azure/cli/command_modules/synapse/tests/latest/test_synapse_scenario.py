@@ -637,7 +637,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse workspace firewall-rule show --name {ruleName} --workspace-name {workspace} '
                  '--resource-group {rg}', expect_failure=True)
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_job(self, resource_group):
         self.kwargs.update({
@@ -650,17 +650,20 @@ class SynapseScenarioTests(ScenarioTest):
                 'abfss://testfilesystem@adlsgen2account.dfs.core.windows.net/samples/java/wordcount/shakespeare.txt',
                 'abfss://testfilesystem@adlsgen2account.dfs.core.windows.net/samples/java/wordcount/result/'],
             'executors': 2,
-            'executor-size': 'Medium'
+            'executor-size': 'Medium',
+            'configuration': '{\\"spark.dynamicAllocation.maxExecutors\\":\\"18\\"}'
         })
 
         # create a spark batch job
         batch_job = self.cmd('az synapse spark job submit --name {job} --workspace-name {workspace} '
                              '--spark-pool-name {spark-pool} --main-definition-file {main-definition-file} '
                              '--main-class-name {main-class-name} --arguments {arguments} '
-                             '--executors {executors} --executor-size {executor-size}',
+                             '--executors {executors} --executor-size {executor-size} --configuration {configuration} ',
                              checks=[self.check('name', self.kwargs['job']),
                                      self.check('jobType', 'SparkBatch'),
-                                     self.check('state', 'not_started')
+                                     self.check('state', 'not_started'),
+                                     self.check('livyInfo.jobCreationRequest.configuration',
+                                                        '{{\'spark.dynamicAllocation.maxExecutors\': \'18\'}}')
                                      ]).get_output_in_json()
 
         self.kwargs['batch-id'] = batch_job['id']
