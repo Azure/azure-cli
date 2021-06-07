@@ -28,7 +28,6 @@ from azure.mgmt.sql.models import (
     ElasticPoolLicenseType,
     SampleName,
     SecurityAlertPolicyState,
-    SecurityAlertPolicyEmailAccountAdmins,
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
@@ -940,8 +939,7 @@ def load_arguments(self, _):
         c.argument('email_account_admins',
                    arg_group=notification_arg_group,
                    options_list=['--email-account-admins'],
-                   help='Whether the alert is sent to the account administrators.',
-                   arg_type=get_enum_type(SecurityAlertPolicyEmailAccountAdmins))
+                   help='Whether the alert is sent to the account administrators.')
 
         # TODO: use server default
 

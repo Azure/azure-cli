@@ -2794,10 +2794,10 @@ def db_threat_detection_policy_update(
         instance.retention_days = retention_days
 
     if email_addresses:
-        instance.email_addresses = ";".join(email_addresses)
+        instance.email_addresses = email_addresses
 
     if disabled_alerts:
-        instance.disabled_alerts = ";".join(disabled_alerts)
+        instance.disabled_alerts = disabled_alerts
 
     if email_account_admins:
         instance.email_account_admins = email_account_admins

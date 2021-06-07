@@ -346,7 +346,7 @@ def load_command_table(self, _):
         g.command('disable', 'disable_recommendation')
 
     database_threat_detection_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseSecurityAlertPoliciesOperations.{}',
         client_factory=get_sql_database_threat_detection_policies_operations)
 
     with self.command_group('sql db threat-policy',
