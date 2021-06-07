@@ -1449,10 +1449,10 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update threat detection policy - enable
         disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-        disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
+        disabled_alerts_expected = ['Sql_Injection_Vulnerability','Access_Anomaly']
         email_addresses_input = 'test1@example.com test2@example.com'
-        email_addresses_expected = 'test1@example.com;test2@example.com'
-        email_account_admins = 'Enabled'
+        email_addresses_expected = ['test1@example.com','test2@example.com']
+        email_account_admins = True
 
         self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint {}'
@@ -5450,10 +5450,10 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
         # enable ADS - (required to use data classification)
         disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-        disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
+        disabled_alerts_expected = ['Sql_Injection_Vulnerability','Access_Anomaly']
         email_addresses_input = 'test1@example.com test2@example.com'
-        email_addresses_expected = 'test1@example.com;test2@example.com'
-        email_account_admins = 'Enabled'
+        email_addresses_expected = ['test1@example.com','test2@example.com']
+        email_account_admins = True
         state_enabled = 'Enabled'
         retention_days = 30
 
