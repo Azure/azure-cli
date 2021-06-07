@@ -637,7 +637,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse workspace firewall-rule show --name {ruleName} --workspace-name {workspace} '
                  '--resource-group {rg}', expect_failure=True)
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_job(self, resource_group):
         self.kwargs.update({
