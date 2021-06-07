@@ -25,7 +25,7 @@ from azure.mgmt.sql.models import (
     IdentityType,
     PartnerInfo,
     PerformanceLevelUnit,
-    ReplicationRole,
+    FailoverGroupReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
     SensitivityLabel,
@@ -1135,7 +1135,7 @@ def db_failover(
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
     # If a replica is secondary, then it has exactly 1 link (to its primary).
-    primary_link = next((link for link in links if link.partner_role == ReplicationRole.primary), None)
+    primary_link = next((link for link in links if link.partner_role == FailoverGroupReplicationRole.primary), None)
     if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.
         return
