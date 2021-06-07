@@ -273,9 +273,9 @@ class TestLogProfileScenarios(ScenarioTest):
         self.kwargs.update({
             'table_name': 'Syslog'
         })
-        # Disable checks due to service issue: https://github.com/Azure/azure-rest-api-specs/issues/12407
+
         self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30 --debug", checks=[
-            # self.check('retentionInDays', 30)
+            self.check('retentionInDays', 30)
         ])
 
         self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
