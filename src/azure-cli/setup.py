@@ -196,7 +196,9 @@ setup(
         ],
         'azure.cli.command_modules.rdbms': [
             'randomname/adjectives.txt',
-            'randomname/nouns.txt'
+            'randomname/nouns.txt',
+            'templates/mysql_githubaction_template.yaml',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass
