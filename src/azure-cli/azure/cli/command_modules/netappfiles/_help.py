@@ -821,6 +821,8 @@ parameters:
     short-summary: Backup Policy Enforced
   - name: --vault-id
     short-summary: Vault Resource ID
+  - name: --snapshot-policy-id
+    short-summary: Snapshot Policy ResourceId
 examples:
   - name: Update an ANF volume
     text: >
@@ -862,6 +864,8 @@ parameters:
     short-summary: The name of the ANF volume
   - name: --backup-name -b
     short-summary: The name of the ANF backup
+  - name: --use-existing-snapshot
+    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups
 examples:
   - name: Returns the created ANF backup
     text: >
