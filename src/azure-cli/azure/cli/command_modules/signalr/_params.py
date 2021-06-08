@@ -64,6 +64,9 @@ def load_arguments(self, _):
     with self.argument_context('signalr key renew') as c:
         c.argument('key_type', help='The name of access key to regenerate', choices=SIGNALR_KEY_TYPE)
 
+    with self.argument_context('signalr key list') as c:
+        c.argument('signalr_name', id_part=None)
+
     with self.argument_context('signalr cors add') as c:
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
@@ -73,6 +76,9 @@ def load_arguments(self, _):
     with self.argument_context('signalr cors update') as c:
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
+    with self.argument_context('signalr cors list') as c:
+        c.argument('signalr_name', id_part=None)
+
     # Network Rule
     with self.argument_context('signalr network-rule update') as c:
         c.argument('connection_name', nargs='*', help='Space-separeted list of private endpoint connection name.', required=False, arg_group='Private Endpoint Connection')
@@ -80,9 +86,15 @@ def load_arguments(self, _):
         c.argument('allow', nargs='*', help='The allowed virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI', type=SignalRRequestType, required=False)
         c.argument('deny', nargs='*', help='The denied virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI', type=SignalRRequestType, required=False)
 
+    with self.argument_context('signalr network-rule list') as c:
+        c.argument('signalr_name', id_part=None)
+
     # Upstream Settings
     with self.argument_context('signalr upstream update') as c:
         c.argument('template', action=UpstreamTemplateAddAction, nargs='+', help='Template item for upstream settings. Use key=value pattern to set properties. Supported keys are "url-template", "hub-pattern", "event-pattern", "category-pattern".')
+
+    with self.argument_context('signalr upstream list') as c:
+        c.argument('signalr_name', id_part=None)
 
     # Managed Identity
     with self.argument_context('signalr identity assign') as c:
