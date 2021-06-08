@@ -103,7 +103,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=2.0.0',
+    'azure-mgmt-netapp~=3.0.0',
     'azure-mgmt-network~=19.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=1.0.0',
@@ -121,7 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
-    'azure-mgmt-signalr~=0.4.0',
+    'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.28.0',
     'azure-mgmt-storage~=18.0.0',
@@ -196,7 +196,9 @@ setup(
         ],
         'azure.cli.command_modules.rdbms': [
             'randomname/adjectives.txt',
-            'randomname/nouns.txt'
+            'randomname/nouns.txt',
+            'templates/mysql_githubaction_template.yaml',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass
