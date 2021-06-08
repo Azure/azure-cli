@@ -295,7 +295,7 @@ class Cloud:  # pylint: disable=too-few-public-methods
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
-    'AzureCloud',
+    'PublicCloud',
     endpoints=CloudEndpoints(
         management='https://management.core.windows.net/',
         resource_manager='https://management.azure.com/',
@@ -332,7 +332,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         attestation_endpoint='.attest.azure.net'))
 
 AZURE_CHINA_CLOUD = Cloud(
-    'AzureChinaCloud',
+    'ChinaCloud',
     endpoints=CloudEndpoints(
         management='https://management.core.chinacloudapi.cn/',
         resource_manager='https://management.chinacloudapi.cn',
@@ -363,7 +363,7 @@ AZURE_CHINA_CLOUD = Cloud(
         synapse_analytics_endpoint='.dev.azuresynapse.azure.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
-    'AzureUSGovernment',
+    'USGovernment',
     endpoints=CloudEndpoints(
         management='https://management.core.usgovcloudapi.net/',
         resource_manager='https://management.usgovcloudapi.net/',
@@ -395,7 +395,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
 
 AZURE_GERMAN_CLOUD = Cloud(
-    'AzureGermanCloud',
+    'GermanCloud',
     endpoints=CloudEndpoints(
         management='https://management.core.cloudapi.de/',
         resource_manager='https://management.microsoftazure.de',
