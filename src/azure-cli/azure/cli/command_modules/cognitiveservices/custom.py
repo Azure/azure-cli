@@ -116,7 +116,7 @@ def create(
     if custom_domain:
         properties.custom_sub_domain_name = custom_domain
     params = Account(sku=sku, kind=kind, location=location,
-                                      properties=properties, tags=tags)
+                     properties=properties, tags=tags)
     if assign_identity:
         params.identity = Identity(type=ResourceIdentityType.system_assigned)
 
@@ -222,14 +222,14 @@ def remove_network_rule(client, resource_group_name, account_name, ip_address=No
 def identity_assign(client, resource_group_name, account_name):
     params = Account()
     params.identity = Identity(type=ResourceIdentityType.system_assigned)
-    sa = client.begin_update(resource_group_name, account_name, params)
+    sa = client.begin_update(resource_group_name, account_name, params).result()
     return sa.identity if sa.identity else {}
 
 
 def identity_remove(client, resource_group_name, account_name):
     params = Account()
     params.identity = Identity(type=ResourceIdentityType.none)
-    client.update(resource_group_name, account_name, params)
+    client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_show(client, resource_group_name, account_name):
