@@ -2153,6 +2153,56 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('provisioningState', 'Succeeded'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_create_vm_user_data')
+    def test_vm_create_user_data(self, resource_group):
+
+        from azure.cli.core.util import b64encode
+
+        user_data = '#cloud-config\nhostname: myVMhostname'
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        user_data_file = os.path.join(curr_dir, 'user_data.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'username': 'ubuntu',
+            'loc': 'westus',
+            'image': 'UbuntuLTS',
+            'auth': 'ssh',
+            'vm': 'vm-name',
+            'user_data': user_data,
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'user_data_file': user_data_file
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --user-data \'{user_data}\' --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', None),
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --user-data @"{user_data_file}"')
+
+        with open(user_data_file) as file_obj:
+            file_content = file_obj.read()
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', b64encode(file_content)),
+        ])
+
+        # Clear the existing data
+        self.cmd('vm update -g {rg} -n {vm} --user-data ""')
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', None),
+        ])
+
 
 # region VMSS Tests
 
@@ -2907,6 +2957,52 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('provisioningState', 'Succeeded'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_user_data')
+    def test_vmss_create_user_data(self):
+
+        from azure.cli.core.util import b64encode
+
+        user_data = '#cloud-config\nhostname: myVMhostname'
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        user_data_file = os.path.join(curr_dir, 'user_data.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'vmss': 'vmss-custom-data',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'user_data': user_data,
+            'user_data_file': user_data_file
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}" --user-data "{user_data}"')
+
+        self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', None),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --user-data @"{user_data_file}"')
+
+        with open(user_data_file) as file_obj:
+            file_content = file_obj.read()
+
+        self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', b64encode(file_content)),
+        ])
+
+        # Clear the existing data
+        self.cmd('vmss update -g {rg} -n {vmss} --user-data ""')
+
+        self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', None),
+        ])
 
 
 class VMSSNicScenarioTest(ScenarioTest):
