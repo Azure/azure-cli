@@ -434,7 +434,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show-deleted -n {kv}', checks=self.check('type', 'Microsoft.KeyVault/deletedVaults'))
         self.cmd('keyvault purge -n {kv}')
         # ' will be parsed by shlex, so need escaping
-        self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
+        self.cmd(r"az keyvault list-deleted --resource-type vault --query [?name==\'{kv}\']", checks=self.is_empty())
 
         # test create keyvault further
         self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} '  # enableSoftDelete is True if omitted
