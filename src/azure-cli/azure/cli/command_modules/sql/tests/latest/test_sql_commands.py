@@ -1028,64 +1028,10 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
         print('Test is started...\n')
 
         self.kwargs.update({
-            'loc': 'westeurope',
-            'vnet_name': 'vcCliTestVnetAad',
-            'subnet_name': 'vcCliTestSubnetAad',
-            'route_table_name': 'vcCliTestRouteTableAad',
-            'route_name_internet': 'vcCliTestRouteInternet',
-            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
-            'admin_login': 'admin123',
-            'admin_password': 'SecretPassword123',
-            'license_type': 'LicenseIncluded',
-            'v_cores': 8,
-            'storage_size_in_gb': '32',
-            'edition': 'GeneralPurpose',
-            'family': 'Gen5',
-            'collation': "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override': "Proxy",
-            'rg': 'DejanDuVnetRG'
-        })
-
-        # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {rg} -n {route_table_name} -l {loc}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
-        print('Vnet is created...\n')
-
-        self.kwargs.update({
-            'subnet_id': subnet['id']
-        })
-
-        # create sql managed_instance
-        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
-                 checks=[
-                     self.check('name', '{managed_instance_name}'),
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('administratorLogin', '{admin_login}'),
-                     self.check('vCores', '{v_cores}'),
-                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                     self.check('licenseType', '{license_type}'),
-                     self.check('sku.tier', '{edition}'),
-                     self.check('sku.family', '{family}'),
-                     self.check('sku.capacity', '{v_cores}'),
-                     self.check('identity', None),
-                     self.check('collation', '{collation}'),
-                     self.check('proxyOverride', '{proxy_override}'),
-                     self.check('publicDataEndpointEnabled', 'True')])
-
-        print('Managed instance is created...\n')
-
-        self.kwargs.update({
-            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
-            'user': 'DSEngAll',
+            'oid': '0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c',
+            'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
+            'managed_instance_name':'t48-gp-neu',
+            'rg':'clperftesting_sneu_rg'
         })
 
         print('Arguments are updated with login and sid data')
@@ -4848,66 +4794,12 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
         print('Test is started...\n')
 
         self.kwargs.update({
-            'loc': 'westeurope',
-            'vnet_name': 'vcCliTestVnetAad',
-            'subnet_name': 'vcCliTestSubnetAad',
-            'route_table_name': 'vcCliTestRouteTableAad',
-            'route_name_internet': 'vcCliTestRouteInternet',
-            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
-            'admin_login': 'admin123',
-            'admin_password': 'SecretPassword123',
-            'license_type': 'LicenseIncluded',
-            'v_cores': 8,
-            'storage_size_in_gb': '32',
-            'edition': 'GeneralPurpose',
-            'family': 'Gen5',
-            'collation': "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override': "Proxy",
-            'rg': 'DejanDuVnetRG'
-        })
-
-        # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {rg} -n {route_table_name} -l {loc}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
-        print('Vnet is created...\n')
-
-        self.kwargs.update({
-            'subnet_id': subnet['id']
-        })
-
-        # create sql managed_instance
-        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
-                 checks=[
-                     self.check('name', '{managed_instance_name}'),
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('administratorLogin', '{admin_login}'),
-                     self.check('vCores', '{v_cores}'),
-                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                     self.check('licenseType', '{license_type}'),
-                     self.check('sku.tier', '{edition}'),
-                     self.check('sku.family', '{family}'),
-                     self.check('sku.capacity', '{v_cores}'),
-                     self.check('identity', None),
-                     self.check('collation', '{collation}'),
-                     self.check('proxyOverride', '{proxy_override}'),
-                     self.check('publicDataEndpointEnabled', 'True')])
-
-        print('Managed instance is created...\n')
-
-        self.kwargs.update({
-            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
-            'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
-            'user': 'DSEngAll',
-            'user2': 'TestUser'
+            'oid': '0ef94dba-c9bc-40d3-9ec2-6db192f3ce0c',
+            'oid2': 'b599ec4b-9e8e-4649-906f-d2685a6105fa',
+            'user': 'OneboxAuthUser1@cltestaad.ccsctp.net',
+            'user2': 'OneboxAuthUser2@cltestaad.ccsctp.net',
+            'managed_instance_name':'t48-gp-neu',
+            'rg':'clperftesting_sneu_rg'
         })
 
         print('Arguments are updated with login and sid data')
