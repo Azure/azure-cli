@@ -6,6 +6,9 @@
 import json
 import os
 import re
+
+from azure.cli.core.commands.arm import ArmTemplateBuilder
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -25,10 +28,10 @@ def get_target_network_api(cli_ctx):
         necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
         (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType
+    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
     version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     if cli_ctx.cloud.profile == 'latest':
-        version = '2018-01-01'
+        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
     return version
 
 
@@ -71,7 +74,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
@@ -93,7 +96,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
         return True
-    except CloudError:
+    except HttpResponseError:
         return False
 
 
@@ -103,7 +106,7 @@ def create_keyvault_data_plane_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
 
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
@@ -352,3 +355,10 @@ def update_disk_sku_info(info_dict, skus):
             except ValueError:
                 raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
             _update(info_dict, lun, value)
+
+
+class ArmTemplateBuilder20190401(ArmTemplateBuilder):
+
+    def __init__(self):
+        super().__init__()
+        self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'

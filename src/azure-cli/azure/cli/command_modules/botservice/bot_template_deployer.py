@@ -46,21 +46,18 @@ class BotTemplateDeployer:
 
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
 
         resource_mgmt_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-            deployment = Deployment(properties=properties)
-            deployment_poller = resource_mgmt_client.create_or_update(resource_group_name, deployment_name, deployment)
-        else:
-            deployment_poller = resource_mgmt_client.create_or_update(resource_group_name, deployment_name, properties)
+        deployment_poller = resource_mgmt_client.begin_create_or_update(resource_group_name, deployment_name,
+                                                                        deployment)
 
         return LongRunningOperation(cmd.cli_ctx, 'Deploying ARM Tempalte')(deployment_poller)
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
-                   location, sku_name, language, bot_template_type):
+                   location, sku_name, language, bot_template_type, cmek_key_vault_url=None):
         kind = 'sdk' if kind == 'webapp' else kind
         (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(language,
                                                                                     bot_template_type)
@@ -94,6 +91,10 @@ class BotTemplateDeployer:
         }
         if description:
             paramsdict['description'] = description
+
+        if cmek_key_vault_url is not None:
+            paramsdict['cmekKeyVaultUrl'] = cmek_key_vault_url
+            paramsdict['isCmekEnabled'] = True
 
         params = {k: {'value': v} for k, v in paramsdict.items()}
 

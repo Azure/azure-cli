@@ -72,7 +72,7 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource, always_
     target_monitor_client = cf_monitor(cmd.cli_ctx, subscription_id=parse_resource_id(target_resource)['subscription'])
     updated_metrics_alert_rules = []
     action_group_mapping = {}
-    ErrorResponseException = cmd.get_models('ErrorResponseException', operation_group='metric_alerts')
+    from azure.core.exceptions import HttpResponseError
     for alert_rule in _gen_metrics_alert_rules_clone_list(source_monitor_client, source_resource, target_resource):
         if always_clone or not same_sub:
             alert_rule = _clone_and_replace_action_group(source_monitor_client,
@@ -89,8 +89,8 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource, always_
                 alert_rule = _add_into_existing_scopes(source_monitor_client,
                                                        alert_rule,
                                                        target_resource)
-            except ErrorResponseException as ex:  # Create new alert rule
-                if ex.response.status_code == 400:
+            except HttpResponseError as ex:  # Create new alert rule
+                if ex.status_code == 400:
                     alert_rule = _clone_alert_rule(target_monitor_client,
                                                    alert_rule,
                                                    target_resource)

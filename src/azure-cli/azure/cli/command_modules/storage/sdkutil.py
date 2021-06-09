@@ -25,9 +25,9 @@ def get_table_data_type(cli_ctx, module_name, *type_names):
 
 def get_blob_service_by_type(cli_ctx, blob_type):
     type_to_service = {
-        'block': lambda ctx: get_sdk(ctx, ResourceType.DATA_STORAGE, 'BlockBlobService', mod='blob'),
-        'page': lambda ctx: get_sdk(ctx, ResourceType.DATA_STORAGE, 'PageBlobService', mod='blob'),
-        'append': lambda ctx: get_sdk(ctx, ResourceType.DATA_STORAGE, 'AppendBlobService', mod='blob')
+        'block': lambda ctx: get_sdk(ctx, ResourceType.DATA_STORAGE, 'BlockBlobService', mod='blob', checked=False),
+        'page': lambda ctx: get_sdk(ctx, ResourceType.DATA_STORAGE, 'PageBlobService', mod='blob', checked=False),
+        'append': lambda ctx: get_sdk(ctx, ResourceType.DATA_STORAGE, 'AppendBlobService', mod='blob', checked=False)
     }
 
     try:

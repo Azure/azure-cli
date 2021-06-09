@@ -53,7 +53,7 @@ examples:
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
-        --hyper-v --sku P3V3
+        --hyper-v --sku P1V3
   - name: Create an app service plan for app service environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
@@ -144,6 +144,10 @@ examples:
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureCloud
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -154,6 +158,8 @@ examples:
     text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
   - name: Remove Access Restriction named internal_agents from the scm site.
     text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+  - name: Remove Access Restriction with service tag AzureFrontDoor.Backend from the main site.
+    text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --service-tag AzureFrontDoor.Backend
 """
 
 helps['functionapp config access-restriction set'] = """
@@ -352,8 +358,8 @@ helps['functionapp config ssl create'] = """
 type: command
 short-summary: Create a Managed Certificate for a hostname in a function app.
 examples:
-  - name: Create a Managed Certificate for $fqdn.
-    text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname $fqdn
+  - name: Create a Managed Certificate for cname.mycustomdomain.com.
+    text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
 """
 
 helps['functionapp cors'] = """
@@ -912,7 +918,9 @@ examples:
   - name: Add a regional virtual network integration to a functionapp
     text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a functionapp using vnet resource id
-    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Network/virtualNetworks/[virtual network name]' --subnet MySubnetName -s [slot]
+    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnetName -s [slot]
+  - name: Add a regional virtual network integration to a functionapp using subnet resource id
+    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName' -s [slot]
 """
 
 helps['functionapp vnet-integration list'] = """
@@ -929,6 +937,16 @@ short-summary: remove a regional virtual network integration from functionapp
 examples:
   - name: remove a regional virtual network integration from functionapp
     text: az functionapp vnet-integration remove -g MyResourceGroup -n MyFunctionapp -s [slot]
+"""
+
+helps['functionapp deploy'] = """
+    type: command
+    short-summary: Deploys a provided artifact to Azure functionapp.
+    examples:
+    - name: Deploy a war file asynchronously.
+      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+    - name: Deploy a static text file to wwwroot/staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
 
 helps['webapp'] = """
@@ -1003,6 +1021,10 @@ examples:
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureCloud
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
+  - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
 """
 
 helps['webapp config access-restriction remove'] = """
@@ -1013,6 +1035,8 @@ examples:
     text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
   - name: Remove Access Restriction named internal_agents from the scm site.
     text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+  - name: Remove Access Restriction with service tag AzureFrontDoor.Backend from the main site.
+    text: az webapp config access-restriction remove -g ResourceGroup -n AppName --service-tag AzureFrontDoor.Backend
 """
 
 helps['webapp config access-restriction set'] = """
@@ -1068,7 +1092,7 @@ parameters:
   - name: --settings
     short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
   - name: --slot-settings
-    short-summary: Space-separated slot appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """
@@ -1188,7 +1212,7 @@ type: command
 short-summary: Bind a hostname to a web app.
 examples:
   - name: Bind a hostname to a web app. (autogenerated)
-    text: az webapp config hostname add --hostname $fqdn --resource-group MyResourceGroup --webapp-name MyWebapp
+    text: az webapp config hostname add --hostname cname.mycustomdomain.com --resource-group MyResourceGroup --webapp-name MyWebapp
     crafted: true
 """
 
@@ -1320,11 +1344,11 @@ examples:
 
 helps['webapp config ssl import'] = """
 type: command
-short-summary: Import an SSL certificate to a web app from Key Vault.
+short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
@@ -1332,8 +1356,8 @@ helps['webapp config ssl create'] = """
 type: command
 short-summary: Create a Managed Certificate for a hostname in a webapp app.
 examples:
-  - name: Create a Managed Certificate for $fqdn.
-    text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname $fqdn
+  - name: Create a Managed Certificate for cname.mycustomdomain.com.
+    text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
 """
 
 helps['webapp config storage-account'] = """
@@ -1434,6 +1458,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
+  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
+  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
@@ -1448,7 +1478,7 @@ examples:
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
   - name: create a WebApp using shared App Service Plan that is in a different resource group.
     text: >
-        AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyResourceGroup --query "id" --out tsv)
+        AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyASPRG --query "id" --out tsv)
         az webapp create -g MyResourceGroup -p "$AppServicePlanID" -n MyUniqueAppName
 """
 
@@ -1815,7 +1845,6 @@ examples:
 helps['webapp log tail'] = """
 type: command
 short-summary: Start live log tracing for a web app.
-long-summary: This command may not work with web apps running on Linux.
 """
 
 helps['webapp log deployment'] = """
@@ -1951,22 +1980,28 @@ short-summary: >
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
-        az webapp up -n MyUniqueAppName --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+        az webapp up --dryrun
+  - name: Create a web app with the default configuration, by running the command from the folder where the code to be deployed exists.
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
-  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
+        az webapp up
+  - name: Create a web app with a specified name
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
-  - name: Deploy new code to an app that was originally created using the same command
+        az webapp up -n MyUniqueAppName
+  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using '|' delimiter
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
+        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|8"
+  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using ':' delimiter
+    text: >
+        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:8"
+  - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
+    text: >
+        az webapp up -l locationName
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
-        az webapp up -n MyUniqueAppName --logs
+        az webapp up --logs
   - name: Create a web app and deploy as a static HTML app.
     text: >
-        az webapp up -n MyUniqueAppName --html
+        az webapp up --html
 """
 
 helps['webapp update'] = """
@@ -1996,7 +2031,9 @@ examples:
   - name: Add a regional virtual network integration to a webapp
     text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a webapp using vnet resource id
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Network/virtualNetworks/[virtual network name]' --subnet MySubnetName -s [slot]
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnetName -s [slot]
+  - name: Add a regional virtual network integration to a webapp using subnet resource id
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName' -s [slot]
 """
 
 helps['webapp vnet-integration list'] = """
@@ -2145,7 +2182,7 @@ helps['appservice ase create'] = """
     type: command
     short-summary: Create app service environment.
     examples:
-    - name: Create Resource Group, vNet and app service environment with default values.
+    - name: Create Resource Group, vNet and app service environment v2 with default values.
       text: |
           az group create -g MyResourceGroup --location westeurope
 
@@ -2154,26 +2191,53 @@ helps['appservice ase create'] = """
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet
-    - name: Create External app service environments with large front-ends and scale factor of 10 in existing resource group and vNet.
+    - name: Create External app service environments v2 with large front-ends and scale factor of 10 in existing resource group and vNet.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --front-end-sku I3 --front-end-scale-factor 10 \\
             --virtual-ip-type External
-    - name: Create vNet and app service environment, but do not create network security group and route table in existing resource group.
+    - name: Create vNet and app service environment v2, but do not create network security group and route table in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --ignore-network-security-group --ignore-route-table
-    - name: Create vNet and app service environment in a smaller than recommended subnet in existing resource group.
+    - name: Create vNet and app service environment v2 in a smaller than recommended subnet in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/26
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --ignore-subnet-size-validation
+    - name: Create Resource Group, vNet and app service environment v3 with default values.
+      text: |
+          az group create -g ASEv3ResourceGroup --location westeurope
+
+          az network vnet create -g ASEv3ResourceGroup -n MyASEv3VirtualNetwork \\
+            --address-prefixes 10.0.0.0/16 --subnet-name Inbound --subnet-prefixes 10.0.0.0/24
+
+          az network vnet subnet create -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
+            --name Outbound --address-prefixes 10.0.1.0/24
+
+          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Outbound --kind asev3
 """
+
+helps['appservice ase create-inbound-services'] = """
+    type: command
+    short-summary: Create the inbound services needed in preview for ASEv3 (private endpoint and DNS) or Private DNS Zone for Internal ASEv2.
+    examples:
+    - name: Create private endpoint, Private DNS Zone, A records and ensure subnet network policy.
+      text: |
+          az appservice ase create-inbound-services -n MyASEName -g ASEResourceGroup \\
+            --vnet-name MyASEVirtualNetwork --subnet MyAseSubnet
+    - name: Create private endpoint and ensure subnet network policy (ASEv3), but do not create DNS Zone and records.
+      text: |
+          az appservice ase create-inbound-services -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Inbound --skip-dns
+"""
+
 
 helps['appservice ase update'] = """
     type: command
@@ -2229,12 +2293,12 @@ helps['staticwebapp list'] = """
       text: az staticwebapp list
 """
 
-helps['staticwebapp browse'] = """
+helps['staticwebapp show'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
     - name: Show static app in a subscription.
-      text: az staticwebapp browse -n MyStaticAppName
+      text: az staticwebapp show -n MyStaticAppName
 """
 
 helps['staticwebapp create'] = """
@@ -2243,7 +2307,18 @@ helps['staticwebapp create'] = """
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
-       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master -t MyAccessToken
+    - name: Create static app in a subscription, retrieving token interactively
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+"""
+
+helps['staticwebapp update'] = """
+    type: command
+    short-summary: Update a static app. Return the app updated.
+    examples:
+    - name: Update static app to standard sku.
+      text: az staticwebapp update -n MyStaticAppName --sku Standard
 """
 
 helps['staticwebapp disconnect'] = """
@@ -2260,6 +2335,8 @@ helps['staticwebapp reconnect'] = """
     examples:
     - name: Connect a repo and branch to static app.
       text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+    - name: Connect a repo and branch to static app, retrieving token interactively
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --login-with-github
 """
 
 helps['staticwebapp delete'] = """
@@ -2386,4 +2463,14 @@ helps['staticwebapp users update'] = """
     examples:
     - name: Updates a user entry with the listed roles.
       text: az staticwebapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
+"""
+
+helps['webapp deploy'] = """
+    type: command
+    short-summary: Deploys a provided artifact to Azure Web Apps.
+    examples:
+    - name: Deploy a war file asynchronously.
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+    - name: Deploy a static text file to wwwroot/staticfiles/test.txt
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """

@@ -36,6 +36,7 @@ from msrest.exceptions import HttpOperationError
 """
 
 track2_header = copyright_header + b"""import datetime
+import msrest
 import msrest.serialization
 from typing import Dict, List, Optional, Union
 from msrest.exceptions import HttpOperationError
@@ -96,11 +97,6 @@ def solve_one_model(models_module, output_folder, track2=False):
     # Only sort based on the first element in the tuple
     models_classes.sort(key=lambda x: x[0])
 
-    py2_models_classes = [
-        (len_mro, path.replace("_py3.py", ".py"), None)
-        for len_mro, path, _ in models_classes
-    ]
-
     paged_models_classes = [
         (inspect.getfile(model_class), model_class) for model_name, model_class in vars(models_module).items()
         if model_name[0].isupper() and Paged in model_class.__mro__
@@ -118,7 +114,6 @@ def solve_one_model(models_module, output_folder, track2=False):
         enum_file_module_name = None
 
     write_model_file(Path(output_folder, "models_py3.py"), models_classes, track2=track2)
-    write_model_file(Path(output_folder, "models.py"), py2_models_classes, track2=track2)
     write_paging_file(Path(output_folder, "paged_models.py"), paged_models_classes)
     write_init(
         Path(output_folder, "__init__.py"),
@@ -232,7 +227,15 @@ if __name__ == "__main__":
 
     track2_packages = [
         'azure.mgmt.keyvault',
-        'azure.mgmt.storage'
+        'azure.mgmt.storage',
+        'azure.mgmt.compute',
+        'azure.mgmt.network',
+        'azure.mgmt.monitor',
+        'azure.mgmt.rdbms'
+        'azure.mgmt.loganalytics',
+        'azure.mgmt.web',
+        'azure.mgmt.cosmosdb',
+        'azure.mgmt.privatedns'
     ]
     prefix = sys.argv[1] if len(sys.argv) >= 2 else "azure.mgmt"
     for autorest_package in find_autorest_generated_folder(prefix):

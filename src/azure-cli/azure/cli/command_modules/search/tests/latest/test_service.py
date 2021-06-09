@@ -74,6 +74,50 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('partitionCount', '{partition_count}')])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_create_ip_rules(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'standard',
+            'name': self.create_random_name(prefix='test', length=24),
+            'public_network_access': 'Enabled',
+            'ip_rules': '123.4.5.6,123.5.6.7;123.6.7.8'
+        })
+
+        _search_service = self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} --ip-rules {ip_rules}',
+                                   checks=[self.check('name', '{name}'),
+                                           self.check('sku.name', '{sku_name}'),
+                                           self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+
+        self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 3)
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_create_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'public_network_access': 'Disabled'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('publicNetworkAccess', '{public_network_access}')])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_create_msi(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'identity_type': 'SystemAssigned'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name} --identity-type {identity_type}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('identity.type', '{identity_type}')])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
     def test_service_update(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -125,6 +169,105 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_update_ip_rules(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'standard',
+            'name': self.create_random_name(prefix='test', length=24),
+            'public_network_access': 'Enabled',
+            'ip_rules': '123.4.5.6,123.5.6.7'
+        })
+
+        _search_service = self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} --ip-rules {ip_rules}',
+                                   checks=[self.check('name', '{name}'),
+                                           self.check('sku.name', '{sku_name}'),
+                                           self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+
+        self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 2)
+
+        self.kwargs.update({
+            'ip_rules': '123.4.5.6,123.5.6.7;123.6.7.8'
+        })
+
+        _search_service = self.cmd('az search service update -n {name} -g {rg} --ip-rules {ip_rules}',
+                                   checks=[self.check('name', '{name}'),
+                                           self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+        self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 3)
+
+        self.kwargs.update({
+            'ip_rules': ','
+        })
+
+        _search_service = self.cmd(
+            'az search service update -n {name} -g {rg} --ip-rules {ip_rules}',
+            checks=[self.check('name', '{name}'),
+                    self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+        self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 0)
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_update_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'public_network_access': 'Disabled'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('publicNetworkAccess', '{public_network_access}')])
+
+        self.kwargs.update({
+            'public_network_access': 'Enabled'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg} --public-access {public_network_access}',
+            checks=[self.check('name', '{name}'),
+                    self.check('publicNetworkAccess', '{public_network_access}')])
+
+        self.kwargs.update({
+            'public_network_access': 'Disabled'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg} --public-access {public_network_access}',
+            checks=[self.check('name', '{name}'),
+                    self.check('publicNetworkAccess', '{public_network_access}')])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_update_msi(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'identity_type': 'SystemAssigned'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name} --identity-type {identity_type}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('identity.type', '{identity_type}')])
+
+        self.kwargs.update({
+            'identity_type': 'None'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg} --identity-type {identity_type}',
+            checks=[self.check('name', '{name}'),
+                    self.check('identity.type', '{identity_type}')])
+
+        self.kwargs.update({
+            'identity_type': 'SystemAssigned'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg} --identity-type {identity_type}',
+            checks=[self.check('name', '{name}'),
+                    self.check('identity.type', '{identity_type}')])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
     def test_service_create_delete_show(self, resource_group):

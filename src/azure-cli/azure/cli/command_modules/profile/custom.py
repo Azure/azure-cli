@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -52,11 +50,15 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    if not show_auth_for_sdk:
-        return profile.get_subscription(subscription)
 
-    # sdk-auth file should be in json format all the time, hence the print
-    print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+    if show_auth_for_sdk:
+        from azure.cli.command_modules.role.custom import CREDENTIAL_WARNING_MESSAGE
+        logger.warning(CREDENTIAL_WARNING_MESSAGE)
+        # sdk-auth file should be in json format all the time, hence the print
+        print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+        return
+
+    return profile.get_subscription(subscription)
 
 
 def get_access_token(cmd, subscription=None, resource=None, resource_type=None, tenant=None):
@@ -111,7 +113,7 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
@@ -153,6 +155,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
             password,
             service_principal,
             tenant,
+            scopes=scopes,
             use_device_code=use_device_code,
             allow_no_subscriptions=allow_no_subscriptions,
             use_cert_sn_issuer=use_cert_sn_issuer)

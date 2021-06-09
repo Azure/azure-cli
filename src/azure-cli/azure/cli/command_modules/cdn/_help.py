@@ -85,6 +85,16 @@ type: group
 short-summary: View all available CDN edge nodes.
 """
 
+helps['cdn name-exists'] = """
+type: command
+short-summary: Check the availability of a resource name.
+               This is needed for resources where name is globally unique, such as a CDN endpoint.
+examples:
+  - name: Check whether the resource name contoso is available or not.
+    text: >
+        az cdn name-exists --name contoso
+"""
+
 helps['cdn endpoint'] = """
 type: group
 short-summary: Manage CDN endpoints.
@@ -134,6 +144,11 @@ examples:
 helps['cdn endpoint load'] = """
 type: command
 short-summary: Pre-load content for a CDN endpoint.
+parameters:
+  - name: --content-paths
+    type: string
+    short-summary: The path to the content to be loaded. Path should be a relative
+                   file URL of the origin.
 examples:
   - name: Pre-load Javascript and CSS content for an endpoint.
     text: >
@@ -144,11 +159,29 @@ examples:
 helps['cdn endpoint purge'] = """
 type: command
 short-summary: Purge pre-loaded content for a CDN endpoint.
+parameters:
+  - name: --content-paths
+    type: string
+    short-summary: The path to the content to be purged. Can describe a file path or a
+                   wildcard directory.
 examples:
   - name: Purge pre-loaded Javascript and CSS content.
     text: >
         az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths
         '/scripts/app.js' '/styles/*'
+"""
+
+helps['cdn endpoint validate-custom-domain'] = """
+type: command
+short-summary: Validates the custom domain mapping to ensure it maps to the correct CDN endpoint in DNS.
+parameters:
+  - name: --host-name
+    type: string
+    short-summary: The host name of the custom domain. Must be a domain name.
+examples:
+  - name: Validate domain www.contoso.com to see whether it maps to the correct CDN endpoint in DNS.
+    text: >
+        az cdn endpoint validate-custom-domain -g group -n endpoint --profile-name profile-name --host-name www.contoso.com
 """
 
 helps['cdn endpoint start'] = """
@@ -196,6 +229,11 @@ short-summary: Manage delivery rules for an endpoint.
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: >
+        Name of the rule, only required for Microsoft SKU.
 examples:
   - name: Create a global rule to disable caching.
     text: >
@@ -204,7 +242,7 @@ examples:
   - name: Create a rule for http to https redirect
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
-        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS
+        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP
         --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
 
@@ -215,6 +253,9 @@ examples:
   - name: Remove the global rule.
     text: >
         az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global
+  - name: Remove the rule with the order 4.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --order 4
 """
 
 helps['cdn endpoint rule show'] = """
@@ -643,6 +684,15 @@ examples:
         az cdn profile list -g group
 """
 
+helps['cdn profile show'] = """
+type: command
+short-summary: Show CDN profile details.
+examples:
+  - name: Show CDN profile details.
+    text: >
+        az cdn profile show -g group -n profile
+"""
+
 helps['cdn profile update'] = """
 type: command
 short-summary: Update a CDN profile.
@@ -986,4 +1036,582 @@ examples:
   - name: Get a rate limit rule of a CDN WAF policy.
     text: >
         az cdn waf policy rate-limit-rule show -g group --policy-name policy -n ratelimitrule
+"""
+
+helps['afd profile'] = """
+type: group
+short-summary: Manage AFD profiles.
+"""
+
+helps['afd profile create'] = """
+type: command
+short-summary: Create a new AFD profile.
+examples:
+  - name: Create an AFD profile using Standard SKU.
+    text: >
+        az afd profile create -g group --profile-name profile --sku Standard_AzureFrontDoor
+"""
+
+helps['afd profile delete'] = """
+type: command
+short-summary: Delete an AFD profile.
+examples:
+  - name: Delete an AFD profile.
+    text: >
+        az afd profile delete -g group --profile-name profile
+"""
+
+helps['afd profile usage'] = """
+type: command
+short-summary: List resource usage within the specific AFD profile.
+examples:
+  - name: List resource usage within the specific AFD profile.
+    text: >
+        az afd profile usage -g group --profile-name profile
+"""
+
+helps['afd profile show'] = """
+type: command
+short-summary: Show details of an AFD profile.
+examples:
+  - name: Show details of an AFD profile.
+    text: >
+        az afd profile show -g group --profile-name profile
+"""
+
+helps['afd profile list'] = """
+type: command
+short-summary: List AFD profiles.
+examples:
+  - name: List AFD profiles in a resource group.
+    text: >
+        az afd profile list -g group
+"""
+
+helps['afd profile update'] = """
+type: command
+short-summary: Update an AFD profile.
+examples:
+  - name: Update an AFD profile with tags.
+    text: az afd profile update --profile-name profile --resource-group MyResourceGroup --tags tag1=value1
+"""
+
+helps['afd origin-group'] = """
+type: group
+short-summary: Manage origin groups under the specified profile.
+long-summary: >
+    An origin group is a set of origins to which Front Door load balances your client requests.
+"""
+
+helps['afd origin-group create'] = """
+type: command
+short-summary: Creates a new origin group within the specified profile.
+examples:
+  - name: Creates a new origin group within the specified profile.
+    text: >
+        az afd origin-group create -g group --origin-group-name og1 --profile-name profile
+        --probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt
+        --sample-size 4 --successful-samples-required 3
+        --additional-latency-in-milliseconds 50
+"""
+
+helps['afd origin-group update'] = """
+type: command
+short-summary: Creates a new origin group within the specified profile.
+examples:
+  - name: Update the probe setting of the specified origin group.
+    text: >
+        az afd origin-group update -g group --origin-group-name og1 --profile-name profile
+        --probe-request-type HEAD --probe-protocol Https --probe-interval-in-seconds 120 --probe-path /test1/azure.txt
+"""
+
+helps['afd origin-group delete'] = """
+type: command
+short-summary: Deletes an existing origin group within the specified profile.
+examples:
+  - name: Deletes an existing origin group within a profile.
+    text: >
+        az afd origin-group delete -g group --origin-group-name og1 --profile-name profile
+"""
+
+helps['afd origin'] = """
+type: group
+short-summary: Manage origins within the specified origin group.
+long-summary: >
+    Origins are the application servers where Front Door will route your client requests.
+    Utilize any publicly accessible application server, including App Service, Traffic Manager, Private Link, and many others.
+"""
+
+helps['afd origin create'] = """
+type: command
+short-summary: Create an AFD origin.
+examples:
+  - name: Create an regular origin
+    text: >
+      az afd origin create -g group --host-name example.contoso.com --profile-name profile --origin-group-name originGroup
+      --origin-name origin1 --origin-host-header example.contoso.com --priority 1 --weight 500 --enabled-state Enabled
+      --http-port 80 --https-port 443
+  - name: Create a private link origin
+    text: >
+      az afd origin create -g group --host-name example.contoso.com --profile-name profile --origin-group-name originGroup
+      --origin-name origin1 --origin-host-header example.contoso.com --priority 1 --weight 500 --enabled-state Enabled
+      --http-port 80 --https-port 443 --private-link-resource
+      /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Storage/storageAccounts/plstest
+      --private-link-location EastUS --private-link-request-message 'Please approve this request' --private-link-sub-resource table
+"""
+
+helps['afd origin update'] = """
+type: command
+short-summary: Update the settings of the specified AFD origin.
+examples:
+  - name: Update the host header and priority of the specified origin.
+    text: >
+      az afd origin update -g group --host-name example.contoso.com --profile-name profile --origin-group-name originGroup
+      --origin-name origin1 --origin-host-header example.contoso.com --priority 3
+  - name: Disable private link of the origin.
+    text: >
+      az afd origin update -g group --host-name example.contoso.com --profile-name profile --origin-group-name originGroup
+      --origin-name origin1 --enable-private-link False
+"""
+
+helps['afd custom-domain'] = """
+type: group
+short-summary: Manage custom domains within the specified profile.
+"""
+
+helps['afd custom-domain create'] = """
+type: command
+short-summary: Create a custom domain within the specified profile.
+long-summary: >
+    Your need to create a DNS TXT record to prove the custom domain's ownership to make the operation successful.
+    Suggest to use "--no-wait" if the DNS update take a lot of time. Use "az afd custom-domain show" to obtain the validation token and
+    create a DNS TXT record for record "_dnsauth.{your custom domain}" with the validation token as its value.
+examples:
+  - name: Create a custom domain that uses AFD managed cerficate for SSL/TLS encryption.
+    text: >
+        az afd custom-domain create -g group --custom-domain-name customDomain --profile-name profile --host-name www.contoso.com
+        --minimum-tls-version TLS12 --certificate-type ManagedCertificate
+  - name: Create a custom domain that uses your own cerficate for SSL/TLS encryption, the certificate is stored in Azure Key Vault and referenced by an AFD secret.
+    text: >
+        az afd custom-domain create -g group --custom-domain-name customDomain --profile-name profile --host-name www.contoso.com
+        --minimum-tls-version TLS12 --certificate-type CustomerCertificate --secret secretName
+"""
+
+helps['afd custom-domain update'] = """
+type: command
+short-summary: Update a custom domain within the specified profile.
+examples:
+  - name: Update the custom domain's supported minimum TLS version.
+    text: >
+        az afd custom-domain update -g group --custom-domain-name customDomain --profile-name profile --minimum-tls-version TLS12
+  - name: Update the custom domain's certificate type to AFD managed certificate.
+    text: >
+        az afd custom-domain update -g group --custom-domain-name customDomain --profile-name profile --certificate-type ManagedCertificate
+"""
+
+helps['afd custom-domain delete'] = """
+type: command
+short-summary: Delete a custom domain.
+examples:
+  - name: Delete a custom domain.
+    text: >
+        az afd custom-domain delete -g group --profile-name profile  --custom-domain-name customDomainName
+"""
+
+helps['afd custom-domain show'] = """
+type: command
+short-summary: Show the custom domain details.
+examples:
+  - name: show details of the custom domain within the specified profile.
+    text: >
+        az afd custom-domain show -g group --profile-name profile  --custom-domain-name customDomainName
+"""
+
+helps['afd custom-domain list'] = """
+type: command
+short-summary: List all the custom domains within the specified profile.
+examples:
+  - name: List all the custom domains within the specified profile.
+    text: >
+        az afd custom-domain list -g group --profile-name profile
+"""
+
+helps['afd custom-domain wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the custom domain is met.
+examples:
+  - name: Wait until a custom domain is created.
+    text: az afd custom-domain wait -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain --created
+"""
+
+helps['afd endpoint'] = """
+type: group
+short-summary: Manage AFD endpoints within the specified profile.
+long-summary: >
+    An endpoint is a logical grouping of domains and their associated configurations.
+"""
+
+helps['afd endpoint create'] = """
+type: command
+short-summary: Creates an endpoint within the specified profile.
+examples:
+  - name: Creates an enabled endpoint with origin response timeout set to 60 seconds.
+    text: >
+        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 60 --enabled-state Enabled
+"""
+
+helps['afd endpoint update'] = """
+type: command
+short-summary: Update an endpoint within the specified profile.
+examples:
+  - name: Update an endpoint's origin response timeout to 30 seconds.
+    text: >
+        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 30
+"""
+
+helps['afd endpoint delete'] = """
+type: command
+short-summary: Delete an endpoint within the specified profile.
+examples:
+  - name: Delete an endpoint named endpoint1.
+    text: >
+        az afd endpoint delete -g group --profile-name profile --endpoint-name endpoint1
+"""
+
+helps['afd endpoint show'] = """
+type: command
+short-summary: Show details of an endpoint within the specified profile.
+examples:
+  - name: show details of the endpoint named endpoint1.
+    text: >
+        az afd endpoint show -g group --profile-name profile  --endpoint-name endpoint1
+"""
+
+helps['afd endpoint list'] = """
+type: command
+short-summary: List all the endpoints within the specified profile.
+examples:
+  - name: List all the endpoints within the specified profile.
+    text: >
+        az afd endpoint list -g group --profile-name profile
+"""
+
+helps['afd endpoint purge'] = """
+type: command
+short-summary: Removes cached contents from Azure Front Door.
+examples:
+  - name: Remove all cached cotents under directory "/script" for domain www.contoso.com
+    text: >
+        az afd endpoint purge -g group --profile-name profile --domains www.contoso.com --content-paths '/scripts/*'
+"""
+
+helps['afd route'] = """
+type: group
+short-summary: Manage routes under an AFD endpoint.
+long-summary: >
+    A route maps your domains and matching URL path patterns to a specific origin group.
+"""
+
+helps['afd route create'] = """
+type: command
+short-summary: Creates a new route within the specified endpoint.
+examples:
+  - name: Creates a route to assoicate the endpoint's default domain with an origin group for all HTTPS requests.
+    text: >
+        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect False
+        --origin-group og001 --supported-protocols Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest
+  - name: Creates a route to assoicate the endpoint's default domain with an origin group for all requests and use the specified rule sets to customize the route behavior.
+    text: >
+        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
+        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect False
+  - name: Creates a route to assoicate the endpoint's default domain and a custom domain with an origin group for all requests with the specified path patterns and redirect all trafic to use Https.
+    text: >
+        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --patterns-to-match /test1/* /tes2/*
+        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect True --link-to-default-domain Enabled
+"""
+
+helps['afd route update'] = """
+type: command
+short-summary: Update an existing route within the specified endpoint.
+examples:
+  - name: Update a route to accept both Http and Https requests and redirect all trafic to use Https.
+    text: >
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1
+        --supported-protocols Http Https --https-redirect True
+  - name: Update a route's rule sets settings to customize the route behavior.
+    text: >
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
+  - name: Update a route's compression settings to enable compression for the specified content types.
+    text: >
+        az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --query-string-caching-behavior IgnoreQueryString
+        --enable-compression true --content-types-to-compress text/javascript text/plain
+"""
+
+helps['afd security-policy'] = """
+type: group
+short-summary: Manage security policies within the specified profile.
+long-summary: >
+    Security policies could be used to apply a web application firewall policy to protect your web applications against OWASP top-10 vulnerabilities and
+    block malicious bots.
+"""
+
+helps['afd security-policy create'] = """
+type: command
+short-summary: Creates a new security policy within the specified profile.
+examples:
+  - name: Creates a security policy to apply the specified WAF policy to an endpoint's default domain and a custom domain.
+    text: >
+        az afd security-policy create -g group --profile-name profile --security-policy-name sp1 --domains
+        /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Cdn/profiles/profile1/afdEndpoints/endpoint1
+        /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Cdn/profiles/profile1/customDomains/customDomain1
+        --waf-policy
+        /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/waf1
+"""
+
+helps['afd security-policy update'] = """
+type: command
+short-summary: Update an existing security policy within the specified profile.
+examples:
+  - name: Update the specified security policy's domain list.
+    text: >
+        az afd security-policy update -g group --security-policy-name sp1 --profile-name profile --domains
+        /subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.Cdn/profiles/profile1/customDomains/customDomain1
+"""
+
+helps['afd route delete'] = """
+type: command
+short-summary: Delete an existing route within the specified endpoint.
+examples:
+  - name: Delete an route named route1.
+    text: >
+        az afd route delete -g group --profile-name profile --endpoint-name endpoint1 --route-name route1
+"""
+
+helps['afd secret'] = """
+type: group
+short-summary: Manage secrets within the specified profile.
+long-summary: >
+    Secrets are used to reference your own certificate stored in Azure Key Vault.
+    You must specifiy the secret name when creating custom domain if you want to use your own certificate for TLS encryption.
+"""
+
+helps['afd secret create'] = """
+type: command
+short-summary: Creates a new secret within the specified profile.
+examples:
+  - name: Creates a secret using the specified certificate version.
+    text: >
+        az afd secret create -g group --profile-name profile --secret-name secret1 --secret-version version1
+        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/certificates/cert1
+"""
+
+helps['afd secret update'] = """
+type: command
+short-summary: Update an existing secret within the specified profile.
+examples:
+  - name: Update the specified secret to use the certificate's latest version.
+    text: >
+        az afd secret update -g group --profile-name profile --secret-name secret1 --use-latest-version
+"""
+
+helps['afd route delete'] = """
+type: command
+short-summary: Delete an existing route within the specified endpoint.
+examples:
+  - name: Delete a route named route1.
+    text: >
+        az afd route delete -g group --profile-name profile --endpoint-name endpoint1 --route-name route1
+"""
+
+helps['afd route show'] = """
+type: command
+short-summary: Show route details.
+examples:
+  - name: show details of the route named route1.
+    text: >
+        az afd route show -g group --profile-name profile  --endpoint-name endpoint1 --route-name route1
+"""
+
+helps['afd route list'] = """
+type: command
+short-summary: List all the routes within the specified endpoint.
+examples:
+  - name: List all the routes within the specified endpoint.
+    text: >
+        az afd route list -g group --profile-name profile --endpoint-name endpoint1
+"""
+
+helps['afd rule-set'] = """
+type: group
+short-summary: Manage rule set for the specified profile.
+long-summary: >
+    Rules Set allows you to customize how HTTP requests are handled at the edge and provides more controls of the behaviors of your web application.
+"""
+
+helps['afd rule-set create'] = """
+type: command
+short-summary: Creates a new rule set under the specified profile.
+examples:
+  - name: Create a new rule set under the specified profile.
+    text: >
+        az afd rule-set create -g group --rule-set-name ruleset1 --profile-name profile
+"""
+
+helps['afd rule-set delete'] = """
+type: command
+short-summary: Delete the rule set.
+examples:
+  - name: Delete a rule set with the name ruleset1.
+    text: >
+        az afd rule-set delete -g group --rule-set-name ruleset1 --profile-name profile
+"""
+
+helps['afd rule'] = """
+type: group
+short-summary: Manage delivery rules within the specified rule set.
+"""
+
+helps['afd rule create'] = """
+type: command
+short-summary: Creates a new delivery rule within the specified rule set.
+examples:
+  - name: Create a rule to append a response header for requests from Thailand.
+    text: >
+        az afd rule create -g group --rule-set-name ruleset1 --profile-name profile --order 2 --match-variable RemoteAddress --operator GeoMatch --match-values TH
+        --rule-name disablecahing --action-name ModifyResponseHeader --header-action Append --header-name X-CDN --header-value AFDX
+  - name: Create a rule for http to https redirect
+    text: >
+        az afd rule create -g group --rule-set-name ruleset1 --profile-name profile --order 1
+        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP
+        --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
+"""
+
+helps['afd rule delete'] = """
+type: command
+short-summary: Remove a delivery rule from rule set.
+examples:
+  - name: Remove a rule with name rule1.
+    text: >
+        az afd rule delete -g group --rule-set-name ruleSetName --profile-name profile --rule-name rule1
+"""
+
+helps['afd rule show'] = """
+type: command
+short-summary: Show delivery rule details.
+examples:
+  - name: show details of the delivery rule with name rule1.
+    text: >
+        az afd rule show -g group --rule-set-name ruleSetName --profile-name profile --rule-name rule1
+"""
+
+helps['afd rule condition'] = """
+type: group
+short-summary: Manage delivery rule conditions for a rule.
+"""
+
+helps['afd rule condition add'] = """
+type: command
+short-summary: Add a condition to a delivery rule.
+examples:
+  - name: Add a remote address condition.
+    text: >
+        az afd rule condition add -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
+        --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
+"""
+
+helps['afd rule condition remove'] = """
+type: command
+short-summary: Remove a condition from a delivery rule.
+examples:
+  - name: Remove the first condition.
+    text: >
+        az afd rule condition remove -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
+        --index 0
+"""
+
+helps['afd rule condition list'] = """
+type: command
+short-summary: show condtions asscociated with the rule.
+examples:
+  - name: show condtions asscociated with the rule.
+    text: >
+        az afd rule condition list -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
+"""
+
+helps['afd rule action'] = """
+type: group
+short-summary: Manage delivery rule actions for a rule.
+"""
+
+helps['afd rule action add'] = """
+type: command
+short-summary: Add an action to a delivery rule.
+examples:
+  - name: Add a redirect action.
+    text: >
+        az afd rule action add --rule-set-name ruleSetName --profile-name profile --rule-name name
+        --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
+  - name: Add a cache expiration action
+    text: >
+        az afd rule action add --rule-set-name ruleSetName --profile-name profile --rule-name name
+        --action-name "CacheExpiration" --cache-behavior BypassCache
+"""
+
+helps['afd rule action remove'] = """
+type: command
+short-summary: Remove an action from a delivery rule.
+examples:
+  - name: Remove the first action.
+    text: >
+        az afd rule action remove -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
+        --index 0
+"""
+
+helps['afd rule action list'] = """
+type: command
+short-summary: show actions asscociated with the rule.
+examples:
+  - name: show actions asscociated with the rule.
+    text: >
+        az afd rule action list -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
+"""
+
+helps['afd log-analytic'] = """
+type: group
+short-summary: Manage afd log analytic results.
+"""
+
+helps['afd log-analytic location'] = """
+type: group
+short-summary: Manage available location names for AFD log analysis.
+"""
+
+helps['afd log-analytic metric'] = """
+type: group
+short-summary: Manage metric statistics for AFD profile.
+"""
+
+helps['afd log-analytic ranking'] = """
+type: group
+short-summary: Manage ranking statistics for AFD profile.
+"""
+
+helps['afd waf-log-analytic'] = """
+type: group
+short-summary: Manage afd WAF related log analytic results.
+"""
+
+helps['afd log-analytic resource'] = """
+type: group
+short-summary: Manage endpoints and custom domains available for AFD log analysis.
+"""
+
+helps['afd waf-log-analytic metric'] = """
+type: group
+short-summary: Manage WAF related metric statistics for AFD profile.
+"""
+
+helps['afd waf-log-analytic ranking'] = """
+type: group
+short-summary: Manage WAF related ranking statistics for AFD profile.
 """

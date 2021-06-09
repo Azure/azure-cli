@@ -4,16 +4,24 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+from datetime import datetime, timedelta
+from importlib import import_module
+import re
+from dateutil.tz import tzutc   # pylint: disable=import-error
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from knack.util import todict
+from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
+from azure.mgmt.rdbms import postgresql, mysql, mariadb
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
 from azure.mgmt.rdbms.postgresql.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as PostgreSQLLocationOperations
+from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
 from azure.mgmt.rdbms.mariadb.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as MariaDBLocationOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, cf_mysql_db, cf_mariadb_db, \
     get_postgresql_management_client, cf_postgres_check_resource_availability_sterling, \
@@ -28,7 +36,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 DEFAULT_DB_NAME = 'defaultdb'
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
@@ -56,12 +64,12 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
 
     # Check availability for server name if it is supplied by the user
     if provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                                  server_name, engine_name)
         check_name_client = cf_postgres_check_resource_availability_sterling(cmd.cli_ctx, None)
-        check_server_name_availability(check_name_client, server_name, "Microsoft.DBforPostgreSQL/servers")
+        name_availability_resquest = postgresql.models.NameAvailabilityRequest(name=server_name, type="Microsoft.DBforPostgreSQL/servers")
+        check_server_name_availability(check_name_client, name_availability_resquest)
         logger.warning('Creating %s Server \'%s\' in group \'%s\'...', engine_name, server_name, resource_group_name)
         logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                        'Please refer to %s  for pricing details', server_name, sku_name, pricing_link)
@@ -86,13 +94,13 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
             parameters.identity = postgresql.models.ResourceIdentity(
                 type=postgresql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMySQL':
-        from azure.mgmt.rdbms import mysql
         engine_name = 'mysql'
         pricing_link = 'https://aka.ms/mysql-pricing'
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                                  server_name, engine_name)
         check_name_client = cf_mysql_check_resource_availability_sterling(cmd.cli_ctx, None)
-        check_server_name_availability(check_name_client, server_name, "Microsoft.DBforMySQL/servers")
+        name_availability_resquest = mysql.models.NameAvailabilityRequest(name=server_name, type="Microsoft.DBforMySQL/servers")
+        check_server_name_availability(check_name_client, name_availability_resquest)
         logger.warning('Creating %s Server \'%s\' in group \'%s\'...', engine_name, server_name, resource_group_name)
         logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                        'Please refer to %s  for pricing details', server_name, sku_name, pricing_link)
@@ -116,13 +124,13 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
         if assign_identity:
             parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMariaDB':
-        from azure.mgmt.rdbms import mariadb
         engine_name = 'mariadb'
         pricing_link = 'https://aka.ms/mariadb-pricing'
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                                  server_name, engine_name)
         check_name_client = cf_mariadb_check_resource_availability_sterling(cmd.cli_ctx, None)
-        check_server_name_availability(check_name_client, server_name, "Microsoft.DBforMariaDB")
+        name_availability_resquest = mariadb.models.NameAvailabilityRequest(name=server_name, type="Microsoft.DBforMariaDB")
+        check_server_name_availability(check_name_client, name_availability_resquest)
         logger.warning('Creating %s Server \'%s\' in group \'%s\'...', engine_name, server_name, resource_group_name)
         logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                        'Please refer to %s  for pricing details', server_name, sku_name, pricing_link)
@@ -143,7 +151,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
             tags=tags)
 
     server_result = resolve_poller(
-        client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(engine_name))
     user = server_result.administrator_login
     version = server_result.version
@@ -197,21 +205,18 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
     if provider == 'Microsoft.DBforMySQL':
-        from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
             properties=mysql.models.ServerPropertiesForRestore(
                 source_server_id=source_server,
                 restore_point_in_time=restore_point_in_time),
             location=None)
     elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
             properties=postgresql.models.ServerPropertiesForRestore(
                 source_server_id=source_server,
                 restore_point_in_time=restore_point_in_time),
             location=None)
     elif provider == 'Microsoft.DBforMariaDB':
-        from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
             properties=mariadb.models.ServerPropertiesForRestore(
                 source_server_id=source_server,
@@ -230,7 +235,7 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 # need to replace source server name with source server id, so customer server georestore function
@@ -257,7 +262,6 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
     if provider == 'Microsoft.DBforMySQL':
-        from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
             sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForGeoRestore(
@@ -267,7 +271,6 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                 source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
             sku=postgresql.models.Sku(name=sku_name),
             properties=postgresql.models.ServerPropertiesForGeoRestore(
@@ -277,7 +280,6 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                 source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforMariaDB':
-        from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
             sku=mariadb.models.Sku(name=sku_name),
             properties=mariadb.models.ServerPropertiesForGeoRestore(
@@ -297,7 +299,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
@@ -332,25 +334,22 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
 
     parameters = None
     if provider == 'Microsoft.DBforMySQL':
-        from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
             sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
             sku=postgresql.models.Sku(name=sku_name),
             properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforMariaDB':
-        from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
             sku=mariadb.models.Sku(name=sku_name),
             properties=mariadb.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 def _replica_stop(client, resource_group_name, server_name):
@@ -362,14 +361,13 @@ def _replica_stop(client, resource_group_name, server_name):
     if server_object.replication_role.lower() != "replica":
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
-    from importlib import import_module
     server_module_path = server_object.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
 
     params = ServerUpdateParameters(replication_role='None')
 
-    return client.update(resource_group_name, server_name, params)
+    return client.begin_update(resource_group_name, server_name, params)
 
 
 def _server_update_custom_func(instance,
@@ -383,7 +381,6 @@ def _server_update_custom_func(instance,
                                assign_identity=False,
                                public_network_access=None,
                                minimal_tls_version=None):
-    from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
@@ -416,17 +413,23 @@ def _server_update_custom_func(instance,
 
     if assign_identity:
         if server_module_path.find('postgres'):
-            from azure.mgmt.rdbms import postgresql
             if instance.identity is None:
                 instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
             params.identity = instance.identity
         elif server_module_path.find('mysql'):
-            from azure.mgmt.rdbms import mysql
             if instance.identity is None:
                 instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
             params.identity = instance.identity
 
     return params
+
+
+def _server_mysql_upgrade(cmd, client, resource_group_name, server_name, target_server_version):
+    parameters = mysql.models.ServerUpgradeParameters(
+        target_server_version=target_server_version
+    )
+
+    client.begin_upgrade(resource_group_name, server_name, parameters)
 
 
 def _server_mariadb_get(cmd, resource_group_name, server_name):
@@ -439,6 +442,12 @@ def _server_mysql_get(cmd, resource_group_name, server_name):
     return client.servers.get(resource_group_name, server_name)
 
 
+def _server_stop(cmd, client, resource_group_name, server_name):
+    logger.warning("Server will be automatically started after 7 days "
+                   "if you do not perform a manual start operation")
+    return client.begin_stop(resource_group_name, server_name)
+
+
 def _server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
@@ -449,7 +458,7 @@ def _server_update_get(client, resource_group_name, server_name):
 
 
 def _server_update_set(client, resource_group_name, server_name, parameters):
-    return client.update(resource_group_name, server_name, parameters)
+    return client.begin_update(resource_group_name, server_name, parameters)
 
 
 def _server_delete(cmd, client, resource_group_name, server_name):
@@ -457,17 +466,24 @@ def _server_delete(cmd, client, resource_group_name, server_name):
     if isinstance(client, MySqlServersOperations):
         database_engine = 'mysql'
 
-    result = client.delete(resource_group_name, server_name)
+    result = client.begin_delete(resource_group_name, server_name)
 
     if cmd.cli_ctx.local_context.is_on:
         local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
         local_context_file.remove_option('{}'.format(database_engine), 'server_name')
 
-    return result
+    return result.result()
 
 
 def _get_sku_name(tier, family, capacity):
     return '{}_{}_{}'.format(SKU_TIER_MAP[tier], family, str(capacity))
+
+
+def _firewall_rule_create(client, resource_group_name, server_name, firewall_rule_name, start_ip_address, end_ip_address):
+
+    parameters = {'name': firewall_rule_name, 'start_ip_address': start_ip_address, 'end_ip_address': end_ip_address}
+
+    return client.begin_create_or_update(resource_group_name, server_name, firewall_rule_name, parameters)
 
 
 def _firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
@@ -475,12 +491,11 @@ def _firewall_rule_custom_getter(client, resource_group_name, server_name, firew
 
 
 def _firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         server_name,
         firewall_rule_name,
-        parameters.start_ip_address,
-        parameters.end_ip_address)
+        parameters)
 
 
 def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
@@ -491,16 +506,57 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
     return instance
 
 
-def _custom_vnet_update_get(client, resource_group_name, server_name, virtual_network_rule_name):
+def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_rule_name, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint=None):
+
+    parameters = {
+        'name': virtual_network_rule_name,
+        'virtual_network_subnet_id': virtual_network_subnet_id,
+        'ignore_missing_vnet_service_endpoint': ignore_missing_vnet_service_endpoint
+    }
+
+    return client.begin_create_or_update(resource_group_name, server_name, virtual_network_rule_name, parameters)
+
+
+def _custom_vnet_update_getter(client, resource_group_name, server_name, virtual_network_rule_name):
     return client.get(resource_group_name, server_name, virtual_network_rule_name)
 
 
-def _custom_vnet_update_set(client, resource_group_name, server_name, virtual_network_rule_name,
-                            virtual_network_subnet_id,
-                            ignore_missing_vnet_service_endpoint=None):
-    return client.create_or_update(resource_group_name, server_name,
-                                   virtual_network_rule_name, virtual_network_subnet_id,
-                                   ignore_missing_vnet_service_endpoint)
+def _custom_vnet_update_setter(client, resource_group_name, server_name, virtual_network_rule_name, parameters):
+    return client.begin_create_or_update(
+        resource_group_name,
+        server_name,
+        virtual_network_rule_name,
+        parameters)
+
+
+def _vnet_rule_update_custom_func(instance, virtual_network_subnet_id, ignore_missing_vnet_service_endpoint=None):
+
+    instance.virtual_network_subnet_id = virtual_network_subnet_id
+    if ignore_missing_vnet_service_endpoint is not None:
+        instance.ignore_missing_vnet_service_endpoint = ignore_missing_vnet_service_endpoint
+    return instance
+
+
+def _configuration_update(client, resource_group_name, server_name, configuration_name, value=None, source=None):
+
+    parameters = {
+        'name': configuration_name,
+        'value': value,
+        'source': source
+    }
+
+    return client.begin_create_or_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def _db_create(client, resource_group_name, server_name, database_name, charset=None, collation=None):
+
+    parameters = {
+        'name': database_name,
+        'charset': charset,
+        'collation': collation
+    }
+
+    return client.begin_create_or_update(resource_group_name, server_name, database_name, parameters)
 
 
 # Custom functions for server logs
@@ -509,7 +565,6 @@ def _download_log_files(
         resource_group_name,
         server_name,
         file_name):
-    from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
 
     # list all files
     files = client.list_by_server(resource_group_name, server_name)
@@ -521,9 +576,6 @@ def _download_log_files(
 
 def _list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
                                 file_last_written=None, max_file_size=None):
-    import re
-    from datetime import datetime, timedelta
-    from dateutil.tz import tzutc   # pylint: disable=import-error
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)
@@ -559,15 +611,19 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, server_name=server_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
-
     new_status = 'Approved' if is_approved else 'Rejected'
-    private_endpoint_connection.private_link_service_connection_state.status = new_status
-    private_endpoint_connection.private_link_service_connection_state.description = description
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   server_name=server_name,
-                                   private_endpoint_connection_name=private_endpoint_connection_name,
-                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
+    private_link_service_connection_state = {
+        'status': new_status,
+        'description': description
+    }
+
+    private_endpoint_connection.private_link_service_connection_state = private_link_service_connection_state
+
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         server_name=server_name,
+                                         private_endpoint_connection_name=private_endpoint_connection_name,
+                                         parameters=private_endpoint_connection)
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
@@ -594,12 +650,12 @@ def server_key_create(client, resource_group_name, server_name, kid):
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        key_name=key_name,
-        uri=kid
-    )
+    parameters = {
+        'uri': kid,
+        'server_key_type': "AzureKeyVault"
+    }
+
+    return client.begin_create_or_update(server_name, key_name, resource_group_name, parameters)
 
 
 def server_key_get(client, resource_group_name, server_name, kid):
@@ -619,7 +675,7 @@ def server_key_delete(cmd, client, resource_group_name, server_name, kid):
     """Drop Server Key."""
     key_name = _get_server_key_name_from_uri(kid)
 
-    return client.delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name)
@@ -632,13 +688,12 @@ def _get_server_key_name_from_uri(uri):
     The SQL server key API requires that the server key has a specific name
     based on the vault, key and key version.
     '''
-    import re
 
-    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
 
     if match is None:
-        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
-                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id. For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
     vault = uri.split('.')[0].split('/')[-1]
     key = uri.split('/')[-2]
@@ -651,20 +706,13 @@ def server_ad_admin_set(client, resource_group_name, server_name, login=None, si
     Sets a server's AD admin.
     '''
 
-    if isinstance(client, MySqlServersOperations):
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerAdministratorResource(
-            login=login,
-            sid=sid,
-            tenant_id=_get_tenant_id())
-    else:
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerAdministratorResource(
-            login=login,
-            sid=sid,
-            tenant_id=_get_tenant_id())
+    parameters = {
+        'login': login,
+        'sid': sid,
+        'tenant_id': _get_tenant_id()
+    }
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         properties=parameters)
@@ -674,8 +722,6 @@ def _get_tenant_id():
     '''
     Gets tenantId from current subscription.
     '''
-    from azure.cli.core._profile import Profile
-
     profile = Profile()
     sub = profile.get_subscription()
     return sub['tenantId']
@@ -700,15 +746,18 @@ def create_database(cmd, resource_group_name, server_name, database_name, engine
         database_client = cf_mysql_db(cmd.cli_ctx, None)
     elif engine_name == 'mariadb':
         database_client = cf_mariadb_db(cmd.cli_ctx, None)
+    parameters = {
+        'name': database_name,
+        'charset': 'utf8'
+    }
     try:
-        database_client.get(resource_group_name, server_name, database_name).result()
-    except CloudError:
+        database_client.get(resource_group_name, server_name, database_name)
+    except ResourceNotFoundError:
         logger.warning('Creating %s database \'%s\'...', engine_name, database_name)
-        database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8').result()
+        database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters)
 
 
 def form_response(server_result, password, host, connection_string, database_name=None, firewall_id=None):
-    from knack.util import todict
     result = todict(server_result)
     result['connectionString'] = connection_string
     result['password'] = password
@@ -729,11 +778,11 @@ def create_postgresql_connection_string(server_name, host, user, password):
     return 'postgres://{user}%40{servername}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
 
 
-def check_server_name_availability(check_name_client, server_name, service_name):
-    server_availability = check_name_client.execute(server_name, service_name)
+def check_server_name_availability(check_name_client, parameters):
+    server_availability = check_name_client.execute(parameters)
     if not server_availability.name_available:
         raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                       "other server name.".format(server_name))
+                       "other server name.".format(parameters.name))
     return True
 
 

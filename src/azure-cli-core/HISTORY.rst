@@ -3,6 +3,64 @@
 Release History
 ===============
 
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
+
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* Refactor AzCommandGroup (#17387)
+* Add a linter rule for `service_name.json` (#17428)
+
+2.22.1
+++++++
+* Minor fixes
+
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
+
+2.21.0
+++++++
+* Unify ADAL and MSAL error handler (#17072)
+* Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+
+2.20.0
+++++++
+* Minor fixes
+
+2.19.1
+++++++
+* No changes
+
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
+
+2.18.0
+++++++
+* Print INFO log from SDK (#15676)
+
+2.17.1
+++++++
+* No changes
+
+2.17.0
+++++++
+* Minor fixes
+
 2.16.0
 ++++++
 * Add 2020-09-01-hybrid API profile for AzureStack (#15096)
