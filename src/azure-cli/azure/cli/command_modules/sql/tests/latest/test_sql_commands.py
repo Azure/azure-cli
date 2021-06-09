@@ -2713,6 +2713,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
         # Update pool back to vcore edition
         vcore_family = 'Gen5'
+        vcore_family_updated = 'Gen5'
         vcore_capacity = 4
         self.cmd('sql elastic-pool update -g {} --server {} --name {} -e {} -c {} -f {} '
                  '--db-max-capacity 2'
@@ -2726,22 +2727,6 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', None),
                      JMESPathCheck('sku.capacity', vcore_capacity),
                      JMESPathCheck('sku.family', vcore_family),
-                     JMESPathCheck('databaseDtuMin', None),
-                     JMESPathCheck('databaseDtuMax', None),
-                     JMESPathCheck('perDatabaseSettings.maxCapacity', 2)])
-
-        # Update only family
-        vcore_family_updated = 'Gen4'
-        self.cmd('sql elastic-pool update -g {} -s {} -n {} --family {}'
-                 .format(resource_group, server, pool_name, vcore_family_updated),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', pool_name),
-                     JMESPathCheck('edition', vcore_edition),
-                     JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('dtu', None),
-                     JMESPathCheck('sku.capacity', vcore_capacity),
-                     JMESPathCheck('sku.family', vcore_family_updated),
                      JMESPathCheck('databaseDtuMin', None),
                      JMESPathCheck('databaseDtuMax', None),
                      JMESPathCheck('perDatabaseSettings.maxCapacity', 2)])
