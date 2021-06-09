@@ -41,7 +41,8 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
     ServerPublicNetworkAccess,
-    ServerInfo
+    ServerInfo,
+    EncryptionProtector
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -3482,11 +3483,8 @@ def server_key_create(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name,
-        parameters=ServerKey(
-            server_key_type=ServerKeyType.azure_key_vault.value,
-            uri=kid
-        )
-    )
+        server_key_type='AzureKeyVault',
+        uri=kid)
 
 
 def server_key_get(
@@ -3606,9 +3604,10 @@ def encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        server_key_type=server_key_type,
-        server_key_name=key_name
-    )
+        encryption_protector_name='Current',
+        parameters=EncryptionProtector(server_key_type=server_key_type,
+        server_key_name=key_name,
+        auto_rotation_enabled=False))
 
 #####
 #           sql server aad-only
