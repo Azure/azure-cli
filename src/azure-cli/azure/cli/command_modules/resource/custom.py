@@ -2132,12 +2132,11 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
         if not_scopes:
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
-                if parse_resource_id(id_arg):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or id_parts.get('namespace'):
                     kwargs_list.append(id_arg)
                 else:
-                    logger.error('az policy assignment create error: argument --not-scopes: \
-                    invalid notscopes value: \'%s\'', id_arg)
-                    return
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
             assignment.not_scopes = kwargs_list
 
     if cmd.supported_api_version(min_api='2018-05-01'):
@@ -2198,12 +2197,11 @@ def update_policy_assignment(cmd, name=None, display_name=None, params=None,
         if not_scopes:
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
-                if parse_resource_id(id_arg):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or id_parts.get('namespace'):
                     kwargs_list.append(id_arg)
                 else:
-                    logger.error('az policy assignment update error: argument --not-scopes: \
-                    invalid notscopes value: \'%s\'', id_arg)
-                    return
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
         assignment.not_scopes = kwargs_list
 
     if cmd.supported_api_version(min_api='2018-05-01'):

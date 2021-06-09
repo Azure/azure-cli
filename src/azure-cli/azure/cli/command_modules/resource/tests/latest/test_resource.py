@@ -12,7 +12,7 @@ import mock
 import unittest
 from pathlib import Path
 
-from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
@@ -2128,6 +2128,10 @@ class PolicyScenarioTest(ScenarioTest):
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
             'padn': self.create_random_name('test_assignment', 20)
         })
+
+        # create a policy assignment with invalid not scopes
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description" --not-scopes "invalid"')
 
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description"', checks=[
             self.check('name', '{pan}'),
