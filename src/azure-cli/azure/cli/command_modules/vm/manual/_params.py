@@ -47,12 +47,12 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
 
-    with self.argument_context('sig shared-image-definition list') as c:
-        c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant', 'subscription']),
+    with self.argument_context('sig image-definition list-shared') as c:
+        c.argument('shared_to', arg_type=get_enum_type(['tenant', 'subscription']),
                    help='The query parameter to decide what shared galleries to fetch when doing listing operations.',
                    default='subscription')
 
-    with self.argument_context('sig shared-image-version list') as c:
-        c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant', 'subscription']),
+    with self.argument_context('sig image-version list-shared') as c:
+        c.argument('shared_to', arg_type=get_enum_type(['tenant', 'subscription']),
                    help='The query parameter to decide what shared galleries to fetch when doing listing operations.',
                    default='subscription')

@@ -12,11 +12,6 @@
 from knack.help_files import helps
 
 
-helps['vm'] = '''
-    type: group
-    short-summary: Manage Compute
-'''
-
 helps['sshkey'] = """
     type: group
     short-summary: Manage ssh public key with vm
@@ -58,74 +53,84 @@ helps['sshkey delete'] = """
     short-summary: "Delete an SSH public key."
 """
 
-helps['sig shared-gallery'] = """
+helps['sig'] = """
     type: group
-    short-summary: Manage shared gallery with vm
+    short-summary: Manage gallery with vm
 """
 
-helps['sig shared-gallery list'] = """
-    type: command
-    short-summary: "List shared galleries by subscription id or tenant id."
-    examples:
-      - name: Get a gallery.
-        text: |-
-               az sig shared-gallery list --location "myLocation"
-"""
-
-helps['sig shared-gallery show'] = """
-    type: command
-    short-summary: "Get a shared gallery by subscription id or tenant id."
-    examples:
-      - name: Get a gallery.
-        text: |-
-               az sig shared-gallery show --gallery-unique-name "galleryUniqueName" --location "myLocation"
-"""
-
-helps['sig shared-image-definition'] = """
+helps['sig image-definition'] = """
     type: group
-    short-summary: Manage shared gallery image with vm
+    short-summary: Manage gallery with vm sub group image-definition
 """
 
-helps['sig shared-image-definition list'] = """
+helps['sig image-definition list-shared'] = """
     type: command
     short-summary: "List shared gallery images by subscription id or tenant id."
     examples:
       - name: Get a gallery.
         text: |-
-               az sig shared-image-definition list --gallery-unique-name "galleryUniqueName" --location "myLocation"
+               az sig image-definition list-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
 """
 
-helps['sig shared-image-definition show'] = """
-    type: command
-    short-summary: "Get a shared gallery image by subscription id or tenant id."
-    examples:
-      - name: Get a gallery.
-        text: |-
-               az sig shared-image-definition show --gallery-image-definition "myGalleryImageName" \
---gallery-unique-name "galleryUniqueName" --location "myLocation"
-"""
-
-helps['sig shared-image-version'] = """
+helps['sig image-version'] = """
     type: group
-    short-summary: Manage shared gallery image version with vm
+    short-summary: Manage gallery with vm sub group image-version
 """
 
-helps['sig shared-image-version list'] = """
+helps['sig image-version list-shared'] = """
     type: command
     short-summary: "List shared gallery image versions by subscription id or tenant id."
     examples:
       - name: Get a gallery.
         text: |-
-               az sig shared-image-version list --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+               az sig image-version list-shared --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
 "galleryUniqueName" --location "myLocation"
 """
 
-helps['sig shared-image-version show'] = """
+helps['sig list-shared'] = """
+    type: command
+    short-summary: "List shared galleries by subscription id or tenant id."
+    examples:
+      - name: Get a gallery.
+        text: |-
+               az sig list-shared --location "myLocation"
+"""
+
+helps['sig show-shared'] = """
+    type: command
+    short-summary: "Get a shared gallery by subscription id or tenant id."
+    examples:
+      - name: Get a gallery.
+        text: |-
+               az sig show-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
+"""
+
+helps['sig image-definition'] = """
+    type: group
+    short-summary: Manage shared gallery image with vm
+"""
+
+helps['sig image-definition show-shared'] = """
+    type: command
+    short-summary: "Get a shared gallery image by subscription id or tenant id."
+    examples:
+      - name: Get a gallery.
+        text: |-
+               az sig image-definition show-shared --gallery-image-definition "myGalleryImageName" \
+--gallery-unique-name "galleryUniqueName" --location "myLocation"
+"""
+
+helps['sig image-version'] = """
+    type: group
+    short-summary: Manage shared gallery image version with vm
+"""
+
+helps['sig image-version show-shared'] = """
     type: command
     short-summary: "Get a shared gallery image version by subscription id or tenant id."
     examples:
       - name: Get a gallery.
         text: |-
-               az sig shared-image-version show --gallery-image-definition "myGalleryImageName" \
+               az sig image-version show-shared --gallery-image-definition "myGalleryImageName" \
 --gallery-image-version "myGalleryImageVersionName" --gallery-unique-name "galleryUniqueName" --location "myLocation"
 """

@@ -59,23 +59,7 @@ def sshkey_delete(client,
                          ssh_public_key_name=ssh_public_key_name)
 
 
-def sig_shared_gallery_list(client,
-                            location,
-                            shared_to=None):
-    if shared_to is None:
-        shared_to = "tenant"
-    return client.list(location=location,
-                       shared_to=shared_to)
-
-
-def sig_shared_gallery_show(client,
-                            location,
-                            gallery_unique_name):
-    return client.get(location=location,
-                      gallery_unique_name=gallery_unique_name)
-
-
-def sig_shared_image_definition_list(client,
+def sig_image_definition_list_shared(client,
                                      location,
                                      gallery_unique_name,
                                      shared_to=None):
@@ -86,16 +70,7 @@ def sig_shared_image_definition_list(client,
                        shared_to=shared_to)
 
 
-def sig_shared_image_definition_show(client,
-                                     location,
-                                     gallery_unique_name,
-                                     gallery_image_name):
-    return client.get(location=location,
-                      gallery_unique_name=gallery_unique_name,
-                      gallery_image_name=gallery_image_name)
-
-
-def sig_shared_image_version_list(client,
+def sig_image_version_list_shared(client,
                                   location,
                                   gallery_unique_name,
                                   gallery_image_name,
@@ -108,7 +83,32 @@ def sig_shared_image_version_list(client,
                        shared_to=shared_to)
 
 
-def sig_shared_image_version_show(client,
+def sig_list_shared(client,
+                    location,
+                    shared_to=None):
+    if shared_to is None:
+        shared_to = "tenant"
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_show_shared(client,
+                    location,
+                    gallery_unique_name):
+    return client.get(location=location,
+                      gallery_unique_name=gallery_unique_name)
+
+
+def sig_image_definition_show_shared(client,
+                                     location,
+                                     gallery_unique_name,
+                                     gallery_image_name):
+    return client.get(location=location,
+                      gallery_unique_name=gallery_unique_name,
+                      gallery_image_name=gallery_image_name)
+
+
+def sig_image_version_show_shared(client,
                                   location,
                                   gallery_unique_name,
                                   gallery_image_name,

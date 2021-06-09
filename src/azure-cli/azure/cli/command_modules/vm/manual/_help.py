@@ -103,30 +103,30 @@ examples:
         az sig share wait --updated -g MyResourceGroup --gallery-name Gallery
 """
 
-helps['sig shared-gallery list'] = """
+helps['sig list-shared'] = """
     type: command
     short-summary: "List shared galleries by subscription id or tenant id."
     examples:
       - name: List shared galleries.
         text: |-
-               az sig shared-gallery list --location "myLocation"
+               az sig list-shared --location "myLocation"
 """
 
-helps['sig shared-image-definition list'] = """
+helps['sig image-definition list-shared'] = """
     type: command
     short-summary: "List shared gallery images by subscription id or tenant id."
     examples:
       - name: List shared images.
         text: |-
-               az sig shared-image-definition list --gallery-unique-name "galleryUniqueName" --location "myLocation"
+               az sig image-definition list-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
 """
 
-helps['sig shared-image-version list'] = """
+helps['sig image-version list-shared'] = """
     type: command
     short-summary: "List shared gallery image versions by subscription id or tenant id."
     examples:
       - name: List shared image versions.
         text: |-
-               az sig shared-image-version list --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+               az sig image-version list-shared --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
 "galleryUniqueName" --location "myLocation"
 """
