@@ -737,7 +737,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-              enable_vtpm=None, count=None, edge_zone=None):
+              enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
+              data_disk_delete_option=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -874,11 +875,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if count:
             nics = [
-                {'id': "[concat('{}', copyIndex())]".format(nics_id)}
+                {
+                    'id': "[concat('{}', copyIndex())]".format(nics_id),
+                    'properties': {
+                        'deleteOption': nic_delete_option
+                    }
+                }
             ]
         else:
             nics = [
-                {'id': nics_id}
+                {
+                    'id': nics_id,
+                    'properties': {
+                        'deleteOption': nic_delete_option
+                    }
+                }
             ]
 
         nic_resource = build_nic_resource(
@@ -931,7 +942,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -3229,15 +3240,27 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
             extension_profile.extensions = [x for x in extensions if
                                             x.type_properties_type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
-    ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
-                                          publisher=publisher,
-                                          type_properties_type=extension_name,
-                                          protected_settings=protected_settings,
-                                          type_handler_version=version,
-                                          settings=settings,
-                                          auto_upgrade_minor_version=(not no_auto_upgrade),
-                                          provision_after_extensions=provision_after_extensions,
-                                          enable_automatic_upgrade=enable_auto_upgrade)
+    if cmd.supported_api_version(min_api='2019-07-01', operation_group='virtual_machine_scale_sets'):
+        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
+                                              publisher=publisher,
+                                              type_properties_type=extension_name,
+                                              protected_settings=protected_settings,
+                                              type_handler_version=version,
+                                              settings=settings,
+                                              auto_upgrade_minor_version=(not no_auto_upgrade),
+                                              provision_after_extensions=provision_after_extensions,
+                                              enable_automatic_upgrade=enable_auto_upgrade)
+    else:
+        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
+                                              publisher=publisher,
+                                              type=extension_name,
+                                              protected_settings=protected_settings,
+                                              type_handler_version=version,
+                                              settings=settings,
+                                              auto_upgrade_minor_version=(not no_auto_upgrade),
+                                              provision_after_extensions=provision_after_extensions,
+                                              enable_automatic_upgrade=enable_auto_upgrade)
+
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 
@@ -3428,7 +3451,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
                 raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
             if not data_snapshot_luns:
-                data_snapshot_luns = [i for i in range(len(data_snapshots))]
+                data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
@@ -3456,7 +3479,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 # Generate LUNs
                 if data_vhds_luns is None:
                     # 0, 1, 2, ...
-                    data_vhds_luns = [i for i in range(len(data_vhds_uris))]
+                    data_vhds_luns = list(range(len(data_vhds_uris)))
                 # Check length
                 len_data_vhds_uris = len(data_vhds_uris)
                 len_data_vhds_luns = len(data_vhds_luns)

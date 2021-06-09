@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.23.0"
+VERSION = "2.24.2"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -53,16 +53,13 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.8.2',
     'msal>=1.10.0,<2.0.0',
-    # Dependencies of the vendored subscription SDK
-    # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
-    'msrest>=0.5.0',
-    'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
     'PyJWT==1.7.1',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.22',
     'six~=1.12',
+    'urllib3[secure]>=1.26.5',
 ]
 
 # dependencies for specific OSes

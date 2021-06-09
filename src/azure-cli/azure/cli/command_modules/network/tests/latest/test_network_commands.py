@@ -1300,6 +1300,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
             'set': 'ruleset1',
             'rule': 'rule1',
             'rule2': 'rule2',
+            'rule3': 'rule3',
             'var': 'http_req_Authorization'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
@@ -1338,6 +1339,9 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
                  ])
         self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
         self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2}')
+
+        # ISSUE#17373 create rewrite rule without
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule3} --sequence 123 --modified-path "/" --no-wait')
 
         # manage rewrite rule conditions
         self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')

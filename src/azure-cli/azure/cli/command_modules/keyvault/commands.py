@@ -112,9 +112,12 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id, supports_no_wait=True)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.wait_command('wait', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
+        g.custom_wait_command('wait', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',
                             mgmt_plr_entity.command_type,
@@ -122,7 +125,7 @@ def load_command_table(self, _):
                             client_factory=mgmt_plr_entity.client_factory,
                             is_preview=True) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
+        g.custom_command('list', 'list_private_link_resource', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
     if not is_azure_stack_profile(self):
