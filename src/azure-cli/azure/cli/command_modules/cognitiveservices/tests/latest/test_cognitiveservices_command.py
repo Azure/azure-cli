@@ -31,15 +31,7 @@ class CognitiveServicesTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         ])
-
-        for i in range(15):
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
-            time.sleep(10)
-
-        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # test to show the details of cognitive services account
         self.cmd('az cognitiveservices account show -n {sname} -g {rg}',

@@ -82,13 +82,11 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Creating')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
-        for i in range(10):
-            time.sleep(15)
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
+
+        account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
         self.assertTrue(account['properties']['encryption'] is not None)
@@ -108,13 +106,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Creating')])
-
-        for i in range(10):
-            time.sleep(15)  # sleep() is mocked in replay mode, so just use a large value.
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --encryption {encryption}')
 
