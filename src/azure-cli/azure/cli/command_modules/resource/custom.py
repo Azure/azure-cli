@@ -2133,7 +2133,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
                 id_parts = parse_resource_id(id_arg)
-                if id_parts.get('subscription') or id_parts.get('namespace'):
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
                     raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
@@ -2198,7 +2198,7 @@ def update_policy_assignment(cmd, name=None, display_name=None, params=None,
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
                 id_parts = parse_resource_id(id_arg)
-                if id_parts.get('subscription') or id_parts.get('namespace'):
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
                     raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)

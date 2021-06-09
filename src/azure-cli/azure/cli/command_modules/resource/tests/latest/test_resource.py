@@ -2198,7 +2198,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em} --not-scopes "{scope}/providers/Microsoft.Compute/virtualMachines/myVm"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('enforcementMode', '{em}')
