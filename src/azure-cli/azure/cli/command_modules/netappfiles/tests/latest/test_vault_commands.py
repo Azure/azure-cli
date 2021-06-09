@@ -3,20 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-
-LOCATION = "eastus2euap"
+LOCATION = "southcentralusstage"
+VNET_LOCATION = "southcentralus"
 
 
 class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
-                 (vnet_name, LOCATION))
+                 (vnet_name, VNET_LOCATION))
         self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.5.0.0/24' "
                  "--delegations 'Microsoft.Netapp/volumes' -g {rg}" % (subnet_name, vnet_name))
-
-    def current_subscription(self):
-        subs = self.cmd("az account show").get_output_in_json()
-        return subs['id']
 
     def create_volume(self, account_name, pool_name, volume_name, volume_only=False):
         vnet_name = "cli-vnet-lefr-02"
@@ -33,8 +29,8 @@ class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):
         # create volume
         return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s --vnet %s --subnet %s "
                         "--file-path %s --usage-threshold 100" %
-                        (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name)) \
-            .get_output_in_json()
+                        (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name)
+                        ).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_vault_')
     def test_list_vault(self):

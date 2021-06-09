@@ -48,6 +48,16 @@ parameters:
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
     short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
+  - name: --aes-encryption
+    short-summary: If enabled, AES encryption will be enabled for SMB communication
+  - name: --ldap-signing
+    short-summary: Specifies whether or not the LDAP traffic needs to be signed
+  - name: --security-operators
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+  - name: --ldap-over-tls
+    short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+  - name: --allow-local-ldap-users
+    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
 examples:
   - name: Add an active directory to the account
     text: >
@@ -88,6 +98,8 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --encryption
+    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -135,6 +147,8 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --encryption
+    short-summary: Encryption settings
 examples:
   - name: Update the tags of an ANF account
     text: >
@@ -156,6 +170,34 @@ examples:
   - name: Get a list of all ANF account backup
     text: >
         az netappfiles account backup list -g mygroup --account-name myaccountname
+"""
+
+helps['netappfiles account backup show'] = """
+type: command
+short-summary: Get Backup for a Netapp Files (ANF) Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --backup-name
+    short-summary: The name of the backup
+examples:
+  - name: Get a list of all ANF account backup
+    text: >
+        az netappfiles account backup show -g mygroup --account-name myaccountname --backup-name mybackupname
+"""
+
+helps['netappfiles account backup delete'] = """
+type: command
+short-summary: Delete Backup for a Netapp Files (ANF) Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --backup-name
+    short-summary: The name of the backup
+examples:
+  - name: Get a list of all ANF account backup
+    text: >
+        az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackupname
 """
 
 
@@ -439,11 +481,11 @@ parameters:
   - name: --usage-threshold
     short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
   - name: --file-path
-    short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target subnet
+    short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target delegate subnet
   - name: --vnet
     short-summary: The ARM Id or name of the vnet for the volume
   - name: --subnet
-    short-summary: The ARM Id or name of the subnet for the vnet. If omitted 'default' will be used
+    short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
   - name: --protocol-types
     short-summary: Space seperated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
@@ -492,6 +534,24 @@ parameters:
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
     short-summary: Has root access to volume
+  - name: --smb-encryption
+    short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
+  - name: --smb-continuously-avl
+    short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
+  - name: --encryption-key-source
+    short-summary: Encryption Key Source
+  - name: --allowed-clients
+    short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
+  - name: --cifs
+    short-summary: Allows NFSv3 protocol. Enable only for NFSv3 type volumes
+  - name: --rule-index
+    short-summary: Order index
+  - name: --unix-read-only
+    short-summary: Read only access
+  - name: --unix-read-write
+    short-summary: Read and write access
+  - name: --ldap-enabled
+    short-summary: Specifies whether LDAP is enabled or not for a given NFS volume
 examples:
   - name: Create an ANF volume
     text: >
@@ -761,6 +821,8 @@ parameters:
     short-summary: Backup Policy Enforced
   - name: --vault-id
     short-summary: Vault Resource ID
+  - name: --snapshot-policy-id
+    short-summary: Snapshot Policy ResourceId
 examples:
   - name: Update an ANF volume
     text: >
@@ -802,6 +864,8 @@ parameters:
     short-summary: The name of the ANF volume
   - name: --backup-name -b
     short-summary: The name of the ANF backup
+  - name: --use-existing-snapshot
+    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups
 examples:
   - name: Returns the created ANF backup
     text: >

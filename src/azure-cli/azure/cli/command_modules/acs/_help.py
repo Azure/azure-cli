@@ -152,6 +152,18 @@ type: group
 short-summary: Manage Azure Kubernetes Services.
 """
 
+helps["aks check-acr"] = """
+type: command
+short-summary: Validate an ACR is accessible from an AKS cluster.
+parameters:
+  - name: --acr
+    short-summary: The FQDN of the ACR.
+examples:
+  - name: Validate the ACR is accessible from the AKS cluster.
+    text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
+    crafted: true
+"""
+
 helps['aks browse'] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
@@ -207,7 +219,7 @@ parameters:
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
   - name: --node-osdisk-type
     type: string
-    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
+    short-summary: "OS disk type to be used for machines in a given agent pool: Ephemeral or Managed. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation."
   - name: --kubernetes-version -k
     type: string
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
@@ -221,10 +233,28 @@ parameters:
     short-summary: User account to create on node VMs for SSH access.
   - name: --windows-admin-username
     type: string
-    short-summary: Username to create on Windows node VMs.
+    short-summary: User account to create on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-username:
+          - restriction: Cannot end in "."
+          - Disallowed values: "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5".
+          - Minimum-length: 1 character
+          - Max-length: 20 characters
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
   - name: --windows-admin-password
     type: string
-    short-summary: Password to create on Windows node VMs.
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-ahub
     type: bool
     short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
@@ -308,7 +338,8 @@ parameters:
                          Learn more at aka.ms/aks/policy.
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
+                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
+            confcom      - enable confcom addon, this will enable SGX device plugin by default.
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -351,6 +382,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -363,6 +397,13 @@ parameters:
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: Private dns zone mode for private cluster.
+    long-summary: Allowed values are "system" or custom private dns zone resource id. If not set, defaults to type system. Requires --enable-private-cluster to be used.
+  - name: --fqdn-subdomain
+    type: string
+    short-summary: Prefix for FQDN that is created for private cluster with custom private dns zone scenario.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
@@ -378,6 +419,30 @@ parameters:
   - name: --aci-subnet-name
     type: string
     short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
+  - name: --appgw-name
+    type: string
+    short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
+  - name: --appgw-subnet-cidr
+    type: string
+    short-summary: Subnet CIDR to use for a new subnet created to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-id
+    type: string
+    short-summary: Resource Id of an existing Application Gateway to use with AGIC. Use with ingress-azure addon.
+  - name: --appgw-subnet-id
+    type: string
+    short-summary: Resource Id of an existing Subnet used to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-watch-namespace
+    type: string
+    short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
+  - name: --enable-sgxquotehelper
+    type: bool
+    short-summary: Enable SGX quote helper for confcom addon.
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -415,6 +480,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
   - name: Create a kubernetes cluster with ephemeral OS enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a kubernetes cluster with EncryptionAtHost enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
+  - name: Create a kubernetes cluster with Azure RBAC enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
 """
 
 helps['aks update'] = """
@@ -439,6 +508,9 @@ parameters:
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
+  - name: --no-uptime-sla
+    type: bool
+    short-summary: Change a paid managed cluster to a free one.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -483,6 +555,32 @@ parameters:
   - name: --disable-ahub
     type: bool
     short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --windows-admin-password
+    type: string
+    short-summary: User account password to use on windows node VMs.
+    long-summary: |-
+      Rules for windows-admin-password:
+          - Minimum-length: 14 characters
+          - Max-length: 123 characters
+          - Complexity requirements: 3 out of 4 conditions below need to be fulfilled
+            * Has lower characters
+            * Has upper characters
+            * Has a digit
+            * Has a special character (Regex match [\\W_])
+          - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
+      Reference: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Update current cluster to use managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --enable-azure-rbac
+    type: bool
+    short-summary: Enable Azure RBAC to control authorization checks on cluster.
+  - name: --disable-azure-rbac
+    type: bool
+    short-summary: Disable Azure RBAC to control authorization checks on cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -508,6 +606,18 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
   - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
+  - name: Update Windows password of a kubernetes cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --windows-admin-password "Repl@cePassw0rd12345678"
+  - name: Update the cluster to use system assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Update the cluster to use user assigned managed identity in control plane.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Update a non managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Update a managed AAD AKS cluster to use Azure RBAC
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-rbac
+  - name: Disable Azure RBAC in a managed AAD AKS cluster
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-rbac
 """
 
 helps['aks delete'] = """
@@ -543,6 +653,7 @@ long-summary: |-
         virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
         azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                      Learn more at aka.ms/aks/policy.
+        ingress-appgw - enable Application Gateway Ingress Controller addon.
 parameters:
   - name: --addons -a
     type: string
@@ -550,19 +661,42 @@ parameters:
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+  - name: --appgw-name
+    type: string
+    short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
+  - name: --appgw-subnet-cidr
+    type: string
+    short-summary: Subnet CIDR to use for a new subnet created to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-id
+    type: string
+    short-summary: Resource Id of an existing Application Gateway to use with AGIC. Use with ingress-azure addon.
+  - name: --appgw-subnet-id
+    type: string
+    short-summary: Resource Id of an existing Subnet used to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-watch-namespace
+    type: string
+    short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
+  - name: --enable-sgxquotehelper
+    type: bool
+    short-summary: Enable SGX quote helper for confcom addon.
 examples:
   - name: Enable Kubernetes addons. (autogenerated)
     text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
+    crafted: true
+  - name: Enable ingress-appgw addon with subnet prefix.
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
     crafted: true
 """
 
 helps['aks get-credentials'] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
+long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
 parameters:
   - name: --admin -a
     type: bool
     short-summary: "Get cluster administrator credentials.  Default: cluster user credentials."
+    long-summary: "On clusters with Azure Active Directory integration, this bypasses normal Azure AD authentication and can be used if you're permanently blocked by not having access to a valid Azure AD group with access to your cluster. Requires 'Azure Kubernetes Service Cluster Admin' role."
   - name: --file -f
     type: string
     short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
@@ -642,6 +776,9 @@ parameters:
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
+  - name: --node-public-ip-prefix-id
+    type: string
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
@@ -681,9 +818,14 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --enable-encryption-at-host
+    type: bool
+    short-summary: Enable EncryptionAtHost, default value is false.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
+  - name: Create a nodepool with EncryptionAtHost enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-encryption-at-host
 """
 
 helps['aks nodepool delete'] = """
@@ -913,10 +1055,36 @@ helps['aks rotate-certs'] = """
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
 """
 
+helps['aks command'] = """
+    type: group
+    short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
+"""
+
+helps['aks command invoke'] = """
+    type: command
+    short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
+    parameters:
+        - name: --command -c
+          type: string
+          short-summary: Command or shell script you want to run.
+        - name: --file -f
+          type: string
+          short-summary: Files to be used by the command, use '.' to attach the current folder.
+"""
+
+helps['aks command result'] = """
+    type: command
+    short-summary: Fetch result from previously triggered 'aks command invoke'.
+    parameters:
+        - name: --command-id -i
+          type: string
+          short-summary: commandId returned from 'aks command invoke'.
+"""
+
 helps['openshift'] = """
 type: group
 short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift create'] = """
@@ -972,7 +1140,7 @@ examples:
 helps['openshift delete'] = """
 type: command
 short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Delete an Azure Red Hat OpenShift 3.11 cluster.
     text: az openshift delete --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
@@ -982,13 +1150,13 @@ examples:
 helps['openshift list'] = """
 type: command
 short-summary: List Azure Red Hat OpenShift 3.11 clusters.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift scale'] = """
 type: command
 short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 parameters:
   - name: --compute-count -c
     type: int
@@ -1012,7 +1180,7 @@ examples:
 helps['openshift wait'] = """
 type: command
 short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
-long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete. Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
     text: |-
@@ -1022,13 +1190,13 @@ examples:
 helps['openshift monitor'] = """
 type: group
 short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift monitor enable'] = """
 type: command
 short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Enable Log Analytics monitoring.
     text: |-
@@ -1038,7 +1206,7 @@ examples:
 helps['openshift monitor disable'] = """
 type: command
 short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Disable Log Analytics monitoring.
     text: |-

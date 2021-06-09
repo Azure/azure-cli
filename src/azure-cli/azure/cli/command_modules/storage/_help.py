@@ -22,6 +22,43 @@ type: command
 short-summary: Check that the storage account name is valid and is not already in use.
 """
 
+helps['storage account blob-inventory-policy'] = """
+type: group
+short-summary: Manage storage account Blob Inventory Policy.
+"""
+
+helps['storage account blob-inventory-policy create'] = """
+type: command
+short-summary: Create Blob Inventory Policy for storage account.
+examples:
+  - name: Create Blob Inventory Policy trough json file for storage account.
+    text: az storage account blob-inventory-policy create -g myresourcegroup --account-name mystorageaccount --policy @policy.json
+"""
+
+helps['storage account blob-inventory-policy show'] = """
+type: command
+short-summary: Show Blob Inventory Policy properties associated with the specified storage account.
+examples:
+  - name: Show Blob Inventory Policy properties associated with the specified storage account without prompt.
+    text: az storage account blob-inventory-policy show -g ResourceGroupName --account-name storageAccountName
+"""
+
+helps['storage account blob-inventory-policy update'] = """
+type: command
+short-summary: Update Blob Inventory Policy associated with the specified storage account.
+examples:
+  - name: Update Blob Inventory Policy associated with the specified storage account.
+    text: az storage account blob-inventory-policy update -g ResourceGroupName --account-name storageAccountName --set "policy.rules[0].name=newname"
+"""
+
+helps['storage account blob-inventory-policy delete'] = """
+type: command
+short-summary: Delete Blob Inventory Policy associated with the specified storage account.
+examples:
+  - name: Delete Blob Inventory Policy associated with the specified storage account without prompt.
+    text: az storage account blob-inventory-policy delete -g ResourceGroupName --account-name storageAccountName -y
+"""
+
 helps['storage account blob-service-properties'] = """
 type: group
 short-summary: Manage the properties of a storage account's blob service.
@@ -54,12 +91,18 @@ parameters:
   - name: --delete-retention-days
     short-summary: 'Indicate the number of days that the deleted blob should be retained. The value must be in range [1,365]. It must be provided when `--enable-delete-retention` is true.'
 examples:
-  - name: Enable the change feed for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-change-feed true -n mystorageaccount -g MyResourceGroup
-  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
-  - name: Enable versioning for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-versioning -n mystorageaccount -g MyResourceGroup
+  - name: Enable change feed and set change feed retention days to infinite for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-change-feed true -n mystorageaccount -g myresourcegroup
+  - name: Enable change feed and set change feed retention days to 100 for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-change-feed --change-feed-days 100 -n mystorageaccount -g myresourcegroup
+  - name: Disable change feed for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-change-feed false -n mystorageaccount -g myresourcegroup
+  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g myresourcegroup
+  - name: Enable versioning for the storage account 'mystorageaccount' in resource group 'myresourcegroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n mystorageaccount -g myresourcegroup
+  - name: Set default version for incoming request for storage account 'mystorageaccount'.
+    text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g myresourcegroup
 """
 
 helps['storage account create'] = """
@@ -103,6 +146,10 @@ examples:
   - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
     text: |
         az storage account encryption-scope create --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account. (autogenerated)
+    text: |
+        az storage account encryption-scope create --account-name mystorageaccount --key-source Microsoft.Storage --name myencryption --resource-group MyResourceGroup --subscription mysubscription
+    crafted: true
 """
 
 helps['storage account encryption-scope list'] = """
@@ -160,6 +207,7 @@ examples:
 
 helps['storage account generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the storage account.
 parameters:
   - name: --services
     short-summary: 'The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.'
@@ -262,11 +310,20 @@ short-summary: Manage storage account management policies.
 helps['storage account management-policy create'] = """
 type: command
 short-summary: Create the data policy rules associated with the specified storage account.
+examples:
+  - name: Create the data policy rules associated with the specified storage account. (autogenerated)
+    text: |
+        az storage account management-policy create --account-name myaccount --policy @policy.json --resource-group myresourcegroup
+    crafted: true
 """
 
 helps['storage account management-policy update'] = """
 type: command
 short-summary: Update the data policy rules associated with the specified storage account.
+examples:
+    - name: Update the data policy rules associated with the specified storage account.
+      text: |
+        az storage account management-policy update --account-name myaccount --resource-group myresourcegroup --set policy.rules[0].name=newname
 """
 
 helps['storage account management-policy show'] = """
@@ -585,7 +642,7 @@ short-summary: Manage blob copy operations. Use `az storage blob show` to check 
 
 helps['storage blob copy start'] = """
 type: command
-short-summary: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
+short-summary: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
 parameters:
   - name: --source-uri -u
     type: string
@@ -599,15 +656,49 @@ parameters:
         `https://myaccount.blob.core.windows.net/mycontainer/myblob`,
         `https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>`,
         `https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken`
+  - name: --destination-if-modified-since
+    type: string
+    short-summary: >
+        A DateTime value. Azure expects the date value passed in to be UTC.
+        If timezone is included, any non-UTC datetimes will be converted to UTC.
+        If a date is passed in without timezone info, it is assumed to be UTC.
+        Specify this conditional header to copy the blob only
+        if the destination blob has been modified since the specified date/time.
+        If the destination blob has not been modified, the Blob service returns
+        status code 412 (Precondition Failed).
+  - name: --destination-if-unmodified-since
+    type: string
+    short-summary: >
+        A DateTime value. Azure expects the date value passed in to be UTC.
+        If timezone is included, any non-UTC datetimes will be converted to UTC.
+        If a date is passed in without timezone info, it is assumed to be UTC.
+        Specify this conditional header to copy the blob only
+        if the destination blob has not been modified since the specified
+        date/time. If the destination blob has been modified, the Blob service
+        returns status code 412 (Precondition Failed).
+  - name: --source-if-modified-since
+    type: string
+    short-summary: >
+        A DateTime value. Azure expects the date value passed in to be UTC.
+        If timezone is included, any non-UTC datetimes will be converted to UTC.
+        If a date is passed in without timezone info, it is assumed to be UTC.
+        Specify this conditional header to copy the blob only if the source
+        blob has been modified since the specified date/time.
+  - name: --source-if-unmodified-since
+    type: string
+    short-summary: >
+        A DateTime value. Azure expects the date value passed in to be UTC.
+        If timezone is included, any non-UTC datetimes will be converted to UTC.
+        If a date is passed in without timezone info, it is assumed to be UTC.
+        Specify this conditional header to copy the blob only if the source blob
+        has not been modified since the specified date/time.
 examples:
-  - name: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs. (autogenerated)
+  - name: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
     text: |
         az storage blob copy start --account-key 00000000 --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --source-uri https://storage.blob.core.windows.net/photos
-    crafted: true
-  - name: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs (autogenerated)
+  - name: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
     text: |
         az storage blob copy start --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --sas-token $sas --source-uri https://storage.blob.core.windows.net/photos
-    crafted: true
 """
 
 helps['storage blob copy start-batch'] = """
@@ -744,7 +835,7 @@ parameters:
 examples:
   - name: Check for the existence of a blob in a container. (autogenerated)
     text: |
-        az storage blob exists --account-key 00000000 --account-name MyAccount --container-name MyContainer --name MyBlob
+        az storage blob exists --account-key 00000000 --account-name MyAccount --container-name mycontainer --name MyBlob
     crafted: true
 """
 
@@ -762,7 +853,7 @@ examples:
         az storage blob generate-sas -c myycontainer -n MyBlob --ip "176.134.171.0-176.134.171.255" --permissions r --expiry $end --https-only
   - name: Generate a shared access signature for the blob. (autogenerated)
     text: |
-        az storage blob generate-sas --account-key 00000000 --account-name MyStorageAccount --container-name MyContainer --expiry 2018-01-01T00:00:00Z --name MyBlob --permissions r
+        az storage blob generate-sas --account-key 00000000 --account-name MyStorageAccount --container-name mycontainer --expiry 2018-01-01T00:00:00Z --name MyBlob --permissions r
     crafted: true
 """
 
@@ -789,6 +880,10 @@ examples:
   - name: Copies an incremental copy of a blob asynchronously. (autogenerated)
     text: |
         az storage blob incremental-copy start --account-key 00000000 --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --source-account-key MySourceKey --source-account-name MySourceAccount --source-blob MyBlob --source-container MySourceContainer --source-snapshot MySnapshot
+    crafted: true
+  - name: Copy an incremental copy of a blob asynchronously. (autogenerated)
+    text: |
+        az storage blob incremental-copy start --connection-string myconnectionstring --destination-blob mydestinationblob --destination-container MyDestinationContainer --source-uri https://storage.blob.core.windows.net/photos
     crafted: true
 """
 
@@ -818,7 +913,7 @@ type: command
 short-summary: List blobs in a given container.
 examples:
   - name: List all storage blobs in a container whose names start with 'foo'; will match names such as 'foo', 'foobar', and 'foo/bar'
-    text: az storage blob list -c MyContainer --prefix foo
+    text: az storage blob list -c mycontainer --prefix foo
 """
 
 helps['storage blob metadata'] = """
@@ -854,6 +949,15 @@ examples:
         az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2 --no-wait
 """
 
+helps['storage blob rewrite'] = """
+type: command
+short-summary:  Create a new Block Blob where the content of the blob is read from a given URL.
+long-summary: The content of an existing blob is overwritten with the new blob.
+examples:
+  - name: Update encryption scope for existing blob.
+    text: az storage blob rewrite --source-uri https://srcaccount.blob.core.windows.net/mycontainer/myblob?<sastoken> --encryption-scope newscope -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage blob service-properties'] = """
 type: group
 short-summary: Manage storage blob service properties.
@@ -871,6 +975,10 @@ examples:
   - name: Show the storage blob delete-policy. (autogenerated)
     text: |
         az storage blob service-properties delete-policy show --account-name mystorageccount --account-key 00000000
+    crafted: true
+  - name: Show the storage blob delete-policy. (autogenerated)
+    text: |
+        az storage blob service-properties delete-policy show --account-name mystorageccount --auth-mode login
     crafted: true
 """
 
@@ -910,7 +1018,7 @@ long-summary: >
 examples:
   - name: Set the block or page tiers on the blob. (autogenerated)
     text: |
-        az storage blob set-tier --account-key 00000000 --account-name MyAccount --container-name MyContainer --name MyBlob --tier P10
+        az storage blob set-tier --account-key 00000000 --account-name MyAccount --container-name mycontainer --name MyBlob --tier P10
     crafted: true
 """
 
@@ -919,10 +1027,10 @@ type: command
 short-summary: Get the details of a blob.
 examples:
   - name: Show all properties of a blob.
-    text: az storage blob show -c MyContainer -n MyBlob
+    text: az storage blob show -c mycontainer -n MyBlob
   - name: Get the details of a blob (autogenerated)
     text: |
-        az storage blob show --account-name mystorageccount --account-key 00000000 --container-name MyContainer --name MyBlob
+        az storage blob show --account-name mystorageccount --account-key 00000000 --container-name mycontainer --name MyBlob
     crafted: true
 """
 
@@ -951,7 +1059,7 @@ parameters:
     short-summary: A page blob tier value to set the blob to. The tier correlates to the size of the blob and number of allowed IOPS. This is only applicable to page blobs on premium storage accounts.
 examples:
   - name: Upload to a blob.
-    text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
+    text: az storage blob upload -f /path/to/file -c mycontainer -n MyBlob
   - name: Upload a file to a storage blob. (autogenerated)
     text: |
         az storage blob upload --account-name mystorageaccount --account-key 0000-0000 --container-name mycontainer --file /path/to/file --name myblob
@@ -1040,7 +1148,7 @@ type: command
 short-summary: Delete the specified container under its account.
 examples:
   - name: Delete the specified container under its account.
-    text: az storage container-rm delete --storage-account myAccount --name myContainer
+    text: az storage container-rm delete --storage-account myAccount --name mycontainer
   - name: Delete the specified container under its account(account id).
     text: az storage container-rm delete --storage-account myaccountid --name mycontainer
   - name: Delete the specified container by resource id.
@@ -1128,7 +1236,7 @@ long-summary: >
 examples:
   - name: Marks the specified container for deletion. (autogenerated)
     text: |
-        az storage container delete --account-key 00000000 --account-name MyAccount --name MyContainer
+        az storage container delete --account-key 00000000 --account-name MyAccount --name mycontainer
     crafted: true
 """
 
@@ -1189,11 +1297,19 @@ short-summary: Manage container legal holds.
 helps['storage container legal-hold clear'] = """
 type: command
 short-summary: Clear legal hold tags.
+examples:
+  - name: Clear legal hold tags.
+    text: |
+        az storage container legal-hold clear --tags tag1 tag2 --container-name mycontainer --account-name mystorageccount -g MyResourceGroup
 """
 
 helps['storage container legal-hold set'] = """
 type: command
-short-summary: Set legal hold tags
+short-summary: Set legal hold tags.
+examples:
+  - name: Set legal hold tags.
+    text: |
+        az storage container legal-hold set --tags tag1 tag2 --container-name mycontainer --account-name mystorageccount -g MyResourceGroup
 """
 
 helps['storage container legal-hold show'] = """
@@ -1202,7 +1318,7 @@ short-summary: Get the legal hold properties of a container.
 examples:
   - name: Get the legal hold properties of a container. (autogenerated)
     text: |
-        az storage container legal-hold show --account-name mystorageccount --container-name MyContainer
+        az storage container legal-hold show --account-name mystorageccount --container-name mycontainer
     crafted: true
 """
 
@@ -1432,10 +1548,10 @@ examples:
         az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --account-key 00000000
     - name: Copy a file asynchronously from source uri to destination storage account with sas token.
       text: |
-        az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+        az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
     - name: Copy a file asynchronously from file snapshot to destination storage account with sas token.
       text: |
-        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
 """
 
 helps['storage file copy start-batch'] = """
@@ -1480,7 +1596,7 @@ examples:
         az storage file copy start-batch --source-account-name srcaccount --source-account-key 00000000 --source-share srcshare --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --account-key 00000000
   - name: Copy all files in a file share to another storage account. with sas token.
     text: |
-        az storage file copy start-batch --source-uri "https://srcaccount.file.core.windows.net/myshare?<sastoken>" --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+        az storage file copy start-batch --source-uri "https://srcaccount.file.core.windows.net/myshare?<sastoken>" --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
 """
 
 helps['storage file delete-batch'] = """
@@ -1569,6 +1685,10 @@ examples:
     text: |
         az storage file generate-sas --account-name MyStorageAccount --expiry 2037-12-31T23:59:00Z --path path/file.txt --permissions rcdw --share-name MyShare --start 2019-01-01T12:20Z
     crafted: true
+  - name: Generate a shared access signature for the file. (autogenerated)
+    text: |
+        az storage file generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2037-12-31T23:59:00Z --https-only --path path/file.txt --permissions rcdw --share-name myshare
+    crafted: true
 """
 
 helps['storage file list'] = """
@@ -1634,10 +1754,12 @@ parameters:
         The storage service checks the hash of the content that has arrived is identical to the hash that was sent.
         This is mostly valuable for detecting bitflips during transfer if using HTTP instead of HTTPS. This hash is not stored.
 examples:
-  - name: Upload files from a local directory to an Azure Storage File Share in a batch operation. (autogenerated)
+  - name: Upload files from a local directory to an Azure Storage File Share in a batch operation.
     text: |
-        az storage file upload-batch --account-key 00000000 --account-name MyAccount --destination . --source /path/to/file
-    crafted: true
+        az storage file upload-batch --destination myshare --source . --account-name myaccount --account-key 00000000
+  - name: Upload files from a local directory to an Azure Storage File Share with url in a batch operation.
+    text: |
+        az storage file upload-batch --destination https://myaccount.file.core.windows.net/myshare --source . --account-key 00000000
 """
 
 helps['storage file url'] = """
@@ -1646,7 +1768,7 @@ short-summary: Create the url to access a file.
 examples:
   - name: Create the url to access a file. (autogenerated)
     text: |
-        az storage file url --account-name MyAccount --path path/file.txt --share-name MyShare
+        az storage file url --account-key 00000000 --account-name mystorageaccount --path path/file.txt --share-name myshare
     crafted: true
 """
 
@@ -1753,6 +1875,10 @@ examples:
   - name: Create file system for Azure Data Lake Storage Gen2 account and enable public access.
     text: |
         az storage fs create -n fsname --public-access file --account-name mystorageaccount --account-key 0000-0000
+  - name: Create file system for Azure Data Lake Storage Gen2 account. (autogenerated)
+    text: |
+        az storage fs create --account-name mystorageaccount --auth-mode login --name fsname
+    crafted: true
 """
 
 helps['storage fs delete'] = """
@@ -1785,6 +1911,10 @@ short-summary: Show properties of file system in ADLS Gen2 account.
 examples:
     - name: Show properties of file system in ADLS Gen2 account.
       text: az storage fs show -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Show properties of file system in ADLS Gen2 account. (autogenerated)
+      text: |
+          az storage fs show --account-name myadlsaccount --auth-mode login --name myfilesystem
+      crafted: true
 """
 
 helps['storage fs directory'] = """
@@ -1808,6 +1938,10 @@ short-summary: Delete a directory in ADLS Gen2 file system.
 examples:
     - name: Delete a directory in ADLS Gen2 file system.
       text: az storage fs directory delete -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Delete a directory in ADLS Gen2 file system. (autogenerated)
+      text: |
+          az storage fs directory delete --account-name myadlsaccount --auth-mode login --file-system myfilesystem --name dir --yes
+      crafted: true
 """
 
 helps['storage fs directory exists'] = """
@@ -1816,6 +1950,10 @@ short-summary: Check for the existence of a directory in ADLS Gen2 file system.
 examples:
     - name: Check for the existence of a directory in ADLS Gen2 file system.
       text: az storage fs directory exists -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Check for the existence of a directory in ADLS Gen2 file system. (autogenerated)
+      text: |
+          az storage fs directory exists --account-name myadlsaccount --auth-mode login --file-system myfilesystem --name dir
+      crafted: true
 """
 
 helps['storage fs directory list'] = """
@@ -1847,6 +1985,10 @@ short-summary: Move a directory in ADLS Gen2 file system.
 examples:
     - name: Move a directory a directory in ADLS Gen2 file system.
       text: az storage fs directory move --new-directory newfs/dir -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Move a directory in ADLS Gen2 file system. (autogenerated)
+      text: |
+          az storage fs directory move --account-name myadlsaccount --auth-mode login --file-system myfilesystem --name dir --new-directory newfs/dir
+      crafted: true
 """
 
 helps['storage fs directory show'] = """
@@ -1857,6 +1999,38 @@ examples:
       text: az storage fs directory show -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
     - name: Show properties of a subdirectory in ADLS Gen2 file system.
       text: az storage fs directory show -n dir/subdir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Show properties of a directory in ADLS Gen2 file system. (autogenerated)
+      text: |
+          az storage fs directory show --account-name myadlsaccount --auth-mode login --file-system myfilesystem --name dir
+      crafted: true
+"""
+
+helps['storage fs directory upload'] = """
+    type: command
+    short-summary: Upload files or subdirectories to a directory in ADLS Gen2 file system.
+    examples:
+        - name: Upload a single file to a storage blob directory.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d directory
+        - name: Upload a local directory to root directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" --recursive
+        - name: Upload a local directory to a directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/directory" -d directory --recursive
+        - name: Upload a set of files in a local directory to a directory in ADLS Gen2 file system.
+          text: az storage fs directory upload -f myfilesystem --account-name mystorageaccount -s "path/to/file*" -d directory --recursive
+"""
+
+helps['storage fs directory download'] = """
+    type: command
+    short-summary: Download files from the directory in ADLS Gen2 file system to a local file path.
+    examples:
+        - name: Download a single file in a directory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/file" -d "<local-path>"
+        - name: Download whole ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount  -d "<local-path>" --recursive
+        - name: Download the entire directory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s SourceDirectoryPath -d "<local-path>" --recursive
+        - name: Download an entire subdirectory in ADLS Gen2 file system.
+          text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
 """
 
 helps['storage fs file'] = """
@@ -1938,7 +2112,7 @@ type: group
 short-summary: Manage the metadata for file in file system.
 """
 
-helps['storage fs metadata show'] = """
+helps['storage fs file metadata show'] = """
 type: command
 short-summary: Return all user-defined metadata for the specified file.
 examples:
@@ -1962,6 +2136,10 @@ examples:
   - name:  Show properties of file in ADLS Gen2 file system.
     text: |
         az storage fs file show -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+  - name: Show properties of file in ADLS Gen2 file system. (autogenerated)
+    text: |
+        az storage fs file show --account-name myadlsaccount --auth-mode login --file-system fsname --path dir/a.txt
+    crafted: true
 """
 
 helps['storage fs file upload'] = """
@@ -2078,7 +2256,7 @@ examples:
     text: |
         az storage metrics update --account-name MyAccount --api true --hour true --minute true --retention 10 --services bfqt
     crafted: true
-  - name: Update metrics settings for a storage account. (autogenerated)
+  - name: Update metrics settings for a storage account by connection string. (autogenerated)
     text: |
         az storage metrics update --api true --connection-string $connectionString --hour true --minute true --retention 10 --services bfqt
     crafted: true
@@ -2112,17 +2290,17 @@ type: command
 short-summary: Delete blobs or files from Azure Storage.
 examples:
   - name: Remove a single blob.
-    text: az storage remove -c MyContainer -n MyBlob
+    text: az storage remove -c mycontainer -n MyBlob
   - name: Remove an entire virtual directory.
-    text: az storage remove -c MyContainer -n path/to/directory --recursive
+    text: az storage remove -c mycontainer -n path/to/directory --recursive
   - name: Remove only the top blobs inside a virtual directory but not its sub-directories.
-    text: az storage remove -c MyContainer --recursive
+    text: az storage remove -c mycontainer --recursive
   - name: Remove all the blobs in a Storage Container.
-    text: az storage remove -c MyContainer -n path/to/directory
+    text: az storage remove -c mycontainer -n path/to/directory
   - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName" and file names don't start with "test").
-    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --exclude-pattern "test*" --recursive
+    text: az storage remove -c mycontainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --exclude-pattern "test*" --recursive
   - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
-    text: az storage remove -c MyContainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
+    text: az storage remove -c mycontainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
   - name: Remove a single file.
     text: az storage remove -s MyShare -p MyFile
   - name: Remove an entire directory.
@@ -2152,7 +2330,8 @@ examples:
 
 helps['storage share-rm delete'] = """
 type: command
-short-summary: Delete the specified Azure file share.
+short-summary: Delete the specified Azure file share or share snapshot.
+long-summary: 'BREAKING CHANGE: Snapshot can not be deleted by default and we have added a new parameter to use if you want to include sanpshots for delete operation.'
 examples:
   - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
@@ -2160,6 +2339,12 @@ examples:
     text: az storage share-rm delete --storage-account mystorageaccount --name myfileshare
   - name: Delete an Azure file share by resource id.
     text: az storage share-rm delete --ids file-share-id
+  - name: Delete an Azure file share snapshot.
+    text: az storage share-rm delete --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
+  - name: Delete an Azure file share and all its snapshots.
+    text: az storage share-rm delete --include snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Delete an Azure file share and all its snapshots (leased/unleased).
+    text: az storage share-rm delete --include leased-snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
 """
 
 helps['storage share-rm exists'] = """
@@ -2184,6 +2369,10 @@ examples:
     text: az storage share-rm list --storage-account mystorageaccount
   - name: List all file shares include deleted under the storage account 'mystorageaccount' .
     text: az storage share-rm list --storage-account mystorageaccount --include-deleted
+  - name: List all file shares include its all snapshots under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-snapshot
+  - name: List all file shares include its all snapshots and deleted file shares under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-deleted --include-snapshot
 """
 
 helps['storage share-rm restore'] = """
@@ -2198,14 +2387,16 @@ examples:
 
 helps['storage share-rm show'] = """
 type: command
-short-summary: Show the properties for a specified Azure file share.
+short-summary: Show the properties for a specified Azure file share or share snapshot.
 examples:
   - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm show -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
   - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
     text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
-  - name: Show the properties of an Azure file shares by resource id.
+  - name: Show the properties of an Azure file share by resource id.
     text: az storage share-rm show --ids file-share-id
+  - name: Show the properties of an Azure file share snapshot
+    text: az storage share-rm show --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
 """
 
 helps['storage share-rm stats'] = """
@@ -2226,6 +2417,14 @@ examples:
     text: az storage share-rm update --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
   - name: Update the properties for an Azure file shares by resource id.
     text: az storage share-rm update --ids file-share-id --quota 3 --metadata key1=value1 key2=value2
+"""
+
+helps['storage share-rm snapshot'] = """
+type: command
+short-summary: Create a snapshot of an existing share under the specified account.
+examples:
+  - name: Create a snapshot of an existing share under the specified account.
+    text: az storage share-rm snapshot -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
 """
 
 helps['storage share'] = """

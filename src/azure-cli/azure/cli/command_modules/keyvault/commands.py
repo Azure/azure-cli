@@ -22,12 +22,12 @@ from azure.cli.command_modules.keyvault._validators import (
 
 def transform_assignment_list(result):
     return [OrderedDict([('Principal', r['principalName']),
-                         ('Role', r['roleDefinitionName']),
+                         ('RoleName', r['roleName']),
                          ('Scope', r['scope'])]) for r in result]
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+    return [OrderedDict([('Name', r['name']), ('RoleName', r['roleName']), ('Type', r['type']),
                          ('Description', r['description'])]) for r in result]
 
 
@@ -77,6 +77,7 @@ def load_command_table(self, _):
         g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('list_deleted'))
+        g.custom_command('show-deleted', 'get_deleted_vault_or_hsm')
         g.generic_update_command(
             'update', setter_name='update_vault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_vault',
@@ -89,9 +90,9 @@ def load_command_table(self, _):
                                 client_factory=mgmt_hsms_entity.client_factory) as g:
             g.generic_update_command(
                 'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-                custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
+                custom_func_name='update_hsm', supports_no_wait=True,
                 doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
-            g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
+            g.custom_wait_command('wait-hsm', 'wait_hsm')
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -111,9 +112,12 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id, supports_no_wait=True)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.wait_command('wait', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
+        g.custom_wait_command('wait', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',
                             mgmt_plr_entity.command_type,
@@ -121,25 +125,22 @@ def load_command_table(self, _):
                             client_factory=mgmt_plr_entity.client_factory,
                             is_preview=True) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
+        g.custom_command('list', 'list_private_link_resource', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault backup', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault backup', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_backup',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_backup'))
 
-        with self.command_group('keyvault restore', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_restore',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_restore'))
 
-        with self.command_group('keyvault security-domain', private_data_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
-            g.keyvault_custom('download', 'security_domain_download')
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_entity.command_type) as g:
@@ -279,6 +280,10 @@ def load_command_table(self, _):
 
         with self.command_group('keyvault role definition', data_access_control_entity.command_type) as g:
             g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
+            g.keyvault_custom('create', 'create_role_definition')
+            g.keyvault_custom('update', 'update_role_definition')
+            g.keyvault_custom('delete', 'delete_role_definition')
+            g.keyvault_custom('show', 'show_role_definition')
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')

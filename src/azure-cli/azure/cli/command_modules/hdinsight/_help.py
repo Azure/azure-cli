@@ -150,6 +150,29 @@ examples:
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/default" \\
         --resource-provider-connection Outbound --enable-private-link
+  - name: Create a cluster with Compute Isolation feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --enable-compute-isolation --workernode-size "Standard_E8S_V3" --headnode-size "Standard_E8S_V3"
+"""
+
+helps['hdinsight resize'] = """
+type: command
+short-summary: Resize the specified HDInsight cluster to the specified size.
+examples:
+  - name: Resize the cluster's workernode.
+    text: |-
+        az hdinsight resize --name MyCluster --resource-group rg --workernode-count 5
+"""
+
+helps['hdinsight update'] = """
+type: command
+short-summary: Update the tags of the specified HDInsight cluster.
+examples:
+  - name: Update the tags.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --tags key=value
 """
 
 helps['hdinsight list'] = """
@@ -307,7 +330,7 @@ short-summary: Update a schedule condition.
 examples:
   - name: Update a schedule condition.
     text: |-
-        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
+        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0 \\
         --time 10:00 --workernode-count 5
 """
 

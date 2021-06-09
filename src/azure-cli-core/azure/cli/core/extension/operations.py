@@ -13,9 +13,9 @@ import zipfile
 import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
-from pkg_resources import parse_version
+from packaging.version import parse
 
 from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module
@@ -85,6 +85,17 @@ def _validate_whl_extension(ext_file):
     check_version_compatibility(azext_metadata)
 
 
+def _get_extension_info_from_source(source):
+    url_parse_result = urlparse(source)
+    is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
+    whl_filename = os.path.basename(url_parse_result.path) if is_url else os.path.basename(source)
+    parsed_filename = WHEEL_INFO_RE(whl_filename)
+    # Extension names can have - but .whl format changes it to _ (PEP 0427). Undo this.
+    extension_name = parsed_filename.groupdict().get('name').replace('_', '-') if parsed_filename else None
+    extension_version = parsed_filename.groupdict().get('ver') if parsed_filename else None
+    return extension_name, extension_version
+
+
 def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
     cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
@@ -100,6 +111,8 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
+    if extension_name == 'rdbms-connect':
+        _install_deps_for_psycopg2()
     ext_file = None
     if is_url:
         # Download from URL
@@ -167,6 +180,75 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     return extension_name
 
 
+def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
+    # Below system dependencies are required to install the psycopg2 dependency for Linux and macOS
+    import platform
+    import subprocess
+    from azure.cli.core.util import get_linux_distro
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    installer = os.getenv(_ENV_AZ_INSTALLER)
+    system = platform.system()
+    if system == 'Darwin':
+        subprocess.call(['xcode-select', '--install'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if installer != 'HOMEBREW':
+            from shutil import which
+            if which('brew') is None:
+                logger.warning('You may need to install postgresql with homebrew first before you install this extension.')
+                return
+        exit_code = subprocess.call(['brew', 'list', 'postgresql'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if exit_code != 0:
+            update_cmd = ['brew', 'install', 'postgresql']
+            logger.warning('This extension depends on postgresql and it will be installed first.')
+            logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
+            subprocess.call(update_cmd)
+        # Fix the issue of -lssl not found during building psycopg2
+        if os.environ.get('LIBRARY_PATH') is None:
+            os.environ['LIBRARY_PATH'] = '/usr/local/opt/openssl/lib/'
+        else:
+            os.environ['LIBRARY_PATH'] = os.pathsep.join([
+                os.environ.get('LIBRARY_PATH'),
+                '/usr/local/opt/openssl/lib/'
+            ])
+    elif system == 'Linux':
+        distname, _ = get_linux_distro()
+        distname = distname.lower().strip()
+        if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
+            from azure.cli.core.util import in_cloud_console
+            if in_cloud_console():
+                raise CLIError("This extension is not supported in Cloud Shell as you do not have permission to install extra dependencies.")
+            exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if exit_code != 0:
+                logger.warning('This extension depends on gcc, libpq-dev, python3-dev and they will be installed first.')
+                apt_update_cmd = 'apt-get update'.split()
+                apt_install_cmd = 'apt-get install -y gcc libpq-dev python3-dev'.split()
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    apt_update_cmd.insert(0, 'sudo')
+                    apt_install_cmd.insert(0, 'sudo')
+                exit_code = subprocess.call(apt_update_cmd, True)
+                if exit_code == 0:
+                    logger.debug("Install dependencies with '%s'", " ".join(apt_install_cmd))
+                    subprocess.call(apt_install_cmd, True)
+        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
+            if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                yum_install_cmd = 'yum install -y gcc postgresql-devel python3-devel'.split()
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    yum_install_cmd.insert(0, 'sudo')
+                logger.debug("Install dependencies with '%s'", " ".join(yum_install_cmd))
+                logger.warning('This extension depends on gcc, postgresql-devel, python3-devel and they will be installed first if not exist.')
+                subprocess.call(yum_install_cmd)
+            elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                zypper_refresh_cmd = ['zypper', 'refresh']
+                zypper_install_cmd = 'zypper install -y gcc postgresql-devel python3-devel'.split()
+                logger.warning('This extension depends on gcc postgresql-devel, python3-devel and they will be installed first if not exist.')
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    zypper_refresh_cmd.insert(0, 'sudo')
+                    zypper_install_cmd.insert(0, 'sudo')
+                exit_code = subprocess.call(zypper_refresh_cmd)
+                if exit_code == 0:
+                    logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
+                    subprocess.call(zypper_install_cmd)
+
+
 def is_valid_sha256sum(a_file, expected_sum):
     sha256 = hashlib.sha256()
     with open(a_file, 'rb') as f:
@@ -189,21 +271,30 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 
 def check_version_compatibility(azext_metadata):
-    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    is_compatible, cli_core_version, min_required, max_required, min_ext_required = ext_compat_with_cli(azext_metadata)
     # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
     #              "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
-        min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI core version {} and this extension " \
-                          "requires ".format(azext_metadata.get('name'), cli_core_version)
-        if min_required and max_required:
-            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
+        ext_name = azext_metadata.get('name')
+        ext_version = azext_metadata.get('version')
+        min_max_msgs = [
+            f"The '{ext_name}' extension version {ext_version} is not compatible with your current CLI core version {cli_core_version}."
+        ]
+        if min_ext_required:
+            min_max_msgs.append(f"This CLI core requires a min of {min_ext_required} for the '{ext_name}' extension.")
+            min_max_msgs.append(f"Please run 'az extension update -n {ext_name}' to update it.")
+        elif min_required and max_required:
+            min_max_msgs.append(f'This extension requires a min of {min_required} and max of {max_required} CLI core.')
+            min_max_msgs.append("Please run 'az upgrade' to upgrade to a compatible version.")
         elif min_required:
-            min_max_msg_fmt += 'a min of {}.'.format(min_required)
+            min_max_msgs.append(f'This extension requires a min of {min_required} CLI core.')
+            min_max_msgs.append("Please run 'az upgrade' to upgrade to a compatible version.")
         elif max_required:
-            min_max_msg_fmt += 'a max of {}.'.format(max_required)
-        min_max_msg_fmt += '\nPlease install a compatible extension version or remove it.'
-        raise CLIError(min_max_msg_fmt)
+            min_max_msgs.append(f'This extension requires a max of {max_required} CLI core.')
+            # we do not want users to downgrade CLI core version, so we suggest updating the extension in this case
+            min_max_msgs.append(f"Please run 'az extension update -n {ext_name}' to update the extension.")
+
+        raise CLIError("\n".join(min_max_msgs))
 
 
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
@@ -216,6 +307,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
     if extension_name:
         cmd_cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
+        set_extension_management_detail(extension_name, version)
         try:
             ext = get_extension(extension_name)
         except ExtensionNotInstalledException:
@@ -228,12 +320,12 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                 logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
                 if version and version == ext.get_version():
                     return
-                logger.warning("It will be overriden with version {}.".format(version) if version else "It will be updated if available.")
+                logger.warning("It will be overridden with version {}.".format(version) if version else "It will be updated if available.")
                 update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
 
@@ -242,12 +334,12 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
             else:
                 err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
             raise CLIError(err)
-
+    ext_name, ext_version = _get_extension_info_from_source(source)
+    set_extension_management_detail(extension_name if extension_name else ext_name, ext_version)
     extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
-        _augment_telemetry_with_ext_info(extension_name, ext)
         if extension_name and ext.experimental:
             logger.warning("The installed extension '%s' is experimental and not covered by customer support. "
                            "Please use with discretion.", extension_name)
@@ -302,7 +394,9 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+            _, ext_version = _get_extension_info_from_source(download_url)
+            set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             msg = "Extension {} with version {} not found.".format(extension_name, version) if version else "No updates available for '{}'. Use --debug for more information.".format(extension_name)
@@ -321,8 +415,6 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
-            # This gets the metadata for the extension *after* the update
-            _augment_telemetry_with_ext_info(extension_name)
         except Exception as err:
             logger.error('An error occurred whilst updating.')
             logger.error(err)
@@ -334,8 +426,8 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         raise CLIError(e)
 
 
-def list_available_extensions(index_url=None, show_details=False):
-    index_data = get_index_extensions(index_url=index_url)
+def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
+    index_data = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx)
     if show_details:
         return index_data
     installed_extensions = get_extensions(ext_type=WheelExtension)
@@ -347,12 +439,12 @@ def list_available_extensions(index_url=None, show_details=False):
         if not items:
             continue
 
-        latest = max(items, key=lambda c: parse_version(c['metadata']['version']))
+        latest = max(items, key=lambda c: parse(c['metadata']['version']))
         installed = False
         if name in installed_extension_names:
             installed = True
             ext_version = get_extension(name).version
-            if ext_version and parse_version(latest['metadata']['version']) > parse_version(ext_version):
+            if ext_version and parse(latest['metadata']['version']) > parse(ext_version):
                 installed = str(True) + ' (upgrade available)'
         results.append({
             'name': name,
@@ -365,8 +457,8 @@ def list_available_extensions(index_url=None, show_details=False):
     return results
 
 
-def list_versions(extension_name, index_url=None):
-    index_data = get_index_extensions(index_url=index_url)
+def list_versions(extension_name, index_url=None, cli_ctx=None):
+    index_data = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx)
 
     try:
         exts = index_data[extension_name]
@@ -381,13 +473,13 @@ def list_versions(extension_name, index_url=None):
     results = []
     latest_compatible_version = None
 
-    for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
+    for ext in sorted(exts, key=lambda c: parse(c['metadata']['version']), reverse=True):
         compatible = ext_compat_with_cli(ext['metadata'])[0]
         ext_version = ext['metadata']['version']
         if latest_compatible_version is None and compatible:
             latest_compatible_version = ext_version
         installed = ext_version == installed_ext.version if installed_ext else False
-        if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
+        if installed and parse(latest_compatible_version) > parse(installed_ext.version):
             installed = str(True) + ' (upgrade available)'
         version = ext['metadata']['version']
         if latest_compatible_version == ext_version:

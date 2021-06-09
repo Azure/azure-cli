@@ -13,4 +13,7 @@ def load_command_table(self, _):
         g.custom_command('version', 'show_version')
 
     with self.command_group('') as g:
-        g.custom_command('upgrade', 'upgrade_version', is_experimental=True)
+        g.custom_command('upgrade', 'upgrade_version', is_preview=True)
+
+    with self.command_group('demo', deprecate_info=g.deprecate(hide=True)) as g:
+        g.custom_command('style', 'demo_style')

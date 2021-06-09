@@ -128,13 +128,17 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_zone8_import(self, resource_group):
         self._test_zone('zone8.com', 'zone8.txt')
 
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone9_import')
+    def test_dns_zone9_import(self, resource_group):
+        self._test_zone('zone9.com', 'zone9.txt')
+
 
 class DnsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns')
     def test_dns(self, resource_group):
 
-        self.kwargs['zone'] = 'myzone.com'
+        self.kwargs['zone'] = 'myzonex.com'
 
         self.cmd('network dns zone list')  # just verify is works (no Exception raised)
         self.cmd('network dns zone create -n {zone} -g {rg}')
@@ -178,7 +182,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -191,7 +195,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
@@ -207,7 +211,7 @@ class DnsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_dns_if_none_match')
     def test_dns_if_none_match(self, resource_group):
 
-        self.kwargs['zone'] = 'myzone.com'
+        self.kwargs['zone'] = 'myzonex.com'
 
         self.cmd('network dns zone list')  # just verify is works (no Exception raised)
         self.cmd('network dns zone create -n {zone} -g {rg}')
@@ -248,7 +252,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -261,7 +265,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 

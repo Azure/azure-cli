@@ -9,6 +9,7 @@ from time import sleep
 from dateutil.tz import tzutc  # pylint: disable=import-error
 from azure_devtools.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.testsdk.base import execute
@@ -94,7 +95,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbcliupgrade', SERVER_NAME_MAX_LENGTH)]
+
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'GeneralPurpose'
@@ -115,6 +118,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         geoBackupRetention = 20
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
 
         list_checks = [JMESPathCheck('name', servers[0]),
                        JMESPathCheck('resourceGroup', resource_group_1),
@@ -243,7 +249,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test georestore server
-        with self.assertRaises(CLIError) as exception:
+        with self.assertRaises(HttpResponseError) as exception:
             self.cmd('{} server georestore -g {} --name {} --source-server {} -l {} '
                      '--geo-redundant-backup {} --backup-retention {}'
                      .format(database_engine, resource_group_2, servers[2], result['id'],
@@ -288,6 +294,32 @@ class ServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server list'.format(database_engine),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
+        connection_string = self.cmd('{} server show-connection-string -s {}'
+                                     .format(database_engine, servers[0])).get_output_in_json()
+
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ruby', connection_string['connectionStrings'])
+        # test mysql version upgrade
+        if database_engine == 'mysql':
+            self.cmd('{} server create -g {} --name {} -l {} '
+                     '--admin-user {} --admin-password {} '
+                     '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                     '--backup-retention {} --version 5.6'
+                     .format(database_engine, resource_group_1, servers[4], loc,
+                             admin_login, admin_passwords[0], skuname,
+                             geoRedundantBackup, backupRetention),
+                     checks=[
+                         JMESPathCheck('version', '5.6')])
+            self.cmd('{} server upgrade -g {} --name {} --target-server-version 5.7'
+                     .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
+            result = self.cmd('{} server show -g {} -n {}'
+                              .format(database_engine, resource_group_1, servers[4])).get_output_in_json()
+            server_version = result['version']
+            self.assertEqual(server_version, '5.7')
+
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
@@ -296,6 +328,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         if database_engine != 'mariadb':
             self.cmd('{} server delete -g {} -n {} --yes'
                      .format(database_engine, resource_group_1, servers[3]), checks=NoneCheck())
+        if database_engine == 'mysql':
+            self.cmd('{} server delete -g {} -n {} --yes'
+                     .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
 
         # test list server should be 0
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])
@@ -307,6 +342,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mariadb')
     def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
@@ -318,6 +354,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'mariadbServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
     def test_mysql_proxy_resources_mgmt(self, resource_group, server, database_engine):
@@ -331,6 +368,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
         self._test_aad_admin(resource_group, server, database_engine)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
     def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
@@ -614,7 +652,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
-                                    '--group-ids {}'
+                                    '--group-id {}'
                                     .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto,
                                             server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_auto)
@@ -644,11 +682,11 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CloudError, expectedError):
+        with self.assertRaisesRegexp(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
-        with self.assertRaisesRegexp(CloudError, expectedError):
+        with self.assertRaisesRegexp(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, rejection_description))
 
@@ -659,7 +697,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
-                                    '--group-ids {} --manual-request'
+                                    '--group-id {} --manual-request'
                                     .format(resource_group, pe_name_manual_approve, vnet, subnet, loc,
                                             pe_connection_name_manual_approve, server_id,
                                             group_id)).get_output_in_json()
@@ -699,7 +737,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CloudError, expectedError):
+        with self.assertRaisesRegexp(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, rejection_description))
 
@@ -710,7 +748,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
-                                    '--group-ids {} --manual-request true'
+                                    '--group-id {} --manual-request true'
                                     .format(resource_group, pe_name_manual_reject, vnet, subnet, loc,
                                             pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
@@ -749,7 +787,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CloudError, expectedError):
+        with self.assertRaisesRegexp(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
@@ -763,11 +801,12 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # add identity to server
         server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
                                .format(database_engine, resource_group, server)).get_output_in_json()
+        print(server_resp)
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
         self.cmd(
-            'keyvault create -g {} -n {} --location eastus --enable-soft-delete true --enable-purge-protection true'
+            'keyvault create -g {} -n {} --location westus --enable-soft-delete true --enable-purge-protection true'
             .format(resource_group, vault_name))
 
         # create key

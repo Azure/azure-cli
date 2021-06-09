@@ -3,6 +3,28 @@
 Release History
 ===============
 
+0.12.0 (4/15/2021)
+++++++
+
+* Add job databoxedge and synapse
+
+0.11.0 (1/18/2021)
+++++++
+
+* Add a job to automatically detect modules that have regression.
+
+0.10.0 (12/30/2020)
+++++++
+
+* Update index.html.
+
+0.9.0 (11/23/2020)
+++++++
+
+* Update index.html and update email content.
+* Clean policy automatically.
+* Fix "No log output captured" problem.
+
 0.8.0 (11/4/2020)
 ++++++
 

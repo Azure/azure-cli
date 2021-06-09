@@ -93,8 +93,14 @@ def load_arguments(self, _):
                    help='SSH public key for the cluster nodes.')
 
         # Node
-        c.argument('headnode_size', arg_type=node_size_type)
-        c.argument('workernode_size', arg_type=node_size_type)
+        c.argument('headnode_size', arg_type=node_size_type,
+                   help='Incoming BREAKING CHANGE: The default value "large" will be removed in next CLI version.'
+                        'The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
+        c.argument('workernode_size', arg_type=node_size_type,
+                   help='Incoming BREAKING CHANGE: The default value "large" will be removed in next CLI version.'
+                        'The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
         c.argument('workernode_data_disk_storage_account_type', arg_group='Node',
@@ -223,6 +229,12 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
+
+        # compute isolation
+        c.argument('enable_compute_isolation', options_list=['--enable-compute-isolation', '--compute-isolation'],
+                   arg_group="Compute Isolation", arg_type=get_three_state_flag(),
+                   help='Indicate whether enable compute isolation or not.')
+        c.argument('host_sku', arg_group='Compute Isolation', help="The dedicated host sku of compute isolation.")
 
         # resize
         with self.argument_context('hdinsight resize') as c:

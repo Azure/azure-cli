@@ -8,6 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -77,7 +78,7 @@ def build_storage_account_resource(_, name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -93,6 +94,14 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'properties': public_ip_properties
     }
 
+    if count:
+        public_ip['name'] = "[concat('{}', copyIndex())]".format(name)
+        public_ip['copy'] = {
+            'name': 'publicipcopy',
+            'mode': 'parallel',
+            'count': count
+        }
+
     # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
     # support x-zone; rather we will rely on the Standard LB to work with such scale sets
     if zone and len(zone) == 1:
@@ -104,8 +113,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None):
-
+                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None,
+                       count=None):
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
         'privateIPAllocationMethod': private_ip_allocation,
@@ -117,15 +126,20 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     if public_ip_id:
         ip_config_properties['publicIPAddress'] = {'id': public_ip_id}
+        if count:
+            ip_config_properties['publicIPAddress']['id'] = "[concat('{}', copyIndex())]".format(public_ip_id)
 
+    ipconfig_name = 'ipconfig{}'.format(vm_name)
     nic_properties = {
         'ipConfigurations': [
             {
-                'name': 'ipconfig{}'.format(vm_name),
+                'name': ipconfig_name,
                 'properties': ip_config_properties
             }
         ]
     }
+    if count:
+        nic_properties['ipConfigurations'][0]['name'] = "[concat('{}', copyIndex())]".format(ipconfig_name)
 
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
@@ -149,6 +163,15 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         'dependsOn': [],
         'properties': nic_properties
     }
+
+    if count:
+        nic['name'] = "[concat('{}', copyIndex())]".format(name)
+        nic['copy'] = {
+            'name': 'niccopy',
+            'mode': 'parallel',
+            'count': count
+        }
+
     return nic
 
 
@@ -254,7 +277,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None):
+        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
+        enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
+        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -262,11 +287,17 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         special_chars = '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
 
+        # _computer_name is used to avoid shadow names
+        _computer_name = computer_name or ''.join(filter(lambda x: x not in special_chars, name))
+
         os_profile = {
             # Use name as computer_name if it's not provided. Remove special characters from name.
-            'computerName': computer_name or ''.join(filter(lambda x: x not in special_chars, name)),
+            'computerName': _computer_name,
             'adminUsername': admin_username
         }
+
+        if count:
+            os_profile['computerName'] = "[concat('{}', copyIndex())]".format(_computer_name)
 
         if admin_password:
             os_profile['adminPassword'] = "[parameters('adminPassword')]"
@@ -303,8 +334,23 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
             os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
 
+        # Windows patch settings
         if patch_mode is not None and custom_image_os_type.lower() == 'windows':
+            if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Windows VM. Valid values are AutomaticByOS, '
+                    'AutomaticByPlatform, Manual.')
             os_profile['windowsConfiguration']['patchSettings'] = {
+                'patchMode': patch_mode,
+                'enableHotpatching': enable_hotpatching
+            }
+
+        # Linux patch settings
+        if patch_mode is not None and custom_image_os_type.lower() == 'linux':
+            if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Linux VM. Valid values are AutomaticByPlatform, ImageDefault.')
+            os_profile['linuxConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode
             }
 
@@ -396,6 +442,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
+        if os_disk_delete_option is not None:
+            profile['osDisk']['deleteOption'] = os_disk_delete_option
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disk_encryption_sets:
             if len(data_disk_encryption_sets) != len(data_disks):
@@ -456,8 +504,26 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if max_price is not None:
         vm_properties['billingProfile'] = {'maxPrice': max_price}
 
+    vm_properties['securityProfile'] = {}
+
     if encryption_at_host is not None:
-        vm_properties['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+        vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
+
+    if security_type is not None:
+        vm_properties['securityProfile']['securityType'] = security_type
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vm_properties['securityProfile']['uefiSettings'] = {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }
+
+    # Compatibility of various API versions
+    if vm_properties['securityProfile'] == {}:
+        del vm_properties['securityProfile']
+
+    if platform_fault_domain is not None:
+        vm_properties['platformFaultDomain'] = platform_fault_domain
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -468,8 +534,21 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         'dependsOn': [],
         'properties': vm_properties,
     }
+
     if zone:
         vm['zones'] = zone
+
+    if count:
+        vm['copy'] = {
+            'name': 'vmcopy',
+            'mode': 'parallel',
+            'count': count
+        }
+        vm['name'] = "[concat('{}', copyIndex())]".format(name)
+
+    if edge_zone:
+        vm['extendedLocation'] = edge_zone
+
     return vm
 
 
@@ -690,7 +769,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
-                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None):
+                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None,
+                        max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
+                        max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
+                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -848,7 +930,15 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
-            'mode': upgrade_policy_mode
+            'mode': upgrade_policy_mode,
+            'rollingUpgradePolicy': {
+                'maxBatchInstancePercent': max_batch_instance_percent,
+                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
+                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
+                'pauseTimeBetweenBatches': pause_time_between_batches,
+                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
+                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
+            }
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,
@@ -932,8 +1022,13 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         },
         'properties': vmss_properties
     }
+
     if zones:
         vmss['zones'] = zones
+
+    if edge_zone:
+        vmss['extendedLocation'] = edge_zone
+
     return vmss
 
 

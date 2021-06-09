@@ -7,7 +7,8 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 
 
 class TestLogProfileScenarios(ScenarioTest):
-    @ResourceGroupPreparer(location='southcentralus')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_lp_create', location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
     def test_monitor_create_log_profile(self, resource_group, storage_account):
         self.kwargs.update({

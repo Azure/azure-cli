@@ -33,6 +33,13 @@ EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 EXT_METADATA_ISPREVIEW = 'azext.isPreview'
 EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
 
+# If this Azure CLI core version has breaking changes that do not support older versions of extensions,
+# put the requirements of the minimum extension versions here.
+# Example:
+# {'azure-devops': {'minExtVersion': '1.0.0'}}
+EXTENSION_VERSION_REQUIREMENTS = {}
+MIN_EXT_VERSION = 'minExtVersion'
+
 WHEEL_INFO_RE = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
     ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
@@ -273,17 +280,24 @@ EXTENSION_TYPES = [WheelExtension, DevExtension]
 
 def ext_compat_with_cli(azext_metadata):
     from azure.cli.core import __version__ as core_version
-    from pkg_resources import parse_version
+    from packaging.version import parse
     is_compatible, min_required, max_required = (True, None, None)
     if azext_metadata:
         min_required = azext_metadata.get(EXT_METADATA_MINCLICOREVERSION)
         max_required = azext_metadata.get(EXT_METADATA_MAXCLICOREVERSION)
-        parsed_cli_version = parse_version(core_version)
-        if min_required and parsed_cli_version < parse_version(min_required):
+        parsed_cli_version = parse(core_version)
+        if min_required and parsed_cli_version < parse(min_required):
             is_compatible = False
-        elif max_required and parsed_cli_version > parse_version(max_required):
+        elif max_required and parsed_cli_version > parse(max_required):
             is_compatible = False
-    return is_compatible, core_version, min_required, max_required
+
+    try:
+        min_ext_required = EXTENSION_VERSION_REQUIREMENTS.get(azext_metadata.get('name')).get(MIN_EXT_VERSION)
+        if parse(azext_metadata.get('version')) < parse(min_ext_required):
+            is_compatible = False
+    except AttributeError:
+        min_ext_required = None
+    return is_compatible, core_version, min_required, max_required, min_ext_required
 
 
 def get_extension_modname(ext_name=None, ext_dir=None):
@@ -316,7 +330,7 @@ def get_extensions(ext_type=None):
     elif not isinstance(ext_type, list):
         ext_type = [ext_type]
     for t in ext_type:
-        extensions.extend([ext for ext in t.get_all()])
+        extensions.extend(t.get_all())
     return extensions
 
 

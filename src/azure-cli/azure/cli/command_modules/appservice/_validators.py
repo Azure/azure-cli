@@ -3,11 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import ipaddress
+
+from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
+from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import _normalize_sku
+
+logger = get_logger(__name__)
 
 
 def validate_timeout_value(namespace):
@@ -65,7 +74,6 @@ def validate_asp_create(cmd, namespace):
         if isinstance(namespace.location, str):
             location = namespace.location
         else:
-            from azure.cli.core.profiles import ResourceType
             rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
             group = rg_client.resource_groups.get(resource_group_name)
@@ -123,7 +131,6 @@ def validate_add_vnet(cmd, namespace):
             vnet_loc = v.location
             break
 
-    from ._appservice_utils import _generic_site_operation
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     # converting geo region to geo location
     webapp_loc = webapp.location.lower().replace(" ", "")
@@ -143,29 +150,6 @@ def validate_front_end_scale_factor(namespace):
             raise CLIError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
 
 
-def validate_asp_sku(cmd, namespace):
-    import json
-    client = web_client_factory(cmd.cli_ctx)
-    serverfarm = namespace.name
-    resource_group_name = namespace.resource_group_name
-    asp = client.app_service_plans.get(resource_group_name, serverfarm, None, raw=True)
-    if asp.response.status_code != 200:
-        raise CLIError(asp.response.text)
-    # convert byte array to json
-    output_str = asp.response.content.decode('utf8')
-    res = json.loads(output_str)
-
-    # Isolated SKU is supported only for ASE
-    if namespace.sku in ['I1', 'I2', 'I3']:
-        if res.get('properties').get('hostingEnvironment') is None:
-            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
-    else:
-        if res.get('properties').get('hostingEnvironment') is not None:
-            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
-
-
 def validate_ip_address(cmd, namespace):
     if namespace.ip_address is not None:
         _validate_ip_address_format(namespace)
@@ -174,24 +158,31 @@ def validate_ip_address(cmd, namespace):
             _validate_ip_address_existence(cmd, namespace)
 
 
+def validate_onedeploy_params(namespace):
+    if namespace.src_path and namespace.src_url:
+        raise CLIError('Only one of --src-path and --src-url can be specified')
+
+    if not namespace.src_path and not namespace.src_url:
+        raise CLIError('Either of --src-path or --src-url must be specified')
+
+    if namespace.src_url and not namespace.artifact_type:
+        raise CLIError('Deployment type is mandatory when deploying from URLs. Use --type')
+
+
 def _validate_ip_address_format(namespace):
     if namespace.ip_address is not None:
-        # IPv6
-        if ':' in namespace.ip_address:
-            if namespace.ip_address.count(':') > 1:
-                if '/' not in namespace.ip_address:
-                    namespace.ip_address = namespace.ip_address + '/128'
-                    return
-                return
-        # IPv4
-        elif '.' in namespace.ip_address:
-            if namespace.ip_address.count('.') == 3:
-                if '/' not in namespace.ip_address:
-                    namespace.ip_address = namespace.ip_address + '/32'
-                    return
-                return
-
-        raise CLIError('Invalid IP address')
+        input_value = namespace.ip_address
+        if ' ' in input_value:
+            raise InvalidArgumentValueError("Spaces not allowed: '{}' ".format(input_value))
+        input_ips = input_value.split(',')
+        if len(input_ips) > 8:
+            raise InvalidArgumentValueError('Maximum 8 IP addresses are allowed per rule.')
+        validated_ips = ''
+        for ip in input_ips:
+            # Use ipaddress library to validate ip network format
+            ip_obj = ipaddress.ip_network(ip)
+            validated_ips += str(ip_obj) + ','
+        namespace.ip_address = validated_ips[:-1]
 
 
 def _validate_ip_address_existence(cmd, namespace):
@@ -199,10 +190,54 @@ def _validate_ip_address_existence(cmd, namespace):
     name = namespace.name
     slot = namespace.slot
     scm_site = namespace.scm_site
-    from ._appservice_utils import _generic_site_operation
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    is_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
-    if True in is_exists:
-        raise CLIError('IP address ' + namespace.ip_address + ' already exists. '
-                       'Cannot add duplicate IP address values.')
+    ip_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
+    if True in ip_exists:
+        raise ArgumentUsageError('IP address: ' + namespace.ip_address + ' already exists. '
+                                 'Cannot add duplicate IP address values.')
+
+
+def validate_service_tag(cmd, namespace):
+    if namespace.service_tag is not None:
+        _validate_service_tag_format(cmd, namespace)
+        # For prevention of adding the duplicate IPs.
+        if 'add' in cmd.name:
+            _validate_service_tag_existence(cmd, namespace)
+
+
+def _validate_service_tag_format(cmd, namespace):
+    if namespace.service_tag is not None:
+        input_value = namespace.service_tag
+        if ' ' in input_value:
+            raise InvalidArgumentValueError("Spaces not allowed: '{}' ".format(input_value))
+        input_tags = input_value.split(',')
+        if len(input_tags) > 8:
+            raise InvalidArgumentValueError('Maximum 8 service tags are allowed per rule.')
+        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+        resource_group_name = namespace.resource_group_name
+        name = namespace.name
+        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+        service_tag_full_list = network_client.service_tags.list(webapp.location).values
+        for tag in input_tags:
+            valid_tag = False
+            for tag_full_list in service_tag_full_list:
+                if tag.lower() == tag_full_list.name.lower():
+                    valid_tag = True
+                    continue
+            if not valid_tag:
+                raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
+
+
+def _validate_service_tag_existence(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    scm_site = namespace.scm_site
+    input_tag_value = namespace.service_tag.replace(' ', '')
+    configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
+    for rule in access_rules:
+        if rule.ip_address and rule.ip_address.lower() == input_tag_value.lower():
+            raise ArgumentUsageError('Service Tag: ' + namespace.service_tag + ' already exists. '
+                                     'Cannot add duplicate Service Tag values.')
