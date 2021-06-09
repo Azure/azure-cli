@@ -42,7 +42,9 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadWriteEndpoint,
     ServerPublicNetworkAccess,
     ServerInfo,
-    EncryptionProtector
+    EncryptionProtector,
+    ManagedInstanceEncryptionProtector,
+    FirewallRule
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -3459,8 +3461,25 @@ def firewall_rule_update(
         firewall_rule_name=firewall_rule_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        start_ip_address=start_ip_address or instance.start_ip_address,
-        end_ip_address=end_ip_address or instance.end_ip_address)
+        parameters=FirewallRule(start_ip_address=start_ip_address or instance.start_ip_address,
+        end_ip_address=end_ip_address or instance.end_ip_address))
+
+def firewall_rule_create(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ip_address=None,
+        end_ip_address=None):
+    '''
+    Creates a firewall rule.
+    '''
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=FirewallRule(start_ip_address=start_ip_address or instance.start_ip_address,
+        end_ip_address=end_ip_address or instance.end_ip_address))
 
 
 #####
@@ -3606,8 +3625,7 @@ def encryption_protector_update(
         server_name=server_name,
         encryption_protector_name='Current',
         parameters=EncryptionProtector(server_key_type=server_key_type,
-        server_key_name=key_name,
-        auto_rotation_enabled=False))
+        server_key_name=key_name))
 
 #####
 #           sql server aad-only
@@ -3945,9 +3963,10 @@ def managed_instance_encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        server_key_type=server_key_type,
-        server_key_name=key_name
-    )
+        encryption_protector_name='Current',
+        parameters=ManagedInstanceEncryptionProtector(server_key_type=server_key_type,
+        server_key_name=key_name,
+        auto_rotation_enabled=False))
 
 
 #####
