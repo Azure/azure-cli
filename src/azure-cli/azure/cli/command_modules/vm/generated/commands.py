@@ -43,7 +43,7 @@ def load_command_table(self, _):
         client_factory=cf_shared_gallery_image)
     with self.command_group('sig image-definition', vm_shared_gallery_image,
                             client_factory=cf_shared_gallery_image) as g:
-        g.custom_command('show-shared', 'sig_image_definition_show_shared')
+        g.custom_command('show-shared', 'sig_image_definition_show_shared', is_experimental=True)
 
     from ..generated._client_factory import cf_shared_gallery_image_version
     vm_shared_gallery_image_version = CliCommandType(
@@ -52,4 +52,4 @@ def load_command_table(self, _):
         client_factory=cf_shared_gallery_image_version)
     with self.command_group('sig image-version', vm_shared_gallery_image_version,
                             client_factory=cf_shared_gallery_image_version) as g:
-        g.custom_command('show-shared', 'sig_image_version_show_shared')
+        g.custom_command('show-shared', 'sig_image_version_show_shared', is_experimental=True)
