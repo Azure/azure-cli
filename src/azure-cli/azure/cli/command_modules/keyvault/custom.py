@@ -405,16 +405,17 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
-    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
+    # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
+    # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
     parameters = ManagedHsm(location=location,
                             sku=ManagedHsmSku(name='Standard_B1', family='B'),
-                            properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
+                            properties={'tenant_id': tenant_id, 'create_mode': 'Recover'})
 
     return sdk_no_wait(
         no_wait, client.begin_create_or_update,
@@ -880,12 +881,12 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
 
 def _permissions_distinct(permissions):
     if permissions:
-        return [_ for _ in {p for p in permissions}]
+        return list(set(permissions))
     return permissions
 
 
 def set_policy(cmd, client, resource_group_name, vault_name,
-               object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
+               object_id=None, application_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None, no_wait=False):
     """ Update security policy settings for a Key Vault. """
 
@@ -913,12 +914,14 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
+                   (application_id or '').lower() == (p.application_id or '').lower() and
                    vault.properties.tenant_id.lower() == p.tenant_id.lower()), None)
     if not policy:
         # Add new policy as none found
         vault.properties.access_policies.append(AccessPolicyEntry(
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
+            application_id=application_id,
             permissions=Permissions(keys=key_permissions,
                                     secrets=secret_permissions,
                                     certificates=certificate_permissions,
@@ -1043,7 +1046,8 @@ def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint:
     return vault.properties.network_acls
 
 
-def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None, no_wait=False):
+def delete_policy(cmd, client, resource_group_name, vault_name,
+                  object_id=None, application_id=None, spn=None, upn=None, no_wait=False):
     """ Delete security policy settings for a Key Vault. """
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -1062,7 +1066,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
                                         vault.properties.tenant_id.lower() != p.tenant_id.lower() or
-                                        object_id.lower() != p.object_id.lower()]
+                                        object_id.lower() != p.object_id.lower() or
+                                        (application_id or '').lower() != (p.application_id or '').lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 
@@ -1745,45 +1750,57 @@ def restore_storage_account(client, vault_base_url, file_path):
 # endregion
 
 
+# region private_link
+def _verify_vault_or_hsm_name(vault_name, hsm_name):
+    if not vault_name and not hsm_name:
+        raise RequiredArgumentMissingError('Please specify --vault-name or --hsm-name.')
+
+
+def list_private_link_resource(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    _verify_vault_or_hsm_name(vault_name, hsm_name)
+
+    if is_azure_stack_profile(cmd) or vault_name:
+        return client.list_by_vault(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    hsm_plr_client = get_client_factory(ResourceType.MGMT_KEYVAULT,
+                                        Clients.mhsm_private_link_resources)(cmd.cli_ctx, None)
+    return hsm_plr_client.list_by_mhsm_resource(resource_group_name=resource_group_name, name=hsm_name)
+# endregion
+
+
 # region private_endpoint
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, name,
                                                private_endpoint_connection_name, is_approved=True, description=None,
                                                no_wait=False):
     PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
                                                             resource_type=ResourceType.MGMT_KEYVAULT)
 
-    connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                            private_endpoint_connection_name=private_endpoint_connection_name)
+    connection = client.get(resource_group_name, name, private_endpoint_connection_name)
 
     new_status = PrivateEndpointServiceConnectionStatus.approved \
         if is_approved else PrivateEndpointServiceConnectionStatus.rejected
     connection.private_link_service_connection_state.status = new_status
     connection.private_link_service_connection_state.description = description
 
-    retval = client.put(resource_group_name=resource_group_name,
-                        vault_name=vault_name,
-                        private_endpoint_connection_name=private_endpoint_connection_name,
-                        properties=connection)
+    retval = client.put(resource_group_name, name, private_endpoint_connection_name, connection)
 
     if no_wait:
         return retval
 
     new_retval = \
-        _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name)
+        _wait_private_link_operation(client, resource_group_name, name, private_endpoint_connection_name)
 
     if new_retval:
         return new_retval
     return retval
 
 
-def _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name):
+def _wait_private_link_operation(client, resource_group_name, name, private_endpoint_connection_name):
     retries = 0
     max_retries = 10
     wait_second = 1
     while retries < max_retries:
-        pl = client.get(resource_group_name=resource_group_name,
-                        vault_name=vault_name,
-                        private_endpoint_connection_name=private_endpoint_connection_name)
+        pl = client.get(resource_group_name, name, private_endpoint_connection_name)
 
         if pl.provisioning_state == 'Succeeded':
             return pl
@@ -1793,24 +1810,45 @@ def _wait_private_link_operation(client, resource_group_name, vault_name, privat
     return None
 
 
-def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
-                                        description=None, no_wait=False):
+def _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name):
+    _verify_vault_or_hsm_name(vault_name, hsm_name)
+    if is_azure_stack_profile(cmd) or vault_name:
+        return client
+    return get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.mhsm_private_endpoint_connections)(cmd.cli_ctx, None)
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                        vault_name=None, hsm_name=None, description=None, no_wait=False):
     """Approve a private endpoint connection request for a Key Vault."""
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return _update_private_endpoint_connection_status(cmd, pec_client, resource_group_name,
+                                                      vault_name or hsm_name, private_endpoint_connection_name,
+                                                      is_approved=True, description=description, no_wait=no_wait)
 
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
-        description=description, no_wait=no_wait
-    )
 
-
-def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
-                                       description=None, no_wait=False):
+def reject_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                       vault_name=None, hsm_name=None, description=None, no_wait=False):
     """Reject a private endpoint connection request for a Key Vault."""
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return _update_private_endpoint_connection_status(cmd, pec_client, resource_group_name,
+                                                      vault_name or hsm_name, private_endpoint_connection_name,
+                                                      is_approved=False, description=description, no_wait=no_wait)
 
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
-        description=description, no_wait=no_wait
-    )
+
+def delete_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                       vault_name=None, hsm_name=None):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return pec_client.begin_delete(resource_group_name,
+                                   vault_name or hsm_name,
+                                   private_endpoint_connection_name)
+
+
+def show_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                     vault_name=None, hsm_name=None):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return pec_client.get(resource_group_name,
+                          vault_name or hsm_name,
+                          private_endpoint_connection_name)
 # endregion
 
 

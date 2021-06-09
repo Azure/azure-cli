@@ -35,8 +35,22 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  '--type microsoft.keyvault/vaults',
                  checks=self.check('@[0].properties.groupId', 'vault'))
 
-    @unittest.skip("Query 'properties.provisioningState' doesn't yield expected value 'Succeeded',"
-                   "instead the actual value is 'Updating'")
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
+    def test_mhsm_private_link_resource(self, resource_group):
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
+            'loc': 'centraluseuap'
+        })
+        self.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+                 '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
+        self.cmd('network private-link-resource list '
+                 '--name {hsm} '
+                 '-g {rg} '
+                 '--type microsoft.keyvault/managedHSMs',
+                 checks=self.check('@[0].properties.groupId', 'managedhsm'))
+        self.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
+        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
@@ -118,8 +132,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  '--description "{rejection_desc}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}'),
-                     self.check('properties.provisioningState', 'Succeeded')
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
                  ])
 
         self.cmd('network private-endpoint-connection show --id {kv_pe_id}',
@@ -133,8 +146,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  '--description "{approval_desc}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('properties.provisioningState', 'Succeeded')
+                     self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')
                  ])
 
         self.cmd('network private-endpoint-connection show --id {kv_pe_id}',
@@ -144,6 +156,104 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
 
         self.cmd('network private-endpoint-connection delete --id {kv_pe_id} -y')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_pe')
+    def test_hsm_private_endpoint_connection(self, resource_group):
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-pe-', 24),
+            'loc': 'centraluseuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'rg': resource_group
+        })
+
+        # Prepare hsm and network
+        hsm = self.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+                       '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"').get_output_in_json()
+        self.kwargs['hsm_id'] = hsm['id']
+        self.cmd('network vnet create '
+                 '-n {vnet} '
+                 '-g {rg} '
+                 '-l {loc} '
+                 '--subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update '
+                 '-n {subnet} '
+                 '--vnet-name {vnet} '
+                 '-g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create '
+                      '-g {rg} '
+                      '-n {pe} '
+                      '--vnet-name {vnet} '
+                      '--subnet {subnet} '
+                      '-l {loc} '
+                      '--connection-name {pe_connection} '
+                      '--private-connection-resource-id {hsm_id} '
+                      '--group-id managedhsm').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        # Show the connection at vault side
+        keyvault = self.cmd('keyvault show --hsm-name {hsm}',
+                            checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+        self.kwargs['hsm_pe_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
+
+        self.cmd('network private-endpoint-connection show '
+                 '--id {hsm_pe_id}',
+                 checks=self.check('id', '{hsm_pe_id}'))
+        self.kwargs['hsm_pe_name'] = self.kwargs['hsm_pe_id'].split('/')[-1]
+        self.cmd('network private-endpoint-connection show  '
+                 '--resource-name {hsm} '
+                 '-g {rg} '
+                 '--name {hsm_pe_name} '
+                 '--type Microsoft.KeyVault/managedHSMs',
+                 checks=self.check('name', '{hsm_pe_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+
+        self.cmd('network private-endpoint-connection approve '
+                 '--resource-name {hsm} '
+                 '--name {hsm_pe_name} '
+                 '-g {rg} '
+                 '--type Microsoft.KeyVault/managedHSMs '
+                 '--description "{approval_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')
+                 ])
+
+        self.cmd('network private-endpoint-connection show --id {hsm_pe_id}',
+                 checks=self.check('properties.provisioningState', 'Succeeded'))
+
+        self.cmd('network private-endpoint-connection reject '
+                 '--id {hsm_pe_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
+
+        self.cmd('network private-endpoint-connection show --id {hsm_pe_id}',
+                 checks=self.check('properties.provisioningState', 'Succeeded'))
+
+        self.cmd('network private-endpoint-connection list --id {hsm_id}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network private-endpoint-connection delete --id {hsm_pe_id} -y')
+
+        # clear resources
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+        self.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
+        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
 class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
@@ -1757,14 +1867,15 @@ class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
         self.cmd("az network private-endpoint-connection delete --id {pec_id} -y")
 
 
-def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
+def _test_private_endpoint(self, approve=True, rejected=True, list_name=True, group_id=True):
     self.kwargs.update({
-        'resource': self.create_random_name('cli-test-resource-', 24),
         'vnet': self.create_random_name('cli-vnet-', 24),
         'subnet': self.create_random_name('cli-subnet-', 24),
         'pe': self.create_random_name('cli-pe-', 24),
         'pe_connection': self.create_random_name('cli-pec-', 24),
     })
+
+    self.kwargs['resource'] = self.kwargs.get('resource', self.create_random_name('cli-test-resource-', 24))
 
     # create resource
     self.kwargs['extra_create'] = self.kwargs.get('extra_create', '')
@@ -1800,9 +1911,10 @@ def _test_private_endpoint(self, approve=True, list_name=True, group_id=True):
     self.cmd('network private-endpoint-connection show --name {name} -g {rg} --resource-name {resource} --type {type}',
              checks=self.check('properties.privateLinkServiceConnectionState.status', 'Approved'))
 
-    self.cmd('network private-endpoint-connection reject --name {name} -g {rg} '
-             '--resource-name {resource} --type {type}',
-             checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
+    if rejected:
+        self.cmd('network private-endpoint-connection reject --name {name} -g {rg} '
+                 '--resource-name {resource} --type {type}',
+                 checks=self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'))
 
     self.cmd('network private-endpoint-connection delete --name {name} -g {rg} '
              '--resource-name {resource} --type {type} -y')
@@ -1867,19 +1979,32 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         _test_private_endpoint(self, list_name=False)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_synapse_workspace")
-    def test_private_endpoint_connection_synapse_workspace(self, resource_group):
+    @StorageAccountPreparer(name_prefix="testpesyn")
+    def test_private_endpoint_connection_synapse_workspace(self, resource_group, storage_account):
         self.kwargs.update({
             'rg': resource_group,
             # config begin
             'cmd': 'synapse workspace',
             'list_num': 3,
             'type': 'Microsoft.Synapse/workspaces',
-            'extra_create': '--storage-account saxyz --file-system file-000 -p 123-xyz-456 -u synapse1230',
+            'extra_create': '--storage-account {} --file-system file-000 -p 123-xyz-456 -u synapse1230'.format(
+                storage_account),
         })
 
-        self.cmd('storage account create -n saxyz -g {rg}')
-
         _test_private_endpoint(self, group_id=False)
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server")
+    def test_private_endpoint_connection_sql_server(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            # config begin
+            'cmd': 'sql server',
+            'list_num': 1,
+            'type': 'Microsoft.Sql/servers',
+            'extra_create': '--admin-user admin123 --admin-password SecretPassword123',
+        })
+
+        _test_private_endpoint(self, approve=False, rejected=False)
 
 
 if __name__ == '__main__':

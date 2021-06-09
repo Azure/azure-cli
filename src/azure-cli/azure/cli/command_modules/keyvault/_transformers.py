@@ -17,7 +17,7 @@ def multi_transformers(*transformers):
 def keep_max_results(output, **command_args):
     maxresults = command_args.get('maxresults', None)
     if maxresults:
-        return [_ for _ in output][:maxresults]
+        return list(output)[:maxresults]
     return output
 
 

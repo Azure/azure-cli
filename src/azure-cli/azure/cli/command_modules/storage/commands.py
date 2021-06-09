@@ -273,7 +273,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account file-service-properties', file_service_mgmt_sdk,
                             custom_command_type=get_custom_sdk('account', client_factory=cf_mgmt_file_services,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01', is_preview=True) as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
         g.show_command('show', 'get_service_properties')
         g.generic_update_command('update',
                                  getter_name='get_service_properties',
@@ -312,6 +312,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_blob_list_output, transform_blob_json_output
         from ._format import transform_blob_output
+        g.storage_custom_command_oauth('copy start', 'copy_blob')
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
@@ -376,7 +377,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
-        g.storage_command_oauth('copy start', 'copy_blob')
         g.storage_command_oauth('copy cancel', 'abort_copy_blob')
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')

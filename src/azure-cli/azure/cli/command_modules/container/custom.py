@@ -371,6 +371,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
+# pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)

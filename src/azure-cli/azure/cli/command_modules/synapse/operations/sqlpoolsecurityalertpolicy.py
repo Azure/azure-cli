@@ -19,7 +19,8 @@ def sqlpool_security_alert_policy_update(
         retention_days=None,
         email_addresses=None,
         disabled_alerts=None,
-        email_account_admins=None):
+        email_account_admins=None,
+        security_alert_policy_name=None):
     '''
     Updates a SQL pool's security alert policy. Custom update function to apply parameters to instance.
     '''
@@ -44,14 +45,16 @@ def sqlpool_security_alert_policy_update(
         instance.retention_days = retention_days
 
     if email_addresses:
-        instance.email_addresses = ";".join(email_addresses)
+        instance.email_addresses = email_addresses
 
     if disabled_alerts:
-        instance.disabled_alerts = ";".join(disabled_alerts)
+        instance.disabled_alerts = disabled_alerts
 
     if email_account_admins:
         instance.email_account_admins = email_account_admins
 
+    if security_alert_policy_name:
+        instance.security_alert_policy_name = 'security_alert_policy_name'
     return instance
 
 
