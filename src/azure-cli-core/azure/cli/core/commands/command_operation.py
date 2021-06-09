@@ -381,7 +381,7 @@ class WaitCommandOperation(BaseCommandOperation):
         super(WaitCommandOperation, self).__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
-    def handler(self, command_args):    # pylint: disable=too-many-statements
+    def handler(self, command_args):    # pylint: disable=too-many-statements, too-many-locals
         """ Callback function of CLICommand handler """
         from msrest.exceptions import ClientException
         from azure.core.exceptions import HttpResponseError
