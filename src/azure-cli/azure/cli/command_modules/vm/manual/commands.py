@@ -13,7 +13,7 @@
 from azure.cli.core.commands import CliCommandType
 from ..generated.commands import vm_shared_gallery_image, vm_shared_gallery_image_version, vm_shared_gallery
 from ..generated._client_factory import cf_shared_gallery_image_version, cf_shared_gallery_image,\
-    cf_shared_gallery
+    cf_gallery
 from ._client_factory import cf_gallery_sharing_profile
 
 
@@ -40,9 +40,9 @@ def load_command_table(self, _):
     with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
         g.custom_command('create', 'sshkey_create')
 
-    with self.command_group('sig shared-gallery', vm_shared_gallery, client_factory=cf_shared_gallery,
-                            is_experimental=True, operation_group='shared_galleries') as g:
-        g.custom_command('list', 'sig_shared_gallery_list')
+    with self.command_group('sig') as g:
+        g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_gallery,
+                         is_experimental=True, operation_group='shared_galleries')
 
     with self.command_group('sig share', vm_gallery_sharing_profile, operation_group='shared_galleries',
                             is_experimental=True, client_factory=cf_gallery_sharing_profile, min_api='2020-09-30') as g:
@@ -51,12 +51,12 @@ def load_command_table(self, _):
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 
-    with self.command_group('sig shared-image-definition', vm_shared_gallery_image, min_api='2020-09-30',
+    with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30',
                             is_experimental=True, operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
-        g.custom_command('list', 'sig_shared_image_definition_list')
+        g.custom_command('list-shared', 'sig_shared_image_definition_list')
 
-    with self.command_group('sig shared-image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
+    with self.command_group('sig image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
                             is_experimental=True, operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
-        g.custom_command('list', 'sig_shared_image_version_list')
+        g.custom_command('list-shared', 'sig_shared_image_version_list')

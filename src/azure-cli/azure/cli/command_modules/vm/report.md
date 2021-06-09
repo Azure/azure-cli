@@ -10,28 +10,28 @@
 |CLI Command Group|Group Swagger name|Commands|
 |---------|------------|--------|
 |az sshkey|SshPublicKeys|[commands](#CommandsInSshPublicKeys)|
-|az sig shared-gallery|SharedGalleries|[commands](#CommandsInSharedGalleries)|
-|az sig shared-image-definition|SharedGalleryImages|[commands](#CommandsInSharedGalleryImages)|
-|az sig shared-image-version|SharedGalleryImageVersions|[commands](#CommandsInSharedGalleryImageVersions)|
+|az sig|Galleries|[commands](#CommandsInGalleries)|
+|az sig image-definition|SharedGalleryImages|[commands](#CommandsInSharedGalleryImages)|
+|az sig image-version|SharedGalleryImageVersions|[commands](#CommandsInSharedGalleryImageVersions)|
 
 ## COMMANDS
-### <a name="CommandsInSharedGalleries">Commands in `az sig shared-gallery` group</a>
+### <a name="CommandsInGalleries">Commands in `az sig` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az sig shared-gallery list](#SharedGalleriesList)|List|[Parameters](#ParametersSharedGalleriesList)|[Example](#ExamplesSharedGalleriesList)|
-|[az sig shared-gallery show](#SharedGalleriesGet)|Get|[Parameters](#ParametersSharedGalleriesGet)|[Example](#ExamplesSharedGalleriesGet)|
+|[az sig image-definition list-shared](#GalleriesList)|List|[Parameters](#ParametersGalleriesList)|[Example](#ExamplesGalleriesList)|
+|[az sig image-version list-shared](#GalleriesList)|List|[Parameters](#ParametersGalleriesList)|[Example](#ExamplesGalleriesList)|
+|[az sig list-shared](#GalleriesList)|List|[Parameters](#ParametersGalleriesList)|[Example](#ExamplesGalleriesList)|
+|[az sig show-shared](#GalleriesGet)|Get|[Parameters](#ParametersGalleriesGet)|[Example](#ExamplesGalleriesGet)|
 
-### <a name="CommandsInSharedGalleryImages">Commands in `az sig shared-image-definition` group</a>
+### <a name="CommandsInSharedGalleryImages">Commands in `az sig image-definition` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az sig shared-image-definition list](#SharedGalleryImagesList)|List|[Parameters](#ParametersSharedGalleryImagesList)|[Example](#ExamplesSharedGalleryImagesList)|
-|[az sig shared-image-definition show](#SharedGalleryImagesGet)|Get|[Parameters](#ParametersSharedGalleryImagesGet)|[Example](#ExamplesSharedGalleryImagesGet)|
+|[az sig image-definition show-shared](#SharedGalleryImagesGet)|Get|[Parameters](#ParametersSharedGalleryImagesGet)|[Example](#ExamplesSharedGalleryImagesGet)|
 
-### <a name="CommandsInSharedGalleryImageVersions">Commands in `az sig shared-image-version` group</a>
+### <a name="CommandsInSharedGalleryImageVersions">Commands in `az sig image-version` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az sig shared-image-version list](#SharedGalleryImageVersionsList)|List|[Parameters](#ParametersSharedGalleryImageVersionsList)|[Example](#ExamplesSharedGalleryImageVersionsList)|
-|[az sig shared-image-version show](#SharedGalleryImageVersionsGet)|Get|[Parameters](#ParametersSharedGalleryImageVersionsGet)|[Example](#ExamplesSharedGalleryImageVersionsGet)|
+|[az sig image-version show-shared](#SharedGalleryImageVersionsGet)|Get|[Parameters](#ParametersSharedGalleryImageVersionsGet)|[Example](#ExamplesSharedGalleryImageVersionsGet)|
 
 ### <a name="CommandsInSshPublicKeys">Commands in `az sshkey` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -46,50 +46,65 @@
 
 ## COMMAND DETAILS
 
-### group `az sig shared-gallery`
-#### <a name="SharedGalleriesList">Command `az sig shared-gallery list`</a>
+### group `az sig`
+#### <a name="GalleriesList">Command `az sig image-definition list-shared`</a>
 
-##### <a name="ExamplesSharedGalleriesList">Example</a>
+##### <a name="ExamplesGalleriesList">Example</a>
 ```
-az sig shared-gallery list --location "myLocation"
+az sig image-definition list-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
 ```
-##### <a name="ParametersSharedGalleriesList">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--location**|string|Resource location.|location|location|
-|**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
-
-#### <a name="SharedGalleriesGet">Command `az sig shared-gallery show`</a>
-
-##### <a name="ExamplesSharedGalleriesGet">Example</a>
-```
-az sig shared-gallery show --gallery-unique-name "galleryUniqueName" --location "myLocation"
-```
-##### <a name="ParametersSharedGalleriesGet">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--location**|string|Resource location.|location|location|
-|**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
-
-### group `az sig shared-image-definition`
-#### <a name="SharedGalleryImagesList">Command `az sig shared-image-definition list`</a>
-
-##### <a name="ExamplesSharedGalleryImagesList">Example</a>
-```
-az sig shared-image-definition list --gallery-unique-name "galleryUniqueName" --location "myLocation"
-```
-##### <a name="ParametersSharedGalleryImagesList">Parameters</a> 
+##### <a name="ParametersGalleriesList">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--location**|string|Resource location.|location|location|
 |**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
 |**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
 
-#### <a name="SharedGalleryImagesGet">Command `az sig shared-image-definition show`</a>
+#### <a name="GalleriesList">Command `az sig image-version list-shared`</a>
+
+##### <a name="ExamplesGalleriesList">Example</a>
+```
+az sig image-version list-shared --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+"galleryUniqueName" --location "myLocation"
+```
+##### <a name="ParametersGalleriesList">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--location**|string|Resource location.|location|location|
+|**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
+|**--gallery-image-name**|string|The name of the Shared Gallery Image Definition from which the Image Versions are to be listed.|gallery_image_name|galleryImageName|
+|**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
+
+#### <a name="GalleriesList">Command `az sig list-shared`</a>
+
+##### <a name="ExamplesGalleriesList">Example</a>
+```
+az sig list-shared --location "myLocation"
+```
+##### <a name="ParametersGalleriesList">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--location**|string|Resource location.|location|location|
+|**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
+
+#### <a name="GalleriesGet">Command `az sig show-shared`</a>
+
+##### <a name="ExamplesGalleriesGet">Example</a>
+```
+az sig show-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
+```
+##### <a name="ParametersGalleriesGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--location**|string|Resource location.|location|location|
+|**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
+
+### group `az sig image-definition`
+#### <a name="SharedGalleryImagesGet">Command `az sig image-definition show-shared`</a>
 
 ##### <a name="ExamplesSharedGalleryImagesGet">Example</a>
 ```
-az sig shared-image-definition show --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
+az sig image-definition show-shared --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
 "galleryUniqueName" --location "myLocation"
 ```
 ##### <a name="ParametersSharedGalleryImagesGet">Parameters</a> 
@@ -99,27 +114,12 @@ az sig shared-image-definition show --gallery-image-definition "myGalleryImageNa
 |**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
 |**--gallery-image-name**|string|The name of the Shared Gallery Image Definition from which the Image Versions are to be listed.|gallery_image_name|galleryImageName|
 
-### group `az sig shared-image-version`
-#### <a name="SharedGalleryImageVersionsList">Command `az sig shared-image-version list`</a>
-
-##### <a name="ExamplesSharedGalleryImageVersionsList">Example</a>
-```
-az sig shared-image-version list --gallery-image-definition "myGalleryImageName" --gallery-unique-name \
-"galleryUniqueName" --location "myLocation"
-```
-##### <a name="ParametersSharedGalleryImageVersionsList">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--location**|string|Resource location.|location|location|
-|**--gallery-unique-name**|string|The unique name of the Shared Gallery.|gallery_unique_name|galleryUniqueName|
-|**--gallery-image-name**|string|The name of the Shared Gallery Image Definition from which the Image Versions are to be listed.|gallery_image_name|galleryImageName|
-|**--shared-to**|choice|The query parameter to decide what shared galleries to fetch when doing listing operations.|shared_to|sharedTo|
-
-#### <a name="SharedGalleryImageVersionsGet">Command `az sig shared-image-version show`</a>
+### group `az sig image-version`
+#### <a name="SharedGalleryImageVersionsGet">Command `az sig image-version show-shared`</a>
 
 ##### <a name="ExamplesSharedGalleryImageVersionsGet">Example</a>
 ```
-az sig shared-image-version show --gallery-image-definition "myGalleryImageName" --gallery-image-version \
+az sig image-version show-shared --gallery-image-definition "myGalleryImageName" --gallery-image-version \
 "myGalleryImageVersionName" --gallery-unique-name "galleryUniqueName" --location "myLocation"
 ```
 ##### <a name="ParametersSharedGalleryImageVersionsGet">Parameters</a> 

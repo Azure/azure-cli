@@ -12,22 +12,24 @@
 from .. import try_manual
 
 
-# EXAMPLE: /SharedGalleries/get/Get a gallery.
+# EXAMPLE: /Galleries/get/Get a gallery.
 @try_manual
-def step_shared_gallery_list(test, checks=None):
+def step_image_definition_list_shared(test, rg, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sig shared-gallery list '
+    test.cmd('az sig image-definition list-shared '
+             '--gallery-unique-name "galleryUniqueName" '
              '--location "myLocation"',
              checks=checks)
 
 
 # EXAMPLE: /SharedGalleryImages/get/Get a gallery.
 @try_manual
-def step_shared_image_definition_list(test, checks=None):
+def step_image_definition_show_shared(test, rg, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sig shared-image-definition list '
+    test.cmd('az sig image-definition show-shared '
+             '--gallery-image-definition "myGalleryImageName" '
              '--gallery-unique-name "galleryUniqueName" '
              '--location "myLocation"',
              checks=checks)
@@ -35,11 +37,12 @@ def step_shared_image_definition_list(test, checks=None):
 
 # EXAMPLE: /SharedGalleryImageVersions/get/Get a gallery.
 @try_manual
-def step_shared_image_version_list(test, checks=None):
+def step_image_version_show_shared(test, rg, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az sig shared-image-version list '
+    test.cmd('az sig image-version show-shared '
              '--gallery-image-definition "myGalleryImageName" '
+             '--gallery-image-version "myGalleryImageVersionName" '
              '--gallery-unique-name "galleryUniqueName" '
              '--location "myLocation"',
              checks=checks)
@@ -47,7 +50,7 @@ def step_shared_image_version_list(test, checks=None):
 
 # EXAMPLE: /SshPublicKeys/put/Create a new SSH public key resource.
 @try_manual
-def step_create(test, checks=None):
+def step_create(test, rg, checks=None):
     if checks is None:
         checks = []
     test.cmd('az sshkey create '
@@ -60,10 +63,11 @@ def step_create(test, checks=None):
 
 # EXAMPLE: /SshPublicKeys/get/Get an ssh public key.
 @try_manual
-def step_show(test, checks=None):
+def step_show(test, rg, checks=None):
     if checks is None:
         checks = []
     test.cmd('az sshkey show '
              '--resource-group "{rg}" '
              '--name "{mySshPublicKey}"',
              checks=checks)
+
