@@ -21,7 +21,7 @@ def create_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_n
 
     sql_pool_info = SqlPool(sku=sku, location=location, create_mode=SynapseSqlCreateMode.Default, tags=tags)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, workspace_name, sql_pool_name, sql_pool_info)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name, sql_pool_name, sql_pool_info)
 
 
 def update_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_name, sku_name=None, tags=None):
@@ -60,7 +60,7 @@ def restore_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_
     dest_sql_pool_info = SqlPool(sku=sku, location=source_sql_pool_info.location, create_mode=create_mode,
                                  restore_point_in_time=restore_point_in_time, source_database_id=source_database_id)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, workspace_name, destination_name,
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name, destination_name,
                        dest_sql_pool_info)
 
 
