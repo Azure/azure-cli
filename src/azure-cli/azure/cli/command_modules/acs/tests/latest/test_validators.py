@@ -83,7 +83,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
         err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
-            validators.validate_cluster_autoscaler_profile(namespace)
+            validators.validate_cluster_autoscaler_profile(MockCmd(self.cli), namespace)
         self.assertEqual(str(cm.exception), err)
 
     def test_one_empty_key_in_pair_one_non_empty(self):

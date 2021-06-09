@@ -754,7 +754,7 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, too-many-lines
-def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy_mode,
+def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
@@ -771,45 +771,49 @@ def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        network_api_version=None, computer_name_prefix=None):
+                        network_api_version=None):
 
     # Build IP configuration
     ip_configuration = {}
-    if ip_config_name:
-        ip_configuration['name'] = ip_config_name
+    ip_config_properties = {}
+
     if subnet_id:
-        ip_configuration['properties'] = {
-            'subnet': {'id': subnet_id}
-        }
+        ip_config_properties['subnet'] = {'id': subnet_id}
 
     if public_ip_per_vm:
-        ip_configuration['properties']['publicipaddressconfiguration'] = {
+        ip_config_properties['publicipaddressconfiguration'] = {
             'name': 'instancepublicip',
             'properties': {
                 'idleTimeoutInMinutes': 10,
             }
         }
         if vm_domain_name:
-            ip_configuration['properties']['publicipaddressconfiguration']['properties']['dnsSettings'] = {
+            ip_config_properties['publicipaddressconfiguration']['properties']['dnsSettings'] = {
                 'domainNameLabel': vm_domain_name
             }
 
     if backend_address_pool_id:
         key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
             else 'ApplicationGatewayBackendAddressPools'
-        ip_configuration['properties'][key] = [
+        ip_config_properties[key] = [
             {'id': backend_address_pool_id}
         ]
 
     if inbound_nat_pool_id:
-        ip_configuration['properties']['loadBalancerInboundNatPools'] = [
+        ip_config_properties['loadBalancerInboundNatPools'] = [
             {'id': inbound_nat_pool_id}
         ]
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_configuration['properties']['applicationSecurityGroups'] = [{'id': x.id}
-                                                                       for x in application_security_groups]
+        ip_config_properties['applicationSecurityGroups'] = [{'id': x.id} for x in application_security_groups]
+
+    if ip_config_properties:
+        ip_configuration = {
+            'name': ip_config_name,
+            'properties': ip_config_properties
+        }
+
     # Build storage profile
     storage_properties = {}
     if disk_info:
@@ -844,7 +848,7 @@ def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy
             storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set
             }
-        if disk_info['os'].get('diffDiskSettings'):
+        if disk_info and disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
         if os_disk_size_gb is not None:
@@ -861,10 +865,12 @@ def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy
         storage_properties['imageReference'] = {
             'id': image
         }
+
     if disk_info:
         data_disks = [v for k, v in disk_info.items() if k != 'os']
     else:
-        data_disks = None
+        data_disks = []
+
     if data_disk_encryption_sets:
         if len(data_disk_encryption_sets) != len(data_disks):
             raise CLIError(
@@ -916,23 +922,27 @@ def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy
 
     # Build VMSS
     nic_config = {}
-    if nic_name:
-        nic_config['name'] = nic_name
+    nic_config_properties = {}
+
     if ip_configuration:
-        nic_config['properties'] = {
-            'primary': 'true',
-            'ipConfigurations': [ip_configuration]
-        }
+        nic_config_properties['ipConfigurations'] = [ip_configuration]
 
     if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         if dns_servers:
-            nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
+            nic_config_properties['dnsSettings'] = {'dnsServers': dns_servers}
 
         if accelerated_networking:
-            nic_config['properties']['enableAcceleratedNetworking'] = True
+            nic_config_properties['enableAcceleratedNetworking'] = True
 
     if nsg:
-        nic_config['properties']['networkSecurityGroup'] = {'id': nsg}
+        nic_config_properties['networkSecurityGroup'] = {'id': nsg}
+
+    if nic_config_properties:
+        nic_config_properties['primary'] = 'true'
+        nic_config = {
+            'name': nic_name,
+            'properties': nic_config_properties
+        }
 
     vmss_properties = {}
     network_profile = {}
@@ -1025,8 +1035,14 @@ def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy
 
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
+
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile
+
+    sku = {}
+    if vm_sku:
+        sku['name'] = vm_sku
+        sku['capacity'] = instance_count
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
@@ -1035,10 +1051,15 @@ def build_vmss_resource(cmd, name, location, tags, overprovision, upgrade_policy
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
-        'properties': vmss_properties
+        'properties': vmss_properties,
+        'dependsOn': []
     }
-    if vm_sku:
-        vmss['sku'] = {'name': vm_sku, 'capacity': instance_count}
+
+    if sku:
+        vmss['sku'] = sku
+
+    if vmss_properties:
+        vmss['properties'] = vmss_properties
 
     if zones:
         vmss['zones'] = zones

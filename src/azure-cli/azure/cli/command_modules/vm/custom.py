@@ -2438,9 +2438,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
-    # flexible_str = 'Flexible'
+    flexible_str = 'Flexible'
     if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
+
         if disk_info:
             storage_sku = disk_info['os'].get('storageAccountType')
 
@@ -2503,10 +2504,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
         else:
             subnet_id = None
-        gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
-                             if vnet_name and app_gateway_type == 'new' else None)
 
-        # public IP is used by either load balancer/application gateway
+        if vnet_name:
+            gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
+                                 if app_gateway_type == 'new' else None)
+        else:
+            gateway_subnet_id = None
+
+            # public IP is used by either load balancer/application gateway
         public_ip_address_id = None
         if public_ip_address:
             public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
@@ -2552,7 +2557,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             master_template.add_resource(lb_resource)
 
             # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
-            if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+            if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None and os_type:
                 nsg_name = '{}NSG'.format(vmss_name)
                 master_template.add_resource(build_nsg_resource(
                     None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
@@ -2639,18 +2644,18 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
 
         if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
             naming_prefix = computer_name_prefix
+
         if orchestration_mode.lower() == uniform_str.lower():
             computer_name_prefix = naming_prefix
+
         if os_version and os_version != 'latest':
             logger.warning('You are deploying VMSS pinned to a specific image version from Azure Marketplace. '
                            'Consider using "latest" as the image version.')
-        if disable_overprovision is not None:
-            overprovision = not disable_overprovision
-        else:
-            overprovision = None
+
         vmss_resource = build_vmss_resource(
-            cmd=cmd, name=vmss_name, location=location, tags=tags,
-            overprovision=overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
+            cmd=cmd, name=vmss_name, computer_name_prefix=computer_name_prefix, location=location, tags=tags,
+            overprovision=not disable_overprovision if orchestration_mode.lower() == uniform_str.lower() else None,
+            upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
             instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
             public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
             accelerated_networking=accelerated_networking, admin_username=admin_username,
@@ -2673,7 +2678,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone,
-            network_api_version=network_api_version, computer_name_prefix=computer_name_prefix)
+            network_api_version=network_api_version)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2693,6 +2698,29 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 role_assignment_guid = str(_gen_guid())
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
+
+    # elif orchestration_mode.lower() == flexible_str.lower():
+    #     if platform_fault_domain_count is None:
+    #         raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
+    #     vmss_resource = {
+    #         'type': 'Microsoft.Compute/virtualMachineScaleSets',
+    #         'name': vmss_name,
+    #         'location': location,
+    #         'tags': tags,
+    #         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+    #         'properties': {
+    #             'singlePlacementGroup': single_placement_group,
+    #             'provisioningState': 0,
+    #             'platformFaultDomainCount': platform_fault_domain_count
+    #         }
+    #     }
+    #     if zones is not None:
+    #         vmss_resource['zones'] = zones
+    #     if proximity_placement_group is not None:
+    #         vmss_resource['properties']['proximityPlacementGroup'] = {
+    #             'id': proximity_placement_group
+    #         }
+
     else:
         raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
