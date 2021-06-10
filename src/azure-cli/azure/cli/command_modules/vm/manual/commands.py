@@ -11,15 +11,49 @@
 # pylint: disable=too-many-locals
 
 from azure.cli.core.commands import CliCommandType
+from ..generated._client_factory import cf_shared_gallery_image_version, cf_shared_gallery_image
+from ._client_factory import cf_gallery_sharing_profile, cf_shared_galleries
 
 
 def load_command_table(self, _):
 
+    custom_tmpl = 'azure.cli.command_modules.vm.manual.custom#{}'
+
+    compute_custom = CliCommandType(operations_tmpl=custom_tmpl)
     from ..generated._client_factory import cf_ssh_public_key
 
     vm_ssh_public_key = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
         client_factory=cf_ssh_public_key,
     )
+
+    vm_gallery_sharing_profile = CliCommandType(
+        operations_tmpl=(
+            'azure.mgmt.compute.operations._gallery_sharing_profile_operations#GallerySharingProfileOperations.{}'
+        ),
+        client_factory=cf_gallery_sharing_profile,
+        operation_group='galleries'
+    )
+
     with self.command_group('sshkey', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
         g.custom_command('create', 'sshkey_create')
+
+    with self.command_group('sig') as g:
+        g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
+                         is_experimental=True, operation_group='shared_galleries')
+
+    with self.command_group('sig share', vm_gallery_sharing_profile, operation_group='shared_galleries',
+                            is_experimental=True, client_factory=cf_gallery_sharing_profile, min_api='2020-09-30') as g:
+        g.custom_command('add', 'sig_share_update', supports_no_wait=True)
+        g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
+        g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
+        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
+
+    with self.command_group('sig image-definition', min_api='2020-09-30', operation_group='shared_galleries',
+                            client_factory=cf_shared_gallery_image) as g:
+        g.custom_command('list-shared', 'sig_shared_image_definition_list', is_experimental=True)
+
+    with self.command_group('sig image-version', min_api='2020-09-30',
+                            operation_group='shared_galleries',
+                            client_factory=cf_shared_gallery_image_version) as g:
+        g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
