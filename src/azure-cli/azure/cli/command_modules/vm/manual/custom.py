@@ -9,7 +9,7 @@
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from ._client_factory import cf_vm_cl
 
 from knack.log import get_logger
@@ -70,7 +70,7 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
     SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
         'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes')
     if subscription_ids is None and tenant_ids is None:
-        raise ValidationError('At least one of subscription ids or tenant ids must be provided')
+        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
     groups = []
     if subscription_ids:
         groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))

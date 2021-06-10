@@ -65,7 +65,7 @@ helps['sig share'] = """
 
 helps['sig share add'] = """
     type: command
-    short-summary: "Update sharing profile of a gallery."
+    short-summary: Add sharing id to the sharing profile of a gallery.
     examples:
       - name: Add sharing id to the sharing profile of a gallery.
         text: |-
@@ -89,7 +89,7 @@ helps['sig share reset'] = """
     type: command
     short-summary: "Reset sharing profile of a gallery."
     examples:
-      - name: reset sharing profile of a gallery.
+      - name: Rreset sharing profile of a gallery.
         text: |-
                az sig share reset --gallery-name "myGalleryName" --resource-group "myResourceGroup"
 """
