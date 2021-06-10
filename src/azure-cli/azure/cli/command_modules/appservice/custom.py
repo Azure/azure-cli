@@ -690,8 +690,9 @@ def set_functionapp(cmd, resource_group_name, name, **kwargs):
 
 
 def list_webapp(cmd, resource_group_name=None):
-    result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' not in r.kind]
+    full_list = _list_app(cmd.cli_ctx, resource_group_name)
+    # ignore apps with kind==null & not functions apps
+    return list(filter(lambda x: x.kind is not None and "function" not in x.kind.lower(), full_list))
 
 
 def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
@@ -706,8 +707,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' in r.kind]
+    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
+                       _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -1645,10 +1646,8 @@ def delete_source_control(cmd, resource_group_name, name, slot=None):
 
 
 def enable_local_git(cmd, resource_group_name, name, slot=None):
-    SiteConfigResource = cmd.get_models('SiteConfigResource')
     client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, name)
-    site_config = SiteConfigResource(location=location)
+    site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     if slot is None:
         client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
