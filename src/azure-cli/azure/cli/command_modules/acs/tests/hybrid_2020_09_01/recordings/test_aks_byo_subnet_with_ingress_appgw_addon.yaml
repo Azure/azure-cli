@@ -1,0 +1,738 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --address-prefix --subnet-name --subnet-prefix -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/acscliapi8?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8","name":"acscliapi8","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '227'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["11.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "aks-subnet", "properties":
+      {"addressPrefix": "11.0.0.0/24"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '208'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --address-prefix --subnet-name --subnet-prefix -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cliakstest000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002\",\r\n
+        \ \"etag\": \"W/\\\"3926f169-f4eb-4e59-8c9d-e273150a92cc\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"1d694783-d568-439c-af0b-b56200dbb8e2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"11.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"aks-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet\",\r\n
+        \       \"etag\": \"W/\\\"3926f169-f4eb-4e59-8c9d-e273150a92cc\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"11.0.0.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9d277aea-02a6-4577-898c-b9c2583db59e?api-version=2018-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1197'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e134f8c6-a5c8-4fea-9c6a-acc1b24856ab
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --address-prefix --subnet-name --subnet-prefix -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9d277aea-02a6-4577-898c-b9c2583db59e?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ce3c40fb-979a-4255-ac3f-0fabaa23a817
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --address-prefix --subnet-name --subnet-prefix -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cliakstest000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002\",\r\n
+        \ \"etag\": \"W/\\\"30c4ffb3-aa49-4fc0-902d-3c66db05d47d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"1d694783-d568-439c-af0b-b56200dbb8e2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"11.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"aks-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet\",\r\n
+        \       \"etag\": \"W/\\\"30c4ffb3-aa49-4fc0-902d-3c66db05d47d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"11.0.0.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1199'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:06 GMT
+      etag:
+      - W/"30c4ffb3-aa49-4fc0-902d-3c66db05d47d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e8336edf-199b-4b91-ba76-9464545f65b9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --resource-group --vnet-name --address-prefixes -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cliakstest000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002\",\r\n
+        \ \"etag\": \"W/\\\"30c4ffb3-aa49-4fc0-902d-3c66db05d47d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"1d694783-d568-439c-af0b-b56200dbb8e2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"11.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"aks-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet\",\r\n
+        \       \"etag\": \"W/\\\"30c4ffb3-aa49-4fc0-902d-3c66db05d47d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"11.0.0.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1199'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:05 GMT
+      etag:
+      - W/"30c4ffb3-aa49-4fc0-902d-3c66db05d47d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 125a33da-08fe-47eb-af74-88a3c5de9ecf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002",
+      "location": "westus", "tags": {}, "etag": "W/\"30c4ffb3-aa49-4fc0-902d-3c66db05d47d\"",
+      "properties": {"addressSpace": {"addressPrefixes": ["11.0.0.0/16"]}, "dhcpOptions":
+      {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet",
+      "name": "aks-subnet", "etag": "W/\"30c4ffb3-aa49-4fc0-902d-3c66db05d47d\"",
+      "properties": {"addressPrefix": "11.0.0.0/24", "delegations": [], "provisioningState":
+      "Succeeded"}}, {"name": "appgw-subnet", "properties": {"addressPrefix": "11.0.1.0/24"}}],
+      "virtualNetworkPeerings": [], "resourceGuid": "1d694783-d568-439c-af0b-b56200dbb8e2",
+      "provisioningState": "Succeeded", "enableDdosProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '925'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --resource-group --vnet-name --address-prefixes -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cliakstest000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002\",\r\n
+        \ \"etag\": \"W/\\\"9d8ed734-a246-421b-b55a-ad55e09d9126\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"1d694783-d568-439c-af0b-b56200dbb8e2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"11.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"aks-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet\",\r\n
+        \       \"etag\": \"W/\\\"9d8ed734-a246-421b-b55a-ad55e09d9126\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"11.0.0.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"appgw-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/appgw-subnet\",\r\n
+        \       \"etag\": \"W/\\\"9d8ed734-a246-421b-b55a-ad55e09d9126\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"11.0.1.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0d86e7d1-5b2a-4c9e-9aa3-7f55f00affd5?api-version=2018-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1704'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1eb98adb-e9a0-4c70-b1b6-bd2f0ab2921e
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --resource-group --vnet-name --address-prefixes -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0d86e7d1-5b2a-4c9e-9aa3-7f55f00affd5?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9b0c0eef-e83c-46d2-80e3-11e3229a9b7b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --resource-group --vnet-name --address-prefixes -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002?api-version=2018-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cliakstest000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002\",\r\n
+        \ \"etag\": \"W/\\\"da715197-2fad-44fa-bc05-27a82a5cb362\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"1d694783-d568-439c-af0b-b56200dbb8e2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"11.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"aks-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet\",\r\n
+        \       \"etag\": \"W/\\\"da715197-2fad-44fa-bc05-27a82a5cb362\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"11.0.0.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"appgw-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/appgw-subnet\",\r\n
+        \       \"etag\": \"W/\\\"da715197-2fad-44fa-bc05-27a82a5cb362\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"11.0.1.0/24\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1707'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:09 GMT
+      etag:
+      - W/"da715197-2fad-44fa-bc05-27a82a5cb362"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 77ef2ad1-1bfb-4af7-8b8f-5afafd2cae06
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - aks create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --enable-managed-identity --generate-ssh-keys --vnet-subnet-id
+        -a --appgw-name --appgw-subnet-id --yes -o
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-resource/16.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/acscliapi8?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8","name":"acscliapi8","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '227'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 05:38:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"kubernetesVersion": "", "dnsPrefix":
+      "cliakstest-acscliapi8-8a4f68", "agentPoolProfiles": [{"count": 3, "vmSize":
+      "Standard_DS2_v2", "vnetSubnetID": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet",
+      "osType": "Linux", "type": "VirtualMachineScaleSets", "mode": "System", "enableNodePublicIP":
+      false, "scaleSetPriority": "Regular", "scaleSetEvictionPolicy": "Delete", "name":
+      "nodepool1"}], "linuxProfile": {"adminUsername": "azureuser", "ssh": {"publicKeys":
+      [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDKmzqj3TPcGPIOqJjZwQyT20uOJE+UD4qUFhv3tGaGua00KbNRShUDOcUwV2G/3b6A+3VLUsQ/tV9u9X97TKuFTxyQSv3SRPYGmrkqNI21p1Dg5jMBuTZl2oFFFPdFCUT/etjuFApVV0qbjOWwsRjtZBRRMCzYToS60TQQrcfSgK6iYld5FgsEbmn6W+3MYytX2FcRTjd9M0Hl993fP7LBFLON9xUr+iFcu+rqjGqiBYkE1j4Pryjf+2c2hZghSB1riehfpAigKeqwEOSppRonwJ7bQXW3ZVs0vT6gAfbBZixUzTb3ie7MH9xwCV1Z7Rp7FmWa6zaTI2HSdQfVSePMixti7xbZvFHKcQvJpji3mt+CiiL6W0slHjpHepRBhmg3yIB6t9RGbtrlqlK9XbkMNgOeQtMQtLSuqO6Xr0ipV6FPXGcEDHLYJVo//o7d4h93cO68XjUP7ze86/uEv5chV0BJmv7dzbYbK1GAWN0XRp5KdUz2h2fYCUmSftZNRTFLh/1R0hNbUIoSlfIO0ZGdZzoh/5N7EzkD0md1pUJ34/cWZ/8aoIsbbzmc5uUjaI2p6E0YumM/WnF1Ymem9L+cVXZjSQ0L8Ad5VyYk0kHp7X4ckRYuPIsNA20r+PoIBq1Yp6i+Q9oHS2wuxummU4Z11aOiCqjkW+TU6rQ+RmRGow==
+      redmond\\bhsantha@bhuvan-dev\n"}]}}, "addonProfiles": {"ingressApplicationGateway":
+      {"enabled": true, "config": {"applicationGatewayName": "gateway", "subnetId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/appgw-subnet"}}},
+      "enableRBAC": true, "networkProfile": {"networkPlugin": "kubenet", "podCidr":
+      "10.244.0.0/16", "serviceCidr": "10.0.0.0/16", "dnsServiceIP": "10.0.0.10",
+      "dockerBridgeCidr": "172.17.0.1/16", "outboundType": "loadBalancer", "loadBalancerSku":
+      "standard"}}, "identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - aks create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1971'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --enable-managed-identity --generate-ssh-keys --vnet-subnet-id
+        -a --appgw-name --appgw-subnet-id --yes -o
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-containerservice/11.2.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.ContainerService/managedClusters/cliakstest000001?api-version=2020-11-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/acscliapi8/providers/Microsoft.ContainerService/managedClusters/cliakstest000001\",\n
+        \ \"location\": \"westus\",\n  \"name\": \"cliakstest000001\",\n  \"type\":
+        \"Microsoft.ContainerService/ManagedClusters\",\n  \"properties\": {\n   \"provisioningState\":
+        \"Creating\",\n   \"powerState\": {\n    \"code\": \"Running\"\n   },\n   \"kubernetesVersion\":
+        \"1.19.11\",\n   \"dnsPrefix\": \"cliakstest-acscliapi8-8a4f68\",\n   \"fqdn\":
+        \"cliakstest-acscliapi8-8a4f68-621d1453.hcp.westus.azmk8s.io\",\n   \"agentPoolProfiles\":
+        [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\":
+        \"Standard_DS2_v2\",\n     \"osDiskSizeGB\": 128,\n     \"osDiskType\": \"Managed\",\n
+        \    \"vnetSubnetID\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/aks-subnet\",\n
+        \    \"maxPods\": 110,\n     \"type\": \"VirtualMachineScaleSets\",\n     \"provisioningState\":
+        \"Creating\",\n     \"powerState\": {\n      \"code\": \"Running\"\n     },\n
+        \    \"orchestratorVersion\": \"1.19.11\",\n     \"enableNodePublicIP\": false,\n
+        \    \"nodeLabels\": {},\n     \"mode\": \"System\",\n     \"osType\": \"Linux\",\n
+        \    \"nodeImageVersion\": \"AKSUbuntu-1804gen2containerd-2021.05.19\"\n    }\n
+        \  ],\n   \"linuxProfile\": {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\":
+        {\n     \"publicKeys\": [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDKmzqj3TPcGPIOqJjZwQyT20uOJE+UD4qUFhv3tGaGua00KbNRShUDOcUwV2G/3b6A+3VLUsQ/tV9u9X97TKuFTxyQSv3SRPYGmrkqNI21p1Dg5jMBuTZl2oFFFPdFCUT/etjuFApVV0qbjOWwsRjtZBRRMCzYToS60TQQrcfSgK6iYld5FgsEbmn6W+3MYytX2FcRTjd9M0Hl993fP7LBFLON9xUr+iFcu+rqjGqiBYkE1j4Pryjf+2c2hZghSB1riehfpAigKeqwEOSppRonwJ7bQXW3ZVs0vT6gAfbBZixUzTb3ie7MH9xwCV1Z7Rp7FmWa6zaTI2HSdQfVSePMixti7xbZvFHKcQvJpji3mt+CiiL6W0slHjpHepRBhmg3yIB6t9RGbtrlqlK9XbkMNgOeQtMQtLSuqO6Xr0ipV6FPXGcEDHLYJVo//o7d4h93cO68XjUP7ze86/uEv5chV0BJmv7dzbYbK1GAWN0XRp5KdUz2h2fYCUmSftZNRTFLh/1R0hNbUIoSlfIO0ZGdZzoh/5N7EzkD0md1pUJ34/cWZ/8aoIsbbzmc5uUjaI2p6E0YumM/WnF1Ymem9L+cVXZjSQ0L8Ad5VyYk0kHp7X4ckRYuPIsNA20r+PoIBq1Yp6i+Q9oHS2wuxummU4Z11aOiCqjkW+TU6rQ+RmRGow==
+        redmond\\\\bhsantha@bhuvan-dev\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\":
+        {\n    \"clientId\":\"00000000-0000-0000-0000-000000000001\"\n   },\n   \"addonProfiles\":
+        {\n    \"ingressApplicationGateway\": {\n     \"enabled\": true,\n     \"config\":
+        {\n      \"applicationGatewayName\": \"gateway\",\n      \"effectiveApplicationGatewayId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MC_acscliapi8_cliakstest000001_westus/providers/Microsoft.Network/applicationGateways/gateway\",\n
+        \     \"subnetId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.Network/virtualNetworks/cliakstest000002/subnets/appgw-subnet\"\n
+        \    }\n    }\n   },\n   \"nodeResourceGroup\": \"MC_acscliapi8_cliakstest000001_westus\",\n
+        \  \"enableRBAC\": true,\n   \"networkProfile\": {\n    \"networkPlugin\":
+        \"kubenet\",\n    \"loadBalancerSku\": \"standard\",\n    \"loadBalancerProfile\":
+        {\n     \"managedOutboundIPs\": {\n      \"count\": 1\n     }\n    },\n    \"podCidr\":
+        \"10.244.0.0/16\",\n    \"serviceCidr\": \"10.0.0.0/16\",\n    \"dnsServiceIP\":
+        \"10.0.0.10\",\n    \"dockerBridgeCidr\": \"172.17.0.1/16\",\n    \"outboundType\":
+        \"loadBalancer\"\n   },\n   \"maxAgentPools\": 100\n  },\n  \"identity\":
+        {\n   \"type\": \"SystemAssigned\",\n   \"principalId\":\"00000000-0000-0000-0000-000000000001\",\n
+        \  \"tenantId\": \"657a2bb7-9a58-4be7-87f3-643bb3b7cbb5\"\n  },\n  \"sku\":
+        {\n   \"name\": \"Basic\",\n   \"tier\": \"Free\"\n  }\n }"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/westus/operations/025733fc-7f27-4ece-b2e4-82822f124679?api-version=2017-08-31
+      cache-control:
+      - no-cache
+      content-length:
+      - '3444'
+      content-type:
+      - application/json
+      date:
+      - Thu, 10 Jun 2021 05:38:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - aks create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --enable-managed-identity --generate-ssh-keys --vnet-subnet-id
+        -a --appgw-name --appgw-subnet-id --yes -o
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-containerservice/11.2.0 Azure-SDK-For-Python AZURECLI/2.23.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/westus/operations/025733fc-7f27-4ece-b2e4-82822f124679?api-version=2017-08-31
+  response:
+    body:
+      string: "{\n  \"name\": \"fc335702-277f-ce4e-b2e4-82822f124679\",\n  \"status\":
+        \"InProgress\",\n  \"startTime\": \"2021-06-10T05:38:16.96Z\"\n }"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '121'
+      content-type:
+      - application/json
+      date:
+      - Thu, 10 Jun 2021 05:38:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - aks create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --enable-managed-identity --generate-ssh-keys --vnet-subnet-id
+        -a --appgw-name --appgw-subnet-id --yes -o
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-containerservice/11.2.0 Azure-SDK-For-Python AZURECLI/2.23.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/westus/operations/025733fc-7f27-4ece-b2e4-82822f124679?api-version=2017-08-31
+  response:
+    body:
+      string: "{\n  \"name\": \"fc335702-277f-ce4e-b2e4-82822f124679\",\n  \"status\":
+        \"InProgress\",\n  \"startTime\": \"2021-06-10T05:38:16.96Z\"\n }"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '121'
+      content-type:
+      - application/json
+      date:
+      - Thu, 10 Jun 2021 05:39:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
