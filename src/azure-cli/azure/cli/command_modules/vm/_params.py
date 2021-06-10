@@ -595,7 +595,8 @@ def load_arguments(self, _):
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
         c.argument('network_api_version', is_preview=True, min_api='2021-03-01',
                    help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
-                   "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'.")
+                   "Interface Configurations for Virtual Machine Scale Set with orchestration mode 'Flexible'. Possible "
+                   "value is 2020-11-01.")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)

@@ -4988,24 +4988,22 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --admin-username testvmss '
-                 '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvm --image debian '
-                 '--vnet-name {vnet_name} --subnet default')
+                 '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvmss --image debian '
+                 '--vnet-name {vnet_name} --subnet default --network-api-version 2020-11-01')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('orchestrationMode', 'Flexible'),
-            self.check('platformFaultDomainCount', 3),
+            self.check('platformFaultDomainCount', 1),
             self.check('singlePlacementGroup', False),
-            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', None),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
-        ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian '
-                 '--ultra-ssd-enabled --zone 2 --location eastus --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Flexible '
-                 '--platform-fault-domain-count 3')
-        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
-        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux'),
         ])
+
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 

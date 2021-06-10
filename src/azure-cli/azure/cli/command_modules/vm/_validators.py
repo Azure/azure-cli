@@ -1357,6 +1357,7 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
     if namespace.orchestration_mode.lower() == flexible_str.lower():

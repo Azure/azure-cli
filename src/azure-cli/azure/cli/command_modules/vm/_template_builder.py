@@ -771,7 +771,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        network_api_version=None):
+                        orchestration_mode=None, network_api_version=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -979,7 +979,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if network_api_version and \
             cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        network_profile['networkApVersion'] = network_api_version
+        network_profile['networkApiVersion'] = network_api_version
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
@@ -1039,10 +1039,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile
 
-    sku = {}
-    if vm_sku:
-        sku['name'] = vm_sku
-        sku['capacity'] = instance_count
+    if orchestration_mode:
+        vmss_properties['orchestrationMode'] = orchestration_mode
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
@@ -1051,12 +1049,14 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
-        'properties': vmss_properties,
-        'dependsOn': []
+        'properties': vmss_properties
     }
 
-    if sku:
-        vmss['sku'] = sku
+    if vm_sku:
+        vmss['sku'] = {
+            'name': vm_sku,
+            'capacity': instance_count
+        }
 
     if vmss_properties:
         vmss['properties'] = vmss_properties

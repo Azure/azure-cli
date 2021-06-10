@@ -2438,7 +2438,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
-    flexible_str = 'Flexible'
     if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
 
@@ -2629,12 +2628,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
 
             if health_probe and not is_valid_resource_id(health_probe):
                 health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
-        if orchestration_mode.lower() == uniform_str.lower():
-            ip_config_name = '{}IPConfig'.format(naming_prefix)
-            nic_name = '{}Nic'.format(naming_prefix)
-        else:
-            ip_config_name = None
-            nic_name = None
+
+        ip_config_name = '{}IPConfig'.format(naming_prefix)
+        nic_name = '{}Nic'.format(naming_prefix)
 
         if custom_data:
             custom_data = read_content_if_is_file(custom_data)
@@ -2678,7 +2674,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone,
-            network_api_version=network_api_version)
+            orchestration_mode=orchestration_mode, network_api_version=network_api_version)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2698,29 +2694,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 role_assignment_guid = str(_gen_guid())
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
-
-    # elif orchestration_mode.lower() == flexible_str.lower():
-    #     if platform_fault_domain_count is None:
-    #         raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
-    #     vmss_resource = {
-    #         'type': 'Microsoft.Compute/virtualMachineScaleSets',
-    #         'name': vmss_name,
-    #         'location': location,
-    #         'tags': tags,
-    #         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
-    #         'properties': {
-    #             'singlePlacementGroup': single_placement_group,
-    #             'provisioningState': 0,
-    #             'platformFaultDomainCount': platform_fault_domain_count
-    #         }
-    #     }
-    #     if zones is not None:
-    #         vmss_resource['zones'] = zones
-    #     if proximity_placement_group is not None:
-    #         vmss_resource['properties']['proximityPlacementGroup'] = {
-    #             'id': proximity_placement_group
-    #         }
-
     else:
         raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
