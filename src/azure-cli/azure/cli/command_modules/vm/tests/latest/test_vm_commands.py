@@ -2180,7 +2180,17 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
             self.check('userData', b64encode(user_data)),
         ])
 
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data --show-details', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
         self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', None),
+        ])
+
+        self.cmd('vm show -g {rg} -n {vm} --show-details', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('userData', None),
         ])
@@ -2986,14 +2996,33 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.userData', None),
         ])
 
-        self.cmd('vmss update -g {rg} -n {vmss} --user-data @"{user_data_file}"')
+        self.kwargs['instance_id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
+
+        self.cmd('vmss show -g {rg} -n {vmss} --instance-id {instance_id} --include-user-data',checks=[
+            self.check('instanceId', '{instance_id}'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vmss show -g {rg} -n {vmss} --instance-id {instance_id}',checks=[
+            self.check('instanceId', '{instance_id}'),
+            self.check('userData', None),
+        ])
 
         with open(user_data_file) as file_obj:
             file_content = file_obj.read()
 
+        self.cmd('vmss update -g {rg} -n {vmss} --user-data @"{user_data_file}"')
+
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('virtualMachineProfile.userData', b64encode(file_content)),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --instance-id {instance_id} --user-data "user_data"')
+
+        self.cmd('vmss show -g {rg} -n {vmss} --instance-id {instance_id} --include-user-data',checks=[
+            self.check('instanceId', '{instance_id}'),
+            self.check('userData', b64encode(user_data)),
         ])
 
         # Clear the existing data

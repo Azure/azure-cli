@@ -2826,9 +2826,15 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
     expand = None
     if include_user_data:
         expand = 'userData'
+
     if instance_id is not None:
-        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
-    return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
+        if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
+        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+
+    if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
+        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
+    return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):

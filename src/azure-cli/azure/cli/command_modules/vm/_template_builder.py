@@ -268,7 +268,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
+def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
