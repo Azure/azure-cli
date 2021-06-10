@@ -108,9 +108,10 @@ def handle_template_based_exception(ex):
     try:
         raise CLIError(ex.inner_exception.error.message)
     except AttributeError:
-        raise_subdivision_deployment_error(ex.response.internal_response.text, ex.error.code if ex.error else None)
-    except AttributeError:
-        raise CLIError(ex)
+        if hasattr(ex, 'response'):
+            raise_subdivision_deployment_error(ex.response.internal_response.text, ex.error.code if ex.error else None)
+        else:
+            raise CLIError(ex)
 
 
 def handle_long_running_operation_exception(ex):
