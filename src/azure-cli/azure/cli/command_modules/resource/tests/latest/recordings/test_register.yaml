@@ -1,0 +1,242 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - provider unregister
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/unregister?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights","namespace":"Microsoft.PolicyInsights","authorizations":[{"applicationId":"1d78a85d-813d-46f0-b496-dd72f50a3ec0","roleDefinitionId":"63d2b225-4c34-4641-8768-21a1f7c68ce8"},{"applicationId":"8cae6e77-e04e-42ce-b5cb-50d82bce26b1","roleDefinitionId":"4a2d3d6b-a6ea-45e2-9882-c9ba3e726ed7"}],"resourceTypes":[{"resourceType":"policyEvents","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyStates","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"None"},{"resourceType":"asyncOperationResults","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview"],"capabilities":"None"},{"resourceType":"remediations","locations":[],"apiVersions":["2019-07-01","2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"eventGridFilters","locations":[],"apiVersions":["2020-10-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyRestrictions","locations":[],"apiVersions":["2020-07-01-preview","2020-07-01"],"capabilities":"None"},{"resourceType":"policyTrackedResources","locations":[],"apiVersions":["2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyMetadata","locations":[],"apiVersions":["2019-10-01"],"capabilities":"None"}],"registrationState":"Unregistering","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1824'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 06:15:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"thirdPartyProviderConsent": {"consentToAuthorization": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - provider register
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '63'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --consent-to-authorization
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/register?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights","namespace":"Microsoft.PolicyInsights","authorizations":[{"applicationId":"1d78a85d-813d-46f0-b496-dd72f50a3ec0","roleDefinitionId":"63d2b225-4c34-4641-8768-21a1f7c68ce8"},{"applicationId":"8cae6e77-e04e-42ce-b5cb-50d82bce26b1","roleDefinitionId":"4a2d3d6b-a6ea-45e2-9882-c9ba3e726ed7"}],"resourceTypes":[{"resourceType":"policyEvents","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyStates","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"None"},{"resourceType":"asyncOperationResults","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview"],"capabilities":"None"},{"resourceType":"remediations","locations":[],"apiVersions":["2019-07-01","2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"eventGridFilters","locations":[],"apiVersions":["2020-10-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyRestrictions","locations":[],"apiVersions":["2020-07-01-preview","2020-07-01"],"capabilities":"None"},{"resourceType":"policyTrackedResources","locations":[],"apiVersions":["2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyMetadata","locations":[],"apiVersions":["2019-10-01"],"capabilities":"None"}],"registrationState":"Registering","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1822'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 06:15:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - provider permission list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/providerPermissions?api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"applicationId":"1d78a85d-813d-46f0-b496-dd72f50a3ec0","roleDefinition":{"idAsGuid":"63d2b225-4c34-4641-8768-21a1f7c68ce8","id":"63d2b2254c344641876821a1f7c68ce8","name":"Policy
+        Insights Resource Provider Service Role","isServiceRole":true,"permissions":[{"actions":["*/read","Microsoft.Authorization/checkAccess/action","Microsoft.Authorization/checkAccess/read","Microsoft.Resources/deployments/cancel/action"],"notActions":[],"dataActions":[],"notDataActions":[]}],"scopes":["/"]}},{"applicationId":"8cae6e77-e04e-42ce-b5cb-50d82bce26b1","roleDefinition":{"idAsGuid":"4a2d3d6b-a6ea-45e2-9882-c9ba3e726ed7","id":"4a2d3d6ba6ea45e29882c9ba3e726ed7","name":"Policy
+        Insights Provider Data Plane Service Role","isServiceRole":true,"permissions":[{"actions":["Microsoft.Resources/subscriptions/read","Microsoft.Authorization/checkAccess/action","Microsoft.Authorization/checkAccess/read","Microsoft.Resources/subscriptions/resourceGroups/read","Microsoft.Authorization/policyassignments/read","Microsoft.KeyVault/vaults/read","Microsoft.ContainerService/managedClusters/read","Microsoft.CustomerLockbox/requests/read","Microsoft.Kubernetes/connectedClusters/read","Microsoft.Network/virtualNetworks/read"],"notActions":[],"dataActions":[],"notDataActions":[]}],"scopes":["/"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 06:15:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - provider unregister
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/unregister?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights","namespace":"Microsoft.PolicyInsights","authorizations":[{"applicationId":"1d78a85d-813d-46f0-b496-dd72f50a3ec0","roleDefinitionId":"63d2b225-4c34-4641-8768-21a1f7c68ce8"},{"applicationId":"8cae6e77-e04e-42ce-b5cb-50d82bce26b1","roleDefinitionId":"4a2d3d6b-a6ea-45e2-9882-c9ba3e726ed7"}],"resourceTypes":[{"resourceType":"policyEvents","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyStates","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"None"},{"resourceType":"asyncOperationResults","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview"],"capabilities":"None"},{"resourceType":"remediations","locations":[],"apiVersions":["2019-07-01","2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"eventGridFilters","locations":[],"apiVersions":["2020-10-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyRestrictions","locations":[],"apiVersions":["2020-07-01-preview","2020-07-01"],"capabilities":"None"},{"resourceType":"policyTrackedResources","locations":[],"apiVersions":["2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyMetadata","locations":[],"apiVersions":["2019-10-01"],"capabilities":"None"}],"registrationState":"Unregistering","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1824'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 06:15:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - provider register
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/register?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights","namespace":"Microsoft.PolicyInsights","authorizations":[{"applicationId":"1d78a85d-813d-46f0-b496-dd72f50a3ec0","roleDefinitionId":"63d2b225-4c34-4641-8768-21a1f7c68ce8"},{"applicationId":"8cae6e77-e04e-42ce-b5cb-50d82bce26b1","roleDefinitionId":"4a2d3d6b-a6ea-45e2-9882-c9ba3e726ed7"}],"resourceTypes":[{"resourceType":"policyEvents","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyStates","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview","2018-04-04","2017-12-12-preview","2017-10-17-preview","2017-08-09-preview"],"capabilities":"None"},{"resourceType":"asyncOperationResults","locations":[],"apiVersions":["2019-10-01","2018-07-01-preview"],"capabilities":"None"},{"resourceType":"remediations","locations":[],"apiVersions":["2019-07-01","2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"eventGridFilters","locations":[],"apiVersions":["2020-10-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyRestrictions","locations":[],"apiVersions":["2020-07-01-preview","2020-07-01"],"capabilities":"None"},{"resourceType":"policyTrackedResources","locations":[],"apiVersions":["2018-07-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"policyMetadata","locations":[],"apiVersions":["2019-10-01"],"capabilities":"None"}],"registrationState":"Registering","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1822'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 06:15:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+version: 1

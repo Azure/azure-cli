@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 
-def _resource_client_factory(cli_ctx, **_):
+def _resource_client_factory(cli_ctx, api_version=None, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, api_version=api_version)
 
 
 def _resource_feature_client_factory(cli_ctx, **_):
@@ -68,12 +68,12 @@ def cf_resource_groups(cli_ctx, _):
     return _resource_client_factory(cli_ctx).resource_groups
 
 
-def cf_resources(cli_ctx, _):
+def cf_resources(cli_ctx, **_):
     return _resource_client_factory(cli_ctx).resources
 
 
-def cf_providers(cli_ctx, _):
-    return _resource_client_factory(cli_ctx).providers
+def cf_providers(cli_ctx, *_):
+    return _resource_client_factory(cli_ctx, api_version="2021-04-01").providers
 
 
 def cf_tags(cli_ctx, _):
