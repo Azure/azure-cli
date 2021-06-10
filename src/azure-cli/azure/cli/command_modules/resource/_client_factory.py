@@ -68,11 +68,11 @@ def cf_resource_groups(cli_ctx, _):
     return _resource_client_factory(cli_ctx).resource_groups
 
 
-def cf_resources(cli_ctx, **_):
+def cf_resources(cli_ctx, _):
     return _resource_client_factory(cli_ctx).resources
 
 
-def cf_providers(cli_ctx, *_):
+def cf_providers(cli_ctx, **_):
     return _resource_client_factory(cli_ctx, api_version="2021-04-01").providers
 
 
