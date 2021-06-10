@@ -59,6 +59,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
+    MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -137,16 +138,17 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-04-01',
         ResourceType.MGMT_NETWORK: '2021-02-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2020-12-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2021-03-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
             'snapshots': '2020-12-01',
-            'galleries': '2019-12-01',
+            'galleries': '2020-09-30',
             'gallery_images': '2020-09-30',
             'gallery_image_versions': '2020-09-30',
-            'virtual_machine_scale_sets': '2020-12-01'
+            'shared_galleries': '2020-09-30',
+            'virtual_machine_scale_sets': '2021-03-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -155,7 +157,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_RESOURCES: '2020-10-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2019-06-01-preview',
+        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
@@ -208,9 +210,10 @@ AZURE_API_PROFILES = {
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
-        ResourceType.MGMT_IOTHUB: '2020-03-01',
+        ResourceType.MGMT_IOTHUB: '2021-03-31',
         ResourceType.MGMT_ARO: '2020-04-30',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
+        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
+        ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview'
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',

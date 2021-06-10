@@ -279,7 +279,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-        enable_vtpm=None, count=None, edge_zone=None):
+        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -442,6 +442,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
+        if os_disk_delete_option is not None:
+            profile['osDisk']['deleteOption'] = os_disk_delete_option
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disk_encryption_sets:
             if len(data_disk_encryption_sets) != len(data_disks):
@@ -928,15 +930,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
-            'mode': upgrade_policy_mode,
-            'rollingUpgradePolicy': {
-                'maxBatchInstancePercent': max_batch_instance_percent,
-                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
-                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
-                'pauseTimeBetweenBatches': pause_time_between_batches,
-                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
-                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
-            }
+            'mode': upgrade_policy_mode
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,
@@ -945,6 +939,31 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
     }
+
+    if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
+        rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
+
+        if max_batch_instance_percent is not None:
+            rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
+
+        if max_unhealthy_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyInstancePercent'] = max_unhealthy_instance_percent
+
+        if max_unhealthy_upgraded_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyUpgradedInstancePercent'] = max_unhealthy_upgraded_instance_percent
+
+        if pause_time_between_batches is not None:
+            rolling_upgrade_policy['pauseTimeBetweenBatches'] = pause_time_between_batches
+
+        if enable_cross_zone_upgrade is not None:
+            rolling_upgrade_policy['enableCrossZoneUpgrade'] = enable_cross_zone_upgrade
+
+        if prioritize_unhealthy_instances is not None:
+            rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
+
+        if not rolling_upgrade_policy:
+            del rolling_upgrade_policy
 
     if not specialized:
         vmss_properties['virtualMachineProfile']['osProfile'] = os_profile

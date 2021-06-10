@@ -16,8 +16,9 @@ from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db, cf_mysql_check_resource_availability
-from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info
+from ._flexible_server_util import resolve_poller, generate_missing_parameters, parse_public_access_input, \
+    generate_password, parse_maintenance_window, get_mysql_list_skus_info
+from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator, validate_server_name
 
@@ -40,7 +41,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'mysql')
     # validator
-    sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
+    sku_info, iops_info, single_az = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
 
     db_context = DbContext(
@@ -50,6 +51,8 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     if high_availability is not None and high_availability.lower() == 'enabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
+        if single_az:
+            raise ArgumentUsageError("This region is single availability zone. High availability is not supported in a single availability zone region.")
 
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
@@ -170,13 +173,12 @@ def flexible_server_update_custom_func(cmd, instance,
                                        tags=None,
                                        auto_grow=None,
                                        assign_identity=False,
-                                       ha_enabled=None,
                                        replication_role=None,
                                        maintenance_window=None,
                                        iops=None):
     # validator
     location = ''.join(instance.location.lower().split())
-    sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
+    sku_info, iops_info, _ = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, instance=instance)
 
     server_module_path = instance.__module__
@@ -244,7 +246,6 @@ def flexible_server_update_custom_func(cmd, instance,
                              ssl_enforcement=ssl_enforcement,
                              delegated_subnet_arguments=instance.delegated_subnet_arguments,
                              tags=tags,
-                             ha_enabled=ha_enabled,
                              replication_role=replication_role)
 
     if assign_identity:
@@ -540,8 +541,7 @@ def _determine_iops(storage_gb, iops_info, iops_input, tier, sku_name):
 def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
     free_iops = MINIMUM_IOPS + (storage_in_mb // 1024) * 3
     max_supported_iops = iops_info[tier][sku_name]  # free iops cannot exceed maximum supported iops for the sku
-    logger.warning(iops_info[tier])
-    logger.warning(iops_info[tier][sku_name])
+
     return min(free_iops, max_supported_iops)
 
 

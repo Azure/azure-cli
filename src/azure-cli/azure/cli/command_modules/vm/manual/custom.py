@@ -9,6 +9,8 @@
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
+from azure.cli.core.azclierror import RequiredArgumentMissingError
+from ._client_factory import cf_vm_cl
 
 from knack.log import get_logger
 
@@ -54,3 +56,56 @@ def sshkey_create(client,
         logger.warning('Public key is saved to "%s".', public_key_file)
     return client.get(resource_group_name=resource_group_name,
                       ssh_public_key_name=ssh_public_key_name)
+
+
+def sig_shared_gallery_list(client, location, shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
+                     op_type=None):
+    SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
+        'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes')
+    if subscription_ids is None and tenant_ids is None:
+        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    groups = []
+    if subscription_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
+    if tenant_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.AAD_TENANTS, ids=tenant_ids))
+    sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_share_reset(cmd, client, resource_group_name, gallery_name):
+    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes')
+    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       shared_to=shared_to)
+
+
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location, gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+
+
+def get_gallery_instance(cmd, resource_group_name, gallery_name):
+    client = cf_vm_cl(cmd.cli_ctx)
+    SelectPermissions = cmd.get_models('SelectPermissions')
+    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)

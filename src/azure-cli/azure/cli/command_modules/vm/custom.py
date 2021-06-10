@@ -26,10 +26,9 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.core.azclierror import CLIInternalError, ValidationError, RequiredArgumentMissingError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
-from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
@@ -737,7 +736,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-              enable_vtpm=None, count=None, edge_zone=None):
+              enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
+              data_disk_delete_option=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -874,11 +874,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if count:
             nics = [
-                {'id': "[concat('{}', copyIndex())]".format(nics_id)}
+                {
+                    'id': "[concat('{}', copyIndex())]".format(nics_id),
+                    'properties': {
+                        'deleteOption': nic_delete_option
+                    }
+                }
             ]
         else:
             nics = [
-                {'id': nics_id}
+                {
+                    'id': nics_id,
+                    'properties': {
+                        'deleteOption': nic_delete_option
+                    }
+                }
             ]
 
         nic_resource = build_nic_resource(
@@ -931,7 +941,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1806,8 +1816,7 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
-                                           InvalidArgumentValueError,
-                                           RequiredArgumentMissingError)
+                                           InvalidArgumentValueError)
 
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
@@ -1831,8 +1840,7 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
     from azure.mgmt.marketplaceordering.models import OfferType
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
-                                           InvalidArgumentValueError,
-                                           RequiredArgumentMissingError)
+                                           InvalidArgumentValueError)
 
     error_msg = 'Please specify all of (--plan, --offer, --publish), or --urn'
     if urn:
@@ -3229,15 +3237,27 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
             extension_profile.extensions = [x for x in extensions if
                                             x.type_properties_type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
-    ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
-                                          publisher=publisher,
-                                          type_properties_type=extension_name,
-                                          protected_settings=protected_settings,
-                                          type_handler_version=version,
-                                          settings=settings,
-                                          auto_upgrade_minor_version=(not no_auto_upgrade),
-                                          provision_after_extensions=provision_after_extensions,
-                                          enable_automatic_upgrade=enable_auto_upgrade)
+    if cmd.supported_api_version(min_api='2019-07-01', operation_group='virtual_machine_scale_sets'):
+        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
+                                              publisher=publisher,
+                                              type_properties_type=extension_name,
+                                              protected_settings=protected_settings,
+                                              type_handler_version=version,
+                                              settings=settings,
+                                              auto_upgrade_minor_version=(not no_auto_upgrade),
+                                              provision_after_extensions=provision_after_extensions,
+                                              enable_automatic_upgrade=enable_auto_upgrade)
+    else:
+        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
+                                              publisher=publisher,
+                                              type=extension_name,
+                                              protected_settings=protected_settings,
+                                              type_handler_version=version,
+                                              settings=settings,
+                                              auto_upgrade_minor_version=(not no_auto_upgrade),
+                                              provision_after_extensions=provision_after_extensions,
+                                              enable_automatic_upgrade=enable_auto_upgrade)
+
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 
@@ -3302,6 +3322,20 @@ def list_image_galleries(cmd, resource_group_name=None):
     if resource_group_name:
         return client.galleries.list_by_resource_group(resource_group_name)
     return client.galleries.list()
+
+
+# from azure.mgmt.compute.models import Gallery, SharingProfile
+def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
+    if permissions:
+        if gallery.sharing_profile is None:
+            SharingProfile = cmd.get_models('SharingProfile')
+            gallery.sharing_profile = SharingProfile(permissions=permissions)
+        else:
+            gallery.sharing_profile.permissions = permissions
+
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
@@ -3428,7 +3462,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
                 raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
             if not data_snapshot_luns:
-                data_snapshot_luns = [i for i in range(len(data_snapshots))]
+                data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
@@ -3456,7 +3490,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 # Generate LUNs
                 if data_vhds_luns is None:
                     # 0, 1, 2, ...
-                    data_vhds_luns = [i for i in range(len(data_vhds_uris))]
+                    data_vhds_luns = list(range(len(data_vhds_uris)))
                 # Check length
                 len_data_vhds_uris = len(data_vhds_uris)
                 len_data_vhds_luns = len(data_vhds_luns)

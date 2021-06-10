@@ -6,21 +6,32 @@
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import datetime as dt
 from datetime import datetime
+import os
 import random
+import subprocess
 import secrets
 import string
+import yaml
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id
+from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import AuthenticationError
 from azure.core.paging import ItemPaged
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
 from azure.mgmt.resource.resources.models import ResourceGroup
-from msrestazure.tools import parse_resource_id
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
-from .flexible_server_custom_common import firewall_rule_create_func
+
 logger = get_logger(__name__)
 
 DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
 DEFAULT_LOCATION_MySQL = 'westus2'
+AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
+AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'
+AZURE_MYSQL_CONNECTION_STRING = 'AZURE_MYSQL_CONNECTION_STRING'
+GITHUB_ACTION_PATH = '/.github/workflows/'
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -74,40 +85,6 @@ def generate_password(administrator_login_password):
             replaced_char = random.choice(string.ascii_letters)
             administrator_login_password = administrator_login_password.replace("-", replaced_char)
     return administrator_login_password
-
-
-def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
-    # allow access to azure ip addresses
-    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
-    now = datetime.now()
-    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                 now.second)
-    if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
-        logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
-                       'Azure resources...')
-        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
-                                                                                                   now.day, now.hour,
-                                                                                                   now.minute,
-                                                                                                   now.second)
-    elif start_ip == end_ip:
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
-    else:
-        if start_ip == '0.0.0.0' and end_ip == '255.255.255.255':
-            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                now.second)
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
-                       end_ip)
-    firewall_client = cf_firewall(cmd.cli_ctx, None)
-
-    # Commenting out until firewall_id is properly returned from RP
-    # return resolve_poller(
-    #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
-    #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
-
-    firewall = firewall_rule_create_func(firewall_client, resource_group_name, server_name, firewall_rule_name=firewall_name,
-                                         start_ip_address=start_ip, end_ip_address=end_ip)
-
-    return firewall.result().name
 
 
 # pylint: disable=inconsistent-return-statements
@@ -205,8 +182,11 @@ def get_mysql_list_skus_info(cmd, location):
 
 def _parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
+    single_az = False
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
+    if len(result) == 1:
+        single_az = True
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -242,8 +222,8 @@ def _parse_list_skus(result, database_engine):
         tiers_dict[tier_name] = tier_dict
 
     if database_engine == 'mysql':
-        return tiers_dict, iops_dict
-    return tiers_dict
+        return tiers_dict, iops_dict, single_az
+    return tiers_dict, single_az
 
 
 def _get_available_values(sku_info, argument, tier=None):
@@ -330,3 +310,109 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
     raise RequiredArgumentMissingError(
         'API version is required and could not be resolved for resource {}'
         .format(resource_type))
+
+
+def run_subprocess(command, stdout_show=None):
+    if stdout_show:
+        process = subprocess.Popen(command, shell=True)
+    else:
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
+    if process.returncode:
+        logger.warning(process.stderr.read().strip().decode('UTF-8'))
+
+
+def run_subprocess_get_output(command):
+    commands = command.split()
+    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
+    return process
+
+
+def register_credential_secrets(cmd, database_engine, server, repository):
+    logger.warning('Adding secret "AZURE_CREDENTIALS" to github repository')
+    resource_group = parse_resource_id(server.id)["resource_group"]
+    provider = "DBforMySQL"
+    if database_engine == "postgresql":
+        provider = "DBforPostgreSQL"
+    scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
+
+    app = create_service_principal_for_rbac(cmd, name=server.name, role='contributor', scopes=[scope])
+    app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
+    app['subscriptionId'] = get_subscription_id(cmd.cli_ctx)
+    app.pop('displayName')
+    app.pop('name')
+
+    app_key_val = []
+    for key, val in app.items():
+        app_key_val.append('"{}": "{}"'.format(key, val))
+
+    app_json = ',\n  '.join(app_key_val)
+    app_json = '{\n  ' + app_json + '\n}'
+    credential_file = "./temp_app_credential.txt"
+    with open(credential_file, "w") as f:
+        f.write(app_json)
+    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
+    os.remove(credential_file)
+
+
+def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
+    logger.warning("Added secret %s to github repository", connection_string_name)
+    if database_engine == 'postgresql':
+        connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    elif database_engine == 'mysql':
+        connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+
+
+def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
+
+    action_dir = get_git_root_dir() + GITHUB_ACTION_PATH
+    if not os.path.exists(action_dir):
+        os.makedirs(action_dir)
+
+    process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
+    github_secrets = process.stdout.read().strip().decode('UTF-8')
+    # connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
+
+    if AZURE_CREDENTIALS not in github_secrets:
+        try:
+            register_credential_secrets(cmd,
+                                        database_engine=database_engine,
+                                        server=server,
+                                        repository=repository)
+        except CloudError:
+            raise AuthenticationError('You do not have authorization to create a service principal to run azure service in github actions. \n'
+                                      'Please create a service principal that has access to the database server and add "AZURE_CREDENTIALS" secret to your github repository. \n'
+                                      'Follow the instruction here "aka.ms/github-actions-azure-credentials".')
+
+    connection_string_name = server.name.upper().replace("-", "_") + "_" + database_name.upper().replace("-", "_") + "_" + database_engine.upper() + "_CONNECTION_STRING"
+    if connection_string_name not in github_secrets:
+        register_connection_secrets(cmd,
+                                    database_engine=database_engine,
+                                    server=server,
+                                    database_name=database_name,
+                                    administrator_login=administrator_login,
+                                    administrator_login_password=administrator_login_password,
+                                    repository=repository,
+                                    connection_string_name=connection_string_name)
+
+    current_location = os.path.dirname(__file__)
+
+    with open(current_location + "/templates/" + database_engine + "_githubaction_template.yaml", "r") as template_file:
+        template = yaml.safe_load(template_file)
+        template['jobs']['build']['steps'][2]['with']['server-name'] = server.fully_qualified_domain_name
+        if database_engine == 'postgresql':
+            template['jobs']['build']['steps'][2]['with']['plsql-file'] = file_name
+        else:
+            template['jobs']['build']['steps'][2]['with']['sql-file'] = file_name
+        template['jobs']['build']['steps'][2]['with']['connection-string'] = "${{ secrets." + connection_string_name + " }}"
+        with open(action_dir + action_name + '.yml', 'w', encoding='utf8') as yml_file:
+            yml_file.write("on: [workflow_dispatch]\n")
+            yml_file.write(yaml.dump(template))
+
+
+def get_git_root_dir():
+    process = run_subprocess_get_output("git rev-parse --show-toplevel")
+    return process.stdout.read().strip().decode('UTF-8')

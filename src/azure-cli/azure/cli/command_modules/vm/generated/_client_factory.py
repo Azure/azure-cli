@@ -18,3 +18,15 @@ def cf_vm_cl(cli_ctx, *_):
 
 def cf_ssh_public_key(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).ssh_public_keys
+
+
+def cf_gallery(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).galleries
+
+
+def cf_shared_gallery_image(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).shared_gallery_images
+
+
+def cf_shared_gallery_image_version(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).shared_gallery_image_versions

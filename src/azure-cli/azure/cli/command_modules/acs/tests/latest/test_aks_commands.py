@@ -17,7 +17,7 @@ from azure.cli.testsdk.checkers import (
 from azure.cli.command_modules.acs._format import version_to_tuple
 from .recording_processors import KeyReplacer
 
-from .custom_preparers import AKSCustomResourceGroupPreparer
+from .custom_preparers import AKSCustomResourceGroupPreparer, AKSCustomVirtualNetworkPreparer
 # flake8: noqa
 
 
@@ -261,8 +261,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.KubeDashboard.enabled', False)
+            self.check('provisioningState', 'Succeeded')
         ])
 
         # scale up
@@ -485,8 +484,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomVirtualNetworkPreparer(address_prefixes='10.128.0.0/24', location='westus2')
     @RoleBasedServicePrincipalPreparer()
-    @VirtualNetworkPreparer()
     def test_aks_create_default_service_with_virtual_node_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
@@ -2695,8 +2694,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.KubeDashboard.enabled', False)
+            self.check('provisioningState', 'Succeeded')
         ])
 
         # scale up
@@ -4330,10 +4328,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'identity_name': identity_name,
             'subdomain_name': subdomain_name,
+            'location': resource_group_location
         })
 
         # create private dns zone
-        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.westus2.azmk8s.io"'
+        create_private_dns_zone = 'network private-dns zone create --resource-group={resource_group} --name="privatelink.{location}.azmk8s.io"'
         zone = self.cmd(create_private_dns_zone, checks=[
             self.check('provisioningState', 'Succeeded')
         ]).get_output_in_json()
