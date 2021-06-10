@@ -20,7 +20,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     DEFAULT_LOCATION_MySQL, generate_password, parse_maintenance_window, get_mysql_list_skus_info
 from .flexible_server_custom_common import user_confirmation, create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network
-from .validators import mysql_arguments_validator, validate_server_name
+from .validators import mysql_arguments_validator, validate_server_name, validate_auto_grow_update
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -211,6 +211,7 @@ def flexible_server_update_custom_func(cmd, instance,
         instance.storage_profile.backup_retention_days = backup_retention
 
     if auto_grow:
+        validate_auto_grow_update(instance, auto_grow)
         instance.storage_profile.storage_autogrow = auto_grow
 
     if subnet_arm_resource_id:
@@ -388,7 +389,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
             backup_retention_days=backup_retention,
             storage_mb=storage_mb,
             storage_iops=iops,
-            storage_autogrow = auto_grow),
+            storage_autogrow=auto_grow),
         location=location,
         create_mode="Default",
         delegated_subnet_arguments=delegated_subnet_arguments,
