@@ -2038,7 +2038,7 @@ def list_resources(cmd, resource_group_name=None,
 
 
 def register_provider(cmd, resource_provider_namespace, consent_to_authorization=False, mg=None, wait=False, accept_terms=None):
-    properties=None
+    properties = None
     if consent_to_authorization:
         from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
         properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_authorization))
