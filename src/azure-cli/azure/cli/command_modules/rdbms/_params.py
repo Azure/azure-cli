@@ -285,6 +285,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
                                 'on compute and storage provisioned. The default value for IOPS is free IOPS. '
                                 'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
+                c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'], default='Enabled',
+                           help='Enable or disable autogrow of the storage. Default value is Enabled.')
 
             c.argument('vnet_resource_id', options_list=['--vnet'], help='Name or ID of a new or existing virtual network. If you want to use a vnet from different resource group or subscription, please provide a resource ID. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')

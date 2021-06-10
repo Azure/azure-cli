@@ -35,7 +35,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            administrator_login_password=None, version=None,
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
-                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None):
+                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None, auto_grow=None):
     # validator
     if location is None:
         location = DEFAULT_LOCATION_MySQL
@@ -97,7 +97,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                                    sku_name, tier, storage_mb, administrator_login,
                                    administrator_login_password,
                                    version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                   high_availability, zone, iops)
+                                   high_availability, zone, iops, auto_grow)
 
     # Adding firewall rule
     if public_access is not None and str(public_access).lower() != 'none':
@@ -369,7 +369,7 @@ def flexible_list_skus(cmd, client, location):
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags,
                    delegated_subnet_arguments,
-                   assign_identity, public_network_access, ha_enabled, availability_zone, iops):
+                   assign_identity, public_network_access, ha_enabled, availability_zone, iops, auto_grow):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -387,7 +387,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         storage_profile=mysql_flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             storage_mb=storage_mb,
-            storage_iops=iops),
+            storage_iops=iops,
+            storage_autogrow = auto_grow),
         location=location,
         create_mode="Default",
         delegated_subnet_arguments=delegated_subnet_arguments,

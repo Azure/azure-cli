@@ -134,7 +134,7 @@ def flexible_server_create(cmd, client,
 
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
+                          _create_postgresql_connection_string(host, user, administrator_login_password), database_name, firewall_id,
                           subnet_id)
 
 
@@ -440,24 +440,9 @@ def _create_postgresql_connection_string(host, user, password):
     return 'postgresql://{user}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
 
 
-def _form_response(username, sku, location, server_id, host, version, password, connection_string, firewall_id=None,
+def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
                    subnet_id=None):
-    '''
-    from collections import OrderedDict
-    new_entry = OrderedDict()
-    new_entry['Id'] = server_id
-    if subnet_id is not None:
-        new_entry['SubnetId'] = subnet_id
-    new_entry['Location'] = location
-    new_entry['SkuName'] = sku
-    new_entry['Version'] = version
-    new_entry['Host'] = host
-    new_entry['UserName'] = username
-    new_entry['Password'] = password
-    new_entry['ConnectionString'] = connection_string
-    if firewall_id is not None:
-        new_entry['FirewallName'] = firewall_id
-    '''
+
     output = {
         'host': host,
         'username': username,
@@ -466,6 +451,7 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'location': location,
         'id': server_id,
         'version': version,
+        'databaseName': database_name,
         'connectionString': connection_string
     }
     if firewall_id is not None:
