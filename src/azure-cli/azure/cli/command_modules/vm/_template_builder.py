@@ -964,8 +964,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if upgrade_policy_mode:
         vmss_properties['upgradePolicy'] = {
             'mode': upgrade_policy_mode
-    }
-    if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        }
+    if upgrade_policy_mode and cmd.supported_api_version(min_api='2020-12-01',
+                                                         operation_group='virtual_machine_scale_sets'):
         vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
         rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
 
@@ -989,9 +990,6 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
-
-    if not specialized:
-        vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
 
     if license_type:
         virtual_machine_profile['licenseType'] = license_type
