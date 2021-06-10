@@ -12,6 +12,7 @@
 
 from azure.cli.core.commands.parameters import (
     tags_type,
+    get_enum_type,
     resource_group_name_type,
     get_location_type
 )
@@ -54,3 +55,50 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
+
+    with self.argument_context('sig image-definition list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('shared_to', arg_type=get_enum_type(['tenant']), help='The query parameter to decide what shared '
+                   'galleries to fetch when doing listing operations.')
+
+    with self.argument_context('sig image-version list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+        c.argument('shared_to', arg_type=get_enum_type(['tenant']), help='The query parameter to decide what shared '
+                   'galleries to fetch when doing listing operations.')
+
+    with self.argument_context('sig list-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('shared_to', arg_type=get_enum_type(['tenant']), help='The query parameter to decide what shared '
+                   'galleries to fetch when doing listing operations.')
+
+    with self.argument_context('sig show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+
+    with self.argument_context('sig image-definition show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+
+    with self.argument_context('sig image-version show-shared') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
+                   id_part='child_name_1')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
+                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
+                   id_part='child_name_2')
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e'], type=str, help='The '
+                   'name of the gallery image version to be created. Needs to follow semantic version name pattern: '
+                   'The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. '
+                   'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
