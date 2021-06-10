@@ -23,11 +23,6 @@ def load_arguments(self, _):
         c.argument('ssh_public_key_name', options_list=['--name', '-n', '--ssh-public-key-name'], type=str, help='The '
                    'name of the SSH public key.', id_part='name')
 
-    with self.argument_context('sig group-list') as c:
-        c.argument('shared_to', options_list=['--scope'], arg_type=get_enum_type(['tenant', 'subscription']),
-                   help='The query parameter to decide what shared galleries to fetch when doing listing operations.',
-                   default='subscription')
-
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
             c.argument('resource_group_name', resource_group_name_type)
