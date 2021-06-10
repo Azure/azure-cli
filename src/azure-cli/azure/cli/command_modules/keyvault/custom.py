@@ -850,7 +850,7 @@ def update_hsm(cmd, instance,
 
     if secondary_locations is not None:
         # service not ready
-        raise InvalidArgumentValueError('--secondary-locations has not been supported yet for hsm')
+        raise InvalidArgumentValueError('--secondary-location has not been supported yet for hsm')
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
