@@ -7,7 +7,8 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck
 
 
 class TestActionGroupScenarios(ScenarioTest):
-    @ResourceGroupPreparer(location='southcentralus')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_ag_basic', location='southcentralus')
     def test_monitor_action_group_basic_scenario(self, resource_group):
         # the prefix is intentionally keep long so as to test the default short name conversion
         action_group_name = self.create_random_name('cliactiongrouptest', 32)

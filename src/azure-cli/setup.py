@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.24.0"
+VERSION = "2.24.2"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -65,10 +65,10 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-appconfiguration~=1.0.1',
-    'azure-mgmt-applicationinsights~=0.1.1',
+    'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=2.0',
-    'azure-mgmt-batch~=9.0.0',
+    'azure-mgmt-batch~=15.0.0',
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==11.0.0',
@@ -86,9 +86,9 @@ DEPENDENCIES = [
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
-    'azure-mgmt-eventgrid==3.0.0rc9',
+    'azure-mgmt-eventgrid==9.0.0',
     'azure-mgmt-eventhub~=4.1.0',
-    'azure-mgmt-hdinsight~=2.2.0',
+    'azure-mgmt-hdinsight~=7.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=4.1.0',
     'azure-mgmt-iothub==2.0.0',
@@ -103,13 +103,13 @@ DEPENDENCIES = [
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=2.0.0',
+    'azure-mgmt-netapp~=3.0.0',
     'azure-mgmt-network~=19.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=8.1.0b4',
     'azure-mgmt-recoveryservicesbackup~=0.11.0',
-    'azure-mgmt-recoveryservices~=0.4.0',
+    'azure-mgmt-recoveryservices~=1.0.0',
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
@@ -121,11 +121,11 @@ DEPENDENCIES = [
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
-    'azure-mgmt-signalr~=0.4.0',
+    'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
     'azure-mgmt-storage~=18.0.0',
-    'azure-mgmt-synapse~=0.6.0',
+    'azure-mgmt-synapse~=2.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=2.0.0',
     'azure-multiapi-storage~=0.6.2',
@@ -143,7 +143,6 @@ DEPENDENCIES = [
     'scp~=0.13.2',
     'semver==2.13.0',
     'sshtunnel~=0.1.4',
-    'urllib3[secure]>=1.25.9,<2.0.0',
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'
@@ -197,7 +196,9 @@ setup(
         ],
         'azure.cli.command_modules.rdbms': [
             'randomname/adjectives.txt',
-            'randomname/nouns.txt'
+            'randomname/nouns.txt',
+            'templates/mysql_githubaction_template.yaml',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass
