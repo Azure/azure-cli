@@ -339,3 +339,10 @@ def load_arguments(self, _):
         c.argument('role_definition_name', options_list=['--role-definition-name', '-n'], help="Unique Name of the Role Definition that this Role Assignment refers to. Eg. 'Contoso Reader Role'.")
         c.argument('scope', validator=validate_scope, options_list=['--scope', '-s'], help="Data plane resource path at which this Role Assignment is being granted.")
         c.argument('principal_id', options_list=['--principal-id', '-p'], help="AAD Object ID of the principal to which this Role Assignment is being granted.")
+
+    # Retrive Sql Container Backup Info
+    with self.argument_context('cosmosdb sql retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', database_name_type, required=True)
+        c.argument('container_name', container_name_type, required=True)
+        c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
