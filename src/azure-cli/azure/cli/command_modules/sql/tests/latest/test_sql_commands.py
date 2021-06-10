@@ -3777,6 +3777,7 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westeurope', name_prefix='clitest')
     def test_sql_server_trust_groups(self):
+        self.skipTest("Skipping based on discussion with owning team - Matija Bojovic")
 
         resource_prefix = 'sqlstg'
 
