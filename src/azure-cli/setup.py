@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.24.0"
+VERSION = "2.24.2"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -65,7 +65,7 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-appconfiguration~=1.0.1',
-    'azure-mgmt-applicationinsights~=0.1.1',
+    'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-batch~=15.0.0',
@@ -88,6 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==9.0.0',
     'azure-mgmt-eventhub~=4.1.0',
+    'azure-mgmt-extendedlocation~=1.0.0b2',
     'azure-mgmt-hdinsight~=7.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=4.1.0',
@@ -103,7 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=2.0.0',
+    'azure-mgmt-netapp~=3.0.0',
     'azure-mgmt-network~=19.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=1.0.0',
@@ -121,7 +122,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
-    'azure-mgmt-signalr~=0.4.0',
+    'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
     'azure-mgmt-storage~=18.0.0',

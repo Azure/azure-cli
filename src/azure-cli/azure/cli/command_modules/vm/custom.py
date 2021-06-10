@@ -3240,15 +3240,27 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
             extension_profile.extensions = [x for x in extensions if
                                             x.type_properties_type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
-    ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
-                                          publisher=publisher,
-                                          type_properties_type=extension_name,
-                                          protected_settings=protected_settings,
-                                          type_handler_version=version,
-                                          settings=settings,
-                                          auto_upgrade_minor_version=(not no_auto_upgrade),
-                                          provision_after_extensions=provision_after_extensions,
-                                          enable_automatic_upgrade=enable_auto_upgrade)
+    if cmd.supported_api_version(min_api='2019-07-01', operation_group='virtual_machine_scale_sets'):
+        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
+                                              publisher=publisher,
+                                              type_properties_type=extension_name,
+                                              protected_settings=protected_settings,
+                                              type_handler_version=version,
+                                              settings=settings,
+                                              auto_upgrade_minor_version=(not no_auto_upgrade),
+                                              provision_after_extensions=provision_after_extensions,
+                                              enable_automatic_upgrade=enable_auto_upgrade)
+    else:
+        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
+                                              publisher=publisher,
+                                              type=extension_name,
+                                              protected_settings=protected_settings,
+                                              type_handler_version=version,
+                                              settings=settings,
+                                              auto_upgrade_minor_version=(not no_auto_upgrade),
+                                              provision_after_extensions=provision_after_extensions,
+                                              enable_automatic_upgrade=enable_auto_upgrade)
+
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 

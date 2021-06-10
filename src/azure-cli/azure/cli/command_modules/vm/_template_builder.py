@@ -930,15 +930,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
-            'mode': upgrade_policy_mode,
-            'rollingUpgradePolicy': {
-                'maxBatchInstancePercent': max_batch_instance_percent,
-                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
-                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
-                'pauseTimeBetweenBatches': pause_time_between_batches,
-                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
-                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances
-            }
+            'mode': upgrade_policy_mode
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,
@@ -947,6 +939,31 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
     }
+
+    if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
+        rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
+
+        if max_batch_instance_percent is not None:
+            rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
+
+        if max_unhealthy_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyInstancePercent'] = max_unhealthy_instance_percent
+
+        if max_unhealthy_upgraded_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyUpgradedInstancePercent'] = max_unhealthy_upgraded_instance_percent
+
+        if pause_time_between_batches is not None:
+            rolling_upgrade_policy['pauseTimeBetweenBatches'] = pause_time_between_batches
+
+        if enable_cross_zone_upgrade is not None:
+            rolling_upgrade_policy['enableCrossZoneUpgrade'] = enable_cross_zone_upgrade
+
+        if prioritize_unhealthy_instances is not None:
+            rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
+
+        if not rolling_upgrade_policy:
+            del rolling_upgrade_policy
 
     if not specialized:
         vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
