@@ -15,7 +15,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -1509,7 +1509,7 @@ def process_vmss_create_namespace(cmd, namespace):
             _validate_secrets(namespace.secrets, namespace.os_type)
 
         if namespace.eviction_policy and not namespace.priority:
-            raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+            raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
         return
 
     # Uniform mode
