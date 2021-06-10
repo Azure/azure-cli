@@ -863,7 +863,6 @@ def _backup_storage_redundancy_specify_geo_warning():
 
 
 def _confirm_backup_storage_redundancy_take_geo_warning():
-    # if not storage_account_type:
     confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
     which will default to geo-redundant storage. Note that database backups will be geo-replicated
     to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
