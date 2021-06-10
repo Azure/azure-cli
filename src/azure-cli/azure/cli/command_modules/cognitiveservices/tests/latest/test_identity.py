@@ -31,9 +31,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                          self.check('sku.name', '{sku}'),
                          self.check('properties.provisioningState', 'Succeeded')])
 
-
         account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
 

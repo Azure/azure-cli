@@ -29,25 +29,16 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
+                         self.check('properties.provisioningState', 'Succeeded'),
                          self.check('properties.customSubDomainName', '{customdomain}')])
-
-        for i in range(15):
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
-            time.sleep(10)
-
-        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
-        sname = self.create_random_name(prefix='cs_cli_test_', length=16)
-        customdomain = self.create_random_name(prefix='csclitest', length=16)
         self.kwargs.update({
-            'sname': sname,
-            'customdomain': customdomain,
+            'sname': self.create_random_name(prefix='cs_cli_test_', length=16),
+            'customdomain': self.create_random_name(prefix='csclitest', length=16),
         })
 
         # test to create cognitive services account
@@ -55,30 +46,15 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         ])
-
-        for i in range(15):
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
-            time.sleep(10)
-
-        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # test to create cognitive services account
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --custom-domain {customdomain}',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
+                         self.check('properties.provisioningState', 'Succeeded'),
                          self.check('properties.customSubDomainName', '{customdomain}')])
-
-        for i in range(15):
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Accepted' != account['properties']['provisioningState']:
-                break
-            time.sleep(10)
-
-        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')

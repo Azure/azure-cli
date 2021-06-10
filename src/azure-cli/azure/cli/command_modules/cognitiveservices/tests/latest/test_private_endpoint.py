@@ -31,15 +31,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         ])
-
-        for i in range(15):
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
-            time.sleep(10)
-
-        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # delete the cognitive services account
         plResource = self.cmd('az network private-link-resource list -g {rg} -n {sname} '
@@ -101,15 +93,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         ])
-
-        for i in range(15):
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
-            time.sleep(10)
-
-        self.assertTrue(account['properties']['provisioningState'], 'Succeeded')
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # delete the cognitive services account
         plResource = self.cmd('az network private-link-resource list -g {rg} -n {sname} '
