@@ -297,3 +297,12 @@ def validate_server_name(client, server_name, type_):
 
     if not result.name_available:
         raise ValidationError("The name is already in use. Please provide a different name.")
+
+
+def validate_auto_grow_update(server, auto_grow):
+    # if replica, cannot be disabled
+    if server.replication_role != 'None' and auto_grow.lower() == 'disabled':
+        raise ValidationError("Auto grow feature for replica server cannot be disabled.")
+    # if ha, cannot be disabled
+    if server.ha_state != 'NotEnabled' and auto_grow.lower() == 'disabled':
+        raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
