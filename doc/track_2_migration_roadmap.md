@@ -54,7 +54,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | SQL   | No |**In progress** | 06/30/2021 |GA (1.0.0) | Preview (0.25.0) | Medium (Once two months) | Module |
 | ACS   |  Yes |**In progress** | 06/30/2021 |ContainerService: GA (14.0.0)<br> ContainerInstance: GA (7.0.0) | ContainerService: GA (11.0.0)<br> ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
 | ACR   | Yes |**In progress** | 06/30/2021 |Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
-|**Phase 3** |  | 33 modules, 51 extensions  | | | |  |||
+|**Phase 3** |  |  | | | |  |||
 | NatGateway || **Completed** | N/A |Network: GA (8.0.0) | Network: GA (2.2.0) | Use Network package| Module |
 | Search |  |**Completed** | N/A |GA (8.0.0) | GA (3.0.0) | Low (Once a year) | Module |
 | Synapse |  |**Completed** | N/A |Preview (1.0.0b1) | Preview (0.6.0) | Medium (Once two months) | Module |
@@ -134,22 +134,24 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | SecurityInsight (CLI own)  | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Swiftlet (CLI own)  | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Image-Copy (CLI own)  | | **Completed (No SDK)** | N/A |N/A | Vendored_SDK | N/A | Extension |
-| PowerbiDedicated (CLI own)  | | **In progress** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| Storage-Preview (CLI own)  | | **Completed** | N/A |N/A | Vendored_SDK | N/A | Extension |
+| Storage-Blob-Preview (CLI own)  | | **Completed** | N/A |N/A | Vendored_SDK | N/A | Extension |
+| Scheduled-Query (CLI own)  | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| PowerbiDedicated (CLI own)  | | **Completed** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| K8S-Configuration  | | **Completed (deprecated)**| N/A|N/A | Vendored_SDK) | N/A | Extension |
+| Log-Analytics-Solution (CLI own)  | | **Completed (too old)** | N/A |N/A | Vendored_SDK | N/A | Extension |
+| Express-Route-Cross-Connection (CLI own)  || **Completed (too old)** | N/A | N/A | Network: Vendored_SDK | N/A | Extension |
+| Ip-Group (CLI own) | | **Completed (too old)** | N/A |N/A | Network: Vendored_SDK | N/A | Extension |
+| Virtual-Network-Tap (CLI own)  | | **Completed (too old)**| N/A |N/A | Network: Vendored_SDK | N/A | Extension |
+| AlertsManagement (CLI own)  | | **Completed (too old)** | N/A|N/A | Vendored_Preview (0.2.0rc2) | N/A | Extension |
+| Notification-Hub (CLI own)  | | **Completed (too old)** | N/A|N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| DataBricks (CLI own)  | | **Completed (too old)** | N/A|N/A | Vendored_Preview (0.1.0 | N/A | Extension |
+| Stream-Analytics (CLI own)  | | **Completed (too old)** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| CodeSpaces   | | **Completed (too old)** | N/A |N/A | Vendored_SDK | N/A | Extension |
 | StorageSync (CLI own)  | | **In progress** | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Connection-Monitor-Preview (CLI own)  | | **In progress** | N/A |N/A | Vendored_SDK | N/A | Extension |
-| AlertsManagement (CLI own)  | | Not Started | N/A|N/A | Vendored_Preview (0.2.0rc2) | N/A | Extension |
 | BluePrint (CLI own)  | | Not Started | N/A|N/A | Vendored_Preview (2018-11-01-preview) | N/A | Extension |
-| Notification-Hub (CLI own)  | | Not Started | N/A|N/A | Vendored_Preview (0.1.0) | N/A | Extension |
-| DataBricks (CLI own)  | | Not Started | N/A|N/A | Vendored_Preview (0.1.0 | N/A | Extension |
-| Stream-Analytics (CLI own)  | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Log-Analytics (CLI own)  | | Not Started | N/A|N/A | Vendored_Preview (0.1.0) | N/A | Extension |
-| Storage-Preview (CLI own)  | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
-| Storage-Blob-Preview (CLI own)  | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
-| Scheduled-Query (CLI own)  | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
-| Log-Analytics-Solution (CLI own)  | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
-| Express-Route-Cross-Connection (CLI own)  || Not Started | N/A | N/A | Network: Vendored_SDK | N/A | Extension |
-| Ip-Group (CLI own) | | Not Started | N/A |N/A | Network: Vendored_SDK | N/A | Extension |
-| Virtual-Network-Tap (CLI own)  | | Not Started | N/A |N/A | Network: Vendored_SDK | N/A | Extension |
 | DMS-Preview   | | Not Started | N/A |N/A | Vendored_GA (4.0.0) | N/A | Extension |
 | CosmosDB-Preview   | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
 | Hack   | | Not Started | N/A |N/A | Call AppService, CosmosDB, RDBMS, CognitiveServices | N/A | Extension |
@@ -157,7 +159,6 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | RDBMS-Connect   | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
 | AKS-Preview  | | Not Started | N/A |N/A | ContainerService: Vendored_GA (0.2.0) | N/A | Extension |
 | ConnectedK8S   | | Not Started | N/A |N/A | Vendored_Preview (0.1.1) | N/A | Extension |
-| K8S-Configuration (Deprecate K8SConfiguration)  | | Not Started | N/A|N/A | Vendored_SDK) | N/A | Extension |
 | K8S-Extension  | | Not Started | N/A|N/A | Vendored_SDK) | N/A | Extension |
 | SpringCloud   | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Support   | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
@@ -166,8 +167,6 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | WebApp   | | Not Started | N/A |N/A | N/A | N/A | Extension |
 | SSH   | | Not Started | N/A |N/A | N/A | N/A | Extension |
 | Quantum   | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
-| CodeSpaces   | | Not Started | N/A |N/A | Vendored_SDK | N/A | Extension |
- Extension |
 | AEM   | | Not Started | N/A |N/A | N/A | N/A | Extension |
 | *Below services don't exist in CLI repo*|  |  | |  | |  |||
 | Azure Security Center |  Yes | | 06/30/2021 | |  |  |  |
