@@ -89,7 +89,7 @@ helps['sig share reset'] = """
     type: command
     short-summary: "Reset sharing profile of a gallery."
     examples:
-      - name: Rreset sharing profile of a gallery.
+      - name: Reset sharing profile of a gallery.
         text: |-
                az sig share reset --gallery-name "myGalleryName" --resource-group "myResourceGroup"
 """
