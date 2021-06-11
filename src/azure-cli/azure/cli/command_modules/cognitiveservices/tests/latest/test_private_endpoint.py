@@ -17,7 +17,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'kind': 'TextAnalytics',
-            'sku': 'S0',
+            'sku': 'S',
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
