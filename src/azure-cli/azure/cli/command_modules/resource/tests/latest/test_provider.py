@@ -14,7 +14,7 @@ class ProviderTests(ScenarioTest):
         }
 
         self.cmd('provider unregister -n {namespace}')
-        self.cmd('provider register -n {namespace} --consent-to-authorization')
+        self.cmd('provider register -n {namespace} --consent-to-permissions')
         self.cmd('provider permission list -n {namespace}')
         self.cmd('provider unregister -n {namespace}')
         self.cmd('provider register -n {namespace}')

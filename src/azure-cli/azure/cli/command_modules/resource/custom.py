@@ -2037,11 +2037,11 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, consent_to_authorization=False, mg=None, wait=False, accept_terms=None):
+def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
-    if consent_to_authorization:
+    if consent_to_permissions:
         from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
-        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_authorization))
+        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
