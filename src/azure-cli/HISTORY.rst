@@ -12,7 +12,7 @@ Release History
 
 **App Service**
 
-* :  Fixing az webapp deployment source config-local-git to set SiteConfig (#18364)
+* `az webapp deployment source config-local-git`:  Fix to set SiteConfig (#18364)
 
 **ARM**
 
@@ -32,7 +32,7 @@ Release History
 
 **Container**
 
-* `az container exec`: decode received bytes as utf-8 string (#18384)
+* `az container exec`: Decode received bytes as utf-8 string (#18384)
 
 **EventGrid**
 
@@ -40,7 +40,7 @@ Release History
 
 **HDInsight**
 
-* Migrate to track2 python sdk 7.0.0 (#18237)
+* Migrate to track2 Python SDK 7.0.0 (#18237)
 
 **Iot Hub**
 
@@ -63,7 +63,7 @@ Release History
 
 **Network**
 
-* Private link add `Microsoft.Sql/servers` provider (#18268)
+* Support `Microsoft.Sql/servers` provider in Private link (#18268)
 * `az network private-link-resource list`: Support `--type microsoft.keyvault/managedHSMs` (#18273)
 * `az network private-endpoint-connection`: Support `--type microsoft.keyvault/managedHSMs` (#18273)
 
@@ -76,7 +76,7 @@ Release History
 
 **Role**
 
-* [BREAKING CHANGE]  `az ad sp create-for-rbac`: `--name` is now only used as the `displayName` of the app. It is not used to generate `identifierUris` anymore. `name` in the output is now the same as `appID` (`servicePrincipalNames`) and deprecated. (#18312)
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: `--name` is now only used as the `displayName` of the app. It is not used to generate `identifierUris` anymore. `name` in the output is now the same as `appID` (`servicePrincipalNames`) and deprecated. (#18312)
 
 **SignalR**
 
@@ -87,12 +87,12 @@ Release History
 
 * `az storage blob copy start`: Support --tier and --rehydrate-priority (#18170)
 * GA release storage file share NFS and SMB multichannel (#18232)
-* BREAKING CAHNGE: `az storage account create`: Remove `StorageFileDataSmbShareOwner` option for --default-share-permission (#18396)
+* [BREAKING CHANGE] `az storage account create`: Remove `StorageFileDataSmbShareOwner` option for --default-share-permission (#18396)
 * `az storage blob list`: --delimiter parameter value will now be honored (#18394)
 
 **Synapse**
 
-* Update to  AZ Synapse mgmt 2.0.0 (#18195)
+* Update to AZ Synapse mgmt 2.0.0 (#18195)
 * Spark configuration conversion, which cause the failure (#18328)
 
 **Webapp**

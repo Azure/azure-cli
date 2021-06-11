@@ -5,7 +5,7 @@ Release History
 
 2.25.0
 ++++++
-* Fix #18360 and #18262: write to stderr issue (#18414)
+* Fix #18360 and #18262: Write to stderr issue (#18414)
 
 2.24.2
 ++++++
