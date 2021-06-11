@@ -12,7 +12,7 @@ import mock
 import unittest
 from pathlib import Path
 
-from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
@@ -2137,9 +2137,14 @@ class PolicyScenarioTest(ScenarioTest):
             'padn': self.create_random_name('test_assignment', 20)
         })
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}"', checks=[
+        # create a policy assignment with invalid not scopes
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description" --not-scopes "invalid"')
+
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description"', checks=[
             self.check('name', '{pan}'),
-            self.check('displayName', '{padn}')
+            self.check('displayName', '{padn}'),
+            self.check('description', 'Policy description')
         ])
 
         # create a policy assignment with not scopes and standard sku
@@ -2149,13 +2154,21 @@ class PolicyScenarioTest(ScenarioTest):
             'sub': self.get_subscription_id()
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
-        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
+        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/vnetFoo'.format(**self.kwargs)
 
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('notScopes[0]', '{notscope}')
+        ])
+
+        # update not scopes using the update command
+        self.kwargs['notscope2'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/virtualMachines/foo'.format(**self.kwargs)
+        self.cmd('policy assignment update -n {pan} -g {rg} --not-scopes "{notscope} {notscope2}" --params "{params}"', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('notScopes[0]', '{notscope}'),
+            self.check('notScopes[1]', '{notscope2}'),
         ])
 
         # create a policy assignment using a built in policy definition name
@@ -2193,7 +2206,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em} --not-scopes "{scope}/providers/Microsoft.Compute/virtualMachines/myVm"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('enforcementMode', '{em}')
@@ -2284,7 +2297,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
@@ -2315,7 +2329,8 @@ class PolicyScenarioTest(ScenarioTest):
         if (subscription):
             self.kwargs.update({'sub': subscription})
 
-        time.sleep(60)
+        if not self.in_recording:
+            time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
@@ -2383,7 +2398,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2418,7 +2434,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the parameterized policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2426,12 +2443,14 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # delete the data policy
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)
@@ -2471,6 +2490,14 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('type', assignmentIdentity['type']),
             self.check('principalId', assignmentIdentity['principalId']),
             self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
         ])
 
         # remove the managed identity and ensure it is removed when retrieving the policy assignment
@@ -2538,6 +2565,111 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_ncm')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_non_compliance_messages(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '095e4ed9-c835-4ab6-9439-b5644362a06c',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce',
+            'drid': 'AINE_MaximumPasswordAge'
+        })
+
+        # create a policy assignment of a built-in policy set
+        self.cmd('policy assignment create -d {bip} -n {pan} -g {rg} --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.not_exists('nonComplianceMessages')
+        ])
+
+        # list the non-compliance messages, should be none
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        # Add two non-compliance messages
+        self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "General message"', checks=[
+            self.check('length([])', 1),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId')
+        ])
+
+        self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # list the non-compliance messages, should be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # show the assignment, should contain non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # update the assignment, should not touch non-compliance messages
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('name', '{pan}'),
+            self.check('description', 'New description'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message that does not exist
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message"', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message that exists but without the right reference ID
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message"', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message"', checks=[
+            self.check('length([])', 1),
+            self.check('[0].message', 'Specific message'),
+            self.check('[0].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message with a reference ID
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+            self.is_empty()
+        ])
+
+        # list the non-compliance messages, should be 0
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
@@ -2547,7 +2679,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(IncorrectUsageError):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
@@ -2650,7 +2782,9 @@ class PolicyScenarioTest(ScenarioTest):
 
         # delete the policy set
         self.cmd('policy set-definition delete -n {psn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
+
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         self.cmd('policy set-definition list',
                  checks=self.check("length([?name=='{psn}'])", 0))
@@ -2703,7 +2837,10 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check("length([?name=='{pan_random}'])", 0))
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+
+        if not self.in_recording:
+            time.sleep(10)
+
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
@@ -2737,7 +2874,8 @@ class PolicyScenarioTest(ScenarioTest):
         if (subscription):
             self.kwargs.update({'sub': subscription})
 
-        time.sleep(60)
+        if not self.in_recording:
+            time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
@@ -2875,7 +3013,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2883,12 +3022,14 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # delete the data policy
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)

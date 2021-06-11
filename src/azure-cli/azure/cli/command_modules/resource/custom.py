@@ -2110,7 +2110,8 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None, location=None, assign_identity=None,
-                             identity_scope=None, identity_role='Contributor', enforcement_mode='Default'):
+                             identity_scope=None, identity_role='Contributor', enforcement_mode='Default',
+                             description=None):
     """Creates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -2124,19 +2125,18 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode, description=description)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
         if not_scopes:
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
-                if parse_resource_id(id_arg):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
-                    logger.error('az policy assignment create error: argument --not-scopes: \
-                    invalid notscopes value: \'%s\'', id_arg)
-                    return
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
             assignment.not_scopes = kwargs_list
 
     if cmd.supported_api_version(min_api='2018-05-01'):
@@ -2168,6 +2168,50 @@ def _build_identities_info(cmd, identities):
         identity_type = ResourceIdentityType.system_assigned
     ResourceIdentity = cmd.get_models('Identity')
     return ResourceIdentity(type=identity_type)
+
+
+def update_policy_assignment(cmd, name=None, display_name=None, params=None,
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None, enforcement_mode=None, description=None):
+    """Updates a policy assignment
+    :param not_scopes: Space-separated scopes where the policy assignment does not apply.
+    """
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    params = _load_file_string_or_uri(params, 'params', False)
+
+    existing_assignment = policy_client.policy_assignments.get(scope, name)
+    PolicyAssignment = cmd.get_models('PolicyAssignment')
+    assignment = PolicyAssignment(
+        display_name=display_name if display_name is not None else existing_assignment.display_name,
+        policy_definition_id=existing_assignment.policy_definition_id,
+        scope=existing_assignment.scope,
+        enforcement_mode=enforcement_mode if enforcement_mode is not None else existing_assignment.enforcement_mode,
+        metadata=existing_assignment.metadata,
+        parameters=params if params is not None else existing_assignment.parameters,
+        description=description if description is not None else existing_assignment.description)
+
+    if cmd.supported_api_version(min_api='2017-06-01-preview'):
+        kwargs_list = existing_assignment.not_scopes
+        if not_scopes:
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
+        assignment.not_scopes = kwargs_list
+
+    if cmd.supported_api_version(min_api='2018-05-01'):
+        assignment.location = existing_assignment.location
+        assignment.identity = existing_assignment.identity
+
+    if cmd.supported_api_version(min_api='2020-09-01'):
+        assignment.non_compliance_messages = existing_assignment.non_compliance_messages
+
+    return policy_client.policy_assignments.create(scope, name, assignment)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
@@ -2216,6 +2260,55 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
         result = [i for i in result if _scope.lower().strip('/') == i.scope.lower().strip('/')]
 
     return result
+
+
+def list_policy_non_compliance_message(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    return policy_client.policy_assignments.get(scope, name).non_compliance_messages
+
+
+def create_policy_non_compliance_message(cmd, name, message, scope=None, resource_group_name=None,
+                                         policy_definition_reference_id=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+
+    assignment = policy_client.policy_assignments.get(scope, name)
+
+    NonComplianceMessage = cmd.get_models('NonComplianceMessage')
+    created_message = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    if not assignment.non_compliance_messages:
+        assignment.non_compliance_messages = []
+    assignment.non_compliance_messages.append(created_message)
+
+    return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
+
+
+def delete_policy_non_compliance_message(cmd, name, message, scope=None, resource_group_name=None,
+                                         policy_definition_reference_id=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+
+    assignment = policy_client.policy_assignments.get(scope, name)
+
+    NonComplianceMessage = cmd.get_models('NonComplianceMessage')
+    message_to_remove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    if assignment.non_compliance_messages:
+        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
+
+    return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
+
+
+def _is_non_compliance_message_equivalent(first, second):
+    first_message = '' if first.message is None else first.message
+    seccond_message = '' if second.message is None else second.message
+    first_reference_id = '' if first.policy_definition_reference_id is None else first.policy_definition_reference_id
+    second_reference_id = '' if second.policy_definition_reference_id is None else second.policy_definition_reference_id
+
+    return first_message.lower() == seccond_message.lower() and first_reference_id.lower() == second_reference_id.lower()
 
 
 def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
