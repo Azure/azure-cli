@@ -2155,7 +2155,10 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
         # Repoint alias to the server within the same resource group
         self.cmd('sql server dns-alias set -n {} --original-server {} -s {} -g {}'
                  .format(alias_name, s1.name, s2.name, s2.group),
-                 checks=[NoneCheck()])
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
 
         # List the aliases on old server to check if alias is not pointing there
         self.cmd('sql server dns-alias list -s {} -g {}'
@@ -2175,7 +2178,10 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
         # Repoint alias to the same server (to check that operation is idempotent)
         self.cmd('sql server dns-alias set -n {} --original-server {} -s {} -g {}'
                  .format(alias_name, s1.name, s2.name, s2.group),
-                 checks=[NoneCheck()])
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
 
         # Check if alias is pointing to the right server
         self.cmd('sql server dns-alias list -s {} -g {}'
@@ -2188,7 +2194,10 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
         # Repoint alias to the server within the same resource group
         self.cmd('sql server dns-alias set -n {} --original-server {} --original-resource-group {} -s {} -g {}'
                  .format(alias_name, s2.name, s2.group, s3.name, s3.group),
-                 checks=[NoneCheck()])
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
 
         # List the aliases on old server to check if alias is not pointing there
         self.cmd('sql server dns-alias list -s {} -g {}'
