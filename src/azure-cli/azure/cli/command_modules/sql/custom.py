@@ -25,7 +25,7 @@ from azure.mgmt.sql.models import (
     IdentityType,
     PartnerInfo,
     PerformanceLevelUnit,
-    ReplicationRole,
+    FailoverGroupReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
     SensitivityLabel,
@@ -41,7 +41,10 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
     ServerPublicNetworkAccess,
-    ServerInfo
+    ServerInfo,
+    EncryptionProtector,
+    ManagedInstanceEncryptionProtector,
+    FirewallRule
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -1135,7 +1138,7 @@ def db_failover(
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
     # If a replica is secondary, then it has exactly 1 link (to its primary).
-    primary_link = next((link for link in links if link.partner_role == ReplicationRole.primary), None)
+    primary_link = next((link for link in links if link.partner_role == FailoverGroupReplicationRole.primary), None)
     if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.
         return
@@ -2794,10 +2797,10 @@ def db_threat_detection_policy_update(
         instance.retention_days = retention_days
 
     if email_addresses:
-        instance.email_addresses = ";".join(email_addresses)
+        instance.email_addresses = email_addresses
 
     if disabled_alerts:
-        instance.disabled_alerts = ";".join(disabled_alerts)
+        instance.disabled_alerts = disabled_alerts
 
     if email_account_admins:
         instance.email_account_admins = email_account_admins
@@ -3458,8 +3461,25 @@ def firewall_rule_update(
         firewall_rule_name=firewall_rule_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        start_ip_address=start_ip_address or instance.start_ip_address,
-        end_ip_address=end_ip_address or instance.end_ip_address)
+        parameters=FirewallRule(start_ip_address=start_ip_address or instance.start_ip_address,
+        end_ip_address=end_ip_address or instance.end_ip_address))
+
+def firewall_rule_create(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ip_address=None,
+        end_ip_address=None):
+    '''
+    Creates a firewall rule.
+    '''
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=FirewallRule(start_ip_address=start_ip_address or instance.start_ip_address,
+        end_ip_address=end_ip_address or instance.end_ip_address))
 
 
 #####
@@ -3482,11 +3502,8 @@ def server_key_create(
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name,
-        parameters=ServerKey(
-            server_key_type=ServerKeyType.azure_key_vault.value,
-            uri=kid
-        )
-    )
+        server_key_type='AzureKeyVault',
+        uri=kid)
 
 
 def server_key_get(
@@ -3606,9 +3623,9 @@ def encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        server_key_type=server_key_type,
-        server_key_name=key_name
-    )
+        encryption_protector_name='Current',
+        parameters=EncryptionProtector(server_key_type=server_key_type,
+        server_key_name=key_name))
 
 #####
 #           sql server aad-only
@@ -3946,9 +3963,10 @@ def managed_instance_encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        server_key_type=server_key_type,
-        server_key_name=key_name
-    )
+        encryption_protector_name='Current',
+        parameters=ManagedInstanceEncryptionProtector(server_key_type=server_key_type,
+        server_key_name=key_name,
+        auto_rotation_enabled=False))
 
 
 #####
