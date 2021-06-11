@@ -26,9 +26,10 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError, ValidationError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import CLIInternalError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
@@ -1833,7 +1834,8 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
-                                           InvalidArgumentValueError)
+                                           InvalidArgumentValueError,
+                                           RequiredArgumentMissingError)
 
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
     error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
@@ -1857,7 +1859,8 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
     from azure.mgmt.marketplaceordering.models import OfferType
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
-                                           InvalidArgumentValueError)
+                                           InvalidArgumentValueError,
+                                           RequiredArgumentMissingError)
 
     error_msg = 'Please specify all of (--plan, --offer, --publish), or --urn'
     if urn:
@@ -3360,20 +3363,6 @@ def list_image_galleries(cmd, resource_group_name=None):
     if resource_group_name:
         return client.galleries.list_by_resource_group(resource_group_name)
     return client.galleries.list()
-
-
-# from azure.mgmt.compute.models import Gallery, SharingProfile
-def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
-    if permissions:
-        if gallery.sharing_profile is None:
-            SharingProfile = cmd.get_models('SharingProfile')
-            gallery.sharing_profile = SharingProfile(permissions=permissions)
-        else:
-            gallery.sharing_profile.permissions = permissions
-
-    client = _compute_client_factory(cmd.cli_ctx)
-
-    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
