@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
@@ -18,7 +17,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'kind': 'TextAnalytics',
-            'sku': 'S',
+            'sku': 'S0',
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
