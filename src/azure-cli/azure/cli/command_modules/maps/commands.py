@@ -9,13 +9,13 @@ from azure.cli.command_modules.maps._client_factory import cf_accounts
 
 def load_command_table(self, _):
     mgmt_type = CliCommandType(
-        operations_tmpl='azure.mgmt.maps.operations#AccountsOperations.{}',
+        operations_tmpl='azure.mgmt.maps.operations._accounts_operations#AccountsOperations.{}',
         client_factory=cf_accounts)
 
     with self.command_group('maps account', mgmt_type) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'list_accounts')
-        g.custom_command('create', 'create_account')
+        g.custom_command('create', 'maps_account_create')
         g.command('delete', 'delete')
         g.generic_update_command('update',
                                  getter_name='get',
