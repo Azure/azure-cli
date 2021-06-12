@@ -6,6 +6,7 @@
 # pylint: disable=no-name-in-module,import-error
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
+from azure.cli.core.profiles import ResourceType
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_managed_clusters
@@ -25,26 +26,33 @@ from ._format import aks_run_command_result_format
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2017_07_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_container_services_operations#ContainerServicesOperations.{}',
+        operation_group='container_services',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_container_services
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2021_03_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
+        operation_group='managed_clusters',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
     agent_pools_sdk = CliCommandType(
         operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
                         'operations._agent_pools_operations#AgentPoolsOperations.{}',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
     openshift_managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2018_09_30_preview.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
+        operation_group='open_shift_managed_clusters',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_openshift_managed_clusters
     )
 
@@ -71,13 +79,17 @@ def load_command_table(self, _):
                          client_factory=None)
 
     # ACS Kubernetes commands
-    with self.command_group('acs kubernetes', container_services_sdk, client_factory=cf_container_services) as g:
+    with self.command_group('acs kubernetes', container_services_sdk,
+                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                            client_factory=cf_container_services) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
 
     # AKS commands
-    with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+    with self.command_group('aks', managed_clusters_sdk,
+                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                            operation_group='managed_clusters', client_factory=cf_managed_clusters) as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.custom_command('update', 'aks_update', supports_no_wait=True)
@@ -106,16 +118,18 @@ def load_command_table(self, _):
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
-        g.wait_command('wait')
-        g.command('stop', 'stop', supports_no_wait=True)
-        g.command('start', 'start', supports_no_wait=True)
+        g.wait_command('wait', operation_group='managed_clusters')
+        g.command('stop', 'stop', supports_no_wait=True, min_api='2020-09-01', client_factory=cf_managed_clusters)
+        g.command('start', 'start', supports_no_wait=True, min_api='2020-09-01', client_factory=cf_managed_clusters)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
                          table_transformer=aks_versions_table_format)
 
     # AKS agent pool commands
-    with self.command_group('aks nodepool', agent_pools_sdk, client_factory=cf_agent_pools) as g:
+    with self.command_group('aks nodepool',
+                            agent_pools_sdk,
+                            client_factory=cf_agent_pools) as g:
         g.custom_command('list', 'aks_agentpool_list',
                          table_transformer=aks_agentpool_list_table_format)
         g.custom_show_command('show', 'aks_agentpool_show',
