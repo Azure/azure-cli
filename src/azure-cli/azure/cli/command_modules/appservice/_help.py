@@ -1246,7 +1246,7 @@ examples:
   - name: turn on "alwaysOn"
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
-  - name: turn on "alwaysOn" through a json with content "{"alwaysOn", true}"
+  - name: turn on "alwaysOn" through a json with content '{"alwaysOn", true}'
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations '{"alwaysOn": true}'
 
