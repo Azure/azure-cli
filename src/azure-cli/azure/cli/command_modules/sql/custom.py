@@ -969,9 +969,9 @@ def db_copy(
                                     server_name=dest_server_name,
                                     resource_group_name=dest_resource_group_name)
     if _should_show_backup_storage_redundancy_warnings(location):
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
@@ -1023,9 +1023,9 @@ def db_create_replica(
                                     server_name=partner_server_name,
                                     resource_group_name=partner_resource_group_name)
     if _should_show_backup_storage_redundancy_warnings(location):
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
@@ -1098,9 +1098,9 @@ def db_restore(
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
     if _should_show_backup_storage_redundancy_warnings(location):
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
@@ -2725,7 +2725,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
-        storage_account_type,
+        requested_backup_storage_redundancy,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -2746,13 +2746,13 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
-    kwargs['storage_account_type'] = storage_account_type
+    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
     return client.create_or_update(
