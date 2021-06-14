@@ -530,16 +530,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.family', vcore_family)])
 
         # Update only family
-        vcore_family_updated = 'Gen4'
-        self.cmd('sql db update -g {} -s {} -n {} --family {}'
-                 .format(resource_group, server, database_name, vcore_family_updated),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('edition', vcore_edition),
-                     JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.capacity', vcore_capacity),
-                     JMESPathCheck('sku.family', vcore_family_updated)])
+        vcore_family_updated = 'Gen5'
 
         # Update only capacity
         vcore_capacity_updated = 8
@@ -1098,7 +1089,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('name', bsr_database),
-                     JMESPathCheck('backupStorageRedundancy', 'Local')
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Local')
                  ])
 
         # copy database to elastic pool in other server (max parameters, other than
@@ -2245,7 +2236,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('backupStorageRedundancy', 'Zone')])
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
 
         # check that the replica was created in the correct server
         self.cmd('sql db show -g {} -s {} -n {}'
