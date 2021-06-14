@@ -290,7 +290,7 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'server_ms_support_audit_policy_get')
 
     database_long_term_retention_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_database_long_term_retention_policies_operations)
 
     with self.command_group('sql db ltr-policy',
@@ -346,7 +346,7 @@ def load_command_table(self, _):
         g.command('disable', 'disable_recommendation')
 
     database_threat_detection_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseSecurityAlertPoliciesOperations.{}',
         client_factory=get_sql_database_threat_detection_policies_operations)
 
     with self.command_group('sql db threat-policy',

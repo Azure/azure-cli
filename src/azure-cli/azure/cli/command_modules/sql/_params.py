@@ -28,7 +28,6 @@ from azure.mgmt.sql.models import (
     ElasticPoolLicenseType,
     SampleName,
     SecurityAlertPolicyState,
-    SecurityAlertPolicyEmailAccountAdmins,
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
@@ -940,8 +939,7 @@ def load_arguments(self, _):
         c.argument('email_account_admins',
                    arg_group=notification_arg_group,
                    options_list=['--email-account-admins'],
-                   help='Whether the alert is sent to the account administrators.',
-                   arg_type=get_enum_type(SecurityAlertPolicyEmailAccountAdmins))
+                   help='Whether the alert is sent to the account administrators.')
 
         # TODO: use server default
 
@@ -1338,6 +1336,19 @@ def load_arguments(self, _):
                    help='Set whether public network access to server is allowed or not. When false,'
                    'only connections made through Private Links can reach this server.',
                    is_preview=True)
+                   
+        c.argument('primary_user_assigned_identity_id',
+                    options_list=['--primary-user-assigned-identity-id'],
+                    help='The ID of the primary user managed identity.')
+
+        c.argument('key_id',
+                    options_list=['--key_id'],
+                    help='The key vault URI for encryption.')
+        
+        c.argument('assign_user_assign_identity',
+                   options_list=['--assign_user_assign_identity'],
+                   help='Generate and assign an User Managed Identity(UMI) for this server '
+                   'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
@@ -1349,7 +1360,9 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'location',
-                'minimal_tls_version'
+                'minimal_tls_version',
+                'primary_user_assigned_identity_id',
+                'key_id'
             ])
 
         c.argument('administrator_login',
@@ -1361,6 +1374,11 @@ def load_arguments(self, _):
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this server '
+                   'for use with key management services like Azure KeyVault.')
+                   
+        c.argument('assign_user_assign_identity',
+                   options_list=['--assign-user-assign-identity'],
+                   help='Generate and assign an User Managed Identity(UMI) for this server '
                    'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server update') as c:
@@ -1708,6 +1726,19 @@ def load_arguments(self, _):
                    'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
 
         c.argument('tags', arg_type=tags_type)
+
+        c.argument('primary_user_assigned_identity_id',
+                    options_list=['--primary-user-assigned-identity-id'],
+                    help='The ID of the primary user managed identity.')
+
+        c.argument('key_id',
+                    options_list=['--key_id'],
+                    help='The key vault URI for encryption.')
+        
+        c.argument('assign_user_assign_identity',
+                   options_list=['--assign_user_assign_identity'],
+                   help='Generate and assign an User Managed Identity(UMI) for this server '
+                   'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql mi create') as c:
         c.argument('location',
