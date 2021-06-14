@@ -283,7 +283,7 @@ def load_command_table(self, _):
                          exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'show_plan')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_app_service_plan',
                                  setter_arg_name='app_service_plan', supports_no_wait=True,
                                  exception_handler=ex_handler_factory())

@@ -1734,6 +1734,14 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
     return instance
 
 
+def show_plan(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    plan = client.app_service_plans.get(resource_group_name, name)
+    if not plan:
+        raise ResourceNotFoundError("Appservice Plan'{}', is not found on RG '{}'.".format(name, resource_group_name))
+    return plan
+
+
 def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):
     instance = update_app_service_plan(instance, sku, number_of_workers)
     if max_burst is not None:
