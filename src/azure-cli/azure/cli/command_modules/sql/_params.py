@@ -105,9 +105,9 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 def get_internal_backup_storage_redundancy(self):
     return {
-        'local': 'LRS',
-        'zone': 'ZRS',
-        'geo': 'GRS',
+        'local': 'Local',
+        'zone': 'Zone',
+        'geo': 'Geo',
     }.get(self.lower(), 'Invalid')
 
 
@@ -464,7 +464,8 @@ def _configure_db_dw_create_params(
             'compute_model',
             'read_scale',
             'high_availability_replica_count',
-            'storage_account_type',
+            'current_backup_storage_redundancy',
+            'requested_backup_storage_redundancy',
             'maintenance_configuration_id',
         ])
 
@@ -489,7 +490,7 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
 
-    arg_ctx.argument('storage_account_type',
+    arg_ctx.argument('requested_backup_storage_redundancy',
                      arg_type=backup_storage_redundancy_param_type)
 
     arg_ctx.argument('maintenance_configuration_id',
@@ -698,7 +699,7 @@ def load_arguments(self, _):
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
-        c.argument('storage_account_type',
+        c.argument('requested_backup_storage_redundancy',
                    arg_type=backup_storage_redundancy_param_type)
 
         c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
@@ -1044,7 +1045,7 @@ def load_arguments(self, _):
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
 
-        c.argument('storage_account_type',
+        c.argument('requested_backup_storage_redundancy',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
 
@@ -2056,7 +2057,7 @@ def load_arguments(self, _):
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
 
-        c.argument('storage_account_type',
+        c.argument('requested_backup_storage_redundancy',
                    arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql midb log-replay start') as c:

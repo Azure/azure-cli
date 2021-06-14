@@ -902,10 +902,10 @@ def db_create(
         resource_group_name=resource_group_name)
 
     if not yes and _should_show_backup_storage_redundancy_warnings(location):
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             if not _confirm_backup_storage_redundancy_take_geo_warning():
                 return None
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
@@ -1381,7 +1381,7 @@ def db_update(
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None,
-        storage_account_type=None,
+        requested_backup_storage_redundancy=None,
         maintenance_configuration_id=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
@@ -1395,7 +1395,7 @@ def db_update(
     # Check backup storage redundancy configuration
     location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
     if _should_show_backup_storage_redundancy_warnings(location):
-        if storage_account_type == 'GRS':
+        if requested_backup_storage_redundancy == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
     #####
@@ -1466,7 +1466,7 @@ def db_update(
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
     # and will potentially conflict with a previously requested update
-    instance.storage_account_type = storage_account_type
+    instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
 
     instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
         cmd.cli_ctx,

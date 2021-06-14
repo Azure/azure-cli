@@ -119,8 +119,8 @@ def validate_subnet(cmd, namespace):
 
 def validate_backup_storage_redundancy(namespace):
     # Validate if entered backup storage redundancy value is within allowed values
-    if (not namespace.storage_account_type or
-            (namespace.storage_account_type and namespace.storage_account_type in ['LRS', 'ZRS', 'GRS'])):
+    if (not namespace.requested_backup_storage_redundancy or
+            (namespace.requested_backup_storage_redundancy and namespace.requested_backup_storage_redundancy in ['Local', 'Zone', 'Geo'])):
         pass
     else:
         raise CLIError('incorrect usage: --backup-storage-redundancy must be either Local, Zone or Geo')

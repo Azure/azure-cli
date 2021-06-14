@@ -384,8 +384,8 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='southeastasia')
-    @SqlServerPreparer(location='southeastasia')
+    @ResourceGroupPreparer(location='eastus2')
+    @SqlServerPreparer(location='eastus2')
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         database_name_2 = "cliautomationdb02"
@@ -410,7 +410,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
                            JMESPathCheck('highAvailabilityReplicaCount', None),
-                           JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
+                           JMESPathCheck('requestedBackupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
                  .format(resource_group, server),
@@ -422,7 +422,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
         self.cmd('sql db list-usages -g {} --server {} --name {}'
                  .format(resource_group, server, database_name),
-                 checks=[JMESPathCheck('[0].resourceName', database_name)])
+                 checks=[JMESPathCheck('[0].resourceGroup', resource_group)])
 
         # Show by group/server/name
         self.cmd('sql db show -g {} --server {} --name {}'
