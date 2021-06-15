@@ -31,7 +31,7 @@ def recover(client, location, resource_group_name, account_name):
     params = CognitiveServicesAccount(properties=properties)
     params.location = location
 
-    return client.begin_create(resource_group_name, account_name, params).result()
+    return client.begin_create(resource_group_name, account_name, params)
 
 
 def list_usages(client, resource_group_name, account_name):
@@ -135,7 +135,7 @@ def create(
     if encryption is not None:
         params.properties.encryption = json.loads(encryption)
 
-    return client.begin_create(resource_group_name, account_name, params).result()
+    return client.begin_create(resource_group_name, account_name, params)
 
 
 def update(client, resource_group_name, account_name, sku_name=None, custom_domain=None,
@@ -161,7 +161,7 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
     if encryption is not None:
         params.properties.encryption = json.loads(encryption)
 
-    return client.begin_update(resource_group_name, account_name, params).result()
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def default_network_acls():
@@ -204,7 +204,7 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
     properties.network_acls = rules
     params = CognitiveServicesAccount(properties=properties)
 
-    return client.begin_update(resource_group_name, account_name, params).result()
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def remove_network_rule(client, resource_group_name, account_name, ip_address=None, subnet=None,
@@ -225,7 +225,7 @@ def remove_network_rule(client, resource_group_name, account_name, ip_address=No
     properties.network_acls = rules
     params = CognitiveServicesAccount(properties=properties)
 
-    return client.begin_update(resource_group_name, account_name, params).result()
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_assign(client, resource_group_name, account_name):
@@ -238,7 +238,7 @@ def identity_assign(client, resource_group_name, account_name):
 def identity_remove(client, resource_group_name, account_name):
     params = CognitiveServicesAccount()
     params.identity = Identity(type=IdentityType.none)
-    client.begin_update(resource_group_name, account_name, params).wait()
+    client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_show(client, resource_group_name, account_name):
