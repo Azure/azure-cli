@@ -33,8 +33,8 @@ def _create_test_cert(cert_file, key_file, subject, valid_days, serial_number):
     cert.set_pubkey(k)
     cert.sign(k, 'sha256')
 
-    cert_str = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('ascii')
-    key_str = crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('ascii')
+    cert_str = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8')
+    key_str = crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8')
 
     open(cert_file, 'w').write(cert_str)
     open(key_file, 'w').write(key_str)
