@@ -25,10 +25,13 @@ allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDa
 allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
+allowed_target_tier_type_chk_archivable = ['VaultArchive']
+allowed_tier_type = ['VaultStandard','Snapshot','VaultArchive','VaultStandardRehydrated','SnapshotAndVaultStandard','SnapshotAndVaultArchive']
+allowed_rehyd_priority_type = ['Standard', 'High']
 
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
-workload_type_help = """Specifiy the type of applications within the Resource which should be discovered and protected by Azure Backup. """
+workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. """
 restore_mode_help = """Specify the restore mode."""
 resolve_conflict_help = "Instruction if there's a conflict with the restored data."
 resource_id_help = """ID of the Azure Resource containing items to be protected by Azure Backup service. Currently, only Azure VM resource IDs are supported."""
@@ -40,6 +43,9 @@ retain_until_help = """The date until which this backed up copy will be availabl
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
+target_tier_help = """ The destination/target tier to which a particular recovery point has to be moved."""
+tier_help = """ The tier whose recovery points have to be fetched and returned."""
+rehyd_priority_type_help = """The type of priority to be maintained while rehydration a recovery point """
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -62,7 +68,9 @@ diskslist_type = CLIArgumentType(nargs='+', help=diskslist_help)
 target_container_name_type = CLIArgumentType(options_list=['--target-container-name'], help=target_container_name_help)
 filepath_type = CLIArgumentType(options_list=['--filepath'], help="The path to which the DB should be restored as files.")
 from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="Name of the starting Recovery point.")
-
+target_tier_type = CLIArgumentType(help=target_tier_help, arg_type=get_enum_type(allowed_target_tier_type_chk_archivable), options_list=['--target-tier'])
+tier_type = CLIArgumentType(help=tier_help, arg_type=get_enum_type(allowed_tier_type), options_list=['--tier'])
+rehyd_priority_type = CLIArgumentType(help=rehyd_priority_type_help, arg_type=get_enum_type(allowed_rehyd_priority_type), options_list=['--rehydration-priority'])
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
@@ -175,15 +183,36 @@ def load_arguments(self, _):
         c.argument('container_name', container_name_type, id_part='child_name_2')
         c.argument('item_name', item_name_type, id_part='child_name_3')
 
-    for command in ['list', 'show-log-chain']:
-        with self.argument_context('backup recoverypoint ' + command) as c:
-            c.argument('vault_name', vault_name_type, id_part=None)
-            c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
-            c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
-            c.argument('backup_management_type', backup_management_type)
-            c.argument('container_name', container_name_type)
-            c.argument('workload_type', workload_type)
-            c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
+    with self.argument_context('backup recoverypoint list') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
+        c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
+        c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('container_name', container_name_type)
+        c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
+        c.argument('is_ready_for_move', arg_type=get_three_state_flag(), help='Option to retrieve recoverypoints that are ready to be moved to destination-tier.')
+        c.argument('target_tier', target_tier_type)
+        c.argument('tier', tier_type)
+        c.argument('recommended_for_archive', action="store_true", help='Option to list recommended recoverypoints that be archived if required.')
+
+    with self.argument_context('backup recoverypoint move') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
+        c.argument('container_name', container_name_type)
+        c.argument('rp_id', rp_name_type, options_list=['--rp-id'], help='ID of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.', id_part='child_name_4')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
+        c.argument('source_tier', help='The source tier from which a particular recovery point has to be moved.', arg_type=get_enum_type(['VaultStandard']), options_list=['--source-tier'])
+        c.argument('destination_tier', help=target_tier_help, arg_type=get_enum_type(['VaultArchive']), options_list=['--destination-tier'])
+
+    with self.argument_context('backup recoverypoint show-log-chain') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
+        c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
+        c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('container_name', container_name_type)
+        c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.', id_part='child_name_4')
@@ -276,6 +305,8 @@ def load_arguments(self, _):
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
         c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
+        c.argument('rehydration_duration', type=int, help='Maximum time, in days, the recovery point stays in hydrated state.')
+        c.argument('rehydration_priority', rehyd_priority_type)
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -296,7 +327,9 @@ def load_arguments(self, _):
     with self.argument_context('backup restore restore-azurewl') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
-
+        c.argument('rehydration_duration', type=int, help='Maximum time, in days, the recovery point stays in hydrated state.')
+        c.argument('rehydration_priority', rehyd_priority_type)
+        
     # Recoveryconfig
     with self.argument_context('backup recoveryconfig show') as c:
         c.argument('container_name', container_name_type, id_part='child_name_2')

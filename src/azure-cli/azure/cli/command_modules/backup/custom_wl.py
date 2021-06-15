@@ -18,12 +18,15 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
-    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
+    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, \
+    AzureWorkloadSAPHanaRestoreWithRehydrateRequest, AzureWorkloadSQLRestoreWithRehydrateRequest
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
-    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf
+    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, _backup_client_factory,\
+    recovery_points_cf
+
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
@@ -320,8 +323,85 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
     return paged_items
 
 
+def fetch_tier(paged_recovery_points):
+    
+    for rp in paged_recovery_points: 
+        isRehydrated = False
+        isInstantRecoverable = False
+        isHardenedRP = False
+        isArchived = False
+
+        if rp.properties.recovery_point_tier_details==None:
+            continue
+        
+        for i in range(len(rp.properties.recovery_point_tier_details)):
+            if rp.properties.recovery_point_tier_details[i].type=="ArchivedRP" and rp.properties.recovery_point_tier_details[i].status=="Rehydrated":
+                isRehydrated = True
+            
+            if rp.properties.recovery_point_tier_details[i].status=="Valid":
+                if rp.properties.recovery_point_tier_details[i].type=="InstantRP":
+                    isInstantRecoverable = True
+                
+                if rp.properties.recovery_point_tier_details[i].type=="HardenedRP":
+                    isHardenedRP = True
+                
+                if rp.properties.recovery_point_tier_details[i].type=="ArchivedRP":
+                    isArchived = True
+        
+        if (isHardenedRP and isArchived) or (isRehydrated):
+            setattr(rp, "tier_type", "VaultStandardRehydrated")
+        
+        elif isInstantRecoverable and isHardenedRP:
+            setattr(rp, "tier_type", "SnapshotAndVaultStandard")
+        
+        elif isInstantRecoverable and isArchived:
+            setattr(rp, "tier_type", "SnapshotAndVaultArchive")
+        
+        elif isArchived:
+            setattr(rp, "tier_type", "VaultArchive")
+        
+        elif isInstantRecoverable:
+            setattr(rp, "tier_type", "Snapshot")
+        
+        elif isHardenedRP:
+            setattr(rp, "tier_type", "VaultStandard")
+
+
+def check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move):
+    
+    if target_tier and is_ready_for_move!=None:
+        filter_rps = []
+        for rp in paged_recovery_points:
+            if rp.properties.recovery_point_move_readiness_info!=None and rp.properties.recovery_point_move_readiness_info['ArchivedRP'].is_ready_for_move==is_ready_for_move:
+                filter_rps.append(rp)
+        
+        return filter_rps
+    
+    elif target_tier or is_ready_for_move!=None:
+        raise RequiredArgumentMissingError("--is-ready-for-move or --target-tier is missing. Please provide the required arguments.")
+    
+    return paged_recovery_points
+
+
+def filter_rp_based_on_tier(recovery_point_list, tier):
+
+    if tier:
+        filter_rps = []
+        for rp in recovery_point_list:
+            if rp.properties.recovery_point_tier_details!=None and rp.tier_type==tier:
+                filter_rps.append(rp)
+
+        return filter_rps
+
+    return recovery_point_list
+
+
 def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                            extended_info=None, use_secondary_region=None):
+                            extended_info=None, is_ready_for_move=None, target_tier=None, use_secondary_region=None, tier=None, recommended_for_archive=None):
+    
+    if recommended_for_archive!=None:
+        raise InvalidArgumentValueError("--recommended-for-archive is supported by AzureIaasVM backup management type only.")
+
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -349,7 +429,27 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = cust_help.get_list_from_paged_response(recovery_points)
 
-    return paged_recovery_points
+    fetch_tier(paged_recovery_points)
+
+    recovery_point_list = check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
+    recovery_point_list = filter_rp_based_on_tier(recovery_point_list, tier)
+    return recovery_point_list
+
+
+def move_wl_recovery_points(cmd, client, resource_group_name, vault_name, item_name, rp_id, source_tier, destination_tier):
+
+    container_uri = cust_help.get_protection_container_uri_from_id(item_name.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item_name.id)
+    
+    Dict = dict({'VaultStandard': 'HardenedRP', 'VaultArchive': 'ArchivedRP', 'Snapshot':'InstantRP'})
+
+    if source_tier not in Dict.keys():
+        raise InvalidArgumentValueError('This tier-type is not accepted by move command at present.')
+
+    parameters = MoveRPAcrossTiersRequest(source_tier_type=Dict[source_tier], target_tier_type=Dict[destination_tier])
+    
+    return _backup_client_factory(cmd.cli_ctx).move_recovery_point(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_id, parameters)
+
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object, protectable_item):
@@ -528,7 +628,9 @@ def list_workload_items(cmd, vault_name, resource_group_name, container_name,
     return cust_help.get_list_from_paged_response(items)
 
 
-def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config):
+def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
+                  rehydration_priority=None):
+                  
     recovery_config_object = cust_help.get_or_read_json(recovery_config)
     restore_mode = recovery_config_object['restore_mode']
     container_uri = recovery_config_object['container_uri']
@@ -543,9 +645,33 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
 
-    # Construct trigger restore request object
-    trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time)
+    recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name, container_uri,
+                                                    item_uri, recovery_point_id, item_type,
+                                                    backup_management_type="AzureWorkload")
+    
+    rp_list = [recovery_point]
+    fetch_tier(rp_list)
+    print(rp_list[0].tier_type)
+    print("\nRestore mode: ", restore_mode)
+
+    if(rp_list[0].tier_type=='VaultArchive' and rehydration_priority==None):
+        raise InvalidArgumentValueError('The selected recovery point is in archive tier, provide additional parameters of rehydration duration and rehydration.')
+    
+
+    if(rp_list[0].tier_type=='VaultArchive'):
+        # Construct trigger restore request object
+        trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority)
+
+        rehyd_duration = 'P'+str(rehydration_duration)+'D'
+        rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration, rehydration_priority=rehydration_priority)
+        trigger_restore_properties.recovery_point_rehydration_info = rehydration_info  
+
+    else:
+        trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)     
+
     trigger_restore_properties.recovery_type = restore_mode
+
+    print("\nTrigger restore properties: ",trigger_restore_properties)
 
     if restore_mode == 'AlternateLocation':
         if recovery_mode != "FileRecovery":
@@ -571,10 +697,16 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     if 'sql' in item_type.lower():
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
+
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
+    print('\nTrigger restore request: ', trigger_restore_request)
+
     # Trigger restore and wait for completion
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
-                            item_uri, recovery_point_id, trigger_restore_request, raw=True)
+                            item_uri, recovery_point_id, trigger_restore_request, raw=True, polling=False).result()
+    
+    print(result)
+    print(dir(result))
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -687,16 +819,31 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'alternate_directory_paths': alternate_directory_paths}
 
 
-def _get_restore_request_instance(item_type, log_point_in_time):
-    if item_type.lower() == "saphana":
-        if log_point_in_time is not None:
-            return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
-        return AzureWorkloadSAPHanaRestoreRequest()
-    if item_type.lower() == "sql":
-        if log_point_in_time is not None:
-            return AzureWorkloadSQLPointInTimeRestoreRequest()
-        return AzureWorkloadSQLRestoreRequest()
-    return None
+def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
+
+    if rehydration_priority is None:
+        if item_type.lower() == "saphana":
+            if log_point_in_time is not None:
+                return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
+            return AzureWorkloadSAPHanaRestoreRequest()
+
+        if item_type.lower() == "sql":
+            if log_point_in_time is not None:
+                return AzureWorkloadSQLPointInTimeRestoreRequest()
+            return AzureWorkloadSQLRestoreRequest()
+        
+        return None
+    
+    else:
+        if item_type.lower() == "saphana":
+            if log_point_in_time is not None:
+                raise InvalidArgumentValueError('Integrated restore is not defined for log recovery point.')
+            return AzureWorkloadSAPHanaRestoreWithRehydrateRequest()
+
+        if item_type.lower() == "sql":
+            if log_point_in_time is not None:
+                raise InvalidArgumentValueError('Integrated restore is not defined for log recovery point.')
+            return AzureWorkloadSQLRestoreWithRehydrateRequest()
 
 
 def _get_protected_item_instance(item_type):
