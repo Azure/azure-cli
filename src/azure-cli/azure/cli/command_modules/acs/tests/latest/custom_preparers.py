@@ -97,10 +97,12 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
         }
         if "ENV_JOB_NAME" in os.environ:
             tags["job"] = os.environ["ENV_JOB_NAME"]
-        tags = " ".join(["{}={}".format(key, value) for key, value in tags.items()])
+        tags = " ".join(
+            ["{}={}".format(key, value) for key, value in tags.items()]
+        )
         template = (
             "az network vnet create --resource-group {} --location {} --name {}"
-            "--subnet-name default --address-prefixes {} --tag " + tags
+            " --subnet-name default --address-prefixes {} --tag " + tags
         )
         self._update_address_prefixes(**kwargs)
         self.live_only_execute(
@@ -129,4 +131,6 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
 
     def _update_address_prefixes(self, **kwargs):
         if self.address_prefixes_parameter_name in kwargs:
-            self.address_prefixes = kwargs.get(self.address_prefixes_parameter_name)
+            self.address_prefixes = kwargs.get(
+                self.address_prefixes_parameter_name
+            )

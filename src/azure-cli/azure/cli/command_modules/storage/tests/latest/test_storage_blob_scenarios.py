@@ -665,6 +665,11 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir/'))
 
+        # Test with custom delimiter
+        self.storage_cmd('storage blob list -c {} --delimiter "ir"', account_info, container) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1),
+                                JMESPathCheck('[0].name', 'dir'))
+
         # Test secondary location
         account_name = account_info[0] + '-secondary'
         account_key = account_info[1]

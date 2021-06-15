@@ -3,6 +3,125 @@
 Release History
 ===============
 
+2.25.0
+++++++
+
+**ACR**
+
+* `az acr connected-registry`: Minor bug fixes (#18288)
+
+**App Service**
+
+* `az webapp deployment source config-local-git`:  Fix to set SiteConfig (#18364)
+
+**ARM**
+
+* `az resource tag`: Fix the problem of tagging resources with resource type `Microsoft.Network/publicIPAddresses` (#18254)
+* `az policy assignment non-compliance-message`: New command group for policy assignment non-compliance messages (#18158)
+* `az policy assignment update`: New command for partially updating existing policy assignments (#18158)
+
+**Backup**
+
+* Migrate backup to track2 SDK (#17831)
+
+**Compute**
+
+* Upgrade api-version for VM and VMSS from '2020-12-01' to '2021-03-01' (#18233)
+* `az vm create`: Support delete option for NICs and Disks for VMs in Azure CLI (#18238)
+* Support user_data for VM and VM Scale Sets (#18432)
+
+**Container**
+
+* `az container exec`: Decode received bytes as utf-8 string (#18384)
+
+**EventGrid**
+
+* Migrate track2 SDK (#18210)
+
+**HDInsight**
+
+* Migrate to track2 Python SDK 7.0.0 (#18237)
+
+**Iot Hub**
+
+* Fix for user-assigned identity ARM issue on remove (#18205)
+
+**Key Vault**
+
+* Fix #11871: AKV10032: Invalid issuer error for operations in nondefault tenant/subscription (#18162)
+* `az keyvault set-policy/delete-policy`: Support --application-id (#18209)
+* `az keyvault recover`: Support MHSM (#18150)
+* `az keyvault private-link-resource list`: Support MHSM (#18273)
+* `az keyvault private-endpoint-connection`: Support MHSM (#18273)
+
+**NetAppFiles**
+
+* `az netappfiles volume backup status`: Command added to get the status of the backup for a volume. (#18303)
+* `az netappfiles volume update`: Optional parameter added named `--snapshot-policy-id` o assign a snapshot policy to the volume. (#18303)
+* `az netappfiles volume backup create`: Optional parameter added named `--use-existing-snapshot` to manually backup an already existing snapshot. (#18303)
+* `az netappfiles volume backup update`: Optional parameters added named `--use-existing-snapshot` to manually backup an already existing snapshot. Optional parameter label also added to add a label to backup. (#18303)
+
+**Network**
+
+* Support `Microsoft.Sql/servers` provider in Private link (#18268)
+* `az network private-link-resource list`: Support `--type microsoft.keyvault/managedHSMs` (#18273)
+* `az network private-endpoint-connection`: Support `--type microsoft.keyvault/managedHSMs` (#18273)
+
+**RDBMS**
+
+* Add commands for Github actions (#17949)
+* `az postgres flexible-server migration`: Add customer facing feature to migrate postgres db servers from Sterling to Meru platform (#18161)
+* Private DNS zone parameter added for restore command, high availability validator (#18218)
+* Change server default location (issue reported) (#18157)
+
+**Role**
+
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: `--name` is now only used as the `displayName` of the app. It is not used to generate `identifierUris` anymore. `name` in the output is now the same as `appID` (`servicePrincipalNames`) and deprecated. (#18312)
+
+**SignalR**
+
+* `az signalr identity`: Add managed identity related command (#18309)
+* `az signalr cors update`: Add update command for cors (#18309)
+
+**Storage**
+
+* `az storage blob copy start`: Support --tier and --rehydrate-priority (#18170)
+* GA release storage file share NFS and SMB multichannel (#18232)
+* [BREAKING CHANGE] `az storage account create`: Remove `StorageFileDataSmbShareOwner` option for --default-share-permission (#18396)
+* `az storage blob list`: --delimiter parameter value will now be honored (#18394)
+
+**Synapse**
+
+* Update to AZ Synapse mgmt 2.0.0 (#18195)
+* Spark configuration conversion, which cause the failure (#18328)
+
+**Webapp**
+
+* Add to `az webapp deploy` param help text (#17743)
+
+2.24.2
+++++++
+
+**Container**
+
+* Hotfix: Fix #18276: `az container create` fails with `AttributeError: 'ResourcesOperations' object has no attribute 'create_or_update'`
+
+2.24.1
+++++++
+
+**App Service**
+
+* Hotfix: Fix #18266 - webapp config appsettings set command causing all values to default to "false"
+
+**ARM**
+* Hotfix: Fix deserialization issue in the What-If formatter of ARM template
+
+**Compute**
+* Hotfix: Fix the bad request issue when creating VMSS in Azure Stack
+
+**IoT**
+* Hotfix: Fix issue for removing last user-assigned identity from IoT Hub
+
 2.24.0
 ++++++
 

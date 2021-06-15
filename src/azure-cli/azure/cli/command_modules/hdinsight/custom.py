@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -43,7 +44,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
-        DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
+        DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
         KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
         Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
         NetworkProperties, PrivateLink, ComputeIsolationProperties
@@ -319,7 +320,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         ldaps_urls = ['ldaps://{}:636'.format(domain_name)]
 
     security_profile = domain and SecurityProfile(
-        directory_type=DirectoryType.active_directory,
+        directory_type=SecurityProfile.directory_type,
         domain=domain_name,
         ldaps_urls=ldaps_urls,
         domain_username=cluster_admin_account,
@@ -395,10 +396,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         identity=cluster_identity
     )
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.create, resource_group_name, cluster_name, create_params)
-
-    return client.create(resource_group_name, cluster_name, create_params)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, cluster_name, create_params)
 
 
 def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
@@ -406,6 +404,15 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
         if resource_group_name else client.list()
 
     return list(clusters_list)
+
+
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import ClusterPatchParameters
+    cluster_patch_parameters = ClusterPatchParameters(
+        tags=tags
+    )
+
+    return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
 
 
 # pylint: disable=unused-argument
@@ -418,10 +425,18 @@ def rotate_hdi_cluster_key(cmd, client, resource_group_name, cluster_name,
         key_version=encryption_key_version
     )
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.rotate_disk_encryption_key, resource_group_name, cluster_name, rotate_params)
+    return sdk_no_wait(no_wait, client.begin_rotate_disk_encryption_key, resource_group_name, cluster_name,
+                       rotate_params)
 
-    return client.rotate_disk_encryption_key(resource_group_name, cluster_name, rotate_params)
+
+def resize_cluster(cmd, client, cluster_name, resource_group_name, target_instance_count, no_wait=False):
+    from azure.mgmt.hdinsight.models import ClusterResizeParameters, RoleName
+    resize_cluster_parameters = ClusterResizeParameters(
+        target_instance_count=target_instance_count
+    )
+
+    return sdk_no_wait(no_wait, client.begin_resize, resource_group_name, cluster_name, RoleName.WORKERNODE,
+                       resize_cluster_parameters)
 
 
 def _all_or_none(*params):
@@ -508,12 +523,13 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
         properties=application_properties
     )
 
-    return client.create(resource_group_name, cluster_name, application_name, create_params)
+    return client.begin_create(resource_group_name, cluster_name, application_name, create_params)
 
 
 # pylint: disable=unused-argument
 def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace,
                           primary_key=None, workspace_type='resource_id', no_validation_timeout=False):
+    from azure.mgmt.hdinsight.models import ClusterMonitoringRequest
     from msrestazure.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
@@ -542,18 +558,21 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 
         workspace_id = log_analytics_workspace.customer_id
 
-    return client.enable_monitoring(
+    monitor_request_parameter = ClusterMonitoringRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_monitoring(
         resource_group_name,
         cluster_name,
-        workspace_id,
-        primary_key)
+        monitor_request_parameter)
 
 
 # pylint: disable=unused-argument
 def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
                               script_uri, script_action_name, roles, script_parameters=None,
                               persist_on_success=False):
-    from azure.mgmt.hdinsight.models import RuntimeScriptAction
+    from azure.mgmt.hdinsight.models import RuntimeScriptAction, ExecuteScriptActionParameters
 
     script_actions_params = [
         RuntimeScriptAction(
@@ -563,8 +582,11 @@ def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
             roles=roles
         )
     ]
-
-    return client.execute_script_actions(resource_group_name, cluster_name, persist_on_success, script_actions_params)
+    execute_script_action_parameters = ExecuteScriptActionParameters(
+        persist_on_success=persist_on_success,
+        script_actions=script_actions_params
+    )
+    return client.begin_execute_script_actions(resource_group_name, cluster_name, execute_script_action_parameters)
 
 
 # pylint: disable=redefined-builtin
@@ -572,7 +594,7 @@ def create_autoscale(cmd, client, resource_group_name, cluster_name, type, min_w
                      max_workernode_count=None, timezone=None, days=None, time=None, workernode_count=None,
                      no_wait=False, yes=False):
     from azure.mgmt.hdinsight.models import Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, \
-        AutoscaleTimeAndCapacity
+        AutoscaleTimeAndCapacity, AutoscaleConfigurationUpdateParameter, RoleName
     load_based_type = "Load"
     schedule_based_type = "Schedule"
     autoscale_configuration = None
@@ -612,13 +634,17 @@ def create_autoscale(cmd, client, resource_group_name, cluster_name, type, min_w
         "This operation will override previous autoscale configuration. "
         "Are you sure you want to perform this operation", yes)
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workernode_count=None,
                      max_workernode_count=None, timezone=None, no_wait=False):
-    from azure.mgmt.hdinsight.models import AutoscaleCapacity, AutoscaleRecurrence
+    from azure.mgmt.hdinsight.models import AutoscaleCapacity, AutoscaleRecurrence, \
+        AutoscaleConfigurationUpdateParameter, RoleName
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
 
@@ -644,8 +670,11 @@ def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workern
         elif not autoscale_configuration.recurrence:
             autoscale_configuration.recurrence = AutoscaleRecurrence(time_zone=timezone)
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def show_autoscale(cmd, client, resource_group_name, cluster_name):
@@ -655,12 +684,17 @@ def show_autoscale(cmd, client, resource_group_name, cluster_name):
 
 
 def delete_autoscale(cmd, client, resource_group_name, cluster_name, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleConfigurationUpdateParameter, RoleName
+
     cluster = client.get(resource_group_name, cluster_name)
     _extract_and_validate_autoscale_configuration(cluster)
     autoscale_configuration = None
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def list_timezones(cmd, client):
@@ -670,7 +704,8 @@ def list_timezones(cmd, client):
 
 def create_autoscale_condition(cmd, client, resource_group_name, cluster_name, days, time, workernode_count,
                                no_wait=False):
-    from azure.mgmt.hdinsight.models import AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity
+    from azure.mgmt.hdinsight.models import AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
+        AutoscaleConfigurationUpdateParameter, RoleName
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
 
@@ -688,13 +723,17 @@ def create_autoscale_condition(cmd, client, resource_group_name, cluster_name, d
         autoscale_configuration.recurrence = AutoscaleRecurrence(
             schedule=[condition]
         )
-
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, days=None, time=None,
                                workernode_count=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleConfigurationUpdateParameter, RoleName
+
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
     _validate_schedule_configuration(autoscale_configuration)
@@ -713,11 +752,16 @@ def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
         autoscale_configuration.recurrence.schedule[index].time_and_capacity.min_instance_count = workernode_count
         autoscale_configuration.recurrence.schedule[index].time_and_capacity.max_instance_count = workernode_count
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleConfigurationUpdateParameter, RoleName
+
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
     _validate_schedule_configuration(autoscale_configuration)
@@ -728,8 +772,11 @@ def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
                        'If you want to disable autoscale please use `az hdinsight autoscale delete`.')
     autoscale_configuration.recurrence.schedule = [autoscale_configuration.recurrence.schedule[i] for i in
                                                    range(conditions_count) if i not in index]
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def list_autoscale_condition(cmd, client, resource_group_name, cluster_name):

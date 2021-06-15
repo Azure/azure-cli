@@ -183,31 +183,36 @@ def load_arguments(self, _):
         c.argument('scope', help='Scope to which this policy assignment applies.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy assignment.')
+        c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
         c.argument('policy', help='Name or id of the policy definition.', completer=get_policy_completion_list)
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
         c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
         c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
         c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
         c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
+
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
+
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
+
+    with self.argument_context('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as c:
+        c.argument('message', options_list=['--message', '-m'], help='Message that will be shown when a resource is denied by policy or evaluation details are inspected.')
+        c.argument('policy_definition_reference_id', options_list=['--policy-definition-reference-id', '-r'], help='Policy definition reference ID within the assigned initiative (policy set) that the message applies to.')
 
     with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)

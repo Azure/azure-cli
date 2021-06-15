@@ -143,7 +143,8 @@ def list_blobs(client, delimiter=None, include=None, marker=None, num_results=No
     from ..track2_util import list_generator
 
     if delimiter:
-        generator = client.walk_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+        generator = client.walk_blobs(
+            name_starts_with=prefix, include=include, results_per_page=num_results, delimiter=delimiter, **kwargs)
     else:
         generator = client.list_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
 
