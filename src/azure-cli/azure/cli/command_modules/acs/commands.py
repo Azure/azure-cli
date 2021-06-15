@@ -80,7 +80,6 @@ def load_command_table(self, _):
 
     # ACS Kubernetes commands
     with self.command_group('acs kubernetes', container_services_sdk,
-                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                             client_factory=cf_container_services) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
@@ -88,8 +87,7 @@ def load_command_table(self, _):
 
     # AKS commands
     with self.command_group('aks', managed_clusters_sdk,
-                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                            operation_group='managed_clusters', client_factory=cf_managed_clusters) as g:
+                            client_factory=cf_managed_clusters) as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.custom_command('update', 'aks_update', supports_no_wait=True)
@@ -118,9 +116,9 @@ def load_command_table(self, _):
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
-        g.wait_command('wait', operation_group='managed_clusters')
-        g.command('stop', 'stop', supports_no_wait=True, min_api='2020-09-01', client_factory=cf_managed_clusters)
-        g.command('start', 'start', supports_no_wait=True, min_api='2020-09-01', client_factory=cf_managed_clusters)
+        g.wait_command('wait')
+        g.command('stop', 'stop', supports_no_wait=True, min_api='2020-09-01')
+        g.command('start', 'start', supports_no_wait=True, min_api='2020-09-01')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
