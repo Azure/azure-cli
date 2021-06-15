@@ -15,9 +15,9 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
-from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
-    DEFAULT_LOCATION_PG
+from .flexible_server_custom_common import create_firewall_rule
+from ._flexible_server_util import generate_missing_parameters, resolve_poller, parse_public_access_input, \
+    generate_password, parse_maintenance_window, get_postgres_list_skus_info
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
 
@@ -29,7 +29,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 # region create without args
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-# pylint: disable=raise-missing-from
+# pylint: disable=raise-missing-from, unbalanced-tuple-unpacking
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
@@ -42,9 +42,10 @@ def flexible_server_create(cmd, client,
                            vnet_address_prefix=None, subnet_address_prefix=None,
                            private_dns_zone_arguments=None):
     # validator
-    if location is None:
-        location = DEFAULT_LOCATION_PG
-    sku_info = get_postgres_list_skus_info(cmd, location)
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+
+    sku_info, single_az = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
     storage_mb *= 1024
 
@@ -55,6 +56,8 @@ def flexible_server_create(cmd, client,
     if high_availability is not None and high_availability.lower() == 'enabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
+        if single_az:
+            raise ArgumentUsageError("This region is single availability zone. High availability is not supported in a single availability zone region.")
 
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
@@ -63,9 +66,6 @@ def flexible_server_create(cmd, client,
 
     server_result = firewall_id = subnet_id = None
 
-    # Populate desired parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'postgres')
     server_name = server_name.lower()
     validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
@@ -138,7 +138,8 @@ def flexible_server_create(cmd, client,
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False):
+                            source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False,
+                            private_dns_zone_arguments=None):
     provider = 'Microsoft.DBforPostgreSQL'
     validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
@@ -169,7 +170,19 @@ def flexible_server_restore(cmd, client,
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
-        parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
+        if source_server_object.public_network_access == 'Disabled':
+            parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
+            if private_dns_zone_arguments is not None:
+                subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id
+                private_dns_zone_id = prepare_private_dns_zone(cmd,
+                                                               'PostgreSQL',
+                                                               resource_group_name,
+                                                               server_name,
+                                                               private_dns_zone=private_dns_zone_arguments,
+                                                               subnet_id=subnet_id,
+                                                               location=location)
+                parameters.private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -190,7 +203,7 @@ def flexible_server_update_custom_func(cmd, instance,
 
     # validator
     location = ''.join(instance.location.lower().split())
-    sku_info = get_postgres_list_skus_info(cmd, location)
+    sku_info, _ = get_postgres_list_skus_info(cmd, location)
     pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
 
     server_module_path = instance.__module__

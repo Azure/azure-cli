@@ -59,9 +59,9 @@ def compute_node_client_factory(cli_ctx, kwargs):
 
 
 def batch_client_factory(cli_ctx, **_):
-    from azure.mgmt.batch import BatchManagementClient
+    from azure.mgmt.batch import BatchManagement
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, BatchManagementClient)
+    return get_mgmt_service_client(cli_ctx, BatchManagement)
 
 
 def batch_data_service_factory(cli_ctx, kwargs):
