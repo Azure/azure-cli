@@ -1852,9 +1852,16 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
-            packed_template = pack(cmd, template_file)
-            input_template = getattr(packed_template, 'RootTemplate')
-            artifacts = getattr(packed_template, 'Artifacts')
+            if is_bicep_file(template_file):
+                template_content = run_bicep_command(["build", "--stdout", template_file])
+                input_content = _remove_comments_from_json(template_content, file_path=template_file)
+                input_template = json.loads(json.dumps(input_content))
+                artifacts = []
+            else:
+                packed_template = pack(cmd, template_file)
+                input_template = getattr(packed_template, 'RootTemplate')
+                artifacts = getattr(packed_template, 'Artifacts')
+
 
         if ui_form_definition_file:
             ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
@@ -1896,9 +1903,15 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
-        packed_template = pack(cmd, template_file)
-        input_template = getattr(packed_template, 'RootTemplate')
-        artifacts = getattr(packed_template, 'Artifacts')
+        if is_bicep_file(template_file):
+            template_content = run_bicep_command(["build", "--stdout", template_file])
+            input_content = _remove_comments_from_json(template_content, file_path=template_file)
+            input_template = json.loads(json.dumps(input_content))
+            artifacts = []
+        else:
+            packed_template = pack(cmd, template_file)
+            input_template = getattr(packed_template, 'RootTemplate')
+            artifacts = getattr(packed_template, 'Artifacts')
 
     if ui_form_definition_file:
         ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
