@@ -101,20 +101,18 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
             """)
 
     workload_type = _check_map(workload_type, workload_type_map)
-    container_name = resource_id.split('/')[-1]
+    container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
-    containers = list_protectable_containers(cmd, resource_group_name, vault_name)
+    if container_name is None or not cust_help.is_native_name(container_name):
+        # refresh containers and try to get the protectable container object again
+        client.refresh(vault_name, resource_group_name, fabric_name)
+        container_name = _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id)
 
-    for container in containers:
-        if cust_help.get_resource_id(container.properties.container_id) == cust_help.get_resource_id(resource_id):
-            container_name = container.name
-            break
-
-    if not cust_help.is_native_name(container_name):
-        raise CLIError(
-            """
-            Container unavailable or already registered.
-            """)
+        if container_name is None or not cust_help.is_native_name(container_name):
+            raise CLIError(
+                """
+                Container unavailable or already registered.
+                """)
 
     properties = AzureVMAppContainerProtectionContainer(backup_management_type=container_type,
                                                         source_resource_id=resource_id,
@@ -729,3 +727,14 @@ def _check_map(item_type, item_type_map):
     az_error = InvalidArgumentValueError(error_text)
     az_error.set_recommendation(recommendation_text)
     raise az_error
+
+
+def _get_protectable_container_name(cmd, resource_group_name, vault_name, resource_id):
+    containers = list_protectable_containers(cmd, resource_group_name, vault_name)
+    container_name = None
+    for container in containers:
+        container_resource_id = cust_help.get_resource_id(container.properties.container_id)
+        if container_resource_id.lower() == cust_help.get_resource_id(resource_id).lower():
+            container_name = container.name
+            break
+    return container_name

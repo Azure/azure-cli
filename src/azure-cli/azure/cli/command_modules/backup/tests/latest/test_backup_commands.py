@@ -35,6 +35,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm': vm_name
         })
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
         # Enable Protection
         self.cmd('backup protection enable-for-vm -g {rg} -v {vault} --vm {vm} -p DefaultPolicy').get_output_in_json()
 
@@ -158,6 +160,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm2': vm2
         })
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         container_json = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg}', checks=[
             self.check('properties.friendlyName', '{vm1}'),
             self.check('properties.healthStatus', 'Healthy'),
@@ -272,6 +275,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'policy': policy_name,
             'default': 'DefaultPolicy'
         })
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         self.kwargs['container1'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
         self.kwargs['container2'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm2} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
 
@@ -353,6 +357,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm': vm_name
         })
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [].name', checks=[
             self.check("length(@)", 2)
         ]).get_output_in_json()
@@ -383,6 +388,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm': vm_name
         })
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         self.kwargs['vm_id'] = self.cmd('vm show -g {rg} -n {vm} --query id').get_output_in_json()
 
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
@@ -448,6 +454,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
             'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
         })
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
         # Original Storage Account Restore Fails
@@ -519,7 +526,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.crossRegionRestoreFlag", True)
         ]).get_output_in_json()
         time.sleep(300)
-
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         # Trigger Cross Region Restore
         self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
 
