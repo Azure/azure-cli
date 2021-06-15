@@ -2513,9 +2513,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
         if service_principal is None or client_secret is None:
             raise CLIError(
                 'usage error: --reset-service-principal --service-principal ID --client-secret SECRET')
-            service_principal_profile = ManagedClusterServicePrincipalProfile(
-                client_id=service_principal,
-                secret=client_secret)
+        service_principal_profile = ManagedClusterServicePrincipalProfile(
+            client_id=service_principal, secret=client_secret
+        )
         return sdk_no_wait(no_wait,
                            client.begin_reset_service_principal_profile,
                            resource_group_name,
