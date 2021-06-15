@@ -42,7 +42,8 @@ def create_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, o
         return None
 
     ManagedClusterLoadBalancerProfile = cmd.get_models('ManagedClusterLoadBalancerProfile',
-                                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+                                                       resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                       operation_group='managed_clusters')
     profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                            outbound_ports, idle_timeout, profile)
@@ -65,21 +66,24 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
         if managed_outbound_ip_count:
             ManagedClusterLoadBalancerProfileManagedOutboundIPs = cmd.get_models(
                 'ManagedClusterLoadBalancerProfileManagedOutboundIPs',
-                resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                operation_group='managed_clusters')
             profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
                 count=managed_outbound_ip_count
             )
         if outbound_ip_resources:
             ManagedClusterLoadBalancerProfileOutboundIPs = cmd.get_models(
                 'ManagedClusterLoadBalancerProfileOutboundIPs',
-                resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                operation_group='managed_clusters')
             profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
                 public_ips=outbound_ip_resources
             )
         if outbound_ip_prefix_resources:
             ManagedClusterLoadBalancerProfileOutboundIPPrefixes = cmd.get_models(
                 'ManagedClusterLoadBalancerProfileOutboundIPPrefixes',
-                resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                operation_group='managed_clusters')
             profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
                 public_ip_prefixes=outbound_ip_prefix_resources
             )
@@ -102,7 +106,8 @@ def is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, i
 def _get_load_balancer_outbound_ips(cmd, load_balancer_outbound_ips):
     """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
     load_balancer_outbound_ip_resources = None
-    ResourceReference = cmd.get_models('ResourceReference', resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+    ResourceReference = cmd.get_models('ResourceReference', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                       operation_group='managed_clusters')
     if load_balancer_outbound_ips:
         load_balancer_outbound_ip_resources = \
             [ResourceReference(id=x.strip())
@@ -114,7 +119,8 @@ def _get_load_balancer_outbound_ip_prefixes(cmd, load_balancer_outbound_ip_prefi
     """parse load balancer profile outbound IP prefix ids and return an array \
     of references to the outbound IP prefix resources"""
     load_balancer_outbound_ip_prefix_resources = None
-    ResourceReference = cmd.get_models('ResourceReference', resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+    ResourceReference = cmd.get_models('ResourceReference', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                       operation_group='managed_clusters')
     if load_balancer_outbound_ip_prefixes:
         load_balancer_outbound_ip_prefix_resources = \
             [ResourceReference(id=x.strip())
