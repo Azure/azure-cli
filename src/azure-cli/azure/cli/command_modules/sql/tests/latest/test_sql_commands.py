@@ -5117,12 +5117,12 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
     def test_sql_instance_failover_group_mgmt(self):
-        managed_instance_name_1 = "azureclitestbsr"
-        managed_instance_name_2 = "azureclitestbsr-secondary"
-        resource_group_name = "ps1308"
+        managed_instance_name_1 = "mifoge"
+        managed_instance_name_2 = "migogw"
+        resource_group_name = "auto-failover-group"
         failover_group_name = "fgtest2020a"
-        mi1_location = "westeurope"
-        mi2_location = "northeurope"
+        mi1_location = "eastus"
+        mi2_location = "westus"
 
         # Create Failover Group
         self.cmd('sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
@@ -5240,15 +5240,6 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         self.cmd('sql instance-failover-group delete -g {} -l {} -n {}'
                  .format(resource_group_name, mi1_location, failover_group_name),
                  checks=NoneCheck())
-
-        # Check if failover group  really got dropped
-        self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
-                 expect_failure=True)
-
-        self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
-                 expect_failure=True)
 
 
 class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
