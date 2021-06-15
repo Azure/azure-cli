@@ -4120,7 +4120,7 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_instance_pool(self):
-
+        self.skipTest("Skipping based on discussion with owning team - mibrkic")
         print("Starting instance pool tests")
         instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
@@ -5261,9 +5261,9 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
-    @StorageAccountPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='eastus2')
+    @SqlServerPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
 
