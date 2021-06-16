@@ -599,7 +599,7 @@ examples:
 
 helps['sig image-definition'] = """
 type: group
-short-summary: Manage shared gallery image with vm
+short-summary: Manage shared gallery image with VM
 """
 
 helps['sig image-definition create'] = """
@@ -645,7 +645,7 @@ examples:
 
 helps['sig image-version'] = """
 type: group
-short-summary: Manage shared gallery image version with vm
+short-summary: Manage shared gallery image version with VM
 """
 
 helps['sig image-version create'] = """
