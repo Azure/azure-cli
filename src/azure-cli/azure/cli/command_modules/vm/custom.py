@@ -3866,3 +3866,58 @@ def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_durati
     return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
 
 # endregion
+
+
+def sig_shared_gallery_list(client, location, shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
+                     op_type=None):
+    SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
+        'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
+    if subscription_ids is None and tenant_ids is None:
+        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    groups = []
+    if subscription_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
+    if tenant_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.AAD_TENANTS, ids=tenant_ids))
+    sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_share_reset(cmd, client, resource_group_name, gallery_name):
+    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes',
+                                                                operation_group='shared_galleries')
+    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       shared_to=shared_to)
+
+
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location, gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+
+
+def get_gallery_instance(cmd, resource_group_name, gallery_name):
+    from ._client_factory import cf_vm_cl
+    client = cf_vm_cl(cmd.cli_ctx)
+    SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
+    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)

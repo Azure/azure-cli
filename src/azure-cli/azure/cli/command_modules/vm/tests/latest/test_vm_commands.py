@@ -3879,7 +3879,7 @@ class VMGalleryImage(ScenarioTest):
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
-            'gallery': 'cligallery',
+            'gallery': self.create_random_name('gellery', 16),
             'image': 'image1',
             'version': '1.1.2',
             'captured': 'managedImage1',
@@ -3935,6 +3935,13 @@ class VMGalleryImage(ScenarioTest):
             self.check('[0].name', '{unique_name}'),
             self.check('[0].uniqueId', '/SharedGalleries/{unique_name}')
         ])
+
+        self.cmd('sig show-shared --location {location} --gallery-unique-name {unique_name}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{unique_name}'),
+            self.check('uniqueId', '/SharedGalleries/{unique_name}')
+        ])
+
         self.cmd('sig image-definition list-shared --gallery-unique-name {unique_name} --location {location}', checks=[
             self.check('[0].location', '{location}'),
             self.check('[0].name', '{image}'),
