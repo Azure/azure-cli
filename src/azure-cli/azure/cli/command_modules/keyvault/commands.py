@@ -44,8 +44,9 @@ def load_command_table(self, _):
         private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+        data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
     else:
-        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
+        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = data_key_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -174,6 +175,21 @@ def load_command_table(self, _):
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
+
+    if is_azure_stack_profile(self):
+        with self.command_group('keyvault key', data_entity.command_type) as g:
+            g.keyvault_command('list', 'get_keys',
+                               transform=multi_transformers(
+                                   filter_out_managed_resources,
+                                   keep_max_results,
+                                   extract_subresource_name(id_parameter='kid')))
+    else:
+        with self.command_group('keyvault key', data_key_entity.command_type) as g:
+            g.keyvault_command('list', 'list_properties_of_keys',
+                               transform=multi_transformers(
+                                   filter_out_managed_resources,
+                                   keep_max_results,
+                                   extract_subresource_name(id_parameter='kid')))
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',

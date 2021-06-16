@@ -42,6 +42,8 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         'azure.keyvault.administration._access_control_client#KeyVaultAccessControlClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_KEYS:
+        'azure.keyvault.keys._client#KeyClient{obj_name}',
 }
 
 
@@ -51,7 +53,8 @@ def is_mgmt_plane(resource_type):
 
 def get_operations_tmpl(resource_type, client_name):
     if resource_type in [ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
-                         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL]:
+                         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL,
+                         ResourceType.DATA_KEYVAULT_KEYS]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
     class_name = OPERATIONS_NAME.get(client_name, '') if is_mgmt_plane(resource_type) else 'KeyVaultClient'
@@ -90,6 +93,8 @@ def get_client_factory(resource_type, client_name=''):
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         return data_plane_azure_keyvault_administration_access_control_client
+    if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
+        return data_plane_azure_keyvault_key_client
     raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
 
@@ -205,15 +210,8 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
 def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultBackupClient
 
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP))
-    profile = Profile(cli_ctx=cli_ctx)
-    credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
-    vault_url = \
-        command_args.get('hsm_name', None) or \
-        command_args.get('vault_base_url', None) or \
-        command_args.get('identifier', None)
-    if not vault_url:
-        raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
+    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
     return KeyVaultBackupClient(
         vault_url=vault_url, credential=credential, api_version=version)
 
@@ -221,7 +219,23 @@ def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args
 def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultAccessControlClient
 
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL))
+    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+    return KeyVaultAccessControlClient(
+        vault_url=vault_url, credential=credential, api_version=version)
+
+
+def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
+    from azure.keyvault.keys import KeyClient
+
+    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_KEYS)
+    return KeyClient(
+        vault_url=vault_url, credential=credential, api_version=version)
+
+
+def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
+    version = str(get_api_version(cli_ctx, resource_type))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
     vault_url = \
@@ -230,5 +244,4 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
         command_args.get('identifier', None)
     if not vault_url:
         raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
-    return KeyVaultAccessControlClient(
-        vault_url=vault_url, credential=credential, api_version=version)
+    return vault_url, credential, version
