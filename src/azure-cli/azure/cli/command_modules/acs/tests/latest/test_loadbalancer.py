@@ -34,8 +34,8 @@ class TestLoadBalancer(unittest.TestCase):
         p = loadbalancer.configure_load_balancer_profile(
             managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports, idle_timeout, profile)
 
-        self.assertIsNotNone(p.managed_outbound_ips)
-        self.assertIsNone(p.outbound_ips)
+        self.assertIsNotNone(p.managed_outbound_i_ps)
+        self.assertIsNone(p.outbound_i_ps)
         self.assertIsNone(p.outbound_ip_prefixes)
 
 
