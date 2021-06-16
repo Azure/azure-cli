@@ -72,8 +72,8 @@ def cf_resources(cli_ctx, _):
     return _resource_client_factory(cli_ctx).resources
 
 
-def cf_providers(cli_ctx, **_):
-    return _resource_client_factory(cli_ctx, api_version="2021-04-01").providers
+def cf_providers(cli_ctx, _, api_version=None):
+    return _resource_client_factory(cli_ctx, api_version=api_version).providers
 
 
 def cf_tags(cli_ctx, _):

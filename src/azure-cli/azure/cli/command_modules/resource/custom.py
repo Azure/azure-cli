@@ -1023,7 +1023,7 @@ def _get_auth_provider_latest_api_version(cli_ctx):
 def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
-    client = cf_providers(cli_ctx)
+    client = cf_providers(cli_ctx, None, api_version='2021-04-01')
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
         if is_rpaas:
@@ -2040,7 +2040,7 @@ def list_resources(cmd, resource_group_name=None,
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
     if consent_to_permissions:
-        from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
+        from azure.mgmt.resource.resources.v2021_04_01.models import ProviderRegistrationRequest, ProviderConsentDefinition
         properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
@@ -2055,7 +2055,7 @@ def list_provider_operations(cmd):
 
 
 def list_provider_permissions(cmd, resource_provider_namespace):
-    client = cf_providers(cmd.cli_ctx)
+    client = cf_providers(cmd.cli_ctx, None, api_version='2021-04-01')
     return client.provider_permissions(resource_provider_namespace)
 
 
