@@ -3366,7 +3366,7 @@ def list_image_galleries(cmd, resource_group_name=None):
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
     if permissions:
         if gallery.sharing_profile is None:
-            SharingProfile = cmd.get_models('SharingProfile')
+            SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
@@ -3869,6 +3869,7 @@ def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_durati
 
 
 def sig_shared_gallery_list(client, location, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
     return client.list(location=location,
@@ -3902,6 +3903,7 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
 
 
 def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
     return client.list(location=location,
@@ -3910,6 +3912,7 @@ def sig_shared_image_definition_list(client, location, gallery_unique_name, shar
 
 
 def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
     return client.list(location=location, gallery_unique_name=gallery_unique_name,
