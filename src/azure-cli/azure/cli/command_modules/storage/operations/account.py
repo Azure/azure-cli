@@ -206,8 +206,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
 
     if enable_nfs_v3 is not None:
-        params.is_nfs_v3_enabled = enable_nfs_v3
-
+        params.enable_nfs_v3 = enable_nfs_v3
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -470,7 +469,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
 
     if enable_nfs_v3 is not None:
-        params.is_nfs_v3_enabled = enable_nfs_v3
+        params.enable_nfs_v3 = enable_nfs_v3
 
     return params
 
