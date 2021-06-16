@@ -1025,9 +1025,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_t
     rcf = _resource_client_factory(cli_ctx)
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
-        if is_rpaas:
-            if not accept_terms:
-                raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
+        if is_rpaas and accept_terms:
             wait = True
         r = rcf.providers.register(namespace)
     elif mg_id and registering:
@@ -1046,7 +1044,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_t
             rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
-        if is_rpaas and registering and mg_id is None:
+        if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
             send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
