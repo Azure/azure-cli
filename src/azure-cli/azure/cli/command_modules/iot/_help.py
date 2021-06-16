@@ -80,9 +80,9 @@ examples:
   - name: Upload a CA certificate PEM file to an Azure IoT Hub device provisioning service.
     text: >
         az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.pem
-  - name: Upload a CA certificate CER file to an Azure IoT Hub device provisioning service.
+  - name: Upload a verified CA certificate CER file to an Azure IoT Hub device provisioning service.
     text: >
-        az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer
+        az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer --verified
 """
 
 helps['iot dps certificate delete'] = """
@@ -268,9 +268,9 @@ type: command
 short-summary: Create/upload an Azure IoT Hub certificate.
 long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
-  - name: Uploads a CA certificate PEM file to an IoT hub.
+  - name: Uploads a verified CA certificate PEM file to an IoT hub.
     text: >
-        az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.pem
+        az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.pem --verified
   - name: Uploads a CA certificate CER file to an IoT hub.
     text: >
         az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.cer

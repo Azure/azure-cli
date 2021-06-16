@@ -291,7 +291,7 @@ def iot_dps_certificate_get(client, dps_name, resource_group_name, certificate_n
     return client.dps_certificate.get(certificate_name, resource_group_name, dps_name)
 
 
-def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path):
+def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path, is_verified=False):
     cert_list = client.dps_certificate.list(resource_group_name, dps_name)
     for cert in cert_list.value:
         if cert.name == certificate_name:
@@ -300,18 +300,24 @@ def iot_dps_certificate_create(client, dps_name, resource_group_name, certificat
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    cert_description = DpsCertificateBodyDescription(certificate=certificate)
-    return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, cert_description)
+    cert_description = DpsCertificateBodyDescription(certificate=certificate, is_verified=is_verified)
+    return client.dps_certificate.create_or_update(
+        resource_group_name,
+        dps_name,
+        certificate_name,
+        cert_description,
+        None
+    )
 
 
-def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag):
+def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag, is_verified=False):
     cert_list = client.dps_certificate.list(resource_group_name, dps_name)
     for cert in cert_list.value:
         if cert.name == certificate_name:
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            cert_description = DpsCertificateBodyDescription(certificate=certificate)
+            cert_description = DpsCertificateBodyDescription(certificate=certificate, is_verified=is_verified)
             return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot dps certificate create' to create a new certificate."
                    .format(certificate_name))
@@ -349,7 +355,7 @@ def iot_hub_certificate_get(client, hub_name, certificate_name, resource_group_n
     return client.certificates.get(resource_group_name, hub_name, certificate_name)
 
 
-def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_path, resource_group_name=None):
+def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_path, resource_group_name=None, is_verified=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     # Get list of certs
     cert_list = client.certificates.list_by_iot_hub(resource_group_name, hub_name)
@@ -360,13 +366,12 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-
-    cert_properties = CertificateProperties(certificate=certificate)
+    cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
     cert_description = CertificateDescription(properties=cert_properties)
     return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
 
-def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None):
+def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None, is_verified=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     cert_list = client.certificates.list_by_iot_hub(resource_group_name, hub_name)
     for cert in cert_list.value:
@@ -374,7 +379,7 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            cert_properties = CertificateProperties(certificate=certificate)
+            cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
             cert_description = CertificateDescription(properties=cert_properties)
             return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."

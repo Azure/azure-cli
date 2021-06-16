@@ -115,6 +115,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='A friendly name for the certificate.')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
 
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot dps certificate {}'.format(subgroup)) as c:
+            c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
+                       help='A boolean indicating whether or not the certificate is verified.')
+
     # Arguments for IoT Hub
     with self.argument_context('iot hub') as c:
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
@@ -285,6 +290,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
                    completer=FilesCompleter([".cer", ".pem"]), help='The path to the file containing the certificate.')
         c.argument('certificate_name', options_list=['--name', '-n'], help='A friendly name for the certificate.')
+
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot hub certificate {}'.format(subgroup)) as c:
+            c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
+                       help='A boolean indicating whether or not the certificate is verified.')
 
     with self.argument_context('iot hub consumer-group') as c:
         c.argument('consumer_group_name', options_list=['--name', '-n'], id_part='child_name_2',
