@@ -1848,12 +1848,12 @@ examples:
 
 helps['provider permission'] = """
 type: group
-short-summary: Get provider permissions.
+short-summary: Manage permissions for a provider.
 """
 
 helps['provider permission list'] = """
 type: command
-short-summary: Get permissions from providers.
+short-summary: List permissions from a provider.
 """
 
 helps['provider operation'] = """
