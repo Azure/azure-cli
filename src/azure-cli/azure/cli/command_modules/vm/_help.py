@@ -598,8 +598,8 @@ examples:
 """
 
 helps['sig image-definition'] = """
-    type: group
-    short-summary: Manage shared gallery image with vm
+type: group
+short-summary: Manage shared gallery image with vm
 """
 
 helps['sig image-definition create'] = """
