@@ -1325,6 +1325,11 @@ examples:
 helps['storage container list'] = """
 type: command
 short-summary: List containers in a storage account.
+examples:
+  - name: List containers in a storage account.
+    text: az storage container list
+  - name: List soft deleted containers in a storage account.
+    text: az storage container list --include-deleted
 """
 
 helps['storage container metadata'] = """
@@ -1341,6 +1346,9 @@ helps['storage container restore'] = """
 type: command
 short-summary: Restore soft-deleted container.
 long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
+examples:
+  - name: Restore soft-deleted container.
+    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """
