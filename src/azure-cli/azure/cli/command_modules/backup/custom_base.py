@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import re
 import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
@@ -71,7 +70,8 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
                          backup_management_type=None, workload_type=None, start_date=None, end_date=None,
-                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None, recommended_for_archive=None):
+                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
+                         recommended_for_archive=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -83,35 +83,41 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
-                                           use_secondary_region, is_ready_for_move, target_tier, tier, recommended_for_archive)
+                                           use_secondary_region, is_ready_for_move, target_tier, tier,
+                                           recommended_for_archive)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date,
-                                               end_date, use_secondary_region, is_ready_for_move, target_tier, tier, recommended_for_archive)
+                                               end_date, use_secondary_region, is_ready_for_move, target_tier, tier,
+                                               recommended_for_archive)
 
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
-                                                 start_date, end_date, is_ready_for_move=is_ready_for_move, target_tier=target_tier,
-                                                 use_secondary_region=use_secondary_region, tier=tier, recommended_for_archive=recommended_for_archive)
+                                                 start_date, end_date, is_ready_for_move=is_ready_for_move,
+                                                 target_tier=target_tier, use_secondary_region=use_secondary_region,
+                                                 tier=tier, recommended_for_archive=recommended_for_archive)
 
     return None
 
 
-def move_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_id, source_tier, destination_tier,
-                         backup_management_type=None, workload_type=None):
+def move_recovery_points(cmd, resource_group_name, vault_name, container_name, item_name, rp_id, source_tier,
+                         destination_tier, backup_management_type=None, workload_type=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
-    item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name, backup_management_type, workload_type)
+    item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
+                     backup_management_type, workload_type)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
-    
+
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.move_recovery_points(cmd, client, resource_group_name, vault_name, item, rp_id, source_tier, destination_tier)      
+        return custom.move_recovery_points(cmd, resource_group_name, vault_name, item, rp_id, source_tier,
+                                           destination_tier)
 
     if item.properties.backup_management_type.lower() == "azureworkload":
-        return custom_wl.move_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, rp_id, source_tier, destination_tier)
+        return custom_wl.move_wl_recovery_points(cmd, resource_group_name, vault_name, item, rp_id,
+                                                 source_tier, destination_tier)
 
     raise InvalidArgumentValueError('This command is not supported for --backup-management-type AzureStorage.')
 
@@ -347,7 +353,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
                   rehydration_priority=None):
 
-    if rehydration_duration<10 or rehydration_duration>30:
+    if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30.')
 
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
@@ -424,12 +430,13 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
-                  rehydration_priority=None):
+                     rehydration_priority=None):
 
-    if rehydration_duration<10 or rehydration_duration>30:
+    if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30.')
 
-    return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration, rehydration_priority)
+    return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config,
+                                      rehydration_duration, rehydration_priority)
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,

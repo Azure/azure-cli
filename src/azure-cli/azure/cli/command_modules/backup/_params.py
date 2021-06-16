@@ -26,7 +26,7 @@ allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase',
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
 allowed_target_tier_type_chk_archivable = ['VaultArchive']
-allowed_tier_type = ['VaultStandard','Snapshot','VaultArchive','VaultStandardRehydrated','SnapshotAndVaultStandard','SnapshotAndVaultArchive']
+allowed_tier_type = ['VaultStandard', 'Snapshot', 'VaultArchive', 'VaultStandardRehydrated', 'SnapshotAndVaultStandard', 'SnapshotAndVaultArchive']
 allowed_rehyd_priority_type = ['Standard', 'High']
 
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
@@ -71,6 +71,7 @@ from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="
 target_tier_type = CLIArgumentType(help=target_tier_help, arg_type=get_enum_type(allowed_target_tier_type_chk_archivable), options_list=['--target-tier'])
 tier_type = CLIArgumentType(help=tier_help, arg_type=get_enum_type(allowed_tier_type), options_list=['--tier'])
 rehyd_priority_type = CLIArgumentType(help=rehyd_priority_type_help, arg_type=get_enum_type(allowed_rehyd_priority_type), options_list=['--rehydration-priority'])
+
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
@@ -329,7 +330,7 @@ def load_arguments(self, _):
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
         c.argument('rehydration_duration', type=int, help='Maximum time, in days, the recovery point stays in hydrated state.')
         c.argument('rehydration_priority', rehyd_priority_type)
-        
+
     # Recoveryconfig
     with self.argument_context('backup recoveryconfig show') as c:
         c.argument('container_name', container_name_type, id_part='child_name_2')

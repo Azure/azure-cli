@@ -210,7 +210,8 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
-                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None, recommended_for_archive=None):
+                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
+                         recommended_for_archive=None):
     if use_secondary_region:
         raise InvalidArgumentValueError(
             """
@@ -218,11 +219,13 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             Please either remove the flag or query for any other backup-management-type.
             """)
 
-    if is_ready_for_move!=None or target_tier!=None or tier!=None:
-        raise InvalidArgumentValueError("Invalid argument has been passed. --is-ready-for-move true, --target-tier and --tier flags are not supported for --backup-management-type AzureStorage.")
+    if is_ready_for_move is not None or target_tier is not None or tier is not None:
+        raise InvalidArgumentValueError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
+        and --tier flags are not supported for --backup-management-type AzureStorage.""")
 
-    if recommended_for_archive!=None:
-        raise InvalidArgumentValueError("--recommended-for-archive is supported by AzureIaasVM backup management type only.")
+    if recommended_for_archive is not None:
+        raise InvalidArgumentValueError("""--recommended-for-archive is supported by AzureIaasVM backup management
+        type only.""")
 
     if cmd.name.split()[2] == 'show-log-chain':
         raise InvalidArgumentValueError("show-log-chain is supported by AzureWorkload backup management type only.")
