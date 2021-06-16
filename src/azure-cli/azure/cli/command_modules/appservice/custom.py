@@ -3570,7 +3570,8 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
     return mod_list
 
 
-def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None):
+def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
+                         disable_route_all=None, skip_delegation_check=False):
     SwiftVirtualNetwork = cmd.get_models('SwiftVirtualNetwork')
     Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
     client = web_client_factory(cmd.cli_ctx)
@@ -3590,26 +3591,45 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
               https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
 
     subnet_id_parts = parse_resource_id(subnet_resource_id)
+    subnet_subscription_id = subnet_id_parts['subscription']
     vnet_name = subnet_id_parts['name']
     vnet_resource_group = subnet_id_parts['resource_group']
     subnet_name = subnet_id_parts['child_name_1']
 
-    subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    delegations = subnetObj.delegations
-    delegated = False
-    for d in delegations:
-        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
-            delegated = True
+    if skip_delegation_check:
+        logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
+                       ' Missing delegation can cause "Bad Request" error.')
+    else:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
+            logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
+                           ' Missing delegation can cause "Bad Request" error.')
+        else:
+            subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+            delegations = subnetObj.delegations
+            delegated = False
+            for d in delegations:
+                if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+                    delegated = True
 
-    if not delegated:
-        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
-                                                   subnet_parameters=subnetObj)
+            if not delegated:
+                subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
+                vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
+                                                           subnet_parameters=subnetObj)
 
     swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
                                     swift_supported=True)
     return_vnet = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                           'create_or_update_swift_virtual_network_connection', slot, swiftVnet)
+
+    # Route all configuration
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if disable_route_all:
+        if config.vnet_route_all_enabled is True:
+            config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='false')
+    else:  # Default enable
+        if config.vnet_route_all_enabled is False:
+            config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
     # reformats the vnet entry, removing unnecessary information
     id_strings = return_vnet.id.split('/')
@@ -3619,7 +3639,8 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
         "location": return_vnet.additional_properties["location"],
         "name": return_vnet.name,
         "resourceGroup": resourceGroup,
-        "subnetResourceId": return_vnet.subnet_resource_id
+        "subnetResourceId": return_vnet.subnet_resource_id,
+        "vnetRouteAllEnabled": config.vnet_route_all_enabled
     }
 
     return mod_vnet
