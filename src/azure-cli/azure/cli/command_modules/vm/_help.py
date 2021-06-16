@@ -625,9 +625,9 @@ examples:
 
 helps['sig image-definition show-shared'] = """
 type: command
-short-summary: Get a shared gallery image by subscription id or tenant id.
+short-summary: Get a shared gallery image.
 examples:
-  - name: Get a gallery.
+  - name: Get a shared gallery image.
     text: |-
            az sig image-definition show-shared --gallery-image-definition "myGalleryImageName" \
 --gallery-unique-name "galleryUniqueName" --location "myLocation"
@@ -722,9 +722,9 @@ examples:
 
 helps['sig image-version show-shared'] = """
 type: command
-short-summary: "Get a shared gallery image version by subscription id or tenant id."
+short-summary: Get a shared gallery image version.
 examples:
-  - name: Get a gallery.
+  - name: Get a shared gallery image version.
     text: |-
            az sig image-version show-shared --gallery-image-definition "myGalleryImageName" \
 --gallery-image-version "myGalleryImageVersionName" --gallery-unique-name "galleryUniqueName" --location "myLocation"
@@ -832,9 +832,9 @@ examples:
 
 helps['sig show-shared'] = """
 type: command
-short-summary: Get a shared gallery by subscription id or tenant id.
+short-summary: Get a shared gallery.
 examples:
-  - name: Get a gallery.
+  - name: Get a shared gallery.
     text: |-
            az sig show-shared --gallery-unique-name "galleryUniqueName" --location "myLocation"
 """
