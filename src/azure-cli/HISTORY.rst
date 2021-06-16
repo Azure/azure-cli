@@ -384,7 +384,7 @@ Release History
 
 **Key Vault**
 
-* Hotfix: GA for managed-HSM ralated commands and parameters
+* Hotfix: GA for managed-HSM related commands and parameters
 
 2.22.0
 ++++++
@@ -816,7 +816,7 @@ Release History
 
 **Network**
 
-* [BREAKING CHANGE] `az network vrouter`: Depracate this command group, please use `az network routeserver`. (#16494)
+* [BREAKING CHANGE] `az network vrouter`: Deprecate this command group, please use `az network routeserver`. (#16494)
 * `az network routeserver`: Add new command group. (#16494)
 * `az network application-gateway create`: Add parameter `--ssl-profile-id` (#16762)
 * `az network application-gateway client-cert`: Manage trusted client certificate of application gateway (#16762)
