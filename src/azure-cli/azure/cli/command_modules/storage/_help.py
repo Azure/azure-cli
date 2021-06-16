@@ -1337,6 +1337,12 @@ type: group
 short-summary: Manage container stored access policies.
 """
 
+helps['storage container restore'] = """
+type: command
+short-summary: Restore soft-deleted container.
+long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
+"""
+
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.

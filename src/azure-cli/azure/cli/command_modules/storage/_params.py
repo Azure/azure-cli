@@ -1236,6 +1236,27 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)
 
+    with self.argument_context('storage container list', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        c.extra('timeout', timeout_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('num_results', arg_type=num_results_type)
+        c.argument('prefix',
+                   help='Filter the results to return only blobs whose name begins with the specified prefix.')
+        c.argument('include_metadata', arg_type=get_three_state_flag(),
+                   help='Specify that container metadata to be returned in the response.')
+        c.argument('show_next_marker', action='store_true', is_preview=True,
+                   help='Show nextMarker in result when specified.')
+        c.argument('include_deleted', arg_type=get_three_state_flag(), min_api='2020-02-10',
+                   help='Specify that deleted containers to be returned in the response. This is for container restore '
+                   'enabled account. The default value is `False`')
+
+    with self.argument_context('storage container restore') as c:
+        c.argument('deleted_container_name', options_list=['--name', '-n'],
+                   help='Specify the name of the deleted container to restore.')
+        c.argument('deleted_container_version', options_list=['--deleted-version'],
+                   help='Specify the version of the deleted container to restore.')
+        c.extra('timeout', timeout_type)
+
     with self.argument_context('storage container-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         from .sdkutil import get_container_access_type_names
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), id_part='child_name_2')
