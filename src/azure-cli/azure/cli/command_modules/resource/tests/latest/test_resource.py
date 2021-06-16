@@ -657,8 +657,6 @@ class ProviderRegistrationTest(ScenarioTest):
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
-            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
-                self.cmd('provider register -n {prov}')
             self.cmd('provider register -n {prov} --accept-terms')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
@@ -669,9 +667,26 @@ class ProviderRegistrationTest(ScenarioTest):
             self.cmd('provider unregister -n {prov}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
-            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
-                self.cmd('provider register -n {prov}')
             self.cmd('provider register -n {prov} --accept-terms')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+
+    def test_provider_registration_rpaas_no_accept_terms(self):
+        self.kwargs.update({'prov': 'Microsoft.Confluent'})
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            self.cmd('provider register -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+        else:
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+            self.cmd('provider register -n {prov}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
 
