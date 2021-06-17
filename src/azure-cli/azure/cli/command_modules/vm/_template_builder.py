@@ -268,7 +268,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
+def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
@@ -279,7 +279,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None):
+        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -524,6 +524,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     if platform_fault_domain is not None:
         vm_properties['platformFaultDomain'] = platform_fault_domain
+
+    if user_data:
+        vm_properties['userData'] = b64encode(user_data)
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -773,7 +776,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        orchestration_mode=None, network_api_version=None):
+                        orchestration_mode=None, user_data=None, network_api_version=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1049,6 +1052,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if encryption_at_host:
         virtual_machine_profile['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+
+    if user_data:
+        vmss_properties['virtualMachineProfile']['userData'] = b64encode(user_data)
 
     if host_group:
         vmss_properties['hostGroup'] = {'id': host_group}
