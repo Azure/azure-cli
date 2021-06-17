@@ -62,7 +62,7 @@ DEPENDENCIES = [
     'azure-keyvault-administration==4.0.0b3',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
-    'azure-mgmt-advisor>=2.0.1,<3.0.0',
+    'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-appconfiguration~=1.0.1',
     'azure-mgmt-applicationinsights~=1.0.0',

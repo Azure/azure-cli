@@ -52,3 +52,5 @@ def load_arguments(self, _):
                    help='Exclude from recommendation generation.')
         c.argument('include', options_list=['--include', '-i'], action='store_true',
                    help='Include in recommendation generation.', validator=validate_include_or_exclude)
+        c.argument('configuration_name', options_list=['--configuration-name'],
+                   help='Advisor configuration name. Value must be "default"')
