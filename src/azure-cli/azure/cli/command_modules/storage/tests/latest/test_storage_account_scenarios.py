@@ -479,7 +479,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-01-01')
-    @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
+    @ResourceGroupPreparer(location='westus', name_prefix='cli_storage_account')
     def test_storage_account_with_nfs(self, resource_group):
         self.kwargs = {
             'name1': self.create_random_name(prefix='sa1', length=24),
