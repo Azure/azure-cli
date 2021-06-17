@@ -179,14 +179,14 @@ def load_arguments(self, _):
         c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('force_dns_registration', help="If true, web app hostname is force registered with DNS",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_custom_domain_verification',
                    help="If true, custom (non *.azurewebsites.net) domains associated with web app are not verified",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('ttl_in_seconds', help="Time to live in seconds for web app's default domain name",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
-                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='2.24.0'))
+                   arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -196,7 +196,7 @@ def load_arguments(self, _):
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
-                   deprecate_info=c.deprecate(expiration='2.24.0'))
+                   deprecate_info=c.deprecate(expiration='3.0.0'))
 
     with self.argument_context('webapp webjob') as c:
         c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
@@ -289,6 +289,7 @@ def load_arguments(self, _):
             c.argument('repository_type', help='repository type',
                        arg_type=get_enum_type(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
+            c.argument('github_action', options_list=['--github-action'], help='If using github action, default to False')
         with self.argument_context(scope + ' identity') as c:
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
@@ -646,37 +647,37 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
-        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
+        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
         c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
         c.argument('subnet', help="The name or resource ID of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp deploy') as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to connect to')
-        c.argument('src_path', options_list=['--src-path'], help='Path of the file to be deployed. Example: /mnt/apps/myapp.war')
-        c.argument('src_url', options_list=['--src-url'], help='url to download the package from. Example: http://mysite.com/files/myapp.war?key=123')
-        c.argument('target_path', options_list=['--target-path'], help='Target path relative to wwwroot to which the file will be deployed to.')
-        c.argument('artifact_type', options_list=['--type'], help='Type of deployment requested')
-        c.argument('is_async', options_list=['--async'], help='Asynchronous deployment', choices=['true', 'false'])
-        c.argument('restart', options_list=['--restart'], help='restart or not. default behavior is to restart.', choices=['true', 'false'])
-        c.argument('clean', options_list=['--clean'], help='clean or not. default is target-type specific.', choices=['true', 'false'])
-        c.argument('ignore_stack', options_list=['--ignore-stack'], help='should override the default stack check', choices=['true', 'false'])
-        c.argument('timeout', options_list=['--timeout'], help='Timeout for operation in milliseconds')
-        c.argument('slot', help="Name of the deployment slot to use")
+        c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to deploy to.')
+        c.argument('src_path', options_list=['--src-path'], help='Path of the artifact to be deployed. Ex: "myapp.zip" or "/myworkspace/apps/myapp.war"')
+        c.argument('src_url', options_list=['--src-url'], help='URL of the artifact. The webapp will pull the artifact from this URL. Ex: "http://mysite.com/files/myapp.war?key=123"')
+        c.argument('target_path', options_list=['--target-path'], help='Absolute path that the artifact should be deployed to. Defaults to "home/site/wwwroot/" Ex: "/home/site/deployments/tools/", "/home/site/scripts/startup-script.sh".')
+        c.argument('artifact_type', options_list=['--type'], help='Used to override the type of artifact being deployed.', choices=['war', 'jar', 'ear', 'lib', 'startup', 'static', 'zip'])
+        c.argument('is_async', options_list=['--async'], help='If true, the artifact is deployed asynchronously. (The command will exit once the artifact is pushed to the web app.)', choices=['true', 'false'])
+        c.argument('restart', options_list=['--restart'], help='If true, the web app will be restarted following the deployment. Set this to false if you are deploying multiple artifacts and do not want to restart the site on the earlier deployments.', choices=['true', 'false'])
+        c.argument('clean', options_list=['--clean'], help='If true, cleans the target directory prior to deploying the file(s). Default value is determined based on artifact type.', choices=['true', 'false'])
+        c.argument('ignore_stack', options_list=['--ignore-stack'], help='If true, any stack-specific defaults are ignored.', choices=['true', 'false'])
+        c.argument('timeout', options_list=['--timeout'], help='Timeout for the deployment operation in milliseconds.')
+        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
 
     with self.argument_context('functionapp deploy') as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the functionapp to connect to')
-        c.argument('src_path', options_list=['--src-path'], help='Path of the file to be deployed. Example: /mnt/apps/myapp.war')
-        c.argument('src_url', options_list=['--src-url'], help='url to download the package from. Example: http://mysite.com/files/myapp.war?key=123')
-        c.argument('target_path', options_list=['--target-path'], help='Target path relative to wwwroot to which the file will be deployed to.')
-        c.argument('artifact_type', options_list=['--type'], help='Type of deployment requested')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
+        c.argument('src_path', options_list=['--src-path'], help='Path of the artifact to be deployed. Ex: "myapp.zip" or "/myworkspace/apps/myapp.war"')
+        c.argument('src_url', options_list=['--src-url'], help='URL of the artifact. The webapp will pull the artifact from this URL. Ex: "http://mysite.com/files/myapp.war?key=123"')
+        c.argument('target_path', options_list=['--target-path'], help='Absolute path that the artifact should be deployed to. Defaults to "home/site/wwwroot/". Ex: "/home/site/deployments/tools/", "/home/site/scripts/startup-script.sh".')
+        c.argument('artifact_type', options_list=['--type'], help='Used to override the type of artifact being deployed.', choices=['war', 'jar', 'ear', 'lib', 'startup', 'static', 'zip'])
         c.argument('is_async', options_list=['--async'], help='Asynchronous deployment', choices=['true', 'false'])
-        c.argument('restart', options_list=['--restart'], help='restart or not. default behavior is to restart.', choices=['true', 'false'])
-        c.argument('clean', options_list=['--clean'], help='clean or not. default is target-type specific.', choices=['true', 'false'])
-        c.argument('ignore_stack', options_list=['--ignore-stack'], help='should override the default stack check', choices=['true', 'false'])
-        c.argument('timeout', options_list=['--timeout'], help='Timeout for operation in milliseconds')
-        c.argument('slot', help="Name of the deployment slot to use")
+        c.argument('restart', options_list=['--restart'], help='If true, the web app will be restarted following the deployment, default value is true. Set this to false if you are deploying multiple artifacts and do not want to restart the site on the earlier deployments.', choices=['true', 'false'])
+        c.argument('clean', options_list=['--clean'], help='If true, cleans the target directory prior to deploying the file(s). Default value is determined based on artifact type.', choices=['true', 'false'])
+        c.argument('ignore_stack', options_list=['--ignore-stack'], help='If true, any stack-specific defaults are ignored.', choices=['true', 'false'])
+        c.argument('timeout', options_list=['--timeout'], help='Timeout for the deployment operation in milliseconds.')
+        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
 
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
@@ -983,8 +984,9 @@ def load_arguments(self, _):
         c.argument('token', options_list=['--token', '-t'],
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets. If you need to create a Github Personal Access Token, "
-                        "please follow the steps found at the following link:\n"
+                        "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
                         "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token")
         c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
     with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',

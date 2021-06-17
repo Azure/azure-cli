@@ -262,3 +262,10 @@ def transform_share_rm_output(result):
         snapshot = result.snapshot_time
         result.snapshot_time = snapshot.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
     return result
+
+
+def transform_share_rm_list_output(result):
+    new_result = []
+    for item in result:
+        new_result.append(transform_share_rm_output(item))
+    return new_result

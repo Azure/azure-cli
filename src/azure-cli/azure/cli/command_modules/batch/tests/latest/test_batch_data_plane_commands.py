@@ -11,8 +11,16 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
+from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
+
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
 
     def _get_test_data_file(self, filename):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
@@ -221,7 +229,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id {p_id} --vm-size small --os-family 4')
 
         # test create job with missing parameters
-        self.kwargs['start'] = datetime.datetime.now().isoformat()
+        self.kwargs['start'] = datetime.datetime.utcnow().isoformat()
         with self.assertRaises(SystemExit):
             self.batch_cmd('batch job create --id {j_id} --metadata test=value '
                            '--job-manager-task-environment-settings a=b '

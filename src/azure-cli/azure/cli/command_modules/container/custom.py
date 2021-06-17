@@ -371,6 +371,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
+# pylint: disable=unsupported-assignment-operation
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
@@ -404,7 +405,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
     api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
 
     return sdk_no_wait(no_wait,
-                       resource_client.resources.create_or_update,
+                       resource_client.resources.begin_create_or_update,
                        resource_group_name,
                        "Microsoft.ContainerInstance",
                        '',
@@ -567,8 +568,8 @@ def container_export(cmd, resource_group_name, name, file):
                                              '',
                                              "containerGroups",
                                              name,
-                                             container_group_client.api_version,
-                                             False).__dict__
+                                             container_group_client.api_version).__dict__
+
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
     resource.pop('sku', None)
@@ -681,6 +682,8 @@ def _cycle_exec_pipe(ws):
     r, _, _ = select.select([ws.sock, sys.stdin], [], [])
     if ws.sock in r:
         data = ws.recv()
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
         sys.stdout.write(data)
         sys.stdout.flush()
     if sys.stdin in r:

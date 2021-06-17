@@ -30,7 +30,7 @@ import datetime
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
 from knack.events import EVENT_CLI_POST_EXECUTE
-from knack.log import CLILogging, get_logger
+from knack.log import CLILogging, get_logger, LOG_FILE_ENCODING
 from knack.util import ensure_dir
 
 
@@ -117,7 +117,7 @@ class AzCliLogging(CLILogging):
         log_file_path = os.path.join(self.command_log_dir, log_name)
         get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", log_file_path)
 
-        logfile_handler = logging.FileHandler(log_file_path)
+        logfile_handler = logging.FileHandler(log_file_path, encoding=LOG_FILE_ENCODING)
 
         lfmt = logging.Formatter(_CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')  # pylint: disable=line-too-long
         logfile_handler.setFormatter(lfmt)
@@ -179,8 +179,7 @@ class AzCliLogging(CLILogging):
                 continue
 
             # else if positional or optional argument / value
-            else:
-                cleaned_args.append(placeholder)
+            cleaned_args.append(placeholder)
 
         return cleaned_args
 

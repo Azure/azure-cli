@@ -252,24 +252,24 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
     # pylint: disable=too-many-nested-blocks
-    for src, dest in [(settings, result), (slot_settings, slot_result)]:
+    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
                     for t in temp:
-                        if t.get('slotSetting', True):
-                            slot_result[t['name']] = t['value']
-                            # Mark each setting as the slot setting
-                        else:
-                            result[t['name']] = t['value']
+                        if 'slotSetting' in t.keys():
+                            slot_result[t['name']] = t['slotSetting']
+                        if setting_type == "SlotSettings":
+                            slot_result[t['name']] = True
+                        result[t['name']] = t['value']
                 else:
                     dest.update(temp)
             except CLIError:
                 setting_name, value = s.split('=', 1)
                 dest[setting_name] = value
+                result.update(dest)
 
-    result.update(slot_result)
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
@@ -280,10 +280,14 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     app_settings_slot_cfg_names = []
     if slot_result:
-        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
-        slot_cfg_names.app_setting_names += new_slot_setting_names
+        # Slot settings logic to add a new setting(s) or remove an existing setting(s)
+        for slot_setting_name, value in slot_result.items():
+            if value and slot_setting_name not in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.append(slot_setting_name)
+            elif not value and slot_setting_name in slot_cfg_names.app_setting_names:
+                slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
@@ -686,8 +690,9 @@ def set_functionapp(cmd, resource_group_name, name, **kwargs):
 
 
 def list_webapp(cmd, resource_group_name=None):
-    result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' not in r.kind]
+    full_list = _list_app(cmd.cli_ctx, resource_group_name)
+    # ignore apps with kind==null & not functions apps
+    return list(filter(lambda x: x.kind is not None and "function" not in x.kind.lower(), full_list))
 
 
 def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
@@ -702,8 +707,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' in r.kind]
+    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
+                       _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -751,7 +756,7 @@ def _build_identities_info(identities):
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -796,7 +801,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
@@ -1414,12 +1419,12 @@ def _mask_creds_related_appsettings(settings):
 
 
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
-    HostNameBinding = cmd.get_models('HostNameBinding')
+    from azure.mgmt.web.models import HostNameBinding
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
-    binding = HostNameBinding(location=webapp.location, site_name=webapp.name)
+    binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 
@@ -1515,7 +1520,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, slot_def, slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
@@ -1561,7 +1566,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                           manual_integration=None, git_token=None, slot=None, cd_app_type=None,
                           app_working_dir=None, nodejs_task_runner=None, python_framework=None,
                           python_version=None, cd_account_create=None, cd_project_url=None, test=None,
-                          slot_swap=None, private_repo_username=None, private_repo_password=None):
+                          slot_swap=None, private_repo_username=None, private_repo_password=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
     location = _get_location_from_webapp(client, resource_group_name, name)
 
@@ -1602,7 +1607,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 
     source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
+                                       is_mercurial=(repository_type != 'git'), is_git_hub_action=bool(github_action))
 
     # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
     for i in range(5):
@@ -1641,10 +1646,8 @@ def delete_source_control(cmd, resource_group_name, name, slot=None):
 
 
 def enable_local_git(cmd, resource_group_name, name, slot=None):
-    SiteConfigResource = cmd.get_models('SiteConfigResource')
     client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, name)
-    site_config = SiteConfigResource(location=location)
+    site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     if slot is None:
         client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
@@ -1753,8 +1756,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backup_status_secrets',
-                                   slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
@@ -2342,7 +2344,8 @@ def _get_log(url, user_name, password, log_file=None):
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'
                 logger.warning(chunk.decode(encoding='utf-8', errors='replace')
                                .encode(std_encoding, errors='replace')
-                               .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
+                               .decode(std_encoding, errors='replace')
+                               .rstrip('\n\r'))  # each line of log has CRLF.
     r.release_conn()
 
 

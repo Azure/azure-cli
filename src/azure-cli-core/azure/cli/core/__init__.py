@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.23.0.1"
+__version__ = "2.25.0.1"
 
 import os
 import sys
@@ -168,14 +168,15 @@ class AzCli(CLI):
 
         # print warning if there are values saved to local context
         if local_context_args:
-            logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
-                           'run `az local-context off` to turn it off.',
+            logger.warning('Parameter persistence is turned on. Its information is saved in working directory %s. '
+                           'You can run `az config param-persist off` to turn it off.',
                            self.local_context.effective_working_directory())
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
-                           'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
+            logger.warning('Your preference of %s now saved as persistent parameter. To learn more, type in `az '
+                           'config param-persist --help`',
+                           ', '.join(args_str) + (' is' if len(args_str) == 1 else ' are'))
 
     def _configure_style(self):
         from azure.cli.core.util import in_cloud_console
@@ -886,6 +887,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 operation = operation.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
                                                                      operation_group=operation_group))
+                break
 
         try:
             mod_to_import, attr_path = operation.split('#')

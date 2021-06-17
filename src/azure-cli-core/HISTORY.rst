@@ -3,10 +3,26 @@
 Release History
 ===============
 
-2.23.0.1
+2.25.0.1
 ++++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.25.0
+++++++
+* Fix #18360 and #18262: Write to stderr issue (#18414)
+
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
 
 2.23.0
 ++++++

@@ -429,6 +429,7 @@ class TestActions(unittest.TestCase):
             'lun': 0,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -436,6 +437,7 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 
@@ -494,6 +496,7 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -513,6 +516,7 @@ class TestActions(unittest.TestCase):
             'lun': 4,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 

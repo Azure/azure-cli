@@ -8,6 +8,7 @@ import sys
 import humanfriendly
 
 BAR_LEN = 70
+EMPTY_LINE = ' ' * BAR_LEN
 
 
 class ProgressViewBase:
@@ -123,10 +124,8 @@ class IndeterminateStandardOut(ProgressViewBase):
             pass
 
     def clear(self):
-        try:
-            self.spinner.clear()
-        except AttributeError:
-            pass
+        self.spinner.clear()
+        self.out.flush()
 
     def flush(self):
         self.out.flush()
