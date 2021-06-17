@@ -1113,7 +1113,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
 
 def _get_earliest_restore_date(db):
-    return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+    return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
 
 
 def _get_earliest_restore_date_for_deleted_db(deleted_db):
@@ -1134,7 +1134,12 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
                       JMESPathCheck('status', 'Online')]).get_output_in_json()
 
     # Wait until earliestRestoreDate is in the past. When run live, this will take at least
-    # 10 minutes. Unforunately there's no way to speed this up.
+    # 10 minutes. Unforunately there's no way to speed this up
+    while db['earliestRestoreDate'] is None:
+        sleep(60)
+        db = test.cmd('sql db show -g {} -s {} -n {}'
+                  .format(resource_group, server, database_name)).get_output_in_json()
+
     earliest_restore_date = _get_earliest_restore_date(db)
 
     if datetime.utcnow() <= earliest_restore_date:
@@ -1220,7 +1225,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', bsr_database),
-                     JMESPathCheck('backupStorageRedundancy', 'Geo')])
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Geo')])
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
