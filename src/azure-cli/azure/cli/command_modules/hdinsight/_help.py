@@ -182,20 +182,40 @@ short-summary: List HDInsight clusters in a resource group or subscription.
 
 helps['hdinsight monitor'] = """
 type: group
-short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Manage Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor disable'] = """
 type: command
-short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Disable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor enable'] = """
 type: command
-short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Enable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor show'] = """
+type: command
+short-summary: Get the status of Classic Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor'] = """
+type: group
+short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor disable'] = """
+type: command
+short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor enable'] = """
+type: command
+short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor show'] = """
 type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
 """
