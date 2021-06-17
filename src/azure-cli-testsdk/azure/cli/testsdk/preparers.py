@@ -148,13 +148,14 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
-                 resource_group_parameter_name='resource_group', skip_delete=True,
+    def __init__(self, name_prefix='clitest', sku='standard', location='westus', enable_soft_delete=True,
+                 parameter_name='key_vault', resource_group_parameter_name='resource_group', skip_delete=False,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
+        self.enable_soft_delete = enable_soft_delete
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
@@ -164,18 +165,21 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            template = 'az keyvault create -n {} -g {} -l {} --sku {}'
-            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
+            template = 'az keyvault create -n {} -g {} -l {} --sku {} --enable-soft-delete {} --retention-days 7'
+            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku,
+                                                                 'true' if self.enable_soft_delete else 'false'))
+            self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: name}
 
-        self.test_class_instance.kwargs[self.key] = name
+        self.test_class_instance.kwargs[self.key] = self.dev_setting_name
         return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
-            self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
+            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {}'.format(name, group))
+            if self.enable_soft_delete:
+                self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
 
     def _get_resource_group(self, **kwargs):
         try:
