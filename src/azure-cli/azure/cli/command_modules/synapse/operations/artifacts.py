@@ -276,12 +276,15 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     if notebook_name is not None:
         notebook = client.get_notebook(notebook_name)
         path = os.path.join(output_folder, notebook.name + '.ipynb')
+        print(notebook.properties.as_dict())
         write_to_file(notebook, path)
     else:
         notebooks = client.get_notebooks_by_workspace()
         for notebook in notebooks:
             path = os.path.join(output_folder, notebook.name + '.ipynb')
+            print(notebook.properties.as_dict())
             write_to_file(notebook, path)
+
 
 def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
