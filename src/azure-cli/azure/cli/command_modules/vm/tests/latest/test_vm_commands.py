@@ -3889,7 +3889,7 @@ class VMGalleryImage(ScenarioTest):
             'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions private')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
