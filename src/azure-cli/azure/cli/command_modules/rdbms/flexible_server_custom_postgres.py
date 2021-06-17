@@ -141,7 +141,7 @@ def flexible_server_create(cmd, client,
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, location=None, zone=None, no_wait=False,
-                            private_dns_zone_arguments=None):
+                            private_dns_zone_arguments=None, subnet_arm_resource_id=None):
     provider = 'Microsoft.DBforPostgreSQL'
     validate_server_name(cf_postgres_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
@@ -174,8 +174,10 @@ def flexible_server_restore(cmd, client,
         parameters.location = source_server_object.location
         if source_server_object.public_network_access == 'Disabled':
             parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
+            if subnet_arm_resource_id is not None:
+                parameters.delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_arm_resource_id)
             if private_dns_zone_arguments is not None:
-                subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id
+                subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id if subnet_arm_resource_id is None else subnet_arm_resource_id
                 private_dns_zone_id = prepare_private_dns_zone(cmd,
                                                                'PostgreSQL',
                                                                resource_group_name,
@@ -184,7 +186,7 @@ def flexible_server_restore(cmd, client,
                                                                subnet_id=subnet_id,
                                                                location=location)
                 parameters.private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
-
+                
     except Exception as e:
         raise ResourceNotFoundError(e)
 
