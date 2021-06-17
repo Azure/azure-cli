@@ -23,7 +23,7 @@ from azure.cli.command_modules.keyvault.security_domain.shared_secret import Sha
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core import telemetry
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
@@ -41,7 +41,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from OpenSSL import crypto
-
 
 logger = get_logger(__name__)
 
@@ -84,7 +83,6 @@ def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_vers
 
 
 def _default_certificate_profile(cmd):
-
     Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
     ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
     KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
@@ -644,6 +642,14 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  no_self_perms=None,
                  tags=None,
                  no_wait=False):
+    try:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        if vault:
+            raise InvalidArgumentValueError('The specified vault: {} already exist'.format(vault_name))
+    except:  # pylint: disable=bare-except
+        # if client.get raise exception, we can take it as no existing vault found
+        # just continue the normal creation process
+        pass
     from azure.cli.core._profile import Profile
     from azure.graphrbac import GraphRbacManagementClient
 
@@ -1082,6 +1088,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
                                     tags=vault.tags,
                                     properties=vault.properties),
                                 no_wait=no_wait)
+
+
 # endregion
 
 
@@ -1401,6 +1409,8 @@ def get_policy_template():
         }]
     }
     return policy
+
+
 # endregion
 
 
@@ -1449,6 +1459,8 @@ def restore_secret(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_secret(vault_base_url, data)
+
+
 # endregion
 
 
@@ -1577,7 +1589,7 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
 
 
 def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''):   # pylint: disable=unused-argument
+                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -1676,6 +1688,7 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
+
     def update(obj, prop, value, nullable=False):
         set_value = value if value is not None else getattr(obj, prop, None)
         if set_value is None and not nullable:
@@ -1733,6 +1746,8 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
+
+
 # endregion
 
 
@@ -1748,6 +1763,8 @@ def restore_storage_account(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
         return client.restore_storage_account(vault_base_url, data)
+
+
 # endregion
 
 
@@ -1766,6 +1783,8 @@ def list_private_link_resource(cmd, client, resource_group_name, vault_name=None
     hsm_plr_client = get_client_factory(ResourceType.MGMT_KEYVAULT,
                                         Clients.mhsm_private_link_resources)(cmd.cli_ctx, None)
     return hsm_plr_client.list_by_mhsm_resource(resource_group_name=resource_group_name, name=hsm_name)
+
+
 # endregion
 
 
@@ -1850,6 +1869,8 @@ def show_private_endpoint_connection(cmd, client, resource_group_name, private_e
     return pec_client.get(resource_group_name,
                           vault_name or hsm_name,
                           private_endpoint_connection_name)
+
+
 # endregion
 
 
@@ -1930,7 +1951,8 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
 
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
-                           assignee_principal_type=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_principal_type=None, hsm_name=None,
+                           identifier=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
@@ -1971,7 +1993,8 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
 
 
 def delete_role_assignment(cmd, client, role_assignment_name=None, scope=None, assignee=None, role=None,
-                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_object_id=None, ids=None, hsm_name=None,
+                           identifier=None):  # pylint: disable=unused-argument
     """ Delete a role assignment. """
     query_scope = scope
     if query_scope is None:
@@ -2167,7 +2190,8 @@ def _get_role_definition_name(role_definition_name, role_id):
     return role_definition_name
 
 
-def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+def delete_role_definition(client, hsm_name, role_definition_name=None,
+                           role_id=None):  # pylint: disable=unused-argument
     # Get role definition name
     role_definition_name = _get_role_definition_name(role_definition_name, role_id)
 
@@ -2183,6 +2207,8 @@ def show_role_definition(client, hsm_name, role_definition_name=None, role_id=No
     result_role_definition = client.get_role_definition(role_scope, role_definition_name)
 
     return _reconstruct_role_definition(result_role_definition)
+
+
 # endregion
 
 
@@ -2223,6 +2249,8 @@ def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=Non
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
     return client.begin_restore(folder_url, token)
+
+
 # endregion
 
 
