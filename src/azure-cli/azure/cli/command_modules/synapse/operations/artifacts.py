@@ -257,8 +257,18 @@ def get_notebook(cmd, workspace_name, notebook_name):
 def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
         try:
+            notebook_properties = notebook.properties.as_dict()
+            for key in list(notebook_properties.keys()):
+                if 'bigDataPool' == key or 'big_data_pool' == key  or 'sessionProperties' == key or \
+                        'session_properties' == key:
+                    notebook_properties.pop(key)
+                elif 'metadata' == key:
+                    print(notebook_properties['metadata'])
+                    for elementkey in list(notebook_properties['metadata'].keys()):
+                        if 'a365ComputeOptions' == elementkey:
+                            notebook_properties['metadata'].pop(elementkey)
             with open(path, 'w') as f:
-                json.dump(notebook.properties.as_dict(), f, indent=4)
+                json.dump(notebook_properties, f, indent=4)
         except IOError:
             raise CLIError('Unable to export to file: {}'.format(path))
 
@@ -266,15 +276,12 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     if notebook_name is not None:
         notebook = client.get_notebook(notebook_name)
         path = os.path.join(output_folder, notebook.name + '.ipynb')
-        print(notebook.properties.as_dict())
         write_to_file(notebook, path)
     else:
         notebooks = client.get_notebooks_by_workspace()
         for notebook in notebooks:
             path = os.path.join(output_folder, notebook.name + '.ipynb')
-            print(notebook.properties.as_dict())
             write_to_file(notebook, path)
-
 
 def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
