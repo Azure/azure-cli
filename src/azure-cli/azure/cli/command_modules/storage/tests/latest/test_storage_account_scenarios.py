@@ -479,25 +479,30 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-01-01')
-    @ResourceGroupPreparer(location='eastus2euap', name_prefix='cli_storage_account')
+    @ResourceGroupPreparer(location='centraluseuap', name_prefix='cli_storage_account')
     def test_storage_account_with_nfs(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        self.cmd('az storage account create -n {} -g {} '.format(name, resource_group),
-                 checks=[JMESPathCheck('enableNfsV3', None)])
+        self.kwargs = {
+            'name1': self.create_random_name(prefix='sa1', length=24),
+            'name2': self.create_random_name(prefix='sa2', length=24),
+            'name3': self.create_random_name(prefix='sa3', length=24),
+            'vnet': self.create_random_name(prefix='vnet', length=10),
+            'subnet': self.create_random_name(prefix='subnet', length=10),
+            'rg': resource_group
+        }
 
-        self.cmd('az storage account create -n {} -g {} --enable-nfs-v3 true'.format(name, resource_group),
+        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        self.kwargs['subnet_id'] = result['newVNet']['subnets'][0]['id']
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage')
+        self.cmd('storage account create -n {name1} -g {rg} --subnet {subnet_id} '
+                 '--default-action Deny --hns --sku Standard_LRS --enable-nfs-v3 true',
                  checks=[JMESPathCheck('enableNfsV3', True)])
 
-        self.cmd('az storage account create -n {} -g {} --enable-nfs-v3 false'.format(name, resource_group),
+        self.cmd('storage account create -n {name2} -g {rg} --enable-nfs-v3 false',
                  checks=[JMESPathCheck('enableNfsV3', False)])
 
-        self.cmd('az storage account create -n {} -g {} --enable-nfs-v3 true'.format(name, resource_group),
-                 checks=[JMESPathCheck('enableNfsV3', True)])
-
-        self.cmd('az storage account update -n {} --enable-nfs-v3 false'.format(name),
-                 checks=[JMESPathCheck('enableNfsV3', False)])
-
-        self.cmd('az storage account update -n {} --enable-nfs-v3 true'.format(name),
+        self.cmd('storage account create -n {name3} -g {rg} --enable-nfs-v3 --vnet-name {vnet} '
+                 '--subnet {subnet} --default-action Deny --hns --sku Standard_LRS ',
                  checks=[JMESPathCheck('enableNfsV3', True)])
 
     def test_show_usage(self):

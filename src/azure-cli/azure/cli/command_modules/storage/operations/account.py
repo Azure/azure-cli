@@ -60,7 +60,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
-                           enable_nfs_v3=None):
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow'):  # pylint: disable=unused-argument
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -152,11 +152,19 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
 
-    if NetworkRuleSet and (bypass or default_action):
+    if NetworkRuleSet and (bypass or default_action or subnet):
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-        params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
-                                                 virtual_network_rules=None)
+        if subnet:
+            from msrestazure.tools import is_valid_resource_id
+            if not is_valid_resource_id(subnet):
+                raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
+            VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
+            virtual_network_rules = [VirtualNetworkRule(virtual_network_resource_id=subnet,
+                                                        action=action)]
+        params.network_rule_set = NetworkRuleSet(
+            bypass=bypass, default_action=default_action, ip_rules=None,
+            virtual_network_rules=virtual_network_rules if virtual_network_rules else None)
 
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
@@ -286,8 +294,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
-                           allow_cross_tenant_replication=None, default_share_permission=None,
-                           enable_nfs_v3=None):
+                           allow_cross_tenant_replication=None, default_share_permission=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -467,9 +474,6 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
-
-    if enable_nfs_v3 is not None:
-        params.enable_nfs_v3 = enable_nfs_v3
 
     return params
 
