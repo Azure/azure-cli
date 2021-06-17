@@ -329,7 +329,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'],
                            help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
                 c.argument('subnet_arm_resource_id', options_list=['--subnet'],
-                       help='Resource ID of a existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers if not already delegated. After delegation, this subnet cannot be used for any other type of Azure resources.')
+                           help='Resource ID of a existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers if not already delegated. After delegation, this subnet cannot be used for any other type of Azure resources.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name or resource ID of the source server to restore from.')

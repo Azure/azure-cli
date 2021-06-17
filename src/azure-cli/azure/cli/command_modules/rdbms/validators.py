@@ -306,3 +306,9 @@ def validate_auto_grow_update(server, auto_grow):
     # if ha, cannot be disabled
     if server.ha_state != 'NotEnabled' and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
+
+
+def validate_private_dns_zone(cmd, server_name, private_dns_zone):
+    postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+    if private_dns_zone == server_name + postgresql_server_endpoint:
+        raise ValidationError("private dns zone name cannot be same as the server's fully qualified domain name")

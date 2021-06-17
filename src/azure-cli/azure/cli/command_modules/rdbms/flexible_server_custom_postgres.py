@@ -186,7 +186,7 @@ def flexible_server_restore(cmd, client,
                                                                subnet_id=subnet_id,
                                                                location=location)
                 parameters.private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
-                
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 
