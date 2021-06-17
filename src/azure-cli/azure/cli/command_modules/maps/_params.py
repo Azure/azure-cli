@@ -37,18 +37,12 @@ def load_arguments(self, _):
                    id_part='name',
                    arg_type=maps_name_type)
     with self.argument_context('maps account') as c:
-        c.argument('sku_name',
-                   options_list=['--sku', '-s'],
-                   help='The name of the SKU.',
-                   arg_type=get_enum_type(['S0', 'S1', 'G2']))
+        c.argument('name', options_list=['--sku', '-s'],arg_type=get_enum_type(['S0', 'S1', 'G2']),
+                   help='The name of the SKU, in standard format '
+                   '(such as S0).', arg_group='Sku')
         c.argument('tags',
                    arg_type=tags_type)
     with self.argument_context('maps account create') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('account_name', options_list=['--name', '-n', '--account-name'], type=str, help='The name of the '
-                   'Maps Account.',id_part='name')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
         c.argument('kind', options_list=['--kind'], arg_type=get_enum_type(['Gen1', 'Gen2']),
                    help='Get or Set Kind property.')
         c.argument('disable_local_auth', options_list=['--disable_local_auth'], arg_type=get_three_state_flag(),
@@ -67,9 +61,6 @@ def load_arguments(self, _):
                    'in the form: \'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microso'
                    'ft.ManagedIdentity/userAssignedIdentities/{identityName}\'. Expected value: '
                    'json-string/@json-file.', arg_group='Identity')
-        c.argument('name', options_list=['--sku', '-s'],arg_type=get_enum_type(['S0', 'S1', 'G2']),
-                   help='The name of the SKU, in standard format '
-                   '(such as S0).', arg_group='Sku')
         c.argument('force',options_list=['--accept-tos'],action='store_true')
 
     # Prevent --ids argument in keys with id_part=None

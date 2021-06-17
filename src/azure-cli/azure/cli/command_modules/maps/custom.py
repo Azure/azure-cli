@@ -3,6 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
+from knack.prompting import prompt_y_n
+
+ACCOUNT_LOCATION = 'global'
+
+logger = get_logger(__name__)
+
 
 def maps_account_create(client,
                         resource_group_name,
@@ -14,14 +21,37 @@ def maps_account_create(client,
                         disable_local_auth=None,
                         linked_resources=None,
                         type_=None,
-                        user_assigned_identities=None):
+                        user_assigned_identities=None,
+                        force=None):
+    terms = 'By creating an Azure Maps account, you agree that you have read and agree to the ' \
+            '\nLicense (https://azure.microsoft.com/support/legal/) and ' \
+            '\nPrivacy Statement (https://privacy.microsoft.com/privacystatement).' \
+            '\nNote - Azure Maps shares customer-provided address/location queries (“Queries”) ' \
+            'with third party TomTom for mapping functionality purposes.' \
+            '\nQueries are not linked to any customer or end-user when shared with TomTom ' \
+            'and cannot be used to identify individuals.' \
+            '\nMicrosoft is currently in the process of adding TomTom to the Online Services Subcontractor List. ' \
+            '\nNote that the Mobility and Weather Services which include integration with ' \
+            'Moovit and AccuWeather are currently in PREVIEW ' \
+            '(see https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/). '
+    hint = 'Please select.'
+    client_denied_terms = 'You must agree to the License and Privacy Statement to create an account.'
+
+    # Show ToS message to the user
+    logger.warning(terms)
+
+    # Prompt yes/no for the user, if --force parameter is not passed in.
+    if not force:
+        option = prompt_y_n(hint)
+        if not option:
+            raise CLIError(client_denied_terms)
     if kind is None:
         kind = "Gen1"
     if disable_local_auth is None:
         disable_local_auth = False
     maps_account = {}
     maps_account['tags'] = tags
-    maps_account['location'] = location
+    maps_account['location'] = ACCOUNT_LOCATION
     maps_account['kind'] = "Gen1" if kind is None else kind
     maps_account['properties'] = {}
     maps_account['properties']['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
