@@ -9,9 +9,16 @@ from azure.cli.core.commands.parameters import (
     get_enum_type,
     get_resource_name_completion_list,
     resource_group_name_type,
-    tags_type)
+    tags_type,
+    get_location_type,
+    get_three_state_flag)
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group,
+    validate_file_or_dict
+)
 
 from azure.mgmt.maps.models import KeyType
+from azure.cli.command_modules.maps.action import AddLinkedResources
 
 
 def load_arguments(self, _):
@@ -29,19 +36,41 @@ def load_arguments(self, _):
         c.argument('account_name',
                    id_part='name',
                    arg_type=maps_name_type)
-
     with self.argument_context('maps account') as c:
         c.argument('sku_name',
                    options_list=['--sku', '-s'],
                    help='The name of the SKU.',
-                   arg_type=get_enum_type(['S0', 'S1']))
+                   arg_type=get_enum_type(['S0', 'S1', 'G2']))
         c.argument('tags',
                    arg_type=tags_type)
-
     with self.argument_context('maps account create') as c:
-        c.argument('force',
-                   options_list=['--accept-tos'],
-                   action='store_true')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('account_name', options_list=['--name', '-n', '--account-name'], type=str, help='The name of the '
+                   'Maps Account.',id_part='name')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('kind', options_list=['--kind'], arg_type=get_enum_type(['Gen1', 'Gen2']),
+                   help='Get or Set Kind property.')
+        c.argument('disable_local_auth', options_list=['--disable_local_auth'], arg_type=get_three_state_flag(),
+                   help='Allows toggle functionality on Azure '
+                   'Policy to disable Azure Maps local authentication support. This will disable Shared Keys '
+                   'authentication from any usage.')
+        c.argument('linked_resources', options_list=['--linked-resources'], action=AddLinkedResources, nargs='+',
+                   help='Sets the resources to be used for '
+                   'Managed Identities based operations for the Map account resource.')
+        c.argument('type_', options_list=['--type'], arg_type=get_enum_type(['SystemAssigned', 'UserAssigned',
+                                                                             'SystemAssigned, UserAssigned', 'None']),
+                   help='The identity type.', arg_group='Identity')
+        c.argument('user_assigned_identities', options_list=['--user-assigned-identites'], type=validate_file_or_dict,
+                   help='The list of user identities associated with the resource. '
+                   'The user identity dictionary key references will be ARM resource ids '
+                   'in the form: \'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microso'
+                   'ft.ManagedIdentity/userAssignedIdentities/{identityName}\'. Expected value: '
+                   'json-string/@json-file.', arg_group='Identity')
+        c.argument('name', options_list=['--sku', '-s'],arg_type=get_enum_type(['S0', 'S1', 'G2']),
+                   help='The name of the SKU, in standard format '
+                   '(such as S0).', arg_group='Sku')
+        c.argument('force',options_list=['--accept-tos'],action='store_true')
 
     # Prevent --ids argument in keys with id_part=None
     with self.argument_context('maps account keys') as c:
@@ -53,3 +82,8 @@ def load_arguments(self, _):
         c.argument('key_type',
                    options_list=['--key'],
                    arg_type=get_enum_type(KeyType))
+
+    with self.argument_context('maps account show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('account_name', options_list=['--name', '-n', '--account-name'], type=str, help='The name of the '
+                   'Maps Account.', id_part='name')
