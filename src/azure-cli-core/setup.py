@@ -54,7 +54,7 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<10.0',
     'jmespath',
     'knack~=0.8.2',
-    'msal>=1.10.0,<2.0.0',
+    'msal>=1.12.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
