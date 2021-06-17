@@ -14,7 +14,6 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties,\
     Identity, ResourceIdentityType as IdentityType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
-from azure.core.polling import AsyncLROPoller, LROPoller
 
 logger = get_logger(__name__)
 
