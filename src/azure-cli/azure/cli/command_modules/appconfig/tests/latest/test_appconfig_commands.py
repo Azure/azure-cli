@@ -102,6 +102,16 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --disable-local-auth',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', structered_tag),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sku.name', sku),
+                    self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key)),
+                    self.check('disableLocalAuth', True)])
+
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
