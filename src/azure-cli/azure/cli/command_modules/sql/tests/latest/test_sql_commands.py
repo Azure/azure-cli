@@ -1126,7 +1126,7 @@ def _get_deleted_date(deleted_db):
 
 def _create_db_wait_for_first_backup(test, resource_group, server, database_name):
     # create db
-    db = test.cmd('sql db create -g {} --server {} --name {}'
+    db = test.cmd('sql db create -g {} --server {} --name {} -y'
                   .format(resource_group, server, database_name),
                   checks=[
                       JMESPathCheck('resourceGroup', resource_group),
@@ -1229,8 +1229,8 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
     @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
