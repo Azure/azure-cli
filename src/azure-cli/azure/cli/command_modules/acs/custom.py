@@ -1424,7 +1424,7 @@ def create_role_assignment(cmd, role, assignee, is_service_principal, resource_g
 def _create_role_assignment(cmd, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
     from azure.cli.core.profiles import get_sdk
-    factory = get_auth_management_client(cli_ctx, scope)
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
@@ -1437,21 +1437,21 @@ def _create_role_assignment(cmd, role, assignee,
     # if not use MSI object id.
     object_id = _resolve_object_id(
         cmd.cli_ctx, assignee) if resolve_assignee else assignee
-    
+ 
     assignment_name = uuid.uuid4()
     custom_headers = None
-    
+
     RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models',
-                                             operation_group='role_assignments')
+                                            'RoleAssignmentCreateParameters', mod='models',
+                                            operation_group='role_assignments')
     if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):   
         parameters = RoleAssignmentCreateParameters(
             role_definition_id=role_id, principal_id=object_id)
         return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
     else:
         RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentProperties', mod='models',
-                                             operation_group='role_assignments')
+                                          'RoleAssignmentProperties', mod='models',
+                                          operation_group='role_assignments')
         properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
         return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
 

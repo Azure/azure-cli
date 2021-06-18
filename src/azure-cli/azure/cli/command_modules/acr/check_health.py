@@ -12,7 +12,6 @@ from .helm import get_helm_command
 from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
 
-from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
@@ -319,7 +318,8 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
             client_id = registry.encryption.key_vault_properties.identity
             valid_identity = False
             if registry.identity:
-                valid_identity = (client_id == 'system') and bool(registry.identity.principal_id)  # use system identity?
+                valid_identity = ((client_id == 'system') and
+                                  bool(registry.identity.principal_id))  # use system identity?
                 if not valid_identity and registry.identity.user_assigned_identities:
                     for k, v in registry.identity.user_assigned_identities.items():
                         if v.client_id == client_id:
