@@ -512,9 +512,9 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     return service_principal, aad_session_key
 
 
-def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
+def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
-    hook = cli_ctx.get_progress_controller(True)
+    hook = cmd.cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to propagate',
              value=0, total_val=1.0)
     logger.info('Waiting for AAD role to propagate')
@@ -524,7 +524,7 @@ def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_pri
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(
-                cli_ctx, role, service_principal_msi_id, is_service_principal, scope=scope)
+                cmd, role, service_principal_msi_id, is_service_principal, scope=scope)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -1415,13 +1415,13 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
-def create_role_assignment(cli_ctx, role, assignee, is_service_principal, resource_group_name=None, scope=None):
-    return _create_role_assignment(cli_ctx,
+def create_role_assignment(cmd, role, assignee, is_service_principal, resource_group_name=None, scope=None):
+    return _create_role_assignment(cmd,
                                    role, assignee, resource_group_name,
                                    scope, resolve_assignee=is_service_principal)
 
 
-def _create_role_assignment(cli_ctx, role, assignee,
+def _create_role_assignment(cmd, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
     from azure.cli.core.profiles import get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
@@ -1436,18 +1436,24 @@ def _create_role_assignment(cli_ctx, role, assignee,
     # If the cluster has service principal resolve the service principal client id to get the object id,
     # if not use MSI object id.
     object_id = _resolve_object_id(
-        cli_ctx, assignee) if resolve_assignee else assignee
-
-    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models',
-                                             operation_group='role_assignments')
-    parameters = RoleAssignmentCreateParameters(
-        role_definition_id=role_id, principal_id=object_id)
+        cmd.cli_ctx, assignee) if resolve_assignee else assignee
+    
     assignment_name = uuid.uuid4()
     custom_headers = None
-    # TODO: track2/remove custom headers, depends on 'azure.mgmt.authorization'
-    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
-
+    
+    RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):   
+        parameters = RoleAssignmentCreateParameters(
+            role_definition_id=role_id, principal_id=object_id)
+        return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
+    else:
+        RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentProperties', mod='models',
+                                             operation_group='role_assignments')
+        properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
+        return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
@@ -1514,15 +1520,16 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def subnet_role_assignment_exists(cli_ctx, scope):
+def subnet_role_assignment_exists(cmd, scope):
     network_contributor_role_id = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 
-    factory = get_auth_management_client(cli_ctx, scope)
+    factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
 
-    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
-        if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
-            return True
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
+        for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+            if i.scope == scope and i.role_definition_id.endswith(network_contributor_role_id):
+                return True
     return False
 
 
@@ -1780,7 +1787,7 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         is_service_principal = False
 
     if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
+        if not _add_role_assignment(cmd, 'Monitoring Metrics Publisher',
                                     service_principal_msi_id, is_service_principal, scope=cluster_resource_id):
             logger.warning('Could not create a role assignment for Monitoring addon. '
                            'Are you an Owner on this subscription?')
@@ -1819,14 +1826,14 @@ def _add_ingress_appgw_addon_role_assignment(result, cmd):
             parsed_appgw_id = parse_resource_id(appgw_id)
             appgw_group_id = resource_id(subscription=parsed_appgw_id["subscription"],
                                          resource_group=parsed_appgw_id["resource_group"])
-            if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+            if not _add_role_assignment(cmd, 'Contributor',
                                         service_principal_msi_id, is_service_principal, scope=appgw_group_id):
                 logger.warning('Could not create a role assignment for application gateway: %s '
                                'specified in %s addon. '
                                'Are you an Owner on this subscription?', appgw_id, CONST_INGRESS_APPGW_ADDON_NAME)
         if CONST_INGRESS_APPGW_SUBNET_ID in config:
             subnet_id = config[CONST_INGRESS_APPGW_SUBNET_ID]
-            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+            if not _add_role_assignment(cmd, 'Network Contributor',
                                         service_principal_msi_id, is_service_principal, scope=subnet_id):
                 logger.warning('Could not create a role assignment for subnet: %s '
                                'specified in %s addon. '
@@ -1840,7 +1847,7 @@ def _add_ingress_appgw_addon_role_assignment(result, cmd):
                                       namespace="Microsoft.Network",
                                       type="virtualNetworks",
                                       name=parsed_subnet_vnet_id["name"])
-                if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+                if not _add_role_assignment(cmd, 'Contributor',
                                             service_principal_msi_id, is_service_principal, scope=vnet_id):
                     logger.warning('Could not create a role assignment for virtual network: %s '
                                    'specified in %s addon. '
@@ -1877,7 +1884,7 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
         is_service_principal = False
 
     if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+        if not _add_role_assignment(cmd, 'Contributor',
                                     service_principal_msi_id, is_service_principal, scope=vnet_id):
             logger.warning('Could not create a role assignment for virtual node addon. '
                            'Are you an Owner on this subscription?')
@@ -2104,7 +2111,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     need_post_creation_vnet_permission_granting = False
     if (vnet_subnet_id and not skip_subnet_role_assignment and
-            not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
+            not subnet_role_assignment_exists(cmd, vnet_subnet_id)):
         # if service_principal_profile is None, then this cluster is an MSI cluster,
         # and the service principal does not exist. Two cases:
         # 1. For system assigned identity, we just tell user to grant the
@@ -2132,7 +2139,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                     cmd.cli_ctx, assign_identity)
             else:
                 identity_client_id = service_principal_profile.client_id
-            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+            if not _add_role_assignment(cmd, 'Network Contributor',
                                         identity_client_id, scope=scope):
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
@@ -2152,7 +2159,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                '--no-wait is not allowed, please wait until the whole operation succeeds.')
             # Attach acr operation will be handled after the cluster is created
         else:
-            _ensure_aks_acr(cmd.cli_ctx,
+            _ensure_aks_acr(cmd,
                             client_id=service_principal_profile.client_id,
                             acr_name_or_id=attach_acr,
                             subscription_id=subscription_id)
@@ -2726,13 +2733,13 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
     if attach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
+        _ensure_aks_acr(cmd,
                         client_id=client_id,
                         acr_name_or_id=attach_acr,
                         subscription_id=subscription_id)
 
     if detach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
+        _ensure_aks_acr(cmd,
                         client_id=client_id,
                         acr_name_or_id=detach_acr,
                         subscription_id=subscription_id,
@@ -3729,7 +3736,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 
-def _ensure_aks_acr(cli_ctx,
+def _ensure_aks_acr(cmd,
                     client_id,
                     acr_name_or_id,
                     subscription_id,
@@ -3746,7 +3753,7 @@ def _ensure_aks_acr(cli_ctx,
         except CloudError as ex:
             raise CLIError(ex.message)
         _ensure_aks_acr_role_assignment(
-            cli_ctx, client_id, registry.id, detach)
+            cmd, client_id, registry.id, detach)
         return
 
     # Check if the ACR exists by name accross all resource groups.
@@ -3760,7 +3767,7 @@ def _ensure_aks_acr(cli_ctx,
             raise CLIError(
                 "ACR {} not found. Have you provided the right ACR name?".format(registry_name))
         raise CLIError(ex.message)
-    _ensure_aks_acr_role_assignment(cli_ctx, client_id, registry.id, detach)
+    _ensure_aks_acr_role_assignment(cmd, client_id, registry.id, detach)
     return
 
 
@@ -4041,12 +4048,12 @@ def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
 
 
-def _ensure_aks_acr_role_assignment(cli_ctx,
+def _ensure_aks_acr_role_assignment(cmd,
                                     client_id,
                                     registry_id,
                                     detach=False):
     if detach:
-        if not _delete_role_assignments(cli_ctx,
+        if not _delete_role_assignments(cmd.cli_ctx,
                                         'acrpull',
                                         client_id,
                                         scope=registry_id):
@@ -4054,7 +4061,7 @@ def _ensure_aks_acr_role_assignment(cli_ctx,
                            'Are you an Owner on this subscription?')
         return
 
-    if not _add_role_assignment(cli_ctx,
+    if not _add_role_assignment(cmd,
                                 'acrpull',
                                 client_id,
                                 scope=registry_id):
@@ -4659,7 +4666,7 @@ def _put_managed_cluster_ensuring_permission(
         if virtual_node_addon_enabled:
             _add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
         if need_grant_vnet_permission_to_cluster_identity:
-            if not _create_role_assignment(cmd.cli_ctx, 'Network Contributor',
+            if not _create_role_assignment(cmd, 'Network Contributor',
                                            cluster.identity.principal_id, scope=vnet_subnet_id,
                                            resolve_assignee=False):
                 logger.warning('Could not create a role assignment for subnet. '
@@ -4675,7 +4682,7 @@ def _put_managed_cluster_ensuring_permission(
                                'it permission to pull from ACR.')
             else:
                 kubelet_identity_client_id = cluster.identity_profile["kubeletidentity"].client_id
-                _ensure_aks_acr(cmd.cli_ctx,
+                _ensure_aks_acr(cmd,
                                 client_id=kubelet_identity_client_id,
                                 acr_name_or_id=attach_acr,
                                 subscription_id=subscription_id)
