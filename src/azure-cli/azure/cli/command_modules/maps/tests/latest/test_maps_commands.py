@@ -6,7 +6,7 @@
 import re
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-from azure.mgmt.maps.models import KeyType
+from azure.mgmt.maps.models import KeyType, MapsKeySpecification
 
 
 class MapsScenarioTests(ScenarioTest):
@@ -25,8 +25,8 @@ class MapsScenarioTests(ScenarioTest):
             'sku': 's0',
             'skus1': 's1',
             'tags': tag_key + '=' + tag_value,
-            'key_type_primary': KeyType.primary.value,
-            'key_type_secondary': KeyType.secondary.value
+            'key_type_primary': 'primary',
+            'key_type_secondary': 'secondary'
         })
 
         # Test 'az maps account create'.
@@ -121,10 +121,7 @@ class MapsScenarioTests(ScenarioTest):
 
         # Test 'az maps account key list'.
         # Test to list keys for a Maps account.
-        account_key_list = self.cmd('az maps account keys list -n {name} -g {rg}', checks=[
-            self.check('id', account['id']),
-            self.check('resourceGroup', '{rg}')
-        ]).get_output_in_json()
+        account_key_list = self.cmd('az maps account keys list -n {name} -g {rg}').get_output_in_json()
 
         # Retrieve primary and secondary keys.
         primary_key_old = account_key_list['primaryKey']
@@ -135,10 +132,7 @@ class MapsScenarioTests(ScenarioTest):
         # Test 'az maps account key regenerate'.
         # Test to change primary and secondary keys for a Maps account.
         key_regenerated = self.cmd(
-            'az maps account keys renew -n {name} -g {rg} --key {key_type_primary}', checks=[
-                self.check('id', account['id']),
-                self.check('resourceGroup', '{rg}')
-            ]).get_output_in_json()
+            'az maps account keys renew -n {name} -g {rg} --key {key_type_primary}').get_output_in_json()
 
         # Only primary key was regenerated. Secondary key should remain same.
         self.assertNotEqual(primary_key_old, key_regenerated['primaryKey'])
