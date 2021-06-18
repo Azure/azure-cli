@@ -5126,21 +5126,24 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus2euap')
-    @VirtualNetworkPreparer(location='eastus2euap')
-    def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network):
+    @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network')
+    @VirtualNetworkPreparer(location='eastus2euap', parameter_name='virtual_network2')
+    def test_vmss_complex_orchestration_mode(self, resource_group, virtual_network, virtual_network2):
 
         self.kwargs.update({
-            'vmss': 'vm-ultrassd',
-            'vmss2': 'vm-ultrassd2',
-            'vnet_name': virtual_network
+            'vmss1': self.create_random_name(prefix='vmss1', length=10),
+            'vnet_name': virtual_network,
+            'vmss2': self.create_random_name(prefix='vmss2', length=10),
+            'vnet_name2': virtual_network2
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
+        # test with password
+        self.cmd('vmss create -g {rg} -n {vmss1} --orchestration-mode Flexible --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --admin-username testvmss '
                  '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvmss --image debian '
                  '--vnet-name {vnet_name} --subnet default --network-api-version 2020-11-01')
 
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('orchestrationMode', 'Flexible'),
             self.check('platformFaultDomainCount', 1),
             self.check('singlePlacementGroup', False),
@@ -5151,6 +5154,26 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux'),
+        ])
+
+        # test with ssh
+        self.cmd('vmss create -n {vmss2} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+                 '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image ubuntults '
+                 '--computer-name-prefix testvmss --vnet-name {vnet_name2} --subnet default --network-api-version '
+                 '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
+
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 1),
+            self.check('singlePlacementGroup', False),
+            self.check('sku.capacity', 0),
+            self.check('sku.name', "Standard_DS1_v2"),
+            self.check('virtualMachineProfile.networkProfile.networkApiVersion', '2020-11-01'),
+            self.check('virtualMachineProfile.osProfile.adminUsername', 'testvmss'),
+            self.exists('virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys'),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'testvmss'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux')
         ])
 
 
@@ -5172,7 +5195,7 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
         self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['another_rg']))
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-keys --subscription {aux_sub}')
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
         time.sleep(70)

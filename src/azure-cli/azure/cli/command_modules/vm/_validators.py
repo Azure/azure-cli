@@ -984,10 +984,11 @@ def _validate_vm_vmss_create_auth(namespace, cmd=None):
 
     if namespace.admin_username is None:
         namespace.admin_username = get_default_admin_username()
-    namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
+    if namespace.admin_username and namespace.os_type:
+        namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
 
-    if not namespace.os_type:
-        raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
+    # if not namespace.os_type:
+    #     raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
         # if both ssh key and password, infer that authentication_type is all.
@@ -996,9 +997,10 @@ def _validate_vm_vmss_create_auth(namespace, cmd=None):
         else:
             # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
             namespace.authentication_type = 'password' \
-                if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
+                if ((namespace.os_type and namespace.os_type.lower() == 'windows') or
+                    namespace.admin_password) else 'ssh'
 
-    if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
+    if namespace.os_type and namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
 
     # validate proper arguments supplied based on the authentication type
@@ -1024,7 +1026,7 @@ def _validate_vm_vmss_create_auth(namespace, cmd=None):
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
     elif namespace.authentication_type == 'all':
-        if namespace.os_type.lower() == 'windows':
+        if namespace.os_type and namespace.os_type.lower() == 'windows':
             raise CLIError('SSH not supported for Windows VMs. Use password authentication.')
 
         if not namespace.admin_password:
@@ -1494,7 +1496,8 @@ def process_vmss_create_namespace(cmd, namespace):
             _validate_vmss_create_nsg(cmd, namespace)
         if namespace.accelerated_networking is not None:
             _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-        if namespace.admin_password or namespace.ssh_dest_key_path or getattr(namespace, 'ssh_dest_key_value', None):
+        if namespace.admin_password or namespace.ssh_dest_key_path or getattr(namespace, 'ssh_dest_key_value', None) \
+                or namespace.generate_ssh_keys:
             _validate_vm_vmss_create_auth(namespace, cmd)
         if namespace.assign_identity == '[system]':
             raise InvalidArgumentValueError('usage error: only user assigned indetity is suppoprted for Flex mode.')

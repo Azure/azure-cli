@@ -1054,7 +1054,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         virtual_machine_profile['securityProfile'] = {'encryptionAtHost': encryption_at_host}
 
     if user_data:
-        vmss_properties['virtualMachineProfile']['userData'] = b64encode(user_data)
+        virtual_machine_profile['userData'] = b64encode(user_data)
 
     if host_group:
         vmss_properties['hostGroup'] = {'id': host_group}
