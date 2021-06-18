@@ -2153,6 +2153,66 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('provisioningState', 'Succeeded'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_create_vm_user_data')
+    def test_vm_create_user_data(self, resource_group):
+
+        from azure.cli.core.util import b64encode
+
+        user_data = '#cloud-config\nhostname: myVMhostname'
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        user_data_file = os.path.join(curr_dir, 'user_data.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'username': 'ubuntu',
+            'loc': 'westus',
+            'image': 'UbuntuLTS',
+            'auth': 'ssh',
+            'vm': 'vm-name',
+            'user_data': user_data,
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'user_data_file': user_data_file
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --user-data \'{user_data}\' --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data --show-details', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', None),
+        ])
+
+        self.cmd('vm show -g {rg} -n {vm} --show-details', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', None),
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --user-data @"{user_data_file}"')
+
+        with open(user_data_file) as file_obj:
+            file_content = file_obj.read()
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', b64encode(file_content)),
+        ])
+
+        # Clear the existing data
+        self.cmd('vm update -g {rg} -n {vm} --user-data ""')
+
+        self.cmd('vm show -g {rg} -n {vm} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('userData', None),
+        ])
+
 
 # region VMSS Tests
 
@@ -2907,6 +2967,71 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('provisioningState', 'Succeeded'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_user_data')
+    def test_vmss_create_user_data(self):
+
+        from azure.cli.core.util import b64encode
+
+        user_data = '#cloud-config\nhostname: myVMhostname'
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        user_data_file = os.path.join(curr_dir, 'user_data.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'vmss': 'vmss-custom-data',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'user_data': user_data,
+            'user_data_file': user_data_file
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}" --user-data "{user_data}"')
+
+        self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', None),
+        ])
+
+        self.kwargs['instance_id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
+
+        self.cmd('vmss show -g {rg} -n {vmss} --instance-id {instance_id} --include-user-data',checks=[
+            self.check('instanceId', '{instance_id}'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
+        self.cmd('vmss show -g {rg} -n {vmss} --instance-id {instance_id}',checks=[
+            self.check('instanceId', '{instance_id}'),
+            self.check('userData', None),
+        ])
+
+        with open(user_data_file) as file_obj:
+            file_content = file_obj.read()
+
+        self.cmd('vmss update -g {rg} -n {vmss} --user-data @"{user_data_file}"')
+
+        self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', b64encode(file_content)),
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --instance-id {instance_id} --user-data "user_data"')
+
+        self.cmd('vmss show -g {rg} -n {vmss} --instance-id {instance_id} --include-user-data',checks=[
+            self.check('instanceId', '{instance_id}'),
+            self.check('userData', b64encode(user_data)),
+        ])
+
+        # Clear the existing data
+        self.cmd('vmss update -g {rg} -n {vmss} --user-data ""')
+
+        self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.userData', None),
+        ])
 
 
 class VMSSNicScenarioTest(ScenarioTest):
@@ -3750,99 +3875,6 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    def test_shared_gallery(self, resource_group, resource_group_location):
-        self.kwargs.update({
-            'vm': 'vm1',
-            'gallery': 'cligallery',
-            'image': 'image1',
-            'version': '1.1.2',
-            'captured': 'managedImage1',
-            'location': resource_group_location,
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
-            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
-            'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac'
-        })
-
-        self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
-                 '--os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
-        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --data-disk-sizes-gb 10 --admin-username clitest1 '
-                 '--generate-ssh-key --nsg-rule NONE')
-        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts '
-                 '"echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
-        time.sleep(70)
-
-        self.cmd('vm deallocate -g {rg} -n {vm}')
-        self.cmd('vm generalize -g {rg} -n {vm}')
-        self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
-                 '--gallery-image-version {version} --managed-image {captured} --replica-count 1')
-
-        # Test shared gallery
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups')
-        res = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.permissions', 'Groups')
-        ]).get_output_in_json()
-
-        self.kwargs['unique_name'] = res['identifier']['uniqueName']
-
-        self.cmd('sig update --gallery-name {gallery} --resource-group {rg} --permissions groups --permissions groups')
-        self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} {sharedSubId} --tenant-ids {tenantId}')
-        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
-            self.check('sharingProfile.groups[0].ids[1]', self.kwargs['sharedSubId']),
-            self.check('sharingProfile.groups[0].type', 'Subscriptions'),
-            self.check('sharingProfile.groups[1].ids[0]', self.kwargs['tenantId']),
-            self.check('sharingProfile.groups[1].type', 'AADTenants')
-        ])
-
-        self.cmd('sig share remove --gallery-name {gallery} -g {rg} --subscription-ids {sharedSubId} --tenant-ids {tenantId}')
-        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.groups[0].ids[0]', self.kwargs['subId']),
-            self.check('length(sharingProfile.groups)', 1),
-        ])
-
-        # Check result by shared user
-        self.cmd('sig list-shared --location {location}', checks=[
-            self.check('[0].location', '{location}'),
-            self.check('[0].name', '{unique_name}'),
-            self.check('[0].uniqueId', '/SharedGalleries/{unique_name}')
-        ])
-        self.cmd('sig image-definition list-shared --gallery-unique-name {unique_name} --location {location}', checks=[
-            self.check('[0].location', '{location}'),
-            self.check('[0].name', '{image}'),
-            self.check('[0].uniqueId', '/SharedGalleries/{unique_name}/Images/{image}')
-        ])
-
-        self.cmd('sig image-definition show-shared --gallery-image-definition {image} '
-                 '--gallery-unique-name {unique_name} --location {location}', checks=[
-            self.check('location', '{location}'),
-            self.check('name', '{image}'),
-            self.check('uniqueId', '/SharedGalleries/{unique_name}/Images/{image}')
-        ])
-
-        self.cmd('sig image-version list-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} '
-                 '--location {location}', checks=[
-            self.check('[0].location', '{location}'),
-            self.check('[0].name', '{version}'),
-            self.check('[0].uniqueId', '/SharedGalleries/{unique_name}/Images/{image}/Versions/{version}')
-        ])
-
-        self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} '
-                 '--location {location} --gallery-image-version {version}', checks=[
-            self.check('location', '{location}'),
-            self.check('name', '{version}'),
-            self.check('uniqueId', '/SharedGalleries/{unique_name}/Images/{image}/Versions/{version}')
-        ])
-
-        # gallery permissions must be reset, or the resource group can't be deleted
-        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
-        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
-            self.check('sharingProfile.permissions', 'Private')
-        ])
-
     @ResourceGroupPreparer(location='eastus2')
     def test_gallery_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
