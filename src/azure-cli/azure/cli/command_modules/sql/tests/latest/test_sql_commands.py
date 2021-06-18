@@ -1234,7 +1234,6 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
-        self.skipTest("Skipping based on discussion with owning team - xinrui.yang")
 
         # Standalone db
         restore_service_objective = 'S1'
