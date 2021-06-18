@@ -25,7 +25,7 @@ def _get_vm_version(vm_type):
 
 class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @StorageAccountPreparer(location="southeastasia")
     def test_backup_scenario(self, resource_group, vault_name, vm_name, storage_account):
@@ -145,7 +145,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -179,7 +179,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
@@ -198,8 +198,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm2': vm2,
             'policy5': self.create_random_name('clitest-policy5', 24),
         })
-
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
 
         self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy1}', checks=[
             self.check('name', '{policy1}'),
@@ -257,7 +255,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -341,7 +339,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -430,7 +428,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -499,7 +497,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -539,7 +537,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -617,7 +615,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @StorageAccountPreparer(location="southeastasia")
     def test_backup_disk_exclusion(self, resource_group, vault_name, vm_name, storage_account):

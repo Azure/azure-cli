@@ -23,9 +23,11 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
-    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf
+    protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
+    vaults_cf, aad_properties_cf, recovery_points_cf, cross_region_restore_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
+import azure.cli.command_modules.backup.custom as custom
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
 
 
@@ -528,7 +530,7 @@ def list_workload_items(cmd, vault_name, resource_group_name, container_name,
     return cust_help.get_list_from_paged_response(items)
 
 
-def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config):
+def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, use_secondary_region=None):
     recovery_config_object = cust_help.get_or_read_json(recovery_config)
     restore_mode = recovery_config_object['restore_mode']
     container_uri = recovery_config_object['container_uri']
@@ -546,6 +548,16 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     # Construct trigger restore request object
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time)
     trigger_restore_properties.recovery_type = restore_mode
+
+    # Get target vm id
+    if container_id is not None:
+        target_container_name = cust_help.get_protection_container_uri_from_id(container_id)
+        target_resource_group = cust_help.get_resource_group_from_id(container_id)
+        target_vault_name = cust_help.get_vault_from_arm_id(container_id)
+        target_container = common.show_container(
+        cmd, backup_protection_containers_cf(cmd.cli_ctx), target_container_name,
+        target_resource_group, target_vault_name, 'AzureWorkload')
+        setattr(trigger_restore_properties, 'target_virtual_machine_id', target_container.properties.source_resource_id)
 
     if restore_mode == 'AlternateLocation':
         if recovery_mode != "FileRecovery":
@@ -572,9 +584,26 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
+
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = custom.secondary_region_map[vault_location]
+        aad_client = aad_properties_cf(cmd.cli_ctx)
+        filter_string = cust_help.get_filter_string({'backupManagementType': 'AzureWorkload'})
+        aad_result = aad_client.get(azure_region, filter_string)
+        rp_client = recovery_points_cf(cmd.cli_ctx)
+        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
+                                                      item_uri, recovery_point_id, aad_result).properties
+        crr_client = cross_region_restore_cf(cmd.cli_ctx)
+        trigger_restore_properties.region = azure_region
+        result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True,
+                                    polling=False).result()
+        return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
+
     # Trigger restore and wait for completion
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
-                            item_uri, recovery_point_id, trigger_restore_request, raw=True)
+                            item_uri, recovery_point_id, trigger_restore_request, raw=True, polling=False).result()
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -590,7 +619,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                 """
                 Target Item must be provided.
                 """)
-
+        if isinstance(target_item, list):
+            raise InvalidArgumentValueError(
+                """
+                Multiple target items found. Please check if you have given correct target server type.
+                """)
         protectable_item_type = target_item.properties.protectable_item_type
         if protectable_item_type.lower() not in ["sqlinstance", "saphanasystem"]:
             raise CLIError(

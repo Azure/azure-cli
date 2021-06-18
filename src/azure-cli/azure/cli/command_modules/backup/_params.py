@@ -296,6 +296,7 @@ def load_arguments(self, _):
     with self.argument_context('backup restore restore-azurewl') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     # Recoveryconfig
     with self.argument_context('backup recoveryconfig show') as c:
@@ -313,6 +314,8 @@ def load_arguments(self, _):
         c.argument('from_full_rp_name', from_full_rp_type)
         c.argument('filepath', filepath_type)
         c.argument('backup_management_type', backup_management_type)
+        c.argument('target_resource_group', options_list=['--target-resource-group'], help="""Specify the resource group of target item for Cross Region Restore. Default value will be same as --resource-group if not specified.""")
+        c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
 
     # Job
     with self.argument_context('backup job') as c:

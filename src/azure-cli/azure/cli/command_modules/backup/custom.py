@@ -201,7 +201,7 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
     backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
                                                  cross_region_restore_flag=cross_region_restore_flag)
     backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-    return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+    return client.patch(vault_name, resource_group_name, backup_storage_config_resource)
 
 
 def get_backup_properties(cmd, client, vault_name, resource_group_name):
@@ -668,7 +668,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     # Trigger restore
     result = client.trigger(vault_name, resource_group_name, fabric_name,
                             container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True)
+                            trigger_restore_request, raw=True, polling=False).result()
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
