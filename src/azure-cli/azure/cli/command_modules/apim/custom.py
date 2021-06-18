@@ -251,9 +251,8 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
 
 def import_apim_api(client, resource_group_name, service_name, path, specification_format, description=None, subscription_key_header_name=None,
                     subscription_key_query_param_name=None, api_id=None, api_revision=None, display_name=None, service_url=None,
-                    protocols=None, specification_path=None, specification_url=None, 
-                    api_type=None, subscription_required=None, soap_api_type=None, wsdl_endpoint_name=None,
-                    wsdl_service_name=None, no_wait=False):
+                    protocols=None, specification_path=None, specification_url=None, api_type=None, subscription_required=None,
+                    soap_api_type=None, wsdl_endpoint_name=None, wsdl_service_name=None, no_wait=False):
     """Import a new API"""
     cms = client.api
 
@@ -284,25 +283,25 @@ def import_apim_api(client, resource_group_name, service_name, path, specificati
     FORMAT_MAPPINGS = {
         ImportFormat.Wadl.value: {
             #specification_path is not none
-            True : "ContentFormat.wadl_xml.value",
+            True: "ContentFormat.wadl_xml.value",
             #specification_url is not none
-            False : "ContentFormat.wadl_link_json.value"
+            False: "ContentFormat.wadl_link_json.value"
         },
         ImportFormat.Swagger.value: {
-            True : "ContentFormat.swagger_json.value",
-            False : "ContentFormat.swagger_link_json.value"
+            True: "ContentFormat.swagger_json.value",
+            False: "ContentFormat.swagger_link_json.value"
         },
         ImportFormat.OpenApi.value: {
-            True : "ContentFormat.openapi.value",
-            False : "ContentFormat.openapi_link.value"
+            True: "ContentFormat.openapi.value",
+            False: "ContentFormat.openapi_link.value"
         },
         ImportFormat.OpenApiJson.value: {
-            True : " ContentFormat.openapijson.value",
-            False : "ContentFormat.openapi_link.value"
+            True: " ContentFormat.openapijson.value",
+            False: "ContentFormat.openapi_link.value"
         },
         ImportFormat.Wsdl.value: {
-            True : "ContentFormat.wsdl.value",
-            False : "ContentFormat.wsdl_link.value"
+            True: "ContentFormat.wsdl.value",
+            False: "ContentFormat.wsdl_link.value"
         }
     }
 
