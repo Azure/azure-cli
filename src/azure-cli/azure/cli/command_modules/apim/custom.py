@@ -249,9 +249,9 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
     return instance
 
 
-def import_apim_api(client, resource_group_name, service_name, path, description=None, subscription_key_header_name=None,
+def import_apim_api(client, resource_group_name, service_name, path, specification_format, description=None, subscription_key_header_name=None,
                     subscription_key_query_param_name=None, api_id=None, api_revision=None, display_name=None, service_url=None,
-                    protocols=None, specification_path=None, specification_url=None, specification_format=None,
+                    protocols=None, specification_path=None, specification_url=None, 
                     api_type=None, subscription_required=None, soap_api_type=None, wsdl_endpoint_name=None,
                     wsdl_service_name=None, no_wait=False):
     """Import a new API"""
@@ -261,21 +261,7 @@ def import_apim_api(client, resource_group_name, service_name, path, description
     # possible parameter format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json', 'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
     # possible parameter specificationFormat is 'Wadl', 'Swagger', 'OpenApi', 'OpenApiJson', 'Wsdl'
 
-    if specification_format == ImportFormat.Wadl.value:
-        s_format = ContentFormat.wadl_xml.value if specification_path is not None else ContentFormat.wadl_link_json.value
-    elif specification_format == ImportFormat.Swagger.value:
-        s_format = ContentFormat.swagger_json.value if specification_path is not None else ContentFormat.swagger_link_json.value
-    elif specification_format == ImportFormat.OpenApi.value:
-        s_format = ContentFormat.openapi.value if specification_path is not None else ContentFormat.openapi_link.value
-    elif specification_format == ImportFormat.OpenApiJson.value:
-        s_format = ContentFormat.openapijson.value if specification_path is not None else ContentFormat.openapi_link.value
-    elif specification_format == ImportFormat.Wsdl.value:
-        s_format = ContentFormat.wsdl.value if specification_path is not None else ContentFormat.wsdl_link.value
-    else:
-        raise CLIError("Please provide valid value for specificationFormat: " + specification_format)
-
     resource = ApiCreateOrUpdateParameter(
-        format=s_format,
         path=path
     )
 
@@ -294,6 +280,36 @@ def import_apim_api(client, resource_group_name, service_name, path, description
         raise CLIError("Can't specify specification-url and specification-path at the same time.")
     else:
         raise CLIError("Please either specify specification-url or specification-path.")
+
+    FORMAT_MAPPINGS = {
+        ImportFormat.Wadl.value: {
+            #specification_path is not none
+            True : "ContentFormat.wadl_xml.value",
+            #specification_url is not none
+            False : "ContentFormat.wadl_link_json.value"
+        },
+        ImportFormat.Swagger.value: {
+            True : "ContentFormat.swagger_json.value",
+            False : "ContentFormat.swagger_link_json.value"
+        },
+        ImportFormat.OpenApi.value: {
+            True : "ContentFormat.openapi.value",
+            False : "ContentFormat.openapi_link.value"
+        },
+        ImportFormat.OpenApiJson.value: {
+            True : " ContentFormat.openapijson.value",
+            False : "ContentFormat.openapi_link.value"
+        },
+        ImportFormat.Wsdl.value: {
+            True : "ContentFormat.wsdl.value",
+            False : "ContentFormat.wsdl_link.value"
+        }
+    }
+
+    if specification_format in FORMAT_MAPPINGS:
+        resource.format = FORMAT_MAPPINGS[specification_format][specification_path is not None]
+    else:
+        raise CLIError("Please provide valid value for specificationFormat: " + specification_format)
 
     resource.protocols = protocols
     resource.service_url = service_url
