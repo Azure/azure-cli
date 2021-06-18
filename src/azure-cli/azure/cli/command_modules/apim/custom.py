@@ -282,9 +282,9 @@ def import_apim_api(client, resource_group_name, service_name, path, specificati
 
     FORMAT_MAPPINGS = {
         ImportFormat.Wadl.value: {
-            #specification_path is not none
+            # specification_path is not none
             True: "ContentFormat.wadl_xml.value",
-            #specification_url is not none
+            # specification_url is not none
             False: "ContentFormat.wadl_link_json.value"
         },
         ImportFormat.Swagger.value: {
