@@ -1234,6 +1234,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
+        self.skipTest("Skipping based on discussion with owning team - xinrui.yang")
 
         # Standalone db
         restore_service_objective = 'S1'
@@ -5262,7 +5263,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
     @StorageAccountPreparer(location='eastus2')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
-
+        self.skipTest("Skipping based on discussion with owning team - ranisha")
         database_name = "sensitivityclassificationsdb01"
 
         # create db
