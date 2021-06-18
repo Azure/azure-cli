@@ -17,9 +17,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_accounts')
         g.custom_command('create', 'maps_account_create')
         g.command('delete', 'delete')
-        g.generic_update_command('update',
-                                 getter_name='get',
-                                 custom_func_name='maps_account_update')
+        g.custom_command('update', 'maps_account_update')
         g.custom_command('list-key', 'maps_account_list_key')
         g.custom_command('regenerate-key', 'maps_account_regenerate_key')
 

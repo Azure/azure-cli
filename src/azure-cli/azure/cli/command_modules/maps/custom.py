@@ -14,7 +14,6 @@ logger = get_logger(__name__)
 def maps_account_create(client,
                         resource_group_name,
                         account_name,
-                        location,
                         name,
                         tags=None,
                         kind=None,
