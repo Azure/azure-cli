@@ -48,7 +48,7 @@ Release History
 
 **Key Vault**
 
-* Fix #11871: AKV10032: Invalid issuer error for operations in nondefault tenant/subscription (#18162)
+* Fix #11871: AKV10032: Invalid issuer error for operations in non-default tenant/subscription (#18162)
 * `az keyvault set-policy/delete-policy`: Support --application-id (#18209)
 * `az keyvault recover`: Support MHSM (#18150)
 * `az keyvault private-link-resource list`: Support MHSM (#18273)
@@ -196,9 +196,9 @@ Release History
 * `az network lb frontend-ip update`: New parameter `--gateway-lb` (#18136)
 * `az network nic ip-config update`: New parameter `--gateway-lb` (#18136)
 * `az network rule create/update`: New parameter `--backend-pools-name` (#18136)
-* `az network vnet-gateway create`: Add new paramter `--nat-rule` (#18045)
+* `az network vnet-gateway create`: Add new parameter `--nat-rule` (#18045)
 * Add new cmd group `az network vnet-gateway nat-rule` (#18045)
-* `az network vpn-conncetion create`: Add new paramter `--ingress-nat-rule` and `--egress-nat-rule` (#18045)
+* `az network vpn-connection create`: Add new parameter `--ingress-nat-rule` and `--egress-nat-rule` (#18045)
 * `az network vnet create`: Add new parameter `--flowtimeout` (#18032)
 
 **Packaging**
@@ -384,7 +384,7 @@ Release History
 
 **Key Vault**
 
-* Hotfix: GA for managed-HSM ralated commands and parameters
+* Hotfix: GA for managed-HSM related commands and parameters
 
 2.22.0
 ++++++
@@ -412,7 +412,7 @@ Release History
 * Fix #17219: Fix ssl bind bug (#17479)
 * Remove preview flag for Python 3.9 in create function app command (#17546)
 * Bugfix: Handle if only single publish profile is returned (#17495)
-* Fix #16203: az webapp log tail supports webapps running on Linix. (#17294)
+* Fix #16203: az webapp log tail supports webapps running on Linux. (#17294)
 
 **ARM**
 
@@ -816,7 +816,7 @@ Release History
 
 **Network**
 
-* [BREAKING CHANGE] `az network vrouter`: Depracate this command group, please use `az network routeserver`. (#16494)
+* [BREAKING CHANGE] `az network vrouter`: Deprecate this command group, please use `az network routeserver`. (#16494)
 * `az network routeserver`: Add new command group. (#16494)
 * `az network application-gateway create`: Add parameter `--ssl-profile-id` (#16762)
 * `az network application-gateway client-cert`: Manage trusted client certificate of application gateway (#16762)
@@ -1359,8 +1359,8 @@ Release History
 
 **SignalR**
 
-* `az signalr create`: Add new option `--enable-messaging-logs` for controling service generate messaging logs or not (#15327)
-* `az signalr update`: Add new option `--enable-messaging-logs` for controling service generate messaging logs or not (#15327)
+* `az signalr create`: Add new option `--enable-messaging-logs` for controlling service generate messaging logs or not (#15327)
+* `az signalr update`: Add new option `--enable-messaging-logs` for controlling service generate messaging logs or not (#15327)
 
 **SQL**
 
@@ -1368,7 +1368,7 @@ Release History
 * `az sql db audit-policy show`: extend to show database's audit policy including LA and EH data (#15444)
 * `az sql db audit-policy update`: extend to allow LA and EH update along with database's audit policy (#15444)
 * `az sql db audit-policy wait`: place the CLI in a waiting state until a condition of the database's audit policy is met. (#15444)
-* `az sql server audit-policy show`: extend to show servers's audit policy including LA and EH data (#15444)
+* `az sql server audit-policy show`: extend to show servers' audit policy including LA and EH data (#15444)
 * `az sql server audit-policy update`: extend to allow LA and EH update along with server's audit policy (#15444)
 * `az sql server audit-policy wait`: place the CLI in a waiting state until a condition of the server's audit policy is met. (#15444)
 * Add AAD-only Support for SQL Managed Instances and Servers (#15292)
@@ -1432,8 +1432,8 @@ Release History
 
 **HDInsight**
 
-* `az hdinsight create`: add deprecate information for argument --public-networrk-access-type and --outbound-public-network-access-type (#15181)
-* `az hdinsight create`: add deprecate information for argument `--public-networrk-access-type` and `--outbound-public-network-access-type` (#15309)
+* `az hdinsight create`: add deprecate information for argument --public-network-access-type and --outbound-public-network-access-type (#15181)
+* `az hdinsight create`: add deprecate information for argument `--public-network-access-type` and `--outbound-public-network-access-type` (#15309)
 * `az hdinsight create`:  add parameter `--idbroker` to support customer to create ESP cluster with HDInsight Id Broker (#15309)
 
 **IoT Central**
@@ -1452,7 +1452,7 @@ Release History
 
 * `az network application-gateway ssl-cert show`: Add example to demonstrate certificate format and fetch information (#15166)
 * `az network application-gateway rule`: Support --priority option (#15222)
-* `az network application-gateway create`: Fix bug that cannot create without public IP sepcified (#15255)
+* `az network application-gateway create`: Fix bug that cannot create without public IP specified (#15255)
 * `az network application-gateway waf-policy managed-rule rule-set add`: Expose server error to user to give more intuitive hint message. (#15261)
 * `az network application-gateway waf-policy managed-rule rule-set update`: Support to change rule set type version. (#15261)
 
@@ -1499,7 +1499,7 @@ Release History
 **AKS**
 
 * CLI should tolerate empty kubeconfig (#14914)
-* FIX #12871: az aks enable-addons: Autogenerated help example is wrong for vitual-node option (#14989)
+* FIX #12871: az aks enable-addons: Autogenerated help example is wrong for virtual-node option (#14989)
 * Remove legacy aci connector actions (#15084)
 * Support azure policy addon in azure-cli (#15092)
 * Fix case sensitive issue for AKS dashboard addon (#15123)
@@ -1581,7 +1581,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 **Network**
 
 * `az network vnet subnet`: Support --disable-private-endpoint-network-policies and --disable-private-link-service-network-policies (#15008)
-* Fix bug while updateing flow-log when its subproperty network_watcher_flow_analytics_configuration is None (#15063)
+* Fix bug while updating flow-log when its subproperty network_watcher_flow_analytics_configuration is None (#15063)
 * API version bump to 2020-06-01 (#15048)
 * Support --tcp-port-behavior while configuring a TCP configuration of a Connection Monitor V2 (#14937)
 * Support more types and coverage level while creating Endpoint of Connection Monitor V2 (#14942)
@@ -1754,7 +1754,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 **Synapse**
 
 * Add workspace, sparkpool, sqlpool related cmdlets (#14755)
-* Add spark job releated commands based on track2 sdk (#14819)
+* Add spark job related commands based on track2 sdk (#14819)
 * Add accesscontrol feature related commands based on track2 sdk (#14834)
 
 **Upgrade**
@@ -1801,7 +1801,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 **APIM**
 
-* apim api import: support API import and enchance other api level cli commands (#14363)
+* apim api import: support API import and enhance other api level cli commands (#14363)
 
 **App Service**
 
@@ -1855,11 +1855,11 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 **IoT Central**
 
-* Add paramater option list for iot central (#14471)
+* Add parameter option list for iot central (#14471)
 
 **KeyVault**
 
-* `az keyvault key encrypt/decrypt`: add parameter `--data-type` for explicitly specifing the type of original data (#14386)
+* `az keyvault key encrypt/decrypt`: add parameter `--data-type` for explicitly specifying the type of original data (#14386)
 
 **Monitor**
 
@@ -1962,7 +1962,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 **Monitor**
 
 * Remove preview flag for commands under Log Analytics workspace (#14064)
-* `az monitor diagnostic-settings subscription`: Support diagnositc settings for subscription (#14157)
+* `az monitor diagnostic-settings subscription`: Support diagnostic settings for subscription (#14157)
 * `az monitor metrics`: support ',' and '|' in metric name (#14254)
 * `az monitor log-analytics workspace data-export`: support log analytics data export (#14155)
 
@@ -2482,7 +2482,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 * `az vm/vmss create`: Add support for specialized image version (#12997)
 * SIG API Version 2019-12-01. (#12899)
 * `az sig image-version create`: Add --target-region-encryption. (#12899)
-* Fix tests fail when running in serial due to keyvault name is duplicated in global in-momery cache
+* Fix tests fail when running in serial due to keyvault name is duplicated in global in-memory cache
 
 **CosmosDB**
 
@@ -3022,7 +3022,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 * Fix issue #11415: permission error for `az storage blob update`
 * Integrate Azcopy 10.3.3 and support Win32.
 * `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
-* `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage remove`: Change `--include` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 
 **ServiceFabric**
@@ -3429,8 +3429,8 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 * gremlin graph create: Add --conflict-resolution-policy
 * gremlin graph create/update: Update the --idx default schema
 * Fix typo in help message
-* database: Add deprecation infomation
-* collection: Add deprecation infomation
+* database: Add deprecation information
+* collection: Add deprecation information
 
 **IoT**
 
@@ -3446,7 +3446,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 **Monitor**
 
 * Updated azure-mgmt-monitor to 0.7.0
-* az monitor action-group create/update: Added suport for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
+* az monitor action-group create/update: Added support for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
 * Included parameter usecommonalertschema for supported receivers
 * Included parameter useaadwebhook for webhook receiver
 
@@ -3497,9 +3497,9 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 * Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
 * Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
-* Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
+* Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commands to support multiple nodepools in aks
 * Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
-* Enable GA support of apiserver authorized IP ranges via paramater `--api-server-authorized-ip-ranges` in `az aks create` and `az aks update`
+* Enable GA support of apiserver authorized IP ranges via parameter `--api-server-authorized-ip-ranges` in `az aks create` and `az aks update`
 
 **AMS**
 
@@ -3704,7 +3704,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 **API Management**
 
-* Introduced initial impementation of API Management preview commands (az apim)
+* Introduced initial implementation of API Management preview commands (az apim)
 
 **AppConfig**
 
@@ -3853,7 +3853,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
 * network application-gateway http-settings create/update: Fixes #9604. Add `--root-certs` to support user associate trusted root certificates with the HTTP settings.
-* network dns record-set ns create: Fixes #9965. Support --subscription again by moving the supression into lower scope.
+* network dns record-set ns create: Fixes #9965. Support --subscription again by moving the suppression into lower scope.
 * network watcher test-ip-flow: Fixes #9845. Fixes #9844. Correct the error messages and help message for the `--vm` and `--nic` arguments. Only providing the name of the vm or nic without `--resource-group` will raise CLI usage error.
 
 **RBAC**
@@ -3912,7 +3912,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 **Relay**
 
-* Fixed issue #8775 : Cannot create hybrid connection with disabled client authroization
+* Fixed issue #8775 : Cannot create hybrid connection with disabled client authorization
 * Added parameter "--requires-transport-security" to az relay wcfrelay create
 
 **Servicebus**
@@ -4005,8 +4005,8 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 **VM**
 
-* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
-  the request but returns failure status code and returns an error mesage.
+* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command successfully sends
+  the request but returns failure status code and returns an error message.
 * vm/vmss extension image list: Fix bug where command fails when used with --latest
 * vmss create `--single-placement-group`: Removed client-side validation. Does not fail if `--single-placement-group` is
   set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
