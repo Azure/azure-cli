@@ -503,7 +503,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage container-rm', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-02-01', is_preview=True) as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-02-01') as g:
         g.custom_command('create', 'create_container_rm')
         g.command('delete', 'delete', confirmation=True)
         g.generic_update_command('update', setter_name='update', max_api='2019-04-01')
@@ -513,6 +513,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('exists', 'container_rm_exists', transform=create_boolean_result_output_transformer('exists'),
                          table_transformer=transform_boolean_for_table)
         g.show_command('show', 'get')
+        g.command('migrate-vlw', 'begin_object_level_worm', supports_no_wait=True, is_preview=True)
+        g.wait_command('get')
 
     file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',

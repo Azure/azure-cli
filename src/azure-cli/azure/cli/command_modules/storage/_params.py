@@ -1248,6 +1248,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('enable_vlw', arg_type=get_three_state_flag(), min_api='2021-01-01', is_preview=True,
+                   help='The object level immutability property of the container. The property is immutable and can '
+                   'only be set to true at the container creation time. Existing containers must undergo a migration '
+                   'process.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage container-rm {}'.format(item),

@@ -785,6 +785,40 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='centraluseuap')
+    def test_storage_container_vlm_scenarios(self, resource_group, storage_account):
+        self.kwargs.update({
+            'container1': self.create_random_name(prefix='con1', length=10),
+            'container2': self.create_random_name(prefix='con2', length=10)
+        })
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --enable-versioning ',
+                 checks={
+                     JMESPathCheck('isVersioningEnabled', True)
+                 })
+        # Enable vlm when creation
+        self.cmd('storage container-rm create -n {container1} --storage-account {sa} --enable-vlw',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['container1']),
+                     JMESPathCheck('immutable_storage_with_versioning.enabled', True)})
+
+        # Enable vlm for containers with immutability policy
+        self.cmd('storage container-rm create -n {container2} --storage-account {sa}',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['container2']),
+                     JMESPathCheck('immutable_storage_with_versioning.enabled', None)})
+
+        self.cmd('storage container immutability-policy create -c {container2} --account-name {sa} -w --period 1',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['container2']),
+                     JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1)})
+
+        self.cmd('storage container-rm migrate-vlw -n {container2} --storage-account {sa} ',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['container2']),
+                     JMESPathCheck('immutable_storage_with_versioning.enabled', True)})
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -57,7 +57,7 @@ def extend_immutability_policy(cmd, client, container_name, account_name, if_mat
 
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
-                        default_encryption_scope=None, deny_encryption_scope_override=None):
+                        default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None):
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
@@ -68,6 +68,10 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                                        default_encryption_scope=default_encryption_scope,
                                        deny_encryption_scope_override=deny_encryption_scope_override,
                                        metadata=metadata)
+        if enable_vlw is not None:
+            ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
+                                                            resource_type=ResourceType.MGMT_STORAGE)
+            blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
         return client.create(resource_group_name=resource_group_name, account_name=account_name,
                              container_name=container_name, blob_container=blob_container)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
