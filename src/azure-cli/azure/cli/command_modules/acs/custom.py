@@ -1448,12 +1448,12 @@ def _create_role_assignment(cmd, role, assignee,
         parameters = RoleAssignmentCreateParameters(
             role_definition_id=role_id, principal_id=object_id)
         return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
-    else:
-        RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                           'RoleAssignmentProperties', mod='models',
-                                           operation_group='role_assignments')
-        properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
-        return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+
+    RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                       'RoleAssignmentProperties', mod='models',
+                                       operation_group='role_assignments')
+    properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
+    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):

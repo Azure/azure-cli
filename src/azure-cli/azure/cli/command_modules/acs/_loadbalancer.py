@@ -71,7 +71,7 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
                 'ManagedClusterLoadBalancerProfileManagedOutboundIPs',
                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                 operation_group='managed_clusters')
-            profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+            profile.managed_outbound_i_ps = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
                 count=managed_outbound_ip_count
             )
         if outbound_ip_resources:

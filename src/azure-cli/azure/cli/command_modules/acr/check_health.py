@@ -12,8 +12,6 @@ from .helm import get_helm_command
 from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
 
-from azure.cli.core.profiles import ResourceType
-
 logger = get_logger(__name__)
 
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
@@ -288,6 +286,7 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
 
 
 def _check_registry_health(cmd, registry_name, ignore_errors):
+    from azure.cli.core.profiles import ResourceType
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
@@ -312,7 +311,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
-    if cmd.supported_api_version(min_api='2020-11-01-preview', resource_type=ResourceType.MGMT_CONTAINERREGISTRY):
+    if cmd.supported_api_version(min_api='2020-11-01-preview', resource_type=ResourceType.MGMT_CONTAINERREGISTRY):  # pylint: disable=too-many-nested-blocks
         # CMK settings
         if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
             client_id = registry.encryption.key_vault_properties.identity
