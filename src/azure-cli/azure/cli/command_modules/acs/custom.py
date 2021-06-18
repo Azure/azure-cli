@@ -1437,23 +1437,24 @@ def _create_role_assignment(cmd, role, assignee,
     # if not use MSI object id.
     object_id = _resolve_object_id(
         cmd.cli_ctx, assignee) if resolve_assignee else assignee
- 
+
     assignment_name = uuid.uuid4()
     custom_headers = None
 
     RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                            'RoleAssignmentCreateParameters', mod='models',
-                                            operation_group='role_assignments')
-    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):   
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
         parameters = RoleAssignmentCreateParameters(
             role_definition_id=role_id, principal_id=object_id)
         return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
     else:
         RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                          'RoleAssignmentProperties', mod='models',
-                                          operation_group='role_assignments')
+                                           'RoleAssignmentProperties', mod='models',
+                                           operation_group='role_assignments')
         properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
         return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
@@ -1968,10 +1969,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False):
-    ManagedClusterIdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'ManagedClusterIdentityUserAssignedIdentitiesValue',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
     ManagedClusterWindowsProfile = cmd.get_models('ManagedClusterWindowsProfile',
                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                   operation_group='managed_clusters')
@@ -2005,6 +2002,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     ManagedCluster = cmd.get_models('ManagedCluster',
                                     resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                     operation_group='managed_clusters')
+    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
+        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group='managed_clusters')
 
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2526,6 +2527,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                            aad_client_app_id=None,
                            aad_tenant_id=None,
                            no_wait=False):
+    ManagedClusterServicePrincipalProfile = cmd.get_models('ManagedClusterServicePrincipalProfile',
+                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                           operation_group='managed_clusters')
     if bool(reset_service_principal) == bool(reset_aad):
         raise CLIError(
             'usage error: --reset-service-principal | --reset-aad-profile')
@@ -2605,10 +2609,6 @@ def aks_update(cmd, client, resource_group_name, name,
                no_wait=False,
                enable_azure_rbac=False,
                disable_azure_rbac=False):
-    ManagedClusterIdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'ManagedClusterIdentityUserAssignedIdentitiesValue',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        operation_group='managed_clusters')
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
@@ -2618,6 +2618,10 @@ def aks_update(cmd, client, resource_group_name, name,
     ManagedClusterIdentity = cmd.get_models('ManagedClusterIdentity',
                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                             operation_group='managed_clusters')
+    Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties = cmd.get_models(
+        'Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group='managed_clusters')
     update_autoscaler = enable_cluster_autoscaler + \
         disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -3747,7 +3751,7 @@ def _ensure_aks_acr(cmd,
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
             acr_client = cf_container_registry_service(
-                cli_ctx, subscription_id=parsed_registry['subscription'])
+                cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
             registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])
         except CloudError as ex:
@@ -3761,7 +3765,7 @@ def _ensure_aks_acr(cmd,
     registry_resource = 'Microsoft.ContainerRegistry/registries'
     try:
         registry = get_resource_by_name(
-            cli_ctx, registry_name, registry_resource)
+            cmd.cli_ctx, registry_name, registry_resource)
     except CloudError as ex:
         if 'was not found' in ex.message:
             raise CLIError(
