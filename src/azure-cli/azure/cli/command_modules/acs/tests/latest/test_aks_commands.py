@@ -705,9 +705,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -797,9 +797,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', True),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -894,9 +894,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('apiServerAccessProfile.authorizedIpRanges',
                        ['1.2.3.4/32']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -987,9 +987,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -1006,13 +1006,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # update managed outbound IP
         self.cmd('aks update -g {resource_group} -n {name} --load-balancer-managed-outbound-ip-count 2', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # scale up
@@ -1103,9 +1103,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.exists('networkProfile.loadBalancerProfile'),
-            self.exists('networkProfile.loadBalancerProfile.outboundIps'),
+            self.exists('networkProfile.loadBalancerProfile.outboundIPs'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -1213,7 +1213,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists(
                 'networkProfile.loadBalancerProfile.outboundIpPrefixes'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -1903,7 +1903,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001')
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
@@ -1913,7 +1913,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000002'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000002'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000003')
         ])
@@ -1940,7 +1940,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('aadProfile.managed', True),
             self.check('aadProfile.enableAzureRbac', False),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001')
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
@@ -1997,7 +1997,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000003'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000003'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000004')
         ])
@@ -2032,7 +2032,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000002')
         ])
@@ -2988,9 +2988,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3076,9 +3076,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check('apiServerAccessProfile.enablePrivateCluster', True),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3169,9 +3169,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('apiServerAccessProfile.authorizedIpRanges',
                        ['1.2.3.4/32']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3258,9 +3258,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3277,13 +3277,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # update managed outbound IP
         self.cmd('aks update -g {resource_group} -n {name} --load-balancer-managed-outbound-ip-count 2', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 2),
         ])
 
         # scale up
@@ -3370,9 +3370,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.exists('networkProfile.loadBalancerProfile'),
-            self.exists('networkProfile.loadBalancerProfile.outboundIps'),
+            self.exists('networkProfile.loadBalancerProfile.outboundIPs'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3476,7 +3476,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists(
                 'networkProfile.loadBalancerProfile.outboundIpPrefixes'),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
@@ -3914,7 +3914,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001')
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
@@ -3924,7 +3924,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000002'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000002'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000003')
         ])
@@ -3968,7 +3968,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000003'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000003'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000004')
         ])
@@ -4002,7 +4002,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('aadProfile.managed', True),
             self.check(
-                'aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001'),
+                'aadProfile.adminGroupObjectIDs[0]', '00000000-0000-0000-0000-000000000001'),
             self.check('aadProfile.tenantId',
                        '00000000-0000-0000-0000-000000000002')
         ])
@@ -4428,8 +4428,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4458,8 +4458,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @RoleBasedServicePrincipalPreparer()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
+    @RoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster_with_addons(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({

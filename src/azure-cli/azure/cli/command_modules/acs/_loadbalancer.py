@@ -60,10 +60,13 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
         cmd, outbound_ip_prefixes)
 
     if managed_outbound_ip_count or outbound_ip_resources or outbound_ip_prefix_resources:
-        profile.managed_outbound_ips = None
-        profile.outbound_ips = None
+        # ips -> i_ps due to track 2 naming issue
+        profile.managed_outbound_i_ps = None
+        # ips -> i_ps due to track 2 naming issue
+        profile.outbound_i_ps = None
         profile.outbound_ip_prefixes = None
         if managed_outbound_ip_count:
+            # ips -> i_ps due to track 2 naming issue
             ManagedClusterLoadBalancerProfileManagedOutboundIPs = cmd.get_models(
                 'ManagedClusterLoadBalancerProfileManagedOutboundIPs',
                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -72,12 +75,14 @@ def configure_load_balancer_profile(cmd, managed_outbound_ip_count, outbound_ips
                 count=managed_outbound_ip_count
             )
         if outbound_ip_resources:
+            # ips -> i_ps due to track 2 naming issue
             ManagedClusterLoadBalancerProfileOutboundIPs = cmd.get_models(
                 'ManagedClusterLoadBalancerProfileOutboundIPs',
                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                 operation_group='managed_clusters')
-            profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_ips=outbound_ip_resources
+            profile.outbound_i_ps = ManagedClusterLoadBalancerProfileOutboundIPs(
+                # ips -> i_ps due to track 2 naming issue
+                public_i_ps=outbound_ip_resources
             )
         if outbound_ip_prefix_resources:
             ManagedClusterLoadBalancerProfileOutboundIPPrefixes = cmd.get_models(

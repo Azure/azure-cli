@@ -1282,7 +1282,7 @@ def update_acs(cmd, client, resource_group_name, container_service_name, new_age
     # null out the windows profile so that validation doesn't complain about not having the admin password
     instance.windows_profile = None
 
-    return client.create_or_update(resource_group_name, container_service_name, instance)
+    return client.begin_create_or_update(resource_group_name, container_service_name, instance)
 
 
 def list_container_services(cmd, client, resource_group_name=None):
@@ -1445,6 +1445,7 @@ def _create_role_assignment(cli_ctx, role, assignee,
         role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
+    # TODO: track2/remove custom headers, depends on 'azure.mgmt.authorization'
     return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
 
 
@@ -2233,7 +2234,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         aad_profile = ManagedClusterAADProfile(
             managed=True,
             enable_azure_rbac=enable_azure_rbac,
-            admin_group_object_ids=_parse_comma_separated_list(
+            # ids -> i_ds due to track 2 naming issue
+            admin_group_object_i_ds=_parse_comma_separated_list(
                 aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
@@ -2279,7 +2281,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
     elif enable_managed_identity and assign_identity:
         user_assigned_identity = {
-            assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
+            # pylint: disable=line-too-long
+            assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
         }
         identity = ManagedClusterIdentity(
             type="UserAssigned",
@@ -2386,7 +2389,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     )
 
     # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def aks_enable_addons(cmd, client, resource_group_name, name, addons,
@@ -2432,7 +2435,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
-            client.create_or_update(resource_group_name, name, instance))
+            client.begin_create_or_update(resource_group_name, name, instance))
 
         if enable_monitoring:
             cloud_name = cmd.cli_ctx.cloud.name
@@ -2461,7 +2464,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
             # Else, the cluster is not using custom VNet, the permission is already granted in AKS RP,
             # we don't need to handle it in client side in this case.
     else:
-        result = sdk_no_wait(no_wait, client.create_or_update,
+        result = sdk_no_wait(no_wait, client.begin_create_or_update,
                              resource_group_name, name, instance)
     return result
 
@@ -2523,10 +2526,13 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
         if service_principal is None or client_secret is None:
             raise CLIError(
                 'usage error: --reset-service-principal --service-principal ID --client-secret SECRET')
+        service_principal_profile = ManagedClusterServicePrincipalProfile(
+            client_id=service_principal, secret=client_secret
+        )
         return sdk_no_wait(no_wait,
-                           client.reset_service_principal_profile,
+                           client.begin_reset_service_principal_profile,
                            resource_group_name,
-                           name, service_principal, client_secret)
+                           name, service_principal_profile)
     if not all([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
         raise CLIError('usage error: --reset-aad --aad-client-app-id ID --aad-server-app-id ID '
                        '--aad-server-app-secret SECRET [--aad-tenant-id ID]')
@@ -2537,7 +2543,7 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
         'tenantID': aad_tenant_id
     }
     return sdk_no_wait(no_wait,
-                       client.reset_aad_profile,
+                       client.begin_reset_aad_profile,
                        resource_group_name,
                        name, parameters)
 
@@ -2559,7 +2565,7 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
             # null out the SP and AAD profile because otherwise validation complains
             instance.service_principal_profile = None
             instance.aad_profile = None
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+            return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
@@ -2780,7 +2786,8 @@ def aks_update(cmd, client, resource_group_name, name,
         if aad_tenant_id is not None:
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
-            instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(
+            # ids -> i_ds due to track 2 naming issue
+            instance.aad_profile.admin_group_object_i_ds = _parse_comma_separated_list(
                 aad_admin_group_object_ids)
         if enable_azure_rbac and disable_azure_rbac:
             raise MutuallyExclusiveArgumentError(
@@ -2833,8 +2840,9 @@ def aks_update(cmd, client, resource_group_name, name,
                 type="SystemAssigned"
             )
         elif goal_identity_type == "userassigned":
+            # pylint: disable=line-too-long
             user_assigned_identity = {
-                assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
+                assign_identity: Components1Umhcm8SchemasManagedclusteridentityPropertiesUserassignedidentitiesAdditionalproperties()
             }
             instance.identity = ManagedClusterIdentity(
                 type="UserAssigned",
@@ -2955,11 +2963,17 @@ def aks_upgrade(cmd,
     instance.service_principal_profile = None
     instance.aad_profile = None
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
-    return sdk_no_wait(no_wait, client.upgrade_node_image_version, resource_group_name, cluster_name, nodepool_name)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_upgrade_node_image_version,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+    )
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
@@ -2981,8 +2995,8 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
-    commandResultFuture = client.run_command(
-        resource_group_name, name, request_payload, long_running_operation_timeout=5, retry_total=0)
+    commandResultFuture = client.begin_run_command(
+        resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
 
     return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
 
@@ -3145,7 +3159,7 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
 
 
 def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
-    return sdk_no_wait(no_wait, client.rotate_cluster_certificates, resource_group_name, name)
+    return sdk_no_wait(no_wait, client.begin_rotate_cluster_certificates, resource_group_name, name)
 
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
@@ -3573,6 +3587,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
             if ex.status_code != 404:
                 raise ex
     else:
+        # TODO: track2/replace create_or_update with begin_create_or_update, depends on 'azure.mgmt.resource.resources'
         resource_groups.create_or_update(default_workspace_resource_group, {
                                          'location': workspace_region})
     GenericResource = cmd.get_models(
@@ -3854,7 +3869,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        agent_pool,
+    )
 
 
 def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
@@ -3869,7 +3891,14 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
         raise CLIError(
             "The new node count is the same as the current node count.")
     instance.count = new_node_count  # pylint: disable=no-member
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
 
 
 def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
@@ -3880,8 +3909,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           no_wait=False):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
     if kubernetes_version != '' and node_image_only:
-        raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version.'
-                       'If you only want to upgrade the node version please use the "--node-image-only" option only.')
+        raise CLIError(
+            'Conflicting flags. Upgrading the Kubernetes version will also '
+            'upgrade node image version. If you only want to upgrade the '
+            'node version please use the "--node-image-only" option only.'
+        )
 
     if node_image_only:
         return _upgrade_single_nodepool_image_version(no_wait,
@@ -3899,7 +3931,14 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
 
 
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
@@ -3971,7 +4010,14 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
     if mode is not None:
         instance.mode = mode
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+    )
 
 
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
@@ -3988,7 +4034,7 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
         raise CLIError("Node pool {} doesnt exist, "
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
-    return sdk_no_wait(no_wait, client.delete, resource_group_name, cluster_name, nodepool_name)
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
 
 def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
@@ -4484,7 +4530,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     try:
         # long_running_operation_timeout=300
-        result = sdk_no_wait(no_wait, client.create_or_update,
+        result = sdk_no_wait(no_wait, client.begin_create_or_update,
                              resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
         result = LongRunningOperation(cmd.cli_ctx)(result)
         instance = client.get(resource_group_name, name)
@@ -4529,7 +4575,7 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
@@ -4544,7 +4590,7 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
         enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
@@ -4557,7 +4603,7 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(
         enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def _is_msi_cluster(managed_cluster):
@@ -4591,11 +4637,11 @@ def _put_managed_cluster_ensuring_permission(
                                           need_grant_vnet_permission_to_cluster_identity)
     if need_post_creation_role_assignment:
         # adding a wait here since we rely on the result for role assignment
-        cluster = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
+        cluster = LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
-            custom_headers=headers))
+            headers=headers))
         cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -4634,10 +4680,10 @@ def _put_managed_cluster_ensuring_permission(
                                 acr_name_or_id=attach_acr,
                                 subscription_id=subscription_id)
     else:
-        cluster = sdk_no_wait(no_wait, client.create_or_update,
+        cluster = sdk_no_wait(no_wait, client.begin_create_or_update,
                               resource_group_name=resource_group_name,
                               resource_name=name,
                               parameters=managed_cluster,
-                              custom_headers=headers)
+                              headers=headers)
 
     return cluster
