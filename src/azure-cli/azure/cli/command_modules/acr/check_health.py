@@ -12,6 +12,9 @@ from .helm import get_helm_command
 from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
 
+from azure.cli.core._profile import Profile
+from azure.cli.core.profiles import ResourceType
+
 logger = get_logger(__name__)
 
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
@@ -310,23 +313,24 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
-    # CMK settings
-    if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
-        client_id = registry.encryption.key_vault_properties.identity
-        valid_identity = False
-        if registry.identity:
-            valid_identity = (client_id == 'system') and bool(registry.identity.principal_id)  # use system identity?
-            if not valid_identity and registry.identity.user_assigned_identities:
-                for k, v in registry.identity.user_assigned_identities.items():
-                    if v.client_id == client_id:
-                        from msrestazure.azure_exceptions import CloudError
-                        try:
-                            valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
-                        except CloudError:
-                            pass
-        if not valid_identity:
-            from ._errors import CMK_MANAGED_IDENTITY_ERROR
-            _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
+    if cmd.supported_api_version(min_api='2020-11-01-preview', resource_type=ResourceType.MGMT_CONTAINERREGISTRY):
+        # CMK settings
+        if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
+            client_id = registry.encryption.key_vault_properties.identity
+            valid_identity = False
+            if registry.identity:
+                valid_identity = (client_id == 'system') and bool(registry.identity.principal_id)  # use system identity?
+                if not valid_identity and registry.identity.user_assigned_identities:
+                    for k, v in registry.identity.user_assigned_identities.items():
+                        if v.client_id == client_id:
+                            from msrestazure.azure_exceptions import CloudError
+                            try:
+                                valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
+                            except CloudError:
+                                pass
+            if not valid_identity:
+                from ._errors import CMK_MANAGED_IDENTITY_ERROR
+                _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
 def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
