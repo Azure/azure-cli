@@ -37,7 +37,7 @@ def create_apim(client, resource_group_name, name, publisher_email, sku_name=Sku
     )
 
     if enable_managed_identity:
-        resource['identity'] = ApiManagementServiceIdentity(type="SystemAssigned")
+        resource.identity = ApiManagementServiceIdentity(type="SystemAssigned")
 
     if resource.sku.name == SkuType.consumption.value:
         resource.sku.capacity = 0
