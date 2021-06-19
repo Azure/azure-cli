@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-from knack.arguments import CLIArgumentType, CaseInsensitiveList
+from knack.arguments import CLIArgumentType
 from knack.log import get_logger
 
 from azure.cli.core.commands.parameters import (
