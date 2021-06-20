@@ -10,14 +10,15 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
 from azure.mgmt.rdbms import postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_flexible_db, cf_postgres_check_resource_availability, resource_client_factory, network_client_factory
 from .flexible_server_custom_common import user_confirmation, create_firewall_rule
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, parse_public_access_input, \
-    generate_password, parse_maintenance_window, get_postgres_list_skus_info, DEFAULT_LOCATION_PG
+    generate_password, parse_maintenance_window, get_postgres_list_skus_info, DEFAULT_LOCATION_PG, check_existence, get_id_components
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone
 from .validators import pg_arguments_validator, validate_server_name
 
@@ -154,7 +155,7 @@ def flexible_server_restore(cmd, client,
                 type='flexibleServers',
                 name=source_server)
         else:
-            raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+            raise ValueError('The provided source server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
 
@@ -168,29 +169,66 @@ def flexible_server_restore(cmd, client,
         location=location)
 
     # Retrieve location from same location as source server
-    id_parts = parse_resource_id(source_server_id)
     try:
+        id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
+        
         if source_server_object.public_network_access == 'Disabled':
-            parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
-            if subnet_arm_resource_id is not None:
-                parameters.delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_arm_resource_id)
-            if private_dns_zone_arguments is not None:
-                subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id if subnet_arm_resource_id is None else subnet_arm_resource_id
-                private_dns_zone_id = prepare_private_dns_zone(cmd,
-                                                               'PostgreSQL',
-                                                               resource_group_name,
-                                                               server_name,
-                                                               private_dns_zone=private_dns_zone_arguments,
-                                                               subnet_id=subnet_id,
-                                                               location=location)
-                parameters.private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
+            setup_restore_network(cmd=cmd,
+                                  resource_group_name=resource_group_name,
+                                  server_name=server_name,
+                                  location=location,
+                                  parameters=parameters,
+                                  source_server_object=source_server_object,
+                                  subnet_id=subnet_arm_resource_id,
+                                  private_dns_zone=private_dns_zone_arguments)
 
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    # return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+
+
+def setup_restore_network(cmd, resource_group_name, server_name, location, parameters, source_server_object, subnet_id=None, private_dns_zone=None):
+
+    if source_server_object.private_dns_zone_arguments is not None:
+        parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
+    else:
+        print("Using msft subscription")
+    parameters.delegated_subnet_arguments = source_server_object.delegated_subnet_arguments
+
+    if subnet_id is not None:
+        vnet_sub, vnet_rg, vnet_name, subnet_name = get_id_components(subnet_id)
+        resource_client = resource_client_factory(cmd.cli_ctx, vnet_sub)
+        nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
+        Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
+        delegation = Delegation(name=DELEGATION_SERVICE_NAME, service_name=DELEGATION_SERVICE_NAME)
+        if check_existence(resource_client, subnet_name, vnet_rg, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
+            subnet = nw_client.subnets.get(vnet_rg, vnet_name, subnet_name)
+            # Add Delegation if not delegated already
+            if not subnet.delegations:
+                logger.warning('Adding "%s" delegation to the existing subnet %s.', DELEGATION_SERVICE_NAME, subnet_name)
+                subnet.delegations = [delegation]
+                subnet = nw_client.subnets.begin_create_or_update(vnet_rg, vnet_name, subnet_name, subnet).result()
+            else:
+                for delgtn in subnet.delegations:
+                    if delgtn.service_name != DELEGATION_SERVICE_NAME:
+                        raise CLIError("Can not use subnet with existing delegations other than {}".format(DELEGATION_SERVICE_NAME))  
+            parameters.delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
+        else:
+            raise ResourceNotFoundError("The subnet does not exist. Please verify the subnet Id.")
+
+    if private_dns_zone is not None:
+        subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id if subnet_id is None else subnet_id
+        private_dns_zone_id = prepare_private_dns_zone(cmd,
+                                                       'PostgreSQL',
+                                                       resource_group_name,
+                                                       server_name,
+                                                       private_dns_zone=private_dns_zone,
+                                                       subnet_id=subnet_id,
+                                                       location=location)
+        parameters.private_dns_zone_arguments = postgresql_flexibleservers.models.ServerPropertiesPrivateDnsZoneArguments(private_dns_zone_arm_resource_id=private_dns_zone_id)
 
 
 # Update Flexible server command
