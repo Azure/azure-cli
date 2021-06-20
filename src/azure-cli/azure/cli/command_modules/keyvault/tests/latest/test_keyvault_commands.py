@@ -2079,13 +2079,14 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
 class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
-    def test_keyvault_softdelete(self, resource_group):
+    @KeyVaultPreparer(name_prefix='cli-test-kv-sd-', location='eastus2', skip_delete=True)
+    @KeyVaultPreparer(name_prefix='cli-test-kv-sd-', location='eastus2', parameter_name='key_vault2', key='kv2', skip_delete=True)
+    def test_keyvault_softdelete(self, resource_group, key_vault, key_vault2):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-sd-', 24),
             'loc': 'eastus2'
         })
 
-        vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+        vault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
 
         # add all purge permissions to default the access policy
         default_policy = vault['properties']['accessPolicies'][0]
@@ -2147,6 +2148,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
                 break
 
         # purge secrets keys and certificates
+        time.sleep(120)
         self.cmd('keyvault secret purge --vault-name {kv} -n secret2')
         self.cmd('keyvault key purge --vault-name {kv} -n key2')
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
@@ -2159,11 +2161,10 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault purge -n {kv}')
 
         # recover and purge with location
-        _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
-        self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
-        self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault purge -n {kv} -l {loc}')
+        self.cmd('keyvault delete -n {kv2}')
+        self.cmd('keyvault recover -n {kv2} -l {loc}', checks=self.check('name', '{kv2}'))
+        self.cmd('keyvault delete -n {kv2}')
+        self.cmd('keyvault purge -n {kv2} -l {loc}')
 
 
 class KeyVaultStorageAccountScenarioTest(ScenarioTest):

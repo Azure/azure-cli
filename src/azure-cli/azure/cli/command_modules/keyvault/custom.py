@@ -642,11 +642,12 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  no_self_perms=None,
                  tags=None,
                  no_wait=False):
+    from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
         if vault:
-            raise InvalidArgumentValueError('The specified vault: {} already exist'.format(vault_name))
-    except:  # pylint: disable=bare-except
+            raise InvalidArgumentValueError('The specified vault: {} already exists'.format(vault_name))
+    except HttpResponseError:
         # if client.get raise exception, we can take it as no existing vault found
         # just continue the normal creation process
         pass
