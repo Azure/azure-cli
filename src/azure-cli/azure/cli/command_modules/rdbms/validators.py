@@ -293,10 +293,13 @@ def _valid_range(addr_range):
 
 
 def validate_server_name(client, server_name, type_):
+    if len(server_name) < 3 or len(server_name) > 63:
+        raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
+
     result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
     if not result.name_available:
-        raise ValidationError("The name is already in use. Please provide a different name.")
+        raise ValidationError(result.message)
 
 
 def validate_auto_grow_update(server, auto_grow):
