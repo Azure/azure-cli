@@ -7,7 +7,6 @@ from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
-import time
 
 from ._utils import (
     validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
@@ -25,7 +24,6 @@ LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
                          "because it is not a fully qualified domain name."
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
-start_time = time.time()
 
 def acr_import(cmd,
                client,
