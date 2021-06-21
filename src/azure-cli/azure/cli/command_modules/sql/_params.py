@@ -65,6 +65,7 @@ from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
     validate_backup_storage_redundancy,
+    validate_managed_instance_backup_storage_redundancy,
     validate_subnet
 )
 
@@ -230,6 +231,12 @@ backup_storage_redundancy_param_type = CLIArgumentType(
     type=get_internal_backup_storage_redundancy,
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
     validator=validate_backup_storage_redundancy)
+
+managed_instance_backup_storage_redundancy_param_type = CLIArgumentType(
+    options_list=['--backup-storage-redundancy', '--bsr'],
+    type=get_internal_backup_storage_redundancy,
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    validator=validate_managed_instance_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
@@ -1767,7 +1774,7 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
+                   arg_type=managed_instance_backup_storage_redundancy_param_type)
 
         c.argument('yes',
                    options_list=['--yes', '-y'],
@@ -2058,7 +2065,7 @@ def load_arguments(self, _):
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
 
         c.argument('requested_backup_storage_redundancy',
-                   arg_type=backup_storage_redundancy_param_type)
+                   arg_type=managed_instance_backup_storage_redundancy_param_type)
 
     with self.argument_context('sql midb log-replay start') as c:
         create_args_for_complex_type(

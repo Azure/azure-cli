@@ -119,7 +119,7 @@ def validate_subnet(cmd, namespace):
 
 def validate_backup_storage_redundancy(namespace):
     # Validate if entered backup storage redundancy value is within allowed values
-    if (not namespace.requested_backup_storage_redundancy or
+    if (not namespace.requested_backup_storage_redundancy or 
             (namespace.requested_backup_storage_redundancy and namespace.requested_backup_storage_redundancy in ['Local', 'Zone', 'Geo'])):
         pass
     else:
@@ -140,6 +140,8 @@ def validate_managed_instance_storage_size(namespace):
 
 
 def validate_managed_instance_backup_storage_redundancy(namespace):
+    # Differentiating from validate_backup_storage_redundancy while Databases and ManagedInstances API use different properties for setting backup storage redundancy
+    # ie. "requested_backup_storage_redundancy" (Databases) vs. "storage_account_type" (ManagedInstances)
     # Validate if entered backup storage redundancy value is within allowed values
     if (not namespace.storage_account_type or
             (namespace.storage_account_type and namespace.storage_account_type in ['LRS', 'ZRS', 'GRS'])):
