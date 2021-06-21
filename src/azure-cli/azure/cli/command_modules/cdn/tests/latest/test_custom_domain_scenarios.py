@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
+from azure.cli.testsdk import ResourceGroupPreparer, KeyVaultPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest
 from .scenario_mixin import CdnScenarioMixin
 from azure.mgmt.cdn.models import (SkuName, CustomHttpsProvisioningState, ProtocolType,
@@ -169,7 +169,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer()
-    def test_cdn_custom_domain_https_msft(self, resource_group):
+    @KeyVaultPreparer(location='centralus', name_prefix='keyvault', name_len=20)
+    def test_cdn_custom_domain_https_msft(self, resource_group, key_vault):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
@@ -216,11 +217,10 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 checks=checks)
 
         # Create a TLS cert to use for BYOC.
-        vault_name = self.create_random_name(prefix='keyvault', length=20)
         cert_name = self.create_random_name(prefix='cert', length=20)
-        self.byoc_create_keyvault_cert(resource_group, vault_name, cert_name)
+        self.byoc_create_keyvault_cert(resource_group, key_vault, cert_name)
         # Get and parse the latest version for the certificate.
-        versions = self.byoc_get_keyvault_cert_versions(vault_name, cert_name).get_output_in_json()
+        versions = self.byoc_get_keyvault_cert_versions(key_vault, cert_name).get_output_in_json()
         version = versions[0]['id'].split('/')[-1]
 
         # Enable custom HTTPS with a custom certificate
@@ -234,7 +234,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 byoc_custom_domain_name,
                                                 user_cert_subscription_id=self.get_subscription_id(),
                                                 user_cert_group_name=resource_group,
-                                                user_cert_vault_name=vault_name,
+                                                user_cert_vault_name=key_vault,
                                                 user_cert_secret_name=cert_name,
                                                 user_cert_secret_version=version,
                                                 user_cert_protocol_type='sni',
@@ -244,7 +244,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer()
-    def test_cdn_custom_domain_byoc_latest(self, resource_group):
+    @KeyVaultPreparer(location='centralus', name_prefix='keyvault', name_len=20)
+    def test_cdn_custom_domain_byoc_latest(self, resource_group, key_vault):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
@@ -271,9 +272,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_show_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, checks=checks)
 
         # Create a TLS cert to use for BYOC.
-        vault_name = self.create_random_name(prefix='keyvault', length=20)
         cert_name = self.create_random_name(prefix='cert', length=20)
-        self.byoc_create_keyvault_cert(resource_group, vault_name, cert_name)
+        self.byoc_create_keyvault_cert(resource_group, key_vault, cert_name)
 
         # Enable custom HTTPS with the custom certificate.
         checks = [JMESPathCheck('name', custom_domain_name),
@@ -286,7 +286,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 custom_domain_name,
                                                 user_cert_subscription_id=self.get_subscription_id(),
                                                 user_cert_group_name=resource_group,
-                                                user_cert_vault_name=vault_name,
+                                                user_cert_vault_name=key_vault,
                                                 user_cert_secret_name=cert_name,
                                                 user_cert_protocol_type='sni',
                                                 checks=checks)

@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 class AmsEncryptionTests(ScenarioTest):
     @ResourceGroupPreparer(location='centralus')
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    @KeyVaultPreparer(location='centralus')
+    @KeyVaultPreparer(location='centralus', additional_params='--enable-purge-protection')
     def test_ams_encryption_set_show(self, resource_group, storage_account_for_create, key_vault):
         amsname = self.create_random_name(prefix='ams', length=12)
 
@@ -28,7 +28,6 @@ class AmsEncryptionTests(ScenarioTest):
             self.check('location', 'Central US')
         ])
 
-        self.cmd('keyvault create --name {keyVault} -g {rg} --enable-soft-delete --enable-purge-protection')
         key_vault_result = self.cmd('keyvault key create --name {keyName} --vault-name {keyVault}')
 
         self.kwargs['keyVaultId'] = key_vault_result.get_output_in_json()['key']['kid']
@@ -45,4 +44,3 @@ class AmsEncryptionTests(ScenarioTest):
         ])
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
-        self.cmd('az keyvault delete -n {keyVault} -g {rg}')

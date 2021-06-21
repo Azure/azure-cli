@@ -13,7 +13,7 @@ import datetime
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               StorageAccountPreparer, JMESPathCheck, live_only)
+                               StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -1196,10 +1196,10 @@ class WebappSSLCertTest(ScenarioTest):
 
 class WebappSSLImportCertTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_webapp_ssl_import(self, resource_group):
+    @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
+    def test_webapp_ssl_import(self, resource_group, key_vault):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
-        kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
         # Cert Generated using
         # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
@@ -1211,13 +1211,12 @@ class WebappSSLImportCertTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
         self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
-            resource_group, kv_name, 'Microsoft.Azure.WebSites'))
+            resource_group, key_vault, 'Microsoft.Azure.WebSites'))
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
-            cert_name, kv_name, pfx_file, cert_password))
+            cert_name, key_vault, pfx_file, cert_password))
 
-        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
