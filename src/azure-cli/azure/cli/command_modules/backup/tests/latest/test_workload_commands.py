@@ -47,6 +47,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Container is already registered to the vault
     # Each test will enable backup at the start and disable backup at the end of the test
     # Make sure that the backup is not already enabled since the start of the test
+
+    # Note: SQL RAF, SQL CRR ALR & SQL CRR RAF tests use different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
     @record_only()
     def test_backup_wl_sql_container(self):
 
@@ -562,68 +564,109 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # SQL workload CRR tests start here
     # Please make sure you have th following setup in place before running the tests -
 
-    #@record_only()
-    #def test_backup_wl_sql_crr(self):
-    #    self.kwargs.update({
-    #        'vault': "akneema-crr-vault",
-    #        'name': "VMAppContainer;Compute;akneemacli;akneemasqlcrrcli2",
-    #        'fname': "akneemasqlcrrcli2",
-    #        'wt': 'MSSQL',
-    #        'sub': 'Vsarg-MABPortalTeamTesting',
-    #        'rg': "akneema",
-    #        'item': "sqldatabase;mssqlserver;master",
-    #        'fitem': "master",
-    #        'titem': 'MSSQLSERVER'
-    #    })
+    @record_only()
+    def test_backup_wl_sql_crr(self):
+        self.kwargs.update({
+            'vault': "akneema-crr-vault",
+            'name': "VMAppContainer;Compute;akneemacli;akneemasqlcrrcli2",
+            'fname': "akneemasqlcrrcli2",
+            'wt': 'MSSQL',
+            'sub': 'Vsarg-MABPortalTeamTesting',
+            'rg': "akneema",
+            'item': "sqldatabase;mssqlserver;master",
+            'fitem': "master",
+            'trg': "akneema",
+            'tvault': 'akneema-crr-vault2',
+            'tname': 'VMAppContainer;Compute;akneema;akneema-sql-vm-crr',
+            'tfname': 'akneema-sql-vm-',
+            'titem': self.create_random_name("master_", 24)
+        })
 
-    #    self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload --use-secondary-region', checks=[
-    #        self.check("length([?name == '{name}'])", 1)])
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload --use-secondary-region', checks=[
+            self.check("length([?name == '{name}'])", 1)])
 
-    #    self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name --use-secondary-region').get_output_in_json()
+        self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name --use-secondary-region').get_output_in_json()
 
-    #    self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload --use-secondary-region', checks=[
-    #        self.check('properties.friendlyName', '{fitem}'),
-    #        self.check('properties.protectedItemHealthStatus', 'Healthy'),
-    #        self.check('properties.protectionState', 'Protected'),
-    #        self.check('properties.protectionStatus', 'Healthy'),
-    #        self.check('resourceGroup', '{rg}')
-    #    ])
+        self.cmd('backup container list -v {tvault} -g {trg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{tname}'])", 1)])
 
-    #    self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [0]').get_output_in_json()
+        self.kwargs['container2'] = self.cmd('backup container show -n {tname} -v {tvault} -g {trg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
-    #    self.kwargs['rp'] = self.kwargs['rp']['name']
+        self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload --use-secondary-region', checks=[
+            self.check('properties.friendlyName', '{fitem}'),
+            self.check('properties.protectionState', 'Protected'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ])
 
-    #    self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-    #    with open("recoveryconfig.json", "w") as f:
-    #        f.write(self.kwargs['rc'])
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [0]').get_output_in_json()
 
-    #    self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
-    #        self.check("properties.operation", "Restore"),
-    #        self.check("properties.status", "InProgress"),
-    #        self.check("resourceGroup", '{rg}')
-    #    ]).get_output_in_json()
+        self.kwargs['rp'] = self.kwargs['rp']['name']
 
-    #    self.kwargs['job'] = self.kwargs['backup_job']['name']
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {tfname} --workload-type {wt} --target-resource-group {trg} --target-vault-name {tvault} --target-container-name {container2}').get_output_in_json(), separators=(',', ':'))
+        with open("recoveryconfig.json", "w") as f:
+            f.write(self.kwargs['rc'])
 
-    #    self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json --use-secondary-region', checks=[
+            self.check("properties.operation", "CrossRegionRestore"),
+            self.check("properties.status", "InProgress")
+        ]).get_output_in_json()
 
-    #    self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container1} --rp-name {rp}').get_output_in_json(), separators=(',', ':'))
-    #    with open("recoveryconfig.json", "w") as f:
-    #        f.write(self.kwargs['rc'])
+        self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-    #    self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
-    #        self.check("properties.operation", "Restore"),
-    #        self.check("properties.status", "InProgress"),
-    #        self.check("resourceGroup", '{rg}')
-    #    ]).get_output_in_json()
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
-    #    os.remove("recoveryconfig.json")
+    @record_only()
+    def test_backup_wl_sql_crr_raf(self):
+        self.kwargs.update({
+            'vault': "akneema-crr-vault",
+            'name': "VMAppContainer;Compute;akneemacli;akneemasqlcrrcli2",
+            'fname': "akneemasqlcrrcli2",
+            'wt': 'MSSQL',
+            'sub': 'Vsarg-MABPortalTeamTesting',
+            'rg': "akneema",
+            'item': "sqldatabase;mssqlserver;master",
+            'fitem': "master",
+            'trg': "akneema",
+            'tvault': 'akneema-crr-vault2',
+            'tname': 'VMAppContainer;Compute;akneema;akneema-sql-vm-crr',
+            'tfname': 'akneema-sql-vm-',
+            'titem': self.create_random_name("master_", 24)
+        })
 
-    #    self.kwargs['job'] = self.kwargs['backup_job']['name']
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload --use-secondary-region', checks=[
+            self.check("length([?name == '{name}'])", 1)])
 
-    #    self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+        self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name --use-secondary-region').get_output_in_json()
 
-    #    self.cmd('backup protection disable -v {vault} -g {rg} -c {name} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
+        self.cmd('backup container list -v {tvault} -g {trg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{tname}'])", 1)])
+
+        self.kwargs['container2'] = self.cmd('backup container show -n {tname} -v {tvault} -g {trg} --backup-management-type AzureWorkload --query name').get_output_in_json()
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload --use-secondary-region', checks=[
+            self.check('properties.friendlyName', '{fitem}'),
+            self.check('properties.protectionState', 'Protected'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [0]').get_output_in_json()
+
+        self.kwargs['rp'] = self.kwargs['rp']['name']
+
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode restoreasfiles --rp-name {rp} --item-name {item} --container-name {container1} --filepath "C:\" --target-server-type SQLInstance --target-server-name {tfname} --workload-type {wt} --target-resource-group {trg} --target-vault-name {tvault} --target-container-name {container2}').get_output_in_json(), separators=(',', ':'))
+        with open("recoveryconfig.json", "w") as f:
+            f.write(self.kwargs['rc'])
+
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json --use-secondary-region', checks=[
+            self.check("properties.operation", "CrossRegionRestore"),
+            self.check("properties.status", "InProgress")
+        ]).get_output_in_json()
+
+        self.kwargs['job'] = self.kwargs['backup_job']['name']
+
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
     # SAP HANA workload tests start here
     # Please make sure you have th following setup in place before running the tests -

@@ -396,7 +396,8 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, use_secondary_region=None):
-    return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, use_secondary_region)
+    return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config,
+                                      use_secondary_region)
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
