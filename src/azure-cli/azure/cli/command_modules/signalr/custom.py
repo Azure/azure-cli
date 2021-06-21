@@ -27,11 +27,11 @@ def signalr_create(client, signalr_name, resource_group_name,
                                 location=location,
                                 network_ac_ls=SignalRNetworkACLs(default_action=default_action))
 
-    return client.create_or_update(resource_group_name, signalr_name, parameter)
+    return client.begin_create_or_update(resource_group_name, signalr_name, parameter)
 
 
 def signalr_delete(client, signalr_name, resource_group_name):
-    return client.delete(resource_group_name, signalr_name)
+    return client.begin_delete(resource_group_name, signalr_name)
 
 
 def signalr_list(client, resource_group_name=None):
@@ -45,7 +45,7 @@ def signalr_show(client, signalr_name, resource_group_name):
 
 
 def signalr_restart(client, signalr_name, resource_group_name):
-    return client.restart(resource_group_name, signalr_name)
+    return client.begin_restart(resource_group_name, signalr_name)
 
 
 def signalr_update_get():
@@ -53,7 +53,7 @@ def signalr_update_get():
 
 
 def signalr_update_set(client, signalr_name, resource_group_name, parameters):
-    return client.update(resource_group_name, signalr_name, parameters)
+    return client.begin_update(resource_group_name, signalr_name, parameters)
 
 
 def signalr_update_custom(instance, sku=None, unit_count=1, tags=None, service_mode=None, allowed_origins=None, default_action=None, enable_message_logs=None):

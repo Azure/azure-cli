@@ -191,10 +191,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Allow or disallow cross AAD tenant object replication. The default interpretation is true for this '
         'property.')
 
-    t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
     default_share_permission_type = CLIArgumentType(
         options_list=['--default-share-permission', '-d'],
-        arg_type=get_enum_type(t_share_permission), min_api='2020-08-01-preview',
+        arg_type=get_enum_type(['None', 'StorageFileDataSmbShareContributor',
+                                'StorageFileDataSmbShareElevatedContributor',
+                                'StorageFileDataSmbShareReader']),
+        min_api='2020-08-01-preview',
         arg_group='Azure Files Identity Based Authentication',
         help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
 
@@ -258,8 +260,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_share_permission = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DefaultSharePermission',
+        t_account_type, t_sku_name, t_kind, t_tls_version = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
@@ -1293,10 +1295,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols), is_preview=True,
+            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols),
                        min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
                        'only available for premium file shares (file shares in the FileStorage account type).')
-            c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
+            c.argument('root_squash', arg_type=get_enum_type(t_root_squash),
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
             c.argument('access_tier', arg_type=get_enum_type(t_access_tier), min_api='2019-06-01',
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '

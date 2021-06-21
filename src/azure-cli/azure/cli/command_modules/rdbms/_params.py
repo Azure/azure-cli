@@ -305,7 +305,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled. High availability can only be set during flexible server create time')
             c.argument('assign_identity', options_list=['--assign-identity'],
                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
-            c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'], help='The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
+            c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'], help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
             c.argument('database_name', id_part=None, arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of the database to be created when provisioning the database server')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
@@ -324,6 +324,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='The name of the source server to restore from.')
                 c.argument('zone', options_list=['--zone'],
                            help='Availability zone into which to provision the resource.')
+                c.argument('private_dns_zone_arguments', options_list=['--private-dns-zone'],
+                           help='This parameter only applies for a server with private access. The name or id of new or existing private dns zone. You can use the private dns zone from same resource group, different resource group, or different subscription. If you want to use a zone from different resource group or subscription, please provide resource Id. CLI creates a new private dns zone within the same resource group if not provided by users.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name or resource ID of the source server to restore from.')
