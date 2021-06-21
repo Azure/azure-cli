@@ -65,7 +65,7 @@ from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
     validate_backup_storage_redundancy,
-    validate_managed_instance_backup_storage_redundancy,
+    validate_backup_storage_redundancy_mi,
     validate_subnet
 )
 
@@ -109,6 +109,14 @@ def get_internal_backup_storage_redundancy(self):
         'local': 'Local',
         'zone': 'Zone',
         'geo': 'Geo',
+    }.get(self.lower(), 'Invalid')
+
+
+def get_internal_backup_storage_redundancy_mi(self):
+    return {
+        'local': 'LRS',
+        'zone': 'ZRS',
+        'geo': 'GRS',
     }.get(self.lower(), 'Invalid')
 
 
@@ -234,9 +242,9 @@ backup_storage_redundancy_param_type = CLIArgumentType(
 
 managed_instance_backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
-    type=get_internal_backup_storage_redundancy,
+    type=get_internal_backup_storage_redundancy_mi,
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
-    validator=validate_managed_instance_backup_storage_redundancy)
+    validator=validate_backup_storage_redundancy_mi)
 
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
