@@ -149,7 +149,11 @@ def _generate_recommendations(client):
             raise ex
 
 
-def _set_configuration(client, resource_group_name=None, parameters=None, configuration_name='default'):
+def _set_configuration(client, resource_group_name=None, parameters=None, configuration_name=None):
+
+    if not configuration_name:
+        configuration_name = 'default'
+
     if resource_group_name:
         return client.create_in_resource_group(
             config_contract=parameters,
