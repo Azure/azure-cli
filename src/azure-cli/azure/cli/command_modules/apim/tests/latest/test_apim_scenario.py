@@ -49,7 +49,7 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          # expect None for Developer sku, even though requested value was True - only works with Consumption sku
                          self.check('enableClientCertificate', None),
-                         self.check('enableManagedIdentity', '{enable_managed_identity}'),
+                         self.check('identity.type', 'SystemAssigned'),
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
