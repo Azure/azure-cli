@@ -390,7 +390,7 @@ Several services support the concept of network rules. To drive consistency acro
 Arguments
     --name -n [Required]      : The name of the [PARENT RESOURCE].
     --resource-group -g       : Name of resource group. You can configure the default group using `az
-                                configure --defaults group=<name>`.
+                                config set defaults.group=<name>`.
 
 IP Address Rule Arguments
     --ip-address              : IPv4 address or CIDR range.
@@ -409,7 +409,7 @@ Virtual Network Rule Arguments
 Arguments
     --name -n [Required]         : The name of the [PARENT RESOURCE].
     --resource-group -g          : Name of resource group. You can configure the default group using
-                                   `az configure --defaults group=<name>`.
+                                   `az config set defaults.group=<name>`.
 
 IP Address Rule Arguments
     --ip-address                 : IPv4 address or CIDR range.

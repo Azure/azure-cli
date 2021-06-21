@@ -44,7 +44,7 @@ we recommend downloading the latest installer to upgrade.
 To install the latest Azure CLI, follow the steps for your preferred platform or
 environment in our [Installation Guide](https://docs.microsoft.com/cli/azure/install-azure-cli).
 
-Once installed, you run `az configure` and follow the steps to setup your default output format.  
+Once installed, you run `az config` and follow the steps to setup your default output format.  
 
 Then run `az login` to login using device authentication.  Once this step is complete you should be authenticated to use both CLIs.  
 
@@ -53,7 +53,7 @@ Then run `az login` to login using device authentication.  Once this step is com
 Here is a quick list of some new and changed concepts that can help you understand the new tool.
 
 * Interactive Concepts
-  * Use `az configure` to setup your default output format
+  * Use `az config` to setup your default output format
   * You will find help to be generally more useful, try `az vm create -h` for an example
   * Positional parameters are not supported, use `az vm list -g MyGroup` instead of `azure vm list MyGroup`
 * Automation and Scripting Concepts
@@ -151,7 +151,7 @@ The Azure CLI supports 4 primary output formats:
 3. tsv   - provides "UNIX-style" output (fields delimited with tabs, records with newlines)
 4. table - simplified human-readable output
 
-You can set your default output format with the `az configure` command or on a
+You can set your default output format with the `az config` command or on a
 by-command basis using `--out` parameter.  
 
 Tips:
