@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
@@ -118,7 +117,7 @@ class CognitiveServicesTests(ScenarioTest):
         self.kwargs.update({
             'name': self.create_random_name(prefix='cs_cli_test_', length=16),
             'kind': 'TextAnalytics',
-            'sku': 'S0',
+            'sku': 'S',
             'location': 'westeurope'
         })
 

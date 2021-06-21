@@ -585,7 +585,7 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
     """
     api_version = get_api_version(api_profile, resource_type)
     if api_version is None:
-        return resource_type
+        return resource_type.import_prefix
     if isinstance(api_version, _ApiVersions):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
