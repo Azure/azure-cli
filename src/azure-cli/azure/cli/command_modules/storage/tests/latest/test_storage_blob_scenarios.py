@@ -798,26 +798,34 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('isVersioningEnabled', True)
                  })
         # Enable vlm when creation
-        self.cmd('storage container-rm create -n {container1} --storage-account {sa} --enable-vlw',
+        self.cmd('storage container-rm create -n {container1} --storage-account {sa} -g {rg} --enable-vlw',
                  checks={
                      JMESPathCheck('name', self.kwargs['container1']),
-                     JMESPathCheck('immutable_storage_with_versioning.enabled', True)})
+                     JMESPathCheck('immutableStorageWithVersioning.enabled', True),
+                     JMESPathCheck('immutableStorageWithVersioning.migrationState', None)})
+        self.cmd('storage container-rm show -n {container1} --storage-account {sa} -g {rg}',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['container1']),
+                     JMESPathCheck('immutableStorageWithVersioning.enabled', True),
+                     JMESPathCheck('immutableStorageWithVersioning.migrationState', None)})
 
         # Enable vlm for containers with immutability policy
-        self.cmd('storage container-rm create -n {container2} --storage-account {sa}',
+        self.cmd('storage container-rm create -n {container2} --storage-account {sa} -g {rg}',
                  checks={
                      JMESPathCheck('name', self.kwargs['container2']),
-                     JMESPathCheck('immutable_storage_with_versioning.enabled', None)})
+                     JMESPathCheck('immutableStorageWithVersioning.enabled', None)})
 
         self.cmd('storage container immutability-policy create -c {container2} --account-name {sa} -w --period 1',
                  checks={
                      JMESPathCheck('name', self.kwargs['container2']),
                      JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1)})
 
-        self.cmd('storage container-rm migrate-vlw -n {container2} --storage-account {sa} ',
+        self.cmd('storage container-rm migrate-vlw -n {container2} --storage-account {sa} -g {rg} --no-wait')
+        self.cmd('storage container-rm show -n {container2} --storage-account {sa} -g {rg}',
                  checks={
                      JMESPathCheck('name', self.kwargs['container2']),
-                     JMESPathCheck('immutable_storage_with_versioning.enabled', True)})
+                     JMESPathCheck('immutableStorageWithVersioning.enabled', False),
+                     JMESPathCheck('immutableStorageWithVersioning.migrationState', 'InProgress')})
 
 
 if __name__ == '__main__':

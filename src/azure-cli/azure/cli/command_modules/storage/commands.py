@@ -514,7 +514,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          table_transformer=transform_boolean_for_table)
         g.show_command('show', 'get')
         g.command('migrate-vlw', 'begin_object_level_worm', supports_no_wait=True, is_preview=True)
-        g.wait_command('get')
 
     file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',

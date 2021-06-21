@@ -1179,6 +1179,18 @@ examples:
     text: az storage container-rm list --storage-account myaccount --include-deleted
 """
 
+helps['storage container-rm migrate-vlw'] = """
+type: command
+short-summary: Migrate a blob container from container level WORM to object level immutability enabled container.
+examples:
+  - name: Migrate a blob container from container level WORM to object level immutability enabled container.
+    text: az storage container-rm migrate-vlw -n mycontainer --storage-account myaccount -g myresourcegroup
+  - name: Migrate a blob container from container level WORM to object level immutability enabled container without waiting.
+    text: |
+        az storage container-rm migrate-vlw -n mycontainer --storage-account myaccount -g myresourcegroup --no-wait
+        az storage container-rm show -n mycontainer --storage-account myaccount -g myresourcegroup  --query immutableStorageWithVersioning.migrationState
+"""
+
 helps['storage container-rm show'] = """
 type: command
 short-summary: Show the properties for a specified container.
