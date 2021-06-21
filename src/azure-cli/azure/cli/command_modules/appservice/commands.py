@@ -247,7 +247,7 @@ def load_command_table(self, _):
         g.custom_command('config', 'enable_cd')
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
-    with self.command_group('webapp deployment github-actions') as g:
+    with self.command_group('webapp deployment github-actions', is_preview=True) as g:
         g.custom_command('add', 'add_github_actions')
         g.custom_command('remove', 'remove_github_actions')
 

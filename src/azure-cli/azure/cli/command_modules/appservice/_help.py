@@ -1722,7 +1722,7 @@ short-summary: Configure GitHub Actions for a webapp
 
 helps['webapp deployment github-actions add'] = """
     type: command
-    short-summary: Adds a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
+    short-summary: Add a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified webapp.
     examples:
       - name: Add GitHub Actions to a specified repository, providing personal access token
         text: >
@@ -1734,7 +1734,7 @@ helps['webapp deployment github-actions add'] = """
 
 helps['webapp deployment github-actions remove'] = """
     type: command
-    short-summary: Removes and disconnects the GitHub Actions workflow file from the specified repository.
+    short-summary: Remove and disconnect the GitHub Actions workflow file from the specified repository.
     examples:
       - name: Remove GitHub Actions from a specified repository, providing personal access token
         text: >
