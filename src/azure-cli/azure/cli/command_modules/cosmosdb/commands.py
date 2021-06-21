@@ -87,6 +87,30 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableDatabaseAccountsOperations.{}',
         client_factory=cf_restorable_database_accounts)
 
+    cosmosdb_sql_restorable_database_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableSqlDatabasesOperations.{}',
+        client_factory=cf_restorable_sql_databases)
+
+    cosmosdb_sql_restorable_container_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableSqlContainersOperations.{}',
+        client_factory=cf_restorable_sql_containers)
+
+    cosmosdb_sql_restorable_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableSqlResourcesOperations.{}',
+        client_factory=cf_restorable_sql_resources)
+
+    cosmosdb_mongodb_restorable_database_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbDatabasesOperations.{}',
+        client_factory=cf_restorable_mongodb_databases)
+
+    cosmosdb_mongodb_restorable_collection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbCollectionsOperations.{}',
+        client_factory=cf_restorable_mongodb_collections)
+
+    cosmosdb_mongodb_restorable_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbResourcesOperations.{}',
+        client_factory=cf_restorable_mongodb_resources)
+
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command(
             'show', 'get', transform=transform_db_account_json_output)
@@ -376,22 +400,22 @@ def load_command_table(self, _):
         g.custom_command(
             'list', 'cli_cosmosdb_restorable_database_account_list')
 
-    with self.command_group('cosmosdb sql restorable-database', cosmosdb_sql_sdk, client_factory=cf_restorable_sql_databases) as g:
+    with self.command_group('cosmosdb sql restorable-database', cosmosdb_sql_restorable_database_sdk, client_factory=cf_restorable_sql_databases) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb sql restorable-container', cosmosdb_sql_sdk, client_factory=cf_restorable_sql_containers) as g:
+    with self.command_group('cosmosdb sql restorable-container', cosmosdb_sql_restorable_container_sdk, client_factory=cf_restorable_sql_containers) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb sql restorable-resource', cosmosdb_sql_sdk, client_factory=cf_restorable_sql_resources) as g:
+    with self.command_group('cosmosdb sql restorable-resource', cosmosdb_sql_restorable_resources_sdk, client_factory=cf_restorable_sql_resources) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb mongodb restorable-database', cosmosdb_mongo_sdk, client_factory=cf_restorable_mongodb_databases) as g:
+    with self.command_group('cosmosdb mongodb restorable-database', cosmosdb_mongodb_restorable_database_sdk, client_factory=cf_restorable_mongodb_databases) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb mongodb restorable-collection', cosmosdb_mongo_sdk, client_factory=cf_restorable_mongodb_collections) as g:
+    with self.command_group('cosmosdb mongodb restorable-collection', cosmosdb_mongodb_restorable_collection_sdk, client_factory=cf_restorable_mongodb_collections) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb mongodb restorable-resource', cosmosdb_mongo_sdk, client_factory=cf_restorable_mongodb_resources) as g:
+    with self.command_group('cosmosdb mongodb restorable-resource', cosmosdb_mongodb_restorable_resources_sdk, client_factory=cf_restorable_mongodb_resources) as g:
         g.command('list', 'list')
 
    # Retrieve backup info

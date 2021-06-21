@@ -532,8 +532,6 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd(
             'az cosmosdb collection delete -g {rg} -n {acc} -d {db_name} -c {col} --yes')
-        assert not self.cmd(
-            'az cosmosdb collection exists -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_database')
     def test_cosmosdb_sql_database(self, resource_group):
@@ -1751,7 +1749,7 @@ class CosmosDBTests(ScenarioTest):
 
         role_definition_list = self.cmd(
             'az cosmosdb sql role definition list -g {rg} -a {acc}').get_output_in_json()
-        assert len(role_definition_list) == 2
+        assert len(role_definition_list) == 4
 
         self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -d {fully_qualified_role_def_id} -i {role_assignment_id}', checks=[
             self.check('id', fully_qualified_role_assignment_id),
@@ -1812,7 +1810,7 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb sql role definition delete -g {rg} -a {acc} -i {fully_qualified_role_def_id2} --yes')
         role_definition_list = self.cmd(
             'az cosmosdb sql role definition list -g {rg} -a {acc}').get_output_in_json()
-        assert len(role_definition_list) == 0
+        assert len(role_definition_list) == 2
 
     @ResourceGroupPreparer(name_prefix='cli_update_backup_policy_database_account')
     def test_update_backup_policy_database_account(self, resource_group):
@@ -1832,6 +1830,10 @@ class CosmosDBTests(ScenarioTest):
             self.check(
                 'backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
             self.check('backupPolicy.type', 'Periodic'),
+        ])
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-policy-type Continuous', checks=[
+            self.check('backupPolicy.type', 'Continuous'),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_restore_using_create', parameter_name_for_location='location')
@@ -1856,7 +1858,7 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
 
         restorable_accounts_list = self.cmd(
-            'az cosmosdb restorable-database-account list').get_output_in_json()
+            'az cosmosdb restorable-database-account list -l {loc}').get_output_in_json()
         restorable_database_account = next(
             acc for acc in restorable_accounts_list if acc['name'] == account['instanceId'])
 
@@ -1868,7 +1870,7 @@ class CosmosDBTests(ScenarioTest):
         restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
         restore_ts_string = restore_ts.isoformat()
         import time
-        time.sleep(240)
+        time.sleep(300)
         self.kwargs.update({
             'db_id': restorable_database_account['id'],
             'rts': restore_ts_string
@@ -1903,28 +1905,71 @@ class CosmosDBTests(ScenarioTest):
             'ins_id': account['instanceId']
         })
 
-        self.cmd(
-            'az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
-        self.cmd(
-            'az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
         restorable_database_account = self.cmd(
             'az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
 
-        account_creation_time = restorable_database_account['creationTime']
         import dateutil
+        import time
         from datetime import timedelta
+
+        # This should fail as restore time is before account creation time
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(
+            minutes=30)
+        self.kwargs.update({
+            'invalid_restore_time': invalid_restore_time.isoformat()
+        })
+        self.assertRaises(CLIError, lambda: self.cmd(
+            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # This should fail as restore time is in future
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(
+            minutes=30)
+        self.kwargs.update({
+            'invalid_restore_time': invalid_restore_time.isoformat()
+        })
+        self.assertRaises(CLIError, lambda: self.cmd(
+            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # Get correct restore ts
+        account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = dateutil.parser.parse(
             account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
-        import time
-        time.sleep(240)
+
         restore_ts_string = restore_ts.isoformat()
         self.kwargs.update({
             'rts': restore_ts_string
         })
 
+        # This should fail as account doesn't exist with this name
+        self.kwargs.update({
+            'invalid_account_name': self.create_random_name(prefix='cli', length=15)
+        })
+        self.assertRaises(CLIError, lambda: self.cmd(
+            'az cosmosdb restore -n {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # This should fail as regional database doesn't exist in this location
+        invalid_location = "westus2"
+        self.kwargs.update({
+            'invalid_location': invalid_location
+        })
+        self.assertRaises(Exception, lambda: self.cmd(
+            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
+
+        # This should fail as account is empty
+        self.assertRaises(Exception, lambda: self.cmd(
+            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # Create content in account and triggering restore
         self.cmd(
-            'az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc}')
+            'az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd(
+            'az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        time.sleep(300)
+
+        self.cmd(
+            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
@@ -1981,7 +2026,7 @@ class CosmosDBTests(ScenarioTest):
             account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
         import time
-        time.sleep(120)
+        time.sleep(200)
         restore_ts_string = restore_ts.isoformat()
         self.kwargs.update({
             'rts': restore_ts_string
@@ -2047,7 +2092,7 @@ class CosmosDBTests(ScenarioTest):
             account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
         import time
-        time.sleep(120)
+        time.sleep(200)
         restore_ts_string = restore_ts.isoformat()
         self.kwargs.update({
             'rts': restore_ts_string
@@ -2079,13 +2124,29 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         print(account)
 
+        # This should fail as database doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd(
+            'az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create database
         self.cmd(
             'az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        # This should fail as container doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd(
+            'az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create container
         self.cmd(
-            'az cosmosdb sql collection create -g {rg} -a {acc} -d {db_name} -n {col} --shard {shard_key} --throughput {throughput}').get_output_in_json()
+            'az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
 
         backup_info = self.cmd(
-            'az cosmosdb retrieve-latest-backup-time -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+            'az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
         print(backup_info)
 
-        assert backup_info['continuousBackupInfo'] == tp1
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        backup_time = int(
+            backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert backup_time > 0

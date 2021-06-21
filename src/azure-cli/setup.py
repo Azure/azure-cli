@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc17',
     'azure-mgmt-containerservice~=15.1.0',
-    'azure-mgmt-cosmosdb~=6.3.0',
+    'azure-mgmt-cosmosdb~=6.4.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -114,7 +114,8 @@ DEPENDENCIES = [
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
-    'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
+    # TODO: Use requirements.txt instead of '==' #9781
+    'azure-mgmt-reservations==0.6.0',
     'azure-mgmt-resource==18.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
@@ -172,7 +173,8 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
+    packages=find_packages(
+        exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
     package_data={
