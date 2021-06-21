@@ -257,16 +257,6 @@ def get_notebook(cmd, workspace_name, notebook_name):
 def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
         try:
-            data = notebook.properties.as_dict()
-            for key in list(data.keys()):
-                if 'bigDataPool' == key or 'big_data_pool' == key  or 'sessionProperties' == key  or 'session_properties' == key:
-                    data.pop(key)
-                elif 'metadata' == key:
-                    print(data['metadata'])
-                    for elekey in list(data['metadata'].keys()):#range(len(data['metadata'])):
-                        if 'a365ComputeOptions' == elekey: #in data['metadata']:
-                            data['metadata'].pop(elekey)#del data['metadata']['a365ComputeOptions']
-
             with open(path, 'w') as f:
                 json.dump(data, f, indent=4)
         except IOError:
@@ -276,13 +266,13 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     if notebook_name is not None:
         notebook = client.get_notebook(notebook_name)
         path = os.path.join(output_folder, notebook.name + '.ipynb')
-        #print(notebook.properties.as_dict())
+        print(notebook.properties.as_dict())
         write_to_file(notebook, path)
     else:
         notebooks = client.get_notebooks_by_workspace()
         for notebook in notebooks:
             path = os.path.join(output_folder, notebook.name + '.ipynb')
-            #print(notebook.properties)
+            print(notebook.properties)
             write_to_file(notebook, path)
 
 

@@ -68,13 +68,11 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
-            'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
             'spark-version': '2.4'
         })
@@ -227,7 +225,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool(self):
         self.kwargs.update({
@@ -309,7 +307,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
-    # @record_only()
+    @record_only()
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -350,7 +348,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.greater_than("length([])", 0)
                  ])
 
-    # @record_only()
+    @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
             'location': 'eastus2euap',
@@ -418,12 +416,11 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check("length([])", 0)
                  ])
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool_tde(self):
         self.kwargs.update({
             'location': 'eastus2euap',
-            'rg': 'rg',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c'
         })
@@ -454,7 +451,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd('az synapse workspace delete --name {workspace} --resource-group {rg} --yes')
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool_threat_policy(self):
         self.kwargs.update({
@@ -486,7 +483,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Enabled')
                  ])
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_pool_audit_policy(self):
         self.kwargs.update({
@@ -537,7 +534,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Disabled')
                  ])
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_aad_admin(self):
         self.kwargs.update({
@@ -574,14 +571,23 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
-    # @record_only()
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_sql_audit_policy(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'storage-account': 'chayangstoragewestus2'
+            'location': 'eastus2euap'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
 
         # test show command
         self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg} \
@@ -676,7 +682,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse workspace firewall-rule show --name {ruleName} --workspace-name {workspace} '
                  '--resource-group {rg}', expect_failure=True)
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_job(self, resource_group):
         self.kwargs.update({
@@ -751,7 +757,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('result', 'Cancelled')
                  ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_session_and_statements(self, resource_group):
         self.kwargs.update({
@@ -863,7 +869,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_access_control(self):
         self.kwargs.update({
@@ -1112,7 +1118,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse dataset show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_pipeline(self):
         self.kwargs.update({
@@ -1190,7 +1196,6 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_trigger(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
             'name': 'trigger',
             'event-trigger': 'EventTrigger',
             'tumbling-window-trigger': 'TumblingWindowTrigger',
@@ -1303,7 +1308,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_notebook(self):
         self.kwargs.update({
