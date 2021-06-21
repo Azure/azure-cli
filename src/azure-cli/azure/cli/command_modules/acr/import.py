@@ -7,6 +7,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
+import time
 
 from ._utils import (
     validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
@@ -24,6 +25,7 @@ LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
                          "because it is not a fully qualified domain name."
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
+start_time = time.time()
 
 def acr_import(cmd,
                client,
@@ -35,8 +37,9 @@ def acr_import(cmd,
                target_tags=None,
                resource_group_name=None,
                repository=None,
-               force=False):
-
+               force=False,
+               no_wait=False,
+               ):
     if source_registry_username and not source_registry_password:
         raise CLIError(CREDENTIALS_INVALID)
 
@@ -94,10 +97,13 @@ def acr_import(cmd,
                                               target_tags=target_tags,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
-    result_poller = client.begin_import_image(
+    result_poller = client.import_image(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         parameters=import_parameters)
+
+    if no_wait:
+        return result_poller
 
     return _handle_result(cmd, result_poller, source_registry, source_image, registry)
 
@@ -105,7 +111,8 @@ def acr_import(cmd,
 def _handle_result(cmd, result_poller, source_registry, source_image, registry):
     from msrestazure.azure_exceptions import ClientException
     try:
-        result = LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
+        result = LongRunningOperation(cmd.cli_ctx, 'Importing image...', 'Import has finished')(result_poller)
+
     except CLIError as e:
         try:
             # if command fails, it might be because user specified registry twice in --source and --registry
@@ -127,7 +134,6 @@ def _handle_result(cmd, result_poller, source_registry, source_image, registry):
             logger.debug("Unexpected exception: %s", unexpected_ex)
 
         raise e  # regardless re-raise the CLIError as this is an error from the service
-
     return result
 
 

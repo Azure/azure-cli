@@ -264,6 +264,9 @@ examples:
     text: |
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
+  - name: Import an image and return right after starting an import.
+    text: >
+        az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag --no-wait
 """
 
 helps['acr list'] = """
