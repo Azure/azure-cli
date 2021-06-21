@@ -6,7 +6,6 @@
 import re
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-from azure.mgmt.maps.models import KeyType, MapsKeySpecification
 
 
 class MapsScenarioTests(ScenarioTest):

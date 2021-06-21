@@ -40,8 +40,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--sku', '-s'],arg_type=get_enum_type(['S0', 'S1', 'G2']),
                    help='The name of the SKU, in standard format '
                    '(such as S0).', arg_group='Sku')
-        c.argument('tags',
-                   arg_type=tags_type)
+        c.argument('tags',arg_type=tags_type)
     with self.argument_context('maps account create') as c:
         c.argument('kind', options_list=['--kind'], arg_type=get_enum_type(['Gen1', 'Gen2']),
                    help='Get or Set Kind property.')
@@ -91,4 +90,25 @@ def load_arguments(self, _):
                    options_list=['--key'],
                    arg_type=get_enum_type(KeyType))
 
+    with self.argument_context('maps creator create') as c:
+        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
+                   'Maps Creator instance.')
+        c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx),
+                   required=False,validator=get_default_location_from_resource_group)
+        c.argument('storage_units', options_list=['--storage-units'], type=int,
+                   help='The storage units to be allocated. Integer values from 1 to 100, inclusive.')
+
+    with self.argument_context('maps creator update') as c:
+        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
+                   'Maps Creator instance.', id_part='child_name_1')
+        c.argument('storage_units', options_list=['--storage-units'], type=int,
+                   help='The storage units to be allocated. Integer values from 1 to 100, inclusive.')
+
+    with self.argument_context('maps creator delete') as c:
+        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
+                   'Maps Creator instance.', id_part='child_name_1')
+
+    with self.argument_context('maps creator show') as c:
+        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
+                   'Maps Creator instance.', id_part='child_name_1')
 

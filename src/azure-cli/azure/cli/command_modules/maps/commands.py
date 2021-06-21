@@ -18,8 +18,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'maps_account_create')
         g.command('delete', 'delete')
         g.custom_command('update', 'maps_account_update')
-        # g.custom_command('list-key', 'maps_account_list_key')
-        # g.custom_command('regenerate-key', 'maps_account_regenerate_key')
 
     with self.command_group('maps account keys', mgmt_type) as g:
         g.custom_command('renew', 'maps_account_regenerate_key')
