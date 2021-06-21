@@ -619,7 +619,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'Disabled')
                  ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_ip_firewall_rules(self, resource_group):
         self.kwargs.update({
@@ -869,7 +869,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_access_control(self):
         self.kwargs.update({

@@ -258,7 +258,7 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
         try:
             with open(path, 'w') as f:
-                json.dump(data, f, indent=4)
+                json.dump(notebook.properties.as_dict(), f, indent=4)
         except IOError:
             raise CLIError('Unable to export to file: {}'.format(path))
 
@@ -272,7 +272,7 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
         notebooks = client.get_notebooks_by_workspace()
         for notebook in notebooks:
             path = os.path.join(output_folder, notebook.name + '.ipynb')
-            print(notebook.properties)
+            print(notebook.properties.as_dict())
             write_to_file(notebook, path)
 
 
