@@ -1,0 +1,56 @@
+name: Fork News
+description: Keeps your fork up to date
+author: 
+branding:
+  icon: 'calendar'  
+  color: 'blue'
+inputs:
+  access-token:
+    description: 'Access token with the repo scope used to access the repository and open PRs.'
+    required: true
+  from-repository:
+    description: 'Path to the upstream repository (owner/repository). Use the value fork-upstream to point it to the default upstream.'
+    required: false
+    default: fork-upstream
+  to-branch:
+    description: 'Target branch of the pull request.'
+    required: false
+    default: main
+  from-branch:
+    description: 'Base branch of the pull request.'
+    required: false
+    default: main
+  pr-title:
+    description: 'Message used as the PR title.'
+    required: false
+    default: Fork News - Updates from the parent repository
+  pr-description:
+    description: 'Message used as the PR body'
+    required: false
+    default: Here are the latest changes from the parent repository.
+runs:
+  using: composite
+  steps:
+    - id: update-step
+      shell: bash
+      run: >- 
+        ${{ github.action_path }}/update_step.sh 
+    - id: git-step
+      shell: bash
+      run: >-
+        ${{ github.action_path }}/git_step.sh 
+        ${{ inputs.access-token }} 
+        ${{ github.repository }}
+        ${{ inputs.to-branch }}
+        ${{ inputs.from-repository }}
+        ${{ inputs.from-branch }}
+    - id: pr-step
+      shell: bash
+      run: >-
+        ${{ github.action_path }}/pr_step.sh 
+        ${{ inputs.access-token }} 
+        ${{ github.repository }} 
+        ${{ steps.git-step.outputs.fork-news-branch }}
+        ${{ inputs.to-branch }}
+        "${{ inputs.pr-title }}"
+        "${{ inputs.pr-description }}"
