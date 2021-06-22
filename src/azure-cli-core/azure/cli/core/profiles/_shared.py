@@ -213,9 +213,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-03-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
             'container_services': '2017-07-01',
-            'open_shift_managed_clusters': '2019-10-27-preview'
+            'open_shift_managed_clusters': '2019-09-30-preview'
         })
     },
     '2020-09-01-hybrid': {
@@ -260,7 +260,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-11-01', {
             'container_services': '2017-07-01',
-            'open_shift_managed_clusters': '2019-10-27-preview'
+            'open_shift_managed_clusters': '2019-09-30-preview'
         })
     },
     '2019-03-01-hybrid': {
