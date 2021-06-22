@@ -232,7 +232,7 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
         instance.service_url = service_url
 
     if protocols is not None:
-        instance.protocols = protocols.split(',')
+        instance.protocols = protocols
 
     if path is not None:
         instance.path = path
