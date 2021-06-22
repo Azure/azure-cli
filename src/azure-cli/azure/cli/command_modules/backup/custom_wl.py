@@ -746,6 +746,7 @@ def _get_protectable_container_name(cmd, resource_group_name, vault_name, resour
             break
     return container_name
 
+
 def _check_none_and_many(item, item_name):
     if item is None:
         error_text = "{} must be provided.".format(item_name)
