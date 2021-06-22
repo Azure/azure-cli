@@ -577,7 +577,7 @@ def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, wor
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:
-        raise CLIError('primary key is required when workspace ID is provided')
+        raise RequiredArgumentMissingError('primary key is required when workspace ID is provided.')
 
     workspace_id = workspace
     if workspace_type == 'resource_id':
