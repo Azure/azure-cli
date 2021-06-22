@@ -1497,7 +1497,7 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.accelerated_networking is not None:
             _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
         if namespace.admin_password or namespace.ssh_dest_key_path or getattr(namespace, 'ssh_dest_key_value', None) \
-                or namespace.generate_ssh_keys:
+                or namespace.generate_ssh_keys or namespace.authentication_type or namespace.os_type:
             _validate_vm_vmss_create_auth(namespace, cmd)
         if namespace.assign_identity == '[system]':
             raise InvalidArgumentValueError('usage error: only user assigned indetity is suppoprted for Flex mode.')
