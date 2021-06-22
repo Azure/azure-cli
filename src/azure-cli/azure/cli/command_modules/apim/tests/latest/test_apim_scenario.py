@@ -35,7 +35,7 @@ class ApimScenarioTest(ScenarioTest):
             'sku_name': 'Developer',
             'skucapacity': 1,
             'enable_cert': True,
-            'tags': ["foo=boo"]
+            'tag': "foo=boo"
         })
 
         self.cmd('apim check-name -n {service_name} -o json',
@@ -97,7 +97,7 @@ class ApimScenarioTest(ScenarioTest):
             'display_name': 'Contoso API',
             'path': 'test',
             'path2': 'test2',
-            'protocols': 'https',
+            'protocol': 'http',
             'service_url': 'https://contoso.com',
             'subscription_key_header_name': 'header',
             'subscription_key_query_param_name': 'query',
@@ -122,10 +122,11 @@ class ApimScenarioTest(ScenarioTest):
         # api operations
 
         # create api
-        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"', checks=[
+        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocol}" --service-url "{service_url}" --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"', checks=[
             self.check('displayName', '{display_name}'),
             self.check('path', '{path}'),
-            self.check('serviceUrl', '{service_url}')
+            self.check('serviceUrl', '{service_url}'),
+            self.check('protocols[0]', '{protocol}')
         ])
 
         # wait
@@ -143,9 +144,14 @@ class ApimScenarioTest(ScenarioTest):
             self.check('serviceUrl', '{service_url}')
         ])
 
+        self.kwargs.update({
+            'protocol': 'https',
+        })
+
         # update api
-        self.cmd('apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}"', checks=[
-            self.check('description', '{description}')
+        self.cmd('apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol}', checks=[
+            self.check('description', '{description}'),
+            self.check('protocols[0]', '{protocol}')
         ])
 
         # list apis
@@ -341,12 +347,12 @@ class ApimScenarioTest(ScenarioTest):
             'value': 'testvalue123',
             'nv_id': self.create_random_name('az-nv', 12),
             'secret': True,
-            'tags': "foo=baz",
+            'tag': "foo=baz",
             'updatedtestvalue': 'updatedtestvalue123'
         })
 
         # create named value
-        self.cmd('apim nv create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --value "{value}" --named-value-id "{nv_id}" --secret "{secret}" --tags "{tags}"', checks=[
+        self.cmd('apim nv create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --value "{value}" --named-value-id "{nv_id}" --secret "{secret}" --tags "{tag}"', checks=[
             self.check('displayName', '{display_name}'),
             self.check('secret', '{secret}')
         ])
