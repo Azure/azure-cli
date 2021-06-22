@@ -56,6 +56,7 @@ from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
+    ResourceIdType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType
@@ -1352,6 +1353,25 @@ def load_arguments(self, _):
                    'only connections made through Private Links can reach this server.',
                    is_preview=True)
 
+        c.argument('primary_user_assigned_identity_id',
+                   options_list=['--primary-user-assigned-identity-id', '-pid'],
+                   help='The ID of the primary user managed identity.')
+
+        c.argument('key_id',
+                   options_list=['--key-id', '-k'],
+                   help='The key vault URI for encryption.')
+
+        c.argument('user_assigned_identity_id',
+                   options_list=['--user-assigned-identity-id', '-a'],
+                   nargs='+',
+                   help='Generate and assign an User Managed Identity(UMI) for this server.')
+
+        c.argument('identity_type',
+                   options_list=['--identity-type', '-t'],
+                   arg_type=get_enum_type(ResourceIdType),
+                   help='Type of Identity to be used. Possible values are SystemAsssigned,'
+                   'UserAssigned, SystemAssigned,UserAssigned and None.')
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1588,6 +1608,11 @@ def load_arguments(self, _):
         c.argument('server_key_type',
                    arg_type=server_key_type_param_type)
 
+        c.argument('auto_rotation_enabled',
+                   options_list=['--auto-rotation-enabled'],
+                   help='The key auto rotation opt in status. Can be either true or false.',
+                   arg_type=get_three_state_flag())
+
     #####
     #           sql server vnet-rule
     #####
@@ -1722,6 +1747,25 @@ def load_arguments(self, _):
 
         c.argument('tags', arg_type=tags_type)
 
+        c.argument('primary_user_assigned_identity_id',
+                   options_list=['--primary-user-assigned-identity-id', '-pid'],
+                   help='The ID of the primary user managed identity.')
+
+        c.argument('key_id',
+                   options_list=['--key-id', '-k'],
+                   help='The key vault URI for encryption.')
+
+        c.argument('user_assigned_identity_id',
+                   options_list=['--user-assigned-identity-id', '-a'],
+                   nargs='+',
+                   help='Generate and assign an User Managed Identity(UMI) for this server.')
+
+        c.argument('identity_type',
+                   options_list=['--identity-type', '-t'],
+                   arg_type=get_enum_type(ResourceIdType),
+                   help='Type of Identity to be used. Possible values are SystemAsssigned,'
+                   'UserAssigned, SystemAssignedUserAssigned and None.')
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1743,7 +1787,9 @@ def load_arguments(self, _):
                 'tags',
                 'storage_account_type',
                 'yes',
-                'maintenance_configuration_id'
+                'maintenance_configuration_id',
+                'primary_user_assigned_identity_id',
+                'key_id'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1878,6 +1924,11 @@ def load_arguments(self, _):
 
         c.argument('server_key_type',
                    arg_type=server_key_type_param_type)
+
+        c.argument('auto_rotation_enabled',
+                   options_list=['--auto-rotation-enabled'],
+                   help='The key auto rotation opt in status. Can be either true or false.',
+                   arg_type=get_three_state_flag())
 
     ###############################################
     #                sql managed db               #

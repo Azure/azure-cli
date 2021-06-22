@@ -497,7 +497,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_firewall_rules_operations) as g:
 
         g.custom_command('create', 'firewall_rule_create',
-                  table_transformer=firewall_rule_table_format)
+                         table_transformer=firewall_rule_table_format)
         g.custom_command('update', 'firewall_rule_update',
                          table_transformer=firewall_rule_table_format)
         g.command('delete', 'delete')
