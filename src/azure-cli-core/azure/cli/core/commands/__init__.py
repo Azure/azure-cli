@@ -107,7 +107,7 @@ def _expand_file_prefixed_files(args):
         except IndexError:
             return _maybe_load_file(arg_split[0])
 
-    return list([_expand_file_prefix(arg) for arg in args])
+    return [_expand_file_prefix(arg) for arg in args]
 
 
 def _pre_command_table_create(cli_ctx, args):

@@ -358,7 +358,7 @@ class Profile:
         token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
@@ -382,7 +382,7 @@ class Profile:
 
         _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
