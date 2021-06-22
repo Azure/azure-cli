@@ -46,7 +46,7 @@ def load_arguments(self, _):
     with self.argument_context('maps account create') as c:
         c.argument('kind', options_list=['--kind'], arg_type=get_enum_type(['Gen1', 'Gen2']),
                    help='Get or Set Kind property.')
-        c.argument('disable_local_auth', options_list=['--disable_local_auth'], arg_type=get_three_state_flag(),
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], arg_type=get_three_state_flag(),
                    help='Allows toggle functionality on Azure '
                    'Policy to disable Azure Maps local authentication support. This will disable Shared Keys '
                    'authentication from any usage.')
@@ -67,7 +67,7 @@ def load_arguments(self, _):
     with self.argument_context('maps account update') as c:
         c.argument('kind', options_list=['--kind'], arg_type=get_enum_type(['Gen1', 'Gen2']),
                    help='Get or Set Kind property.')
-        c.argument('disable_local_auth', options_list=['--disable_local_auth'], arg_type=get_three_state_flag(),
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], arg_type=get_three_state_flag(),
                    help='Allows toggle functionality on Azure '
                    'Policy to disable Azure Maps local authentication support. This will disable Shared Keys '
                    'authentication from any usage.')
