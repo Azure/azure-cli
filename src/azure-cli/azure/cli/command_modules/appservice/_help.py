@@ -1458,10 +1458,10 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using '|' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
-  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime and Java SE 8 web server using ':' delimiter.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
@@ -2307,7 +2307,10 @@ helps['staticwebapp create'] = """
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
-       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master -t MyAccessToken
+    - name: Create static app in a subscription, retrieving token interactively
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
 """
 
 helps['staticwebapp update'] = """
@@ -2332,6 +2335,8 @@ helps['staticwebapp reconnect'] = """
     examples:
     - name: Connect a repo and branch to static app.
       text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+    - name: Connect a repo and branch to static app, retrieving token interactively
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --login-with-github
 """
 
 helps['staticwebapp delete'] = """

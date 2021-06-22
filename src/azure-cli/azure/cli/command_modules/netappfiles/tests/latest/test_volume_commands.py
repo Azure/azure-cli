@@ -10,8 +10,9 @@ import time
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-RG_LOCATION = "eastus"
-DP_RG_LOCATION = "southcentralus"
+RG_LOCATION = "southcentralusstage"
+DP_RG_LOCATION = "eastus2euap"
+VNET_LOCATION = "southcentralus"
 GIB_SCALE = 1024 * 1024 * 1024
 
 # No tidy up of tests required. The resource group is automatically removed
@@ -51,7 +52,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
     def prepare_for_volume_creation(self, rg, account_name, pool_name, vnet_name, subnet_name,
                                     pool_payload=POOL_DEFAULT, tags=None):
         tag = "--tags %s" % tags if tags is not None else ""
-        self.setup_vnet(rg, vnet_name, subnet_name, '10.0.0.0', RG_LOCATION)
+        self.setup_vnet(rg, vnet_name, subnet_name, '10.0.0.0', VNET_LOCATION)
         self.cmd("az netappfiles account create -g %s -a '%s' -l %s" %
                  (rg, account_name, RG_LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" %
@@ -123,10 +124,10 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         subnet_rg = self.create_random_name(prefix='cli-rg-subnet', length=24)
         subs_id = self.current_subscription()
-        self.cmd("az group create -n %s --subscription %s -l %s" % (subnet_rg, subs_id, RG_LOCATION)).get_output_in_json()
+        self.cmd("az group create -n %s --subscription %s -l %s" % (subnet_rg, subs_id, VNET_LOCATION)).get_output_in_json()
 
         rg = '{rg}'
-        self.setup_vnet(subnet_rg, vnet_name, subnet_name, '10.0.0.0', RG_LOCATION)
+        self.setup_vnet(subnet_rg, vnet_name, subnet_name, '10.0.0.0', VNET_LOCATION)
         self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg, account_name, RG_LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % (rg, account_name, pool_name, RG_LOCATION, POOL_DEFAULT)).get_output_in_json()
 

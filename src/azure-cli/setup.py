@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.23.0"
+VERSION = "2.25.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -65,20 +65,20 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-appconfiguration~=1.0.1',
-    'azure-mgmt-applicationinsights~=0.1.1',
+    'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai~=2.0',
-    'azure-mgmt-batch~=9.0.0',
+    'azure-mgmt-batch~=15.0.0',
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==11.0.0',
-    'azure-mgmt-cognitiveservices~=6.3.0',
-    'azure-mgmt-compute~=20.0.0',
+    'azure-mgmt-cognitiveservices~=12.0.0',
+    'azure-mgmt-compute~=21.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc17',
-    'azure-mgmt-cosmosdb~=6.2.0',
-    'azure-mgmt-containerservice~=11.2.0',
+    'azure-mgmt-containerservice~=15.1.0',
+    'azure-mgmt-cosmosdb~=6.3.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -86,13 +86,14 @@ DEPENDENCIES = [
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
-    'azure-mgmt-eventgrid==3.0.0rc9',
+    'azure-mgmt-eventgrid==9.0.0',
     'azure-mgmt-eventhub~=4.1.0',
-    'azure-mgmt-hdinsight~=2.2.0',
+    'azure-mgmt-extendedlocation~=1.0.0b2',
+    'azure-mgmt-hdinsight~=7.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=4.1.0',
+    'azure-mgmt-iothub==2.0.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-keyvault==9.0.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=8.0.0',
@@ -103,29 +104,29 @@ DEPENDENCIES = [
     'azure-mgmt-media~=3.0',
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=2.0.0',
-    'azure-mgmt-network~=18.0.0',
+    'azure-mgmt-netapp~=3.0.0',
+    'azure-mgmt-network~=19.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=8.1.0b4',
     'azure-mgmt-recoveryservicesbackup~=0.11.0',
-    'azure-mgmt-recoveryservices~=0.4.0',
+    'azure-mgmt-recoveryservices~=1.0.0',
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==16.1.0',
+    'azure-mgmt-resource==18.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=6.0.0',
     'azure-mgmt-servicefabric~=0.5.0',
-    'azure-mgmt-servicefabricmanagedclusters~=1.0.0b1',
-    'azure-mgmt-signalr~=0.4.0',
+    'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
+    'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-sql~=0.26.0',
     'azure-mgmt-storage~=18.0.0',
-    'azure-mgmt-synapse~=0.6.0',
+    'azure-mgmt-synapse~=2.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=2.0.0',
     'azure-multiapi-storage~=0.6.2',
@@ -143,7 +144,6 @@ DEPENDENCIES = [
     'scp~=0.13.2',
     'semver==2.13.0',
     'sshtunnel~=0.1.4',
-    'urllib3[secure]>=1.25.9,<2.0.0',
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'
@@ -155,14 +155,12 @@ TESTS_REQUIRE = [
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
-with open('HISTORY.rst', 'r', encoding='utf-8') as f:
-    HISTORY = f.read()
 
 setup(
     name='azure-cli',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
-    long_description=README + '\n\n' + HISTORY,
+    long_description=README,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
@@ -197,7 +195,9 @@ setup(
         ],
         'azure.cli.command_modules.rdbms': [
             'randomname/adjectives.txt',
-            'randomname/nouns.txt'
+            'randomname/nouns.txt',
+            'templates/mysql_githubaction_template.yaml',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass

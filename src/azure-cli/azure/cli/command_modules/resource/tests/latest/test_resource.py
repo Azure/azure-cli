@@ -12,7 +12,7 @@ import mock
 import unittest
 from pathlib import Path
 
-from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
@@ -364,7 +364,8 @@ class TagScenarioTest(ScenarioTest):
             'rg_loc': resource_group_location,
             'uri': 'http://www.microsoft.com',
             'actions': 'push',
-            'sku': 'Standard'
+            'sku': 'Standard',
+            'ip_name': self.create_random_name('cli_ip', 20)
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -392,8 +393,15 @@ class TagScenarioTest(ScenarioTest):
             self.check('[0].tags', {'cli-test': 'test'})
         ])
 
+        # Test Microsoft.Network/publicIPAddresses
+        public_ip = self.cmd('network public-ip create -g {rg} -n {ip_name} --location {loc} --sku Standard ').\
+            get_output_in_json()
+        self.kwargs['public_ip_id'] = public_ip['publicIp']['id']
+        self.cmd('resource tag --ids {public_ip_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {public_ip_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -753,13 +761,13 @@ class TemplateSpecsTest(ScenarioTest):
         })
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
-            self.check('template.variables.provider', "[split(parameters('resource'), '/')[0]]"),
-            self.check('template.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
-            self.check('template.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
-            self.check('template.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
-            self.check('template.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
-            self.check('template.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
-            self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
+            self.check('mainTemplate.variables.provider', "[split(parameters('resource'), '/')[0]]"),
+            self.check('mainTemplate.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
+            self.check('mainTemplate.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
+            self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
+            self.check('mainTemplate.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
+            self.check('mainTemplate.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
+            self.check('mainTemplate.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
 
         with self.assertRaises(IncorrectUsageError) as err:
@@ -781,6 +789,7 @@ class TemplateSpecsTest(ScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
+            'uf': os.path.join(curr_dir, 'sample_form_ui_definition_rg.json').replace('\\', '\\\\')
         })
 
         path = os.path.join(curr_dir, 'artifacts')
@@ -790,11 +799,12 @@ class TemplateSpecsTest(ScenarioTest):
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
-            self.check('artifacts.length([])', 3),
-            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
-            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
-            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --ui-form-definition "{uf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
+            self.check('linkedTemplates.length([])', 3),
+            self.check_pattern('linkedTemplates[0].path', 'artifacts.createResourceGroup.json'),
+            self.check_pattern('linkedTemplates[1].path', 'artifacts.createKeyVault.json'),
+            self.check_pattern('linkedTemplates[2].path', 'artifacts.createKeyVaultWithSecret.json'),
+            self.check('uiFormDefinition.view.properties.title', 'titleFooRG')
         ]).get_output_in_json()
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
@@ -818,6 +828,8 @@ class TemplateSpecsTest(ScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
+            'uf': os.path.join(curr_dir, 'sample_form_ui_definition_sub.json').replace('\\', '\\\\'),
+            'uf1': os.path.join(curr_dir, 'sample_form_ui_definition_mg.json').replace('\\', '\\\\'),
         })
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
@@ -829,16 +841,16 @@ class TemplateSpecsTest(ScenarioTest):
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
         self.cmd('ts update -s {template_spec_id} --display-name {display_name} --description {description} --yes', checks=[
-                 self.check('name', self.kwargs['template_spec_name']),
-                 self.check('description', self.kwargs['description'].replace('"', '')),
-                 self.check('displayName', self.kwargs['display_name'].replace('"', ''))
-                 ])
+            self.check('name', self.kwargs['template_spec_name']),
+            self.check('description', self.kwargs['description'].replace('"', '')),
+            self.check('displayName', self.kwargs['display_name'].replace('"', ''))
+        ])
 
         self.cmd('ts update -s {template_spec_version_id} --version-description {version_description} --yes', checks=[
-                 self.check('name', '1.0'),
-                 self.check('description', self.kwargs['version_description'].replace('"', '')),
-                 self.check('artifacts', None)
-                 ])
+            self.check('name', '1.0'),
+            self.check('description', self.kwargs['version_description'].replace('"', '')),
+            self.check('linkedTemplates', None)
+        ])
 
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
@@ -847,13 +859,14 @@ class TemplateSpecsTest(ScenarioTest):
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
-        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
-                 self.check('description', self.kwargs['version_description'].replace('"', '')),
-                 self.check('artifacts.length([])', 3),
-                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
-                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
-                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
-                 ])
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --ui-form-definition "{uf1}" --yes', checks=[
+            self.check('description', self.kwargs['version_description'].replace('"', '')),
+            self.check('linkedTemplates.length([])', 3),
+            self.check_pattern('linkedTemplates[0].path', 'artifacts.createResourceGroup.json'),
+            self.check_pattern('linkedTemplates[1].path', 'artifacts.createKeyVault.json'),
+            self.check_pattern('linkedTemplates[2].path', 'artifacts.createKeyVaultWithSecret.json'),
+            self.check('uiFormDefinition.view.properties.title', 'titleFooMG')
+        ])
 
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
@@ -1042,7 +1055,7 @@ class TemplateSpecsExportTest(LiveScenarioTest):
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
-    @StorageAccountPreparer(name_prefix='testquerystrrg', location='eastus', kind='StorageV2')
+    @StorageAccountPreparer(name_prefix='testquerystr', location='eastus', kind='StorageV2')
     def test_resource_group_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
 
         container_name = self.create_random_name('querystr', 20)
@@ -1758,6 +1771,9 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
         deployment_output = self.cmd('deployment sub create --location westus --template-file "{tf}"').get_output_in_json()
         self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
 
+        # Make sure the formatter works without exception
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}"')
+
         self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
@@ -2121,9 +2137,14 @@ class PolicyScenarioTest(ScenarioTest):
             'padn': self.create_random_name('test_assignment', 20)
         })
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}"', checks=[
+        # create a policy assignment with invalid not scopes
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description" --not-scopes "invalid"')
+
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}" --description "Policy description"', checks=[
             self.check('name', '{pan}'),
-            self.check('displayName', '{padn}')
+            self.check('displayName', '{padn}'),
+            self.check('description', 'Policy description')
         ])
 
         # create a policy assignment with not scopes and standard sku
@@ -2133,13 +2154,21 @@ class PolicyScenarioTest(ScenarioTest):
             'sub': self.get_subscription_id()
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
-        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
+        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/vnetFoo'.format(**self.kwargs)
 
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('notScopes[0]', '{notscope}')
+        ])
+
+        # update not scopes using the update command
+        self.kwargs['notscope2'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/virtualMachines/foo'.format(**self.kwargs)
+        self.cmd('policy assignment update -n {pan} -g {rg} --not-scopes "{notscope} {notscope2}" --params "{params}"', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('notScopes[0]', '{notscope}'),
+            self.check('notScopes[1]', '{notscope2}'),
         ])
 
         # create a policy assignment using a built in policy definition name
@@ -2177,7 +2206,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em} --not-scopes "{scope}/providers/Microsoft.Compute/virtualMachines/myVm"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('enforcementMode', '{em}')
@@ -2268,7 +2297,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
@@ -2299,7 +2329,8 @@ class PolicyScenarioTest(ScenarioTest):
         if (subscription):
             self.kwargs.update({'sub': subscription})
 
-        time.sleep(60)
+        if not self.in_recording:
+            time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
@@ -2367,7 +2398,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2402,7 +2434,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the parameterized policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2410,12 +2443,14 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # delete the data policy
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)
@@ -2455,6 +2490,14 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('type', assignmentIdentity['type']),
             self.check('principalId', assignmentIdentity['principalId']),
             self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # ensure the managed identity is not touched during update
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('description', 'New description'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
         ])
 
         # remove the managed identity and ensure it is removed when retrieving the policy assignment
@@ -2522,6 +2565,111 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_ncm')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_non_compliance_messages(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '095e4ed9-c835-4ab6-9439-b5644362a06c',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location,
+            'em': 'DoNotEnforce',
+            'drid': 'AINE_MaximumPasswordAge'
+        })
+
+        # create a policy assignment of a built-in policy set
+        self.cmd('policy assignment create -d {bip} -n {pan} -g {rg} --enforcement-mode {em}', checks=[
+            self.check('name', '{pan}'),
+            self.not_exists('nonComplianceMessages')
+        ])
+
+        # list the non-compliance messages, should be none
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        # Add two non-compliance messages
+        self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "General message"', checks=[
+            self.check('length([])', 1),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId')
+        ])
+
+        self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # list the non-compliance messages, should be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # show the assignment, should contain non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # update the assignment, should not touch non-compliance messages
+        self.cmd('policy assignment update -n {pan} -g {rg} --description "New description"', checks=[
+            self.check('name', '{pan}'),
+            self.check('description', 'New description'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message that does not exist
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message"', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message that exists but without the right reference ID
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message"', checks=[
+            self.check('length([])', 2),
+            self.check('[0].message', 'General message'),
+            self.not_exists('[0].policyDefinitionReferenceId'),
+            self.check('[1].message', 'Specific message'),
+            self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message"', checks=[
+            self.check('length([])', 1),
+            self.check('[0].message', 'Specific message'),
+            self.check('[0].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # remove a non-compliance message with a reference ID
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+            self.is_empty()
+        ])
+
+        # list the non-compliance messages, should be 0
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
@@ -2531,7 +2679,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(IncorrectUsageError):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
@@ -2634,7 +2782,9 @@ class PolicyScenarioTest(ScenarioTest):
 
         # delete the policy set
         self.cmd('policy set-definition delete -n {psn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
+
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         self.cmd('policy set-definition list',
                  checks=self.check("length([?name=='{psn}'])", 0))
@@ -2687,7 +2837,10 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check("length([?name=='{pan_random}'])", 0))
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+
+        if not self.in_recording:
+            time.sleep(10)
+
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
@@ -2721,7 +2874,8 @@ class PolicyScenarioTest(ScenarioTest):
         if (subscription):
             self.kwargs.update({'sub': subscription})
 
-        time.sleep(60)
+        if not self.in_recording:
+            time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
@@ -2859,7 +3013,8 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
 
         cmd = self.cmdstring('policy set-definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
@@ -2867,12 +3022,14 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # delete the data policy
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)
+        if not self.in_recording:
+            time.sleep(10)
 
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)

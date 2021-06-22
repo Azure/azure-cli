@@ -1986,3 +1986,102 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertIn('policyId', result)
         self.assertIn('ruleId', result['rules'][0])
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
+
+
+class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer(name_prefix='cli_test_blob_inventory', location='eastus2')
+    @StorageAccountPreparer(location='eastus2', kind='StorageV2')
+    def test_storage_account_blob_inventory_policy(self, resource_group, storage_account):
+        import os
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        policy_file = os.path.join(curr_dir, 'blob_inventory_policy.json').replace('\\', '\\\\')
+        policy_file_no_type = os.path.join(curr_dir, 'blob_inventory_policy_no_type.json').replace('\\', '\\\\')
+        self.kwargs = {'rg': resource_group,
+                       'sa': storage_account,
+                       'policy': policy_file,
+                       'policy_no_type': policy_file_no_type}
+        account_info = self.get_account_info(resource_group, storage_account)
+        self.storage_cmd('storage container create -n mycontainer', account_info)
+
+        # Create policy without type specified
+        self.cmd('storage account blob-inventory-policy create --account-name {sa} -g {rg} --policy @"{policy_no_type}"',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters", None),
+                         JMESPathCheck("policy.rules[0].definition.format", "Parquet"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Container"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Weekly"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule1"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters", None),
+                         JMESPathCheck("policy.rules[0].definition.format", "Parquet"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Container"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Weekly"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule1"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        # Enable Versioning for Storage Account when includeBlobInventory=true in policy
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --enable-versioning', checks=[
+                 JMESPathCheck('isVersioningEnabled', True)])
+
+        self.cmd('storage account blob-inventory-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.blobTypes[0]", "blockBlob"),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeBlobVersions", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.format", "Csv"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule2"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}',
+                 checks=[JMESPathCheck("name", "DefaultInventoryPolicy"),
+                         JMESPathCheck("policy.rules[0].destination", "mycontainer"),
+                         JMESPathCheck("policy.enabled", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.blobTypes[0]", "blockBlob"),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeBlobVersions", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
+                         JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.format", "Csv"),
+                         JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
+                         JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),
+                         JMESPathCheck("policy.rules[0].definition.schemaFields[0]", "Name"),
+                         JMESPathCheck("policy.rules[0].enabled", True),
+                         JMESPathCheck("policy.rules[0].name", "inventoryPolicyRule2"),
+                         JMESPathCheck("policy.type", "Inventory"),
+                         JMESPathCheck("resourceGroup", resource_group),
+                         JMESPathCheck("systemData", None)])
+
+        self.cmd('storage account blob-inventory-policy update --account-name {sa} -g {rg}'
+                 ' --set "policy.rules[0].name=newname"')
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}',
+                 checks=JMESPathCheck('policy.rules[0].name', 'newname'))
+
+        self.cmd('storage account blob-inventory-policy delete --account-name {sa} -g {rg} -y')
+        self.cmd('storage account blob-inventory-policy show --account-name {sa} -g {rg}', expect_failure=True)

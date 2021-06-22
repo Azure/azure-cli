@@ -371,6 +371,7 @@ def load_arguments(self, _):
                    help='Enable secure boot. It is part of trusted launch.')
         c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    help='Enable vTPM. It is part of trusted launch.')
+        c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -390,6 +391,14 @@ def load_arguments(self, _):
     for scope in ['vm show', 'vm list']:
         with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
+
+    for scope in ['vm show', 'vmss show']:
+        with self.argument_context(scope) as c:
+            c.argument('include_user_data', action='store_true', options_list=['--include-user-data', '-u'], help='Include the user data properties in the query result.', min_api='2021-03-01')
+
+    for scope in ['vm get-instance-view', 'vm wait', 'vmss wait']:
+        with self.argument_context(scope) as c:
+            c.ignore('include_user_data')
 
     with self.argument_context('vm diagnostics') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
@@ -592,6 +601,7 @@ def load_arguments(self, _):
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
+        c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -621,6 +631,7 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
@@ -782,6 +793,11 @@ def load_arguments(self, _):
             c.argument('data_disk_mbps', min_api='2019-07-01', nargs='+', type=int, help='Specify the bandwidth in MB per second (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
             c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
+            c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2021-03-01',
+                       help='Specify the behavior of the managed disk when the VM gets deleted i.e whether the managed disk is deleted or detached.')
+            c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', '--data-delete-option'],
+                       nargs='+', min_api='2021-03-01',
+                       help='Specify whether data disk should be deleted or detached upon VM deletion.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -796,6 +812,10 @@ def load_arguments(self, _):
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
                 c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+            c.argument('nic_delete_option', nargs='+', min_api='2021-03-01',
+                       help='Specify what happens to the network interface when the VM is deleted. Use a singular '
+                       'value to apply on all resources, or use <Name>=<Value> to configure '
+                       'the delete behavior for individual resources. Possible options are Delete and Detach.')
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
@@ -880,6 +900,7 @@ def load_arguments(self, _):
     with self.argument_context('vm update') as c:
         c.argument('license_type', help=license_msg, arg_type=get_enum_type(
             ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_ELS_6', 'None']))
+        c.argument('user_data', help='UserData for the VM. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vmss create') as c:
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',

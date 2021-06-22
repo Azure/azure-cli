@@ -120,6 +120,7 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
 
     with self.argument_context('netappfiles volume backup') as c:
         c.argument('backup_name', options_list=['--backup-name', '-b'], id_part='child_name_3')
+        c.argument('use_existing_snapshot', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume backup list') as c:
         c.argument('account_name', id_part=None)

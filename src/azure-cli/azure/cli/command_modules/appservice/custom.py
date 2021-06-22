@@ -270,7 +270,6 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 dest[setting_name] = value
                 result.update(dest)
 
-    result.update(slot_result)
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
@@ -691,8 +690,9 @@ def set_functionapp(cmd, resource_group_name, name, **kwargs):
 
 
 def list_webapp(cmd, resource_group_name=None):
-    result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' not in r.kind]
+    full_list = _list_app(cmd.cli_ctx, resource_group_name)
+    # ignore apps with kind==null & not functions apps
+    return list(filter(lambda x: x.kind is not None and "function" not in x.kind.lower(), full_list))
 
 
 def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
@@ -707,8 +707,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' in r.kind]
+    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
+                       _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -756,7 +756,7 @@ def _build_identities_info(identities):
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -801,7 +801,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
@@ -1099,7 +1099,7 @@ def url_validator(url):
 def _get_linux_multicontainer_decoded_config(cmd, resource_group_name, name, slot=None):
     from base64 import b64decode
     linux_fx_version = _get_fx_version(cmd, resource_group_name, name, slot)
-    if not any([linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES]):
+    if not any(linux_fx_version.startswith(s) for s in MULTI_CONTAINER_TYPES):
         raise CLIError("Cannot decode config that is not one of the"
                        " following types: {}".format(','.join(MULTI_CONTAINER_TYPES)))
     return b64decode(linux_fx_version.split('|')[1].encode('utf-8'))
@@ -1419,12 +1419,12 @@ def _mask_creds_related_appsettings(settings):
 
 
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
-    HostNameBinding = cmd.get_models('HostNameBinding')
+    from azure.mgmt.web.models import HostNameBinding
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp_name))
-    binding = HostNameBinding(location=webapp.location, site_name=webapp.name)
+    binding = HostNameBinding(site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 
@@ -1520,7 +1520,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, slot_def, slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
@@ -1646,10 +1646,8 @@ def delete_source_control(cmd, resource_group_name, name, slot=None):
 
 
 def enable_local_git(cmd, resource_group_name, name, slot=None):
-    SiteConfigResource = cmd.get_models('SiteConfigResource')
     client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, name)
-    site_config = SiteConfigResource(location=location)
+    site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     if slot is None:
         client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
@@ -1758,8 +1756,7 @@ def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def list_backups(cmd, resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'list_backup_status_secrets',
-                                   slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'get_backup_configuration', slot)
 
 
 def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,

@@ -55,6 +55,18 @@ def _create_keyvault(test, kwargs, additional_args=None):
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium --retention-days 7 {add}')
 
 
+def _create_hsm(test):
+    # There's no generic way to get the object id of signed in user/sp, just use a fixed one
+    return test.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+                    '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
+
+
+def _delete_and_purge_hsm(test):
+    test.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
+    test.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
+    time.sleep(10)
+
+
 def _clear_hsm_role_assignments(test, hsm_url, assignees):
     for assignee in assignees:
         test.cmd('keyvault role assignment delete --id {hsm_url} --assignee {assignee}'
@@ -103,6 +115,22 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
                      self.check('length(@)', 1),
                      self.check('[0].groupId', 'vault')
                  ])
+
+
+class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
+    def test_mhsm_private_link_resource(self, resource_group):
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
+            'loc': 'centraluseuap'
+        })
+        _create_hsm(self)
+        self.cmd('keyvault private-link-resource list --hsm-name {hsm}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].groupId', 'managedhsm')
+                 ])
+        _delete_and_purge_hsm(self)
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
@@ -180,15 +208,82 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  ])
 
 
+class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
+    def test_hsm_private_endpoint_connection(self, resource_group):
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-pec-', 24),
+            'loc': 'centraluseuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare vault and network
+        hsm = _create_hsm(self).get_output_in_json()
+        self.kwargs['hsm_id'] = hsm['id']
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {hsm_id} '
+                      '--group-id managedhsm').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        # Show the connection at vault side
+        hsm = self.cmd('keyvault show --hsm-name {hsm}',
+                       checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+        self.kwargs['hsm_pec_id'] = hsm['properties']['privateEndpointConnections'][0]['id']
+        self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
+                 checks=self.check('id', '{hsm_pec_id}'))
+        self.kwargs['hsm_pec_name'] = self.kwargs['hsm_pec_id'].split('/')[-1]
+        self.cmd('keyvault private-endpoint-connection show --hsm-name {hsm} --name {hsm_pec_name}',
+                 checks=self.check('name', '{hsm_pec_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd('keyvault private-endpoint-connection approve --hsm-name {hsm} --name {hsm_pec_name} '
+                 '--description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
+                     self.check('provisioningState', 'Updating')
+                 ])
+        self.cmd('keyvault private-endpoint-connection wait --id {hsm_pec_id} --created')
+
+        self.cmd('keyvault private-endpoint-connection reject --id {hsm_pec_id} '
+                 '--description "{rejection_desc}" --no-wait', checks=self.is_empty())
+
+        self.cmd('keyvault private-endpoint-connection wait --id {hsm_pec_id} --created')
+        self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('keyvault private-endpoint-connection delete --hsm-name {hsm} --name {hsm_pec_name}')
+
+        # clear resources
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+        _delete_and_purge_hsm(self)
+
+
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
-            'hsm_name': 'clitest-mhsm',
-            'hsm_url': 'https://clitest-mhsm.managedhsm.azure.net/',
+            'hsm_name': self.create_random_name('clitest-mhsm-', 24),
             'rg': 'clitest-mhsm-rg',
-            'loc': 'westeurope',
-            'init_admin': 'f3ea48f6-a16e-4b37-8260-f69cf2200525'
+            'loc': 'eastus2',
+            'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
         })
 
         show_checks = [
@@ -196,9 +291,17 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('name', '{hsm_name}'),
             self.check('resourceGroup', '{rg}'),
             self.check('sku.name', 'Standard_B1'),
+            self.check('type', 'Microsoft.KeyVault/managedHSMs'),
             self.check('length(properties.initialAdminObjectIds)', 1),
             self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
             self.exists('properties.hsmUri')
+        ]
+
+        show_deleted_checks = [
+            self.check('name', '{hsm_name}'),
+            self.check('type', 'Microsoft.Keyvault/deletedManagedHSMs'),
+            self.check('properties.location', '{loc}'),
+            self.exists('properties.deletionDate')
         ]
 
         list_checks = [
@@ -212,6 +315,13 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[0].properties.hsmUri')
         ]
 
+        list_deleted_checks = [
+            self.check('length(@)', 1),
+            self.check('[0].properties.location', '{loc}'),
+            self.check('[0].name', '{hsm_name}'),
+            self.exists('[0].properties.deletionDate')
+        ]
+
         self.cmd('group create -g {rg} -l {loc}'),
         self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin}')
 
@@ -222,10 +332,15 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
-        self.cmd('keyvault show-deleted --hsm-name {hsm_name}', checks=show_checks)
-        self.cmd('keyvault show-deleted --hsm-name {hsm_name} -l {loc}', checks=show_checks)
-        self.cmd('keyvault list-deleted --resource-type hsm', checks=list_checks)
+        self.cmd('keyvault show-deleted --hsm-name {hsm_name}', checks=show_deleted_checks)
+        self.cmd('keyvault show-deleted --hsm-name {hsm_name} -l {loc}', checks=show_deleted_checks)
+        self.cmd('keyvault list-deleted --resource-type hsm', checks=list_deleted_checks)
 
+        self.cmd('keyvault recover --hsm-name {hsm_name}')
+        self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
+        time.sleep(120)
+
+        self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
         self.cmd('group delete -n {rg} --yes')
 
@@ -287,13 +402,27 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.networkAcls.bypass', 'AzureServices'),
                      self.check('properties.networkAcls.defaultAction', 'Deny')
                  ])
-        # test policy set/delete
+        # test policy set
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapKey',
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapkey',
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+        # test policy for compound identity set
+        result = self.cmd('ad app create --display-name {kv}').get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id} --key-permissions get list',
+                 checks=[
+                     self.check('properties.accessPolicies[1].applicationId', self.kwargs['app_id']),
+                     self.check('properties.accessPolicies[1].objectId', self.kwargs['policy_id']),
+                     self.check('length(properties.accessPolicies[1].permissions.keys)', 2)
+                 ])
+        # test policy for compound identity delete
+        self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id}',
+                 checks=self.check('length(properties.accessPolicies)', 1))
+        self.cmd('ad app delete --id {app_id}')
+        # test policy delete
         self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id}', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
