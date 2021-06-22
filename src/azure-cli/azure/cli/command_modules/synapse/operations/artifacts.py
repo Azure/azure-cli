@@ -211,6 +211,7 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
                               executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
+    # Only extract properties from imported file
     for key in list(definition_file.keys()):
         if 'properties' == key:
             definition_file = definition_file['properties']
