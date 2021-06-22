@@ -137,24 +137,24 @@ t" --name "G2" --account-name "myMapsAccount" --resource-group "myResourceGroup"
 "myResourceGroup"
 """
 
-helps['maps account list-key'] = """
+helps['maps account keys list'] = """
     type: command
     short-summary: "Get the keys to use with the Maps APIs. A key is used to authenticate and authorize access to the \
 Maps REST APIs. Only one key is needed at a time; two are given to provide seamless key regeneration."
     examples:
-      - name: List Keys
+      - name: Keys List
         text: |-
-               az maps account list-key --name "myMapsAccount" --resource-group "myResourceGroup"
+               az maps account keys list --name "myMapsAccount" --resource-group "myResourceGroup"
 """
 
-helps['maps account regenerate-key'] = """
+helps['maps account keys renew'] = """
     type: command
     short-summary: "Regenerate either the primary or secondary key for use with the Maps APIs. The old key will stop \
 working immediately."
     examples:
-      - name: Regenerate Key
+      - name: Keys Renew
         text: |-
-               az maps account regenerate-key --name "myMapsAccount" --key-type "primary" --resource-group \
+               az maps account keys renew --name "myMapsAccount" --key-type "primary" --resource-group \
 "myResourceGroup"
 """
 

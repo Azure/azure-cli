@@ -39,8 +39,8 @@ def load_arguments(self, _):
 
     with self.argument_context('maps account') as c:
         c.argument('name', options_list=['--sku', '-s'], arg_type=get_enum_type(['S0', 'S1', 'G2']),
-                   help='The name of the SKU, in standard format '
-                   '(such as S0).', arg_group='Sku')
+                   help='The name of the SKU, in standard format (such as S0).', arg_group='Sku',
+                   required=True)
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('maps account create') as c:
@@ -62,7 +62,8 @@ def load_arguments(self, _):
                    'in the form: \'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microso'
                    'ft.ManagedIdentity/userAssignedIdentities/{identityName}\'. Expected value: '
                    'json-string/@json-file.', arg_group='Identity')
-        c.argument('force', options_list=['--accept-tos'], action='store_true')
+        c.argument('force', options_list=['--accept-tos'], action='store_true',
+                   help='You must agree to the License and Privacy Statement to create an account.')
 
     with self.argument_context('maps account update') as c:
         c.argument('kind', options_list=['--kind'], arg_type=get_enum_type(['Gen1', 'Gen2']),
@@ -93,7 +94,8 @@ def load_arguments(self, _):
     with self.argument_context('maps account keys renew') as c:
         c.argument('key_type',
                    options_list=['--key'],
-                   arg_type=get_enum_type(KeyType))
+                   arg_type=get_enum_type(KeyType),
+                   help='Whether the operation refers to the primary or secondary key')
 
     with self.argument_context('maps creator') as c:
         c.argument('tags', arg_type=tags_type)
