@@ -390,7 +390,7 @@ def __is_feature_flag(kv):
 
 
 def __is_key_vault_ref(kv):
-    return (kv and kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
+    return kv and kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE
 
 
 def __discard_features_from_retrieved_kv(src_kvs):
