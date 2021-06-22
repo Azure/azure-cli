@@ -334,7 +334,7 @@ def __read_kv_from_config_store(azconfig_client,
 
             if kv.content_type and kv.value:
                 # resolve key vault reference
-                if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                if keyvault_client and __is_key_vault_ref(kv):
                     __resolve_secret(keyvault_client, kv)
 
         # trim unwanted fields from kv object instead of leaving them as null.
@@ -369,8 +369,8 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if not preserve_labels:
             set_kv.label = label
 
-        # Don't overwrite the content type of feature flags
-        if content_type and not __is_feature_flag(set_kv):
+        # Don't overwrite the content type of feature flags or key vault references
+        if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
         try:
@@ -387,6 +387,10 @@ def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
+
+
+def __is_key_vault_ref(kv):
+    return (kv and kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
 
 
 def __discard_features_from_retrieved_kv(src_kvs):
@@ -467,7 +471,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             name = kv.key
             value = kv.value
             # If its a KeyVault ref, convert the format to AppService KeyVault ref format
-            if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+            if __is_key_vault_ref(kv):
                 try:
                     secret_uri = json.loads(value).get("uri")
                     if secret_uri:
