@@ -20,7 +20,7 @@ class CosmosDBTests(ScenarioTest):
             'network_acl_bypass_resource_id': network_acl_bypass_resource_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids "{network_acl_bypass_resource_id}" --backup-interval 480 --backup-retention 8')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel',
@@ -1885,7 +1885,10 @@ class CosmosDBTests(ScenarioTest):
         assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
 
+    from azure_devtools.scenario_tests import AllowLargeResponse
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_restore_command', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
     def test_cosmosdb_restore_command(self, resource_group, location):
         col = self.create_random_name(prefix='cli', length=15)
 
@@ -1918,7 +1921,7 @@ class CosmosDBTests(ScenarioTest):
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
-        self.assertRaises(CLIError, lambda: self.cmd(
+        self.assertRaises(Exception, lambda: self.cmd(
             'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as restore time is in future
@@ -1927,7 +1930,7 @@ class CosmosDBTests(ScenarioTest):
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
-        self.assertRaises(CLIError, lambda: self.cmd(
+        self.assertRaises(Exception, lambda: self.cmd(
             'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # Get correct restore ts
@@ -1945,7 +1948,7 @@ class CosmosDBTests(ScenarioTest):
         self.kwargs.update({
             'invalid_account_name': self.create_random_name(prefix='cli', length=15)
         })
-        self.assertRaises(CLIError, lambda: self.cmd(
+        self.assertRaises(Exception, lambda: self.cmd(
             'az cosmosdb restore -n {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as regional database doesn't exist in this location
@@ -1970,12 +1973,13 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd(
             'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
-        restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
-            self.check('restoreParameters.restoreMode', 'PointInTime')
-        ]).get_output_in_json()
-
-        assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
-        assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
+        self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime'),
+            self.check('restoreParameters.restoreSource',
+                       restorable_database_account['id']),
+            self.check('restoreParameters.restoreTimestampInUtc',
+                       restore_ts_string)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_restorable_commands', parameter_name_for_location='location')
     def test_cosmosdb_sql_restorable_commands(self, resource_group, location):
