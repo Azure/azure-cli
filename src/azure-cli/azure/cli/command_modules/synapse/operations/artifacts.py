@@ -211,6 +211,9 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
                               executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
+    for key in list(definition_file.keys()):
+        if 'properties' == key:
+            definition_file = definition_file['properties']
     spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
         endpoint = '{}{}{}'.format("https://", workspace_name, cmd.cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
@@ -258,14 +261,11 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
         try:
             notebook_properties = notebook.properties.as_dict()
-            for section_key in list(notebook_properties.keys()):
-                if 'properties' == section_key:
-                    notebook_properties = notebook_properties['properties']
-            for item_key in list(notebook_properties.keys()):
-                if 'bigDataPool' == item_key or 'big_data_pool' == item_key  or 'sessionProperties' == item_key or \
-                        'session_properties' == item_key:
-                    notebook_properties.pop(item_key)
-                elif 'metadata' == item_key:
+            for key in list(notebook_properties.keys()):
+                if 'bigDataPool' == key or 'big_data_pool' == key  or 'sessionProperties' == key or \
+                        'session_properties' == key:
+                    notebook_properties.pop(key)
+                elif 'metadata' == key:
                     for elementkey in list(notebook_properties['metadata'].keys()):
                         if 'a365ComputeOptions' == elementkey:
                             notebook_properties['metadata'].pop(elementkey)
