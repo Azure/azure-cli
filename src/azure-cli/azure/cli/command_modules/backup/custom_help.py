@@ -336,7 +336,7 @@ def is_json(content):
 
 
 def get_protection_container_uri_from_id(arm_id):
-    m = re.search('(?<=protectionContainers/)[^/]+', arm_id)
+    m = re.search('(?<=/protectionContainers/)[^/]+', arm_id)
     return m.group(0)
 
 
@@ -356,7 +356,7 @@ def get_vm_name_from_vm_id(arm_id):
 
 
 def get_resource_group_from_id(arm_id):
-    m = re.search('(?<=resourceGroups/)[^/]+', arm_id)
+    m = re.search('(?<=/resourceGroups/)[^/]+', arm_id)
     return m.group(0)
 
 
@@ -366,7 +366,7 @@ def get_operation_id_from_header(header):
 
 
 def get_vault_from_arm_id(arm_id):
-    m = re.search('(?<=vaults/)[^/]+', arm_id)
+    m = re.search('(?<=/vaults/)[^/]+', arm_id)
     return m.group(0)
 
 
