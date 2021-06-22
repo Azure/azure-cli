@@ -258,12 +258,14 @@ def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
         try:
             notebook_properties = notebook.properties.as_dict()
-            for key in list(notebook_properties.keys()):
-                if 'bigDataPool' == key or 'big_data_pool' == key  or 'sessionProperties' == key or \
-                        'session_properties' == key:
-                    notebook_properties.pop(key)
-                elif 'metadata' == key:
-                    print(notebook_properties['metadata'])
+            for section_key in list(notebook_properties.keys()):
+                if 'properties' == section_key:
+                    notebook_properties = notebook_properties['properties']
+            for item_key in list(notebook_properties.keys()):
+                if 'bigDataPool' == item_key or 'big_data_pool' == item_key  or 'sessionProperties' == item_key or \
+                        'session_properties' == item_key:
+                    notebook_properties.pop(item_key)
+                elif 'metadata' == item_key:
                     for elementkey in list(notebook_properties['metadata'].keys()):
                         if 'a365ComputeOptions' == elementkey:
                             notebook_properties['metadata'].pop(elementkey)
