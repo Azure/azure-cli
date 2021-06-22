@@ -1355,22 +1355,23 @@ def load_arguments(self, _):
                    is_preview=True)
 
         c.argument('primary_user_assigned_identity_id',
-                    options_list=['--primary-user-assigned-identity-id', '-pid'],
-                    help='The ID of the primary user managed identity.')
+                   options_list=['--primary-user-assigned-identity-id', '-pid'],
+                   help='The ID of the primary user managed identity.')
 
         c.argument('key_id',
-                    options_list=['--key-id', '-k'],
-                    help='The key vault URI for encryption.')
+                   options_list=['--key-id', '-k'],
+                   help='The key vault URI for encryption.')
 
         c.argument('user_assigned_identity_id',
                    options_list=['--user-assigned-identity-id', '-a'],
                    nargs='+',
                    help='Generate and assign an User Managed Identity(UMI) for this server.')
-        
+
         c.argument('identity_type',
-                    options_list=['--identity-type', '-t'],
-                    arg_type=get_enum_type(ResourceIdType),
-                    help='Type of Identity to be used. Possible values are SystemAsssigned, UserAssigned, SystemAssigned,UserAssigned and None.')
+                   options_list=['--identity-type', '-t'],
+                   arg_type=get_enum_type(ResourceIdType),
+                   help='Type of Identity to be used. Possible values are SystemAsssigned,'
+                   'UserAssigned, SystemAssigned,UserAssigned and None.')
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
@@ -1748,22 +1749,23 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
 
         c.argument('primary_user_assigned_identity_id',
-                    options_list=['--primary-user-assigned-identity-id', '-pid'],
-                    help='The ID of the primary user managed identity.')
+                   options_list=['--primary-user-assigned-identity-id', '-pid'],
+                   help='The ID of the primary user managed identity.')
 
         c.argument('key_id',
-                    options_list=['--key-id', '-k'],
-                    help='The key vault URI for encryption.')
+                   options_list=['--key-id', '-k'],
+                   help='The key vault URI for encryption.')
 
         c.argument('user_assigned_identity_id',
                    options_list=['--user-assigned-identity-id', '-a'],
-                   help='Generate and assign an User Managed Identity(UMI) for this server.',
-                   nargs='+')
-        
+                   nargs='+',
+                   help='Generate and assign an User Managed Identity(UMI) for this server.')
+
         c.argument('identity_type',
-                    options_list=['--identity-type', '-t'],
-                    arg_type=get_enum_type(ResourceIdType),
-                    help='Type of Identity to be used. Possible values are SystemAsssigned, UserAssigned, SystemAssignedUserAssigned and None.')
+                   options_list=['--identity-type', '-t'],
+                   arg_type=get_enum_type(ResourceIdType),
+                   help='Type of Identity to be used. Possible values are SystemAsssigned,'
+                   'UserAssigned, SystemAssignedUserAssigned and None.')
 
     with self.argument_context('sql mi create') as c:
         c.argument('location',

@@ -7,7 +7,6 @@
 from enum import Enum
 import calendar
 from datetime import datetime
-from logging import NullHandler
 from dateutil.parser import parse
 
 from azure.cli.core.util import (
@@ -23,7 +22,6 @@ from azure.mgmt.sql.models import (
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
-    IdentityType,
     PartnerInfo,
     PerformanceLevelUnit,
     FailoverGroupReplicationRole,
@@ -31,7 +29,6 @@ from azure.mgmt.sql.models import (
     SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
-    ServerKey,
     ServerKeyType,
     ServiceObjectiveName,
     Sku,
@@ -396,74 +393,101 @@ def _get_tenant_id():
     sub = profile.get_subscription()
     return sub['tenantId']
 
+
 def _get_identity_object_from_type(
-        assignIdentityIsPresent, 
-        resourceIdentityType, 
+        assignIdentityIsPresent,
+        resourceIdentityType,
         userAssignedIdentities,
         existingResourceIdentity):
     '''
     Gets the resource identity type.
     '''
-    identityResult=None
+    identityResult = None
 
     if resourceIdentityType is not None and resourceIdentityType == ResourceIdType.none.value:
         identityResult = ResourceIdentity(type=ResourceIdType.none.value)
         return identityResult
-    
+
     if assignIdentityIsPresent and resourceIdentityType is not None:
         # When UMI is of type SystemAssigned,UserAssigned
         if resourceIdentityType == ResourceIdType.system_assigned_user_assigned.value:
             umiDict = None
 
             if userAssignedIdentities is None:
-                raise CLIError('"The list of user assigned identity ids needs to be passed if the IdentityType is UserAssigned or SystemAssignedUserAssigned.')
+                raise CLIError('"The list of user assigned identity ids needs to be passed if the'
+                               'IdentityType is UserAssigned or SystemAssignedUserAssigned.')
 
             if existingResourceIdentity is not None and existingResourceIdentity.user_assigned_identities is not None:
-                for identity in userAssignedIdentities:
-                    existingResourceIdentity.user_assigned_identities.update({identity : UserIdentity()})
-                
-                identityResult = ResourceIdentity(type=ResourceIdType.system_assigned_user_assigned.value)
-            #create scenarios
+                identityResult = _get_sys_assigned_user_assigned_identity(userAssignedIdentities,
+                                                                          existingResourceIdentity)
+
+            # Create scenarios
             else:
                 for identity in userAssignedIdentities:
-                    if(umiDict == None):
-                        umiDict = {identity : UserIdentity()}
+                    if umiDict is None:
+                        umiDict = {identity: UserIdentity()}
                     else:
                         umiDict[identity] = UserIdentity()
-                
-                identityResult = ResourceIdentity(type=ResourceIdType.system_assigned_user_assigned.value, user_assigned_identities=umiDict)
+
+                identityResult = ResourceIdentity(type=ResourceIdType.system_assigned_user_assigned.value,
+                                                  user_assigned_identities=umiDict)
         # When UMI is of type UserAssigned
         if resourceIdentityType == ResourceIdType.user_assigned.value:
             umiDict = None
 
             if userAssignedIdentities is None:
-                raise CLIError('"The list of user assigned identity ids needs to be passed if the IdentityType is UserAssigned or SystemAssignedUserAssigned.')
+                raise CLIError('"The list of user assigned identity ids needs to be passed if the '
+                               'IdentityType is UserAssigned or SystemAssignedUserAssigned.')
 
             if existingResourceIdentity is not None and existingResourceIdentity.user_assigned_identities is not None:
-                for identity in userAssignedIdentities:
-                    existingResourceIdentity.user_assigned_identities.update({identity : UserIdentity()})
-                
-                identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value)
+                identityResult = _get__user_assigned_identity(userAssignedIdentities, existingResourceIdentity)
+
             else:
                 for identity in userAssignedIdentities:
-                    if(umiDict == None):
-                        umiDict = {identity : UserIdentity()}
+                    if umiDict is None:
+                        umiDict = {identity: UserIdentity()}
                     else:
                         umiDict[identity] = UserIdentity()
-                
-                identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value, user_assigned_identities=umiDict)
+
+                identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
+                                                  user_assigned_identities=umiDict)
     elif assignIdentityIsPresent:
-       if existingResourceIdentity is not None:
-           identityResult = existingResourceIdentity
-           identityResult.type = ResourceIdType.system_assigned.value
-       else:
-           identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
-    
+        if existingResourceIdentity is not None:
+            identityResult = existingResourceIdentity
+            identityResult.type = ResourceIdType.system_assigned.value
+        else:
+            identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
+
     if assignIdentityIsPresent is False and existingResourceIdentity is not None:
         identityResult = existingResourceIdentity
 
     print(identityResult)
     return identityResult
+
+
+def _get_sys_assigned_user_assigned_identity(
+        userAssignedIdentities,
+        existingResourceIdentity):
+
+    for identity in userAssignedIdentities:
+        existingResourceIdentity.user_assigned_identities.update({identity: UserIdentity()})
+
+    identityResult = ResourceIdentity(type=ResourceIdType.system_assigned_user_assigned.value)
+
+    return identityResult
+
+
+def _get__user_assigned_identity(
+        userAssignedIdentities,
+        existingResourceIdentity):
+
+    for identity in userAssignedIdentities:
+        existingResourceIdentity.user_assigned_identities.update({identity: UserIdentity()})
+
+    identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value)
+
+    return identityResult
+
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
@@ -545,6 +569,7 @@ class SqlServerMinimalTlsVersionType(Enum):
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
 
+
 class ResourceIdType(Enum):
     '''
     Gets the type of resource identity.
@@ -553,6 +578,7 @@ class ResourceIdType(Enum):
     user_assigned = 'UserAssigned'
     system_assigned_user_assigned = 'SystemAssigned,UserAssigned'
     none = 'None'
+
 
 class SqlManagedInstanceMinimalTlsVersionType(Enum):
     no_tls = "None"
@@ -3448,14 +3474,14 @@ def server_update(
     '''
 
     # Once assigned, the identity cannot be removed
-    #if instance.identity is None and assign_identity:
+    # if instance.identity is None and assign_identity:
     #    instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     instance.identity = _get_identity_object_from_type(
-                            assign_identity, 
-                            identity_type, 
-                            user_assigned_identity_id, 
-                            instance.identity)
+        assign_identity,
+        identity_type,
+        user_assigned_identity_id,
+        instance.identity)
 
     # Apply params to instance
     instance.administrator_login_password = (
@@ -3467,7 +3493,7 @@ def server_update(
         instance.public_network_access = (
             ServerPublicNetworkAccess.enabled if enable_public_network
             else ServerPublicNetworkAccess.disabled)
-    
+
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
 
@@ -3565,7 +3591,8 @@ def firewall_rule_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         parameters=FirewallRule(start_ip_address=start_ip_address or instance.start_ip_address,
-        end_ip_address=end_ip_address or instance.end_ip_address))
+                                end_ip_address=end_ip_address or instance.end_ip_address))
+
 
 def firewall_rule_create(
         client,
@@ -3581,8 +3608,8 @@ def firewall_rule_create(
         firewall_rule_name=firewall_rule_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        parameters=FirewallRule(start_ip_address=start_ip_address or instance.start_ip_address,
-        end_ip_address=end_ip_address or instance.end_ip_address))
+        parameters=FirewallRule(start_ip_address=start_ip_address,
+                                end_ip_address=end_ip_address))
 
 
 #####
@@ -3729,8 +3756,8 @@ def encryption_protector_update(
         server_name=server_name,
         encryption_protector_name='Current',
         parameters=EncryptionProtector(server_key_type=server_key_type,
-        server_key_name=key_name,
-        auto_rotation_enabled=auto_rotation_enabled))
+                                       server_key_name=key_name,
+                                       auto_rotation_enabled=auto_rotation_enabled))
 
 #####
 #           sql server aad-only
@@ -3912,10 +3939,8 @@ def managed_instance_create(
                 return
 
     kwargs['key_id'] = key_id
-    
-    kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
-    #kwargs['user_assigned_identity_id'] = user_assigned_identity_id
+    kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
     # Create
     return client.create_or_update(
@@ -3963,14 +3988,11 @@ def managed_instance_update(
     '''
 
     # Once assigned, the identity cannot be removed
-    #if instance.identity is None and assign_identity:
-    #    instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
-
     instance.identity = _get_identity_object_from_type(
-                            assign_identity, 
-                            identity_type, 
-                            user_assigned_identity_id, 
-                            instance.identity)
+        assign_identity,
+        identity_type,
+        user_assigned_identity_id,
+        instance.identity)
 
     # Apply params to instance
     instance.administrator_login_password = (
@@ -4098,8 +4120,8 @@ def managed_instance_encryption_protector_update(
         managed_instance_name=managed_instance_name,
         encryption_protector_name='Current',
         parameters=ManagedInstanceEncryptionProtector(server_key_type=server_key_type,
-        server_key_name=key_name,
-        auto_rotation_enabled=auto_rotation_enabled))
+                                                      server_key_name=key_name,
+                                                      auto_rotation_enabled=auto_rotation_enabled))
 
 
 #####
