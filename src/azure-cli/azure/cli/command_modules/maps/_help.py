@@ -192,7 +192,7 @@ helps['maps creator show'] = """
     examples:
       - name: Get Creator Resource
         text: |-
-               az maps creator show --account-name "myMapsAccount" --name "myCreator" --resource-group \
+               az maps creator show --account-name "myMapsAccount" --creator-name "myCreator" --resource-group \
 "myResourceGroup"
 """
 
@@ -204,7 +204,7 @@ a custom set of mapping data. It requires an account to exist before it can be c
       - name: Create Creator Resource
         text: |-
                az maps creator create --location "eastus2" --storage-units 5 --tags test="true" --account-name \
-"myMapsAccount" --name "myCreator" --resource-group "myResourceGroup"
+"myMapsAccount" --creator-name "myCreator" --resource-group "myResourceGroup"
 """
 
 helps['maps creator update'] = """
@@ -215,7 +215,7 @@ such as Tags."
       - name: Update Creator Resource
         text: |-
                az maps creator update --storage-units 10 --tags specialTag="true" --account-name "myMapsAccount" \
---name "myCreator" --resource-group "myResourceGroup"
+--creator-name "myCreator" --resource-group "myResourceGroup"
 """
 
 helps['maps creator delete'] = """
@@ -224,6 +224,6 @@ helps['maps creator delete'] = """
     examples:
       - name: Delete Creator Resource
         text: |-
-               az maps creator delete --account-name "myMapsAccount" --name "myCreator" --resource-group \
+               az maps creator delete --account-name "myMapsAccount" --creator-name "myCreator" --resource-group \
 "myResourceGroup"
 """

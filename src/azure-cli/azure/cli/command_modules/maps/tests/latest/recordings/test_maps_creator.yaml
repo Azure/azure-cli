@@ -1,0 +1,406 @@
+interactions:
+- request:
+    body: '{"location": "global", "sku": {"name": "S1"}, "kind": "Gen1", "properties":
+      {"disableLocalAuth": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '104'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sku --accept-tos
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004?api-version=2021-02-01
+  response:
+    body:
+      string: "{\r\n  \"kind\": \"Gen1\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"S1\",\r\n    \"tier\": \"Standard\"\r\n  },\r\n
+        \ \"properties\": {\r\n    \"uniqueId\": \"6b7b00cb-8e1b-4539-97c8-249252a59e5b\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"disableLocalAuth\": false\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004\",\r\n
+        \ \"name\": \"cli-000004\",\r\n  \"location\": \"global\",\r\n  \"tags\":
+        {}\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '558'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:02:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "westus2", "properties": {"storageUnits": 5}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '58'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --creator-name -g --storage-units -l
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005?api-version=2021-02-01
+  response:
+    body:
+      string: '{"type":"Microsoft.Maps/accounts/creators","properties":{"provisioningState":"Created","storageUnits":5},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005","name":"cli-000005","location":"westus2","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '401'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:02:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - d23fb157-023d-44e9-8fab-e7629e27f802
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"tags": {"key-000002": "val-000003"}, "properties": {"storageUnits": 10}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '74'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --creator-name -g --storage-units --tags
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005?api-version=2021-02-01
+  response:
+    body:
+      string: '{"error":{"code":"500 InternalServerError","message":"Unknown error
+        - Unable to update consumption tracking item at this time."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '129'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:02:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - 27fe8f0e-1dbe-4db1-8c6a-6dd8291e5b0c
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"tags": {"key-000002": "val-000003"}, "properties": {"storageUnits": 10}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '74'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --creator-name -g --storage-units --tags
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005?api-version=2021-02-01
+  response:
+    body:
+      string: '{"type":"Microsoft.Maps/accounts/creators","properties":{"provisioningState":"Succeeded","storageUnits":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005","name":"cli-000005","location":"westus2","tags":{"key-000002":"val-000003"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:02:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - 2e7e81a8-5a1e-4ba0-87c7-a9588564a61b
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --creator-name
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005?api-version=2021-02-01
+  response:
+    body:
+      string: '{"type":"Microsoft.Maps/accounts/creators","properties":{"provisioningState":"Succeeded","storageUnits":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005","name":"cli-000005","location":"westus2","tags":{"key-000002":"val-000003"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:02:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - 5a267714-9936-449f-9b15-b358c5ab6846
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators?api-version=2021-02-01
+  response:
+    body:
+      string: '{"value":[{"type":"Microsoft.Maps/accounts/creators","properties":{"provisioningState":"Succeeded","storageUnits":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005","name":"cli-000005","location":"westus2","tags":{"key-000002":"val-000003"}}],"nextLink":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '457'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:02:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - 194f3e49-974e-4921-92a0-b580c6439694
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --creator-name -g -y
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators/cli-000005?api-version=2021-02-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 22 Jun 2021 05:02:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - b610e8c0-d47d-4a68-bcd2-234909342672
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps creator list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-mgmt-maps/2.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000004/creators?api-version=2021-02-01
+  response:
+    body:
+      string: '{"value":[],"nextLink":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '28'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Jun 2021 05:03:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-correlation-id:
+      - 650ce908-89c8-467f-8ef7-c66bed0a1666
+    status:
+      code: 200
+      message: OK
+version: 1

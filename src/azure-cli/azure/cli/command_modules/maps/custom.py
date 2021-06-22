@@ -5,6 +5,7 @@
 
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
+from knack.util import CLIError
 
 ACCOUNT_LOCATION = 'global'
 

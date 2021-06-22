@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.maps._client_factory import cf_accounts,cf_map,cf_creator
+from azure.cli.command_modules.maps._client_factory import cf_accounts, cf_map, cf_creator
 
 
 def load_command_table(self, _):
