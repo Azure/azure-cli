@@ -4825,7 +4825,7 @@ def _add_publish_profile_to_github(cmd, resource_group, name, repo, token, githu
     publish_profile_bytes = _generic_site_operation(
         cmd.cli_ctx, resource_group, name, 'list_publishing_profile_xml_with_secrets',
         slot, {"format": "WebDeploy"})
-    publish_profile = [x for x in publish_profile_bytes]
+    publish_profile = list(publish_profile_bytes)
     if publish_profile:
         publish_profile = publish_profile[0].decode('ascii')
     else:
