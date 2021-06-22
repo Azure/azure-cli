@@ -28,7 +28,8 @@ from azure.cli.testsdk.preparers import (
 from azure.cli.command_modules.sql.custom import (
     ClientAuthenticationType,
     ClientType,
-    ComputeModelType)
+    ComputeModelType,
+    ResourceIdType)
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -3271,19 +3272,20 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # update encryption protector to akv key
-        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {}'
+        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {} --auto-rotation-enabled'
                  .format(resource_group, server, kid),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
-                     JMESPathCheck('serverKeyName', server_key_name),
-                     JMESPathCheck('uri', kid)])
+                     JMESPathCheck('serverKeyName', server_key_name),                   
+                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('autoRotationEnabled', True)])
 
         # validate encryption protector is akv via show
         self.cmd('sql server tde-key show -g {} -s {}'
                  .format(resource_group, server),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
-                     JMESPathCheck('serverKeyName', server_key_name),
+                     JMESPathCheck('serverKeyName', server_key_name),                    
                      JMESPathCheck('uri', kid)])
 
         # update encryption protector to service managed
@@ -3311,6 +3313,59 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql server key list -g {} -s {}'
                  .format(resource_group, server),
                  checks=[JMESPathCheck('length(@)', 1)])
+
+class SqlServerIdentityTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    def test_sql_server_identity(self):
+
+        server_name_test = 'umitest'
+        server_name = self.create_random_name(server_name_test, managed_instance_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        families = ['Gen5']
+
+        subnet = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance'
+
+        license_type = 'LicenseIncluded'
+        loc = 'eastus2euap'
+        v_cores = 4
+        storage_size_in_gb = '32'
+        edition = 'GeneralPurpose'
+        resource_group_1 = "alswansotest3-rg"
+        collation = "SQL_Latin1_General_CP1_CI_AS"
+        proxy_override = "Proxy"
+
+        test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+        umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+        
+        identity_type = ResourceIdType.system_assigned_user_assigned.value
+        user = admin_login
+
+        self.cmd('sql server create -g {} -n {} -l {} -i '
+                  '--admin-user {} --admin-password {} --user-assigned-identity-id {} --identity-type {} -pid {}'
+                  .format(resource_group_1, server_name, loc, user, admin_passwords[0], umi_list, identity_type, test_umi),
+                  checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')])
+        
+        # test show sql server
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group_1, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login)])
+
+        self.cmd('sql server delete -g {} -n {} --yes'
+                 .format(resource_group_1, server_name), checks=NoneCheck())
+
+        # test show sql server doesn't return anything
+        self.cmd('sql server show -g {} -n {}'
+                 .format(resource_group_1, server_name),
+                 expect_failure=True)
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
@@ -4068,28 +4123,41 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_managed_instance_create_identity_mgmt(self):
 
-        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        managed_instance_name_test = 'umitest'
+        managed_instance_name = self.create_random_name(managed_instance_name_test, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
 
-        subnet = '/subscriptions/8fb1ad69-28b1-4046-b50f-43999c131722/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1'
+        subnet = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance'
 
         license_type = 'LicenseIncluded'
-        loc = 'westeurope'
-        v_cores = 8
-        storage_size_in_gb = '128'
+        loc = 'eastus2euap'
+        v_cores = 4
+        storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
-        resource_group_1 = "toki"
-        collation = "Serbian_Cyrillic_100_CS_AS"
+        resource_group_1 = "alswansotest3-rg"
+        collation = "SQL_Latin1_General_CP1_CI_AS"
         proxy_override = "Proxy"
 
+        test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+        umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+        
+        identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
+
+        print('sql mi create -g {} -n {} -l {} -i '
+                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled ' 
+                  '--user-assigned-identity-id {} --identity-type {} -pid {}'
+                 .format(resource_group_1, managed_instance_name, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition,
+                  families[0], collation, proxy_override, umi_list, identity_type, test_umi))
 
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
-                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
-                 .format(resource_group_1, managed_instance_name, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override),
+                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled ' 
+                  '--user-assigned-identity-id {} --identity-type {} -pid {}'
+                 .format(resource_group_1, managed_instance_name, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition,
+                  families[0], collation, proxy_override, umi_list, identity_type, test_umi),
                  checks=[
                      JMESPathCheck('name', managed_instance_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -4100,7 +4168,7 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('sku.family', families[0]),
                      JMESPathCheck('sku.capacity', v_cores),
-                     JMESPathCheck('identity.type', 'SystemAssigned'),
+                     JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
                      JMESPathCheck('collation', collation),
                      JMESPathCheck('proxyOverride', proxy_override),
                      JMESPathCheck('publicDataEndpointEnabled', 'True')])
@@ -4120,7 +4188,6 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
         self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name),
                  expect_failure=True)
-
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
@@ -4316,11 +4383,12 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                      self.check('serverKeyName', 'ServiceManaged')])
 
         # update encryption protector to akv key
-        self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid}',
+        self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid} --auto_rotation_enabled',
                  checks=[
                      self.check('serverKeyType', 'AzureKeyVault'),
                      self.check('serverKeyName', '{server_key_name}'),
-                     self.check('uri', '{kid}')])
+                     self.check('uri', '{kid}'),
+                     self.check('autoRotationEnabled', True)])
 
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
