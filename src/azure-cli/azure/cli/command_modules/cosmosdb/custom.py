@@ -168,6 +168,7 @@ def cli_cosmosdb_create(cmd, client,
                                     arm_location=resource_group_location)
 
 
+# pylint: disable=too-many-statements
 def _create_database_account(client,
                              resource_group_name,
                              account_name,
@@ -1649,6 +1650,7 @@ def _get_options(throughput=None, max_throughput=None):
     return options
 
 
+# pylint: disable=too-many-statements
 def cli_cosmosdb_restore(cmd,
                          client,
                          resource_group_name,
@@ -1709,8 +1711,7 @@ def cli_cosmosdb_restore(cmd,
             if err.code == 404:
                 raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(
                     account_name, restore_timestamp, location))
-            else:
-                raise
+            raise
     elif target_restorable_account.api_type.lower() == "mongodb":
         try:
             from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
@@ -1725,8 +1726,7 @@ def cli_cosmosdb_restore(cmd,
             if err.code == 404:
                 raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(
                     account_name, restore_timestamp, location))
-            else:
-                raise
+            raise
     else:
         raise CLIError("Provided API Type {} is not supported for account {}".format(
             target_restorable_account.api_type, account_name))

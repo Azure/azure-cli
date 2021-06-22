@@ -1341,6 +1341,28 @@ cosmosdb update:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+cosmosdb restore:
+  parameters:
+    target_database_account_name:
+      rule_exclusions:
+        - option_length_too_long
+cosmosdb sql retrieve-latest-backup-time:
+  parameters:
+    target_database_account_name:
+      rule_exclusions:
+        - option_length_too_long
+cosmosdb database:
+  parameters:
+    db_resource_group_name:
+      rule_exclusions:
+        - option_length_too_long
+        - parameter_should_not_end_in_resource_group
+cosmosdb collection:
+  parameters:
+    db_resource_group_name:
+      rule_exclusions:
+        - option_length_too_long
+        - parameter_should_not_end_in_resource_group
 deploymentmanager service create:
   parameters:
     service_topology_name:
