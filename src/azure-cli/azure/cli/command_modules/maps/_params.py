@@ -56,7 +56,7 @@ def load_arguments(self, _):
         c.argument('type_', options_list=['--type'], arg_type=get_enum_type(['SystemAssigned', 'UserAssigned',
                                                                              'SystemAssigned, UserAssigned', 'None']),
                    help='The identity type.', arg_group='Identity')
-        c.argument('user_assigned_identities', options_list=['--user-assigned-identites'], type=validate_file_or_dict,
+        c.argument('user_assigned_identities', options_list=['--user-identites'], type=validate_file_or_dict,
                    help='The list of user identities associated with the resource. '
                    'The user identity dictionary key references will be ARM resource ids '
                    'in the form: \'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microso'
@@ -77,7 +77,7 @@ def load_arguments(self, _):
         c.argument('type_', options_list=['--type'], arg_type=get_enum_type(['SystemAssigned', 'UserAssigned',
                                                                              'SystemAssigned, UserAssigned', 'None']),
                    help='The identity type.', arg_group='Identity')
-        c.argument('user_assigned_identities', options_list=['--user-assigned-identites'], type=validate_file_or_dict,
+        c.argument('user_assigned_identities', options_list=['--user-identites'], type=validate_file_or_dict,
                    help='The list of user identities associated with the resource. '
                    'The user identity dictionary key references will be ARM resource ids '
                    'in the form: \'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microso'
