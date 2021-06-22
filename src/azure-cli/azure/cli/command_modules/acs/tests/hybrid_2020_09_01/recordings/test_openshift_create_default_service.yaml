@@ -1,0 +1,450 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --display-name --key-type --password --identifier-uris
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?$filter=startswith%28displayName%2C%27clitest000001%27%29&api-version=1.6
+  response:
+    body:
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '121'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Thu, 10 Jun 2021 08:30:53 GMT
+      duration:
+      - '446065'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - /SDo63YB3FUluvw0LRzVOtWORcsB82kmFFQHvqUgnas=
+      ocp-aad-session-key:
+      - QCWwGGew-P1plHklIt2PctvTwSGnPxYnKZhjDnFxRnxYs19U-KgFnMfJGlK6EPlbFWhaLP4Ul1qyARo5NfoEYr52MeL4gAvbvT5uqKr9DTiqdW62k66V_nzNPaoqn1Cd46VpnkCooZXHPzwHy1Hf5svMND985tfFs_ayrqmFGh8.8yIYhXnM0yQ8f1ggCqxNwBXLrms0FyW4RywHx63pbdk
+      pragma:
+      - no-cache
+      request-id:
+      - 86b0e966-c79e-4558-8757-89ff1acdac4b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-ms-resource-unit:
+      - '2'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"availableToOtherTenants": false, "passwordCredentials": [{"startDate":
+      "2021-06-10T08:30:54.778122Z", "endDate": "2022-06-09T08:30:54.778122Z", "keyId":
+      "021fa5c9-3e70-43fb-8315-9dcf0ed34d9b", "value": "ReplacedSPPassword123*"}],
+      "displayName": "ReplacedSPPassword123*", "identifierUris": ["http://ReplacedSPPassword123*"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --display-name --key-type --password --identifier-uris
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?api-version=1.6
+  response:
+    body:
+      string: '{"odata.metadata": "https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/@Element",
+        "odata.type": "Microsoft.DirectoryServices.Application", "objectType": "Application",
+        "objectId": "dce4ffdd-7855-497b-892c-287eb89b7969", "deletionTimestamp": null,
+        "acceptMappedClaims": null, "addIns": [], "appId": "f0441917-eab2-48a5-88f0-bc1a60279465",
+        "applicationTemplateId": null, "appRoles": [], "availableToOtherTenants":
+        false, "displayName": "clitest000001", "errorUrl": null, "groupMembershipClaims":
+        null, "homepage": null, "identifierUris": ["http://clitest000001"], "informationalUrls":
+        {"termsOfService": null, "support": null, "privacy": null, "marketing": null},
+        "isDeviceOnlyAuthSupported": null, "keyCredentials": [], "knownClientApplications":
+        [], "logoutUrl": null, "logo@odata.mediaEditLink": "directoryObjects/dce4ffdd-7855-497b-892c-287eb89b7969/Microsoft.DirectoryServices.Application/logo",
+        "logo@odata.mediaContentType": "application/json;odata=minimalmetadata; charset=utf-8",
+        "logoUrl": null, "mainLogo@odata.mediaEditLink": "directoryObjects/dce4ffdd-7855-497b-892c-287eb89b7969/Microsoft.DirectoryServices.Application/mainLogo",
+        "oauth2AllowIdTokenImplicitFlow": true, "oauth2AllowImplicitFlow": false,
+        "oauth2AllowUrlPathMatching": false, "oauth2Permissions": [{"adminConsentDescription":
+        "Allow the application to access clitest000001 on behalf of the signed-in
+        user.", "adminConsentDisplayName": "Access clitest000001", "id": "dda54172-c21f-4c2b-ac1f-f72c7b17aafe",
+        "isEnabled": true, "type": "User", "userConsentDescription": "Allow the application
+        to access clitest000001 on your behalf.", "userConsentDisplayName": "Access
+        clitest000001", "value": "user_impersonation"}], "oauth2RequirePostResponse":
+        false, "optionalClaims": null, "orgRestrictions": [], "parentalControlSettings":
+        {"countriesBlockedForMinors": [], "legalAgeGroupRule": "Allow"}, "passwordCredentials":
+        [{"customKeyIdentifier": null, "endDate": "2022-06-09T08:30:54.778122Z", "keyId":
+        "021fa5c9-3e70-43fb-8315-9dcf0ed34d9b", "startDate": "2021-06-10T08:30:54.778122Z",
+        "value": "ReplacedSPPassword123*"}], "publicClient": null, "publisherDomain":
+        "bhuvanitgmail.onmicrosoft.com", "recordConsentConditions": null, "replyUrls":
+        [], "requiredResourceAccess": [], "samlMetadataUrl": null, "signInAudience":
+        "AzureADMyOrg", "tokenEncryptionKeyId": null}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '2302'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Thu, 10 Jun 2021 08:30:54 GMT
+      duration:
+      - '2777951'
+      expires:
+      - '-1'
+      location:
+      - https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/dce4ffdd-7855-497b-892c-287eb89b7969/Microsoft.DirectoryServices.Application
+      ocp-aad-diagnostics-server-name:
+      - m4jubrNwoR6aGjVyorOSv21ZcagFQHb2CxdiFi0DGdc=
+      ocp-aad-session-key:
+      - KuytDUk7y8AICCDKHehUX5gT0l6r-tXm3QSeU2wuVRi7SYU8ERvzAHCRqtof_OiTqTWZcuLRLg8P-Vab-xv4wijABRUn5kyHNgBlEVMaS7YmmfS9Euv4Cs1p-9kDUQW94pRjbqHegsDsnIcB3IqfZ_BjIF5eEquTLLBNs64ifPM.lX0OIQvumkGeJikgiXCy3De93GclnQir9WFlYsQmxgU
+      pragma:
+      - no-cache
+      request-id:
+      - 88279f2a-1d10-4346-afb2-37af41858689
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-ms-resource-unit:
+      - '1'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - openshift create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --compute-count --aad-client-app-id --aad-client-app-secret
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-containerservice/11.2.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.ContainerService/openShiftManagedClusters/clitestosa000003?api-version=2019-09-30-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.ContainerService/openShiftManagedClusters/clitestosa000003''
+        under resource group ''acscliapi8'' was not found. For more details please
+        go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '249'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Jun 2021 08:30:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "WestUS2", "properties": {"openShiftVersion": "v3.11", "networkProfile":
+      {"vnetCidr": "10.0.0.0/8"}, "routerProfiles": [{"name": "default"}], "masterPoolProfile":
+      {"name": "master", "count": 3, "vmSize": "Standard_D4s_v3", "subnetCidr": "10.0.0.0/24",
+      "osType": "Linux"}, "agentPoolProfiles": [{"name": "compute", "count": 1, "vmSize":
+      "Standard_D4s_v3", "subnetCidr": "10.0.0.0/24", "osType": "Linux", "role": "compute"},
+      {"name": "infra", "count": 3, "vmSize": "Standard_D4s_v3", "subnetCidr": "10.0.0.0/24",
+      "osType": "Linux", "role": "infra"}], "authProfile": {"identityProviders": [{"name":
+      "Azure AD", "provider": {"kind": "AADIdentityProvider", "clientId": "f0441917-eab2-48a5-88f0-bc1a60279465",
+      "secret": "clitest000001"}}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - openshift create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '759'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location --compute-count --aad-client-app-id --aad-client-app-secret
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-containerservice/11.2.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acscliapi8/providers/Microsoft.ContainerService/openShiftManagedClusters/clitestosa000003?api-version=2019-09-30-preview
+  response:
+    body:
+      string: "{\n  \"code\": \"CreatesNotAllowed\",\n  \"message\": \"Microsoft.ContainerService/openshiftManagedClusters
+        is in the process of being deprecated. Please do all new creates on Microsoft.RedHatOpenshift/openShiftClusters\"\n
+        }"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '214'
+      content-type:
+      - application/json
+      date:
+      - Thu, 10 Jun 2021 08:30:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?$filter=identifierUris%2Fany%28s%3As%20eq%20%27f0441917-eab2-48a5-88f0-bc1a60279465%27%29&api-version=1.6
+  response:
+    body:
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '121'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Thu, 10 Jun 2021 08:30:56 GMT
+      duration:
+      - '479672'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - Jo3xFIkM9mb8Lp7+VPvE4cfrpCS7spretmG7f2BpLM8=
+      ocp-aad-session-key:
+      - MhNqf9PB3kUMNUk1rZ3UEI6FiEGcQUQeL2lGTywSiadjc8MB9dKJ-vGTMrHlckRnz5U-cAdKAJsJWVm1A9yR5zfPFlqHLU0TyrGUsvXzhCfN1lU1tFgpddXLFLYwbviyHv7MOHf6A98-DpCkEIeouyntDfQjmXWjJ_gTz05aKGY.CFi2YaRyZKdLJxEWHO8FC6951ZTx06PeSqx9jB3EVEQ
+      pragma:
+      - no-cache
+      request-id:
+      - 5fd4a508-81ca-4d95-adcc-2713c37bdb4b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-ms-resource-unit:
+      - '2'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?$filter=appId%20eq%20%27f0441917-eab2-48a5-88f0-bc1a60279465%27&api-version=1.6
+  response:
+    body:
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"dce4ffdd-7855-497b-892c-287eb89b7969","deletionTimestamp":null,"acceptMappedClaims":null,"addIns":[],"appId":"f0441917-eab2-48a5-88f0-bc1a60279465","applicationTemplateId":null,"appRoles":[],"availableToOtherTenants":false,"displayName":"clitest000001","errorUrl":null,"groupMembershipClaims":null,"homepage":null,"identifierUris":["http://clitest000001"],"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"isDeviceOnlyAuthSupported":null,"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"logo@odata.mediaEditLink":"directoryObjects/dce4ffdd-7855-497b-892c-287eb89b7969/Microsoft.DirectoryServices.Application/logo","logoUrl":null,"mainLogo@odata.mediaEditLink":"directoryObjects/dce4ffdd-7855-497b-892c-287eb89b7969/Microsoft.DirectoryServices.Application/mainLogo","oauth2AllowIdTokenImplicitFlow":true,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access clitest000001 on behalf of the signed-in user.","adminConsentDisplayName":"Access
+        clitest000001","id":"dda54172-c21f-4c2b-ac1f-f72c7b17aafe","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access clitest000001 on your behalf.","userConsentDisplayName":"Access
+        clitest000001","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"optionalClaims":null,"orgRestrictions":[],"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2022-06-09T08:30:54.778122Z","keyId":"021fa5c9-3e70-43fb-8315-9dcf0ed34d9b","startDate":"2021-06-10T08:30:54.778122Z","value":null}],"publicClient":null,"publisherDomain":"bhuvanitgmail.onmicrosoft.com","recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null,"signInAudience":"AzureADMyOrg","tokenEncryptionKeyId":null}]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '2219'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Thu, 10 Jun 2021 08:30:55 GMT
+      duration:
+      - '547902'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - ZD/zvBhigbAIftKPayN2/Dmdgunt/DUfCEhO+J6I+Yo=
+      ocp-aad-session-key:
+      - PdUXgbPkqUB1t-xOj53WlKHnP-XQeDV2iWUmx6aFblo-XAfm_UZrHpq-WO9ARu_jGpJnr11RFvhmqrtLY2fuvObKsqR0kfj0VJlQBWfWIP9nhP05GZI0dzdQoOuU9HLb8KOH9IHzf2OrmzjNzaahPY9f-LTJd8kw2IWkHQFYEBE.38zZhWWS6AOVSktD4NUEcNapi2jFfOV6d_f2OSCv34I
+      pragma:
+      - no-cache
+      request-id:
+      - 2975f630-1764-4b87-8443-792e1aadc421
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-ms-resource-unit:
+      - '2'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.23.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications/dce4ffdd-7855-497b-892c-287eb89b7969?api-version=1.6
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      date:
+      - Thu, 10 Jun 2021 08:30:56 GMT
+      duration:
+      - '1096432'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - TGZiSY7BOPh44S88kCZWfuQODjEH0CUrfdTLgtGF8oo=
+      ocp-aad-session-key:
+      - APVBmCrfu8G-Jkc5m4-0-bIWd8P5cSt8S0j8b6L9MzaBu9Mmzw0Q6bmTzSTNWvPIE_wGGV8gabg9lFRaHyfhe2GJzcXEBvOCm1m00QM0PUv1MWVNdoql-BUYXY-AXAthOmFQ7Z_GB1Q6-JhUCBR3nhzqAyioRQDyVkJlYaH9cX0.tLauXJULG0tB_9-6o28sqDaoIWwdtBdyOUh3hh_iv2I
+      pragma:
+      - no-cache
+      request-id:
+      - 3779a452-26d6-4a7a-9c08-90acddbb0ec4
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-ms-resource-unit:
+      - '1'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 204
+      message: No Content
+version: 1
