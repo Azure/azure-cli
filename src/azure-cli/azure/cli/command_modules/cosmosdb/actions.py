@@ -33,7 +33,8 @@ class CreateLocation(argparse._AppendAction):
                 _key = kvp[0].lower()
                 if _key in keys_found:
                     # pylint: disable=line-too-long
-                    raise CLIError('usage error: --locations [KEY=VALUE ...]. KEY {} provided multiple times'.format(_key))
+                    raise CLIError(
+                        'usage error: --locations [KEY=VALUE ...]. KEY {} provided multiple times'.format(_key))
                 keys_found.add(_key)
                 if _key == "regionname":
                     _name = kvp[1]
@@ -43,7 +44,8 @@ class CreateLocation(argparse._AppendAction):
                     _is_zr = kvp[1].lower() == "true"
                 else:
                     # pylint: disable=line-too-long
-                    raise CLIError('usage error: --locations [KEY=VALUE ...]. KEY {} not supported. Valid keys are regionName, failoverPriority, and isZoneRedundant'.format(_key))
+                    raise CLIError(
+                        'usage error: --locations [KEY=VALUE ...]. KEY {} not supported. Valid keys are regionName, failoverPriority, and isZoneRedundant'.format(_key))
             namespace.locations.append(
                 Location(location_name=_name,
                          failover_priority=_failover,
@@ -51,7 +53,8 @@ class CreateLocation(argparse._AppendAction):
         else:
             # pylint: disable=line-too-long
             if not namespace._deprecated_location_format:
-                logger.warning('The regionName=failoverPriority method of specifying locations is deprecated. Use --locations KEY=VALUE [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
+                logger.warning(
+                    'The regionName=failoverPriority method of specifying locations is deprecated. Use --locations KEY=VALUE [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
             namespace._deprecated_location_format = True
 
             for item in values:
@@ -61,13 +64,15 @@ class CreateLocation(argparse._AppendAction):
                              failover_priority=int(comps[1]),
                              is_zone_redundant=False))
 
+
 class CreateDatabaseRestoreResource(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         if namespace.databases_to_restore is None:
             namespace.databases_to_restore = []
         if not values:
             # pylint: disable=line-too-long
-            raise CLIError('usage error: --databases-to-restore [name=DatabaseName collections=CollectionName1 CollectionName2 ...]')
+            raise CLIError(
+                'usage error: --databases-to-restore [name=DatabaseName collections=CollectionName1 CollectionName2 ...]')
         database_restore_resource = DatabaseRestoreResource()
         i = 0
         for item in values:
@@ -75,17 +80,20 @@ class CreateDatabaseRestoreResource(argparse._AppendAction):
                 kvp = item.split('=', 1)
                 if len(kvp) != 2 or kvp[0].lower() != 'name':
                     # pylint: disable=line-too-long
-                    raise CLIError('usage error: --databases-to-restore [name=DatabaseName collections=CollectionName1 CollectionName2 ...]')
+                    raise CLIError(
+                        'usage error: --databases-to-restore [name=DatabaseName collections=CollectionName1 CollectionName2 ...]')
                 database_name = kvp[1]
                 database_restore_resource.database_name = database_name
             elif i == 1:
                 kvp = item.split('=', 1)
                 if len(kvp) != 2 or kvp[0].lower() != 'collections':
                     # pylint: disable=line-too-long
-                    raise CLIError('usage error: --databases-to-restore [name=DatabaseName collections=CollectionName1 CollectionName2 ...]')
+                    raise CLIError(
+                        'usage error: --databases-to-restore [name=DatabaseName collections=CollectionName1 CollectionName2 ...]')
                 database_restore_resource.collection_names = []
                 collection_name = kvp[1]
-                database_restore_resource.collection_names.append(collection_name)
+                database_restore_resource.collection_names.append(
+                    collection_name)
             else:
                 if database_restore_resource.collection_names is None:
                     database_restore_resource.collection_names = []
@@ -114,7 +122,8 @@ class UtcDatetimeAction(argparse.Action):
             pass
 
         if not dt_val:
-            raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+            raise CLIError("Unable to parse: '{}'. Expected format: {}".format(
+                value_string, help_string))
 
         if not dt_val.tzinfo:
             dt_val = dt_val.replace(tzinfo=dateutil.tz.tzutc())

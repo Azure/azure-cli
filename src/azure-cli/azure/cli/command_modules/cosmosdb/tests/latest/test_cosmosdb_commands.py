@@ -1960,8 +1960,8 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
 
         # This should fail as account is empty
-        self.assertRaises(Exception, lambda: self.cmd(
-            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+        # self.assertRaises(Exception, lambda: self.cmd(
+        #     'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
 
         # Create content in account and triggering restore
         self.cmd(

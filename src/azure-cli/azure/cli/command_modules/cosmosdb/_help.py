@@ -1142,3 +1142,8 @@ helps['cosmosdb mongodb restorable-resource list'] = """
 type: command
 short-summary: List all the databases and its collections that can be restored in the given account at the given timesamp and region.
 """
+
+helps['cosmosdb sql retrieve-latest-backup-time'] = """
+type: command
+short-summary: Retrieves latest restorable timestamp for the given sql container in given region.
+"""

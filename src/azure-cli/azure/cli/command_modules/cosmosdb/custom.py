@@ -1707,7 +1707,7 @@ def cli_cosmosdb_restore(cmd,
                 restore_timestamp_datetime_utc)
         except HTTPError as err:
             if err.code == 404:
-                raise CLIError("Cannot find a database account with name {} that is online at {} in location".format(
+                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(
                     account_name, restore_timestamp, location))
             else:
                 raise
@@ -1723,7 +1723,7 @@ def cli_cosmosdb_restore(cmd,
                 restore_timestamp_datetime_utc)
         except HTTPError as err:
             if err.code == 404:
-                raise CLIError("Cannot find a database account with name {} that is online at {} in location".format(
+                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(
                     account_name, restore_timestamp, location))
             else:
                 raise
