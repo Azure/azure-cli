@@ -1599,6 +1599,8 @@ class WebappNetworkConnectionTests(ScenarioTest):
         namespace_name = self.create_random_name('hcnamespace', 24)
         hyco_name = self.create_random_name('hcname', 24)
         um = "[{{\\\"key\\\":\\\"endpoint\\\",\\\"value\\\":\\\"vmsq1:80\\\"}}]"
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
 
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
@@ -1614,11 +1616,18 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', hyco_name)
         ])
+
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, webapp_name, slot_webapp_name))
+        self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
+            resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
+            JMESPathCheck('length(@)', 1)
+        ])
         self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(
             resource_group, webapp_name, namespace_name, hyco_name))
-        self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('length(@)', 0)
-        ])
+        self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {} --slot {}'.format(
+            resource_group, webapp_name, namespace_name, hyco_name, slot_webapp_name))
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
