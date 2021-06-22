@@ -1423,7 +1423,7 @@ def create_role_assignment(cmd, role, assignee, is_service_principal, resource_g
 
 def _create_role_assignment(cmd, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
-    from azure.cli.core.profiles import ResourceType, get_sdk
+    from azure.cli.core.profiles import get_sdk
     factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -1437,23 +1437,24 @@ def _create_role_assignment(cmd, role, assignee,
     # if not use MSI object id.
     object_id = _resolve_object_id(
         cmd.cli_ctx, assignee) if resolve_assignee else assignee
-    
+
     assignment_name = uuid.uuid4()
     custom_headers = None
 
     RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                              'RoleAssignmentCreateParameters', mod='models',
                                              operation_group='role_assignments')
-    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):   
+    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
         parameters = RoleAssignmentCreateParameters(
             role_definition_id=role_id, principal_id=object_id)
         return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
 
     RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                            'RoleAssignmentProperties', mod='models',
-                                            operation_group='role_assignments')
+                                       'RoleAssignmentProperties', mod='models',
+                                       operation_group='role_assignments')
     properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
     return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
@@ -3750,7 +3751,7 @@ def _ensure_aks_acr(cmd,
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
             acr_client = cf_container_registry_service(
-                cli_ctx, subscription_id=parsed_registry['subscription'])
+                cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
             registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])
         except CloudError as ex:
@@ -3764,7 +3765,7 @@ def _ensure_aks_acr(cmd,
     registry_resource = 'Microsoft.ContainerRegistry/registries'
     try:
         registry = get_resource_by_name(
-            cli_ctx, registry_name, registry_resource)
+            cmd.cli_ctx, registry_name, registry_resource)
     except CloudError as ex:
         if 'was not found' in ex.message:
             raise CLIError(
