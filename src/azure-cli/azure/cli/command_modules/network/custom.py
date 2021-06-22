@@ -7019,10 +7019,12 @@ def rdp_bastion_host(cmd, resource_group_name, name, resource_id, resource_port=
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-    
+
     command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
     logger.debug("Running rdp command %s", ' '.join(command))
     subprocess.call(command, shell=platform.system() == 'Windows')
+
+    tunnel_server.cleanup()
 
 def get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts

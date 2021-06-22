@@ -50,6 +50,7 @@ class TunnelServer:
         self.client = None
         self.ws = None
         self.last_token = None
+        self.node_id = None
         self.cli_ctx = cli_ctx
         
         logger.info('Creating a socket on port: %s', self.local_port)
@@ -89,8 +90,13 @@ class TunnelServer:
             'token': self.last_token,
         }
         
+        if self.node_id:
+            custom_header = {'X-Node-Id': self.node_id }
+        else:
+            custom_header = {}
+
         web_address = 'https://{}/api/tokens'.format(self.bastion.dns_name)
-        response = requests.post(web_address, data=content, verify=(not should_disable_connection_verify()))
+        response = requests.post(web_address, data=content, headers=custom_header, verify=(not should_disable_connection_verify()))
 
         if response.status_code not in [200]:
             exp = CloudError(response)
@@ -109,7 +115,6 @@ class TunnelServer:
             self.client, _address = self.sock.accept()
 
             auth_token = self._get_auth_token()
-
             host = 'wss://{}/webtunnel/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
@@ -162,6 +167,7 @@ class TunnelServer:
                     responseData = buf[0:nbytes]
                     logger.info('Sending to websocket, index: %s', index)
                     ws_socket.send_binary(responseData)
+                    
                     logger.info('Done sending to websocket, index: %s', index)
                 else:
                     logger.info('Client close, index: %s', index)
@@ -175,6 +181,25 @@ class TunnelServer:
 
     def start_server(self):
         self._listen()
+
+    def cleanup(self):
+        if self.last_token:
+            logger.info('Cleaning up session')
+
+            if self.node_id:
+                custom_header = {'X-Node-Id': self.node_id }
+            else:
+                custom_header = {}
+
+            web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
+            response = requests.delete(web_address, headers=custom_header, verify=(not should_disable_connection_verify()))
+
+            if response.status_code not in [200, 204]:
+                exp = CloudError(response)
+                raise exp
+
+            self.last_token = None
+            self.node_id = None
 
     def get_port(self):
         return self.local_port
