@@ -1922,7 +1922,7 @@ class CosmosDBTests(ScenarioTest):
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
         self.assertRaises(Exception, lambda: self.cmd(
-            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
+            'az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as restore time is in future
         invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(
@@ -1931,7 +1931,7 @@ class CosmosDBTests(ScenarioTest):
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
         self.assertRaises(Exception, lambda: self.cmd(
-            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
+            'az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # Get correct restore ts
         account_creation_time = restorable_database_account['creationTime']
@@ -1949,7 +1949,7 @@ class CosmosDBTests(ScenarioTest):
             'invalid_account_name': self.create_random_name(prefix='cli', length=15)
         })
         self.assertRaises(Exception, lambda: self.cmd(
-            'az cosmosdb restore -n {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+            'az cosmosdb restore --account-name {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as regional database doesn't exist in this location
         invalid_location = "westus2"
@@ -1957,7 +1957,7 @@ class CosmosDBTests(ScenarioTest):
             'invalid_location': invalid_location
         })
         self.assertRaises(Exception, lambda: self.cmd(
-            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
+            'az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
 
         # This should fail as account is empty
         # self.assertRaises(Exception, lambda: self.cmd(
@@ -1972,7 +1972,7 @@ class CosmosDBTests(ScenarioTest):
         time.sleep(300)
 
         self.cmd(
-            'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+            'az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
         self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime'),
             self.check('restoreParameters.restoreSource',
