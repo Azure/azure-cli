@@ -35,7 +35,7 @@ class ApimScenarioTest(ScenarioTest):
             'sku_name': 'Developer',
             'skucapacity': 1,
             'enable_cert': True,
-            'tags': ["foo=boo"]
+            'tags': ["foo=boo"],
         })
 
         self.cmd('apim check-name -n {service_name} -o json',
@@ -117,7 +117,15 @@ class ApimScenarioTest(ScenarioTest):
             'state': 'notPublished',
             'new_state': 'published',
             'subscription_limit': 8,
-            'new_subscription_limit': 7
+            'new_subscription_limit': 7,
+            'versionset_name': 'MyVersionSet',
+            'version_schema': 'Query',
+            'version_query_name': 'QueryName',
+            'vs_description': 'This is vs description',
+            'vs_id': 'MyVSId',
+            'new_vs_name': 'MyNewVersionSet',
+            'api_revision': '2',
+            'api_revision_description': "New API Revision"
         })
 
         # api operations
@@ -261,12 +269,6 @@ class ApimScenarioTest(ScenarioTest):
             'release_id': "releaseVersionOne",
             'release_notes': "release this version",
             'new_release_notes': "release that version",
-            'versionset_name': 'MyVersionSet',
-            'version_schema': 'Query',
-            'version_query_name': 'QueryName',
-            'vs_description': 'This is vs description',
-            'vs_id': 'MyVSId',
-            'new_vs_name': 'MyNewVersionSet',
             'api_revision': '2',
             'api_revision_description': "New API Revision"
         })
