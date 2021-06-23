@@ -49,3 +49,6 @@ ADDONS = {
 }
 
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.2-alpha"
+
+CONST_MANAGED_IDENTITY_OPERATOR_ROLE = 'Managed Identity Operator'
+CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'

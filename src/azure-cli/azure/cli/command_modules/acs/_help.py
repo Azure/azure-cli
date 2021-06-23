@@ -413,6 +413,9 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
+  - name: --assign-kubelet-identity
+    type: string
+    short-summary: Specify an existing user assigned identity for kubelet's usage, which is typically used to pull image from ACR.
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
@@ -484,6 +487,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-encryption-at-host
   - name: Create a kubernetes cluster with Azure RBAC enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --enable-azure-rbac
+  - name: Create a kubernetes cluster with custom control plane identity and kubelet identity.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --assign-identity <control-plane-identity-resource-id> --assign-kubelet-identity <kubelet-identity-resource-id>
 """
 
 helps['aks update'] = """

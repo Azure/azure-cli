@@ -421,3 +421,12 @@ def validate_assign_identity(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_identity):
             raise InvalidArgumentValueError("--assign-identity is not a valid Azure resource ID.")
+
+
+def validate_assign_kubelet_identity(namespace):
+    if namespace.assign_kubelet_identity is not None:
+        if namespace.assign_kubelet_identity == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.assign_kubelet_identity):
+            raise CLIError("--assign-kubelet-identity is not a valid Azure resource ID.")
