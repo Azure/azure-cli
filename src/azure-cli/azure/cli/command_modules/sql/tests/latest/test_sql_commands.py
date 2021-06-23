@@ -108,7 +108,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test update without identity parameter, validate identity still exists
         # also use --id instead of -g/-n
-        self.cmd('sql server update --id {} --admin-password {}'
+        self.cmd('sql server update --ids {} --admin-password {}'
                  .format(server_1['id'], admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server_name_1),
