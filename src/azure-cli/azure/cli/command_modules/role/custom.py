@@ -5,11 +5,11 @@
 
 import base64
 import datetime
-import json
-import re
-import os
-import uuid
 import itertools
+import json
+import os
+import re
+import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
@@ -19,7 +19,7 @@ from msrestazure.azure_exceptions import CloudError
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
@@ -33,7 +33,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
-CREDENTIAL_WARNING_MESSAGE = (
+CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
@@ -41,6 +41,9 @@ ROLE_ASSIGNMENT_CREATE_WARNING = (
     "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
     "If needed, use the --role argument to explicitly create a role assignment."
 )
+
+NAME_DEPRECATION_WARNING = \
+    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
 
 logger = get_logger(__name__)
 
@@ -1400,34 +1403,20 @@ def create_service_principal_for_rbac(
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     years = years or 1
-    sp_oid = None
     _RETRY_TIMES = 36
-    app_display_name, existing_sps = None, None
-    if name:
-        if '://' not in name:
-            prefix = "http://"
-            app_display_name = name
-            # replace space, /, \ with - to make it a valid URI
-            name = name.replace(' ', '-').replace('/', '-').replace('\\', '-')
-            logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
-                           ' used for service principal names', name, prefix, name)
-            name = prefix + name  # normalize be a valid graph service principal name
-        else:
-            app_display_name = name.split('://', 1)[-1]
+    existing_sps = None
 
-    if name:
-        query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
+    if not name:
+        # No name is provided, create a new one
+        app_display_name = 'azure-cli-' + datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+    else:
+        app_display_name = name
+        # patch existing app with the same displayName to make the command idempotent
+        query_exp = "displayName eq '{}'".format(name)
         existing_sps = list(graph_client.service_principals.list(filter=query_exp))
-        if existing_sps:
-            app_display_name = existing_sps[0].display_name
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
-
-    app_display_name = app_display_name or ('azure-cli-' +
-                                            app_start_date.strftime('%Y-%m-%d-%H-%M-%S'))
-    if name is None:
-        name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
         _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
@@ -1436,12 +1425,8 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    # replace space, /, \ with - to make it a valid URI
-    homepage = 'https://' + app_display_name.replace(' ', '-').replace('/', '-').replace('\\', '-')
     aad_application = create_application(cmd,
                                          display_name=app_display_name,
-                                         homepage=homepage,
-                                         identifier_uris=[name],
                                          available_to_other_tenants=False,
                                          password=password,
                                          key_value=public_cert_string,
@@ -1469,9 +1454,9 @@ def create_service_principal_for_rbac(
                     time.sleep(5)
                 else:
                     logger.warning(
-                        "Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                        name, ex.response.headers if hasattr(ex,
-                                                             'response') else ex)  # pylint: disable=no-member
+                        "Creating service principal failed for '%s'. Trace followed:\n%s",
+                        app_id, ex.response.headers
+                        if hasattr(ex, 'response') else ex)  # pylint: disable=no-member
                     raise
     sp_oid = aad_sp.object_id
 
@@ -1493,18 +1478,19 @@ def create_service_principal_for_rbac(
                         logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
-                    elif _error_caused_by_role_assignment_exists(ex):
+                    if _error_caused_by_role_assignment_exists(ex):
                         logger.warning('  Role assignment already exists.\n')
                         break
-                    else:
-                        # dump out history for diagnoses
-                        logger.warning('  Role assignment creation failed.\n')
-                        if getattr(ex, 'response', None) is not None:
-                            logger.warning('  role assignment response headers: %s\n',
-                                           ex.response.headers)  # pylint: disable=no-member
+
+                    # dump out history for diagnoses
+                    logger.warning('  Role assignment creation failed.\n')
+                    if getattr(ex, 'response', None) is not None:
+                        logger.warning('  role assignment response headers: %s\n',
+                                       ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
+    logger.warning(CREDENTIAL_WARNING)
+    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1518,7 +1504,7 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': name,
+        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }
@@ -1538,14 +1524,8 @@ def _get_signed_in_user_object_id(graph_client):
 
 
 def _get_keyvault_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
@@ -1776,7 +1756,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
 
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
+    logger.warning(CREDENTIAL_WARNING)
     return result
 
 

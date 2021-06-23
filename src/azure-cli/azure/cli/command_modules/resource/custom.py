@@ -33,7 +33,8 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory,
+    cf_providers)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy
@@ -373,7 +374,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
@@ -485,7 +486,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
@@ -566,7 +567,7 @@ def _deploy_arm_template_at_resource_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
@@ -645,7 +646,7 @@ def _deploy_arm_template_at_management_group(cmd,
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -719,7 +720,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
         except HttpResponseError as cx:
-            _raise_subdivision_deployment_error(cx.response.text, cx.error.code if cx.error else None)
+            _raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -886,7 +887,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
         # template_spec are consistent in the same profile:
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['template']
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
         template_content = (
             run_bicep_command(["build", "--stdout", template_file])
@@ -1019,23 +1020,23 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_terms=None):
+def _update_provider(cli_ctx, namespace, registering, wait, properties=None, mg_id=None, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
-    rcf = _resource_client_factory(cli_ctx)
+    client = cf_providers(cli_ctx, None, api_version='2021-04-01')
     is_rpaas = namespace.lower() in RPAAS_APIS
     if mg_id is None and registering:
         if is_rpaas:
             if not accept_terms:
                 raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
             wait = True
-        r = rcf.providers.register(namespace)
+        r = client.register(namespace, properties=properties)
     elif mg_id and registering:
-        r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
+        r = client.register_at_management_group_scope(namespace, mg_id)
         if r is None:
             return
     else:
-        r = rcf.providers.unregister(namespace)
+        r = client.unregister(namespace)
 
     if r.registration_state == target_state:
         return
@@ -1043,7 +1044,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_t
     if wait:
         while True:
             time.sleep(10)
-            rp_info = rcf.providers.get(namespace)
+            rp_info = client.get(namespace)
             if rp_info.registration_state == target_state:
                 break
         if is_rpaas and registering and mg_id is None:
@@ -1627,7 +1628,6 @@ def _single_or_collection(obj, default=None):
     return obj
 
 
-# pylint: unused-argument
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None, include_response_body=False, latest_include_preview=False):
@@ -1697,7 +1697,6 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
     return _single_or_collection(results)
 
 
-# pylint: unused-argument
 def update_resource(cmd, parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
@@ -1714,7 +1713,6 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
                  is_incremental=None, latest_include_preview=False):
@@ -1732,7 +1730,6 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
             tags, is_incremental)) for id_dict in parsed_ids])
 
 
-# pylint: unused-argument
 def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
@@ -1831,9 +1828,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None, tags=None, no_prompt=False):
-    artifacts = None
-    input_template = None
+                         description=None, version=None, version_description=None, tags=None, no_prompt=False, ui_form_definition_file=None):
     if location is None:
         rcf = _resource_client_factory(cmd.cli_ctx)
         location = rcf.resource_groups.get(resource_group_name).location
@@ -1843,7 +1838,8 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         raise IncorrectUsageError('please provide --version if --template-file is specified')
 
     if version:
-        Exists = False
+        input_template, artifacts, input_ui_form_definition = None, None, None
+        exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
                 existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
@@ -1851,7 +1847,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
                 if not confirmation:
                     return None
-                Exists = True
+                exists = True
             except Exception:  # pylint: disable=broad-except
                 pass
 
@@ -1861,11 +1857,15 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
             input_template = getattr(packed_template, 'RootTemplate')
             artifacts = getattr(packed_template, 'Artifacts')
 
-        if not Exists:
+        if ui_form_definition_file:
+            ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+            input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
+
+        if not exists:
             try:  # Check if parent template spec already exists.
-                exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+                existing_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
                 if tags is None:  # New version should inherit tags from parent if none are provided.
-                    tags = getattr(exisiting_parent, 'tags')
+                    tags = getattr(existing_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 tags = tags or {}
                 TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1873,8 +1873,8 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
-        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
+        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1883,7 +1883,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
 
 def update_template_spec(cmd, resource_group_name=None, name=None, template_spec=None, template_file=None, display_name=None,
-                         description=None, version=None, version_description=None, tags=None):
+                         description=None, version=None, version_description=None, tags=None, ui_form_definition_file=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_spec:
@@ -1893,38 +1893,42 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    existing_template = None
-    artifacts = None
 
+    existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
         packed_template = pack(cmd, template_file)
         input_template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
+    if ui_form_definition_file:
+        ui_form_definition_content = _remove_comments_from_json(read_file_content(ui_form_definition_file))
+        input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
+
     if version:
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
 
-        version_tags = tags
-        if tags is None:  # Do not remove tags if not explicitely empty.
-            version_tags = getattr(existing_template, 'tags')
+        # Do not remove tags if not explicitly empty.
+        if tags is None:
+            tags = getattr(existing_template, 'tags')
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:
-            input_template = getattr(existing_template, 'template')
-
+            input_template = getattr(existing_template, 'main_template')
+        if ui_form_definition_file is None:
+            input_ui_form_definition = getattr(existing_template, 'ui_form_definition')
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=version_tags)
+        updated_template_spec = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
-    version_tags = tags
-    if version_tags is None:  # Do not remove tags if not explicitely empty.
+    # Do not remove tags if not explicitly empty.
+    if tags is None:
         tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')
@@ -2033,8 +2037,12 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, mg=None, wait=False, accept_terms=None):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mg_id=mg, accept_terms=accept_terms)
+def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
+    properties = None
+    if consent_to_permissions:
+        from azure.mgmt.resource.resources.v2021_04_01.models import ProviderRegistrationRequest, ProviderConsentDefinition
+        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
+    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
@@ -2044,6 +2052,11 @@ def unregister_provider(cmd, resource_provider_namespace, wait=False):
 def list_provider_operations(cmd):
     auth_client = _authorization_management_client(cmd.cli_ctx)
     return auth_client.provider_operations_metadata.list()
+
+
+def list_provider_permissions(cmd, resource_provider_namespace):
+    client = cf_providers(cmd.cli_ctx, None, api_version='2021-04-01')
+    return client.provider_permissions(resource_provider_namespace)
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
@@ -2107,7 +2120,8 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None, location=None, assign_identity=None,
-                             identity_scope=None, identity_role='Contributor', enforcement_mode='Default'):
+                             identity_scope=None, identity_role='Contributor', enforcement_mode='Default',
+                             description=None):
     """Creates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -2121,19 +2135,18 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode, description=description)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
         if not_scopes:
             kwargs_list = []
             for id_arg in not_scopes.split(' '):
-                if parse_resource_id(id_arg):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
                     kwargs_list.append(id_arg)
                 else:
-                    logger.error('az policy assignment create error: argument --not-scopes: \
-                    invalid notscopes value: \'%s\'', id_arg)
-                    return
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
             assignment.not_scopes = kwargs_list
 
     if cmd.supported_api_version(min_api='2018-05-01'):
@@ -2165,6 +2178,50 @@ def _build_identities_info(cmd, identities):
         identity_type = ResourceIdentityType.system_assigned
     ResourceIdentity = cmd.get_models('Identity')
     return ResourceIdentity(type=identity_type)
+
+
+def update_policy_assignment(cmd, name=None, display_name=None, params=None,
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None, enforcement_mode=None, description=None):
+    """Updates a policy assignment
+    :param not_scopes: Space-separated scopes where the policy assignment does not apply.
+    """
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    params = _load_file_string_or_uri(params, 'params', False)
+
+    existing_assignment = policy_client.policy_assignments.get(scope, name)
+    PolicyAssignment = cmd.get_models('PolicyAssignment')
+    assignment = PolicyAssignment(
+        display_name=display_name if display_name is not None else existing_assignment.display_name,
+        policy_definition_id=existing_assignment.policy_definition_id,
+        scope=existing_assignment.scope,
+        enforcement_mode=enforcement_mode if enforcement_mode is not None else existing_assignment.enforcement_mode,
+        metadata=existing_assignment.metadata,
+        parameters=params if params is not None else existing_assignment.parameters,
+        description=description if description is not None else existing_assignment.description)
+
+    if cmd.supported_api_version(min_api='2017-06-01-preview'):
+        kwargs_list = existing_assignment.not_scopes
+        if not_scopes:
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                id_parts = parse_resource_id(id_arg)
+                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
+        assignment.not_scopes = kwargs_list
+
+    if cmd.supported_api_version(min_api='2018-05-01'):
+        assignment.location = existing_assignment.location
+        assignment.identity = existing_assignment.identity
+
+    if cmd.supported_api_version(min_api='2020-09-01'):
+        assignment.non_compliance_messages = existing_assignment.non_compliance_messages
+
+    return policy_client.policy_assignments.create(scope, name, assignment)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
@@ -2213,6 +2270,55 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
         result = [i for i in result if _scope.lower().strip('/') == i.scope.lower().strip('/')]
 
     return result
+
+
+def list_policy_non_compliance_message(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    return policy_client.policy_assignments.get(scope, name).non_compliance_messages
+
+
+def create_policy_non_compliance_message(cmd, name, message, scope=None, resource_group_name=None,
+                                         policy_definition_reference_id=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+
+    assignment = policy_client.policy_assignments.get(scope, name)
+
+    NonComplianceMessage = cmd.get_models('NonComplianceMessage')
+    created_message = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    if not assignment.non_compliance_messages:
+        assignment.non_compliance_messages = []
+    assignment.non_compliance_messages.append(created_message)
+
+    return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
+
+
+def delete_policy_non_compliance_message(cmd, name, message, scope=None, resource_group_name=None,
+                                         policy_definition_reference_id=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+
+    assignment = policy_client.policy_assignments.get(scope, name)
+
+    NonComplianceMessage = cmd.get_models('NonComplianceMessage')
+    message_to_remove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
+    if assignment.non_compliance_messages:
+        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
+
+    return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
+
+
+def _is_non_compliance_message_equivalent(first, second):
+    first_message = '' if first.message is None else first.message
+    seccond_message = '' if second.message is None else second.message
+    first_reference_id = '' if first.policy_definition_reference_id is None else first.policy_definition_reference_id
+    second_reference_id = '' if second.policy_definition_reference_id is None else second.policy_definition_reference_id
+
+    return first_message.lower() == seccond_message.lower() and first_reference_id.lower() == second_reference_id.lower()
 
 
 def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
@@ -3150,7 +3256,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         # to properties will fail due to the lack of properties, so the PATCH type should be used
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
                               'Microsoft.ContainerRegistry/registries/webhooks',
-                              'Microsoft.ContainerInstance/containerGroups']
+                              'Microsoft.ContainerInstance/containerGroups',
+                              'Microsoft.Network/publicIPAddresses']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)

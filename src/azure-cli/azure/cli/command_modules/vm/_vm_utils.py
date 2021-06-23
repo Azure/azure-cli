@@ -101,15 +101,8 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
 
 
 def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import get_api_version, ResourceType
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -130,10 +123,13 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
+# pylint: disable=too-many-statements
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False):
+                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
+    from ._validators import validate_delete_options
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below
     # {
@@ -148,6 +144,7 @@ def normalize_disk_info(image_data_disks=None,
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
 
+    data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
     info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
@@ -180,7 +177,8 @@ def normalize_disk_info(image_data_disks=None,
             'lun': i,
             'managedDisk': {'storageAccountType': None},
             'createOption': 'empty',
-            'diskSizeGB': sizes_copy.pop(0)
+            'diskSizeGB': sizes_copy.pop(0),
+            'deleteOption': data_disk_delete_option if isinstance(data_disk_delete_option, str) else None
         }
 
     # update storage skus for managed data disks
@@ -212,9 +210,15 @@ def normalize_disk_info(image_data_disks=None,
 
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
+            if data_disk_delete_option:
+                info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
+                    else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
             info[i]['name'] = d.split('/')[-1].split('.')[0]
+            if data_disk_delete_option:
+                info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
+                    else data_disk_delete_option.get(info[i]['name'], None)
 
     # fill in data disk caching
     if data_disk_cachings:

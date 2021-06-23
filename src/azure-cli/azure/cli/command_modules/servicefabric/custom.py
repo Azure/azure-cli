@@ -20,8 +20,7 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
-from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
 
@@ -119,7 +118,7 @@ def list_cluster(client, resource_group_name=None):
 def new_cluster(cmd,
                 client,
                 resource_group_name,
-                location,
+                location=None,
                 certificate_subject_name=None,
                 parameter_file=None,
                 template_file=None,
@@ -170,6 +169,9 @@ def new_cluster(cmd,
     rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
     if rg is None:
         _create_resource_group_name(cli_ctx, resource_group_name, location)
+
+    if location is None:
+        location = rg.location
 
     if vault_name is None:
         vault_name = resource_group_name
@@ -439,72 +441,6 @@ def remove_client_cert(client,
     patch_request = ClusterUpdateParameters(client_certificate_thumbprints=cluster.client_certificate_thumbprints,
                                             client_certificate_common_names=cluster.client_certificate_common_names)
 
-    return client.update(resource_group_name, cluster_name, patch_request)
-
-
-def add_cluster_cert(cmd,
-                     client,
-                     resource_group_name,
-                     cluster_name,
-                     certificate_file=None,
-                     certificate_password=None,
-                     vault_name=None,
-                     vault_resource_group_name=None,
-                     certificate_output_folder=None,
-                     certificate_subject_name=None,
-                     secret_identifier=None):
-    cli_ctx = cmd.cli_ctx
-    cluster = client.get(resource_group_name, cluster_name)
-    if cluster.certificate is None:
-        raise CLIError("Unsecure cluster is not allowed to add certificate")
-
-    result = _create_certificate(cmd,
-                                 cli_ctx,
-                                 resource_group_name,
-                                 certificate_file,
-                                 certificate_password,
-                                 vault_name,
-                                 vault_resource_group_name,
-                                 certificate_output_folder,
-                                 certificate_subject_name,
-                                 secret_identifier)
-
-    vault_id = result[0]
-    secret_url = result[1]
-    thumbprint = result[2]
-
-    compute_client = compute_client_factory(cli_ctx)
-    primary_node_type = [n for n in cluster.node_types if n.is_primary is True][0]
-    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, primary_node_type.name)
-    fabric_ext = _get_sf_vm_extension(vmss)
-    if fabric_ext is None:
-        raise CLIError("Failed to find service fabric extension")
-
-    # add cert and star vmss update
-    _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster.cluster_id, vault_id, secret_url, is_cluster_cert=True, thumbprint=thumbprint)
-
-    # cluser update
-    patch_request = ClusterUpdateParameters(certificate=cluster.certificate)
-    patch_request.certificate.thumbprint_secondary = thumbprint
-    return client.update(resource_group_name, cluster_name, patch_request)
-
-
-def remove_cluster_cert(client, resource_group_name, cluster_name, thumbprint):
-    cluster = client.get(resource_group_name, cluster_name)
-    if cluster.certificate is None:
-        raise CLIError("Unsecure cluster is not allowed to remove certificate")
-    if cluster.certificate.thumbprint_secondary.lower() == thumbprint.lower():
-        cluster.certificate.thumbprint_secondary = None
-    else:
-        if cluster.certificate.thumbprint.lower() == thumbprint.lower():
-            cluster.certificate.thumbprint = cluster.certificate.thumbprint_secondary
-            cluster.certificate.thumbprint_secondary = None
-        else:
-            raise CLIError(
-                "Unable to find the certificate with the thumbprint {} in the cluster".format(thumbprint))
-
-    patch_request = ClusterUpdateParameters(certificate=cluster.certificate)
-    patch_request.certificate = cluster.certificate
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
@@ -1661,14 +1597,8 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
 
 
 def _get_keyVault_not_arm_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
-
-    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
-    return client
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def _create_keyvault(cmd,
@@ -1880,7 +1810,6 @@ def _set_parameters_for_customize_template(cmd,
                                            certificate_subject_name,
                                            secret_identifier,
                                            parameter_file):
-    cli_ctx = cli_ctx
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
