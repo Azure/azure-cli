@@ -3343,7 +3343,7 @@ class SqlServerIdentityTest(ScenarioTest):
         user = admin_login
 
         self.cmd('sql server create -g {} -n {} -l {} -i '
-                  '--admin-user {} --admin-password {} --user-assigned-identity-id {} --identity-type {} -pid {}'
+                  '--admin-user {} --admin-password {} --user-assigned-identity-id {} --identity-type {} --pid {}'
                   .format(resource_group_1, server_name, loc, user, admin_passwords[0], umi_list, identity_type, test_umi),
                   checks=[
                      JMESPathCheck('name', server_name),
@@ -4146,16 +4146,10 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
 
-        print('sql mi create -g {} -n {} -l {} -i '
-                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled ' 
-                  '--user-assigned-identity-id {} --identity-type {} -pid {}'
-                 .format(resource_group_1, managed_instance_name, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition,
-                  families[0], collation, proxy_override, umi_list, identity_type, test_umi))
-
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
                  '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled ' 
-                  '--user-assigned-identity-id {} --identity-type {} -pid {}'
+                  '--user-assigned-identity-id {} --identity-type {} --pid {}'
                  .format(resource_group_1, managed_instance_name, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition,
                   families[0], collation, proxy_override, umi_list, identity_type, test_umi),
                  checks=[

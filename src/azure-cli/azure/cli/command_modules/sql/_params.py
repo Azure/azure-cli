@@ -1354,7 +1354,7 @@ def load_arguments(self, _):
                    is_preview=True)
 
         c.argument('primary_user_assigned_identity_id',
-                   options_list=['--primary-user-assigned-identity-id', '-pid'],
+                   options_list=['--primary-user-assigned-identity-id', '--pid'],
                    help='The ID of the primary user managed identity.')
 
         c.argument('key_id',
@@ -1748,7 +1748,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
 
         c.argument('primary_user_assigned_identity_id',
-                   options_list=['--primary-user-assigned-identity-id', '-pid'],
+                   options_list=['--primary-user-assigned-identity-id', '--pid'],
                    help='The ID of the primary user managed identity.')
 
         c.argument('key_id',
