@@ -35,7 +35,7 @@ def process_condition_parameter(namespace):
 
     # Ensure all the string at even options are AND operator
     operators = [expression[i] for i in range(1, len(expression), 2)]
-    if any([op != 'and' for op in operators]):
+    if any(op != 'and' for op in operators):
         raise CLIError(error)
 
     # Pick the strings at odd position and convert them into condition leaf.
