@@ -14,11 +14,17 @@ import re
 from copy import deepcopy
 
 from adal import AdalError
-from azure.mgmt.resource.subscriptions.models import \
-    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK,
+                                     _transform_subscription_for_multiapi)
+if _USE_VENDORED_SUBSCRIPTION_SDK:
+    from azure.cli.core.vendored_sdks.subscriptions.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+else:
+    from azure.mgmt.resource.subscriptions.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
@@ -314,7 +320,16 @@ class TestProfile(unittest.TestCase):
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
         result = finder._arm_client_factory(mock.MagicMock())
-        self.assertEqual(result.config.base_url, 'http://foo_arm')
+        self.assertEqual(result._client._base_url, 'http://foo_arm')
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
+        cli = DummyCli()
+        get_client_class_mock.return_value = None
+        finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
+        from azure.cli.core.azclierror import CLIInternalError
+        with self.assertRaisesRegexp(CLIInternalError, 'Unable to get'):
+            finder._arm_client_factory(mock.MagicMock())
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
@@ -1072,7 +1087,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_system_assigned(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1110,7 +1125,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1148,7 +1163,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], self.test_msi_tenant)
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1191,7 +1206,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,
                                                                             mock_msi_auth):
-        from requests import HTTPError
+        from azure.cli.core.azclierror import AzureResponseError
 
         class SubscriptionFinderStub:
             def find_from_raw_token(self, tenant, token):
@@ -1216,9 +1231,8 @@ class TestProfile(unittest.TestCase):
                         'access_token': TestProfile.test_msi_access_token
                     }
                 else:
-                    mock_obj = mock.MagicMock()
-                    mock_obj.status, mock_obj.reason = 400, 'Bad Request'
-                    raise HTTPError(response=mock_obj)
+                    raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                             'Get Token request returned http error: 400, reason: Bad Request')
 
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
@@ -1235,7 +1249,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1512,7 +1526,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_arm_client.subscriptions.list.side_effect = deepcopy([[self.subscription1], [self.subscription2, sp_subscription1]])
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
-        profile._creds_cache.retrieve_secret_of_service_principal = lambda _: 'verySecret'
+        profile._creds_cache.retrieve_cred_for_service_principal = lambda _: 'verySecret'
         profile._creds_cache.flush_to_disk = lambda _: ''
         # action
         profile.refresh_accounts(finder)
@@ -1581,21 +1595,29 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    def test_credscache_retrieve_sp_secret_with_cert(self, mock_read_file):
+    def test_credscache_retrieve_sp_cred(self, mock_read_file):
         cli = DummyCli()
-        test_sp = {
-            "servicePrincipalId": "myapp",
-            "servicePrincipalTenant": "mytenant",
-            "certificateFile": 'junkcert.pem'
-        }
-        mock_read_file.return_value = [test_sp]
+        test_cache = [
+            {
+                "servicePrincipalId": "myapp",
+                "servicePrincipalTenant": "mytenant",
+                "accessToken": "Secret"
+            },
+            {
+                "servicePrincipalId": "myapp2",
+                "servicePrincipalTenant": "mytenant",
+                "certificateFile": 'junkcert.pem'
+            }
+        ]
+        mock_read_file.return_value = test_cache
 
         # action
         creds_cache = CredsCache(cli, async_persist=False)
         creds_cache.load_adal_token_cache()
 
         # assert
-        self.assertEqual(creds_cache.retrieve_secret_of_service_principal(test_sp['servicePrincipalId']), None)
+        self.assertEqual(creds_cache.retrieve_cred_for_service_principal('myapp'), 'Secret')
+        self.assertEqual(creds_cache.retrieve_cred_for_service_principal('myapp2'), 'junkcert.pem')
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
@@ -1766,8 +1788,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(token_type, token_entry2['tokenType'])
 
     @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
-    def test_credscache_good_error_on_file_corruption(self, mock_read_file):
-        mock_read_file.side_effect = ValueError('a bad error for you')
+    @mock.patch('os.path.isfile', autospec=True, return_value=True)
+    def test_credscache_good_error_on_file_corruption(self, isfile_mock, get_file_json_mock):
+        get_file_json_mock.side_effect = ValueError('a bad error for you')
         cli = DummyCli()
 
         # action
@@ -1800,6 +1823,12 @@ class TestProfile(unittest.TestCase):
             'certificateFile': test_cert_file,
             'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
         })
+
+    def test_service_principal_auth_client_cert_err(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'err_sp_cert.pem')
+        with self.assertRaisesRegexp(CLIError, 'Invalid certificate'):
+            ServicePrincipalAuth(test_cert_file)
 
     def test_detect_adfs_authority_url(self):
         cli = DummyCli()
@@ -1911,9 +1940,14 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
         self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
 
+    @mock.patch('msal.ConfidentialClientApplication.acquire_token_for_client', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_cred_for_service_principal', autospec=True)
+    @mock.patch('msal.ClientApplication.acquire_token_by_refresh_token', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
-    @mock.patch('azure.cli.core._msal.AdalRefreshTokenBasedClientApplication._acquire_token_silent_by_finding_specific_refresh_token', autospec=True)
-    def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription', autospec=True)
+    def test_get_msal_token(self, get_subscription_mock, retrieve_token_for_user_mock,
+                            acquire_token_by_refresh_token_mock, retrieve_cred_for_service_principal_mock,
+                            acquire_token_for_client_mock):
         """
         This is added only for vmssh feature.
         It is a temporary solution and will deprecate after MSAL adopted completely.
@@ -1922,15 +1956,27 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
-        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
-        profile._set_subscriptions(consolidated)
-
-        some_token_type = 'Bearer'
-        mock_retrieve_token_for_user.return_value = (some_token_type, TestProfile.raw_token1, TestProfile.token_entry1)
-        mock_acquire_token.return_value = {
-            'access_token': 'fake_access_token'
+        msal_result = {
+            'token_type': 'ssh-cert',
+            'scope': 'https://pas.windows.net/CheckMyAccess/Linux/user_impersonation https://pas.windows.net/CheckMyAccess/Linux/.default',
+            'expires_in': 3599,
+            'ext_expires_in': 3599,
+            'access_token': 'fake_cert'
         }
-        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
+
+        # User
+        get_subscription_mock.return_value = {
+            'tenantId': self.tenant_id,
+            'user': {
+                'name': self.user1,
+                'type': 'user'
+            },
+        }
+
+        retrieve_token_for_user_mock.return_value = ('Bearer', self.raw_token1, self.token_entry1)
+        acquire_token_by_refresh_token_mock.return_value = msal_result
+
+        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/.default"]
         data = {
             "token_type": "ssh-cert",
             "req_cnf": "fake_jwk",
@@ -1938,7 +1984,22 @@ class TestProfile(unittest.TestCase):
         }
         username, access_token = profile.get_msal_token(scopes, data)
         self.assertEqual(username, self.user1)
-        self.assertEqual(access_token, 'fake_access_token')
+        self.assertEqual(access_token, 'fake_cert')
+
+        # Service Principal
+        sp_id = '610a3200-0000-0000-0000-000000000000'
+        get_subscription_mock.return_value = {
+            'tenantId': self.tenant_id,
+            'user': {
+                'name': sp_id,
+                'type': 'servicePrincipal'
+            },
+        }
+        retrieve_cred_for_service_principal_mock.return_value = "some_secret"
+        acquire_token_for_client_mock.return_value = msal_result
+        username, access_token = profile.get_msal_token(scopes, data)
+        self.assertEqual(username, sp_id)
+        self.assertEqual(access_token, 'fake_cert')
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
@@ -2010,6 +2071,55 @@ class MSRestAzureAuthStub:
     @token.setter
     def token(self, value):
         self._token = value
+
+
+class TestUtil(unittest.TestCase):
+
+    def test_transform_subscription_for_multiapi(self):
+
+        class SimpleSubscription:
+            pass
+
+        class SimpleManagedByTenant:
+            pass
+
+        tenant_id = "00000001-0000-0000-0000-000000000000"
+
+        # No 2019-06-01 property is set.
+        s = SimpleSubscription()
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {}
+
+        # home_tenant_id is set.
+        s = SimpleSubscription()
+        s.home_tenant_id = tenant_id
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000'}
+
+        # managed_by_tenants is set, but is None. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = None
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': None}
+
+        # managed_by_tenants is set, but is []. It is still preserved.
+        s = SimpleSubscription()
+        s.managed_by_tenants = []
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': []}
+
+        # managed_by_tenants is set, and has valid items. It is preserved.
+        s = SimpleSubscription()
+        t = SimpleManagedByTenant()
+        t.tenant_id = tenant_id
+        s.managed_by_tenants = [t]
+        d = {}
+        _transform_subscription_for_multiapi(s, d)
+        assert d == {'managedByTenants': [{"tenantId": tenant_id}]}
 
 
 if __name__ == '__main__':

@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "westus2"
+LOCATION = "southcentralusstage"
+VAULT_LOCATION = "southcentralus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -64,7 +65,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_get_account_by_name(self):
         account_name = self.create_random_name(prefix='cli', length=24)
-        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION))
         account = self.cmd("az netappfiles account show --resource-group {rg} -a %s" % account_name).get_output_in_json()
         assert account['name'] == account_name
         account_from_id = self.cmd("az netappfiles account show --ids %s" % account['id']).get_output_in_json()
@@ -76,7 +77,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account_name = self.create_random_name(prefix='cli', length=24)
         tag = "Tag1=Value1"
 
-        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
         account = self.cmd("az netappfiles account update --resource-group {rg} -a %s --tags %s" % (account_name, tag)).get_output_in_json()
         assert account['name'] == account_name
         assert account['tags']['Tag1'] == 'Value1'
@@ -84,23 +85,60 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_active_directory(self):
+        # create account
         account_name = self.create_random_name(prefix='cli', length=24)
-
-        # create an account as normal
-        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s --tags Tag1=Value1" % (account_name, LOCATION)).get_output_in_json()
+        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s --tags Tag1=Value1" %
+                           (account_name, LOCATION)).get_output_in_json()
         assert account['name'] == account_name
 
-        # now add an active directory
-        acc_with_active_directory = self.cmd("netappfiles account ad add -g {rg} -n %s --username aduser --password aduser --smb-server-name SMBSERVER --dns '1.2.3.4' --domain westcentralus" % (account_name)).get_output_in_json()
+        # add an active directory
+        ad_name = 'cli-ad-name'
+        kdc_ip = '172.16.254.1'
+        ldap_signing = True
+        allow_local_ldap_users = True
+        acc_with_active_directory = self.cmd("netappfiles account ad add -g {rg} -n %s --username aduser "
+                                             "--password aduser --smb-server-name SMBSERVER --dns '1.2.3.4' "
+                                             "--domain westcentralus --ad-name %s --kdc-ip %s --ldap-signing %s "
+                                             "--allow-local-ldap-users %s" %
+                                             (account_name, ad_name, kdc_ip, ldap_signing, allow_local_ldap_users)).get_output_in_json()
         assert acc_with_active_directory['name'] == account_name
         assert acc_with_active_directory['activeDirectories'][0]['username'] == 'aduser'
+        assert acc_with_active_directory['activeDirectories'][0]['status'] == 'Created'
+        assert acc_with_active_directory['activeDirectories'][0]['adName'] == ad_name
+        assert acc_with_active_directory['activeDirectories'][0]['aesEncryption'] is False
+        assert acc_with_active_directory['activeDirectories'][0]['ldapSigning'] is ldap_signing
+        assert acc_with_active_directory['activeDirectories'][0]['allowLocalNFSUsersWithLdap'] is allow_local_ldap_users
 
-        # now add an active directory
-        active_directory = self.cmd("netappfiles account ad list -g {rg} -n %s" % (account_name)).get_output_in_json()
-        assert account['name'] == account_name
+        # list active directory
+        active_directory = self.cmd("netappfiles account ad list -g {rg} -n %s" % account_name).get_output_in_json()
         assert active_directory[0]['username'] == 'aduser'
+        assert len(active_directory) == 1
 
-        # now remove using the previously obtained details
-        acc_with_active_directory = self.cmd("netappfiles account ad remove -g {rg} -n %s --active-directory %s" % (account_name, active_directory[0]['activeDirectoryId'])).get_output_in_json()
+        # remove active directory using the previously obtained details
+        self.cmd("netappfiles account ad remove -g {rg} -n %s --active-directory %s" %
+                 (account_name, active_directory[0]['activeDirectoryId'])).get_output_in_json()
+
+        account = self.cmd("netappfiles account show -g {rg} -n %s" % account_name).get_output_in_json()
         assert account['name'] == account_name
         assert account['activeDirectories'] is None
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    def test_account_encryption(self):
+        # create account with encryption value
+        account_name = self.create_random_name(prefix='cli', length=24)
+        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s --encryption %s" %
+                           (account_name, LOCATION, "Microsoft.NetApp")).get_output_in_json()
+        assert account['name'] == account_name
+        assert account['encryption']['keySource'] == "Microsoft.NetApp"
+
+        # create account without encryption value
+        account_name = self.create_random_name(prefix='cli', length=24)
+        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" %
+                           (account_name, LOCATION)).get_output_in_json()
+        assert account['name'] == account_name
+
+        # update account with encryption value
+        account = self.cmd("az netappfiles account update --resource-group {rg} -a %s --encryption %s"
+                           % (account_name, "Microsoft.NetApp")).get_output_in_json()
+        assert account['name'] == account_name
+        assert account['encryption']['keySource'] == "Microsoft.NetApp"

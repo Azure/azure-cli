@@ -364,7 +364,7 @@ class PolicyInsightsTests(ScenarioTest):
     @AllowLargeResponse()
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': '09d18943ace14946aff83c21',
+            'pan': '98904c39668a4f70804aef09',
             'rg': 'az-cli-policy-insights-test',
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
@@ -441,7 +441,7 @@ class PolicyInsightsTests(ScenarioTest):
 
         self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
             self.check('name', '{rn}'),
-            self.check('provisioningState', 'Evaluating'),
+            self.check_pattern('provisioningState', '(?:Evaluating|Accepted)'),
             self.check('resourceGroup', '{rg}'),
             self.check('policyAssignmentId', '{pid}'),
             self.check('deploymentStatus.totalDeployments', 0),

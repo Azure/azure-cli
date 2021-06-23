@@ -15,24 +15,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/17.1.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-04-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-05-11T02:24:04.6044969Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-05-11T02:24:04.6044969Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '380'
       content-type:
       - application/json
       date:
-      - Thu, 23 Jul 2020 04:58:13 GMT
+      - Tue, 11 May 2021 02:24:24 GMT
       expires:
       - '-1'
       pragma:
@@ -60,9 +57,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.9.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.23.0
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:14 GMT
+      - Tue, 11 May 2021 02:24:25 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -74,11 +71,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 23 Jul 2020 04:58:15 GMT
+      - Tue, 11 May 2021 02:24:27 GMT
       etag:
-      - '"0x8D82EC5030BC4BE"'
+      - '"0x8D91423E6D54FEC"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:16 GMT
+      - Tue, 11 May 2021 02:24:27 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -94,11 +91,11 @@ interactions:
       Content-Length:
       - '131072'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.9.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.23.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:16 GMT
+      - Tue, 11 May 2021 02:24:28 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -112,11 +109,11 @@ interactions:
       content-md5:
       - DfvoqkwgtS4bi/PLbL3xkw==
       date:
-      - Thu, 23 Jul 2020 04:58:17 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -130,19 +127,24 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob lease acquire
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       If-Modified-Since:
       - Fri, 01 Apr 2016 12:00:00 GMT
+      ParameterSetName:
+      - --lease-duration -b -c --if-modified-since --proposed-lease-id --account-name
+        --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       x-ms-lease-action:
       - acquire
       x-ms-lease-duration:
@@ -150,7 +152,7 @@ interactions:
       x-ms-proposed-lease-id:
       - abcdabcd-abcd-abcd-abcd-abcdabcdabcd
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004?comp=lease
   response:
@@ -160,17 +162,17 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 23 Jul 2020 04:58:19 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-lease-id:
       - abcdabcd-abcd-abcd-abcd-abcdabcdabcd
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 201
       message: Created
@@ -178,17 +180,23 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -c --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:19 GMT
+      - Tue, 11 May 2021 02:24:30 GMT
+      x-ms-encryption-algorithm:
+      - AES256
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: HEAD
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004
   response:
@@ -204,17 +212,17 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Thu, 23 Jul 2020 04:58:20 GMT
+      - Tue, 11 May 2021 02:24:30 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       x-ms-lease-duration:
       - fixed
       x-ms-lease-state:
@@ -224,7 +232,7 @@ interactions:
       x-ms-server-encrypted:
       - 'true'
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK
@@ -232,17 +240,21 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob lease change
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -b -c --lease-id --proposed-lease-id --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:20 GMT
+      - Tue, 11 May 2021 02:24:31 GMT
       x-ms-lease-action:
       - change
       x-ms-lease-id:
@@ -250,7 +262,7 @@ interactions:
       x-ms-proposed-lease-id:
       - dcbadcba-dcba-dcba-dcba-dcbadcbadcba
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004?comp=lease
   response:
@@ -260,17 +272,17 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 23 Jul 2020 04:58:21 GMT
+      - Tue, 11 May 2021 02:24:32 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-lease-id:
       - dcbadcba-dcba-dcba-dcba-dcbadcbadcba
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK
@@ -278,23 +290,27 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob lease renew
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -b -c --lease-id --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:21 GMT
+      - Tue, 11 May 2021 02:24:33 GMT
       x-ms-lease-action:
       - renew
       x-ms-lease-id:
       - dcbadcba-dcba-dcba-dcba-dcbadcbadcba
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004?comp=lease
   response:
@@ -304,17 +320,17 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 23 Jul 2020 04:58:22 GMT
+      - Tue, 11 May 2021 02:24:34 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-lease-id:
       - dcbadcba-dcba-dcba-dcba-dcbadcbadcba
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK
@@ -322,17 +338,23 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -c --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:23 GMT
+      - Tue, 11 May 2021 02:24:34 GMT
+      x-ms-encryption-algorithm:
+      - AES256
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: HEAD
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004
   response:
@@ -348,17 +370,17 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Thu, 23 Jul 2020 04:58:23 GMT
+      - Tue, 11 May 2021 02:24:34 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       x-ms-lease-duration:
       - fixed
       x-ms-lease-state:
@@ -368,7 +390,7 @@ interactions:
       x-ms-server-encrypted:
       - 'true'
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK
@@ -376,23 +398,27 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob lease break
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -b -c --lease-break-period --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:24 GMT
+      - Tue, 11 May 2021 02:24:35 GMT
       x-ms-lease-action:
       - break
       x-ms-lease-break-period:
       - '30'
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004?comp=lease
   response:
@@ -402,17 +428,17 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 23 Jul 2020 04:58:24 GMT
+      - Tue, 11 May 2021 02:24:36 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-lease-time:
       - '30'
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 202
       message: Accepted
@@ -420,17 +446,23 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -c --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:25 GMT
+      - Tue, 11 May 2021 02:24:36 GMT
+      x-ms-encryption-algorithm:
+      - AES256
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: HEAD
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004
   response:
@@ -446,17 +478,17 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Thu, 23 Jul 2020 04:58:25 GMT
+      - Tue, 11 May 2021 02:24:36 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       x-ms-lease-state:
       - breaking
       x-ms-lease-status:
@@ -464,7 +496,7 @@ interactions:
       x-ms-server-encrypted:
       - 'true'
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK
@@ -472,23 +504,27 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob lease release
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -b -c --lease-id --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:26 GMT
+      - Tue, 11 May 2021 02:24:37 GMT
       x-ms-lease-action:
       - release
       x-ms-lease-id:
       - dcbadcba-dcba-dcba-dcba-dcbadcbadcba
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004?comp=lease
   response:
@@ -498,15 +534,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 23 Jul 2020 04:58:27 GMT
+      - Tue, 11 May 2021 02:24:38 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK
@@ -514,17 +550,23 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/xml
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - storage blob show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -n -c --account-name --account-key
       User-Agent:
-      - azsdk-python-storage-blob/12.3.1 Python/3.7.7 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.23.0 azsdk-python-storage-blob/12.7.1 Python/3.7.7 (Windows-10-10.0.19041-SP0)
       x-ms-date:
-      - Thu, 23 Jul 2020 04:58:27 GMT
+      - Tue, 11 May 2021 02:24:38 GMT
+      x-ms-encryption-algorithm:
+      - AES256
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     method: HEAD
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004
   response:
@@ -540,17 +582,17 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Thu, 23 Jul 2020 04:58:27 GMT
+      - Tue, 11 May 2021 02:24:38 GMT
       etag:
-      - '"0x8D82EC50427B91F"'
+      - '"0x8D91423E7E3BD0E"'
       last-modified:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Thu, 23 Jul 2020 04:58:18 GMT
+      - Tue, 11 May 2021 02:24:29 GMT
       x-ms-lease-state:
       - available
       x-ms-lease-status:
@@ -558,7 +600,7 @@ interactions:
       x-ms-server-encrypted:
       - 'true'
       x-ms-version:
-      - '2019-07-07'
+      - '2020-04-08'
     status:
       code: 200
       message: OK

@@ -13,16 +13,13 @@ interactions:
       Content-Length:
       - '70'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --storage-account -g -n --enabled-protocols --root-squash
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2021-04-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","properties":{"enabledProtocols":"NFS","rootSquash":"AllSquash"}}'
@@ -34,9 +31,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 15 Sep 2020 03:21:16 GMT
+      - Tue, 18 May 2021 03:30:59 GMT
       etag:
-      - '"0x8D859266877988F"'
+      - '"0x8D919AD5AAFE8C4"'
       expires:
       - '-1'
       pragma:
@@ -48,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -66,26 +63,23 @@ interactions:
       ParameterSetName:
       - --storage-account -g -n --root-squash
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D859266877988F\"","properties":{"lastModifiedTime":"2020-09-15T03:21:16.0000000Z","shareQuota":5120}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D919AD5AAFE8C4\"","properties":{"signedIdentifiers":[],"accessTier":"Premium","lastModifiedTime":"2021-05-18T03:30:59.0000000Z","shareQuota":100,"enabledProtocols":"NFS","rootSquash":"AllSquash"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '484'
+      - '579'
       content-type:
       - application/json
       date:
-      - Tue, 15 Sep 2020 03:21:18 GMT
+      - Tue, 18 May 2021 03:30:59 GMT
       etag:
-      - '"0x8D859266877988F"'
+      - '"0x8D919AD5AAFE8C4"'
       expires:
       - '-1'
       pragma:
@@ -104,7 +98,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"shareQuota": 5120, "rootSquash": "NoRootSquash"}}'
+    body: '{"properties": {"shareQuota": 100, "enabledProtocols": "NFS", "rootSquash":
+      "NoRootSquash", "accessTier": "Premium"}}'
     headers:
       Accept:
       - application/json
@@ -115,32 +110,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '66'
+      - '117'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --storage-account -g -n --root-squash
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","properties":{"shareQuota":5120,"rootSquash":"NoRootSquash"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","properties":{"accessTier":"Premium","shareQuota":100,"enabledProtocols":"NFS","rootSquash":"NoRootSquash"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '431'
+      - '478'
       content-type:
       - application/json
       date:
-      - Tue, 15 Sep 2020 03:21:19 GMT
+      - Tue, 18 May 2021 03:31:00 GMT
       etag:
-      - '"0x8D8592669FEC1AB"'
+      - '"0x8D919AD5B8DA0EF"'
       expires:
       - '-1'
       pragma:
@@ -156,7 +148,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -174,26 +166,23 @@ interactions:
       ParameterSetName:
       - --storage-account -g -n
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D8592669FEC1AB\"","properties":{"lastModifiedTime":"2020-09-15T03:21:19.0000000Z","shareQuota":5120}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D919AD5B8DA0EF\"","properties":{"signedIdentifiers":[],"accessTier":"Premium","lastModifiedTime":"2021-05-18T03:31:00.0000000Z","shareQuota":100,"enabledProtocols":"NFS","rootSquash":"NoRootSquash"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '484'
+      - '582'
       content-type:
       - application/json
       date:
-      - Tue, 15 Sep 2020 03:21:20 GMT
+      - Tue, 18 May 2021 03:31:01 GMT
       etag:
-      - '"0x8D8592669FEC1AB"'
+      - '"0x8D919AD5B8DA0EF"'
       expires:
       - '-1'
       pragma:
@@ -225,24 +214,21 @@ interactions:
       ParameterSetName:
       - --storage-account -g
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares?api-version=2021-04-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D8592669FEC1AB\"","properties":{"accessTier":"TransactionOptimized","lastModifiedTime":"2020-09-15T03:21:19.0000000Z","shareQuota":5120,"enabledProtocols":"SMB"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D919AD5B8DA0EF\"","properties":{"accessTier":"Premium","lastModifiedTime":"2021-05-18T03:31:00.0000000Z","shareQuota":100,"enabledProtocols":"NFS","rootSquash":"NoRootSquash"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '557'
+      - '571'
       content-type:
       - application/json
       date:
-      - Tue, 15 Sep 2020 03:21:22 GMT
+      - Tue, 18 May 2021 03:31:01 GMT
       expires:
       - '-1'
       pragma:
@@ -276,12 +262,9 @@ interactions:
       ParameterSetName:
       - --storage-account -g -n -y
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares/share000003?api-version=2021-04-01&$include=none
   response:
     body:
       string: ''
@@ -293,7 +276,7 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 03:21:23 GMT
+      - Tue, 18 May 2021 03:31:03 GMT
       expires:
       - '-1'
       pragma:
@@ -323,12 +306,9 @@ interactions:
       ParameterSetName:
       - --storage-account -g
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-storage/11.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nfs000001/providers/Microsoft.Storage/storageAccounts/nfs000002/fileServices/default/shares?api-version=2021-04-01
   response:
     body:
       string: '{"value":[]}'
@@ -340,7 +320,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 15 Sep 2020 03:21:25 GMT
+      - Tue, 18 May 2021 03:31:03 GMT
       expires:
       - '-1'
       pragma:

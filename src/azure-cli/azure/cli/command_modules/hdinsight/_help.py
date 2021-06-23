@@ -77,13 +77,6 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount --encryption-at-host true
-  - name: Create a cluster with private link settings.
-    text: |-
-        az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
-        -p "HttpPassword1234!" \\
-        --storage-account MyStorageAccount \\
-        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
-        --public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer
   - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
@@ -151,6 +144,35 @@ examples:
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --autoscale-type Schedule --timezone "Pacific Standard Time" --days Monday \\
         --time 09:00 --autoscale-workernode-count 5
+  - name: Create a cluster with Relay Outbound and Private Link feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/default" \\
+        --resource-provider-connection Outbound --enable-private-link
+  - name: Create a cluster with Compute Isolation feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --enable-compute-isolation --workernode-size "Standard_E8S_V3" --headnode-size "Standard_E8S_V3"
+"""
+
+helps['hdinsight resize'] = """
+type: command
+short-summary: Resize the specified HDInsight cluster to the specified size.
+examples:
+  - name: Resize the cluster's workernode.
+    text: |-
+        az hdinsight resize --name MyCluster --resource-group rg --workernode-count 5
+"""
+
+helps['hdinsight update'] = """
+type: command
+short-summary: Update the tags of the specified HDInsight cluster.
+examples:
+  - name: Update the tags.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --tags key=value
 """
 
 helps['hdinsight list'] = """
@@ -160,20 +182,40 @@ short-summary: List HDInsight clusters in a resource group or subscription.
 
 helps['hdinsight monitor'] = """
 type: group
-short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Manage Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor disable'] = """
 type: command
-short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Disable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor enable'] = """
 type: command
-short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Enable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor show'] = """
+type: command
+short-summary: Get the status of Classic Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor'] = """
+type: group
+short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor disable'] = """
+type: command
+short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor enable'] = """
+type: command
+short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor show'] = """
 type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
 """
@@ -308,7 +350,7 @@ short-summary: Update a schedule condition.
 examples:
   - name: Update a schedule condition.
     text: |-
-        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
+        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0 \\
         --time 10:00 --workernode-count 5
 """
 

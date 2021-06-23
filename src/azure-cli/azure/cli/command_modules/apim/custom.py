@@ -40,7 +40,7 @@ def create_apim(client, resource_group_name, name, publisher_email, sku_name=Sku
         resource['identity'] = ApiManagementServiceIdentity(type="SystemAssigned")
 
     if resource.sku.name == SkuType.consumption.value:
-        resource.sku.capacity = None
+        resource.sku.capacity = 0
 
     cms = client.api_management_service
 
@@ -113,6 +113,18 @@ def apim_backup(client, resource_group_name, name, backup_name, storage_account_
         backup_name=backup_name)
 
     return client.api_management_service.backup(resource_group_name, name, parameters)
+
+
+def apim_restore(client, resource_group_name, name, backup_name, storage_account_name,
+                 storage_account_container, storage_account_key):
+    """Restore an API Management service to the configured storage account """
+    parameters = ApiManagementServiceBackupRestoreParameters(
+        storage_account=storage_account_name,
+        access_key=storage_account_key,
+        container_name=storage_account_container,
+        backup_name=backup_name)
+
+    return client.api_management_service.restore(resource_group_name, name, parameters)
 
 
 def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):

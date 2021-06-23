@@ -13,11 +13,13 @@ from ipaddress import ip_network
 # pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
+from azure.cli.core.profiles import ResourceType
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 import azure.cli.core.keys as keys
 
-from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterPropertiesAutoScalerProfile
 
 logger = get_logger(__name__)
 
@@ -106,7 +108,7 @@ def validate_k8s_version(namespace):
                            'such as "1.11.8" or "1.12.6"')
 
 
-def validate_cluster_autoscaler_profile(namespace):
+def validate_cluster_autoscaler_profile(cmd, namespace):
     """ Validates that cluster autoscaler profile is acceptable by:
         1. Extracting the key[=value] format to map
         2. Validating that the key isn't empty and that the key is valid
@@ -115,12 +117,15 @@ def validate_cluster_autoscaler_profile(namespace):
     _extract_cluster_autoscaler_params(namespace)
     if namespace.cluster_autoscaler_profile is not None:
         for key in namespace.cluster_autoscaler_profile.keys():
-            _validate_cluster_autoscaler_key(key)
+            _validate_cluster_autoscaler_key(cmd, key)
 
 
-def _validate_cluster_autoscaler_key(key):
+def _validate_cluster_autoscaler_key(cmd, key):
     if not key:
         raise CLIError('Empty key specified for cluster-autoscaler-profile')
+    ManagedClusterPropertiesAutoScalerProfile = cmd.get_models('ManagedClusterPropertiesAutoScalerProfile',
+                                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                                                               operation_group='managed_clusters')
     valid_keys = list(k.replace("_", "-") for k, v in ManagedClusterPropertiesAutoScalerProfile._attribute_map.items())  # pylint: disable=protected-access
     if key not in valid_keys:
         raise CLIError("'{0}' is an invalid key for cluster-autoscaler-profile. "
@@ -229,8 +234,8 @@ def validate_load_balancer_outbound_ports(namespace):
 def validate_load_balancer_idle_timeout(namespace):
     """validate load balancer profile idle timeout"""
     if namespace.load_balancer_idle_timeout is not None:
-        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 120:
-            raise CLIError("--load-balancer-idle-timeout must be in the range [4,120]")
+        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
+            raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
 def validate_nodes_count(namespace):
@@ -313,6 +318,15 @@ def validate_vnet_subnet_id(namespace):
             raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
 
 
+def validate_ppg(namespace):
+    if namespace.ppg is not None:
+        if namespace.ppg == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.ppg):
+            raise CLIError("--ppg is not a valid Azure resource ID.")
+
+
 def validate_nodepool_labels(namespace):
     """Validates that provided node labels is a valid format"""
 
@@ -383,3 +397,27 @@ def validate_label(label):
                        "characters, '-', '_' or '.', and must start and end with an alphanumeric character" % label)
 
     return {kv[0]: kv[1]}
+
+
+def validate_max_surge(namespace):
+    """validates parameters like max surge are postive integers or percents. less strict than RP"""
+    if namespace.max_surge is None:
+        return
+    int_or_percent = namespace.max_surge
+    if int_or_percent.endswith('%'):
+        int_or_percent = int_or_percent.rstrip('%')
+
+    try:
+        if int(int_or_percent) < 0:
+            raise CLIError("--max-surge must be positive")
+    except ValueError:
+        raise CLIError("--max-surge should be an int or percentage")
+
+
+def validate_assign_identity(namespace):
+    if namespace.assign_identity is not None:
+        if namespace.assign_identity == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.assign_identity):
+            raise InvalidArgumentValueError("--assign-identity is not a valid Azure resource ID.")

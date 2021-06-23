@@ -16,14 +16,42 @@ helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a flexible server.
 examples:
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with VNET enabled by default.
+    text: |
+        az mysql flexible-server create
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with all public IPs (0.0.0.0 - 255.255.255.255).
+    text: |
+        az mysql flexible-server create --public-access all
+  - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
+    text: |
+        az mysql flexible-server create --public-access none
+  - name: Create a MySQL flexible server with public access and add client IP address to have access to the server
+    text: |
+        az mysql flexible-server create --public-access <my_client_ip>
+  - name: Create a MySQL flexible server with public access and add the range of IP address to have access to this server
+    text: |
+      az mysql flexible-server create --public-access <start_ip_address-end_ip_address>
+  - name: Create a MySQL flexible server with public access and allow applications from Azure IP addresses to connect to your flexible server
+    text: |
+      az mysql flexible-server create --public-access 0.0.0.0
   - name: Create a MySQL flexible server with specified SKU and storage, using defaults from local context.
     text: |
         az mysql flexible-server create --name testServer --admin-password password
+  - name: Create a MySQL flexible server using already existing virtual network and subnet. If provided virtual network and subnet does not exists then virtual network and subnet with default address prefix will be created.
+    text: |
+      az mysql flexible-server create --vnet myVnet --subnet mySubnet
+  - name: Create a MySQL flexible server using already existing virtual network, subnet, and using the subnet ID. The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforMySQL/flexibleServers, if not already delegated.
+    text: |
+      az mysql flexible-server create --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName}
+  - name: Create a MySQL flexible server using new virtual network, subnet with non-default address prefix.
+    text: |
+      az mysql flexible-server create --vnet myVnet --address-prefixes 10.0.0.0/24 --subnet mySubnet --subnet-prefixes 10.0.0.0/24
   - name: Create a MySQL flexible server with  parameters set.
     text: |
-        az mysql flexible-server create --location northeurope --resource-group testGroup --name testServer --admin-user username \\
-            --admin-password password --sku-name Standard_B1ms --tier GeneralPurpose --public-access 0.0.0.0 \\
-            --storage-size 32 --tags "key=value" --version 5.7
+        az mysql flexible-server create --location northeurope --resource-group testGroup \\
+          --name testServer --admin-user username --admin-password password \\
+          --sku-name Standard-B1ms --tier Burstable --public-access 0.0.0.0 --storage-size 32 \\
+          --tags "key=value" --version 5.7
 """
 
 helps['mysql flexible-server db'] = """
@@ -38,7 +66,7 @@ examples:
   - name: Create database 'testDatabase' in the flexible server 'testServer' with the default parameters.
     text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase
   - name: Create database 'testDatabase' in the flexible server 'testServer' with a given character set and collation rules.
-    text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase//
+    text: az mysql flexible-server db create --resource-group testGroup --server-name testServer --database-name testDatabase \\
             --charset validCharset --collation validCollation
 """
 
@@ -72,6 +100,8 @@ short-summary: Delete a flexible server.
 examples:
   - name: Delete a flexible server.
     text: az mysql flexible-server delete --resource-group testGroup --name testServer
+  - name: Delete a flexible server without prompt or confirmation.
+    text: az mysql flexible-server delete --resource-group testGroup --name testServer --yes
 """
 
 helps['mysql flexible-server firewall-rule'] = """
@@ -84,9 +114,9 @@ type: command
 short-summary: Create a new firewall rule for a flexible server.
 examples:
   - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az mysql flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
+    text: az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
   - name: Create a firewall rule allowing connections from an IP address range.
-    text: az mysql flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+    text: az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['mysql flexible-server firewall-rule delete'] = """
@@ -94,7 +124,7 @@ type: command
 short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
-    text: az mysql flexible-server firewall-rule delete --name testRule --resource-group testGroup --server-name testServer
+    text: az mysql flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -103,7 +133,7 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az mysql server firewall-rule list --resource-group testGroup --server-name testServer
+    text: az mysql server firewall-rule list --resource-group testGroup --name testServer
     crafted: false
 """
 
@@ -112,7 +142,7 @@ type: command
 short-summary: Get the details of a firewall rule.
 examples:
   - name: Get the details of a firewall rule.
-    text: az mysql flexible-server firewall-rule show --name testRule --resource-group testGroup --server-name testServer
+    text: az mysql flexible-server firewall-rule show --rule-name testRule --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -121,11 +151,11 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az mysql flexible-server firewall-rule update --resource-group testGroup --server-name testServer
-            --name allowiprange --start-ip-address 107.46.14.1
+    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer \\
+            --rule-name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az mysql flexible-server firewall-rule update --resource-group testGroup --server-name testServer
-            --name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
+    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer \\
+            --rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
 helps['mysql flexible-server list'] = """
@@ -185,7 +215,7 @@ type: command
 short-summary: Create a read replica for a server.
 examples:
   - name: Create a read replica 'testReplicaServer' for 'testServer'.
-    text: az mysql flexible-server replica create -n testReplicaServer -g testGroup --source-server testServer
+    text: az mysql flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testServer
 """
 
 helps['mysql flexible-server replica list'] = """
@@ -193,7 +223,7 @@ type: command
 short-summary: List all read replicas for a given server.
 examples:
   - name: List all read replicas for master server 'testServer'.
-    text: az mysql flexible-server replica list -g testGroup -s primaryservername
+    text: az mysql flexible-server replica list -g testGroup -n primaryservername
 """
 
 helps['mysql flexible-server replica stop-replication'] = """
@@ -201,7 +231,7 @@ type: command
 short-summary: Stop replication to a read replica and make it a read/write server.
 examples:
   - name: Stop replication to 'testReplicaServer' and make it a read/write server.
-    text: az mysql flexible-server replica stop-replication -g testGroup -s testReplicaServer
+    text: az mysql flexible-server replica stop-replication -g testGroup -n testReplicaServer
 """
 
 helps['mysql flexible-server restart'] = """
@@ -218,12 +248,12 @@ type: command
 short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testServer' to a specific point-in-time as a new server 'testServerNew'.
-    text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --time "2017-06-15T13:10:00Z"
+    text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
     text: |
         az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
-            --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testServer2" \\
-            --time "2017-06-15T13:10:00Z"
+          --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testServer2" \\
+          --restore-time "2017-06-15T13:10:00Z"
 """
 
 helps['mysql flexible-server show'] = """
@@ -258,7 +288,7 @@ type: command
 short-summary: Update a flexible server.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
-    text: az mysql flexible-server update --sku-name Standard_D4s_v3
+    text: az mysql flexible-server update --sku-name Standard_D4ds_v4 --tier GeneralPurpose
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
     crafted: true
@@ -279,4 +309,35 @@ examples:
   - name: Wait for the flexible server to satisfy certain conditions.
     text: az mysql flexible-server wait --exists --resource-group testGroup --name testServer
     crafted: true
+"""
+
+helps['mysql flexible-server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MySQL flexible-server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mysql flexible-server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['mysql flexible-server deploy'] = """
+type: group
+short-summary: Enable and run github action workflow for MySQL server
+"""
+
+helps['mysql flexible-server deploy setup'] = """
+type: command
+short-summary: Create github action workflow file for MySQL server.
+examples:
+  - name: Create github action workflow file for MySQL server.
+    text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
+  - name: Create github action workflow file for MySQL server and push it to the remote repository
+    text: az mysql flexible-server deploy setup -s testServer -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
+"""
+
+helps['mysql flexible-server deploy run'] = """
+type: command
+short-summary: Run an existing workflow in your github repository
+examples:
+  - name: Run an existing workflow in your github repository
+    text: az mysql flexible-server deploy run --action-name testAction --branch userBranch
 """

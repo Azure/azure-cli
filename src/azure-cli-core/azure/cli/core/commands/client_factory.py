@@ -95,27 +95,35 @@ def configure_common_settings(cli_ctx, client):
     except KeyError:
         pass
 
+    # Prepare CommandName header
+    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
+    cli_ctx.data['headers']['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # Prepare ParameterSetName header
+    if cli_ctx.data.get('safe_params'):
+        cli_ctx.data['headers']['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
+    # Prepare x-ms-client-request-id header
+    client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
+
+    logger.debug("Adding custom headers to the client:")
+
     for header, value in cli_ctx.data['headers'].items():
+        # msrest doesn't print custom headers in debug log, so CLI should do that
+        logger.debug("    '%s': '%s'", header, value)
         # We are working with the autorest team to expose the add_header functionality of the generated client to avoid
         # having to access private members
         client._client.add_header(header, value)  # pylint: disable=protected-access
 
-    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
-    # pylint: disable=protected-access
-    client._client.add_header('CommandName',
-                              "{}{}".format(cli_ctx.data['command'], command_name_suffix))
-    if cli_ctx.data.get('safe_params'):
-        client._client.add_header('ParameterSetName',
-                                  ' '.join(cli_ctx.data['safe_params']))
-    client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
-
-def configure_common_settings_track2(cli_ctx):
+def _prepare_client_kwargs_track2(cli_ctx):
+    """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
+    # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
-    client_kwargs['logging_enable'] = True
+    # Prepare User-Agent header, used by UserAgentPolicy
     client_kwargs['user_agent'] = get_az_user_agent()
 
     try:
@@ -125,15 +133,55 @@ def configure_common_settings_track2(cli_ctx):
     except KeyError:
         pass
 
+    # Prepare custom headers, used by HeadersPolicy
     headers = dict(cli_ctx.data['headers'])
+
+    # - Prepare CommandName header
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
     headers['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # - Prepare ParameterSetName header
     if cli_ctx.data.get('safe_params'):
         headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
     client_kwargs['headers'] = headers
 
+    # Prepare x-ms-client-request-id header, used by RequestIdPolicy
     if 'x-ms-client-request-id' in cli_ctx.data['headers']:
         client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+
+    # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
+    #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
+    from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
+    client_kwargs['logging_policy'] = SafeNetworkTraceLoggingPolicy()
+
+    # Disable ARMHttpLoggingPolicy.
+    #   ARMHttpLoggingPolicy: Only log allowed information.
+    from azure.core.pipeline.policies import SansIOHTTPPolicy
+    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+
+    return client_kwargs
+
+
+def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
+    """Prepare kwargs for Track 2 SDK mgmt client."""
+    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+
+    from azure.cli.core.util import resource_to_scopes
+    # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
+    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+
+    client_kwargs['credential_scopes'] = scopes
+
+    # Track 2 currently lacks the ability to take external credentials.
+    #   https://github.com/Azure/azure-sdk-for-python/issues/8313
+    # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
+    #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+    if getattr(cred, "_external_tenant_token_retriever", None):
+        *_, external_tenant_tokens = cred.get_all_tokens(*scopes)
+        # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
+        client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
+            ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
 
     return client_kwargs
 
@@ -168,7 +216,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred))
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
@@ -229,3 +277,6 @@ def _get_add_headers_callback(cli_ctx):
             pass
 
     return _add_headers
+
+
+prepare_client_kwargs_track2 = _prepare_client_kwargs_track2

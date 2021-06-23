@@ -117,6 +117,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_show_command('show', 'iot_hub_consumer_group_get')
         g.custom_command('delete', 'iot_hub_consumer_group_delete')
 
+    # iot hub identity commands
+    with self.command_group('iot hub identity', client_factory=iot_hub_service_factory) as g:
+        g.custom_command('assign', 'iot_hub_identity_assign')
+        g.custom_show_command('show', 'iot_hub_identity_show')
+        g.custom_command('remove', 'iot_hub_identity_remove')
+
     # iot hub policy commands
     with self.command_group('iot hub policy', client_factory=iot_hub_service_factory) as g:
         g.custom_command('list', 'iot_hub_policy_list')
@@ -156,8 +162,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             min_api="2019-07-01-preview") as g:
         g.custom_show_command('show', 'iot_hub_devicestream_show')
 
-    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
-                            is_preview=True) as g:
+    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory) as g:
         g.custom_command('create', 'iot_central_app_create', supports_no_wait=True)
         g.custom_command('list', 'iot_central_app_list')
         g.custom_show_command('show', 'iot_central_app_get')

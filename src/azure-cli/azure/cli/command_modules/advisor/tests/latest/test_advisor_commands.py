@@ -13,6 +13,8 @@ from azure.cli.command_modules.advisor.custom import (
     _parse_operation_id,
     _parse_recommendation_uri)
 
+from azure.cli.testsdk.decorators import serial_test
+
 
 class AzureAdvisorUnitTest(unittest.TestCase):
 
@@ -68,6 +70,7 @@ class AzureAdvisorUnitTest(unittest.TestCase):
 
 class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 
+    @serial_test()
     def test_recommendations(self):
         # List should return at least one recommendation with filters
         output = self.cmd('advisor recommendation list --category Security',
@@ -104,8 +107,9 @@ class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
                  checks=[self.check("[0].id", recommendation_id),
                          self.check("[0].suppressionIds", None)])
 
+    @serial_test()
     def test_recommendations_resource_group(self):
-        resource_group = 'AzExpertStg'
+        resource_group = 'cli-live-test-rg'
         self.kwargs.update({
             'resource_group': resource_group
         })
@@ -157,19 +161,19 @@ class AzureAdvisorScenarioTest(ScenarioTest):
         # Show should reflect the changes made by Update
         self.cmd('advisor configuration update --low-cpu-threshold 15 --exclude')
         self.cmd('advisor configuration show',
-                 checks=[self.check("properties.lowCpuThreshold", "15"),
-                         self.check("properties.exclude", True)])
+                 checks=[self.check("lowCpuThreshold", "15"),
+                         self.check("exclude", True)])
 
         # Show should reflect the changes made by Update
         self.cmd('advisor configuration update --low-cpu-threshold 5 --include')
         self.cmd('advisor configuration show',
-                 checks=[self.check("properties.lowCpuThreshold", "5"),
-                         self.check("properties.exclude", False)])
+                 checks=[self.check("lowCpuThreshold", "5"),
+                         self.check("exclude", False)])
 
         # List should reflect the changes made by Update
         self.cmd('advisor configuration list',
-                 checks=[self.check("[0].properties.lowCpuThreshold", "5"),
-                         self.check("[0].properties.exclude", False)])
+                 checks=[self.check("[0].lowCpuThreshold", "5"),
+                         self.check("[0].exclude", False)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_advisor')
     def test_configurations_resource_group(self, resource_group):
@@ -181,13 +185,13 @@ class AzureAdvisorScenarioTest(ScenarioTest):
         self.cmd('advisor configuration update --exclude -g {rg}')
         self.cmd('advisor configuration show -g {rg}',
                  checks=[self.check("resourceGroup", resource_group),
-                         self.check("properties.exclude", True)])
+                         self.check("exclude", True)])
 
         # Show should reflect the changes made by Update
         self.cmd('advisor configuration update --include -g {rg}')
         self.cmd('advisor configuration show -g {rg}',
                  checks=[self.check("resourceGroup", resource_group),
-                         self.check("properties.exclude", False)])
+                         self.check("exclude", False)])
 
 
 if __name__ == '__main__':

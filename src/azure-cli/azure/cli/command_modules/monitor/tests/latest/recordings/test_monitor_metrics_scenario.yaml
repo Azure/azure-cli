@@ -13,24 +13,21 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-storage/17.1.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2021-04-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-17T08:29:05.4211747Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-17T08:29:05.4211747Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-07-17T08:29:05.3430450Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-05-12T02:28:34.4966772Z","key2":"2021-05-12T02:28:34.4966772Z"},"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-05-12T02:28:34.4966772Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-05-12T02:28:34.4966772Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-05-12T02:28:34.4029207Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1240'
+      - '1336'
       content-type:
       - application/json
       date:
-      - Fri, 17 Jul 2020 08:29:24 GMT
+      - Wed, 12 May 2021 02:28:54 GMT
       expires:
       - '-1'
       pragma:
@@ -56,16 +53,61 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - monitor metrics list-namespaces
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricNamespaces?api-version=2017-12-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricNamespaces/Microsoft.Storage-storageAccounts","name":"Microsoft.Storage-storageAccounts","type":"Microsoft.Insights/metricNamespaces","classification":"Platform","properties":{"metricNamespaceName":"Microsoft.Storage/storageAccounts"}}]}'
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '501'
+      content-type:
+      - application/json
+      date:
+      - Wed, 12 May 2021 02:28:55 GMT
+      request-context:
+      - appId=cid-v1:b021da79-5252-4375-9df5-2e17c1dcd822
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - monitor metrics list-definitions
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource --namespace
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricDefinitions?api-version=2018-01-01&metricnamespace=Microsoft.Storage%2FstorageAccounts
   response:
@@ -104,6 +146,8 @@ interactions:
         service or the specified API operation.","isDimensionRequired":false,"unit":"Percent","primaryAggregationType":"Average","supportedAggregationTypes":["Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
         type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]}]}'
     headers:
+      access-control-expose-headers:
+      - Request-Context
       cache-control:
       - no-cache
       content-length:
@@ -111,7 +155,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 17 Jul 2020 08:29:25 GMT
+      - Wed, 12 May 2021 02:28:56 GMT
+      request-context:
+      - appId=cid-v1:b021da79-5252-4375-9df5-2e17c1dcd822
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -143,29 +189,30 @@ interactions:
       ParameterSetName:
       - --resource --namespace --metrics --start-time --end-time
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2018-01-01T00%253A00%253A00%252B00%253A00%252F2999-01-01T00%253A00%253A00%252B00%253A00&interval=PT1M&metricnames=Ingress%2CEgress&top=10&api-version=2018-01-01&metricnamespace=Microsoft.Storage%2FstorageAccounts
   response:
     body:
-      string: '{"cost":0,"timespan":"2998-12-01T00:00:00Z/2999-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
+      string: '{"cost":89278,"timespan":"2998-12-01T00:00:00Z/2999-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
+      access-control-expose-headers:
+      - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '1355'
+      - '1359'
       content-type:
       - application/json
       date:
-      - Fri, 17 Jul 2020 08:29:27 GMT
+      - Wed, 12 May 2021 02:28:58 GMT
+      request-context:
+      - appId=cid-v1:b021da79-5252-4375-9df5-2e17c1dcd822
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -197,29 +244,30 @@ interactions:
       ParameterSetName:
       - --resource --metrics --start-time --offset
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2018-01-01T00%253A00%253A00%252B00%253A00%252F2031-09-10T00%253A00%253A00%252B00%253A00&interval=PT1M&metricnames=Ingress%2CEgress&top=10&api-version=2018-01-01
   response:
     body:
-      string: '{"cost":0,"timespan":"2031-08-10T00:00:00Z/2031-09-10T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
+      string: '{"cost":89278,"timespan":"2031-08-10T00:00:00Z/2031-09-10T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
+      access-control-expose-headers:
+      - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '1355'
+      - '1359'
       content-type:
       - application/json
       date:
-      - Fri, 17 Jul 2020 08:29:27 GMT
+      - Wed, 12 May 2021 02:28:59 GMT
+      request-context:
+      - appId=cid-v1:b021da79-5252-4375-9df5-2e17c1dcd822
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -251,29 +299,30 @@ interactions:
       ParameterSetName:
       - --resource --metrics --end-time --offset
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.23.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.7 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metrics?timespan=2011-04-25T00%253A00%253A00%252B00%253A00%252F2025-01-01T00%253A00%253A00%252B00%253A00&interval=PT1M&metricnames=Ingress%2CEgress&top=10&api-version=2018-01-01
   response:
     body:
-      string: '{"cost":0,"timespan":"2024-12-01T00:00:00Z/2025-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
+      string: '{"cost":89278,"timespan":"2024-12-01T00:00:00Z/2025-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
         amount of egress data. This number includes egress to external client from
         Azure Storage as well as egress within Azure. As a result, this number does
         not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
+      access-control-expose-headers:
+      - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '1355'
+      - '1359'
       content-type:
       - application/json
       date:
-      - Fri, 17 Jul 2020 08:29:28 GMT
+      - Wed, 12 May 2021 02:29:00 GMT
+      request-context:
+      - appId=cid-v1:b021da79-5252-4375-9df5-2e17c1dcd822
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:

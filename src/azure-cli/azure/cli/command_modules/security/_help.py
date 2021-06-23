@@ -90,6 +90,146 @@ examples:
         az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled false
 """
 
+helps['security va sql'] = """
+type: group
+short-summary: View Sql Vulnerability Assessment scan results and manage baseline.
+"""
+
+helps['security va sql scans'] = """
+type: group
+short-summary: View Sql Vulnerability Assessment scan summaries.
+"""
+
+helps['security va sql scans show'] = """
+type: command
+short-summary: View Sql Vulnerability Assessment scan summaries.
+examples:
+  - name: View Sql Vulnerability Assessment scan summary on an Azure virtual machine.
+    text: >
+        az security va sql scans show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --scan-id MyScanId
+  - name: View Sql Vulnerability Assessment scan summary on an On-Premise machine.
+    text: >
+        az security va sql scans show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId
+"""
+
+helps['security va sql scans list'] = """
+type: command
+short-summary: List all Sql Vulnerability Assessment scan summaries.
+examples:
+  - name: List all Sql Vulnerability Assessment scan summaries on an Azure virtual machine.
+    text: >
+        az security va sql scans list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName
+  - name: List all Sql Vulnerability Assessment scan summaries on an On-Premise machine.
+    text: >
+        az security va sql scans list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID
+"""
+
+helps['security va sql results'] = """
+type: group
+short-summary: View Sql Vulnerability Assessment scan results.
+"""
+
+helps['security va sql results show'] = """
+type: command
+short-summary: View Sql Vulnerability Assessment scan results.
+examples:
+  - name: View Sql Vulnerability Assessment scan results on an Azure virtual machine.
+    text: >
+        az security va sql results show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --scan-id MyScanId --rule-id VA9999
+  - name: View Sql Vulnerability Assessment scan results on an On-Premise machine.
+    text: >
+        az security va sql results show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId --rule-id VA9999
+"""
+
+helps['security va sql results list'] = """
+type: command
+short-summary: View all Sql Vulnerability Assessment scan results.
+examples:
+  - name: View all Sql Vulnerability Assessment scan results on an Azure virtual machine.
+    text: >
+        az security va sql results list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --scan-id MyScanId
+  - name: View all Sql Vulnerability Assessment scan results on an On-Premise machine.
+    text: >
+        az security va sql results list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId
+"""
+
+helps['security va sql baseline'] = """
+type: group
+short-summary: View and manage Sql Vulnerability Assessment baseline.
+"""
+
+helps['security va sql baseline show'] = """
+type: command
+short-summary: View Sql Vulnerability Assessment rule baseline.
+examples:
+  - name: View Sql Vulnerability Assessment rule baseline on an Azure virtual machine.
+    text: >
+        az security va sql baseline show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999
+  - name: View Sql Vulnerability Assessment rule baseline on an On-Premise machine.
+    text: >
+        az security va sql baseline show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999
+"""
+
+helps['security va sql baseline list'] = """
+type: command
+short-summary: View Sql Vulnerability Assessment baseline for all rules.
+examples:
+  - name: View Sql Vulnerability Assessment baseline for all rules on an Azure virtual machine.
+    text: >
+        az security va sql baseline list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName
+  - name: View Sql Vulnerability Assessment baseline for all rules on an On-Premise machine.
+    text: >
+        az security va sql baseline list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID
+"""
+
+helps['security va sql baseline delete'] = """
+type: command
+short-summary: Delete Sql Vulnerability Assessment rule baseline.
+examples:
+  - name: Delete Sql Vulnerability Assessment rule baseline on an Azure virtual machine.
+    text: >
+        az security va sql baseline delete --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999
+  - name: Delete Sql Vulnerability Assessment rule baseline on an On-Premise machine.
+    text: >
+        az security va sql baseline delete --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999
+"""
+
+helps['security va sql baseline update'] = """
+type: command
+short-summary: Update Sql Vulnerability Assessment rule baseline. Replaces the current rule baseline.
+examples:
+  - name: Update Sql Vulnerability Assessment rule baseline on an Azure virtual machine. Replaces the current rule baseline with latest scan results.
+    text: >
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999 --latest
+  - name: Update Sql Vulnerability Assessment rule baseline on an Azure virtual machine. Replaces the current rule baseline with provided results.
+    text: >
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999 --baseline Line1_Col1 Line1_Col2 --baseline Line2_Col1 Line2_Col2
+  - name: Update Sql Vulnerability Assessment rule baseline on an On-Premise machine. Replaces the current rule baseline with latest scan results.
+    text: >
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999 --latest
+  - name: Update Sql Vulnerability Assessment rule baseline on an On-Premise machine. Replaces the current rule baseline with provided results.
+    text: >
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999 --baseline Line1_Col1 Line1_Col2 --baseline Line2_Col1 Line2_Col2
+"""
+
+helps['security va sql baseline set'] = """
+type: command
+short-summary: Sets Sql Vulnerability Assessment baseline. Replaces the current baseline.
+examples:
+  - name: Sets Sql Vulnerability Assessment baseline on an Azure virtual machine. Replaces the current baseline with latest scan results.
+    text: >
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --latest
+  - name: Sets Sql Vulnerability Assessment baseline on an Azure virtual machine. Replaces the current baseline with provided results.
+    text: >
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --baseline rule=VA9999 Line1_col1 Line1_col2 Line1_col3 --baseline rule=VA8888 Line1_col1 Line1_col2 --baseline rule=VA9999 Line2_col1 Line2_col2 Line2_col3
+  - name: Sets Sql Vulnerability Assessment baseline on an On-Premise machine. Replaces the current baseline with latest scan results.
+    text: >
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --latest
+  - name: Sets Sql Vulnerability Assessment baseline on an On-Premise machine. Replaces the current baseline with provided results.
+    text: >
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --baseline rule=VA9999 Line1_col1 Line1_col2 Line1_col3 --baseline rule=VA8888 Line1_col1 Line1_col2 --baseline rule=VA9999 Line2_col1 Line2_col2 Line2_col3
+"""
+
 helps['security auto-provisioning-setting'] = """
 type: group
 short-summary: View your auto provisioning settings.
@@ -264,37 +404,37 @@ examples:
 
 helps['security pricing'] = """
 type: group
-short-summary: Shows the Azure Security Center Pricing tier for the subscription.
+short-summary: Enables managing the Azure Defender plan for the subscription
 """
 
 helps['security pricing create'] = """
 type: command
-short-summary: Updates the Azure Security Center Pricing tier for the subscription.
+short-summary: Updates the Azure defender plan for the subscription.
 examples:
-  - name: Updates the Azure Security Center Pricing tier for the subscription.
+  - name: Updates the Azure defender plan for the subscription.
     text: >
-        az security pricing create -n default --tier 'standard'
-  - name: Updates the Azure Security Center Pricing tier for the subscription. (autogenerated)
-    text: az security pricing create --name default --subscription MySubscription --tier 'standard'
+        az security pricing create -n VirtualMachines --tier 'standard'
+  - name: Updates the Azure defender plan for the subscription. (autogenerated)
+    text: az security pricing create -n VirtualMachines --tier 'standard'
     crafted: true
 """
 
 helps['security pricing list'] = """
 type: command
-short-summary: Shows the Azure Security Center Pricing tier for the subscription.
+short-summary: Shows the Azure Defender plans for the subscription.
 examples:
-  - name: Shows the Azure Security Center Pricing tier for the subscription.
+  - name: Shows the Azure Defender plans for the subscription.
     text: >
         az security pricing list
 """
 
 helps['security pricing show'] = """
 type: command
-short-summary: Shows the Azure Security Center Pricing tier for the subscription.
+short-summary: Shows the Azure Defender plan for the subscription
 examples:
-  - name: Shows the Azure Security Center Pricing tier for the subscription.
+  - name: Shows the Azure Defender plan for the subscription
     text: >
-        az security pricing show -n default
+        az security pricing show -n VirtualMachines
 """
 
 helps['security setting'] = """
@@ -782,4 +922,64 @@ examples:
   - name: Get selected regulatory compliance control details and state.
     text: >
         az security regulatory-compliance-assessments show --standard-name 'Azure-CIS-1.1.0' --control-name '1.1' -n '94290b00-4d0c-d7b4-7cea-064a9554e681'
+"""
+
+helps['security secure-scores'] = """
+type: group
+short-summary: secure scores.
+"""
+
+helps['security secure-scores list'] = """
+type: command
+short-summary: List of secure-scores details and state results.
+examples:
+  - name: Get secure scores list.
+    text: >
+        az security secure-scores list
+"""
+
+helps['security secure-scores show'] = """
+type: command
+short-summary: Shows a secure score details for selected initiative.
+examples:
+  - name: Get secure score details.
+    text: >
+        az security secure-scores show -n 'ascScore'
+"""
+
+helps['security secure-score-controls'] = """
+type: group
+short-summary: secure score controls.
+"""
+
+helps['security secure-score-controls list'] = """
+type: command
+short-summary: List supported of secure score controls details and state for scope.
+examples:
+  - name: Get secure score controls list.
+    text: >
+        az security secure-score-controls list
+"""
+
+helps['security secure-score-controls list_by_score'] = """
+type: command
+short-summary: List supported of secure score controls details and state for selected score.
+examples:
+  - name: Get secure score controls list.
+    text: >
+        az security secure-score-controls list_by_score -n 'ascScore'
+"""
+
+helps['security secure-score-control-definitions'] = """
+type: group
+short-summary: secure score control definitions.
+"""
+
+helps['security secure-score-control-definitions list'] = """
+type: command
+short-summary: Get details of secure score control definitions.
+examples:
+  - name: Get secure score control definitions.
+    text: >
+        az security secure-score-control-definitions list
 """

@@ -416,8 +416,11 @@ Group
         Command group 'storage fs' is in preview. It may be changed/removed in a future
         release.
 Commands:
-    set  : Set the access control properties of a path(directory or file) in Azure Data Lake        Storage Gen2 account.
-    show : Show the access control properties of a path (directory or file) in Azure Data           Lake Storage Gen2 account.
+    remove-recursive : Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+    set              : Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
+    set-recursive    : Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+    show             : Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
+    update-recursive : Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
 ```
 
 ##### Set access control list of a path
@@ -499,5 +502,32 @@ az storage fs access show \
 ```
 az storage fs access show \
     -p myfile \
+    -f myfilesystem
+```
+
+##### Set the Access Control on a path and sub-paths
+- Set the Access Control on a path and sub-paths
+```
+az storage fs access set-recursive \
+    --acl "default:user:[id]:rwx"\
+    -p mydir \
+    -f myfilesystem
+```
+
+##### Modify the Access Control on a path and sub-paths
+- Modify the Access Control on a path and sub-paths
+```
+az storage fs access update-recursive \
+    --acl "user::r-x"\
+    -p mydir \
+    -f myfilesystem
+```
+
+##### Remove the Access Control on a path and sub-paths
+- Remove the Access Control on a path and sub-paths
+```
+az storage fs access remove-recursive \
+    --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923"\
+    -p mydir \
     -f myfilesystem
 ```

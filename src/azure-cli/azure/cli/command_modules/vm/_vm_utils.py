@@ -6,6 +6,9 @@
 import json
 import os
 import re
+
+from azure.cli.core.commands.arm import ArmTemplateBuilder
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -25,10 +28,10 @@ def get_target_network_api(cli_ctx):
         necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
         (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType
+    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
     version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     if cli_ctx.cloud.profile == 'latest':
-        version = '2018-01-01'
+        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
     return version
 
 
@@ -71,7 +74,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
@@ -93,20 +96,13 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
         return True
-    except CloudError:
+    except HttpResponseError:
         return False
 
 
 def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import get_api_version, ResourceType
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
-
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+    return keyvault_data_plane_factory(cli_ctx)
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -127,10 +123,13 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
+# pylint: disable=too-many-statements
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False):
+                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
+    from ._validators import validate_delete_options
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below
     # {
@@ -145,6 +144,7 @@ def normalize_disk_info(image_data_disks=None,
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
 
+    data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
     info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
@@ -177,7 +177,8 @@ def normalize_disk_info(image_data_disks=None,
             'lun': i,
             'managedDisk': {'storageAccountType': None},
             'createOption': 'empty',
-            'diskSizeGB': sizes_copy.pop(0)
+            'diskSizeGB': sizes_copy.pop(0),
+            'deleteOption': data_disk_delete_option if isinstance(data_disk_delete_option, str) else None
         }
 
     # update storage skus for managed data disks
@@ -209,9 +210,15 @@ def normalize_disk_info(image_data_disks=None,
 
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
+            if data_disk_delete_option:
+                info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
+                    else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
             info[i]['name'] = d.split('/')[-1].split('.')[0]
+            if data_disk_delete_option:
+                info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
+                    else data_disk_delete_option.get(info[i]['name'], None)
 
     # fill in data disk caching
     if data_disk_cachings:
@@ -352,3 +359,10 @@ def update_disk_sku_info(info_dict, skus):
             except ValueError:
                 raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
             _update(info_dict, lun, value)
+
+
+class ArmTemplateBuilder20190401(ArmTemplateBuilder):
+
+    def __init__(self):
+        super().__init__()
+        self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'

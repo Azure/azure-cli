@@ -6,6 +6,7 @@
 from enum import Enum
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.core._profile import Profile
@@ -16,13 +17,17 @@ class Clients(str, Enum):
     private_endpoint_connections = 'private_endpoint_connections'
     private_link_resources = 'private_link_resources'
     managed_hsms = 'managed_hsms'
+    mhsm_private_endpoint_connections = 'mhsm_private_endpoint_connections'
+    mhsm_private_link_resources = 'mhsm_private_link_resources'
 
 
 OPERATIONS_NAME = {
     Clients.vaults: 'VaultsOperations',
     Clients.private_endpoint_connections: 'PrivateEndpointConnectionsOperations',
     Clients.private_link_resources: 'PrivateLinkResourcesOperations',
-    Clients.managed_hsms: 'ManagedHsmsOperations'
+    Clients.managed_hsms: 'ManagedHsmsOperations',
+    Clients.mhsm_private_endpoint_connections: 'MHSMPrivateEndpointConnectionsOperations',
+    Clients.mhsm_private_link_resources: 'MHSMPrivateLinkResourcesOperations'
 }
 
 KEYVAULT_TEMPLATE_STRINGS = {
@@ -110,6 +115,7 @@ def get_client(cli_ctx, resource_type, client_name=''):
 
 def is_azure_stack_profile(cmd):
     return cmd.cli_ctx.cloud.profile in [
+        '2020-09-01-hybrid',
         '2019-03-01-hybrid',
         '2018-03-01-hybrid',
         '2017-03-09-profile'
@@ -123,7 +129,7 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
     return _keyvault_mgmt_client_factory
 
 
-def keyvault_data_plane_factory(cli_ctx, _):
+def keyvault_data_plane_factory(cli_ctx, *_):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -132,7 +138,8 @@ def keyvault_data_plane_factory(cli_ctx, _):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
@@ -168,7 +175,8 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
         try:
-            return Profile(cli_ctx=cli_ctx).get_raw_token(resource)[0]
+            return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
+                                                          subscription=cli_ctx.data.get('subscription_id'))[0]
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and
@@ -200,9 +208,12 @@ def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
-    vault_url = command_args['hsm_name']
+    vault_url = \
+        command_args.get('hsm_name', None) or \
+        command_args.get('vault_base_url', None) or \
+        command_args.get('identifier', None)
     if not vault_url:
-        vault_url = command_args['vault_base_url']
+        raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
     return KeyVaultBackupClient(
         vault_url=vault_url, credential=credential, api_version=version)
 
@@ -213,8 +224,11 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
-    vault_url = command_args['hsm_name']
+    vault_url = \
+        command_args.get('hsm_name', None) or \
+        command_args.get('vault_base_url', None) or \
+        command_args.get('identifier', None)
     if not vault_url:
-        vault_url = command_args['vault_base_url']
+        raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
     return KeyVaultAccessControlClient(
         vault_url=vault_url, credential=credential, api_version=version)

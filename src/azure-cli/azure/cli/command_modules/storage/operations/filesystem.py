@@ -15,5 +15,5 @@ def exists(cmd, client, timeout=None):
         from azure.cli.command_modules.storage.track2_util import _dont_fail_on_exist
         StorageErrorCode = cmd.get_models("_shared.models#StorageErrorCode",
                                           resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
-        _dont_fail_on_exist(ex, StorageErrorCode.blob_not_found)
+        _dont_fail_on_exist(ex, StorageErrorCode.container_not_found)
         return False
