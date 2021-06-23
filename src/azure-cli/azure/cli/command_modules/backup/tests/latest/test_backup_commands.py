@@ -751,6 +751,3 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("tierType", '{rp1_tier}'),
             self.check("resourceGroup", '{rg}')
         ])
-
-       
-        
