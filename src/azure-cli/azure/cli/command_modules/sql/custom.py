@@ -43,7 +43,9 @@ from azure.mgmt.sql.models import (
     EncryptionProtector,
     ManagedInstanceEncryptionProtector,
     FirewallRule,
-    UserIdentity
+    UserIdentity,
+    ServerExternalAdministrator,
+    ManagedInstanceExternalAdministrator
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -3418,6 +3420,10 @@ def server_create(
         user_assigned_identity_id=None,
         primary_user_assigned_identity_id=None,
         identity_type=None,
+        enable_ad_only_auth=False,
+        external_admin_principal_type=None,
+        external_admin_sid=None,
+        external_admin_name=None,
         **kwargs):
     '''
     Creates a server.
@@ -3437,6 +3443,17 @@ def server_create(
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
+    ad_only = None
+    if enable_ad_only_auth:
+        ad_only = True
+
+    kwargs['administrators'] = ServerExternalAdministrator(
+        principal_type = external_admin_principal_type,
+        login = external_admin_name,
+        sid = external_admin_sid,
+        azure_ad_only_authentication = ad_only,
+        tenant_id=_get_tenant_id())
+
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
                        server_name=server_name,
@@ -3446,18 +3463,39 @@ def server_create(
 
 def server_list(
         client,
-        resource_group_name=None):
+        resource_group_name=None,
+        expand_ad_admin=False):
     '''
     Lists servers in a resource group or subscription
     '''
 
+    expand=None
+    if expand_ad_admin:
+        expand='administrators/activedirectory'
+
     if resource_group_name:
         # List all servers in the resource group
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
+        return client.list_by_resource_group(resource_group_name=resource_group_name,expand=expand)
 
     # List all servers in the subscription
-    return client.list()
+    return client.list(expand)
 
+
+def server_get(
+        client,
+        resource_group_name,
+        server_name,
+        expand_ad_admin=False):
+    '''
+    Gets a server
+    '''
+
+    expand=None
+    if expand_ad_admin:
+        expand='administrators/activedirectory'
+
+    # List all servers in the subscription
+    return client.get(resource_group_name,server_name,expand)
 
 def server_update(
         instance,
@@ -3906,6 +3944,10 @@ def managed_instance_create(
         user_assigned_identity_id=None,
         primary_user_assigned_identity_id=None,
         identity_type=None,
+        enable_ad_only_auth=False,
+        external_admin_principal_type=None,
+        external_admin_sid=None,
+        external_admin_name=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -3942,6 +3984,17 @@ def managed_instance_create(
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
+    ad_only = None
+    if enable_ad_only_auth:
+        ad_only = True
+
+    kwargs['administrators'] = ManagedInstanceExternalAdministrator(
+        principal_type = external_admin_principal_type,
+        login = external_admin_name,
+        sid = external_admin_sid,
+        azure_ad_only_authentication = ad_only,
+        tenant_id=_get_tenant_id())
+
     # Create
     return client.create_or_update(
         managed_instance_name=managed_instance_name,
@@ -3951,17 +4004,38 @@ def managed_instance_create(
 
 def managed_instance_list(
         client,
-        resource_group_name=None):
+        resource_group_name=None,
+        expand_ad_admin=False):
     '''
-    Lists managed instances in a resource group or subscription
+    Lists servers in a resource group or subscription
     '''
+
+    expand=None
+    if expand_ad_admin:
+        expand='administrators/activedirectory'
 
     if resource_group_name:
         # List all managed instances in the resource group
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
+        return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
 
     # List all managed instances in the subscription
-    return client.list()
+    return client.list(expand)
+
+def managed_instance_get(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        expand_ad_admin=False):
+    '''
+    Gets a Managed Instance
+    '''
+
+    expand=None
+    if expand_ad_admin:
+        expand='administrators/activedirectory'
+
+    # List all servers in the subscription
+    return client.get(resource_group_name,managed_instance_name,expand)
 
 
 def managed_instance_update(

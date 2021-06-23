@@ -1386,19 +1386,47 @@ def load_arguments(self, _):
             ])
 
         c.argument('administrator_login',
-                   required=True)
+                   required=False)
 
         c.argument('administrator_login_password',
-                   required=True)
+                   required=False)
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
+        c.argument('enable_ad_only_auth',
+                   options_list=['--enable-ad-only-auth'],
+                   help='Enable Azure Active Directory Only Authentication for this server.')
+
+        c.argument('external_admin_name',
+                   options_list=['--external-admin-name'],
+                   help='Display name of the Azure AD administrator user, group or application.')
+
+        c.argument('external_admin_sid',
+                   options_list=['--external-admin-sid'],
+                   help='The unique ID of the Azure AD administrator. Object Id for User or Group, '
+                   'Client Id for Applications')
+
+        c.argument('external_admin_principal_type',
+                   options_list=['--external-admin-principal-type'],
+                   help='User, Group or Application')
+
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
                    help='The administrator login password.')
+
+    with self.argument_context('sql server show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql server list') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
 
     #####
     #           sql server ad-admin
@@ -1804,11 +1832,11 @@ def load_arguments(self, _):
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'],
-                   required=True)
+                   required=False)
 
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'],
-                   required=True)
+                   required=False)
 
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
@@ -1836,6 +1864,23 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Assign maintenance configuration to this managed instance.')
+                
+        c.argument('enable_ad_only_auth',
+                   options_list=['--enable-ad-only-auth'],
+                   help='Enable Azure Active Directory Only Authentication for this server.')
+
+        c.argument('external_admin_name',
+                   options_list=['--external-admin-name'],
+                   help='Display name of the Azure AD administrator user, group or application.')
+
+        c.argument('external_admin_sid',
+                   options_list=['--external-admin-sid'],
+                   help='The unique ID of the Azure AD administrator. Object Id for User or Group, '
+                   'Client Id for Applications')
+
+        c.argument('external_admin_principal_type',
+                   options_list=['--external-admin-principal-type'],
+                   help='User, Group or Application')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -1867,6 +1912,17 @@ def load_arguments(self, _):
             ])
 
         c.ignore('name')  # Hide sku name
+
+    with self.argument_context('sql mi show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql mi list') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
 
     #####
     #           sql managed instance key
