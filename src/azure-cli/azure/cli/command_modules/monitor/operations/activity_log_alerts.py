@@ -35,7 +35,7 @@ def process_condition_parameter(namespace):
 
     # Ensure all the string at even options are AND operator
     operators = [expression[i] for i in range(1, len(expression), 2)]
-    if any([op != 'and' for op in operators]):
+    if any(op != 'and' for op in operators):
         raise CLIError(error)
 
     # Pick the strings at odd position and convert them into condition leaf.
@@ -212,13 +212,13 @@ def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resourc
 
 
 def _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=True):
-    from azure.mgmt.monitor.v2017_04_01.models import ErrorResponseException
+    from azure.core.exceptions import HttpResponseError
 
     try:
         return client.get(resource_group_name=resource_group_name, activity_log_alert_name=activity_log_alert_name)
-    except ErrorResponseException as ex:
+    except HttpResponseError as ex:
         from knack.util import CLIError
-        if ex.response.status_code == 404:
+        if ex.status_code == 404:
             if throw_if_missing:
                 raise CLIError('Can\'t find activity log alert {} in resource group {}.'.format(activity_log_alert_name,
                                                                                                 resource_group_name))

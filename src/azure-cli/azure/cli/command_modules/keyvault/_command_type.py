@@ -97,7 +97,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 
             client_arg_name = resolve_client_arg_name(operations_tmpl.format(method_name), kwargs)
             if client_arg_name in op_args:
-                client = client_factory(self.command_loader.cli_ctx, command_args)
+                client = client_factory(command_args['cmd'].cli_ctx, command_args)
                 command_args[client_arg_name] = client
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
@@ -113,7 +113,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 # apply results transform if specified
                 transform_result = merged_kwargs.get('transform', None)
                 if transform_result:
-                    return _encode_hex(transform_result(result, **command_args))
+                    return _encode_hex(transform_result(result, **{**command_args, 'kv_transform': True}))
 
                 # otherwise handle based on return type of results
                 if isinstance(result, poller_classes()):

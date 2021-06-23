@@ -127,6 +127,10 @@ server_configure_help = 'You can configure the default using `az configure --def
 
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 
+storage_arg_group = "Storage"
+log_analytics_arg_group = "Log Analytics"
+event_hub_arg_group = "Event Hub"
+
 
 def get_location_type_with_default_from_resource_group(cli_ctx):
     return CLIArgumentType(
@@ -194,6 +198,10 @@ zone_redundant_param_type = CLIArgumentType(
     help='Specifies whether to enable zone redundancy',
     arg_type=get_three_state_flag())
 
+maintenance_configuration_id_param_type = CLIArgumentType(
+    options_list=['--maint-config-id', '-m'],
+    help='Specified maintenance configuration id or name for this resource.')
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
@@ -252,10 +260,51 @@ read_scale_param_type = CLIArgumentType(
     arg_type=get_enum_type(['Enabled', 'Disabled']))
 
 read_replicas_param_type = CLIArgumentType(
-    options_list=['--read-replicas'],
+    options_list=['--read-replicas', '--ha-replicas'],
     type=int,
-    help='The number of readonly replicas to provision for the database. '
+    help='The number of high availability replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
+
+blob_storage_target_state_param_type = CLIArgumentType(
+    arg_group=storage_arg_group,
+    options_list=['--blob-storage-target-state', '--bsts'],
+    configured_default='sql-server',
+    help='Indicate whether blob storage is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+log_analytics_target_state_param_type = CLIArgumentType(
+    arg_group=log_analytics_arg_group,
+    options_list=['--log-analytics-target-state', '--lats'],
+    configured_default='sql-server',
+    help='Indicate whether log analytics is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+log_analytics_workspace_resource_id_param_type = CLIArgumentType(
+    arg_group=log_analytics_arg_group,
+    options_list=['--log-analytics-workspace-resource-id', '--lawri'],
+    configured_default='sql-server',
+    help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace '
+         'to which you would like to send Audit Logs.')
+
+event_hub_target_state_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub-target-state', '--ehts'],
+    configured_default='sql-server',
+    help='Indicate whether event hub is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+event_hub_authorization_rule_id_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub-authorization-rule-id', '--ehari'],
+    configured_default='sql-server',
+    help='The resource Id for the event hub authorization rule.')
+
+event_hub_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub', '--eh'],
+    configured_default='sql-server',
+    help='The name of the event hub. If none is specified '
+         'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -302,7 +351,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('read_scale',
                      arg_type=read_scale_param_type)
 
-    arg_ctx.argument('read_replica_count',
+    arg_ctx.argument('high_availability_replica_count',
                      arg_type=read_replicas_param_type)
 
     creation_arg_group = 'Creation'
@@ -325,9 +374,6 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
-
-    arg_ctx.argument('storage_account_type',
-                     arg_type=backup_storage_redundancy_param_type)
 
 
 def _configure_db_dw_create_params(
@@ -418,8 +464,9 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count',
-            'storage_account_type'
+            'high_availability_replica_count',
+            'storage_account_type',
+            'maintenance_configuration_id',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -443,12 +490,19 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
 
+    arg_ctx.argument('storage_account_type',
+                     arg_type=backup_storage_redundancy_param_type)
+
+    arg_ctx.argument('maintenance_configuration_id',
+                     arg_type=maintenance_configuration_id_param_type)
+
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
+        arg_ctx.ignore('maintenance_configuration_id')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -489,6 +543,7 @@ def _configure_db_dw_create_params(
         # --read-replica-count was accidentally included in previous releases and
         # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
+        arg_ctx.ignore('high_availability_replica_count')
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
@@ -543,9 +598,6 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
-
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
@@ -565,9 +617,6 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -596,9 +645,6 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -655,6 +701,8 @@ def load_arguments(self, _):
 
         c.argument('storage_account_type',
                    arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -774,8 +822,15 @@ def load_arguments(self, _):
                    options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
+        c.argument('partner_database_name',
+                   options_list=['--partner-database'],
+                   help='Name of the new replica.'
+                   ' If unspecified, defaults to the source database name.')
+
+        c.argument('secondary_type',
+                   options_list=['--secondary-type'],
+                   help='Type of secondary to create.'
+                   ' Allowed values include: Geo, Named.')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
@@ -803,8 +858,6 @@ def load_arguments(self, _):
     #           sql db audit-policy & threat-policy
     #####
     def _configure_security_policy_storage_params(arg_ctx):
-
-        storage_arg_group = 'Storage'
 
         arg_ctx.argument('storage_account',
                          options_list=['--storage-account'],
@@ -839,6 +892,23 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
 
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
@@ -1070,6 +1140,9 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku (for vcore skus only). '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('maintenance_configuration_id',
+                   arg_type=maintenance_configuration_id_param_type)
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1080,6 +1153,7 @@ def load_arguments(self, _):
                 'per_database_settings',
                 'tags',
                 'zone_redundant',
+                'maintenance_configuration_id',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
@@ -1251,7 +1325,7 @@ def load_arguments(self, _):
 
         c.argument('assign_identity',
                    options_list=['--assign_identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('minimal_tls_version',
@@ -1286,7 +1360,7 @@ def load_arguments(self, _):
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
+                   help='Generate and assign an Azure Active Directory Identity for this server '
                    'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server update') as c:
@@ -1322,8 +1396,6 @@ def load_arguments(self, _):
     #           sql server audit-policy
     ######
     with self.argument_context('sql server audit-policy update') as c:
-        storage_arg_group = 'Storage'
-
         c.argument('storage_account',
                    options_list=['--storage-account'],
                    arg_group=storage_arg_group,
@@ -1355,6 +1427,66 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
+
+    #####
+    #           sql server ms-support audit-policy
+    ######
+    with self.argument_context('sql server ms-support audit-policy update') as c:
+        c.argument('storage_account',
+                   options_list=['--storage-account'],
+                   arg_group=storage_arg_group,
+                   help='Name of the storage account.')
+
+        c.argument('storage_account_access_key',
+                   options_list=['--storage-key'],
+                   arg_group=storage_arg_group,
+                   help='Access key for the storage account.')
+
+        c.argument('storage_endpoint',
+                   arg_group=storage_arg_group,
+                   help='The storage account endpoint.')
+        _configure_security_policy_storage_params(c)
+
+        policy_arg_group = 'Policy'
+
+        c.argument('state',
+                   arg_group=policy_arg_group,
+                   help='Auditing policy state',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
 
     #####
     #           sql server conn-policy
@@ -1471,6 +1603,57 @@ def load_arguments(self, _):
                 help='The virtual network name')
 
     ###############################################
+    #           sql server trust groups           #
+    ###############################################
+
+    with self.argument_context('sql stg') as c:
+        c.argument('resource_group_name',
+                   help='The resource group name')
+
+    with self.argument_context('sql stg create') as c:
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+        c.argument('location',
+                   help='The location name of the Server Trust Group.')
+
+        c.argument('group_member',
+                   options_list=['--group-member', '-m'],
+                   help="""Managed Instance that is to be a member of the group.
+                   Specify resource group, subscription id and the name of the instance.""",
+                   nargs='+')
+
+        c.argument('trust_scope',
+                   help='The trust scope of the Server Trust Group.',
+                   nargs='+')
+
+    with self.argument_context('sql stg show') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg delete') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.')
+
+        c.argument('name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Server Trust Group.')
+
+    with self.argument_context('sql stg list') as c:
+        c.argument('location',
+                   help='The location of the Server Trust Group.',
+                   arg_group='List By Location')
+
+        c.argument('instance_name',
+                   help='Managed Instance name.',
+                   arg_group='List By Instance')
+
+    ###############################################
     #                sql managed instance         #
     ###############################################
     with self.argument_context('sql mi') as c:
@@ -1546,7 +1729,8 @@ def load_arguments(self, _):
                 'timezone_id',
                 'tags',
                 'storage_account_type',
-                'yes'
+                'yes',
+                'maintenance_configuration_id'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1590,6 +1774,10 @@ def load_arguments(self, _):
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
 
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1606,6 +1794,10 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Change maintenance configuration for this managed instance.')
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(

@@ -16,6 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -130,22 +131,6 @@ def process_secret_set_namespace(cmd, namespace):
     namespace.value = content
 
 
-def process_storage_uri(ns):
-    if not ns.storage_resource_uri:
-        if ns.storage_account_name and ns.blob_container_name:
-            ns.storage_resource_uri = 'https://{}.blob.core.windows.net/{}'.format(
-                ns.storage_account_name, ns.blob_container_name
-            )
-            del ns.storage_account_name
-            del ns.blob_container_name
-        else:
-            raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
-                           '--storage-account-name NAME --blob-container-name NAME]')
-    else:
-        raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
-                       'if --storage-resource-uri is specified.')
-
-
 def process_sas_token_parameter(cmd, ns):
     from azure.cli.core.profiles import ResourceType
 
@@ -199,6 +184,16 @@ def validate_key_import_source(ns):
         raise ValueError('--pem-password must be used with --pem-file or --pem-string')
 
 
+def validate_key_import_type(ns):
+    # Default value of kty is: RSA
+    kty = getattr(ns, 'kty', None)
+    crv = getattr(ns, 'curve', None)
+
+    if (kty == 'EC' and crv is None) or (kty != 'EC' and crv):
+        from azure.cli.core.azclierror import ValidationError
+        raise ValidationError('parameter --curve should be specified when key type --kty is EC.')
+
+
 def validate_key_type(ns):
     crv = getattr(ns, 'curve', None)
     kty = getattr(ns, 'kty', None) or ('EC' if crv else 'RSA')
@@ -233,14 +228,20 @@ def validate_private_endpoint_connection_id(cmd, ns):
         from azure.cli.core.util import parse_proxy_resource_id
         result = parse_proxy_resource_id(ns.connection_id)
         ns.resource_group_name = result['resource_group']
-        ns.vault_name = result['name']
+        if result['type'] and 'managedHSM' in result['type']:
+            ns.hsm_name = result['name']
+        else:
+            ns.vault_name = result['name']
         ns.private_endpoint_connection_name = result['child_name_1']
 
-    if ns.vault_name and not ns.resource_group_name:
-        ns.resource_group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, ns.vault_name)
+    if not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_resource_name(cli_ctx=cmd.cli_ctx,
+                                                                        vault_name=getattr(ns, 'vault_name', None),
+                                                                        hsm_name=getattr(ns, 'hsm_name', None))
 
-    if not all([ns.vault_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
+    if not all([(getattr(ns, 'vault_name', None) or getattr(ns, 'hsm_name', None)),
+                ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME | --name NAME --hsm-name NAME]')
 
     del ns.connection_id
 
@@ -314,7 +315,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
         if vault_name:
             id_comps = parse_resource_id(resource.properties.vault_id)
         else:
-            id_comps = parse_resource_id(resource.properties.id)
+            id_comps = parse_resource_id(resource.properties.mhsm_id)
 
     # otherwise, iterate through deleted vaults to find one with a matching name
     else:
@@ -322,7 +323,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
             if vault_name:
                 id_comps = parse_resource_id(v.properties.vault_id)
             else:
-                id_comps = parse_resource_id(v.properties.id)
+                id_comps = parse_resource_id(v.properties.mhsm_id)
             if id_comps['name'].lower() == resource_name.lower():
                 resource = v
                 ns.location = resource.properties.location
@@ -332,7 +333,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     if not resource:
         raise CLIError('No deleted Vault or HSM was found with name ' + resource_name)
 
-    if 'keyvault purge' not in cmd.name:
+    if 'keyvault purge' not in cmd.name and 'keyvault show-deleted' not in cmd.name:
         setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
 
         # resource_group_name must match the resource group of the deleted vault
@@ -435,6 +436,13 @@ def validate_subnet(cmd, namespace):
         namespace.subnet = _construct_vnet(cmd, namespace.resource_group_name, vnet, subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+
+
+def validate_role_assignment_args(ns):
+    if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):
+        raise RequiredArgumentMissingError(
+            'Please specify at least one of these parameters: '
+            '--name, --scope, --assignee, --assignee-object-id, --role, --ids')
 
 
 def validate_vault_or_hsm(ns):

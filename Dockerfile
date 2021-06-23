@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.6.10"
+ARG PYTHON_VERSION="3.8.9"
 
-FROM python:${PYTHON_VERSION}-alpine3.11
+FROM python:${PYTHON_VERSION}-alpine3.13
 
 ARG CLI_VERSION
 
@@ -37,6 +37,7 @@ LABEL maintainer="Microsoft" \
 RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
  && apk add --no-cache libintl icu-libs libc6-compat \
+ && apk add --no-cache bash-completion \
  && update-ca-certificates
 
 ARG JP_VERSION="0.1.3"

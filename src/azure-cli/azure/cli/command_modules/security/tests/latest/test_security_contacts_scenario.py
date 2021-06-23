@@ -11,7 +11,7 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
 
     def test_security_contacts(self):
 
-        self.cmd('az security contact create -n default1 --email john@contoso.com')
+        self.cmd('az security contact create -n default1 --email john@contoso.com --alert-notifications off --alerts-admins off')
 
         security_contacts = self.cmd('az security contact list').get_output_in_json()
         assert len(security_contacts) >= 0
@@ -20,7 +20,7 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
 
         assert contact["email"] == "john@contoso.com"
 
-        self.cmd('az security contact create -n default1 --email lisa@contoso.com')
+        self.cmd('az security contact create -n default1 --email lisa@contoso.com --alert-notifications off --alerts-admins off')
 
         contact = self.cmd('az security contact show -n default1').get_output_in_json()
 

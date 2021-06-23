@@ -9,10 +9,10 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.6.8
+set PYTHON_VERSION=3.8.9
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python368-32.zip"
+set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python389-32.zip"
 set PROPAGATE_ENV_CHANGE_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/propagate_env_change.zip"
 
 :: Set up the output directory and temp. directories
@@ -26,7 +26,7 @@ mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
-set PYTHON_DIR=%ARTIFACTS_DIR%\Python368-32
+set PYTHON_DIR=%ARTIFACTS_DIR%\Python389-32
 set PROPAGATE_ENV_CHANGE_DIR=%~dp0..\propagate_env_change
 
 set REPO_ROOT=%~dp0..\..\..
@@ -75,10 +75,10 @@ if not exist %PYTHON_DIR% (
     mkdir %PYTHON_DIR%
     pushd %PYTHON_DIR%
     echo Downloading Python.
-    curl -o Python368-32.zip %PYTHON_DOWNLOAD_URL% -k
-    unzip -q Python368-32.zip
+    curl -o Python389-32.zip %PYTHON_DOWNLOAD_URL% -k
+    unzip -q Python389-32.zip
     if %errorlevel% neq 0 goto ERROR
-    del Python368-32.zip
+    del Python389-32.zip
     echo Python downloaded and extracted successfully.
     popd
 )
@@ -99,6 +99,7 @@ if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
+%BUILDING_DIR%\python.exe %~dp0\remove_unused_api_versions.py
 popd
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
@@ -122,11 +123,6 @@ for /f %%a in ('dir /b /s *_py3.*.pyc') do (
 )
 popd
 
-:: Remove unused Network SDK API versions
-pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt\network
-rmdir /s /q v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_10_01 v2018_12_01 v2019_04_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01
-popd
-
 :: Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
@@ -145,9 +141,25 @@ for /f %%f in ('dir /b /s *.pyc') do (
 )
 popd
 
+:: Remove __pycache__
+echo remove pycache
 for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
+
+:: Remove aio
+echo remove aio
+for /d /r %BUILDING_DIR%\Lib\site-packages\azure\mgmt %%d in (aio) do (
+    if exist %%d rmdir /s /q "%%d"
+)
+
+:: Remove dist-info
+echo remove dist-info
+pushd %BUILDING_DIR%\Lib\site-packages
+for /d %%d in ("azure*.dist-info") do (
+    if exist %%d rmdir /s /q "%%d"
+)
+popd
 
 if %errorlevel% neq 0 goto ERROR
 

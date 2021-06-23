@@ -30,8 +30,7 @@ def load_arguments(self, _):
     from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, PublicNetworkAccess, \
-        OutboundOnlyPublicNetworkAccessType
+    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, ResourceProviderConnection
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
                                      help='The size of the node. See also: https://docs.microsoft.com/azure/'
@@ -94,8 +93,12 @@ def load_arguments(self, _):
                    help='SSH public key for the cluster nodes.')
 
         # Node
-        c.argument('headnode_size', arg_type=node_size_type)
-        c.argument('workernode_size', arg_type=node_size_type)
+        c.argument('headnode_size', arg_type=node_size_type,
+                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
+        c.argument('workernode_size', arg_type=node_size_type,
+                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                        'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
         c.argument('workernode_data_disk_storage_account_type', arg_group='Node',
@@ -185,15 +188,6 @@ def load_arguments(self, _):
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help="The name or ID of user assigned identity.")
 
-        # Private Link Network Settings
-        c.argument('public_network_access_type', arg_group='Private Link Network Settings',
-                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.',
-                   deprecate_info=c.deprecate(expiration='2.14.0'))
-        c.argument('outbound_public_network_access_type', arg_group='Private Link Network Settings',
-                   arg_type=get_enum_type(OutboundOnlyPublicNetworkAccessType),
-                   help='The outbound only public network access type.',
-                   deprecate_info=c.deprecate(expiration='2.14.0'))
-
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
                    help='Indicates whether enable encryption in transit.')
@@ -226,6 +220,19 @@ def load_arguments(self, _):
                    options_list=['--autoscale-workernode-count', '--autoscale-count'],
                    arg_group='Autoscale Configuration',
                    help='The scheduled workernode count.')
+
+        # relay outbound and private link
+        c.argument('resource_provider_connection', options_list=['--resource-provider-connection', '--rp-connection'],
+                   arg_group='Resource provider connection',
+                   arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
+        c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
+                   help='Indicate whether enable the private link or not.')
+
+        # compute isolation
+        c.argument('enable_compute_isolation', options_list=['--enable-compute-isolation', '--compute-isolation'],
+                   arg_group="Compute Isolation", arg_type=get_three_state_flag(),
+                   help='Indicate whether enable compute isolation or not.')
+        c.argument('host_sku', arg_group='Compute Isolation', help="The dedicated host sku of compute isolation.")
 
         # resize
         with self.argument_context('hdinsight resize') as c:
@@ -279,6 +286,16 @@ def load_arguments(self, _):
 
         # Monitoring
         with self.argument_context('hdinsight monitor') as c:
+            c.argument('workspace', validator=validate_workspace,
+                       completer=get_resource_name_completion_list_under_subscription(
+                           'Microsoft.OperationalInsights/workspaces'),
+                       help='The name, resource ID or workspace ID of Log Analytics workspace.')
+            c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
+                                           'Required when workspace ID is provided.')
+            c.ignore('workspace_type')
+
+        # Azure Monitor
+        with self.argument_context('hdinsight azure-monitor') as c:
             c.argument('workspace', validator=validate_workspace,
                        completer=get_resource_name_completion_list_under_subscription(
                            'Microsoft.OperationalInsights/workspaces'),

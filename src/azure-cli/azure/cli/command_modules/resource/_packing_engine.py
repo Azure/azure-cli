@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
+import re
 import json
 from knack.util import CLIError
-from azure.cli.core.util import read_file_content
+from azure.cli.core.util import read_file_content, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -23,6 +24,28 @@ class PackingContext():  # pylint: disable=too-few-public-methods
         self.Artifact = []
 
 
+# pylint: disable=redefined-outer-name
+def process_template(template, preserve_order=True, file_path=None):
+    from jsmin import jsmin
+
+    # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
+    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
+    minified = jsmin(template)
+
+    # Remove extra spaces, compress multiline string(s)
+    result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
+
+    try:
+        return shell_safe_json_parse(result, preserve_order)
+    except CLIError:
+        # Because the processing of removing comments and compression will lead to misplacement of error location,
+        # so the error message should be wrapped.
+        if file_path:
+            raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
+        raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
+
+
 def pack(cmd, template_file):
     """
     Packs the specified template and its referenced artifacts for use in a Template Spec.
@@ -32,8 +55,7 @@ def pack(cmd, template_file):
     root_template_file_path = os.path.abspath(template_file)
     context = PackingContext(os.path.dirname(root_template_file_path))
     template_content = read_file_content(template_file)
-    sanitized_template = _remove_comments_from_json(template_content)
-    template_json = json.loads(json.dumps(sanitized_template))
+    template_json = json.loads(json.dumps(process_template(template_content)))
     _pack_artifacts(cmd, root_template_file_path, context)
     return PackagedTemplate(template_json, getattr(context, 'Artifact'))
 
@@ -47,15 +69,14 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
     :type template_abs_file_path : str
     :param context : The packing context of the current packing operation
     :type content : PackingContext
-    :param artifactableTemplateObj : The packagable template object
+    :param artifactableTemplateObj : The packageable template object
     :type artifactableTemplateObj : JSON
     """
     original_directory = getattr(context, 'CurrentDirectory')
     try:
         context.CurrentDirectory = os.path.dirname(template_abs_file_path)
         template_content = read_file_content(template_abs_file_path)
-        artifactable_template_obj = sanitized_template = _remove_comments_from_json(template_content)
-        template_json = json.loads(json.dumps(sanitized_template))
+        artifactable_template_obj = _remove_comments_from_json(template_content)
         template_link_to_artifact_objs = _get_template_links_to_artifacts(cmd, artifactable_template_obj,
                                                                           includeNested=True)
 
@@ -91,12 +112,11 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
                 if os.path.samefile(prev_added_artifact, abs_local_path):
                     continue
             _pack_artifacts(cmd, abs_local_path, context)
-            TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                                   'TemplateSpecTemplateArtifact', mod='models')
+            LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
+                                             'LinkedTemplateArtifact', mod='models')
             template_content = read_file_content(abs_local_path)
-            sanitized_template = _remove_comments_from_json(template_content)
-            template_json = json.loads(json.dumps(sanitized_template))
-            artifact = TemplateSpecTemplateArtifact(path=as_relative_path, template=template_json)
+            template_json = json.loads(json.dumps(process_template(template_content)))
+            artifact = LinkedTemplateArtifact(path=as_relative_path, template=template_json)
             context.Artifact.append(artifact)
     finally:
         context.CurrentDirectory = original_directory
@@ -115,9 +135,9 @@ def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
         results.append(deployment_resource_obj)
         if(includeNested and 'properties' in deployment_resource_obj):
             deployment_resource_props_obj = deployment_resource_obj['properties']
-            if 'template' in deployment_resource_props_obj:
+            if 'mainTemplate' in deployment_resource_props_obj:
                 results.extend(_get_deployment_resource_objects(cmd,
-                                                                deployment_resource_props_obj['template'],
+                                                                deployment_resource_props_obj['mainTemplate'],
                                                                 includeNested=True))
     return results
 
@@ -162,7 +182,7 @@ def _absolute_to_relative_path(root_dir_path, abs_file_path):
 
 def unpack(cmd, exported_template, target_dir, template_file_name):
 
-    packaged_template = PackagedTemplate(exported_template.template, exported_template.artifacts)
+    packaged_template = PackagedTemplate(exported_template.main_template, exported_template.linked_templates)
     # Ensure paths are normalized:
     template_file_name = os.path.basename(template_file_name)
     target_dir = os.path.abspath(target_dir).rstrip(os.sep).rstrip(os.altsep)
@@ -177,8 +197,8 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
                                   _normalize_directory_seperators_for_local_file_system(getattr(artifact, 'path')))
         abs_local_path = os.path.abspath(local_path)
         if os.path.commonpath([target_dir]) != os.path.commonpath([target_dir, abs_local_path]):
-            raise CLIError('Unable to unpack artifact ' + getattr(artifact, 'path') + 'because it would create a file' +
-                           'outside of the target directory hierarchy of' + target_dir)
+            raise CLIError('Unable to unpack linked template ' + getattr(artifact, 'path') +
+                           'because it would create a file outside of the target directory hierarchy of' + target_dir)
 
     # Now that the artifact paths checkout...let's begin by writing our main template
     # file and then processing each artifact:
@@ -188,11 +208,11 @@ def unpack(cmd, exported_template, target_dir, template_file_name):
     with open(root_template_file_path, 'w') as root_file:
         json.dump(getattr(packaged_template, 'RootTemplate'), root_file, indent=2)
 
-    TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                           'TemplateSpecTemplateArtifact', mod='models')
+    LinkedTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
+                                     'LinkedTemplateArtifact', mod='models')
     for artifact in getattr(packaged_template, 'Artifacts'):
-        if not isinstance(artifact, TemplateSpecTemplateArtifact):
-            raise CLIError('Unknown artifact type encountered...')
+        if not isinstance(artifact, LinkedTemplateArtifact):
+            raise CLIError('Unknown linked template type encountered...')
         artifact_path = _normalize_directory_seperators_for_local_file_system(getattr(artifact, 'path'))
         abs_local_path = os.path.abspath(os.path.join(target_dir, artifact_path))
         if not os.path.exists(os.path.dirname(abs_local_path)):

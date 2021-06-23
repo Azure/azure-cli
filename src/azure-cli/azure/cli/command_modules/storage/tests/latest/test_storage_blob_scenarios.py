@@ -149,6 +149,15 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    def test_storage_blob_download_directory(self, resource_group, storage_account):
+        local_dir = self.create_temp_dir()
+        account_info = self.get_account_info(resource_group, storage_account)
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegexp(FileOperationError, 'File is expected, not a directory'):
+            self.storage_cmd('storage blob download -c mycontainer -n myblob -f "{}"', account_info, local_dir)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
     def test_storage_blob_socket_timeout(self, resource_group, storage_account):
         local_dir = self.create_temp_dir()
         local_file = self.create_temp_file(1)
@@ -656,6 +665,11 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir/'))
 
+        # Test with custom delimiter
+        self.storage_cmd('storage blob list -c {} --delimiter "ir"', account_info, container) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1),
+                                JMESPathCheck('[0].name', 'dir'))
+
         # Test secondary location
         account_name = account_info[0] + '-secondary'
         account_key = account_info[1]
@@ -729,7 +743,7 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, start_range, end_range, storage_account, resource_group))
 
-        time.sleep(90)
+        time.sleep(300)
 
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
         # c1/b2 -> c2/b3
@@ -744,6 +758,32 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
         time.sleep(120)
         self.cmd('storage blob restore -t {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, storage_account, resource_group))
+
+
+class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='storageV2')
+    def test_storage_blob_copy_rehydrate_priority(self, resource_group, storage_account):
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        source_container = self.create_container(account_info)
+        target_container = self.create_container(account_info)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src ', account_info,
+                         source_container, source_file)
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive', account_info,
+                         source_container, 'src')
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, source_container, 'src') \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        source_uri = self.storage_cmd('storage blob url -c {} -n src', account_info, source_container).output
+
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {} --tier Cool -r High', account_info,
+                         target_container, source_uri)
+        self.storage_cmd('storage blob show -c {} -n {} ', account_info, target_container, 'dst') \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
 
 
 if __name__ == '__main__':

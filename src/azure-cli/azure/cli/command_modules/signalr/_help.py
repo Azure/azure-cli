@@ -27,6 +27,11 @@ type: group
 short-summary: Manage upstream settings.
 """
 
+helps['signalr identity'] = """
+type: group
+short-summary: Manage managed identity settings.
+"""
+
 helps['signalr cors add'] = """
 type: command
 short-summary: Add allowed origins to a SignalR Service
@@ -50,13 +55,22 @@ examples:
         az signalr cors remove -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
 """
 
+helps['signalr cors update'] = """
+type: command
+short-summary: Update allowed origins to a SignalR Service
+examples:
+  - name: Update a list of allowed origins to a SignalR Service
+    text: >
+        az signalr cors update -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
+"""
+
 helps['signalr create'] = """
 type: command
 short-summary: Creates a SignalR Service.
 examples:
-  - name: Create a SignalR Service with the Standard SKU and serverless mode.
+  - name: Create a SignalR Service with the Standard SKU and serverless mode and enable messaging logs.
     text: >
-        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless
+        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-message-logs True
 """
 
 helps['signalr delete'] = """
@@ -131,6 +145,9 @@ examples:
   - name: Update service mode.
     text: >
         az signalr update -n MySignalR -g MyResourceGroup --service-mode Serverless
+  - name: Update for enabling messaging logs in the service.
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --enable-message-logs True
 """
 
 helps['signalr upstream list'] = """
@@ -173,4 +190,26 @@ examples:
   - name: Set denying client connection for both public network and private endpoint connections
     text: >
         az signalr network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MySignalR -g MyResourceGroup --deny ClientConnection
+"""
+
+helps['signalr identity assign'] = """
+type: command
+short-summary: Assign managed identity for SignalR Service.
+examples:
+  - name: Assign system assigned identity.
+    text: >
+        az signalr identity assign --identity [system] -n MySignalR -g MyResourceGroup
+  - name: Assign user assigned identity.
+    text: >
+        az signalr identity assign --identity MyManagedIdentityId -n MySignalR -g MyResourceGroup
+"""
+
+helps['signalr identity remove'] = """
+type: command
+short-summary: Remove managed identity for SignalR Service.
+"""
+
+helps['signalr identity show'] = """
+type: command
+short-summary: Show managed identity for SignalR Service.
 """

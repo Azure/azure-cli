@@ -127,21 +127,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
 
-        config_store_name = self.create_random_name(prefix='PubNetworkFalse', length=24)
-
-        self.kwargs.update({
-            'config_store_name': config_store_name,
-            'enable_public_network': 'false'
-        })
-
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', sku),
-                         self.check('publicNetworkAccess', 'Disabled')])
-
         config_store_name = self.create_random_name(prefix='PubNetworkNull', length=24)
 
         self.kwargs.update({
@@ -164,15 +149,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
-
-        # Disable public network access with update command
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network {enable_public_network}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', sku),
-                         self.check('publicNetworkAccess', 'Disabled')])
 
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
@@ -394,6 +370,34 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
+        # add a key-value with null label
+        kv_with_null_label = 'KvWithNullLabel'
+        self.kwargs.update({
+            'key': kv_with_null_label
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} -y',
+                 checks=[self.check('key', kv_with_null_label),
+                         self.check('label', None)])
+
+        # List key-values with null label
+        null_label_pattern = "\\0"
+        self.kwargs.update({
+            'null_label': null_label_pattern
+        })
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{null_label}"').get_output_in_json()
+        assert len(list_keys) == 2
+
+        # List key-values with multiple labels
+        multi_labels = entry_label + ',' + null_label_pattern
+        self.kwargs.update({
+            'multi_labels': multi_labels
+        })
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{multi_labels}"').get_output_in_json()
+        assert len(list_keys) == 3
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @KeyVaultPreparer()
@@ -439,7 +443,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'imported_format': 'json',
         })
 
-        self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
+        self.cmd('appconfig kv export -n {config_store_name} -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
 
@@ -613,7 +617,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
@@ -1764,7 +1767,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                          self.check('conditions', default_conditions)])
 
         first_filter_name = 'FirstFilter'
-        first_filter_params = 'Name1=Value1 Name2=Value2 Name1=Value1.1 Name3 Name4={\\"key\\":\\"value\\"}'
+        first_filter_params = 'Name1=[\\"Value1\\",\\"Value1.1\\"] Name2=\\"Value2\\" Name3 Name4={\\"key\\":\\"value\\"}'
         first_filter_params_output = {
             "Name1": [
                 "Value1",
@@ -1772,7 +1775,9 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             ],
             "Name2": "Value2",
             "Name3": "",
-            "Name4": "{\"key\":\"value\"}"
+            "Name4": {
+                "key": "value"
+            }
         }
 
         # Add filters
@@ -1787,7 +1792,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
         # Add another unique filter
         second_filter_name = 'SecondFilter'
-        second_filter_params = 'Foo=Bar=value name=Foo=Bar {\\"Value\\":\\"50\\",\\"SecondValue\\":\\"75\\"}=ParamNameIsJsonString'
+        second_filter_params = 'Foo=\\"Bar=value\\" name=\\"Foo=Bar\\" {\\"Value\\":\\"50\\",\\"SecondValue\\":\\"75\\"}=\\"ParamNameIsJsonString\\"'
         second_filter_params_output = {
             "Foo": "Bar=value",
             "name": "Foo=Bar",
@@ -1867,6 +1872,73 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # List Filters when no filters present
         self.cmd('appconfig feature filter list -n {config_store_name} --feature {feature} --label {label}',
                  checks=NoneCheck())
+
+        # Error on adding filter parameters with invalid JSON escaped string
+        invalid_filter_name = 'InvalidFilter'
+        invalid_filter_params = 'Name1=Value1'
+        self.kwargs.update({
+            'filter_name': invalid_filter_name,
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, "Filter parameter value must be a JSON escaped string"):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
+        # Error on adding duplicate filter parameters
+        invalid_filter_params = 'Name1=10 Name1=20'
+        self.kwargs.update({
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
+        # Error on filter parameter with empty name
+        invalid_filter_params = '=value'
+        self.kwargs.update({
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, 'Parameter name cannot be empty.'):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
+        # Test more inputs for filter param value
+        filter_name = 'NewFilter'
+        filter_params = 'ArrayParam=[1,2,\\"three\\"] BoolParam=true NullParam=null'
+        filter_params_output = {
+            "ArrayParam": [
+                1,
+                2,
+                "three"
+            ],
+            # This is the output in python object format - our backend stores the bool and null values in correct JSON format
+            "BoolParam": True,
+            "NullParam": None
+        }
+
+        self.kwargs.update({
+            'filter_name': filter_name,
+            'filter_parameters': filter_params
+        })
+
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+                 checks=[self.check('name', filter_name),
+                         self.check('parameters', filter_params_output)])
+
+        # Different ways to set empty string as filter param value
+        filter_params = 'EmptyStr1 EmptyStr2= EmptyStr3="" EmptyStr4=\\"\\"'
+        filter_params_output = {
+            "EmptyStr1": "",
+            "EmptyStr2": "",
+            "EmptyStr3": "",
+            "EmptyStr4": ""
+        }
+
+        self.kwargs.update({
+            'filter_name': filter_name,
+            'filter_parameters': filter_params
+        })
+
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+                 checks=[self.check('name', filter_name),
+                         self.check('parameters', filter_params_output)])
 
 
 class AppConfigKeyValidationScenarioTest(ScenarioTest):
@@ -1955,8 +2027,9 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         assert expected_export == actual_export
 
 
-class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
+class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
@@ -2017,7 +2090,8 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'endpoint': endpoint
         })
 
-        # Before assigning data reader role, read operation should fail with AAD auth
+        # Before assigning data reader role, read operation should fail with AAD auth.
+        # The exception really depends on the which identity is used to run this testcase.
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 
