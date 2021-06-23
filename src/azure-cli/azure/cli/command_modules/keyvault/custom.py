@@ -1586,7 +1586,7 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
 
 
 def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''): # pylint: disable=unused-argument
+                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
