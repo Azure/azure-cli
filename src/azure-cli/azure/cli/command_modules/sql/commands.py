@@ -472,7 +472,7 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.command('delete', 'delete',
                   confirmation=True)
-        g.custom_command('show', 'server_get',
+        g.custom_show_command('show', 'server_get',
                        table_transformer=server_table_format)
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
@@ -634,7 +634,7 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'managed_instance_create', transform=mi_transform, supports_no_wait=True)
         g.command('delete', 'delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
-        g.custom_command('show', 'managed_instance_get', transform=mi_transform)
+        g.custom_show_command('show', 'managed_instance_get', transform=mi_transform)
         g.custom_command('list', 'managed_instance_list', transform=mi_list_transform)
         g.generic_update_command('update', custom_func_name='managed_instance_update', transform=mi_transform, supports_no_wait=True)
         g.command('failover', 'failover', supports_no_wait=True)
