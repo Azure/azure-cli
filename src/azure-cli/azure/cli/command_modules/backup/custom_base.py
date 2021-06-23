@@ -100,6 +100,32 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
     return None
 
 
+def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
+                                   backup_management_type=None, workload_type=None, start_date=None, end_date=None,
+                                   use_secondary_region=None):
+
+    items_client = backup_protected_items_cf(cmd.cli_ctx)
+    item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
+                     backup_management_type, workload_type, use_secondary_region)
+    custom_help.validate_item(item)
+
+    if isinstance(item, list):
+        raise ValidationError("Multiple items found. Please give native names instead.")
+
+    if item.properties.backup_management_type.lower() == "azureiaasvm":
+        return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
+                                           use_secondary_region)
+
+    if item.properties.backup_management_type.lower() == "azurestorage":
+        return custom_afs.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date,
+                                               end_date, use_secondary_region)
+
+    if item.properties.backup_management_type.lower() == "azureworkload":
+        return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
+                                                 start_date, end_date, use_secondary_region=use_secondary_region)
+    return None
+
+
 def move_recovery_points(cmd, resource_group_name, vault_name, container_name, item_name, rp_id, source_tier,
                          destination_tier, backup_management_type=None, workload_type=None):
 

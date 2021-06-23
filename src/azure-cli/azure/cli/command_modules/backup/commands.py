@@ -91,7 +91,7 @@ def load_command_table(self, _):
         g.show_command('show', 'show_recovery_point')
         g.command('list', 'list_recovery_points', table_transformer=transform_recovery_point_list)
         g.command('move', 'move_recovery_points')
-        g.show_command('show-log-chain', 'list_recovery_points', table_transformer=transform_log_chain_list)
+        g.show_command('show-log-chain', 'show_log_chain_recovery_points', table_transformer=transform_log_chain_list)
 
     with self.command_group('backup restore', backup_custom_base, client_factory=restores_cf) as g:
         g.command('restore-disks', 'restore_disks')
