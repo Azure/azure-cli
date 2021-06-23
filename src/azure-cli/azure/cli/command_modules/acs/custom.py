@@ -46,9 +46,7 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
-from azure.cli.core.azclierror import (ResourceNotFoundError,
-                                       ArgumentUsageError,
-                                       ClientRequestError,
+from azure.cli.core.azclierror import (ArgumentUsageError,
                                        InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ValidationError)
