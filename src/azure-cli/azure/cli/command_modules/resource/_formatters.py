@@ -108,7 +108,7 @@ def _format_change_type_legend(builder, resource_changes):
         change_type_color = _change_type_to_color[change_type]
         _format_indent(builder)
         builder.append(change_type_symbol, change_type_color).append(Symbol.WHITE_SPACE)
-        builder.append_line(change_type.value.title())
+        builder.append_line(change_type.title())
 
 
 def _format_resource_changes_stats(builder, resource_changes):

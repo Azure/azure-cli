@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-import unittest
 
-LOCATION = "centralus"
+LOCATION = "southcentralusstage"
+VNET_LOCATION = "southcentralus"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 vnet_name = "cli-vnet-lefr-02"
 subnet_name = "default"
@@ -14,7 +14,7 @@ subnet_name = "default"
 class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
-                 (vnet_name, LOCATION))
+                 (vnet_name, VNET_LOCATION))
         self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.5.0.0/24' "
                  "--delegations 'Microsoft.Netapp/volumes' -g {rg}" % (subnet_name, vnet_name))
 
@@ -29,11 +29,13 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
             self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4" %
                      (account_name, pool_name, LOCATION))
 
+        snapshot = "--snapshot-policy-id %s" % snapshot_policy_id if snapshot_policy_id is not None else ""
+
         # create volume
         return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s --vnet %s --subnet %s "
-                        "--file-path %s %s --snapshot-policy-id %s" %
+                        "--file-path %s %s %s" %
                         (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name,
-                         VOLUME_DEFAULT, snapshot_policy_id)).get_output_in_json()
+                         VOLUME_DEFAULT, snapshot)).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
     def test_create_delete_snapshot_policies(self):
@@ -267,7 +269,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
     def test_snapshot_policy_list_volumes(self):
         # create account
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION))
 
         # create snapshot policy
         snapshot_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
@@ -275,8 +277,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         hourly_minute = 10
         enabled = True
         self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s -l %s -u %s --hourly-minute %s --enabled %s"
-                 % (account_name, snapshot_policy_name, LOCATION, hourly_snapshots_to_keep, hourly_minute, enabled)
-                 ).get_output_in_json()
+                 % (account_name, snapshot_policy_name, LOCATION, hourly_snapshots_to_keep, hourly_minute, enabled))
 
         snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
                                    (account_name, snapshot_policy_name)).get_output_in_json()
@@ -300,3 +301,33 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
                                 (account_name, snapshot_policy_name)).get_output_in_json()
 
         assert len(list_volumes['value']) == 2
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
+    def test_assign_snapshot_policy_to_volume(self):
+        # create account
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION))
+
+        # create volume
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        self.create_volume(account_name, pool_name, volume_name)
+
+        # create snapshot policy
+        snapshot_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
+        hourly_snapshots_to_keep = 1
+        hourly_minute = 10
+        enabled = True
+        self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s -l %s -u %s "
+                 "--hourly-minute %s --enabled %s" % (account_name, snapshot_policy_name, LOCATION,
+                                                      hourly_snapshots_to_keep, hourly_minute, enabled))
+        snapshot_policy = self.cmd("az netappfiles snapshot policy show -g {rg} -a %s --snapshot-policy-name %s" %
+                                   (account_name, snapshot_policy_name)).get_output_in_json()
+
+        # assign snapshot policy to the volume
+        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --snapshot-policy-id %s" %
+                 (account_name, pool_name, volume_name, snapshot_policy['id']))
+
+        volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s" %
+                          (account_name, pool_name, volume_name)).get_output_in_json()
+        assert volume['dataProtection']['snapshot']['snapshotPolicyId'] == snapshot_policy['id']

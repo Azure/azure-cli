@@ -663,8 +663,8 @@ def create_afd_security_policy(client: SecurityPoliciesOperations,
                                domains: List[str],
                                waf_policy: str):
 
-    if any([("/afdendpoints/" not in domain.lower() and
-             "/customdomains/" not in domain.lower()) for domain in domains]):
+    if any(("/afdendpoints/" not in domain.lower() and
+            "/customdomains/" not in domain.lower()) for domain in domains):
         raise InvalidArgumentValueError('Domain should either be endpoint ID or custom domain ID.')
 
     if "/frontdoorwebapplicationfirewallpolicies/" not in waf_policy.lower():
@@ -690,8 +690,8 @@ def update_afd_security_policy(client: SecurityPoliciesOperations,
                                domains: List[str] = None,
                                waf_policy: str = None):
 
-    if domains is not None and any([("/afdendpoints/" not in domain.lower() and
-                                     "/customdomains/" not in domain.lower()) for domain in domains]):
+    if domains is not None and any(("/afdendpoints/" not in domain.lower() and
+                                    "/customdomains/" not in domain.lower()) for domain in domains):
         raise InvalidArgumentValueError('Domain should be either endpoint ID or custom domain ID.')
 
     if waf_policy is not None and "/frontdoorwebapplicationfirewallpolicies/" not in waf_policy:

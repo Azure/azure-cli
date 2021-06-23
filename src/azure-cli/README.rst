@@ -103,3 +103,8 @@ License
 =======
 
 `MIT <https://github.com/Azure/azure-cli/blob/master/LICENSE.txt>`__
+
+Release History
+===============
+
+See `Azure CLI release notes <https://docs.microsoft.com/cli/azure/release-notes-azure-cli>`__.
