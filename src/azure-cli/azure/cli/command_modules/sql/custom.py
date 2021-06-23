@@ -4022,6 +4022,7 @@ def managed_instance_list(
     # List all managed instances in the subscription
     return client.list(expand)
 
+
 def managed_instance_get(
         client,
         resource_group_name,

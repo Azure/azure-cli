@@ -473,7 +473,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete',
                   confirmation=True)
         g.custom_show_command('show', 'server_get',
-                       table_transformer=server_table_format)
+                              table_transformer=server_table_format)
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
         g.generic_update_command('update',
