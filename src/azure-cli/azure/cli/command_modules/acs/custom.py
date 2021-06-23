@@ -2320,7 +2320,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         cluster_identity_object_id = _get_user_assigned_identity_object_id(cmd.cli_ctx, assign_identity)
         # ensure the cluster identity has "Managed Identity Operator" role at the scope of kubelet identity
         _ensure_cluster_identity_permission_on_kubelet_identity(
-            cmd.cli_ctx, 
+            cmd.cli_ctx,
             cluster_identity_object_id)
 
     mc = ManagedCluster(
