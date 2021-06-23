@@ -80,7 +80,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
-    
+
     AgentProperties, AuthInfo, BaseImageTrigger, PlatformProperties, \
         SourceControlType, SourceProperties, SourceTrigger, Task, TriggerStatus, \
         TriggerProperties = cmd.get_models(
@@ -237,10 +237,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 return deserialized
             return pipeline_response
         return client._create_initial(resource_group_name=resource_group_name,
-                                   registry_name=registry_name,
-                                   task_name=task_name,
-                                   task_create_parameters=task_create_parameters,
-                                   cls=local_fix)
+                                      registry_name=registry_name,
+                                      task_name=task_name,
+                                      task_create_parameters=task_create_parameters,
+                                      cls=local_fix)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -376,7 +376,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         DockerBuildStepUpdateParameters, FileTaskStepUpdateParameters, PlatformUpdateParameters, \
         SourceControlType, SourceUpdateParameters, SourceTriggerUpdateParameters, \
         TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters = cmd.get_models(
-            'AgentProperties', 
+            'AgentProperties',
             'AuthInfoUpdateParameters',
             'BaseImageTriggerUpdateParameters',
             'DockerBuildStepUpdateParameters',
@@ -838,9 +838,9 @@ def acr_task_update_run(cmd,
     run_update_parameters = {'is_archive_enabled': is_archive_enabled}
 
     return client.begin_update(resource_group_name=resource_group_name,
-                         registry_name=registry_name,
-                         run_id=run_id,
-                         run_update_parameters=run_update_parameters)
+                               registry_name=registry_name,
+                               run_id=run_id,
+                               run_update_parameters=run_update_parameters)
 
 
 def acr_task_run(cmd,  # pylint: disable=too-many-locals
@@ -1024,7 +1024,7 @@ def _get_all_override_arguments(argument=None, secret_argument=None):
 
 def _build_identities_info(cmd, identities, is_remove=False):
     IdentityProperties, ResourceIdentityType, UserIdentityProperties = cmd.get_models(
-        'IdentityProperties', 
+        'IdentityProperties',
         'ResourceIdentityType',
         'UserIdentityProperties',
         operation_group='tasks')

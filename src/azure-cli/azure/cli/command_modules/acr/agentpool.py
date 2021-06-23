@@ -31,7 +31,7 @@ def acr_agentpool_create(cmd,
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
-    
+
     AgentPool = cmd.get_models('AgentPool', operation_group='agent_pools')
 
     agentpool_create_parameters = AgentPool(

@@ -477,7 +477,6 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
     from azure.cli.core.commands.client_factory import get_subscription_id
     remove_system_identity, remove_user_identities = _analyze_identities(identities)
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
-    print(registry.identity.type)
 
     ResourceIdentityType = cmd.get_models('ResourceIdentityType')
 

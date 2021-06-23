@@ -18,7 +18,7 @@ def delete_agentpool_with_polling(cmd,
                                   registry_name,
                                   resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in  get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
 
     def deserialize_agentpool(response):
         return deserializer('AgentPool', response.http_response)
@@ -26,7 +26,7 @@ def delete_agentpool_with_polling(cmd,
     return LROPoller(
         client=client,
         initial_response=client.get(
-            resource_group_name, registry_name, agent_pool_name, cls=lambda x,y,z: x),
+            resource_group_name, registry_name, agent_pool_name, cls=lambda x, y, z: x),
         deserialization_callback=deserialize_agentpool,
         polling_method=RunPolling(
             cmd=cmd,

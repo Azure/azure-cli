@@ -19,9 +19,9 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     private_endpoint_connection.private_link_service_connection_state.description = description
 
     return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                   registry_name=registry_name,
-                                   private_endpoint_connection_name=private_endpoint_connection_name,
-                                   private_endpoint_connection=private_endpoint_connection)
+                                         registry_name=registry_name,
+                                         private_endpoint_connection_name=private_endpoint_connection_name,
+                                         private_endpoint_connection=private_endpoint_connection)
 
 
 def approve(cmd, client, registry_name, private_endpoint_connection_name,

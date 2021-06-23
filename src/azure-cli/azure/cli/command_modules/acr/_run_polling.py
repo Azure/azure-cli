@@ -26,7 +26,7 @@ def get_run_with_polling(cmd,
     return LROPoller(
         client=client,
         initial_response=client.get(
-            resource_group_name, registry_name, run_id, cls=lambda x,y,z: x.http_response),
+            resource_group_name, registry_name, run_id, cls=lambda x, y, z: x.http_response),
         deserialization_callback=deserialize_run,
         polling_method=RunPolling(
             cmd=cmd,

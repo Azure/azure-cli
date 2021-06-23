@@ -286,17 +286,11 @@ def get_custom_registry_credentials(cmd,
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
-    Credentials, \
-    SourceRegistryCredentials, \
-    CustomRegistryCredentials, \
-    SecretObject, \
-    SecretObjectType = cmd.get_models(
-        'Credentials',
-        'CustomRegistryCredentials',
-        'SourceRegistryCredentials',
-        'SecretObject',
-        'SecretObjectType',
-        operation_group='tasks')
+    Credentials, SourceRegistryCredentials, CustomRegistryCredentials, SecretObject, \
+        SecretObjectType = cmd.get_models(
+            'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject', 
+            'SecretObjectType',
+            operation_group='tasks')
 
     source_registry_credentials = None
     if auth_mode:
