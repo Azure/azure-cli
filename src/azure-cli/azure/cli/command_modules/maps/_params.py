@@ -121,3 +121,12 @@ def load_arguments(self, _):
     with self.argument_context('maps creator show') as c:
         c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
                    'Maps Creator instance.', id_part='child_name_1')
+
+    with self.argument_context('maps creator list') as c:
+        c.argument('resource_group_name',
+                   arg_type=resource_group_name_type,
+                   id_part=None,
+                   help='Resource group name')
+        c.argument('account_name',
+                   id_part=None,
+                   arg_type=maps_name_type)
