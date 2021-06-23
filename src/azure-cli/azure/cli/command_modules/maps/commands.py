@@ -31,7 +31,7 @@ def load_command_table(self, _):
         g.custom_command('list-operation', 'maps_map_list_operation')
 
     maps_creator = CliCommandType(
-        operations_tmpl='azext_maps.vendored_sdks.maps.operations._creators_operations#CreatorsOperations.{}',
+        operations_tmpl='azure.mgmt.maps.operations._creators_operations#CreatorsOperations.{}',
         client_factory=cf_creator)
     with self.command_group('maps creator', maps_creator, client_factory=cf_creator) as g:
         g.custom_command('list', 'maps_creator_list')
