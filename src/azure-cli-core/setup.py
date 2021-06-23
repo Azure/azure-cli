@@ -57,8 +57,9 @@ DEPENDENCIES = [
     'msal>=1.12.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
+    'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests~=2.22',
+    'requests~=2.25.1',
     'six~=1.12',
     'urllib3[secure]>=1.26.5',
 ]
