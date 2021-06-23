@@ -217,10 +217,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.check('networkProfile.loadBalancerSku', 'Standard'),
-            self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
             self.exists(
-                'networkProfile.loadBalancerProfile.effectiveOutboundIps')
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs')
         ])
 
         # get-credentials
