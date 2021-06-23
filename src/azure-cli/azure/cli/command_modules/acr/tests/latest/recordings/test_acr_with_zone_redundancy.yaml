@@ -1,0 +1,1058 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-23T07:26:01Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
+      false, "anonymousPullEnabled": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '124'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:14.9741035+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:14.9741035+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2021-06-23T07:26:14.9741035Z","provisioningState":"Creating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:18.3132198+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-45b912c6-d3f4-11eb-984b-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1368'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-45b912c6-d3f4-11eb-984b-f48e389cc17c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-45b912c6-d3f4-11eb-984b-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:14.9741035+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:14.9741035+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2021-06-23T07:26:14.9741035Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:18.3132198+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1369'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-06-23T07:26:01Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
+      false, "zoneRedundancy": "Enabled", "anonymousPullEnabled": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '153'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --sku --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003","name":"testreg2000003","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:38.8024575+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:38.8024575+00:00"},"properties":{"loginServer":"testreg2000003.azurecr.io","creationDate":"2021-06-23T07:26:38.8024575Z","provisioningState":"Creating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:41.6992442+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Enabled","anonymousPullEnabled":false}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/operationStatuses/registries-54609a61-d3f4-11eb-8670-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1367'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/operationStatuses/registries-54609a61-d3f4-11eb-8670-f48e389cc17c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/operationStatuses/registries-54609a61-d3f4-11eb-8670-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003","name":"testreg2000003","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:38.8024575+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:38.8024575+00:00"},"properties":{"loginServer":"testreg2000003.azurecr.io","creationDate":"2021-06-23T07:26:38.8024575Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:41.6992442+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Enabled","anonymousPullEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1368'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --registry --resource-group
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003","name":"testreg2000003","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:38.8024575+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:38.8024575+00:00"},"properties":{"loginServer":"testreg2000003.azurecr.io","creationDate":"2021-06-23T07:26:38.8024575Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:41.6992442+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Enabled","anonymousPullEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1368'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --registry --resource-group
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus","name":"eastus","location":"eastus","tags":{},"systemData":{"createdBy":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","createdByType":"Application","createdAt":"2021-06-23T07:26:43.2360752+00:00","lastModifiedBy":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:43.2360752+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2021-06-23T07:26:53.3057779Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:26:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:14.9741035+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:14.9741035+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2021-06-23T07:26:14.9741035Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:18.3132198+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1369'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "properties": {"zoneRedundancy": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '68'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2","name":"eastus2","location":"eastus2","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:27:09.3201076+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:27:09.3201076+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2021-06-23T07:27:10.9733791Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Enabled"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2/operationStatuses/replications-6547b0a7-d3f4-11eb-819f-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '795'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2/operationStatuses/replications-6547b0a7-d3f4-11eb-819f-f48e389cc17c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2/operationStatuses/replications-6547b0a7-d3f4-11eb-819f-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/replications/eastus2","name":"eastus2","location":"eastus2","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:27:09.3201076+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:27:09.3201076+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2021-06-23T07:27:21.9547338Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '820'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003","name":"testreg2000003","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:38.8024575+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:38.8024575+00:00"},"properties":{"loginServer":"testreg2000003.azurecr.io","creationDate":"2021-06-23T07:26:38.8024575Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:41.6992442+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Enabled","anonymousPullEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1368'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --registry -g --location
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2","name":"eastus2","location":"eastus2","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:27:31.8063894+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:27:31.8063894+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2021-06-23T07:27:33.4028834Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2/operationStatuses/replications-73dcb692-d3f4-11eb-8ec3-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '796'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2/operationStatuses/replications-73dcb692-d3f4-11eb-8ec3-f48e389cc17c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2/operationStatuses/replications-73dcb692-d3f4-11eb-8ec3-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/eastus2","name":"eastus2","location":"eastus2","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:27:31.8063894+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:27:31.8063894+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2021-06-23T07:27:39.7150378Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '821'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003","name":"testreg2000003","location":"eastus","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:26:38.8024575+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:26:38.8024575+00:00"},"properties":{"loginServer":"testreg2000003.azurecr.io","creationDate":"2021-06-23T07:26:38.8024575Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-06-23T07:26:41.6992442+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Enabled","anonymousPullEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1368'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"zoneRedundancy": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2","name":"westus2","location":"westus2","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:27:54.8168274+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:27:54.8168274+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2021-06-23T07:27:57.0861928Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2/operationStatuses/replications-812f19f5-d3f4-11eb-8355-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '796'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:27:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2/operationStatuses/replications-812f19f5-d3f4-11eb-8355-f48e389cc17c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2/operationStatuses/replications-812f19f5-d3f4-11eb-8355-f48e389cc17c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:28:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --registry -g --location --zone-redundancy
+      User-Agent:
+      - AZURECLI/2.24.0 azsdk-python-azure-mgmt-containerregistry/8.0.0 Python/3.8.3
+        (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg2000003/replications/westus2","name":"westus2","location":"westus2","tags":{},"systemData":{"createdBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","createdByType":"Application","createdAt":"2021-06-23T07:27:54.8168274+00:00","lastModifiedBy":"8a95323f-4a83-4a69-903f-7d2c69349c3c","lastModifiedByType":"Application","lastModifiedAt":"2021-06-23T07:27:54.8168274+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2021-06-23T07:28:05.1496186Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '821'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 07:28:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

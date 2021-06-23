@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGrou
 
 class AcrTaskCommandsTests(ScenarioTest):
 
-#     @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
+    # @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
         self.kwargs.update({

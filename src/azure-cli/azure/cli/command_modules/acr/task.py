@@ -232,14 +232,15 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     try:
         # BUG: Discriminator type is absent or null, use base class TaskStepProperties.
         #      Deserialized twice in SDK: `deserialized = self._deserialize('Task', pipeline_response)`
-        breakpoint()
-        result = client.begin_create(resource_group_name=resource_group_name,
+        def local_fix(pipeline_response, deserialized, _):
+            if pipeline_response.http_response.status_code == 200:
+                return deserialized
+            return pipeline_response
+        return client._create_initial(resource_group_name=resource_group_name,
                                    registry_name=registry_name,
                                    task_name=task_name,
                                    task_create_parameters=task_create_parameters,
-                                   polling=False)
-        result = result.result()
-        return result
+                                   cls=local_fix)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -334,7 +335,7 @@ def acr_task_delete(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     user_confirmation("Are you sure you want to delete the task '{}' ".format(task_name), yes)
-    return client.delete(resource_group_name, registry_name, task_name)
+    return client.begin_delete(resource_group_name, registry_name, task_name)
 
 
 def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
@@ -380,6 +381,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
             'BaseImageTriggerUpdateParameters',
             'DockerBuildStepUpdateParameters',
             'FileTaskStepUpdateParameters',
+            'PlatformUpdateParameters',
             'SourceControlType',
             'SourceUpdateParameters',
             'SourceTriggerUpdateParameters',
@@ -396,7 +398,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
             status=status,
             timeout=timeout,
             log_template=log_template)
-        return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+        return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
     step = task.step
     branch = None
@@ -528,7 +530,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         log_template=log_template
     )
 
-    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_identity_assign(cmd,
@@ -833,11 +835,12 @@ def acr_task_update_run(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     is_archive_enabled = not no_archive if no_archive is not None else None
+    run_update_parameters = {'is_archive_enabled': is_archive_enabled}
 
-    return client.update(resource_group_name=resource_group_name,
+    return client.begin_update(resource_group_name=resource_group_name,
                          registry_name=registry_name,
                          run_id=run_id,
-                         is_archive_enabled=is_archive_enabled)
+                         run_update_parameters=run_update_parameters)
 
 
 def acr_task_run(cmd,  # pylint: disable=too-many-locals
@@ -863,7 +866,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
     OverrideTaskStepProperties, TaskRunRequest = cmd.get_models(
         'OverrideTaskStepProperties',
         'TaskRunRequest',
-        operation_group='OverrideTaskStepProperties')
+        operation_group='tasks')
 
     from ._client_factory import cf_acr_registries_tasks
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
@@ -884,7 +887,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         update_trigger_token=update_trigger_token
     )
     queued_run = LongRunningOperation(cmd.cli_ctx)(
-        client_registries.schedule_run(
+        client_registries.begin_schedule_run(
             resource_group_name,
             registry_name,
             TaskRunRequest(
@@ -927,7 +930,7 @@ def acr_task_cancel_run(cmd,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    return client.cancel(resource_group_name, registry_name, run_id)
+    return client.begin_cancel(resource_group_name, registry_name, run_id)
 
 
 def acr_task_list_runs(cmd,

@@ -26,7 +26,7 @@ def get_run_with_polling(cmd,
     return LROPoller(
         client=client,
         initial_response=client.get(
-            resource_group_name, registry_name, run_id, raw=True),
+            resource_group_name, registry_name, run_id, cls=lambda x,y,z: x.http_response),
         deserialization_callback=deserialize_run,
         polling_method=RunPolling(
             cmd=cmd,
@@ -93,6 +93,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         raise CloudError(response)
 
     def _update_status(self):
-        self._response = self._client.send(
+        self._response = self._client._pipeline.run(
             self._client.get(self._url), stream=False)
-        self._set_operation_status(self._response)
+        self._set_operation_status(self._response.http_response)

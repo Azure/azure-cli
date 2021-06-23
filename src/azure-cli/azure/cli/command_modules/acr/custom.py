@@ -486,10 +486,10 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         raise CLIError("The registry {} has no system or user assigned identities.".format(registry_name))
 
     if remove_system_identity:
-        if registry.identity.type == ResourceIdentityType.user_assigned:
+        if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower():
             raise CLIError("The registry does not have a system identity assigned.")
         registry.identity.type = (ResourceIdentityType.none
-                                  if registry.identity.type == ResourceIdentityType.system_assigned
+                                  if registry.identity.type.lower() == ResourceIdentityType.system_assigned.lower()
                                   else ResourceIdentityType.user_assigned)
         # if we have no system assigned identitiy then set identity object to none
         registry.identity.principal_id = None
@@ -520,7 +520,7 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         if not registry.identity.user_assigned_identities:
             registry.identity.user_assigned_identities = None  # required for put
             registry.identity.type = (ResourceIdentityType.none
-                                      if registry.identity.type == ResourceIdentityType.user_assigned
+                                      if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower()
                                       else ResourceIdentityType.system_assigned)
 
     # this method should be named create_or_update as it calls the PUT method
