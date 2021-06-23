@@ -106,8 +106,7 @@ def load_command_table(self, _):
     with self.command_group('keyvault private-endpoint-connection',
                             mgmt_pec_entity.command_type,
                             min_api='2018-02-14',
-                            client_factory=mgmt_pec_entity.client_factory,
-                            is_preview=True) as g:
+                            client_factory=mgmt_pec_entity.client_factory) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
@@ -122,8 +121,7 @@ def load_command_table(self, _):
     with self.command_group('keyvault private-link-resource',
                             mgmt_plr_entity.command_type,
                             min_api='2018-02-14',
-                            client_factory=mgmt_plr_entity.client_factory,
-                            is_preview=True) as g:
+                            client_factory=mgmt_plr_entity.client_factory) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
         g.custom_command('list', 'list_private_link_resource', transform=gen_dict_to_list_transform(key='value'))
 
@@ -269,8 +267,7 @@ def load_command_table(self, _):
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault role', data_access_control_entity.command_type,
-                                is_preview=True):
+        with self.command_group('keyvault role', data_access_control_entity.command_type):
             pass
 
         with self.command_group('keyvault role assignment', data_access_control_entity.command_type) as g:
