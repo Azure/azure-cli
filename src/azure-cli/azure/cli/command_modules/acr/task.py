@@ -5,7 +5,6 @@
 
 # pylint: disable=C0302
 import re
-from msrest import pipeline
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -236,7 +235,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             if pipeline_response.http_response.status_code == 200:
                 return deserialized
             return pipeline_response
-        return client._create_initial(resource_group_name=resource_group_name,
+        return client._create_initial(resource_group_name=resource_group_name,  # pylint: disable=protected-access
                                       registry_name=registry_name,
                                       task_name=task_name,
                                       task_create_parameters=task_create_parameters,

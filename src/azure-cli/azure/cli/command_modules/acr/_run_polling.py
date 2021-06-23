@@ -93,6 +93,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         raise CloudError(response)
 
     def _update_status(self):
-        self._response = self._client._pipeline.run(
+        self._response = self._client._pipeline.run(  # pylint: disable=protected-access
             self._client.get(self._url), stream=False)
         self._set_operation_status(self._response.http_response)

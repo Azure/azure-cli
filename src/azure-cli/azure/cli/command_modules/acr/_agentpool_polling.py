@@ -21,7 +21,7 @@ def delete_agentpool_with_polling(cmd,
         {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
 
     def deserialize_agentpool(response):
-        return deserializer('AgentPool', response.http_response)
+        return deserializer('AgentPool', response)
 
     return LROPoller(
         client=client,
@@ -50,7 +50,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self.operation_result = None
 
     def initialize(self, client, initial_response, deserialization_callback):
-        self._client = client._client
+        self._client = client._client  # pylint: disable=protected-access
         self._response = initial_response
         self._url = initial_response.http_request.url
         self._deserialize = deserialization_callback
@@ -91,6 +91,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         raise HttpResponseError(response)
 
     def _update_status(self):
-        self._response = self._client._pipeline.run(
+        self._response = self._client._pipeline.run(  # pylint: disable=protected-access
             self._client.get(self._url), stream=False)
         self._set_operation_status(self._response)
