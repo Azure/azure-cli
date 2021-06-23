@@ -1427,7 +1427,6 @@ def load_arguments(self, _):
                    options_list=['--expand-ad-admin'],
                    help='Expand the Active Directory Administrator for the server.')
 
-
     #####
     #           sql server ad-admin
     ######
@@ -1864,7 +1863,7 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Assign maintenance configuration to this managed instance.')
-                
+
         c.argument('enable_ad_only_auth',
                    options_list=['--enable-ad-only-auth'],
                    help='Enable Azure Active Directory Only Authentication for this server.')
@@ -1922,7 +1921,6 @@ def load_arguments(self, _):
         c.argument('expand_ad_admin',
                    options_list=['--expand-ad-admin'],
                    help='Expand the Active Directory Administrator for the server.')
-
 
     #####
     #           sql managed instance key

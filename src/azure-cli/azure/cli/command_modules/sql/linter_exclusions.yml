@@ -72,6 +72,11 @@ sql db ltr-backup:
         target_resource_group_name:
             rule_exclusions:
             - parameter_should_not_end_in_resource_group
+sql db ltr-backup restore:
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
 sql failover-group create:
     parameters:
         partner_resource_group:
@@ -107,4 +112,14 @@ sql server dns-alias set:
         original_resource_group_name:
             rule_exclusions:
             - parameter_should_not_end_in_resource_group
+sql mi create:
+    parameters:
+        external_admin_principal_type:
+            rule_exclusions:
+            - option_length_too_long
+sql server create:
+    parameters:
+        external_admin_principal_type:
+            rule_exclusions:
+            - option_length_too_long
 ...

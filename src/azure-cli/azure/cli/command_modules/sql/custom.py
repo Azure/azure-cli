@@ -3448,10 +3448,10 @@ def server_create(
         ad_only = True
 
     kwargs['administrators'] = ServerExternalAdministrator(
-        principal_type = external_admin_principal_type,
-        login = external_admin_name,
-        sid = external_admin_sid,
-        azure_ad_only_authentication = ad_only,
+        principal_type=external_admin_principal_type,
+        login=external_admin_name,
+        sid=external_admin_sid,
+        azure_ad_only_authentication=ad_only,
         tenant_id=_get_tenant_id())
 
     # Create
@@ -3469,13 +3469,13 @@ def server_list(
     Lists servers in a resource group or subscription
     '''
 
-    expand=None
+    expand = None
     if expand_ad_admin:
-        expand='administrators/activedirectory'
+        expand = 'administrators/activedirectory'
 
     if resource_group_name:
         # List all servers in the resource group
-        return client.list_by_resource_group(resource_group_name=resource_group_name,expand=expand)
+        return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
 
     # List all servers in the subscription
     return client.list(expand)
@@ -3490,12 +3490,13 @@ def server_get(
     Gets a server
     '''
 
-    expand=None
+    expand = None
     if expand_ad_admin:
-        expand='administrators/activedirectory'
+        expand = 'administrators/activedirectory'
 
     # List all servers in the subscription
-    return client.get(resource_group_name,server_name,expand)
+    return client.get(resource_group_name, server_name, expand)
+
 
 def server_update(
         instance,
@@ -3989,10 +3990,10 @@ def managed_instance_create(
         ad_only = True
 
     kwargs['administrators'] = ManagedInstanceExternalAdministrator(
-        principal_type = external_admin_principal_type,
-        login = external_admin_name,
-        sid = external_admin_sid,
-        azure_ad_only_authentication = ad_only,
+        principal_type=external_admin_principal_type,
+        login=external_admin_name,
+        sid=external_admin_sid,
+        azure_ad_only_authentication=ad_only,
         tenant_id=_get_tenant_id())
 
     # Create
@@ -4010,9 +4011,9 @@ def managed_instance_list(
     Lists servers in a resource group or subscription
     '''
 
-    expand=None
+    expand = None
     if expand_ad_admin:
-        expand='administrators/activedirectory'
+        expand = 'administrators/activedirectory'
 
     if resource_group_name:
         # List all managed instances in the resource group
@@ -4030,12 +4031,12 @@ def managed_instance_get(
     Gets a Managed Instance
     '''
 
-    expand=None
+    expand = None
     if expand_ad_admin:
-        expand='administrators/activedirectory'
+        expand = 'administrators/activedirectory'
 
     # List all servers in the subscription
-    return client.get(resource_group_name,managed_instance_name,expand)
+    return client.get(resource_group_name, managed_instance_name, expand)
 
 
 def managed_instance_update(
