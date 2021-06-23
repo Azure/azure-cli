@@ -221,6 +221,7 @@ def load_command_table(self, _):
         g.custom_command('register', 'register_provider')
         g.custom_command('unregister', 'unregister_provider')
         g.custom_command('operation list', 'list_provider_operations')
+        g.custom_command('permission list', 'list_provider_permissions')
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands

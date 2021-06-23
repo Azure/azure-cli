@@ -13,30 +13,21 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.24.2 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate","namespace":"Microsoft.ClassicInfrastructureMigrate","authorization":{"applicationId":"5e5abe2b-83cd-4786-826a-a05653ebb103","roleDefinitionId":"766c4d9b-ef83-4f73-8352-1450a506a69b"},"resourceTypes":[{"resourceType":"classicInfrastructureResources","locations":["East
-        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
-        Central US","Central US","North Europe","West Europe","Japan East","Japan
-        West","Brazil South","Australia East","Australia Southeast","Central India","West
-        India","South India","Canada Central","Canada East","West US 2","West Central
-        US","UK South","UK West","Korea Central","Korea South","France Central","France
-        South","Australia Central","Australia Central 2","Germany North","Germany
-        West Central","Norway East","Norway West","South Africa North","South Africa
-        West","Switzerland North","Switzerland West","UAE Central","UAE North","East
-        US 2 EUAP","Central US EUAP"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Unregistered","registrationPolicy":"RegistrationRequired"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate","namespace":"Microsoft.ClassicInfrastructureMigrate","authorization":{"applicationId":"5e5abe2b-83cd-4786-826a-a05653ebb103","roleDefinitionId":"766c4d9b-ef83-4f73-8352-1450a506a69b"},"resourceTypes":[],"registrationState":"Unregistered","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1163'
+      - '391'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:01:19 GMT
+      - Wed, 16 Jun 2021 06:24:18 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +42,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"thirdPartyProviderConsent": {"consentToAuthorization": true}}'
     headers:
       Accept:
       - application/json
@@ -62,11 +53,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '0'
+      - '63'
+      Content-Type:
+      - application/json
       ParameterSetName:
-      - -n
+      - -n --consent-to-permissions
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.24.2 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate/register?api-version=2021-04-01
   response:
@@ -79,17 +72,16 @@ interactions:
         US","UK South","UK West","Korea Central","Korea South","France Central","France
         South","Australia Central","Australia Central 2","Germany North","Germany
         West Central","Norway East","Norway West","South Africa North","South Africa
-        West","Switzerland North","Switzerland West","UAE Central","UAE North","East
-        US 2 EUAP","Central US EUAP"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Registering","registrationPolicy":"RegistrationRequired"}'
+        West","Switzerland North","Switzerland West","UAE Central","UAE North"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Registering","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1162'
+      - '1127'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:01:22 GMT
+      - Wed, 16 Jun 2021 06:24:23 GMT
       expires:
       - '-1'
       pragma:
@@ -103,7 +95,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -121,7 +113,7 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.24.2 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate?api-version=2020-10-01
   response:
@@ -134,17 +126,59 @@ interactions:
         US","UK South","UK West","Korea Central","Korea South","France Central","France
         South","Australia Central","Australia Central 2","Germany North","Germany
         West Central","Norway East","Norway West","South Africa North","South Africa
-        West","Switzerland North","Switzerland West","UAE Central","UAE North","East
-        US 2 EUAP","Central US EUAP"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Registering","registrationPolicy":"RegistrationRequired"}'
+        West","Switzerland North","Switzerland West","UAE Central","UAE North"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Registering","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1162'
+      - '1127'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:01:23 GMT
+      - Wed, 16 Jun 2021 06:24:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - provider permission list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.24.2 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate/providerPermissions?api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"applicationId":"5e5abe2b-83cd-4786-826a-a05653ebb103","roleDefinition":{"idAsGuid":"766c4d9b-ef83-4f73-8352-1450a506a69b","id":"766c4d9bef834f7383521450a506a69b","name":"Classic
+        Resource Migration Service Role","isServiceRole":true,"permissions":[{"actions":["Microsoft.Authorization/locks/*","Microsoft.Compute/availabilitySets/*","Microsoft.Compute/locations/*","Microsoft.Compute/register/*","Microsoft.Compute/virtualMachines/*","Microsoft.Compute/virtualMachines/extensions/*","Microsoft.Compute/virtualMachineScaleSets/*","Microsoft.Compute/cloudServices/read","Microsoft.Compute/cloudServices/write","Microsoft.Compute/cloudServices/delete","Microsoft.Features/providers/features/register/action","Microsoft.KeyVault/register/*","Microsoft.KeyVault/vaults/*","Microsoft.Network/applicationGateways/*","Microsoft.Network/connections/*","Microsoft.Network/loadBalancers/*","Microsoft.Network/localNetworkGateways/*","Microsoft.Network/locations/*","Microsoft.Network/networkInterfaces/*","Microsoft.Network/networkSecurityGroups/*","Microsoft.Network/publicIPAddresses/*","Microsoft.Network/register/*","Microsoft.Network/routeTables/*","Microsoft.Network/virtualNetworkGateways/*","Microsoft.Network/virtualNetworks/*","Microsoft.Resources/deployments/*","Microsoft.Resources/subscriptions/resourceGroups/*","Microsoft.Storage/register/*","Microsoft.Storage/storageAccounts/*"],"notActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*","Microsoft.Storage/storageAccounts/queueServices/queues/messages/*"],"dataActions":[],"notDataActions":[]}],"scopes":["/"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1604'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Jun 2021 06:24:27 GMT
       expires:
       - '-1'
       pragma:
@@ -174,7 +208,7 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.24.2 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate/unregister?api-version=2021-04-01
   response:
@@ -187,17 +221,16 @@ interactions:
         US","UK South","UK West","Korea Central","Korea South","France Central","France
         South","Australia Central","Australia Central 2","Germany North","Germany
         West Central","Norway East","Norway West","South Africa North","South Africa
-        West","Switzerland North","Switzerland West","UAE Central","UAE North","East
-        US 2 EUAP","Central US EUAP"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Unregistering","registrationPolicy":"RegistrationRequired"}'
+        West","Switzerland North","Switzerland West","UAE Central","UAE North"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Unregistering","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1164'
+      - '1129'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 Apr 2021 02:01:25 GMT
+      - Wed, 16 Jun 2021 06:24:31 GMT
       expires:
       - '-1'
       pragma:
@@ -211,58 +244,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - provider show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ClassicInfrastructureMigrate","namespace":"Microsoft.ClassicInfrastructureMigrate","authorization":{"applicationId":"5e5abe2b-83cd-4786-826a-a05653ebb103","roleDefinitionId":"766c4d9b-ef83-4f73-8352-1450a506a69b"},"resourceTypes":[{"resourceType":"classicInfrastructureResources","locations":["East
-        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
-        Central US","Central US","North Europe","West Europe","Japan East","Japan
-        West","Brazil South","Australia East","Australia Southeast","Central India","West
-        India","South India","Canada Central","Canada East","West US 2","West Central
-        US","UK South","UK West","Korea Central","Korea South","France Central","France
-        South","Australia Central","Australia Central 2","Germany North","Germany
-        West Central","Norway East","Norway West","South Africa North","South Africa
-        West","Switzerland North","Switzerland West","UAE Central","UAE North","East
-        US 2 EUAP","Central US EUAP"],"apiVersions":["2015-06-15"],"capabilities":"None"}],"registrationState":"Unregistering","registrationPolicy":"RegistrationRequired"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1164'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 16 Apr 2021 02:01:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      - '1199'
     status:
       code: 200
       message: OK
