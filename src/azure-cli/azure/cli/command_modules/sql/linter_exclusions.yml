@@ -35,33 +35,76 @@ sql virtual-cluster:
     rule_exclusions:
     - require_wait_command_if_no_wait
 sql db classification list:
-    rule_exclusions:
-    - missing_parameter_help
-sql stg:
-    rule_exclusions:
-    - no_required_location_param
+    parameters:
+        count:
+            rule_exclusions:
+            - missing_parameter_help
+        skip_token:
+            rule_exclusions:
+            - missing_parameter_help
+sql stg create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+sql stg delete:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+sql stg show:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+sql instance-pool create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
 sql db copy:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
-sql db ltr-backup restore:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
-sql db replica:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
-sql failover-group:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
-sql instance-failover-group:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
+    parameters:
+        dest_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db ltr-backup:
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql failover-group create:
+    parameters:
+        partner_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db replica create:
+    parameters:
+        partner_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db replica delete-link:
+    parameters:
+        partner_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql instance-failover-group create:
+    parameters:
+        partner_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
 sql midb ltr-backup restore:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
 sql midb restore:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
-sql server dns-alias:
-    rule_exclusions:
-    - parameter_should_not_end_in_resource_group
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql server dns-alias set:
+    parameters:
+        original_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
 ...
