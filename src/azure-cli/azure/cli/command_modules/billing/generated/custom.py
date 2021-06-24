@@ -202,13 +202,15 @@ def billing_invoice_section_create(client,
                                    display_name=None,
                                    labels=None,
                                    no_wait=False):
+    parameters = {}
+    parameters['display_name'] = display_name
+    parameters['labels'] = labels
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        billing_account_name=account_name,
                        billing_profile_name=profile_name,
                        invoice_section_name=invoice_section_name,
-                       display_name=display_name,
-                       labels=labels)
+                       parameters=parameters)
 
 
 def billing_invoice_section_update(client,
