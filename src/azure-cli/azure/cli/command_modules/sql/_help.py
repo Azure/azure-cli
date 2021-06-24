@@ -759,12 +759,14 @@ examples:
     text: az sql mi create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName \\
               --external-admin-sid c5e964e2-6bb2-1111-1111-3b16ec0e1234 -g myResourceGroup -n myServer -i \\
               --user-assigned-identity-id /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
-              --identity-type SystemAssigned,UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
+              --identity-type SystemAssigned,UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+              --subnet /subscriptions/78975f9f-2222-1111-1111-29c42ac70000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/ManagedInstance
   - name: Create a managed instance without SQL Admin, with AD admin, AD Only enabled, User ManagedIdenties and Identity Type is UserAssigned.
     text: az sql mi create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName \\
               --external-admin-sid c5e964e2-6bb2-1111-1111-3b16ec0e1234 -g myResourceGroup -n myServer -i \\
               --user-assigned-identity-id /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
-              --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
+              --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+              --subnet /subscriptions/78975f9f-2222-1111-1111-29c42ac70000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/ManagedInstance
 """
 
 helps['sql mi delete'] = """
