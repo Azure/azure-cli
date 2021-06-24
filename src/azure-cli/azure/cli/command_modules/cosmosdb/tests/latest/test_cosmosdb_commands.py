@@ -12,6 +12,31 @@ from knack.util import CLIError
 class CosmosDBTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_analytical_storage_schema_type_on_create(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40)
+        })
+
+        schemaType = "FullFidelity"
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --analytical-storage-schema-type ' + schemaType)
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('analyticalStorageConfiguration.schemaType', schemaType)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_analytical_storage_schema_type_on_update(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40)
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --analytical-storage-schema-type FullFidelity')
+        schemaType = "WellDefined"
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --analytical-storage-schema-type ' + schemaType)
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('analyticalStorageConfiguration.schemaType', schemaType)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_create_database_account(self, resource_group):
         network_acl_bypass_resource_id = '/subscriptions/subId/resourcegroups/rgName/providers/Microsoft.Synapse/workspaces/workspaceName'
 
