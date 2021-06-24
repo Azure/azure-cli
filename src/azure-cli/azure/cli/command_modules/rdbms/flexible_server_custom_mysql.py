@@ -20,7 +20,7 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     DEFAULT_LOCATION_MySQL, generate_password, parse_maintenance_window, get_mysql_list_skus_info
 from .flexible_server_custom_common import user_confirmation, create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network
-from .validators import mysql_arguments_validator, validate_server_name, validate_auto_grow_update
+from .validators import mysql_arguments_validator, validate_server_name, validate_auto_grow_update, validate_mysql_ha_enabled
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -177,6 +177,7 @@ def flexible_server_update_custom_func(cmd, instance,
                                        assign_identity=False,
                                        replication_role=None,
                                        maintenance_window=None,
+                                       ha_enabled=None,
                                        iops=None):
     # validator
     location = ''.join(instance.location.lower().split())
@@ -209,6 +210,9 @@ def flexible_server_update_custom_func(cmd, instance,
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
+
+    if ha_enabled:
+        validate_mysql_ha_enabled(instance)
 
     if auto_grow:
         validate_auto_grow_update(instance, auto_grow)
@@ -249,6 +253,7 @@ def flexible_server_update_custom_func(cmd, instance,
                              ssl_enforcement=ssl_enforcement,
                              delegated_subnet_arguments=instance.delegated_subnet_arguments,
                              tags=tags,
+                             ha_enabled=ha_enabled,
                              replication_role=replication_role)
 
     if assign_identity:
@@ -538,7 +543,7 @@ def _determine_iops(storage_gb, iops_info, iops_input, tier, sku_name):
     if iops_input and iops_input > free_iops:
         iops = min(iops_input, max_supported_iops)
 
-    logger.warning("IOPS is set to %d which is either your input or free/maximum IOPS supported for your storage size and SKU.", iops)
+    logger.warning("IOPS is %d which is either your input or free(maximum) IOPS supported for your storage size and SKU.", iops)
     return iops
 
 

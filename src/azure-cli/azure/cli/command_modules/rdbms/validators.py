@@ -315,3 +315,8 @@ def validate_private_dns_zone(cmd, server_name, private_dns_zone):
     postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
     if private_dns_zone == server_name + postgresql_server_endpoint:
         raise ValidationError("private dns zone name cannot be same as the server's fully qualified domain name")
+
+
+def validate_mysql_ha_enabled(server):
+    if server.storage_profile.storage_autogrow == "Disabled":
+        raise ValidationError("You need to enable auto grow first to enable high availability.")
