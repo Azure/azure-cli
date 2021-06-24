@@ -195,7 +195,7 @@ short-summary: Import an API Management API.
 examples:
   - name: Import an API Management API From a file or a url
     text: |-
-        az apim api import --service-name MyApim -g MyResourceGroup --api-id MyApi --specification-url https://MySpecificationURL --specification-format OpenApiJson
+        az apim api import -g MyResourceGroup --service-name MyApim --path MyApi --specification-url https://MySpecificationURL --specification-format OpenApiJson
 """
 
 helps['apim product api list'] = """
