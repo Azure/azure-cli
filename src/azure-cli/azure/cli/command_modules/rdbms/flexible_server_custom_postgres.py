@@ -187,16 +187,13 @@ def flexible_server_restore(cmd, client,
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    # return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 def setup_restore_network(cmd, resource_group_name, server_name, location, parameters, source_server_object, subnet_id=None, private_dns_zone=None):
 
-    if source_server_object.private_dns_zone_arguments is not None:
-        parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
-    else:
-        print("Using msft subscription")
     parameters.delegated_subnet_arguments = source_server_object.delegated_subnet_arguments
+    parameters.private_dns_zone_arguments = source_server_object.private_dns_zone_arguments
 
     if subnet_id is not None:
         vnet_sub, vnet_rg, vnet_name, subnet_name = get_id_components(subnet_id)
@@ -219,7 +216,7 @@ def setup_restore_network(cmd, resource_group_name, server_name, location, param
         else:
             raise ResourceNotFoundError("The subnet does not exist. Please verify the subnet Id.")
 
-    if private_dns_zone is not None:
+    if private_dns_zone is not None or source_server_object.private_dns_zone_arguments is None:
         subnet_id = source_server_object.delegated_subnet_arguments.subnet_arm_resource_id if subnet_id is None else subnet_id
         private_dns_zone_id = prepare_private_dns_zone(cmd,
                                                        'PostgreSQL',
