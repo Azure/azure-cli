@@ -35,7 +35,7 @@ class ApimScenarioTest(ScenarioTest):
             'sku_name': 'Developer',
             'skucapacity': 1,
             'enable_cert': True,
-            'tags': ["foo=boo"]
+            'tags': ["foo=boo"],
         })
 
         self.cmd('apim check-name -n {service_name} -o json',
@@ -93,6 +93,7 @@ class ApimScenarioTest(ScenarioTest):
         self.kwargs.update({
             'api_id': self.create_random_name('az-cli', 10),
             'api_type': 'http',
+            'api_version': 'v1',
             'description': 'Contoso API Description',
             'display_name': 'Contoso API',
             'path': 'test',
@@ -116,10 +117,37 @@ class ApimScenarioTest(ScenarioTest):
             'state': 'notPublished',
             'new_state': 'published',
             'subscription_limit': 8,
-            'new_subscription_limit': 7
+            'new_subscription_limit': 7,
+            'versionset_name': 'MyVersionSet',
+            'version_schema': 'Query',
+            'version_query_name': 'QueryName',
+            'vs_description': 'This is vs description',
+            'vs_id': 'MyVSId',
+            'new_vs_name': 'MyNewVersionSet',
+            'api_revision': '2',
+            'api_revision_description': "New API Revision"
         })
 
         # api operations
+
+        # list API version set
+        initial_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
+
+        # create API version set
+        self.cmd('apim api versionset create -g "{rg}" -n "{service_name}" --display-name "{versionset_name}" --version-set-id "{vs_id}" --versioning-scheme "{version_schema}" --description "{vs_description}" --version-query-name "{version_query_name}"', checks=[
+            self.check('displayName', '{versionset_name}'),
+            self.check('description', '{vs_description}'),
+            self.check('versioningScheme', '{version_schema}'),
+            self.check('name', '{vs_id}')
+        ])
+
+        # show API version set
+        self.cmd('apim api versionset show -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
+
+        # update API version set
+        self.cmd('apim api versionset update -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}" --display-name "{new_vs_name}"', checks=[
+            self.check('displayName', '{new_vs_name}')
+        ])
 
         # create api
         self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"', checks=[
@@ -132,7 +160,7 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --created', checks=[self.is_empty()])
 
         # import api
-        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}"', checks=[
+        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}" --api-version-set-id {vs_id} --api-version {api_version}', checks=[
             self.check('displayName', 'Swagger Petstore'),
             self.check('path', '{path2}')
         ])
@@ -241,12 +269,6 @@ class ApimScenarioTest(ScenarioTest):
             'release_id': "releaseVersionOne",
             'release_notes': "release this version",
             'new_release_notes': "release that version",
-            'versionset_name': 'MyVersionSet',
-            'version_schema': 'Query',
-            'version_query_name': 'QueryName',
-            'vs_description': 'This is vs description',
-            'vs_id': 'MyVSId',
-            'new_vs_name': 'MyNewVersionSet',
             'api_revision': '2',
             'api_revision_description': "New API Revision"
         })
@@ -280,30 +302,6 @@ class ApimScenarioTest(ScenarioTest):
 
         final_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
         self.assertEqual(final_release_count, initial_release_count)
-
-        # list API version set
-        initial_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
-
-        # create API version set
-        self.cmd('apim api versionset create -g "{rg}" -n "{service_name}" --display-name "{versionset_name}" --version-set-id "{vs_id}" --versioning-scheme "{version_schema}" --description "{vs_description}" --version-query-name "{version_query_name}"', checks=[
-            self.check('displayName', '{versionset_name}'),
-            self.check('description', '{vs_description}'),
-            self.check('versioningScheme', '{version_schema}'),
-            self.check('name', '{vs_id}')
-        ])
-
-        # show API version set
-        self.cmd('apim api versionset show -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
-
-        # update API version set
-        self.cmd('apim api versionset update -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}" --display-name "{new_vs_name}"', checks=[
-            self.check('displayName', '{new_vs_name}')
-        ])
-
-        # delete API version set
-        self.cmd('apim api versionset delete -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
-        final_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
-        self.assertEqual(final_vs_count, initial_vs_count)
 
         # product Apis operations
 
@@ -377,6 +375,11 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim nv delete -g {rg} --service-name {service_name} --named-value-id {nv_id} -y')
         nv_count = len(self.cmd('apim nv list -g {rg} --service-name {service_name}').get_output_in_json())
         self.assertEqual(nv_count, 0)
+
+        # delete API version set
+        self.cmd('apim api versionset delete -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
+        final_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
+        self.assertEqual(final_vs_count, initial_vs_count)
 
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')

@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long, too-many-locals, too-many-arguments, too-many-statements, too-many-branches, no-else-return
 
 import uuid
+import re
 from knack.util import CLIError
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
@@ -18,8 +19,24 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract)
 
-# Service Operations
 
+# Helpers
+
+API_VS_ARM_ID_Reg = "(.*?)/providers/microsoft.apimanagement/service/([^/]+)/apiVersionSets/([^/]+)"
+API_VS_PREFIX = "/apiVersionSets/"
+
+
+def _get_vs_fullpath(versionSetId):
+    if versionSetId is not None:
+        if re.match(API_VS_ARM_ID_Reg, versionSetId) is None:
+            return API_VS_PREFIX + versionSetId
+        else:
+            return versionSetId
+    else:
+        return None
+
+
+# Service Operations
 
 def create_apim(client, resource_group_name, name, publisher_email, sku_name=SkuType.developer.value,
                 sku_capacity=1, virtual_network_type=VirtualNetworkType.none.value, enable_managed_identity=False,
@@ -250,7 +267,8 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
 
 
 def import_apim_api(client, resource_group_name, service_name, path, description=None, subscription_key_header_name=None,
-                    subscription_key_query_param_name=None, api_id=None, api_revision=None, display_name=None, service_url=None,
+                    subscription_key_query_param_name=None, api_id=None, api_revision=None, api_version=None,
+                    api_version_set_id=None, display_name=None, service_url=None,
                     protocols=None, specification_path=None, specification_url=None, specification_format=None,
                     api_type=None, subscription_required=None, soap_api_type=None, wsdl_endpoint_name=None,
                     wsdl_service_name=None, no_wait=False):
@@ -301,6 +319,8 @@ def import_apim_api(client, resource_group_name, service_name, path, description
     resource.description = description
     resource.subscription_required = subscription_required
     resource.subscription_key_parameter_names = get_subscription_key_parameter_names(subscription_key_query_param_name, subscription_key_header_name)
+    resource.api_version = api_version
+    resource.api_version_set_id = _get_vs_fullpath(api_version_set_id)
 
     if specification_format == ImportFormat.Wsdl.value:
         if api_type == ApiType.http.value:
@@ -316,7 +336,13 @@ def import_apim_api(client, resource_group_name, service_name, path, description
                 wsdl_endpoint_name=wsdl_endpoint_name
             )
 
-    return sdk_no_wait(no_wait, cms.create_or_update, resource_group_name=resource_group_name, service_name=service_name, api_id=api_id, parameters=resource)
+    return sdk_no_wait(
+        no_wait,
+        cms.create_or_update,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        parameters=resource)
 
 
 def get_subscription_key_parameter_names(subscription_key_header_name=None, subscription_key_query_param_name=None):
