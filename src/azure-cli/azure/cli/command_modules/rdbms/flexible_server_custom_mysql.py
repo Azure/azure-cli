@@ -17,8 +17,8 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db, cf_mysql_check_resource_availability
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, parse_public_access_input, \
-    DEFAULT_LOCATION_MySQL, generate_password, parse_maintenance_window, get_mysql_list_skus_info
-from .flexible_server_custom_common import user_confirmation, create_firewall_rule
+    generate_password, parse_maintenance_window, get_mysql_list_skus_info
+from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network
 from .validators import mysql_arguments_validator, validate_server_name, validate_auto_grow_update, validate_mysql_ha_enabled
 
@@ -36,9 +36,11 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
                            vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None, auto_grow=None):
+
+    # Populate desired parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'mysql')
     # validator
-    if location is None:
-        location = DEFAULT_LOCATION_MySQL
     sku_info, iops_info, single_az = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
 
@@ -58,10 +60,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                        "and --public_access is invalid. Use either one of them.")
 
     server_result = firewall_id = subnet_id = None
-
-    # Populate desired parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'mysql')
     server_name = server_name.lower()
     validate_server_name(cf_mysql_check_resource_availability(cmd.cli_ctx, '_'), server_name, 'Microsoft.DBforMySQL/flexibleServers')
 

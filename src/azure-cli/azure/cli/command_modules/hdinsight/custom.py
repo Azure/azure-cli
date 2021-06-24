@@ -69,6 +69,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
 
     if component_version:
         # See validator
+        # pylint: disable=consider-using-dict-comprehension
         component_version = dict([version.split('=') for version in component_version])
 
     # Validate whether HTTP credentials were provided
@@ -566,6 +567,48 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
         resource_group_name,
         cluster_name,
         monitor_request_parameter)
+
+
+# pylint: disable=unused-argument
+def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
+                             workspace_type='resource_id', no_validation_timeout=False):
+    from azure.mgmt.hdinsight.models import AzureMonitorRequest
+    from msrestazure.tools import parse_resource_id
+    from ._client_factory import cf_log_analytics
+
+    if workspace_type != 'resource_id' and not primary_key:
+        raise RequiredArgumentMissingError('primary key is required when workspace ID is provided.')
+
+    workspace_id = workspace
+    if workspace_type == 'resource_id':
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
+
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+        log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+        if not log_analytics_workspace:
+            raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+        # Only retrieve primary key when not provided
+        if not primary_key:
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
+            if not shared_keys:
+                raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+            primary_key = shared_keys.primary_shared_key
+
+        workspace_id = log_analytics_workspace.customer_id
+
+    azure_monitor_request_parameter = AzureMonitorRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_azure_monitor(
+        resource_group_name,
+        cluster_name,
+        azure_monitor_request_parameter)
 
 
 # pylint: disable=unused-argument

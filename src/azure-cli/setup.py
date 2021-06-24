@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.24.2"
+VERSION = "2.25.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -62,7 +62,7 @@ DEPENDENCIES = [
     'azure-keyvault-administration==4.0.0b3',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
-    'azure-mgmt-advisor>=2.0.1,<3.0.0',
+    'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-appconfiguration~=1.0.1',
     'azure-mgmt-applicationinsights~=1.0.0',
@@ -72,13 +72,13 @@ DEPENDENCIES = [
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.3.0',
     'azure-mgmt-cdn==11.0.0',
-    'azure-mgmt-cognitiveservices~=6.3.0',
+    'azure-mgmt-cognitiveservices~=12.0.0',
     'azure-mgmt-compute~=21.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc17',
+    'azure-mgmt-containerservice~=16.0.0',
     'azure-mgmt-cosmosdb~=6.3.0',
-    'azure-mgmt-containerservice~=11.2.0',
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -89,7 +89,7 @@ DEPENDENCIES = [
     'azure-mgmt-eventgrid==9.0.0',
     'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-extendedlocation~=1.0.0b2',
-    'azure-mgmt-hdinsight~=7.0.0',
+    'azure-mgmt-hdinsight~=8.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=4.1.0',
     'azure-mgmt-iothub==2.0.0',
@@ -155,14 +155,12 @@ TESTS_REQUIRE = [
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
-with open('HISTORY.rst', 'r', encoding='utf-8') as f:
-    HISTORY = f.read()
 
 setup(
     name='azure-cli',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
-    long_description=README + '\n\n' + HISTORY,
+    long_description=README,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',

@@ -737,7 +737,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None):
+              data_disk_delete_option=None, user_data=None):
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -922,6 +923,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
 
+    if user_data:
+        user_data = read_content_if_is_file(user_data)
+
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
@@ -941,7 +945,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
-        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option)
+        enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
+        user_data=user_data)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1070,8 +1075,11 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
     return client.global_schedules.create_or_update(resource_group_name, name, schedule)
 
 
-def get_instance_view(cmd, resource_group_name, vm_name):
-    return get_vm(cmd, resource_group_name, vm_name, 'instanceView')
+def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
+    expand = 'instanceView'
+    if include_user_data:
+        expand = expand + ',userData'
+    return get_vm(cmd, resource_group_name, vm_name, expand)
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
@@ -1087,10 +1095,10 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
     return vm
 
 
-def get_vm_details(cmd, resource_group_name, vm_name):
+def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     from msrestazure.tools import parse_resource_id
     from azure.cli.command_modules.vm._vm_utils import get_target_network_api
-    result = get_instance_view(cmd, resource_group_name, vm_name)
+    result = get_instance_view(cmd, resource_group_name, vm_name, include_user_data)
     network_client = get_mgmt_service_client(
         cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cmd.cli_ctx))
     public_ips = []
@@ -1326,15 +1334,20 @@ def patch_vm(cmd, resource_group_name, vm_name, vm):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
-def show_vm(cmd, resource_group_name, vm_name, show_details=False):
-    return get_vm_details(cmd, resource_group_name, vm_name) if show_details \
-        else get_vm(cmd, resource_group_name, vm_name)
+def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_data=False):
+    if show_details:
+        return get_vm_details(cmd, resource_group_name, vm_name, include_user_data)
+
+    expand = None
+    if include_user_data:
+        expand = "userData"
+    return get_vm(cmd, resource_group_name, vm_name, expand)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
-              enable_vtpm=None, **kwargs):
+              enable_vtpm=None, user_data=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1357,6 +1370,10 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if license_type is not None:
         vm.license_type = license_type
+
+    if user_data is not None:
+        from azure.cli.core.util import b64encode
+        vm.user_data = b64encode(user_data)
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
@@ -2431,7 +2448,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
-                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None):
+                enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None, user_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2636,6 +2653,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if custom_data:
             custom_data = read_content_if_is_file(custom_data)
 
+        if user_data:
+            user_data = read_content_if_is_file(user_data)
+
         if secrets:
             secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
@@ -2670,7 +2690,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             max_unhealthy_instance_percent=max_unhealthy_instance_percent,
             max_unhealthy_upgraded_instance_percent=max_unhealthy_upgraded_instance_percent,
             pause_time_between_batches=pause_time_between_batches, enable_cross_zone_upgrade=enable_cross_zone_upgrade,
-            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone)
+            prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2797,10 +2817,20 @@ def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
                        resource_group_name, vm_scale_set_name, instance_ids)
 
 
-def get_vmss(cmd, resource_group_name, name, instance_id=None):
+def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
     client = _compute_client_factory(cmd.cli_ctx)
+
+    expand = None
+    if include_user_data:
+        expand = 'userData'
+
     if instance_id is not None:
+        if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
         return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+
+    if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
+        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
@@ -2957,7 +2987,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, max_batch_instance_percent=None,
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
-                **kwargs):
+                user_data=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -2971,9 +3001,14 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
 
     # handle vmss instance update
+    from azure.cli.core.util import b64encode
+
     if instance_id is not None:
         if license_type is not None:
             vmss.license_type = license_type
+
+        if user_data is not None:
+            vmss.user_data = b64encode(user_data)
 
         if not vmss.protection_policy:
             vmss.protection_policy = VMProtectionPolicy()
@@ -2990,6 +3025,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     # else handle vmss update
     if license_type is not None:
         vmss.virtual_machine_profile.license_type = license_type
+
+    if user_data is not None:
+        vmss.virtual_machine_profile.user_data = b64encode(user_data)
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
         if vmss.virtual_machine_profile.scheduled_events_profile is None:
@@ -3328,7 +3366,7 @@ def list_image_galleries(cmd, resource_group_name=None):
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None, **kwargs):
     if permissions:
         if gallery.sharing_profile is None:
-            SharingProfile = cmd.get_models('SharingProfile')
+            SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
@@ -3339,13 +3377,17 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None):
+                         location=None, no_wait=False, tags=None, permissions=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
 
     client = _compute_client_factory(cmd.cli_ctx)
+    if permissions:
+        SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
+        gallery.sharing_profile = SharingProfile(permissions=permissions)
+
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
 
@@ -3828,3 +3870,61 @@ def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_durati
     return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
 
 # endregion
+
+
+def sig_shared_gallery_list(client, location, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       shared_to=shared_to)
+
+
+def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
+                     op_type=None):
+    SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
+        'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
+    if subscription_ids is None and tenant_ids is None:
+        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    groups = []
+    if subscription_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
+    if tenant_ids:
+        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.AAD_TENANTS, ids=tenant_ids))
+    sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_share_reset(cmd, client, resource_group_name, gallery_name):
+    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes',
+                                                                operation_group='shared_galleries')
+    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               gallery_name=gallery_name,
+                               sharing_update=sharing_update)
+
+
+def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location,
+                       gallery_unique_name=gallery_unique_name,
+                       shared_to=shared_to)
+
+
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
+    if shared_to == 'subscription':
+        shared_to = None
+    return client.list(location=location, gallery_unique_name=gallery_unique_name,
+                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+
+
+def get_gallery_instance(cmd, resource_group_name, gallery_name):
+    from ._client_factory import cf_vm_cl
+    client = cf_vm_cl(cmd.cli_ctx)
+    SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
+    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
