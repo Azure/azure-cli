@@ -749,13 +749,13 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
         # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
         self.kwargs.update({
-            'resource_group': 'ConvertSPOResourceGroup',
-            'server_name': 'convertsposerver1',
-            'database_name': 'testdb1',
+            'resource_group': 'WestUS2ResourceGroup',
+            'server_name': 'lillian-westus2-server',
+            'database_name': 'ps5691',
             'retention_days_v1': 7,
-            'diffbackup_hours_v1': 12,
+            'diffbackup_hours_v1': 24,
             'retention_days_v2': 6,
-            'diffbackup_hours_v2': 24
+            'diffbackup_hours_v2': 12
         })
 
         # Test UPDATE short term retention policy on live database, value updated to v1.
