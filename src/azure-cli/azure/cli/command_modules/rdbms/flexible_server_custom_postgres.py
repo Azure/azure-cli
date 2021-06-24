@@ -173,7 +173,7 @@ def flexible_server_restore(cmd, client,
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
-        
+
         if source_server_object.public_network_access == 'Disabled':
             setup_restore_network(cmd=cmd,
                                   resource_group_name=resource_group_name,
@@ -211,7 +211,7 @@ def setup_restore_network(cmd, resource_group_name, server_name, location, param
             else:
                 for delgtn in subnet.delegations:
                     if delgtn.service_name != DELEGATION_SERVICE_NAME:
-                        raise CLIError("Can not use subnet with existing delegations other than {}".format(DELEGATION_SERVICE_NAME))  
+                        raise CLIError("Can not use subnet with existing delegations other than {}".format(DELEGATION_SERVICE_NAME))
             parameters.delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
         else:
             raise ResourceNotFoundError("The subnet does not exist. Please verify the subnet Id.")
