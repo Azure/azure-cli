@@ -13,27 +13,28 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westeurope/capabilities?include=supportedManagedInstanceVersions&api-version=2020-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/eastus2euap/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
   response:
     body:
-      string: '{"name":"West Europe","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
-        is available in multi-az regions"}],"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
-        is available in multi-az regions"}],"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
+      string: '{"name":"East US 2 EUAP","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
+        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_EastUS2EUAP_MI_1","status":"Available"},{"name":"SQL_EastUS2EUAP_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
+        is available in multi-az regions"}],"zoneRedundant":false,"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7796'
+      - '11028'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:12:32 GMT
+      - Wed, 23 Jun 2021 03:10:56 GMT
       expires:
       - '-1'
       pragma:
@@ -52,12 +53,13 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westeurope", "identity": {"type": "SystemAssigned"}, "sku":
-      {"name": "GP_Gen5"}, "properties": {"administratorLogin": "admin123", "administratorLoginPassword":
-      "SecretPassword123", "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1",
-      "licenseType": "LicenseIncluded", "vCores": 8, "storageSizeInGB": 128, "collation":
-      "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
-      "Proxy"}}'
+    body: '{"location": "eastus2euap", "identity": {"userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":
+      {}}, "type": "SystemAssigned,UserAssigned"}, "sku": {"name": "GP_Gen5"}, "properties":
+      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123",
+      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance",
+      "licenseType": "LicenseIncluded", "vCores": 4, "storageSizeInGB": 32, "collation":
+      "SQL_Latin1_General_CP1_CI_AS", "publicDataEndpointEnabled": true, "proxyOverride":
+      "Proxy", "primaryUserAssignedIdentityId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"}}'
     headers:
       Accept:
       - application/json
@@ -68,31 +70,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '541'
+      - '927'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"00000000-0000-0000-0000-000000000000","type":"None","tenantId":"00000000-0000-0000-0000-000000000000"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"principalId":"00000000-0000-0000-0000-000000000000","type":"SystemAssigned,
+        UserAssigned","tenantId":"00000000-0000-0000-0000-000000000000"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '763'
+      - '846'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:12:49 GMT
+      - Wed, 23 Jun 2021 03:11:04 GMT
       expires:
       - '-1'
       pragma:
@@ -122,23 +126,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:13:50 GMT
+      - Wed, 23 Jun 2021 03:12:05 GMT
       expires:
       - '-1'
       pragma:
@@ -170,23 +176,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:14:21 GMT
+      - Wed, 23 Jun 2021 03:12:35 GMT
       expires:
       - '-1'
       pragma:
@@ -218,23 +226,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:14:50 GMT
+      - Wed, 23 Jun 2021 03:13:06 GMT
       expires:
       - '-1'
       pragma:
@@ -266,23 +276,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:15:20 GMT
+      - Wed, 23 Jun 2021 03:13:36 GMT
       expires:
       - '-1'
       pragma:
@@ -314,23 +326,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:15:51 GMT
+      - Wed, 23 Jun 2021 03:14:07 GMT
       expires:
       - '-1'
       pragma:
@@ -362,23 +376,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:16:21 GMT
+      - Wed, 23 Jun 2021 03:14:37 GMT
       expires:
       - '-1'
       pragma:
@@ -410,23 +426,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:16:51 GMT
+      - Wed, 23 Jun 2021 03:15:07 GMT
       expires:
       - '-1'
       pragma:
@@ -458,23 +476,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:17:21 GMT
+      - Wed, 23 Jun 2021 03:15:37 GMT
       expires:
       - '-1'
       pragma:
@@ -506,23 +526,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:17:51 GMT
+      - Wed, 23 Jun 2021 03:16:07 GMT
       expires:
       - '-1'
       pragma:
@@ -554,23 +576,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '961'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:18:22 GMT
+      - Wed, 23 Jun 2021 03:16:38 GMT
       expires:
       - '-1'
       pragma:
@@ -602,23 +626,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1070'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:18:52 GMT
+      - Wed, 23 Jun 2021 03:17:08 GMT
       expires:
       - '-1'
       pragma:
@@ -650,23 +676,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1070'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:19:22 GMT
+      - Wed, 23 Jun 2021 03:19:39 GMT
       expires:
       - '-1'
       pragma:
@@ -698,23 +726,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1070'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:19:52 GMT
+      - Wed, 23 Jun 2021 03:20:09 GMT
       expires:
       - '-1'
       pragma:
@@ -746,23 +776,25 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Creating","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1070'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:20:22 GMT
+      - Wed, 23 Jun 2021 03:20:40 GMT
       expires:
       - '-1'
       pragma:
@@ -794,23 +826,1775 @@ interactions:
       ParameterSetName:
       - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
         --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1068'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:20:52 GMT
+      - Wed, 23 Jun 2021 03:21:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:21:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:22:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:22:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:23:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:23:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:24:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:24:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:25:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:25:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:26:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:26:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:27:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:27:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:28:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:28:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:29:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:29:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:30:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:30:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1214'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:31:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1323'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:31:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:32:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:32:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:33:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:33:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:34:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:34:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:35:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:35:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:36:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:36:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:37:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:37:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:38:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l -i --admin-user --admin-password --subnet --license-type --capacity
+        --storage --edition --family --collation --proxy-override --public-data-endpoint-enabled
+        --user-assigned-identity-id --identity-type --pid
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1745'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:38:46 GMT
       expires:
       - '-1'
       pragma:
@@ -842,24 +2626,25 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"identity":{"principalId":"5adc95a3-80e0-45d1-ad3c-53365475922d","type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.dbd83b138df7.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":128,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"dbd83b138df7","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","privateEndpointConnections":[],"storageAccountType":"GRS"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"identity":{"userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi":{"principalId":"81ee4b1f-60be-4cab-a171-39017a727129","clientId":"0af29906-102c-42c7-a886-b4d0501a1d82"}},"principalId":"932098eb-38a0-4d56-93c9-1c47a33f26d7","type":"SystemAssigned,
+        UserAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"umitest000001.b10499e8771a.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"b10499e8771a","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"storageAccountType":"GRS","zoneRedundant":false,"primaryUserAssignedIdentityId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001","name":"umitest000001","type":"Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1068'
+      - '1745'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:20:53 GMT
+      - Wed, 23 Jun 2021 03:38:47 GMT
       expires:
       - '-1'
       pragma:
@@ -893,22 +2678,30 @@ interactions:
       ParameterSetName:
       - -g -n --yes
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: ''
+      string: '{"operation":"DropManagedServer","startTime":"2021-06-23T03:38:49.657Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/locations/eastus2euap/managedInstanceAzureAsyncOperation/2878d3ac-2e39-4501-9c5c-1af98b13d192?api-version=2020-11-01-preview
       cache-control:
       - no-cache
+      content-length:
+      - '72'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:20:57 GMT
+      - Wed, 23 Jun 2021 03:38:49 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/locations/eastus2euap/managedInstanceOperationResults/2878d3ac-2e39-4501-9c5c-1af98b13d192?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -920,8 +2713,55 @@ interactions:
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
-      code: 204
-      message: No Content
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/locations/eastus2euap/managedInstanceAzureAsyncOperation/2878d3ac-2e39-4501-9c5c-1af98b13d192?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"2878d3ac-2e39-4501-9c5c-1af98b13d192","status":"Succeeded","startTime":"2021-06-23T03:38:49.657Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Jun 2021 03:39:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -936,36 +2776,36 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.14393-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-sql/0.20.0 Azure-SDK-For-Python AZURECLI/2.11.0
+      - python/3.8.10 (Windows-10-10.0.19043-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-sql/0.28.0 Azure-SDK-For-Python AZURECLI/2.24.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/toki/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2020-02-02-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alswansotest3-rg/providers/Microsoft.Sql/managedInstances/umitest000001?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Sql/managedInstances/clitestmi000001''
-        under resource group ''toki'' was not found. For more details please go to
-        https://aka.ms/ARMResourceNotFoundFix"}}'
+      string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
+        of type ''Microsoft.Sql/managedInstances'' with name ''umitest000001'' was
+        not found."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '227'
+      - '161'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 04 Sep 2020 14:20:58 GMT
+      - Wed, 23 Jun 2021 03:39:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
     status:
       code: 404
       message: Not Found

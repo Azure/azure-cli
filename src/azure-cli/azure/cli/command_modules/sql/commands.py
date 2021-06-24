@@ -290,7 +290,7 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'server_ms_support_audit_policy_get')
 
     database_long_term_retention_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_database_long_term_retention_policies_operations)
 
     with self.command_group('sql db ltr-policy',
@@ -346,7 +346,7 @@ def load_command_table(self, _):
         g.command('disable', 'disable_recommendation')
 
     database_threat_detection_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseSecurityAlertPoliciesOperations.{}',
         client_factory=get_sql_database_threat_detection_policies_operations)
 
     with self.command_group('sql db threat-policy',
@@ -472,8 +472,8 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.command('delete', 'delete',
                   confirmation=True)
-        g.show_command('show', 'get',
-                       table_transformer=server_table_format)
+        g.custom_show_command('show', 'server_get',
+                              table_transformer=server_table_format)
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
         g.generic_update_command('update',
@@ -496,8 +496,8 @@ def load_command_table(self, _):
                             firewall_rules_operations,
                             client_factory=get_sql_firewall_rules_operations) as g:
 
-        g.command('create', 'create_or_update',
-                  table_transformer=firewall_rule_table_format)
+        g.custom_command('create', 'firewall_rule_create',
+                         table_transformer=firewall_rule_table_format)
         g.custom_command('update', 'firewall_rule_update',
                          table_transformer=firewall_rule_table_format)
         g.command('delete', 'delete')
@@ -634,7 +634,7 @@ def load_command_table(self, _):
 
         g.custom_command('create', 'managed_instance_create', transform=mi_transform, supports_no_wait=True)
         g.command('delete', 'delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
-        g.show_command('show', 'get', transform=mi_transform)
+        g.custom_show_command('show', 'managed_instance_get', transform=mi_transform)
         g.custom_command('list', 'managed_instance_list', transform=mi_list_transform)
         g.generic_update_command('update', custom_func_name='managed_instance_update', transform=mi_transform, supports_no_wait=True)
         g.command('failover', 'failover', supports_no_wait=True)
