@@ -53,7 +53,7 @@ def get_sql_database_sensitivity_labels_operations(cli_ctx, _):
 
 
 def get_sql_database_threat_detection_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).database_threat_detection_policies
+    return get_sql_management_client(cli_ctx).database_security_alert_policies
 
 
 def get_sql_database_transparent_data_encryption_activities_operations(cli_ctx, _):
@@ -205,7 +205,7 @@ def get_sql_managed_database_long_term_retention_backups_operations(cli_ctx, _):
 
 
 def get_sql_database_long_term_retention_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).backup_long_term_retention_policies
+    return get_sql_management_client(cli_ctx).long_term_retention_policies
 
 
 def get_sql_database_long_term_retention_backups_operations(cli_ctx, _):
