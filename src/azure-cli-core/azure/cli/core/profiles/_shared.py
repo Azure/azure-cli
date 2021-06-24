@@ -60,12 +60,12 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
+    MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
 
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
-    MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
     MGMT_MEDIA = ('azure.mgmt.media', None)
     MGMT_BACKUP = ('azure.mgmt.recoveryservicesbackup', None)
@@ -144,9 +144,10 @@ AZURE_API_PROFILES = {
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
             'snapshots': '2020-12-01',
-            'galleries': '2019-12-01',
+            'galleries': '2020-09-30',
             'gallery_images': '2020-09-30',
             'gallery_image_versions': '2020-09-30',
+            'shared_galleries': '2020-09-30',
             'virtual_machine_scale_sets': '2021-03-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
@@ -212,7 +213,11 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_IOTHUB: '2021-03-31',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
-        ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview'
+        ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-05-01', {
+            'container_services': '2017-07-01',
+            'open_shift_managed_clusters': '2019-09-30-preview'
+        })
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
@@ -252,7 +257,12 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
+        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-11-01', {
+            'container_services': '2017-07-01',
+            'open_shift_managed_clusters': '2019-09-30-preview'
+        })
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',

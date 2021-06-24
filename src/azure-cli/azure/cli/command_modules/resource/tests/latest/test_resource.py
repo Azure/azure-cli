@@ -681,6 +681,28 @@ class ProviderRegistrationTest(ScenarioTest):
         result = self.cmd('provider register -n {prov} --m testmg')
         self.assertTrue(result, None)
 
+    def test_register_consent_to_permissions(self):
+
+        self.kwargs = {
+            'prov': "Microsoft.ClassicInfrastructureMigrate"
+        }
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            self.cmd('provider register -n {prov} --consent-to-permissions')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            result = self.cmd('provider permission list -n {prov}').get_output_in_json()
+            self.assertGreaterEqual(len(result['value']), 1)
+            self.cmd('provider unregister -n {prov}')
+        else:
+            self.cmd('provider unregister -n {prov}')
+            self.cmd('provider register -n {prov} --consent-to-permissions')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            result = self.cmd('provider permission list -n {prov}').get_output_in_json()
+            self.assertGreaterEqual(len(result['value']), 1)
+
 
 class ProviderOperationTest(ScenarioTest):
 

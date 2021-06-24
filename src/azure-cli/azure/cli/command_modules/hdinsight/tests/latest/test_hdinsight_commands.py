@@ -292,6 +292,49 @@ class HDInsightClusterTests(ScenarioTest):
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_azure_monitor(self, storage_account_info):
+        self.kwargs.update({
+            'ws': self.create_random_name('testws', 20),
+            'la_prop_path': os.path.join(TEST_DIR, 'loganalytics.json')
+        })
+
+        ws_response = self.cmd('resource create -g {rg} -n {ws} '
+                               '--resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"') \
+            .get_output_in_json()
+        ws_customer_id = ws_response['properties']['customerId']
+
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_explicit_ssh_creds()
+        )
+
+        # get monitor status
+        self.cmd('az hdinsight azure-monitor show -g {rg} -n {cluster}', checks=[
+            self.check('clusterMonitoringEnabled', False),
+            self.check('workspaceId', None)
+        ])
+
+        # enable monitoring
+        self.cmd('az hdinsight azure-monitor enable -g {rg} -n {cluster} --workspace {ws} --no-validation-timeout')
+
+        # get monitor status
+        self.cmd('az hdinsight azure-monitor show -g {rg} -n {cluster}', checks=[
+            self.check('clusterMonitoringEnabled', True),
+            self.check('workspaceId', ws_customer_id)
+        ])
+
+        # disable monitor
+        self.cmd('az hdinsight azure-monitor disable -g {rg} -n {cluster}')
+
+        # get monitor status
+        self.cmd('az hdinsight azure-monitor show -g {rg} -n {cluster}', checks=[
+            self.check('clusterMonitoringEnabled', False),
+            self.check('workspaceId', None)
+        ])
+
+    # Uses 'rg' kwarg
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_script_action(self, storage_account_info):
         self.kwargs.update({
             'script_uri': 'https://hdiconfigactions.blob.core.windows.net/linuxgiraphconfigactionv01/giraph-installer-v01.sh',
