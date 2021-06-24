@@ -114,8 +114,7 @@ DEPENDENCIES = [
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
-    # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-reservations==0.6.0',
+    'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==18.0.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-search~=8.0',
@@ -173,8 +172,7 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(
-        exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
     package_data={
