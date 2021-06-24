@@ -97,7 +97,7 @@ class ApimScenarioTest(ScenarioTest):
             'display_name': 'Contoso API',
             'path': 'test',
             'path2': 'test2',
-            'protocol': 'http',
+            'protocol': 'https',
             'service_url': 'https://contoso.com',
             'subscription_key_header_name': 'header',
             'subscription_key_query_param_name': 'query',
@@ -143,10 +143,6 @@ class ApimScenarioTest(ScenarioTest):
             self.check('displayName', '{display_name}'),
             self.check('serviceUrl', '{service_url}')
         ])
-
-        self.kwargs.update({
-            'protocol': 'https',
-        })
 
         # update api
         self.cmd('apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}" --protocols {protocol}', checks=[
