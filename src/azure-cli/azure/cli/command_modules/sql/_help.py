@@ -754,7 +754,7 @@ examples:
   - name: Create a managed instance with maintenance configuration
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -m SQL_{Region}_{MaintenanceConfigName}
   - name: Create a managed instance without SQL Admin, with AAD admin and AD Only enabled
-    text: sql mi create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName --external-admin-sid c5e964e2-6bb2-2222-1111-3b16ec0e1234 -g myResourceGroup -n miName --subnet /subscriptions/78975f9f-2222-1111-1111-29c42ac70000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/ManagedInstance
+    text: az sql mi create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName --external-admin-sid c5e964e2-6bb2-2222-1111-3b16ec0e1234 -g myResourceGroup -n miName --subnet /subscriptions/78975f9f-2222-1111-1111-29c42ac70000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/ManagedInstance
 """
 
 helps['sql mi delete'] = """
