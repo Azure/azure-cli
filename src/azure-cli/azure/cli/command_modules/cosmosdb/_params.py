@@ -349,15 +349,15 @@ def load_arguments(self, _):
         c.argument('target_database_account_name', options_list=['--target-database-account-name', '-n'], help='Name of the new target Cosmos DB database account after the restore')
         c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the source Cosmos DB database account for the restore', id_part=None)
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to.")
-        c.argument('location', arg_type=get_location_type(self.cli_ctx),help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
 
     # Retrive Sql Container Backup Info
     with self.argument_context('cosmosdb sql retrieve-latest-backup-time') as c:
-        c.argument('account_name', account_name_type,id_part=None, required=True, help='Name of the Cosmos DB database account')
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the Cosmos DB database account')
         c.argument('database_name', database_name_type, required=True, help='Name of the Cosmos DB sql database name')
         c.argument('container_name', container_name_type, required=True, help='Name of the Cosmos DB sql container name')
-        c.argument('location', options_list=[ '--location', '-l'], help="Location of the account", required=True)
+        c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
 
     # Restorable Database Accounts
     with self.argument_context('cosmosdb restorable-database-account show') as c:

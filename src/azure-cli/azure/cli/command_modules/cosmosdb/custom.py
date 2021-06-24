@@ -258,8 +258,7 @@ def _create_database_account(client,
     params = None
     if create_mode == 'Restore':
         if restore_source is None or restore_timestamp is None:
-            raise CLIError(
-                'restore-source and restore-timestamp should be provided for a restore request.')
+            raise CLIError('restore-source and restore-timestamp should be provided for a restore request.')
         restore_parameters = RestoreParameters(
             restore_mode='PointInTime',
             restore_source=restore_source,
@@ -386,8 +385,7 @@ def cli_cosmosdb_update(client,
     if backup_interval is not None or backup_retention is not None:
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             if backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
-                raise CLIError(
-                    'backup-interval and backup-retention can only be set with periodic backup policy.')
+                raise CLIError('backup-interval and backup-retention can only be set with periodic backup policy.')
             periodic_mode_properties = PeriodicModeProperties(
                 backup_interval_in_minutes=backup_interval,
                 backup_retention_interval_in_hours=backup_retention
@@ -1610,13 +1608,11 @@ def cli_cosmosdb_restore(cmd,
                          location,
                          databases_to_restore=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
-    restorable_database_accounts_client = cf_restorable_database_accounts(
-        cmd.cli_ctx, [])
+    restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
     restorable_database_accounts_list = list(restorable_database_accounts)
     target_restorable_account = None
-    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(
-        restore_timestamp)
+    restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
 
     # If restore timestamp is timezone aware, get the utcnow as timezone aware as well
     from datetime import datetime, timezone
@@ -1626,8 +1622,7 @@ def cli_cosmosdb_restore(cmd,
 
     # Fail if provided restoretimesamp is greater than current timestamp
     if restore_timestamp_datetime_utc > current_dateTime:
-        raise CLIError("Restore timestamp {} should be less than current timestamp {}".format(
-                       restore_timestamp_datetime_utc, current_dateTime))
+        raise CLIError("Restore timestamp {} should be less than current timestamp {}".format(restore_timestamp_datetime_utc, current_dateTime))
 
     for account in restorable_database_accounts_list:
         if account.account_name == account_name:
@@ -1641,49 +1636,37 @@ def cli_cosmosdb_restore(cmd,
                     break
 
     if target_restorable_account is None:
-        raise CLIError("Cannot find a database account with name {} that is online at {}".format(
-            account_name, restore_timestamp))
+        raise CLIError("Cannot find a database account with name {} that is online at {}".format(account_name, restore_timestamp))
 
     # Validate if source account is empty
-    from urllib.error import HTTPError
     restorable_resources = None
     if target_restorable_account.api_type.lower() == "sql":
         try:
             from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
-            restorable_sql_resources_client = cf_restorable_sql_resources(
-                cmd.cli_ctx, [])
+            restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
             restorable_resources = restorable_sql_resources_client.list(
                 target_restorable_account.location,
                 target_restorable_account.name,
                 location,
                 restore_timestamp_datetime_utc)
-        except HTTPError as err:
-            if err.code == 404:
-                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(
-                    account_name, restore_timestamp, location))
-            raise
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
     elif target_restorable_account.api_type.lower() == "mongodb":
         try:
             from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
-            restorable_mongodb_resources_client = cf_restorable_mongodb_resources(
-                cmd.cli_ctx, [])
+            restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
             restorable_resources = restorable_mongodb_resources_client.list(
                 target_restorable_account.location,
                 target_restorable_account.name,
                 location,
                 restore_timestamp_datetime_utc)
-        except HTTPError as err:
-            if err.code == 404:
-                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(
-                    account_name, restore_timestamp, location))
-            raise
+        except ResourceNotFoundError:
+            raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
     else:
-        raise CLIError("Provided API Type {} is not supported for account {}".format(
-            target_restorable_account.api_type, account_name))
+        raise CLIError("Provided API Type {} is not supported for account {}".format(target_restorable_account.api_type, account_name))
 
     if restorable_resources is None or not any(restorable_resources):
-        raise CLIError("Database account {} contains no restorable resources in location {} at given restore timestamp {}".format(
-                       target_restorable_account, location, restore_timestamp_datetime_utc))
+        raise CLIError("Database account {} contains no restorable resources in location {} at given restore timestamp {}".format(target_restorable_account, location, restore_timestamp_datetime_utc))
 
     # Trigger restore
     locations = []
@@ -1708,8 +1691,7 @@ def _convert_to_utc_timestamp(timestamp_string):
     timestamp_datetime_utc = None
     # Convert to utc only if timezone aware
     if timestamp_datetime.tzinfo is not None and timestamp_datetime.tzinfo.utcoffset(timestamp_datetime) is not None:
-        timestamp_datetime_utc = timestamp_datetime.astimezone(
-            datetime.timezone.utc)
+        timestamp_datetime_utc = timestamp_datetime.astimezone(datetime.timezone.utc)
     else:
         timestamp_datetime_utc = timestamp_datetime
     return timestamp_datetime_utc
@@ -1742,16 +1724,14 @@ def cli_retrieve_latest_backup_time(client,
                                     container_name,
                                     location):
     try:
-        client.get_sql_database(
-            resource_group_name, account_name, database_name)
-    except Exception as e:
-        raise CLIError(str(e))
+        client.get_sql_database(resource_group_name, account_name, database_name)
+    except ResourceNotFoundError:
+        raise CLIError("Cannot find a database with name {}".format(database_name))
 
     try:
-        client.get_sql_container(
-            resource_group_name, account_name, database_name, container_name)
-    except Exception as e:
-        raise CLIError(str(e))
+        client.get_sql_container(resource_group_name, account_name, database_name, container_name)
+    except ResourceNotFoundError:
+        raise CLIError("Cannot find a container with name {} under database {}".format(container_name, database_name))
 
     restoreLocation = ContinuousBackupRestoreLocation(
         location=location
@@ -1769,6 +1749,7 @@ def cli_retrieve_latest_backup_time(client,
 ######################
 
 # database operations
+
 
 def _get_database_link(database_id):
     return 'dbs/{}'.format(database_id)

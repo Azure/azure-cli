@@ -1605,16 +1605,14 @@ class CosmosDBTests(ScenarioTest):
         from datetime import timedelta
 
         # This should fail as restore time is before account creation time
-        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(
-            minutes=30)
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(days=30)
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as restore time is in future
-        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(
-            minutes=30)
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(days=30)
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
@@ -1622,8 +1620,7 @@ class CosmosDBTests(ScenarioTest):
 
         # Get correct restore ts
         account_creation_time = restorable_database_account['creationTime']
-        creation_timestamp_datetime = dateutil.parser.parse(
-            account_creation_time)
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
 
         restore_ts_string = restore_ts.isoformat()
@@ -1638,11 +1635,11 @@ class CosmosDBTests(ScenarioTest):
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as regional database doesn't exist in this location
-        invalid_location = "westus2"
-        self.kwargs.update({
-            'invalid_location': invalid_location
-        })
-        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
+        # invalid_location = "westus2"
+        # self.kwargs.update({
+        #     'invalid_location': invalid_location
+        # })
+        # self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
 
         # This should fail as account is empty
         # self.assertRaises(Exception, lambda: self.cmd(
@@ -1657,10 +1654,8 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
         self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime'),
-            self.check('restoreParameters.restoreSource',
-                       restorable_database_account['id']),
-            self.check('restoreParameters.restoreTimestampInUtc',
-                       restore_ts_string)
+            self.check('restoreParameters.restoreSource', restorable_database_account['id']),
+            self.check('restoreParameters.restoreTimestampInUtc', restore_ts_string)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_restorable_commands', parameter_name_for_location='location')
@@ -1701,8 +1696,7 @@ class CosmosDBTests(ScenarioTest):
         account_creation_time = restorable_database_account['creationTime']
         import dateutil
         from datetime import timedelta
-        creation_timestamp_datetime = dateutil.parser.parse(
-            account_creation_time)
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
         import time
         time.sleep(200)
@@ -1721,7 +1715,7 @@ class CosmosDBTests(ScenarioTest):
     def test_cosmosdb_mongodb_restorable_commands(self, resource_group, location):
         col = self.create_random_name(prefix='cli', length=15)
         db_name = self.create_random_name(prefix='cli', length=15)
-        print(col)
+
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
             'restored_acc': self.create_random_name(prefix='cli', length=15),
@@ -1732,7 +1726,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
-        print(account)
+
         self.kwargs.update({
             'ins_id': account['instanceId'],
             'shard_key': "theShardKey",
@@ -1759,8 +1753,7 @@ class CosmosDBTests(ScenarioTest):
         account_creation_time = restorable_database_account['creationTime']
         import dateutil
         from datetime import timedelta
-        creation_timestamp_datetime = dateutil.parser.parse(
-            account_creation_time)
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
         restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
         import time
         time.sleep(200)
@@ -1779,18 +1772,24 @@ class CosmosDBTests(ScenarioTest):
     def test_cosmosdb_sql_container_backupinfo(self, resource_group, location):
         col = self.create_random_name(prefix='cli', length=15)
         db_name = self.create_random_name(prefix='cli', length=15)
-        print(col)
+        new_default_ttl1 = 2000
+        new_default_ttl2 = 5000
+
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
             'restored_acc': self.create_random_name(prefix='cli', length=15),
             'db_name': db_name,
             'col': col,
-            'loc': location
+            'loc': location,
+            'nttl1': new_default_ttl1,
+            'nttl2': new_default_ttl2,
         })
+
+        # This should fail as account doesn't exist
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
-        print(account)
 
         # This should fail as database doesn't exist
         self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
@@ -1812,3 +1811,30 @@ class CosmosDBTests(ScenarioTest):
 
         backup_time = int(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
         assert backup_time > 0
+
+        # Update container
+        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
+        # assert container_update["resource"]["defaultTtl"] == 2000
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time = int(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time >= backup_time
+
+        # Update container again
+        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl2}').get_output_in_json()
+        # assert container_update["resource"]["defaultTtl"] == 3000
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time2 = int(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time2 >= backup_time
+        assert new_backup_time2 >= new_backup_time
