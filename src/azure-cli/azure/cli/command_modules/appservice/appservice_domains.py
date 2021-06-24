@@ -97,7 +97,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
 
     tld = '.'.join(hostname.split('.')[1:])
     from azure.mgmt.web.models import TopLevelDomainAgreementOption
-    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=True, for_transfer=True)
+    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=bool(privacy), for_transfer=False)
     agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
     agreement_keys = [agreement.agreement_key for agreement in agreements]
 
