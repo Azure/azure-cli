@@ -3447,12 +3447,16 @@ def server_create(
     if enable_ad_only_auth:
         ad_only = True
 
+    tenant_id = None
+    if external_admin_name is not None:
+        tenant_id = _get_tenant_id()
+
     kwargs['administrators'] = ServerExternalAdministrator(
         principal_type=external_admin_principal_type,
         login=external_admin_name,
         sid=external_admin_sid,
         azure_ad_only_authentication=ad_only,
-        tenant_id=_get_tenant_id())
+        tenant_id=tenant_id)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -3989,12 +3993,16 @@ def managed_instance_create(
     if enable_ad_only_auth:
         ad_only = True
 
+    tenant_id = None
+    if external_admin_name is not None:
+        tenant_id = _get_tenant_id()
+
     kwargs['administrators'] = ManagedInstanceExternalAdministrator(
         principal_type=external_admin_principal_type,
         login=external_admin_name,
         sid=external_admin_sid,
         azure_ad_only_authentication=ad_only,
-        tenant_id=_get_tenant_id())
+        tenant_id=tenant_id)
 
     # Create
     return client.create_or_update(
