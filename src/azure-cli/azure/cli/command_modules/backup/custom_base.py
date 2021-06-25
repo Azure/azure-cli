@@ -126,7 +126,7 @@ def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name,
     return None
 
 
-def move_recovery_points(cmd, resource_group_name, vault_name, container_name, item_name, rp_id, source_tier,
+def move_recovery_points(cmd, resource_group_name, vault_name, container_name, item_name, rp_name, source_tier,
                          destination_tier, backup_management_type=None, workload_type=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -138,11 +138,11 @@ def move_recovery_points(cmd, resource_group_name, vault_name, container_name, i
         raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.move_recovery_points(cmd, resource_group_name, vault_name, item, rp_id, source_tier,
+        return custom.move_recovery_points(cmd, resource_group_name, vault_name, item, rp_name, source_tier,
                                            destination_tier)
 
     if item.properties.backup_management_type.lower() == "azureworkload":
-        return custom_wl.move_wl_recovery_points(cmd, resource_group_name, vault_name, item, rp_id,
+        return custom_wl.move_wl_recovery_points(cmd, resource_group_name, vault_name, item, rp_name,
                                                  source_tier, destination_tier)
 
     raise InvalidArgumentValueError('This command is not supported for --backup-management-type AzureStorage.')
@@ -380,7 +380,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
-        raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30.')
+        raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
 
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
@@ -459,7 +459,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
                      rehydration_priority=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
-        raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30.')
+        raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
 
     return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config,
                                       rehydration_duration, rehydration_priority)

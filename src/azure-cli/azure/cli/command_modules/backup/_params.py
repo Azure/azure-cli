@@ -45,7 +45,7 @@ disk_list_setting_help = """option to decide whether to include or exclude the d
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
 target_tier_help = """ The destination/target tier to which a particular recovery point has to be moved."""
 tier_help = """ The tier whose recovery points have to be fetched and returned."""
-rehyd_priority_type_help = """The type of priority to be maintained while rehydration a recovery point """
+rehyd_priority_type_help = """The type of priority to be maintained while rehydrating a recovery point """
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -192,15 +192,15 @@ def load_arguments(self, _):
         c.argument('container_name', container_name_type)
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
-        c.argument('is_ready_for_move', arg_type=get_three_state_flag(), help='Option to retrieve recoverypoints that are ready to be moved to destination-tier.')
+        c.argument('is_ready_for_move', arg_type=get_three_state_flag(), help='Use this flag to retrieve the recoverypoints that are ready to be moved to destination-tier.')
         c.argument('target_tier', target_tier_type)
         c.argument('tier', tier_type)
-        c.argument('recommended_for_archive', action="store_true", help='Option to list recommended recoverypoints that be archived if required.')
+        c.argument('recommended_for_archive', action="store_true", help='Use this flag to retrieve recommended archivable recoverypoints.')
 
     with self.argument_context('backup recoverypoint move') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('container_name', container_name_type)
-        c.argument('rp_id', rp_name_type, options_list=['--rp-id'], help='ID of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.', id_part='child_name_4')
+        c.argument('rp_name', rp_name_type, id_part='child_name_4')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('source_tier', help='The source tier from which a particular recovery point has to be moved.', arg_type=get_enum_type(['VaultStandard']), options_list=['--source-tier'])
@@ -306,7 +306,7 @@ def load_arguments(self, _):
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
         c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
-        c.argument('rehydration_duration', type=int, help='Maximum time, in days, the recovery point stays in hydrated state.')
+        c.argument('rehydration_duration', type=int, help='Set the maximum time, in days for which the recovery point stays in hydrated state. Default: 15')
         c.argument('rehydration_priority', rehyd_priority_type)
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
@@ -328,7 +328,7 @@ def load_arguments(self, _):
     with self.argument_context('backup restore restore-azurewl') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
-        c.argument('rehydration_duration', type=int, help='Maximum time, in days, the recovery point stays in hydrated state.')
+        c.argument('rehydration_duration', type=int, help='Set the maximum time, in days for which the recovery point stays in hydrated state. Default: 15')
         c.argument('rehydration_priority', rehyd_priority_type)
 
     # Recoveryconfig
