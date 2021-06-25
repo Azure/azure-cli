@@ -38,7 +38,7 @@ from azure.mgmt.sql.models import (
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
-    ServerPublicNetworkAccess,
+    ServerNetworkAccessFlag,
     ServerInfo,
     EncryptionProtector,
     ManagedInstanceEncryptionProtector,
@@ -952,7 +952,7 @@ def _db_dw_create(
         kwargs['maintenance_configuration_id'])
 
     # Create
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
                        resource_group_name=dest_db.resource_group_name,
                        database_name=dest_db.database_name,
@@ -3364,7 +3364,7 @@ def instance_pool_create(
     kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
         cmd.cli_ctx, kwargs['location'], sku)
 
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        instance_pool_name=instance_pool_name,
                        resource_group_name=resource_group_name,
                        parameters=kwargs)
@@ -3436,8 +3436,8 @@ def server_create(
 
     if enable_public_network is not None:
         kwargs['public_network_access'] = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     kwargs['key_id'] = key_id
 
@@ -3455,7 +3455,7 @@ def server_create(
         tenant_id=_get_tenant_id())
 
     # Create
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=server_name,
                        resource_group_name=resource_group_name,
                        parameters=kwargs)
@@ -3530,8 +3530,8 @@ def server_update(
 
     if enable_public_network is not None:
         instance.public_network_access = (
-            ServerPublicNetworkAccess.enabled if enable_public_network
-            else ServerPublicNetworkAccess.disabled)
+            ServerNetworkAccessFlag.enabled if enable_public_network
+            else ServerNetworkAccessFlag.disabled)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
@@ -3847,7 +3847,7 @@ def server_trust_group_create(
         no_wait=False):
 
     members = [ServerInfo(server_id=member) for member in group_member]
-    return sdk_no_wait(no_wait, client.create_or_update,
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        location_name=location,
                        server_trust_group_name=name,
@@ -3862,7 +3862,7 @@ def server_trust_group_delete(
         location,
         no_wait=False):
 
-    return sdk_no_wait(no_wait, client.delete,
+    return sdk_no_wait(no_wait, client.begin_delete,
                        resource_group_name=resource_group_name,
                        location_name=location,
                        server_trust_group_name=name)
