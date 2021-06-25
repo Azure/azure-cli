@@ -9,6 +9,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands.parameters import (
     tags_type,
+    get_enum_type,
     resource_group_name_type,
     get_resource_name_completion_list,
     get_location_type)
@@ -18,6 +19,8 @@ from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_resource_skus
+
+from azure.mgmt.cognitiveservices.models import KeyName
 
 logger = get_logger(__name__)
 name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -147,7 +150,7 @@ def load_arguments(self, _):
         c.argument('kind', help='the API name of cognitive services account',
                    completer=kind_completer)
         c.argument('tags', tags_type)
-        c.argument('key_name', required=True, help='Key name to generate', choices=['key1', 'key2'])
+        c.argument('key_name', required=True, help='Key name to generate', arg_type=get_enum_type(KeyName))
         c.argument('api_properties', api_properties_type)
         c.argument('custom_domain', help='User domain assigned to the account. Name is the CNAME source.')
         c.argument('storage', help='The storage accounts for this resource, in JSON array format.')

@@ -75,7 +75,7 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
-_USE_VENDORED_SUBSCRIPTION_SDK = True
+_USE_VENDORED_SUBSCRIPTION_SDK = False
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -301,6 +301,7 @@ class Profile:
         """Build an empty Subscription which will be used as a tenant account.
         API version doesn't matter as only specified attributes are preserved by _normalize_properties."""
         if _USE_VENDORED_SUBSCRIPTION_SDK:
+            # pylint: disable=no-name-in-module, import-error
             from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
             SubscriptionType = Subscription
         else:
@@ -357,7 +358,7 @@ class Profile:
         token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
@@ -381,7 +382,7 @@ class Profile:
 
         _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
@@ -1047,6 +1048,7 @@ class SubscriptionFinder:
         """
         if _USE_VENDORED_SUBSCRIPTION_SDK:
             # Use vendered subscription SDK to decouple from `resource` command module
+            # pylint: disable=no-name-in-module, import-error
             from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
             client_type = SubscriptionClient
         else:

@@ -221,11 +221,13 @@ def load_arguments(self, _):
         c.argument('hsm_name', deleted_hsm_name_type)
         c.argument('location', help='Location of the deleted Vault or HSM', required=False)
 
-    with self.argument_context('keyvault delete-policy') as c:
-        c.argument('object_id', validator=validate_principal)
+    for item in ['set-policy', 'delete-policy']:
+        with self.argument_context('keyvault {}'.format(item)) as c:
+            c.argument('object_id', validator=validate_principal)
+            c.argument('application_id', help='Application ID of the client making request on behalf of a principal. '
+                                              'Exposed for compound identity using on-behalf-of authentication flow.')
 
     with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
-        c.argument('object_id', validator=validate_principal)
         c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*',
                    help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
         c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*',
@@ -243,17 +245,23 @@ def load_arguments(self, _):
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
         with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
             c.extra('connection_id', options_list=['--id'], required=False,
-                    help='The ID of the private endpoint connection associated with the Key Vault. '
-                         'If specified --vault-name and --name/-n, this should be omitted.')
+                    help='The ID of the private endpoint connection associated with the Key Vault/HSM. '
+                         'If specified --vault-name/--hsm-name and --name/-n, this should be omitted.')
             c.argument('description', help='Comments for the {} operation.'.format(item))
             c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
-                       help='The name of the private endpoint connection associated with the Key Vault. '
+                       help='The name of the private endpoint connection associated with the Key Vault/HSM. '
                             'Required if --id is not specified')
             c.argument('vault_name', vault_name_type, required=False,
                        help='Name of the Key Vault. Required if --id is not specified')
+            c.argument('hsm_name', mgmt_plane_hsm_name_type, min_api='2021-04-01-preview',
+                       help='Name of the HSM. Required if --id is not specified.'
+                            '(--hsm-name and --vault-name are mutually exclusive, please specify just one of them)')
 
-    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14', max_api='2020-04-01-preview') as c:
+        c.argument('vault_name', vault_name_type, required=True)
+    with self.argument_context('keyvault private-link-resource', min_api='2021-04-01-preview') as c:
         c.argument('vault_name', vault_name_type)
+        c.argument('hsm_name', mgmt_plane_hsm_name_type)
     # endregion
 
     # region Shared

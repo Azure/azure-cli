@@ -20,7 +20,7 @@ def signalr_cors_add(client, resource_group_name, signalr_name, allowed_origins)
     cors.allowed_origins = cors.allowed_origins + allowed_origins
     parameters = SignalRResource(cors=cors)
 
-    return client.update(resource_group_name, signalr_name, parameters)
+    return client.begin_update(resource_group_name, signalr_name, parameters)
 
 
 def signalr_cors_remove(client, resource_group_name, signalr_name, allowed_origins):
@@ -32,7 +32,13 @@ def signalr_cors_remove(client, resource_group_name, signalr_name, allowed_origi
         cors.allowed_origins = ['*']
     parameters = SignalRResource(cors=cors)
 
-    return client.update(resource_group_name, signalr_name, parameters)
+    return client.begin_update(resource_group_name, signalr_name, parameters)
+
+
+def signalr_cors_update(client, resource_group_name, signalr_name, allowed_origins):
+    cors = SignalRCorsSettings(allowed_origins=allowed_origins)
+    parameters = SignalRResource(cors=cors)
+    return client.begin_update(resource_group_name, signalr_name, parameters)
 
 
 def _get_cors_details(client, resource_group_name, signalr_name):

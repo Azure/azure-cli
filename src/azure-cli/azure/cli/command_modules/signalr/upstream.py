@@ -17,10 +17,10 @@ def signalr_upstream_list(client, resource_group_name, signalr_name):
 def signalr_upstream_update(client, resource_group_name, signalr_name, template):
     upstream = ServerlessUpstreamSettings(templates=template)
     parameters = SignalRResource(upstream=upstream)
-    return client.update(resource_group_name, signalr_name, parameters)
+    return client.begin_update(resource_group_name, signalr_name, parameters)
 
 
 def signalr_upstream_clear(client, resource_group_name, signalr_name):
     upstream = ServerlessUpstreamSettings(templates=[])
     parameters = SignalRResource(upstream=upstream)
-    return client.update(resource_group_name, signalr_name, parameters)
+    return client.begin_update(resource_group_name, signalr_name, parameters)
