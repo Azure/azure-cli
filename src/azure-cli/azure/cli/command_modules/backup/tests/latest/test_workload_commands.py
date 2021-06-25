@@ -599,7 +599,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         
         if is_move:
             # # Move Recovery points
-            self.cmd('backup recoverypoint move -g {rg} -v {vault} -i {item} -c {container} --source-tier VaultStandard --destination-tier VaultArchive --rp-id {rp_move}', checks=[
+            self.cmd('backup recoverypoint move -g {rg} -v {vault} -i {item} -c {container} --source-tier VaultStandard --destination-tier VaultArchive --rp-name {rp_move}', checks=[
                 self.check("properties.entityFriendlyName", 'msdb [archsqlccyvm2]'),
                 self.check("resourceGroup", '{rg}'),
                 self.check("properties.operation", "MoveRecoveryPoint"),
@@ -673,7 +673,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         
         if is_move:
             # # Move Recovery points
-            self.cmd('backup recoverypoint move -g {rg} -v {vault} -i {item} -c {container} --source-tier VaultStandard --destination-tier VaultArchive --rp-id {rp_move}', checks=[
+            self.cmd('backup recoverypoint move -g {rg} -v {vault} -i {item} -c {container} --source-tier VaultStandard --destination-tier VaultArchive --rp-name {rp_move}', checks=[
                 self.check("properties.entityFriendlyName", 'systemdb [BVTD2HSuse15]'),
                 self.check("resourceGroup", '{rg}'),
                 self.check("properties.operation", "MoveRecoveryPoint"),
