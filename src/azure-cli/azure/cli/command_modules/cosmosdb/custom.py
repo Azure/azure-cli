@@ -251,74 +251,48 @@ def _create_database_account(client,
         )
         backup_policy.periodic_mode_properties = periodic_mode_properties
 
-    create_mode = 'Default'
-    if is_restore_request is not None:
-        create_mode = 'Restore' if is_restore_request else 'Default'
-
+    create_mode = CreateMode.restore.value if is_restore_request else CreateMode.default.value
     params = None
+    restore_parameters = None
     if create_mode == 'Restore':
         if restore_source is None or restore_timestamp is None:
             raise CLIError('restore-source and restore-timestamp should be provided for a restore request.')
+
         restore_parameters = RestoreParameters(
             restore_mode='PointInTime',
             restore_source=restore_source,
             restore_timestamp_in_utc=restore_timestamp
         )
+
         if databases_to_restore is not None:
-            logger.debug(databases_to_restore)
             restore_parameters.databases_to_restore = databases_to_restore
-        logger.debug(restore_parameters)
-        params = DatabaseAccountCreateUpdateParameters(
-            location=arm_location,
-            locations=locations,
-            tags=tags,
-            kind=kind,
-            consistency_policy=consistency_policy,
-            ip_rules=ip_range_filter,
-            is_virtual_network_filter_enabled=enable_virtual_network,
-            enable_automatic_failover=enable_automatic_failover,
-            capabilities=capabilities,
-            virtual_network_rules=virtual_network_rules,
-            enable_multiple_write_locations=enable_multiple_write_locations,
-            disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
-            key_vault_key_uri=key_uri,
-            public_network_access=public_network_access,
-            api_properties=api_properties,
-            enable_analytical_storage=enable_analytical_storage,
-            enable_free_tier=enable_free_tier,
-            network_acl_bypass=network_acl_bypass,
-            network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
-            backup_policy=backup_policy,
-            identity=system_assigned_identity,
-            default_identity=default_identity,
-            create_mode=CreateMode.restore.value,
-            restore_parameters=restore_parameters
-        )
-    else:
-        params = DatabaseAccountCreateUpdateParameters(
-            location=arm_location,
-            locations=locations,
-            tags=tags,
-            kind=kind,
-            consistency_policy=consistency_policy,
-            ip_rules=ip_range_filter,
-            is_virtual_network_filter_enabled=enable_virtual_network,
-            enable_automatic_failover=enable_automatic_failover,
-            capabilities=capabilities,
-            virtual_network_rules=virtual_network_rules,
-            enable_multiple_write_locations=enable_multiple_write_locations,
-            disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
-            key_vault_key_uri=key_uri,
-            public_network_access=public_network_access,
-            api_properties=api_properties,
-            enable_analytical_storage=enable_analytical_storage,
-            enable_free_tier=enable_free_tier,
-            network_acl_bypass=network_acl_bypass,
-            network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
-            backup_policy=backup_policy,
-            identity=system_assigned_identity,
-            default_identity=default_identity
-        )
+
+    params = DatabaseAccountCreateUpdateParameters(
+        location=arm_location,
+        locations=locations,
+        tags=tags,
+        kind=kind,
+        consistency_policy=consistency_policy,
+        ip_rules=ip_range_filter,
+        is_virtual_network_filter_enabled=enable_virtual_network,
+        enable_automatic_failover=enable_automatic_failover,
+        capabilities=capabilities,
+        virtual_network_rules=virtual_network_rules,
+        enable_multiple_write_locations=enable_multiple_write_locations,
+        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
+        key_vault_key_uri=key_uri,
+        public_network_access=public_network_access,
+        api_properties=api_properties,
+        enable_analytical_storage=enable_analytical_storage,
+        enable_free_tier=enable_free_tier,
+        network_acl_bypass=network_acl_bypass,
+        network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
+        backup_policy=backup_policy,
+        identity=system_assigned_identity,
+        default_identity=default_identity,
+        create_mode=create_mode,
+        restore_parameters=restore_parameters
+    )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()

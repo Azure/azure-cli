@@ -7,7 +7,7 @@
 
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
-
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 class CosmosDBTests(ScenarioTest):
 
@@ -1537,6 +1537,7 @@ class CosmosDBTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_restore_using_create', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
     def test_cosmosdb_restore_using_create(self, resource_group, location):
         col = self.create_random_name(prefix='cli', length=15)
 
@@ -1576,8 +1577,6 @@ class CosmosDBTests(ScenarioTest):
 
         assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
-
-    from azure_devtools.scenario_tests import AllowLargeResponse
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_restore_command', parameter_name_for_location='location')
     @AllowLargeResponse(size_kb=9999)
