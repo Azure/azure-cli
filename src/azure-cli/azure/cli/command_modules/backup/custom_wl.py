@@ -372,13 +372,11 @@ def move_wl_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_
     container_uri = cust_help.get_protection_container_uri_from_id(item_name.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item_name.id)
 
-    tier_type_map = dict({'VaultStandard': 'HardenedRP', 'VaultArchive': 'ArchivedRP', 'Snapshot': 'InstantRP'})
-
-    if source_tier not in tier_type_map.keys():
+    if source_tier not in common.tier_type_map.keys():
         raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
 
-    parameters = MoveRPAcrossTiersRequest(source_tier_type=tier_type_map[source_tier],
-                                          target_tier_type=tier_type_map[destination_tier])
+    parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
+                                          target_tier_type=common.tier_type_map[destination_tier])
 
     result = _backup_client_factory(cmd.cli_ctx).move_recovery_point(vault_name, resource_group_name, fabric_name,
                                                                      container_uri, item_uri, rp_name, parameters,

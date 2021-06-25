@@ -25,7 +25,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
 
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError 
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
@@ -571,13 +571,13 @@ def move_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_nam
     container_uri = _get_protection_container_uri_from_id(item_name.id)
     item_uri = _get_protected_item_uri_from_id(item_name.id)
 
-    tier_type_map = dict({'VaultStandard': 'HardenedRP', 'VaultArchive': 'ArchivedRP', 'Snapshot': 'InstantRP'})
+    
 
-    if source_tier not in tier_type_map.keys():
+    if source_tier not in common.tier_type_map.keys():
         raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
 
-    parameters = MoveRPAcrossTiersRequest(source_tier_type=tier_type_map[source_tier],
-                                          target_tier_type=tier_type_map[destination_tier])
+    parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
+                                          target_tier_type=common.tier_type_map[destination_tier])
 
     result = _backup_client_factory(cmd.cli_ctx).move_recovery_point(vault_name, resource_group_name, fabric_name,
                                                                      container_uri, item_uri, rp_name, parameters,
@@ -736,7 +736,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
             raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
 
         if rehydration_priority is not None:
-            raise InvalidArgumentValueError('Cannot have both use_secondary_region and rehydration_priority together.')
+            raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
 
         azure_region = secondary_region_map[vault_location]
         aad_client = aad_properties_cf(cmd.cli_ctx)
