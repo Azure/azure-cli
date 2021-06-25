@@ -330,7 +330,7 @@ def get_extensions(ext_type=None):
     elif not isinstance(ext_type, list):
         ext_type = [ext_type]
     for t in ext_type:
-        extensions.extend([ext for ext in t.get_all()])
+        extensions.extend(t.get_all())
     return extensions
 
 

@@ -23,6 +23,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties
 
 from azure.cli.core.util import CLIError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
@@ -162,14 +163,14 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
     # now delete the vault
     try:
         vault_client.delete(resource_group_name, vault_name)
-    except Exception as ex:
+    except HttpResponseError as ex:
         raise ex
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     try:
         client.delete(resource_group_name, vault_name)
-    except Exception as ex:  # pylint: disable=broad-except
+    except HttpResponseError as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
         else:
